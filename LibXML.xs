@@ -974,6 +974,11 @@ _parse_string(self, string, dir = &PL_sv_undef)
             xmlFreeParserCtxt(ctxt);
         }
         if ( real_doc != NULL ) {
+  	    if (real_doc->URL != NULL) { /* free "" assigned above */
+               xmlFree((char*) real_doc->URL);
+               real_doc->URL = NULL;
+            }
+
             recover = LibXML_get_recover(real_obj);
 
             if ( directory == NULL ) {
