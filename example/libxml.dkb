@@ -223,8 +223,6 @@ perl Makefile.PL LIBS=&#39;-L/path/to/lib&#39; INC=&#39;-I/path/to/include&#39;<
     <sect1>
       <title>Kown Issues</title>
       <para>The push-parser implementation causes memory leaks.</para>
-      <para>Using the direct SAX parser, default namespaces will not get
-      recognized correctly.</para>
     </sect1>
   </chapter>
   <chapter>
@@ -434,38 +432,257 @@ EOT</programlisting>
     </sect1>
   </chapter>
   <chapter>
-    <title>Parsing XML Files with XML::LibXML</title>
-    <titleabbrev>XML::LibXML-Parser</titleabbrev>
-    <para>TO BE DONE</para>
+    <title>Parsing XML Data with XML::LibXML</title>
+    <titleabbrev>XML::LibXML::Parser</titleabbrev>
+    <sect1>
+      <title>Synopsis</title>
+      <programlisting>use XML::LibXML;
+my $parser = XML::LibXML-&#62;new();
+
+my $doc = $parser-&#62;parse_string(&#60;&#60;&#39;EOT&#39;);
+&#60;some-xml/&#62;
+EOT
+my $fdoc = $parser-&#62;parse_file( $xmlfile );
+
+my $fhdoc = $parser-&#62;parse_fh( $xmlstream );
+
+my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
+    </sect1>
     <sect1>
       <title>Parsing</title>
-      <para>TO BE DONE</para>
+      <para>A XML document is read into a datastructure such as a DOM tree by
+      a piece of software, called parser. XML::LibXML currently provides four
+      diffrent parser interfaces:</para>
+      <itemizedlist>
+        <listitem>
+          <para>A DOM Pull-Parser</para>
+        </listitem>
+        <listitem>
+          <para>A DOM Push-Parser</para>
+        </listitem>
+        <listitem>
+          <para>A SAX Parser</para>
+        </listitem>
+        <listitem>
+          <para>A DOM based SAX Parser.</para>
+        </listitem>
+      </itemizedlist>
       <sect2>
-        <title>Input Callbacks</title>
-        <para>TO BE DONE</para>
+        <title>Creating a Parser Instance</title>
+        <para>XML::LibXML provides an OO interface to the libxml2 parser
+        functions. Thus you have to create a parser instance before you can
+        parse any XML data.</para>
+        <variablelist>
+          <varlistentry>
+            <term>new</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser = XML::LibXML-&#62;new();</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>There is nothing much to say about the constructor. It
+              simply creates a new parser instance.</para>
+              <para>Although libxml2 uses mainly global flags to alter the
+              behaviour of the parser, each XML::LibXML parser instance has
+              its own flags or callbacks and does not interfere with other
+              instances.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
       </sect2>
       <sect2>
         <title>DOM Parser</title>
-        <para>TO BE DONE</para>
+        <para>One of the common parser interfaces of XML::LibXML is the DOM
+        parser. This parser reads XML data into a DOM like datastructure, so
+        each tag can get accessed and transformed.</para>
+        <para>XML::LibXML&#39;s DOM parser is not only capable to parse XML
+        data, but also (strict) HTML and SGML files. There are three ways to
+        parse documents - as a string, as a Perl filehandle, or as a filename.
+        The return value from each is a XML::LibXML::Document object, which is
+        a DOM object. </para>
+        <para>All of the functions listed below will throw an exception if the
+        document is invalid. To prevent this causing your program exiting,
+        wrap the call in an eval{} block</para>
+        <variablelist>
+          <varlistentry>
+            <term>parse_file</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_file( $xmlfilename );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>This function reads an absolute filename into the memory.
+              It causes XML::LibXML to use libxml2&#39;s file parser instead
+              of letting perl reading the file such as with parse_fh(). If you
+              need to parse files directly, this function would be the faster
+              choice, since this function is about 6-8 times faster then
+              parse_fh().</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_fh</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_fh( $io_fh );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>parse_fh() parses a IOREF or a subclass of IO::Handle.
+              </para>
+              <para>Because the data comes from an open handle, libxml2&#39;s
+              parser does not know about the base URI of the document. To set
+              the base URI one should use parse_fh() as follows:</para>
+              <programlisting>my $doc = $parser-&#62;parse_fh( $io_fh, $baseuri );</programlisting>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_string</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_string( $xmlstring);</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>This function is similar to parse_fh(), but it parses a
+              XML document that is available as a single string in memory.
+              Again, you can pass an optional base URI to the function.</para>
+              <programlisting>my $doc = $parser-&#62;parse_stirng( $xmlstring, $baseuri );</programlisting>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_html_file</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_html_file( $htmlfile );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Similar to parse_file() but parses HTML (strict)
+              documents.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_html_fh</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_html_fh( $io_fh );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Similar to parse_fh() but parses HTML (strict) streams.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_html_string</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_html_string( $htmlstring );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Similar to parse_file() but parses HTML (strict) strings.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_sgml_file</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_sgml_file( $sgmlfile );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Similar to parse_file() but parses SGML documents.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_sgml_fh</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_sgml_fh( $io_fh );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Similar to parse_file() but parses SGML streams.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_sgml_string</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$doc = $parser-&#62;parse_sgml_string( $sgmlstring );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Similar to parse_file() but parses SGML strings.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>The functions described above are implemented to parse well
+        formed documents. In some cases a program gets well balanced XML
+        instead of well formed documents (e.g. a XML fragment from a
+        Database). With XML::LibXML it is not required to wrap such fragments
+        in the code, because XML::LibXML is capable even to parse well
+        balanced XML fragments.</para>
+        <variablelist>
+          <varlistentry>
+            <term>parse_balanced_chunk</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$fragment = $parser-&#62;parse_balanced_chunk( $wbxmlstring );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>This function parses a well balanced XML string into a
+              XML::LibXML::DocumentFragment.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>parse_xml_chunk</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$fragment = $parser-&#62;parse_xml_chunk( $wbxmlstring );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>This is the old name of parse_balanced_chunk(). Because it
+              may causes confusion with the push parser interface, this
+              function should be used anymore.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>By default XML::LibXML does not process XInclude tags within a
+        XML Document (see options section below). XML::LibXML allows to post
+        process a document to expand XInclude tags.</para>
+        <variablelist>
+          <varlistentry>
+            <term>process_xincludes</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser-&#62;process_xincludes( $doc );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>After a document is parsed into a DOM structure, you may
+              want to expand the documents XInclude tags. This function
+              processes the given document structure and expands all XInclude
+              tags (or throws an error) by using the flags and callbacks of
+              the given parser instance.</para>
+              <para>Note that the resulting Tree contains some extra nodes (of
+              type XML_XINCLUDE_START and XML_XINCLUDE_END) after successfully
+              processing the document. These nodes indicate where data was
+              included into the original tree. if the document is serialized,
+              these extra nodes will not show up.</para>
+              <para>Remember: A Document with processed XIncludes differs from
+              the original document after serialization, because the original
+              XInclude tags will not get restored!</para>
+              <para>If the parser flag &#34;expand_xincludes&#34; is set to 1,
+              you need not to post process the parsed document.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>processXIncludes</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser-&#62;processXIncludes( $doc );</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>This is an alias to process_xincludes, but through a JAVA
+              like function name.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
       </sect2>
       <sect2>
         <title>Push Parser</title>
-        <para>XML::LibXML provides a push parser interface. This allows one to
-        parse large documents without actually loading the entire document
-        into memory. While parse_file() and parse_fh() won&#39;t load the
-        document before parsing either. While parse_file() forces the data to
-        be a wellformed XML file, parse_fh() may be used to parse data comming
-        from any kind of source that delivers wellformed XML documents.
-        parse_fh()&#39;s parsing ability is limited to single documents. For a
-        programmer there is no chance to interrupt the parsing process if for
-        example multiple XML documents are recieved through the same channel.
-        XML::LibXML&#39;s push parser works around this imitation and provides
-        an interface to libxml2&#39;s pushparser. This parser will parse the
-        data the application provides to it at the time they are pushed into
-        the parser, rather than pulling the data itself.</para>
-        <para>Through this it is possible to preprocess incoming data if
-        required - i.e. in the given example to find the document boundaries.
-        Different to the pull parser implemented in parse_fh() or
+        <para>XML::LibXML provides a push parser interface. Rather than
+        pulling the data from a given source the push parser waits for the
+        data to be pushed into it.</para>
+        <para>This allows one to parse large documents without waiting for the
+        parser to finish. The interface is especially usefull if a program
+        needs to preprocess the incoming pieces of XML (e.g. to detect
+        document boundaries). </para>
+        <para>While XML::LibXML parse_*() functions force the data to be a
+        wellformed XML, the push parser will take any arbitrary string that
+        contains some XML data. The only requirement is that all the pushed
+        strings are together a wellformed document. With the push parser
+        interface a programm can interrupt the parsing process as required,
+        where the parse_*() functions give not enough flexibility.</para>
+        <para>Different to the pull parser implemented in parse_fh() or
         parse_file(), the push parser is not able to find out about the
         documents end itself. Thus the calling program needs to indicate
         explicitly when the parsing is done.</para>
@@ -537,7 +754,7 @@ if ( $@ ) {
               <programlisting>eval {
     $parser-&#62;push( &#34;&#60;foo&#62;&#34;, &#34;bar&#34; );
     $doc = $parser-&#62;finish_push(1);   # will return the data parsed
-                                      # until an error happend
+                                      # unless an error happend
 };
 
 print $doc-&#62;toString(); # returns &#34;&#60;foo&#62;bar&#60;/foo&#62;&#34;</programlisting>
@@ -548,21 +765,336 @@ print $doc-&#62;toString(); # returns &#34;&#60;foo&#62;bar&#60;/foo&#62;&#34;</
         </variablelist>
       </sect2>
       <sect2>
-        <title>SAX Parser</title>
-        <para>TO BE DONE</para>
+        <title>DOM based SAX Parser</title>
+        <para>XML::LibXML provides a DOM based SAX parser. The SAX parser is
+        defined in XML::LibXML::SAX::Parser. As it is not a stream based
+        parser, it parses documents into a DOM and traverses the DOM tree
+        instead.</para>
+        <para>The API of this parser is exactly the same as any other Perl
+        SAX2 parser. See XML::SAX::Intro for details.</para>
+        <para>Aside from the regular parsing methods, you can access the DOM
+        tree traverser directly, using the generate() method:</para>
+        <programlisting>my $doc = build_yourself_a_document();
+my $saxparser = $XML::LibXML::SAX::Parser-&#62;new( ... );
+$parser-&#62;generate( $doc );</programlisting>
+        <para>This is useful for serializing DOM trees, for example that you
+        might have done prior processing on, or that you have as a result of
+        XSLT processing.</para>
+        <para><emphasis>WARNING</emphasis></para>
+        <para>This is NOT a streaming SAX parser. As I said above, this parser
+        reads the entire document into a DOM and serialises it. Some people
+        couldn&#39;t read that in the paragraph above so I&#39;ve added this
+        warning.</para>
+        <para>If you want a streaming SAX parser look at the XML::LibXML::SAX
+        man page</para>
       </sect2>
     </sect1>
     <sect1>
       <title>Serialization</title>
-      <para>TO BE DONE</para>
+      <para>XML::LibXML provides some functions to serialize nodes and
+      documents. The serialization functions themself are described at the
+      XML::LibXML::Node manpage or the XML::LibXML::Document manpage.
+      XML::LibXML checks three global flags that alter the serialization
+      process:</para>
+      <itemizedlist>
+        <listitem>
+          <para>skipXMLDeclaration</para>
+        </listitem>
+        <listitem>
+          <para>skipDTD</para>
+        </listitem>
+        <listitem>
+          <para>setTagCompression</para>
+        </listitem>
+      </itemizedlist>
+      <para>of that three functions only setTagCompression is available for
+      all serialization functions. </para>
+      <para>Because XML::LibXML does these flags not itself, one has to define
+      them locally as the following example shows:</para>
+      <programlisting>local $XML::LibXML::skipXMLDeclaration = 1;
+local $XML::LibXML::skipDTD = 1;
+local $XML::LibXML::setTagCompression = 1;</programlisting>
+      <para>If skipXMLDeclaration is defined and not &#39;0&#39;, the XML
+      declaration is omitted during serialization.</para>
+      <para>If skipDTD is defined and not &#39;0&#39;, an existing DTD would
+      not be serialized with the document.</para>
+      <para>If setTagCompression is defined and not &#39;0&#39; empty tags are
+      displayed as open and closing tags ranther than the shortcut. For
+      example the empty tag <emphasis>foo</emphasis> will be rendered as
+      <emphasis>&#60;foo&#62;&#60;/foo&#62;</emphasis> rather than
+      <emphasis>&#60;foo/&#62;</emphasis>.</para>
     </sect1>
     <sect1>
-      <title>Options</title>
-      <para>TO BE DONE</para>
+      <title>Parser Options</title>
+      <para>LibXML options are global (unfortunately this is a limitation of
+      the underlying implementation, not this interface). They can either be
+      set using $parser-&#62;option(...), or XML::LibXML-&#62;option(...),
+      both are treated in the same manner. Note that even two parser processes
+      will share some of the same options, so be careful out there!</para>
+      <para>Every option returns the previous value, and can be called without
+      parameters to get the current value.</para>
+      <variablelist>
+        <varlistentry>
+          <term>validation</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;validation(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Turn validation on (or off). Defaults to off.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>recover</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;recover(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Turn the parsers recover mode on (or off). Defaults to off.</para>
+            <para>This allows to parse broken XML data into memory. This
+            switch will only work with XML data rather than HTML data. Also
+            the validation will be switched off automaticly.</para>
+            <para>The recover mode helps to recover documents that are almost
+            wellformed very efficiently. That is for example a document that
+            forgets to close the document tag (or any other tag inside the
+            document). The recover mode of XML::LibXML has problems though to
+            restore documents that are more like well ballanced chunks. In
+            that case XML::LibXML will only parse the first tag of the chunk.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>expand_entities</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;expand_entities(0);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Turn entity expansion on or off, enabled by default. If
+            entity expansion is off, any external parsed entities in the
+            document are left as entities. Probably not very useful for most
+            purposes.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>keep_blanks</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;keep_blanks(0);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Allows you to turn off XML::LibXML&#39;s default behaviour
+            of maintaining whitespace in the document.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>pedantic_parser</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;pedantic_parser(1)</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>You can make XML::LibXML more pedantic if you want to.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>load_ext_dtd</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;load_ext_dtd(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Load external DTD subsets while parsing.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>complete_attributes</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;complete_attributes(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Complete the elements attributes lists with the ones
+            defaulted from the DTDs. By default, this option is enabled.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>expand_xinclude</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;expand_xinclude(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Expands XIinclude tags imidiatly while parsing the document.
+            This flag assures that the parser callbacks are used while parsing
+            the included document.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>load_catalog</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;load_catalog( $catalog_file );</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Will use $catalog_file as a catalog during all parsing
+            processes. Using a catalog will significantly speed up parsing
+            processes if many external ressources are loaded into the parsed
+            documents (such as DTDs or XIncludes).</para>
+            <para>Note that catalogs will not be available if an external
+            entity handler was specified. At the current state it is not
+            possible to make use of both types of resolving systems at the
+            same time.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>base_uri</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;base_uri( $your_base_uri );</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>In case of parsing strings or file handles, XML::LibXML
+            doesn&#39;t know about the base uri of the document. To make
+            relative references such as XIncludes work, one has to set a
+            separate base URI, that is then used for the parsed documents.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>gdome_dom</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;gdome_dom(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>THIS FLAG IS EXPERIMENTAL!</para>
+            <para>Although quite powerful XML:LibXML&#39;s DOM implementation
+            is limited if one needs or wants full DOM level 2 or level 3
+            support. XML::GDOME is based on libxml2 as well but provides a
+            rather complete DOM implementation by wrapping libgdome. This
+            allows you to make use of XML::LibXML&#39;s full parser options
+            and XML::GDOME&#39;s DOM implementation at the same time.</para>
+            <para>To make use of this function, one has to install libgdome
+            and configure XML::LibXML to use this library.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <sect2>
+        <title>Input Callbacks</title>
+        <para>If libxml2 has to load external documents during parsing, this
+        may cause strange results, if the location is not a HTTP, FTP or
+        relative location. To get around this limitation, one may add its own
+        input handler, to open, read and close particular locations or URI
+        classes.</para>
+        <para>The input callbacks are used whenever LibXML has to get
+        something other than external parsed entities from somewhere. The
+        input callbacks in LibXML are stacked on top of the original input
+        callbacks within the libxml library. This means that if you decide not
+        to use your own callbacks (see match()), then you can revert to the
+        default way of handling input. This allows, for example, to only
+        handle certain URI schemes.</para>
+        <para>Callbacks are only used on files, but not on strings or
+        filehandles. This is because LibXML requires the match event to find
+        out about which callback set is shall be used for the current input
+        stream. LibXML can decide this only before the stream is open. For
+        LibXML strings and filehandles are already opened streams.</para>
+        <para>The following callbacks are defined:</para>
+        <variablelist>
+          <varlistentry>
+            <term>match_callback</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser-&#62;match_callback($subref);</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>If you want to handle the URI, simply return a true value
+              from this callback.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>open_callback</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser-&#62;open_callback($subref);</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Open something and return it to handle that resource.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>read_callback</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser-&#62;read_callback($subref);</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Read a certain number of bytes from the resource. This
+              callback is called even if the entire Document has already read.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>close_callback</term>
+            <listitem>
+              <funcsynopsis>
+                <funcsynopsisinfo>$parser-&#62;close_callback($subref);</funcsynopsisinfo>
+              </funcsynopsis>
+              <para>Close the handle associated with the resource.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>The following example explains the concept a bit. It is a purely
+        fictitious example that uses a MyScheme::Handler object that responds
+        to methods similar to an IO::Handle.</para>
+        <programlisting>$parser-&#62;match_callback(\&#38;match_uri);
+  
+  $parser-&#62;open_callback(\&#38;open_uri);
+  
+  $parser-&#62;read_callback(\&#38;read_uri);
+  
+  $parser-&#62;close_callback(\&#38;close_uri);
+  
+  sub match_uri {
+    my $uri = shift;
+    return $uri =~ /^myscheme:/;
+  }
+  
+  sub open_uri {
+    my $uri = shift;
+    return MyScheme::Handler-&#62;new($uri);
+  }
+  
+  sub read_uri {
+    my $handler = shift;
+    my $length = shift;
+    my $buffer;
+    read($handler, $buffer, $length);
+    return $buffer;
+  }
+  
+  sub close_uri {
+    my $handler = shift;
+    close($handler);
+  }</programlisting>
+        <para>A more realistic example can be found in the &#34;example&#34;
+        directory.</para>
+        <para>Since the parser requires all callbacks defined it is also
+        possible to set all callbacks with a single call of callbacks(). This
+        would implify the example code to:</para>
+        <programlisting>$parser-&#62;callbacks( \&#38;match_uri, \&#38;open_uri, \&#38;read_uri, \&#38;close_uri);</programlisting>
+        <para>All functions that are used to set the callbacks, can also be
+        used to retrieve the callbacks from the parser.</para>
+        <para>Optionaly it is possible to apply global callback on the
+        XML::LibXML class level. This allows multiple parses to share the same
+        callbacks. To set these global callbacks one can use the callback
+        access functions directly on the class.</para>
+        <programlisting>XML::LibXML-&#62;callbacks( \&#38;match_uri, \&#38;open_uri, \&#38;read_uri, \&#38;close_uri);</programlisting>
+        <para>The previous code snippet will set the callbacks from the first
+        example as global callbacks.</para>
+      </sect2>
     </sect1>
     <sect1>
       <title>Error Reporting</title>
-      <para>TO BE DONE</para>
+      <para>XML::LibXML throws exceptions during parseing, validation or XPath
+      processing. These errors can be catched by useing eval blocks. The error
+      then will be stored in <emphasis>$@</emphasis>. Alternatively one can
+      use the get_last_error() function of XML::LibXML. It will return the
+      same string that is stored in <emphasis>$@</emphasis>. Using
+      get_last_error() makes it still nessecary to eval the statement, since
+      these function groups will die() on errors.</para>
+      <para>get_last_error() can be called either by the class itself or by a
+      parser instance:</para>
+      <programlisting>$errstring = XML::LibXML-&#62;get_last_error();
+$errstring = $parser-&#62;get_last_error();</programlisting>
+      <para>However, XML::LibXML exceptions are global. That means if
+      get_last_error() is called on an parser instance, the last
+      <emphasis>global</emphasis> error will be returned. This is not
+      nessecarily the error caused by the parser instance itself.</para>
     </sect1>
   </chapter>
   <chapter>
@@ -591,8 +1123,35 @@ print $doc-&#62;toString(); # returns &#34;&#60;foo&#62;bar&#60;/foo&#62;&#34;</
     </sect1>
   </chapter>
   <chapter>
+    <title>Building DOM trees from SAX events.</title>
+    <titleabbrev>XML::LibXML::SAX::Builder</titleabbrev>
+    <sect1>
+      <title>Synopsis</title>
+      <programlisting>my $builder = XML::LibXML::SAX::Builder-&#62;new();
+
+my $gen = XML::Generator::DBI-&#62;new(Handler =&#62; $builder, dbh =&#62; $dbh);
+$gen-&#62;execute(&#34;SELECT * FROM Users&#34;);
+
+my $doc = $builder-&#62;result();</programlisting>
+    </sect1>
+    <sect1>
+      <title>Description</title>
+      <para>Building DOM trees from SAX events is quite easy with
+      XML::LibXML::SAX::Builder. The class is designed as a SAX2 final
+      handler. </para>
+      <para>Since SAX is strictly stream oriented, you should not expect
+      anything to return from a generator. Instead you have to ask the builder
+      instance directly to get the document built.
+      XML::LibXML::SAX::Builder&#39;s result function holds the document
+      generated from the last SAX stream.</para>
+      <para>This is a SAX handler that generates a DOM tree from SAX events.
+      Usage is as above. Input is accepted from any SAX1 or SAX2 event
+      generator.</para>
+    </sect1>
+  </chapter>
+  <chapter>
     <title>XML::LibXML DOM Implementation</title>
-    <titleabbrev>XML::LibXML-DOM</titleabbrev>
+    <titleabbrev>XML::LibXML::DOM</titleabbrev>
     <sect1>
       <title>Description</title>
       <para>XML::LibXML provides an lightwight interface to
@@ -1739,7 +2298,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <para>The function is similar to toString(). Instead of simply
           searializing the document tree, it transforms it as it is specified
           in the XML-C14N Specification. Such transformation is known as
-          canonization. </para>
+          canonization.</para>
           <para>If $with_comments is 0 or not defined, the result-document
           will not contain any comments that exist in the original document.
           To include comments into the canonized document, $with_comments has
@@ -2646,7 +3205,6 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
   </chapter>
   <chapter>
     <title>XML::LibXML DTD Handling</title>
-    <subtitle></subtitle>
     <titleabbrev>XML::LibXML::Dtd</titleabbrev>
     <para>This class holds a DTD. You may parse a DTD from either a string, or
     from an external SYSTEM identifier.</para>
@@ -2723,21 +3281,5 @@ $pinode-&#62;setData( name=&#62;string_value [...] );</funcsynopsisinfo>
         </listitem>
       </varlistentry>
     </variablelist>
-  </chapter>
-  <chapter>
-    <title>Internals of the Perl Layer for libxml2</title>
-    <titleabbrev>XML::LibXMLguts</titleabbrev>
-    <sect1>
-      <title>General Information</title>
-      <para>TO BE DONE</para>
-    </sect1>
-    <sect1>
-      <title>How To extend XML::LibXML</title>
-      <para>TO BE DONE</para>
-    </sect1>
-    <sect1>
-      <title>Internal API Description</title>
-      <para>TO BE DONE</para>
-    </sect1>
   </chapter>
 </book>

@@ -292,20 +292,3 @@ sub fatal_error {
 1;
 
 __END__
-
-=head1 NAME
-
-XML::LibXML::SAX::Builder - build a LibXML tree from SAX events
-
-=head1 SYNOPSIS
-
-  my $builder = XML::LibXML::SAX::Builder->new();
-  my $gen = XML::Generator::DBI->new(Handler => $builder, dbh => $dbh);
-  my $dom = $gen->execute("SELECT * FROM Users");
-
-=head1 DESCRIPTION
-
-This is a SAX handler that generates a DOM tree from SAX events. Usage
-is as above. Input is accepted from any SAX1 or SAX2 event generator.
-
-=cut

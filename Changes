@@ -6,10 +6,11 @@ versions of the package.
 
 1.55
    - Added C14N interface "toStringC14N()" (thanks to Chip Turner)
+   - fixed default namespace bug with libxml2 2.5.8 (by Vaclav Barta)
    - fixed a NOOP in the XPath code.
    - fixed insertBefore() behaviour to be DOM conform
    - fixed a minor problem in Makefile.PL
-   - converted documentation to DocBook   
+   - converted documentation to DocBook
 
 1.54
    - fixed some major bugs, works now with libxml2 2.5.x
@@ -40,7 +41,7 @@ versions of the package.
      (after realizing some CPAN testers refuse to read their warnings
      from Makefile.PL)
    - improved parser testsuite
-   - improved Makefile.PL
+   - improved M
    - more documentation 
 
 1.53

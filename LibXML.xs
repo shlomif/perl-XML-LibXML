@@ -3705,10 +3705,12 @@ _attributes( self )
                      * this avoids segfaults in the end.
                      */
                     xmlNsPtr tns = xmlCopyNamespace(ns);
-                    element = sv_newmortal();
-                    XPUSHs(sv_setref_pv( element, 
-                                         (char *)CLASS, 
-                                         (void*)tns));
+                    if ( tns != NULL ) {
+                        element = sv_newmortal();
+                        XPUSHs(sv_setref_pv( element, 
+                                             (char *)CLASS, 
+                                             (void*)tns));
+                    }
                 }
                 ns = ns->next;
                 len++;
