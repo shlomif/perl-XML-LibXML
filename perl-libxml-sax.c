@@ -33,6 +33,7 @@ extern "C" {
 typedef struct {
     SV * parser;
     xmlNodePtr ns_stack;
+    xmlSAXLocator * locator;
 } PmmSAXVector;
 
 typedef PmmSAXVector* PmmSAXVectorPtr;
@@ -66,6 +67,7 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser ) {
 
     vec = (PmmSAXVector*) xmlMalloc( sizeof(PmmSAXVector) );
     vec->ns_stack = xmlNewNode( NULL, "stack" );
+    vec->locator = NULL;
     SvREFCNT_inc( parser );
     vec->parser = parser;
     ctxt->_private = (void*)vec;
@@ -312,6 +314,38 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
     return retval;
 }
 
+HV * 
+PmmGenCharDataSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * data ) {
+    HV * retval = newHV();
+
+    if ( data != NULL && xmlStrlen( data ) ) {
+        hv_store(retval, "Data", 4,
+                 C2Sv(data, NULL), DataHash);
+    }
+
+    return retval;
+}
+
+HV * 
+PmmGenPISV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * target, const xmlChar * data ) {
+    HV * retval = newHV();
+
+    if ( target != NULL && xmlStrlen( target ) ) {
+        hv_store(retval, "Target", 6,
+                 C2Sv(data, NULL), TargetHash);
+
+        if ( data != NULL && xmlStrlen( data ) ) {
+            hv_store(retval, "Data", 4,
+                     C2Sv(data, NULL), DataHash);
+        }
+        else {
+            hv_store(retval, "Data", 4,
+                     C2Sv("", NULL), DataHash);
+        }
+    }
+
+    return retval;
+}
 int
 PSaxStartDocument(void * ctx)
 {
@@ -337,11 +371,11 @@ PSaxStartDocument(void * ctx)
     XPUSHs(sax->parser);
 
     if ( ctxt->version != NULL ) {
-        XPUSHs(C2Sv(ctxt->version, NULL));
+        XPUSHs(sv_2mortal(C2Sv(ctxt->version, NULL)));
     }
 
     if ( ctxt->encoding != NULL ) {
-        XPUSHs(C2Sv(ctxt->encoding, NULL));
+        XPUSHs(sv_2mortal(C2Sv(ctxt->encoding, NULL)));
     }
 
     PUTBACK;
@@ -363,7 +397,7 @@ PSaxEndDocument(void * ctx)
 
     dTHX;
     dSP;
-    
+
     ENTER;
     SAVETMPS;
 
@@ -388,6 +422,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr) {
  
     dTHX;
     dSP;
+
     
     ENTER;
     SAVETMPS;
@@ -423,7 +458,7 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
 
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
-    XPUSHs(C2Sv(name, NULL));
+    XPUSHs(sv_2mortal(C2Sv(name, NULL)));
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::end_element", 0 );
@@ -447,13 +482,13 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
 
         dTHX;
         dSP;
-    
+
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
         XPUSHs(sax->parser);
-        XPUSHs(C2Sv(data, NULL));
+        XPUSHs(newRV_noinc((SV*)PmmGenCharDataSV(aTHX_ sax,data)));
         PUTBACK;
 
         count = perl_call_pv( "XML::LibXML::_SAXParser::characters", 0 );
@@ -477,13 +512,13 @@ PSaxComment(void *ctx, const xmlChar * ch) {
 
         dTHX;
         dSP;
-    
+
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
         XPUSHs(sax->parser);
-        XPUSHs(C2Sv(data, NULL));
+        XPUSHs(newRV_noinc((SV*)PmmGenCharDataSV(aTHX_ sax,data)));
         PUTBACK;
 
         count = perl_call_pv( "XML::LibXML::_SAXParser::comment", 0 );
@@ -507,13 +542,13 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
 
         dTHX;
         dSP;
-    
+
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
         XPUSHs(sax->parser);
-        XPUSHs(C2Sv(data, NULL));
+        XPUSHs(newRV_noinc((SV*)PmmGenCharDataSV(aTHX_ sax,data)));
         PUTBACK;
 
         count = perl_call_pv( "XML::LibXML::_SAXParser::cdata_block", 0 );
@@ -542,8 +577,8 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
 
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
-    XPUSHs(C2Sv(target, NULL));
-    XPUSHs(C2Sv(data, NULL));
+    XPUSHs(newRV_noinc((SV*)PmmGenPISV(aTHX_ sax, target, data)));
+
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::processing_instruction", 0 );
@@ -578,6 +613,9 @@ PmmSaxWarning(void * ctx, const char * msg, ...)
     XPUSHs(sax->parser);
 
     XPUSHs(svMessage);
+    XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
+    XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
+
     PUTBACK;
 
     perl_call_pv( "XML::LibXML::_SAXParser::warning", 0 );
@@ -601,7 +639,6 @@ PmmSaxError(void * ctx, const char * msg, ...)
     dTHX;
     dSP;
 
-
     svMessage = NEWSV(0,512);
 
     va_start(args, msg);
@@ -616,6 +653,8 @@ PmmSaxError(void * ctx, const char * msg, ...)
     XPUSHs(sax->parser);
 
     XPUSHs(svMessage);
+    XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
+    XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;
     perl_call_pv( "XML::LibXML::_SAXParser::error", 0 );
     
@@ -651,6 +690,8 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     XPUSHs(sax->parser);
 
     XPUSHs(svMessage);
+    XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
+    XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;
     perl_call_pv( "XML::LibXML::_SAXParser::fatal_error", 0 );
     
@@ -671,12 +712,14 @@ PSaxGetHandler()
     memset(retval, 0, sizeof(xmlSAXHandler));
 
     retval->startDocument = (startDocumentSAXFunc)&PSaxStartDocument;
-    retval->endDocument   = (endDocumentSAXFunc)&PSaxEndDocument;
+    retval->endDocument   = NULL; /* (endDocumentSAXFunc)&PSaxEndDocument; */
 
     retval->startElement  = (startElementSAXFunc)&PSaxStartElement;
     retval->endElement    = (endElementSAXFunc)&PSaxEndElement;
 
     retval->characters    = (charactersSAXFunc)&PSaxCharacters;
+    retval->ignorableWhitespace = (ignorableWhitespaceSAXFunc)&PSaxCharacters;
+
     retval->comment       = (commentSAXFunc)&PSaxComment;
     retval->cdataBlock    = (cdataBlockSAXFunc)&PSaxCDATABlock;
 

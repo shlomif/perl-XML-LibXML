@@ -45,6 +45,47 @@ $ XMLPREFIX=/usr/brand-new perl Makefile.PL
 will ask '/usr/brand-new/bin/xml2-config' about your real 
 libxml2 configuration.
 
+NOTES FOR HPUX
+==============
+
+XML::LibXML requires libxml2 2.4.20 or later. That means the current
+binary libxml2 package for HPUX cannot be used with XML::LibXML. For
+some reasons the HPUX cc will not compile libxml2 correct, which will
+force you to recompile perl with gcc (if you havn't already done that).
+
+Additionally I got these Note from Rozi Kovesdi:
+
+> Here is my report if someone else runs into the same problem:
+>
+> Finally I am done with installing all the libraries and XML Perl
+> modules
+>
+> The combination that worked best for me was:
+> gcc
+> GNU make
+>
+> Most important - before trying to install Perl modules that depend on
+> libxml2:
+>
+> must set SHLIB_PATH  to include  the path to  libxml2 shared library
+> 
+> assuming that you used the default:
+>
+> export  SHLIB=/usr/local/lib
+>
+> also, make sure that the config  files have execute permission:
+>
+> /usr/local/bin/xml2-config
+> /usr/local/bin/xslt-config
+> 
+> they did not have +x after they were installed by 'make install'
+> and it took me a while to realize that this was my problem
+> 
+> or one can use:
+> 
+> perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'
+
+
 Contact
 =======
 

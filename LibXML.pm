@@ -792,11 +792,15 @@ package XML::LibXML::Namespace;
 # this is infact not a node!
 sub prefix { return "xmlns"; }
 
+sub getNamespaces { return (); }
+
 sub nodeName {
     my $self = shift;
     my $nsP  = $self->name;
     return length($nsP) ? "xmlns:$nsP" : "xmlns";
 }
+
+sub getNodeName { my $self = shift; return $self->nodeName; }
 
 sub isEqualNode {
     my ( $self, $ref ) = @_;
@@ -907,17 +911,14 @@ sub removeNamedItemNS {
 package XML::LibXML::_SAXParser;
 
 # this is pseudo class!!!
-use Carp;
+
+use XML::SAX::Exception;
+
+# NOTE: there is not end_document ON PURPOSE!
 
 sub start_document {
     my $parser = shift;
-    $parser->{SAX}->{State} = 1;
     $parser->{HANDLER}->start_document({});
-}
-
-sub end_document {
-    my $parser = shift;
-    $parser->{SAX}->{State} = 0;
 }
 
 sub xml_decl {
@@ -936,55 +937,65 @@ sub start_element {
     if ( defined $attrs ) {
         $parser->{HANDLER}->start_element( { %$elem, Attributes=>$attrs} )
     }
-
 }
 
 sub end_element {
     my (  $parser, $name ) = @_;
     my $elem = pop @{$parser->{SAX}->{ELSTACK}};
     if ( $elem->{Name} ne $name ) {
-        croak( "cought error where parser should work ($elem->{Name} != $name" );
+        my $error = XML::SAX::Execption::Parse->new( Message => "cought error where parser should catch ('$elem->{Name}' ne '$name' )" );
+        $parser->{HANDLER}->error( $error );
+        return;
     }
     $parser->{HANDLER}->end_element( $elem );
 }
 
 sub characters {
     my ( $parser, $data ) = @_;
-    $parser->{HANDLER}->characters( {Data => $data} );
+    $parser->{HANDLER}->characters( $data );
 }
 
 sub comment {
     my ( $parser, $data ) = @_;
-    $parser->{HANDLER}->comment( {Data => $data} );
+    $parser->{HANDLER}->comment( $data );
 }
 
 sub cdata_block {
     my ( $parser, $data ) = @_;
     $parser->{HANDLER}->start_cdata();
-    $parser->{HANDLER}->characters( {Data => $data} );
+    $parser->{HANDLER}->characters( $data );
     $parser->{HANDLER}->end_cdata();
 }
 
 sub processing_instruction {
-    my ( $parser, $target, $data ) = @_;
-    $parser->{HANDLER}->processing_instruction( {Target => $target,
-                                                 Data   => $data} );
+    my ( $parser, $target ) = @_;
+    $parser->{HANDLER}->processing_instruction( $target );
 }
 
 # these functions will use SAX exceptions as soon i know how things really work
 sub warning {
-    my ( $parser, $message ) = @_;
-    eval { die( $message ); };
+    my ( $parser, $message, $line, $col ) = @_;
+    my $error = XML::SAX::Exception::Parse->new( LineNumber   => $line,
+                                                 ColumnNumber => $col,
+                                                 Message      => $message, );
+    $parser->{HANDLER}->warning( $error );
 }
 
 sub error {
-    my ( $parser, $message ) = @_;
-    eval { die( $message ); };
+    my ( $parser, $message, $line, $col ) = @_;
+
+    my $error = XML::SAX::Exception::Parse->new( LineNumber   => $line,
+                                                 ColumnNumber => $col,
+                                                 Message      => $message, );
+    $parser->{HANDLER}->error( $error );
 }
 
 sub fatal_error {
-    my ( $parser, $message ) = @_;
-    die( $message );
+    my ( $parser, $message, $line, $col ) = @_;
+    my $error = XML::SAX::Exception::Parse->new( LineNumber   => $line,
+                                                 ColumnNumber => $col,
+                                                 Message      => $message, );
+    $parser->{HANDLER}->fatal_error( $error );
 }
 
 1;

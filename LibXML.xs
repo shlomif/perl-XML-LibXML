@@ -3841,12 +3841,18 @@ _find( pnode, pxpath )
 
                                 /* let's be paranoid */
                                 if (tnode->type == XML_NAMESPACE_DECL) {
-                                    element = sv_newmortal();
-                                    cls = PmmNodeTypeName( tnode );
-                                    element = sv_setref_pv( element,
-                                                            (const char *)cls,
-                                                            (void *)xmlCopyNamespace((xmlNsPtr)tnode)
+                                     xmlNsPtr newns = xmlCopyNamespace((xmlNsPtr)tnode);
+                                    if ( newns != NULL ) {
+                                        element = NEWSV(0,0);
+                                        cls = PmmNodeTypeName( tnode );
+                                        element = sv_setref_pv( element,
+                                                                (const char *)cls,
+                                                                (void *)newns
                                                           );
+                                    }
+                                    else {
+                                        continue;
+                                    }
                                 }
                                 else {
                                     element = PmmNodeToSv(tnode, owner);
@@ -3945,12 +3951,18 @@ _findnodes( pnode, perl_xpath )
                     element = NULL;
                     tnode = nodelist->nodeTab[i];
                     if (tnode->type == XML_NAMESPACE_DECL) {
-                        element = sv_newmortal();
-                        cls = PmmNodeTypeName( tnode );
-                        element = sv_setref_pv( element,
-                                                (const char *)cls,
-                                                (void *)xmlCopyNamespace((xmlNsPtr)tnode)
-                                              );
+                        xmlNsPtr newns = xmlCopyNamespace((xmlNsPtr)tnode);
+                        if ( newns != NULL ) {
+                            element = NEWSV(0,0);
+                            cls = PmmNodeTypeName( tnode );
+                            element = sv_setref_pv( element,
+                                                    (const char *)cls,
+                                                    newns
+                                                  );
+                        }
+                        else {
+                            continue;
+                        }
                     }
                     else {
                         element = PmmNodeToSv(tnode, owner);
@@ -3966,6 +3978,34 @@ _findnodes( pnode, perl_xpath )
                 croak(SvPV(LibXML_error, len));
             }
         }
+
+void
+getNamespaces( pnode )
+        SV * pnode
+    ALIAS:  
+        namespaces = 1
+    PREINIT:
+        xmlNodePtr node;
+        xmlNsPtr ns = NULL;
+        xmlNsPtr newns = NULL;
+        SV* element;
+        const char * class = "XML::LibXML::Namespace";
+    PPCODE:
+        node = PmmSvNode(pnode);
+        ns = node->nsDef;
+        while ( ns != NULL ) {
+            newns = xmlCopyNamespace((xmlNsPtr)ns);
+            if ( newns != NULL ) {
+                element = NEWSV(0,0);
+                element = sv_setref_pv( element,
+                                        (const char *)class,
+                                        (void*)newns
+                                      );
+                XPUSHs( sv_2mortal(element) );
+            }
+            ns = ns->next;
+        }
+    
         
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
@@ -4471,6 +4511,8 @@ appendText( self, string )
         SV * string
     ALIAS:
         appendTextNode = 1
+        XML::LibXML::DocumentFragment::appendText = 2
+        XML::LibXML::DocumentFragment::appendTextNode = 3
     PREINIT:
         xmlNodePtr node   = PmmSvNode( self );
         xmlChar * content = nodeSv2C( string, node );

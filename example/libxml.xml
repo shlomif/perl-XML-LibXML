@@ -1148,13 +1148,27 @@ is therefore a shortcut for
                 </p>
             </method>
 
-            <method name="normalize" synopsis="$node->normalize">
+            <method name="normalize" synopsis="$node->normalize;">
                  <p>
                    This function normalizes adjacent textnodes. This
                    function is not as strict as libxml2's
                    xmlTextMerge() function, since it will not free a
                    node that is still refered by the perl layer.
                  </p>
+            </method>
+
+            <method name="getNamespaces" synopsis="@nslist = $node->getNamespaces;">
+                <p>
+                    If a node has any namespaces defined, this
+                    function will return these namespaces. Note, that
+                    this will not return all namespaces that are in
+                    scope, but only the ones declares explicitly for
+                    that node.
+                </p>
+                <p>
+                    Although getNamespaces is available for all nodes,
+                    it makes only sense if used with element nodes.
+                </p>
             </method>
 
         </description>

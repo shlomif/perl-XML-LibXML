@@ -36,6 +36,7 @@ sub xml_decl {
 sub end_document {
     my ($self, $doc) = @_;
     my $dom = $self->{DOM};
+    $dom = $self->{Parent} unless defined $dom; # this is for parsing document chunks
     delete $self->{Parent};
     delete $self->{DOM};
     return $dom;
@@ -44,11 +45,28 @@ sub end_document {
 sub start_element {
     my ($self, $el) = @_;
     my $node;
+
+    unless ( defined $self->{DOM} or defined $self->{Parent} ) {
+        $self->{Parent} = XML::LibXML::DocumentFragment->new();
+    }
+
     if ($el->{NamespaceURI}) {
-        $node = $self->{DOM}->createElementNS($el->{NamespaceURI}, $el->{Name});
+        if ( defined $self->{DOM} ) {
+            $node = $self->{DOM}->createElementNS($el->{NamespaceURI},
+                                                  $el->{Name});
+        }
+        else {
+            $node = XML::LibXML::Element->new( $el->{Name} );
+            $node->setNamespace( $el->{NamespaceURI},$el->{Prefix} , 1 );
+        }
     }
     else {
-        $node = $self->{DOM}->createElement($el->{Name});
+        if ( defined $self->{DOM} ) {
+            $node = $self->{DOM}->createElement($el->{Name});
+        }
+        else {
+            $node = XML::LibXML::Element->new( $el->{Name} );
+        }
     }
 
     # append
@@ -88,13 +106,27 @@ sub end_element {
 
 sub characters {
     my ($self, $chars) = @_;
+    if ( not defined $self->{DOM} and not defined $self->{Parent} ) {
+        $self->{Parent} = XML::LibXML::DocumentFragment->new();
+    }
     return unless $self->{Parent};
     $self->{Parent}->appendText($chars->{Data});
 }
 
 sub comment {
     my ($self, $chars) = @_;
-    my $comment = $self->{DOM}->createComment( $chars->{Data} );
+    my $comment;
+    if ( not defined $self->{DOM} and not defined $self->{Parent} ) {
+        $self->{Parent} = XML::LibXML::DocumentFragment->new();
+    }
+
+    if ( defined $self->{DOM} ) {
+        $comment = $self->{DOM}->createComment( $chars->{Data} );
+    }
+    else {
+        $comment = XML::LibXML::Comment->new( $chars->{Data} );
+    }
+
     if ( defined $self->{Parent} ) {
         $self->{Parent}->appendChild($comment);
     }
@@ -105,13 +137,39 @@ sub comment {
 
 sub processing_instruction {
     my ( $self,  $pi ) = @_;
-    my $PI = $self->{DOM}->createPI( $pi->{Target}, $pi->{Data} );
+    my $PI;
+    return unless  defined $self->{DOM};
+    $PI = $self->{DOM}->createPI( $pi->{Target}, $pi->{Data} );
+
     if ( defined $self->{Parent} ) {
         $self->{Parent}->appendChild( $PI );
     }
     else {
         $self->{DOM}->appendChild( $PI );
     }
+}
+
+sub warning {
+    my $self = shift;
+    my $error = shift;
+    # fill $@ but do not die seriously
+    eval { $error->throw; };
+}
+
+sub error {
+    my $self = shift;
+    my $error = shift;
+    delete $self->{Parent};
+    delete $self->{DOM};
+    $error->throw;
+}
+
+sub fatal_error {
+    my $self = shift;
+    my $error = shift;
+    delete $self->{Parent};
+    delete $self->{DOM};
+    $error->throw;
 }
 
 1;

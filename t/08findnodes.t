@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>15 }
+BEGIN { plan tests=>18 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -93,6 +93,24 @@ ok(@doc);
 
 eval { my $literal = $root->findvalue( "/-" ); };
 ok( $@ );
+
+eval { my @nodes = $root->findnodes( "/-" ); };
+ok( $@ );
+
+# this query should result an empty array!
+my @nodes = $root->findnodes( "/humpty/dumpty" );
+ok( scalar(@nodes), 0 );
+
+
+my $docstring = q{
+<foo xmlns="http://kungfoo" xmlns:bar="http://foo"/>
+};
+ $doc = $parser->parse_string( $docstring );
+ $root = $doc->documentElement;
+
+my @ns = $root->findnodes('namespace::*');
+ok(scalar(@ns), 2 );
+
 
 
 sub finddoc {
