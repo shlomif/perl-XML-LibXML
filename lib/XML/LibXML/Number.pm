@@ -13,11 +13,11 @@ use overload
 sub new {
     my $class = shift;
     my $number = shift;
-    if ($number !~ /^\s*(\d+(\.\d*)?|\.\d+)\s*$/) {
+    if ($number !~ /^\s*(-\s*)?(\d+(\.\d*)?|\.\d+)\s*$/) {
         $number = undef;
     }
     else {
-        $number =~ s/^\s*(.*)\s*$/$1/;
+        $number =~ s/\s+//g;
     }
     bless \$number, $class;
 }
