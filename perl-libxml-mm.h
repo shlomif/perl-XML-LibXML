@@ -93,6 +93,24 @@ PmmSetSvOwner(SV * perlnode, SV * owner );
 void
 PmmFixOwner(ProxyNodePtr node, ProxyNodePtr newOwner );
 
+/**
+ * NAME domNodeTypeName
+ * TYPE function
+ * 
+ * returns the perl class name for the given node
+ *
+ * SYNOPSIS
+ * CLASS = domNodeTypeName( node );
+ */
+const char*
+PmmNodeTypeName( xmlNodePtr elem );
+
+xmlChar*
+PmmEncodeString( const char *encoding, const char *string );
+
+char*
+PmmDecodeString( const char *encoding, const xmlChar *string);
+
 /* string manipulation will go elsewhere! */
 
 /*

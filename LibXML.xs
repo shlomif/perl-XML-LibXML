@@ -1354,7 +1354,7 @@ decodeFromUTF8( encoding, string )
 #endif
             realstring = Sv2C(string,(const xmlChar*)"UTF8" );
             if ( realstring != NULL ) {
-                tstr =  (xmlChar*)domDecodeString( (const char*)encoding,
+                tstr =  (xmlChar*)PmmDecodeString( (const char*)encoding,
                                                    (const xmlChar*)realstring );
                 if ( tstr != NULL ) {
                     RETVAL = C2Sv((const xmlChar*)tstr,(const xmlChar*)encoding);
@@ -3304,7 +3304,7 @@ _find( pnode, pxpath )
                                 /* let's be paranoid */
                                 if (tnode->type == XML_NAMESPACE_DECL) {
                                     element = sv_newmortal();
-                                    cls = domNodeTypeName( tnode );
+                                    cls = PmmNodeTypeName( tnode );
                                     element = sv_setref_pv( element,
                                                             (const char *)cls,
                                                             (void *)xmlCopyNamespace((xmlNsPtr)tnode)
@@ -3390,7 +3390,7 @@ _findnodes( pnode, perl_xpath )
                     tnode = nodelist->nodeTab[i];
                     if (tnode->type == XML_NAMESPACE_DECL) {
                         element = sv_newmortal();
-                        cls = domNodeTypeName( tnode );
+                        cls = PmmNodeTypeName( tnode );
                         element = sv_setref_pv( element,
                                                 (const char *)cls,
                                                 (void *)xmlCopyNamespace((xmlNsPtr)tnode)

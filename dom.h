@@ -32,24 +32,6 @@
 xmlNodePtr 
 domReadWellBalancedString( xmlDocPtr doc, xmlChar* string );
 
-xmlChar*
-domEncodeString( const char *encoding, const char *string );
-
-char*
-domDecodeString( const char *encoding, const xmlChar *string);
-
-/**
- * NAME domNodeTypeName
- * TYPE function
- * 
- * returns the perl class name for the given node
- *
- * SYNOPSIS
- * CLASS = domNodeTypeName( node );
- */
-const char*
-domNodeTypeName( xmlNodePtr self );
-
 /**
  * NAME domIsParent
  * TYPE function

@@ -20,8 +20,7 @@ extern "C" {
 #include "XSUB.h"
 
 #include <libxml/parser.h>
-
-#include "dom.h"
+#include <libxml/tree.h>
 
 #ifdef __cplusplus
 }
@@ -32,6 +31,60 @@ extern "C" {
 #else
 #define xs_warn(string)
 #endif
+
+/**
+ * this is a wrapper function that does the type evaluation for the 
+ * node. this makes the code a little more readable in the .XS
+ * 
+ * the code is not really portable, but i think we'll avoid some 
+ * memory leak problems that way.
+ **/
+const char*
+PmmNodeTypeName( xmlNodePtr elem ){
+    const char *name = "XML::LibXML::Node";
+
+    if ( elem != NULL ) {
+        char * ptrHlp;
+        switch ( elem->type ) {
+        case XML_ELEMENT_NODE:
+            name = "XML::LibXML::Element";   
+            break;
+        case XML_TEXT_NODE:
+            name = "XML::LibXML::Text";
+            break;
+        case XML_COMMENT_NODE:
+            name = "XML::LibXML::Comment";
+            break;
+        case XML_CDATA_SECTION_NODE:
+            name = "XML::LibXML::CDATASection";
+            break;
+        case XML_ATTRIBUTE_NODE:
+            name = "XML::LibXML::Attr"; 
+            break;
+        case XML_DOCUMENT_NODE:
+        case XML_HTML_DOCUMENT_NODE:
+            name = "XML::LibXML::Document";
+            break;
+        case XML_DOCUMENT_FRAG_NODE:
+            name = "XML::LibXML::DocumentFragment";
+            break;
+        case XML_NAMESPACE_DECL:
+            name = "XML::LibXML::Namespace";
+            break;
+        case XML_DTD_NODE:
+            name = "XML::LibXML::Dtd";
+            break;
+        case XML_PI_NODE:
+            name = "XML::LibXML::PI";
+            break;
+        default:
+            name = "XML::LibXML::Node";
+            break;
+        };
+        return name;
+    }
+    return "";
+}
 
 /*
  * @node: Reference to the node the structure proxies
@@ -211,7 +264,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 
     if ( node != NULL ) {
         /* find out about the class */
-        CLASS = domNodeTypeName( node );
+        CLASS = PmmNodeTypeName( node );
         xs_warn(" return new perl node\n");
         xs_warn( CLASS );
 
@@ -368,6 +421,115 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
     return(0);
 }
 
+/** 
+ * encodeString returns an UTF-8 encoded String
+ * while the encodig has the name of the encoding of string
+ **/ 
+xmlChar*
+PmmEncodeString( const char *encoding, const xmlChar *string ){
+    xmlCharEncoding enc;
+    xmlChar *ret = NULL;
+    xmlBufferPtr in, out;
+    xmlCharEncodingHandlerPtr coder = NULL;
+    
+    if ( string != NULL ) {
+        if( encoding != NULL ) {
+            xs_warn( encoding );
+            enc = xmlParseCharEncoding( encoding );
+            if ( enc > 1 ) {
+                coder= xmlGetCharEncodingHandler( enc );
+            }
+            else if ( enc == 1 ) {
+                ret = xmlStrdup( string );
+            }
+            else if ( enc == XML_CHAR_ENCODING_ERROR ){
+                xs_warn("no standard encoding\n");
+                coder = xmlFindCharEncodingHandler( encoding );
+            }
+            else {
+                xs_warn("no encoding found\n");
+            }
+
+            if ( coder != NULL ) {
+                xs_warn("coding machine found\n");
+                in    = xmlBufferCreate();
+                out   = xmlBufferCreate();
+                xmlBufferCCat( in, string );
+                if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
+                    ret = xmlStrdup( out->content );
+                }
+                else {
+                     xs_warn( "b0rked encoiding!\n");
+                }
+                    
+                xmlBufferFree( in );
+                xmlBufferFree( out );
+            }
+            else {
+                xs_warn("no coder found\n");
+                /* ret = xmlStrdup( string ); */
+            }
+        }
+        else {
+            /* if utf-8 is requested we do nothing */
+            ret = xmlStrdup( string );
+        }
+    }
+    return ret;
+}
+
+/**
+ * decodeString returns an $encoding encoded string.
+ * while string is an UTF-8 encoded string and 
+ * encoding is the coding name
+ **/
+char*
+PmmDecodeString( const char *encoding, const xmlChar *string){
+    char *ret=NULL;
+    xmlCharEncoding enc;
+    xmlBufferPtr in, out;
+    xmlCharEncodingHandlerPtr coder = NULL;
+
+    if ( string != NULL ) {
+        if( encoding != NULL ) {
+            enc = xmlParseCharEncoding( encoding );
+            if ( enc > 1 ) {
+                coder= xmlGetCharEncodingHandler( enc );
+            }
+            else if ( enc == 1 ) {
+                ret = xmlStrdup( string );
+            }
+            else if ( enc == XML_CHAR_ENCODING_ERROR ) {
+                coder = xmlFindCharEncodingHandler( encoding );
+            }
+            else {
+                xs_warn("no encoding found");
+            }
+
+            if ( coder != NULL ) {
+                in  = xmlBufferCreate();
+                out = xmlBufferCreate();
+                    
+                xmlBufferCat( in, string );        
+                if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
+                    ret=xmlStrdup(out->content);
+                }
+                else {
+                    /* printf("decoding error \n"); */
+                }
+            
+                xmlBufferFree( in );
+                xmlBufferFree( out );
+                xmlCharEncCloseFunc( coder );
+            }
+        }
+        else {
+            ret = xmlStrdup(string);
+        }
+    }
+    return ret;
+}
+
 SV*
 C2Sv( const xmlChar *string, const xmlChar *encoding )
 {
@@ -417,7 +579,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
             if ( encoding != NULL ) {
 #endif
                 xs_warn( "domEncodeString!" );
-                ts= domEncodeString( encoding, string );
+                ts= PmmEncodeString( encoding, string );
                 xs_warn( "done!" );
                 if ( string != NULL ) 
                     xmlFree(string);
@@ -443,7 +605,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
         xmlDocPtr real_doc = refnode->doc;
         if ( real_doc && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = domDecodeString( (const char *)real_doc->encoding ,
+            xmlChar * decoded = PmmDecodeString( (const char *)real_doc->encoding ,
                                                  (const xmlChar *)string );
 
             retval = C2Sv( decoded, real_doc->encoding );
