@@ -1,11 +1,15 @@
 Revision history for Perl extension XML::LibXSLT.
 
+1.31
+    - Removed C-layer parser implementation.
+
 1.30
     - Full PI access
     - New parser implementation (safer)
     - Callbacks API changed to be on the object, not the class
     - SAX uses XML::SAX now (required)
     - Memory leak fixes
+    - applied a bunch of patches provided by T.J. Mather
 
 1.00
     - Added SAX serialisation
