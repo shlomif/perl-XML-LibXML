@@ -73,6 +73,7 @@ LibXML_error_handler(void * ctxt, const char * msg, ...)
 {
     va_list args;
     SV * sv;
+    /* xmlParserCtxtPtr context = (xmlParserCtxtPtr) ctxt; */
 
     sv = NEWSV(0,512);
 
@@ -116,6 +117,7 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
     va_list args;
     STRLEN len;
     SV * sv;
+    char * string = NULL;
     
     sv = NEWSV(0,512);
     
@@ -123,7 +125,14 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
     sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
     va_end(args);
     
-    warn(SvPV(sv, len));
+    string = SvPV(sv, len);
+    if ( string != NULL ) {
+        if ( len > 0 ) {
+             warn("validation error: '%s'" , string);
+        }
+        Safefree(string);
+    }
+
     SvREFCNT_dec(sv);
 }
 
@@ -3212,16 +3221,20 @@ string_value ( node, useDomEncoding = &PL_sv_undef )
     ALIAS:
         to_literal = 1
         textContent = 2
+    PREINIT:
+         xmlChar * string = NULL;
     CODE:
         /* we can't just return a string, because of UTF8! */
+        string = xmlXPathCastNodeToString(PmmSvNode(node));
         if ( SvTRUE(useDomEncoding) ) {
-            RETVAL = nodeC2Sv(xmlXPathCastNodeToString(PmmSvNode(node)),
+            RETVAL = nodeC2Sv(string,
                               PmmSvNode(node));
         }
         else {
-            RETVAL = C2Sv(xmlXPathCastNodeToString(PmmSvNode(node)),
+            RETVAL = C2Sv(string,
                           NULL);
         }
+        xmlFree(string);
     OUTPUT:
         RETVAL
 
@@ -3351,12 +3364,13 @@ _findnodes( pnode, perl_xpath )
             XSRETURN_UNDEF;
         }
     PPCODE:
-        if ( node->doc ) {
+        /*if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement(node->doc ) );
         }
         else {
             domNodeNormalize( PmmOWNER(SvPROXYNODE(pnode)) );
         }
+        */
 
         nodelist = domXPathSelect( node, xpath );
         xmlFree(xpath);
