@@ -12,7 +12,9 @@ XML::LibXML::Element - The DOM Element Class
   $node->removeAttribute( $aname );
   @nodes = $node->getElementsByTagName($tagname);
   $node->appendWellBalancedChunk( $chunk )
-  $node->appendTextNode( $PCDATA )
+  $node->appendText( $PCDATA );
+  $node->appendTextNode( $PCDATA );
+  $node->appendTextChild( $childname , $PCDATA )
 
 =head1 DESCRIPTION
 
@@ -42,17 +44,29 @@ attribute list, if the attribute can be found.
 
 =item B<getElementsByTagName>
 
-The function gives direct access to all childnodes of the current node with the same tagname. It makes things a lot easier if you need to handle big datasets.
+The function gives direct access to all childnodes of the current
+node with the same tagname. It makes things a lot easier if you
+need to handle big datasets.
 
 =item B<appendWellBalancedChunk>
 
 Sometimes it is nessecary to append a string coded XML Tree to a node. B<appendWellBalancedChunk> will do the trick for you.
 But this is only done if the String is I<well-balanced> .
 
+=item B<appendText>
+
+alias for appendTextNode().
+
 =item B<appendTextNode>
 
 This wrapper function lets you add a string directly to an element
 node.
+
+=item B<appendTextChild>
+
+Somewhat similar with I<appendTextNode> : It lets you set an
+Element, that contains only a I<text node> directly by
+specifying the name and the text content.
 
 =back
 

@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 use XML::LibXML;
+use File::Path;
+use File::Basename;
 
 # (c) 2001 christian p. glahn
 
@@ -99,8 +101,9 @@ sub handle_class {
   # print the data to a separated POD File
   my $filename = $node->getAttribute("name");
   $filename =~ s/::/\//g;
-  print("writing file: lib/${filename}.pod\n");
-  open FILE , "> lib/${filename}.pod" ||
+  print("writing file: XML-LibXML-${XML::LibXML::VERSION}/lib/${filename}.pod\n");
+  mkpath([dirname("XML-LibXML-${XML::LibXML::VERSION}/lib/${filename}.pod")]);
+  open FILE , "> XML-LibXML-${XML::LibXML::VERSION}/lib/${filename}.pod" ||
     do{
       warn "cannot open file...\n"; 
       return ; # don't proceed if there is no open descriptor

@@ -66,18 +66,13 @@ RPMs, as this is where the headers (.h files) are.
 DEATH
 }
 
-# have_library("xml2", "ghttp_get_header_names");
-
-print "creating POD files\n";
-
-system($^X, "example/xml2pod.pl");
-
 WriteMakefile(
     'NAME'	=> 'XML::LibXML',
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
     'AUTHOR'    => 'Matt Sergeant',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
+    'dist'      => { PREOP => "$^X example/xml2pod.pl" },
     %config,
 );
 

@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXSLT.
 
+0.92
+    - Many segfault and other bug fixes
+    - More DOM API methods added
+
 0.91
     - Removed from XML::LibXSLT distribution
     - Added DOM API (phish)

@@ -7,6 +7,7 @@ XML::LibXML::Node - "virtual" Base Class DOM-Nodes
   use XML::LibXML::Node;
 
   $name = $node->getName();
+  $bool = $node->isEqual( $other_node );
   $content = $node->getData()
   $type = $node->getType();
   $node->unbindNode()
@@ -26,6 +27,7 @@ XML::LibXML::Node - "virtual" Base Class DOM-Nodes
   @nodes = $node->findnodes( $xpath_statement );
   @children = $node->getChildnodes();
   $xmlstring = $node->toString();
+  $document->importNode( $node [, $move] );
 
 =head1 DESCRIPTION
 
@@ -42,6 +44,11 @@ functionality.
 =item B<getName>
 
 Returns the node's name
+
+=item B<isEqual>
+
+returns TRUE (1) if documents refer to the same nodestructure,
+otherwise FALSE (0) is returned.
 
 =item B<getData>
 
@@ -78,9 +85,6 @@ childnode is allready a child of I<$node>
 B<cloneNode> creates a copy of I<$node> . Wether $deep
 is set to 1 (true) the function will copy all childnodes as
 well. If $deep is 0 only the current node will be copied.
-By now the function is not aware about the CLASS that is
-blessed to the node to copy, therefor all CLASS specific
-functions will not be accesseble any more :-(
 
 =item B<getParentNode>
 
@@ -113,7 +117,8 @@ document the current node is bound to.
 
 =item B<setOwnerDocument>
 
-This function binds a node to another DOM. This method unbinds the node first, if it is allready bound to another document.
+This function binds a node to another DOM. This method unbinds the
+node first, if it is allready bound to another document.
 
 =item B<insertBefore>
 
@@ -131,12 +136,22 @@ B<findnodes> performs the xpath statement on the current node and returns the re
 
 =item B<getChildnodes>
 
-B<getChildnodes> implements a more intuitive interface to the childnodes of the current node. It enables you to pass all children directly to a I<map> or I<grep> .
+B<getChildnodes> implements a more intuitive interface to the
+childnodes of the current node. It enables you to pass all
+children directly to a I<map> or I<grep> .
 
 =item B<toString>
 
 This is the equivalent to I<XML::LibXML::Document::toString> for
 a single node. This means a node and all its childnodes will be dumped into the result string. There is no formating implemented yet, which may cause an unreadable output.
+
+=item B<importNode>
+
+B<THIS FUNCTION IS NOT IMPLEMENTED YET> If a node is not part of a document, it can be imported to another
+document. As specified in DOM Level 2 Specification the Node will
+not be altered or removed from its original document by default. ( I<$node->cloneNode(1)> will get called implicitly). Sometimes it is nessecary to I<move> a node between
+documents. In such a case the node will not be copied, but removed
+from the original document.
 
 =back
 
