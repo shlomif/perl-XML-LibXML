@@ -3,6 +3,8 @@ Revision history for Perl extension XML::LibXSLT.
 1.31
     - Removed C-layer parser implementation.
     - Added support for prefixes in find* functions
+    - More memory leak fixes (in custom DOMs)
+    - Allow global callbacks
 
 1.30
     - Full PI access
