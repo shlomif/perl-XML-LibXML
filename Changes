@@ -6,13 +6,19 @@ the behaviour of some functions may have changed to previous
 versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
+1.52
+   - fixed some typos (thanks to randy kobes and hildo biersma)
+   - fixed namespace node handling
+   - corrected the parser default values.
+   - added some documentation
+
 1.51
    - fixed parser bug with broken XML declarations
    - fixed memory management within documents that have subsets
    - fixed some threaded perl issues
-     (very special thanks to andreas koenig for the patch)
-   - applied Win32 patch
-     (very special thanks to randy kobes for the patch)
+     (special thanks to andreas koenig for the patch)
+   - applied Win32 tests 
+     (special thanks to randy kobes for the patch)
    - fixed findnodes() and find() to return empty arrays in array context
      if the statement was legal but produced no result.
    - fixed namespace handling in xpath functions
