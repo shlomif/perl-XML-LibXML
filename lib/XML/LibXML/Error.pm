@@ -1,5 +1,8 @@
 package XML::LibXML::Error;
 
+use strict;
+use vars qw($AUTOLOAD @error_domains);
+use Carp;
 use overload
   '""' => \&as_string;
 
@@ -33,14 +36,32 @@ use constant XML_ERR_FROM_C14N	     => 21; # The Canonicalization module
 use constant XML_ERR_FROM_XSLT	     => 22; # The XSLT engine from libxslt
 use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 
-use vars qw(@error_domains);
-
 @error_domains = ("", "parser", "tree", "namespace", "validity",
 		  "HTML parser", "memory", "output", "I/O", "ftp",
 		  "http", "XInclude", "XPath", "xpointer", "regexp",
 		  "Schemas datatype", "Schemas parser", "Schemas validity", 
 		  "Relax-NG parser", "Relax-NG validity",
 		  "Catalog", "C14N", "XSLT", "validity");
+
+sub AUTOLOAD {
+  my $self=shift;
+  return undef unless ref($self);
+  my $sub = $AUTOLOAD;
+  $sub =~ s/.*:://;
+  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|str[123]|int[12])$/) {
+    return $self->{$sub};
+  } else {
+    croak("Unknown error field $sub");
+  }
+}
+
+sub DESTROY {}
+
+sub domain {
+  my ($self)=@_;
+  return undef unless ref($self);
+  return $error_domains[$self->{domain}]
+}
 
 sub as_string {
   my ($self)=@_;
