@@ -1807,6 +1807,7 @@ _end_push( self, pctxt, restore )
         xmlDocPtr doc = NULL;
         HV* real_obj = (HV *)SvRV(self);
         SV ** item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
+        STRLEN len;
     INIT:
         ctxt = PmmSvContext( pctxt );
         if ( ctxt == NULL ) {
@@ -2076,6 +2077,7 @@ toFH( self, filehandler, format=0 )
         xmlDtdPtr intSubset = NULL;
         xmlDocPtr doc = (xmlDocPtr)PmmSvNode( self );
         int t_indent_var = xmlIndentTreeOutput;
+        STRLEN len;
     CODE:
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
@@ -2143,6 +2145,7 @@ toFile( self, filename, format=0 )
     PREINIT:
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
+        STRLEN len;
     CODE:
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
@@ -4302,6 +4305,10 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
         }
 
         nsPrefix = nodeSv2C(namespacePrefix, node);
+        if ( xmlStrlen( nsPrefix ) == 0 ) {
+            xmlFree(nsPrefix);
+            nsPrefix = NULL;
+        } 
         if ( ns = xmlSearchNsByHref(node->doc, node, nsURI) ) {
             if ( ns->prefix == nsPrefix               /* both are NULL then */
                  || xmlStrEqual( ns->prefix, nsPrefix ) ) {            
@@ -5356,6 +5363,7 @@ parse_string(CLASS, str, ...)
         xmlParserInputBufferPtr buffer;
         xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
         char * new_string;
+        STRLEN len;
     CODE:
         LibXML_init_error();
         if (items > 2) {
