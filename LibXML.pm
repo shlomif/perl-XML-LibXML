@@ -355,8 +355,6 @@ sub parse_file {
     return $result;
 }
 
-sub parse_chunk { my $self = shift; return $self->parse_xml_chunk(@_); }
-
 sub parse_xml_chunk {
     my $self = shift;
     # max 2 parameter:
@@ -384,6 +382,8 @@ sub parse_xml_chunk {
 
     return $result;
 }
+
+sub parse_chunk { my $self = shift; return $self->parse_xml_chunk(@_); }
 
 sub processXIncludes {
     my $self = shift;
@@ -1311,20 +1311,6 @@ L<"XML::LibXML::Dtd">.
 Process any xinclude tags in the file. (currently using B<only> libxml2's
 default callbacks)
 
-
-=head1 XML::LibXML::Dtd
-
-This module allows you to parse and return a DTD object. It has one method
-right now, C<new()>.
-
-=head2 new()
-
-  my $dtd = XML::LibXML::Dtd->new($public, $system);
-
-Creates a new DTD object from the public and system identifiers. It will
-automatically load the objects from the filesystem, or use the input
-callbacks (see L<"Input Callbacks"> below) to load the DTD.
-
 =head1 Input Callbacks
 
 The input callbacks are used whenever LibXML has to get something B<other
@@ -1342,22 +1328,26 @@ opened streams.
 
 The following callbacks are defined:
 
-=head2 match(uri)
+=over4
+
+=item match(uri)
 
 If you want to handle the URI, simply return a true value from this callback.
 
-=head2 open(uri)
+=item open(uri)
 
 Open something and return it to handle that resource.
 
-=head2 read(handle, bytes)
+=item read(handle, bytes)
 
 Read a certain number of bytes from the resource. This callback is
 called even if the entire Document has already read.
 
-=head2 close(handle)
+=item close(handle)
 
 Close the handle associated with the resource.
+
+=back
 
 =head2 Example
 
@@ -1396,6 +1386,27 @@ that responds to methods similar to an IO::Handle.
   }
 
 A more realistic example can be found in the L<"example"> directory
+
+Since the parser requires all callbacks defined it is also possible to
+set all callbacks with a single call of callbacks(). This would
+simplify the example code to:
+
+  $parser->callbacks( \&match_uri, \&open_uri, \&read_uri, \&close_uri);
+
+All functions that are used to set the callbacks, can also be used to
+retrieve the callbacks from the parser.
+
+=head2 Global Callbacks
+
+Optionaly it is possible to apply global callback on the XML::LibXML
+class level. This allows multiple parses to share the same callbacks.
+To set these global callbacks one can use the callback access
+functions directly on the class.
+
+  XML::LibXML->callbacks( \&match_uri, \&open_uri, \&read_uri, \&close_uri);
+
+The previous code snippet will set the callbacks from the first
+example as global callbacks.
 
 =head1 Encoding
 
@@ -1436,6 +1447,19 @@ This Function transforms an UTF-8 encoded string the specified
 encoding.  While transforms to ISO encodings may cause errors if the
 given stirng contains unsupported characters, this function can
 transform to UTF-16 encodings as well.
+
+=head1 XML::LibXML::Dtd
+
+This module allows you to parse and return a DTD object. It has one method
+right now, C<new()>.
+
+=head2 new()
+
+  my $dtd = XML::LibXML::Dtd->new($public, $system);
+
+Creates a new DTD object from the public and system identifiers. It will
+automatically load the objects from the filesystem, or use the input
+callbacks (see L<"Input Callbacks"> below) to load the DTD.
 
 =head1 Processing Instructions - XML::LibXML::PI
 
