@@ -14,6 +14,10 @@ require DynaLoader;
 
 @ISA = qw(DynaLoader Exporter);
 
+$XML::LibXML::skipDTD            = 0;
+$XML::LibXML::skipXMLDeclaration = 0;
+$XML::LibXML::setTagCompression  = 0;
+
 bootstrap XML::LibXML $VERSION;
 
 @EXPORT = qw( XML_ELEMENT_NODE
@@ -419,26 +423,17 @@ sub toString {
 
     my $retval = "";
 
-    my $intDTD;
-    # if ( defined $XML::LibXML::skipDTD
-    #     and $XML::LibXML::skipDTD == 1 ) {
-    #    $intDTD = 1;
-    #    $self->setExternalSubset( $self->internalSubset );
-    #}
-
     if ( defined $XML::LibXML::skipXMLDeclaration
          and $XML::LibXML::skipXMLDeclaration == 1 ) {
         foreach ( $self->childNodes ){
+            next if $_->nodeType == XML::LibXML::XML_DTD_NODE()
+                    and $XML::LibXML::skipDTD;
             $retval .= $_->toString;
         }
     }
     else {
         $retval =  $self->_toString($flag||0);
     }
-
-    # if ( defined $intDTD ) {
-    #    $self->setInternalSubset( $self->externalSubset );
-    # }
 
     return $retval;
 }
@@ -526,6 +521,15 @@ sub getChildrenByTagName {
     my ( $node, $name ) = @_;
     my @nodes = grep { $_->nodeName eq $name } $node->childNodes();
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
+
+sub appendWellBalancedChunk {
+    my ( $self, $chunk ) = @_;
+
+    my $local_parser = XML::LibXML->new();
+    my $frag = $local_parser->parse_xml_chunk( $chunk );
+
+    $self->appendChild( $frag );
 }
 
 1;

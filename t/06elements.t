@@ -9,7 +9,8 @@ use Devel::Peek;
 use strict;
 use warnings;
 
-BEGIN { plan tests => 45 };
+
+BEGIN { plan tests => 51 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -154,4 +155,30 @@ print "# 4. Text Append and Normalization\n";
 
     ok( $t2->parentNode, undef);
     ok( $t3->parentNode, undef);
+}
+
+
+print "# 5. XML::LibXML extensions\n";
+{
+    my $plainstring = "foo";
+    my $stdentstring= "$foo & this";
+    
+    my $doc = XML::LibXML::Document->new();
+    my $elem = $doc->createElement( $foo );
+    $doc->setDocumentElement( $elem );
+    
+    $elem->appendText( $plainstring );
+    ok( $elem->string_value , $plainstring );
+
+    $elem->appendText( $stdentstring );
+    ok( $elem->string_value , $plainstring.$stdentstring );
+
+    $elem->appendTextChild( "foo");
+    $elem->appendTextChild( "foo" => "foo&bar" );
+
+    my @cn = $elem->childNodes;
+    ok( @cn );
+    ok( scalar(@cn), 3 );
+    ok( !$cn[1]->hasChildNodes);
+    ok( $cn[2]->hasChildNodes);
 }

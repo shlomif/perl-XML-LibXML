@@ -1371,11 +1371,19 @@ _toString(self, format=0)
         int len=0;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
+        xmlDtdPtr intSubset = NULL;
     CODE:
         real_dom = (xmlDocPtr)PmmNODE(SvPROXYNODE(self));
         internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
+        }
+
+        internalFlag = get_sv("XML::LibXML::skipDTD", 0);
+        if ( internalFlag && SvTRUE(internalFlag) ) {
+            intSubset = xmlGetIntSubset( real_dom );
+            if ( intSubset )
+                xmlUnlinkNode( (xmlNodePtr)intSubset );
         }
 
         if ( format <= 0 ) {
@@ -1388,6 +1396,13 @@ _toString(self, format=0)
             xmlIndentTreeOutput = 1;
             xmlDocDumpFormatMemory( real_dom, &result, &len, format ); 
             xmlIndentTreeOutput = t_indent_var;
+        }
+
+        if ( intSubset != NULL ) {
+            if (real_dom->children == NULL)
+                 xmlAddChild((xmlNodePtr) real_dom, (xmlNodePtr) intSubset);
+            else
+                xmlAddPrevSibling(real_dom->children, (xmlNodePtr) intSubset);
         }
 
         xmlSaveNoEmptyTags = oldTagFlag;
@@ -1414,10 +1429,19 @@ toFH( self, filehandler, format=1 )
         xmlCharEncodingHandlerPtr handler = NULL;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
+        xmlDtdPtr intSubset = NULL;
+        xmlDocPtr doc = (xmlDocPtr)PmmSvNode( self );
     CODE:
         internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
+        }
+
+        internalFlag = get_sv("XML::LibXML::skipDTD", 0);
+        if ( internalFlag && SvTRUE(internalFlag) ) {
+            intSubset = xmlGetIntSubset( doc );
+            if ( intSubset )
+                xmlUnlinkNode( (xmlNodePtr)intSubset );
         }
 
         xmlRegisterDefaultOutputCallbacks();
@@ -1435,9 +1459,16 @@ toFH( self, filehandler, format=1 )
                                           filehandler,
                                           handler ); 
         RETVAL =xmlSaveFormatFileTo( buffer, 
-                                     (xmlDocPtr)PmmSvNode(self),
+                                     doc,
                                      encoding,
                                      format);
+        if ( intSubset != NULL ) {
+            if (doc->children == NULL)
+                xmlAddChild((xmlNodePtr) doc, (xmlNodePtr) intSubset);
+            else
+                xmlAddPrevSibling(doc->children, (xmlNodePtr) intSubset);
+        }
+
         xmlSaveNoEmptyTags = oldTagFlag;
         xmlOutputBufferClose( buffer );
     OUTPUT:
@@ -1554,7 +1585,6 @@ createInternalSubset( doc, Pname, extID, sysID )
         systemID   = Sv2C(sysID, NULL);
 
         dtd = xmlCreateIntSubset( document, name, externalID, systemID );
-
         xmlFree(externalID);
         xmlFree(systemID);
         xmlFree(name);
@@ -2115,7 +2145,7 @@ setInternalSubset( document, extdtd )
                 doc->extSubset = NULL;
             }
 
-            olddtd = doc->intSubset;
+            olddtd = xmlGetIntSubset( doc );
             if( olddtd ) {
                 xmlReplaceNode( (xmlNodePtr)olddtd, (xmlNodePtr) dtd );
                 if ( olddtd->_private == NULL ) {
@@ -2123,41 +2153,10 @@ setInternalSubset( document, extdtd )
                 }
             }
             else {
-                /* there is no setinternal subset function in libxml :/ */
-                if (doc->children == NULL) {
-                    doc->children = (xmlNodePtr) dtd;
-                    doc->last = (xmlNodePtr) dtd;
-                } else {
-                    if (doc->type == XML_HTML_DOCUMENT_NODE) {
-                        xmlNodePtr prev;
-
-                        prev = doc->children;
-                        prev->prev = (xmlNodePtr) dtd;
-                        dtd->next = prev;
-                        doc->children = (xmlNodePtr) dtd;
-                    } else {
-                        xmlNodePtr next;
-
-                        next = doc->children;
-                        while ((next != NULL)
-                               && (next->type != XML_ELEMENT_NODE))
-                            next = next->next;
-                        if (next == NULL) {
-                            dtd->prev = doc->last;
-                            dtd->prev->next = (xmlNodePtr) dtd;
-                            dtd->next = NULL;
-                            doc->last = (xmlNodePtr) dtd;
-                        } else {
-                            dtd->next = next;
-                            dtd->prev = next->prev;
-                            if (dtd->prev == NULL)
-                                doc->children = (xmlNodePtr) dtd;
-                            else
-                                dtd->prev->next = (xmlNodePtr) dtd;
-                            next->prev = (xmlNodePtr) dtd;
-                        }
-                    }
-                }
+                if (doc->children == NULL)
+                    xmlAddChild((xmlNodePtr) doc, (xmlNodePtr) dtd);
+                else
+                    xmlAddPrevSibling(doc->children, (xmlNodePtr) dtd);
             }
             doc->intSubset = dtd;
         }
@@ -2169,7 +2168,7 @@ removeInternalSubset( document )
         xmlDocPtr doc = (xmlDocPtr)PmmSvNode(document);
         xmlDtdPtr dtd = NULL;
     CODE:
-        dtd = doc->intSubset;
+        dtd = xmlGetIntSubset(doc);
         if ( !dtd ) {
             XSRETURN_UNDEF;   
         }
@@ -2486,6 +2485,7 @@ nodeValue( proxy_node, useDomEncoding = &PL_sv_undef )
         XML::LibXML::Attr::getValue  = 2
         XML::LibXML::Text::data      = 3
         XML::LibXML::Node::getValue  = 4
+        XML::LibXML::Node::getData   = 5
     PREINIT:
         xmlNodePtr node;
         xmlChar * content = NULL;
@@ -2527,7 +2527,8 @@ SV*
 parentNode( self )
         SV *self
     ALIAS:
-        XML::LibXML::Attr::ownerElement = 1
+        XML::LibXML::Attr::ownerElement  = 1
+        XML::LibXML::Node::getParentNode = 2
     CODE:
         RETVAL = PmmNodeToSv( PmmSvNode(self)->parent,
                               PmmOWNERPO( SvPROXYNODE(self) ) ); 
@@ -2582,6 +2583,8 @@ _childNodes( node )
 SV*
 firstChild( self )
         SV *self
+    ALIAS:
+        getFirstChild = 1
     CODE:
         RETVAL = PmmNodeToSv( PmmSvNode(self)->children,
                               PmmOWNERPO( SvPROXYNODE(self) ) ); 
@@ -2591,6 +2594,8 @@ firstChild( self )
 SV*
 lastChild( self )
         SV *self
+    ALIAS:
+        getLastChild = 1
     CODE:
         RETVAL = PmmNodeToSv( PmmSvNode(self)->last,
                               PmmOWNERPO( SvPROXYNODE(self) ) ); 
@@ -3544,10 +3549,6 @@ getAttribtueNS( self, namespaceURI, attr_name )
             xmlFree(nsURI);
             XSRETURN_UNDEF;
         }
-        if ( !nsURI ) {
-            xmlFree(name);
-            XSRETURN_UNDEF;
-        }
         
         ret = xmlGetNsProp( node, name, nsURI );
         xmlFree( name );
@@ -3575,52 +3576,59 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlChar * value = NULL;
         xmlNsPtr ns;
     CODE:
-        if ( !nsURI ) {
-            XSRETURN_UNDEF;
-        }
+        if ( nsURI && xmlStrlen(nsURI) ) {
+            ns = xmlSearchNsByHref( node->doc, node, nsURI );
+            if ( !ns ) {
+                // create new ns
+                xmlChar * localname;
+                xmlChar * prefix;
 
-        ns = xmlSearchNsByHref( node->doc, node, nsURI );
-        if ( !ns ) {
-            // create new ns
-            xmlChar * localname;
-            xmlChar * prefix;
+                name  = nodeSv2C( attr_name, node );
+                if ( ! name ) {
+                    xmlFree(nsURI);
+                    XSRETURN_UNDEF;
+                }
+                localname = xmlSplitQName2(name, &prefix); 
+            
+                xmlFree( name );
+                name = localname;
+            
+                ns = xmlNewNs(node, nsURI , prefix );
+                xmlFree( prefix );
+            }
+            else {
+                xmlChar * localname;
+                xmlChar * prefix;
 
-            name  = nodeSv2C( attr_name, node );
-            if ( ! name ) {
-                xmlFree(nsURI);
+                name  = nodeSv2C( attr_name, node );
+                if (!name) {
+                    xmlFree(nsURI);
+                    XSRETURN_UNDEF;
+                }
+                localname = xmlSplitQName2(name, &prefix); 
+                xmlFree(prefix);
+                xmlFree(name);
+                name = localname;
+            }
+            xmlFree(nsURI);
+
+            value = nodeSv2C( attr_value, node );
+            if (!value) {
+                xmlFree(name);
                 XSRETURN_UNDEF;
             }
-            localname = xmlSplitQName2(name, &prefix); 
-            
-            xmlFree( name );
-            name = localname;
-            
-            ns = xmlNewNs(node, nsURI , prefix );
-            xmlFree( prefix );
+        
+            xmlSetNsProp( node, ns, name, value );
         }
         else {
-            xmlChar * localname;
-            xmlChar * prefix;
-
             name  = nodeSv2C( attr_name, node );
             if (!name) {
                 xmlFree(nsURI);
                 XSRETURN_UNDEF;
             }
-            localname = xmlSplitQName2(name, &prefix); 
-            xmlFree(prefix);
-            xmlFree(name);
-            name = localname;
+            value = nodeSv2C( attr_value, node ); 
+            xmlSetProp( node, name, value );            
         }
-        xmlFree(nsURI);
-
-        value = nodeSv2C( attr_value, node );
-        if (!value) {
-            xmlFree(name);
-            XSRETURN_UNDEF;
-        }
-        
-        xmlSetNsProp( node, ns, name, value );
         xmlFree( name );
         xmlFree( value );
 
@@ -3765,6 +3773,64 @@ removeAttributeNode( self, attr_node )
         PmmFixOwner( SvPROXYNODE(RETVAL), NULL );
     OUTPUT:
         RETVAL
+
+void
+appendText( self, string )
+        SV * self
+        SV * string
+    ALIAS:
+        appendTextNode = 1
+    PREINIT:
+        xmlNodePtr node   = PmmSvNode( self );
+        xmlChar * content = nodeSv2C( string, node );
+    INIT:
+        if ( content == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        if ( xmlStrlen(content) == 0 ) {
+            xmlFree( content );
+            XSRETURN_UNDEF;
+        }
+    CODE:
+        xmlNodeAddContent( node, content );
+        xmlFree(content);
+
+void
+appendTextChild( self, strname, strcontent=&PL_sv_undef, nsURI=&PL_sv_undef )
+        SV * self
+        SV * strname
+        SV * strcontent
+        SV * nsURI
+    PREINIT:
+        xmlNodePtr node   = PmmSvNode( self );
+        xmlChar * name    = nodeSv2C( strname, node );
+        xmlChar * content = NULL;
+        xmlChar * encstr  = NULL;
+    INIT:
+        if ( name == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        if ( xmlStrlen(name) == 0 ) {
+            xmlFree(name);
+            XSRETURN_UNDEF;
+        }
+    CODE: 
+        content = nodeSv2C(strcontent, node);
+        if ( content &&  xmlStrlen( content ) == 0 ) {
+            xmlFree(content);
+            content=NULL;
+        }
+        else if ( content ) {
+            encstr = xmlEncodeEntitiesReentrant( node->doc, content );
+            xmlFree(content);
+        }
+
+        xmlNewChild( node, NULL, name, encstr );
+
+        if ( encstr ) 
+            xmlFree(encstr);
+        xmlFree(name);
+
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 
@@ -4205,6 +4271,8 @@ href(self)
     ALIAS:
         value = 1
         nodeValue = 2
+        getData = 3
+        getNamespaceURI = 4
     PREINIT:
         xmlNsPtr ns = (xmlNsPtr)SvIV(SvRV(self));
         xmlChar * href;
@@ -4219,7 +4287,9 @@ SV*
 localname(self)
         SV * self
     ALIAS:
-        name = 2
+        name = 1
+        getLocalName = 2
+        getName = 3 
     PREINIT:
         xmlNsPtr ns = (xmlNsPtr)SvIV(SvRV(self));
         xmlChar * prefix;

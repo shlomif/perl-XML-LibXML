@@ -59,7 +59,7 @@ sub process_node {
     }
     elsif ($node_type == XML_TEXT_NODE || $node_type == XML_CDATA_SECTION_NODE) {
         # warn($node->getData . "\n");
-        $self->characters( { Data => $node->getData } );
+        $self->characters( { Data => $node->nodeValue } );
     }
     elsif ($node_type == XML_ELEMENT_NODE) {
         # warn("<" . $node->getName . ">\n");
@@ -98,43 +98,43 @@ sub process_element {
     my $attribs = {};
     my @ns_maps;
 
-    foreach my $attr ($element->getAttributes) {
+    foreach my $attr ($element->attributes) {
         my $key;
         # warn("Attr: $attr -> ", $attr->getName, " = ", $attr->getData, "\n");
         if ($attr->isa('XML::LibXML::Namespace')) {
             # TODO This needs fixing modulo agreeing on what
             # is the right thing to do here.
             my ($localname, $p);
-            if (my $prefix = $attr->getLocalName) {
-                $key = "{" . $attr->getNamespaceURI . "}" . $prefix;
+            if (my $prefix = $attr->prefix) {
+                $key = "{" . $attr->href . "}" . $prefix;
                 $localname = $prefix;
                 $p = "xmlns";
             }
             else {
-                $key = $attr->getName;
+                $key = $attr->name;
                 $localname = $key;
                 $p = '';
             }
             $attribs->{$key} =
                 {
-                    Name => $attr->getName,
-                    Value => $attr->getData,
-                    NamespaceURI => $attr->getNamespaceURI,
+                    Name => $attr->prefix,
+                    Value => $attr->href,
+                    NamespaceURI => $attr->href,
                     Prefix => $p,
                     LocalName => $localname,
                 };
             push @ns_maps, $attribs->{$key};
         }
         else {
-            my $ns = $attr->getNamespaceURI || '';
-            $key = "{$ns}".$attr->getLocalName;
+            my $ns = $attr->namespaceURI || '';
+            $key = "{$ns}".$attr->localname;
             $attribs->{$key} =
                 {
-                    Name => $attr->getName,
-                    Value => $attr->getData,
-                    NamespaceURI => $attr->getNamespaceURI,
-                    Prefix => $attr->getPrefix,
-                    LocalName => $attr->getLocalName,
+                    Name => $attr->name,
+                    Value => $attr->value,
+                    NamespaceURI => $attr->namespaceURI,
+                    Prefix => $attr->prefix,
+                    LocalName => $attr->localname,
                 };
         }
         # use Data::Dumper;
@@ -142,11 +142,11 @@ sub process_element {
     }
 
     my $node = {
-        Name => $element->getName,
+        Name => $element->nodeName,
         Attributes => $attribs,
-        NamespaceURI => $element->getNamespaceURI,
-        Prefix => $element->getPrefix,
-        LocalName => $element->getLocalName,
+        NamespaceURI => $element->namespaceURI,
+        Prefix => $element->prefix,
+        LocalName => $element->localname,
     };
 
     foreach my $ns (@ns_maps) {
