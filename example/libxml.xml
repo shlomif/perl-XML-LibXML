@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <module name="XML::LibXML">
     <!-- $Id$ -->
     <version>1.50</version>
@@ -579,7 +580,7 @@ is therefore a shortcut for
                     <st>NOTE:</st> A text content containing something
                     that looks like an entity reference, will not be
                     expanded to a real entity reference unless it is a
-                    predefined entity (such as &gt;)
+                    predefined entity (such as &amp;gt;)
                 </p>
                 
                 <example><![CDATA[
@@ -1024,7 +1025,7 @@ is therefore a shortcut for
                     results. This enables you to ensure that you get a
                     string back from your search, allowing certain
                     shortcuts. This could be used as the equivalent of
-                    &lt;xsl:value-of select="some_xpath"/&gt;.
+                    XSLT's &lt;xsl:value-of select="some_xpath"/&gt;.
                 </p>
             </method>
 
@@ -1035,8 +1036,9 @@ is therefore a shortcut for
                     interface to the childnodes of the current
                     node. It enables you to pass all children directly
                     to a <em>map</em> or <em>grep</em>. If this
-                    function is called in scalar context, the number
-                    of childnodes will be returned.
+                    function is called in scalar context, a
+                    <em>XML::LibXML::NodeList</em> object will be
+                    returned.
                 </p>
             </method>
 
@@ -1093,11 +1095,13 @@ is therefore a shortcut for
             <method name="attributes" 
                     synopsis="@attributelist = $node->attributes();">
                 <p>
-                    returns all attributes of a given node
+                    Returns all attributes of a given node.
                 </p>
                 <p>
-                    if this function is called in array context the
-                    attribute nodes are returned as an array hash.
+                    If this function is called in array context the
+                    attribute nodes are returned as an array. In
+                    scalar context the function will return a
+                    <em>XML::LibXML::NamedNodeMap</em> object.
                 </p>
             </method>
 
