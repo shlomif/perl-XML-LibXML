@@ -434,7 +434,7 @@ domInsertBefore( xmlNodePtr self,
         return NULL;
    
     if ( refChild == NULL ) {
-        return domAppendChild( self, newChild );
+        refChild = self->children;
     }
 
     if ( refChild->parent != self

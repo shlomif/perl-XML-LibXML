@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 121 };
+BEGIN { plan tests => 122 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -136,9 +136,15 @@ print "# 1.1 Node Attributes\n";
         print "# 2.1.1 Single Node\n";
 
         my $inode = $doc->createElement("kungfoo"); # already tested
+        my $jnode = $doc->createElement("kungfoo"); 
         my $xn = $node->insertBefore($inode, $rnode);
         ok( $xn );
         ok( $xn->isSameNode($inode) );
+
+        $node->insertBefore( $jnode, undef );
+        ( $xn ) = $node->childNodes;
+        ok( $xn->isSameNode( $jnode ) );
+        $jnode->unbindNode;
 
         my @cn = $node->childNodes;
         ok(scalar(@cn), 6);
