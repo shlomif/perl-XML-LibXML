@@ -37,7 +37,7 @@ These packages are required. If one is missing some tests will fail.
 
 Again, libxml2 is required to make XML::LibXML work. The library is not just
 requiered to build XML::LibXML, it has to be accessible during runtime as well.
-Because of this you need to make shure libxml2 is installed properly. To test
+Because of this you need to make sure libxml2 is installed properly. To test
 this, run the xmllint program on your system. xmllint is shipped with libxml2
 and therefore should be available.
 
@@ -71,7 +71,7 @@ their installation.
 If you already run an older version of XML::LibXML and you wish to upgrade to a
 bug fixed version of libxml2. libxml2 2.4.25 and 2.5.x versions are not 100%
 binary compatible. So if you intend to upgrade to such a version you will need
-to recompile XML::LibXML as well.
+to rebuild XML::LibXML (and XML::LibXML::Common) as well.
 
 Users of perl 5.005_03 and perl 5.6.1 with thread support will also like to
 avoid libxml2 version 2.4.25 and use later versions instead.
@@ -82,7 +82,7 @@ the correct libxml2 version in use.
 
 e.g.
 
->  XMLPREFIX=/usr/brand-new perl Makefile.PL
+>  perl Makefile.PL XMLPREFIX=/usr/brand-new 
 
 will ask '/usr/brand-new/bin/xml2-config' about your real libxml2
 configuration.
@@ -112,10 +112,13 @@ The following versions are tested:
    o past 2.4.25: tested, working
    o past 2.5.0: tested; working
    o version 2.5.5: tested; tests pass, but known as broken
-   o up to version 2.5.10: tested; working
-   o 2.6.0: tested; not working
-   o 2.6.1: tested; working
-   o 2.6.3: tested; working, except for SEGV in bad xml tests (fixed in CVS)
+   o up to version 2.5.11: tested; working
+   o version 2.6.0: tested; not working
+   o to version 2.6.2: tested; working
+   o version 2.6.3: tested; not working
+   o version 2.6.4: tested; not working (XML Schema errors)
+   o version 2.6.5: tested; not working (broken XIncludes)
+   o up to version 2.6.7: tested; working
 
 It happens, that an older version of libxml2 passes all tests under certain
 conditions. This is no reason to assume that version to work on all platforms.
@@ -149,10 +152,10 @@ Notes for HPUX
 
 XML::LibXML requires libxml2 2.4.25 or later. That means there may not exist a
 usable binary libxml2 package for HPUX and XML::LibXML. For some reasons the
-HPUX cc will not compile libxml2 correct, which will force you to recompile
+HPUX cc will not compile libxml2 correctly, which will force you to recompile
 perl with gcc (if you havn't already done that).
 
-Additionally I recieved the following Note from Rozi Kovesdi:
+Additionally I received the following Note from Rozi Kovesdi:
 
 > Here is my report if someone else runs into the same problem:
 > 
@@ -163,7 +166,7 @@ Additionally I recieved the following Note from Rozi Kovesdi:
 > gcc
 > GNU make
 > 
-> Most important - before trying to install Perl modules that depend on
+> Most importantly - before trying to install Perl modules that depend on
 > libxml2:
 > 
 > must set SHLIB_PATH  to include  the path to  libxml2 shared library
@@ -211,10 +214,10 @@ Version >= 1.49 are maintained by Christian Glahn
 PATCHES AND DEVELOPER VERSION
 =============================
 
-As XML::LibXML is open source software help and patches are apprechiated. If
-you found a bug in the current release, make shure this bug still existis in
-the developer version of XML::LibXML. This version can get downloaded from cvs.
-The cvs version can be be loaded via
+As XML::LibXML is open source software help and patches are appreciated. If you
+find a bug in the current release, make sure this bug still exists in the
+developer version of XML::LibXML. This version can be downloaded from cvs. The
+cvs version can be be loaded via
 
 cvs -d:pserver:anonymous@axkit.org:/home/cvs -z3 co XML-LibXML
 
@@ -227,8 +230,8 @@ If you find documentation bugs, please fix them in the libxml.dkb file, stored
 in the docs directory.
 
 
-KOWN ISSUES
-===========
+KNOWN ISSUES
+============
 
 The push-parser implementation causes memory leaks.
 
