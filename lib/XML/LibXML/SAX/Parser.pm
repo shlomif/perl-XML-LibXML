@@ -42,7 +42,7 @@ sub generate {
     my ($node) = @_;
     
     $self->start_document({});
-    
+    $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
     $self->process_node($node);
     
     $self->end_document({});
@@ -71,13 +71,15 @@ sub process_node {
         }
     }
     elsif ($node_type == XML_DOCUMENT_NODE) {
-        # just get root element. Ignore other cruft.
         foreach my $kid ($node->getChildnodes) {
-            if ($kid->getType() == XML_ELEMENT_NODE) {
-                $self->process_element($kid);
-                last;
-            }
+            $self->process_node($kid);
         }
+    }
+    elsif ($node_type == XML_PI_NODE) {
+        $self->processing_instruction( { Target =>  $node->getName, Data => $node->getData } );
+    }
+    elsif ($node_type == XML_COMMENT_NODE) {
+        $self->comment( { Data => $node->getData } );
     }
     else {
         warn("unsupported node type: $node_type");
