@@ -775,7 +775,6 @@ _parse_string(self, string, directory = NULL)
         }
         else {
             STRLEN n_a;
-            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
             # ok check the xincludes
             item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_XINCLUDE", 26, 0 );
             if ( item != NULL && SvTRUE(*item) ) {
@@ -783,8 +782,6 @@ _parse_string(self, string, directory = NULL)
                 xmlXIncludeProcess(real_dom);
             }
 
-            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
-            SvREFCNT_dec(newURI);
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
             RETVAL = sv_newmortal();
             sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
@@ -821,7 +818,6 @@ _parse_fh(self, fh, directory = NULL)
         }
         else {
             STRLEN n_a;
-            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
             HV* real_self = (HV*)SvRV(self);
             SV** item;
             # ok check the xincludes
@@ -829,8 +825,6 @@ _parse_fh(self, fh, directory = NULL)
             if ( item != NULL && SvTRUE(*item) ) 
                 xmlXIncludeProcess(real_dom);
 
-            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
-            SvREFCNT_dec(newURI);
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
