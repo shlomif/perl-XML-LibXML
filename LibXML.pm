@@ -6,6 +6,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT $ORIGINAL_STRING);
 use Carp;
 use XML::LibXML::NodeList;
+use IO::Handle; # for FH reads called as methods
 
 $VERSION = "1.31";
 require Exporter;
@@ -268,7 +269,10 @@ sub XML::LibXML::Node::findvalue {
 sub XML::LibXML::Node::find {
     my ($node, $xpath) = @_;
     my ($type, @params) = $node->_find($xpath);
-    return $type->new(@params);
+    if ($type) {
+        return $type->new(@params);
+    }
+    return undef;
 }
 
 sub XML::LibXML::Element::getElementsByTagName {
