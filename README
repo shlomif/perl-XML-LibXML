@@ -1,9 +1,28 @@
-This module is a minimal interface to the Gnome libxml2 library which you
-can find at http://www.xmlsoft.org/
+XML::LibXML
+===========
 
-Currently this is just a helper module for XML::LibXSLT (and as such is
-included with the XML::LibXSLT distribution), but libxml2 has a full DOM
-API, and so I hope to be able to offer full access to that API one day.
+This module implements much of the DOM Level 2 API as an 
+interface to the Gnome libxml2 library. This makes it a fast
+and highly capable validating XML parser library, as well as
+a high performance DOM.
+
+Installation
+============
+
+Prior to installation you MUST have installed the libxml2
+library.
+
+Then run:
+
+ $ perl Makefile.PL
+ $ make test
+ $ su
+ $ make install
+
+Parser documentation is in perldoc XML::LibXML. DOM documentation
+starts in perldoc XML::LibXML::Document and perldoc
+XML::LibXML::Node.
 
 This is free software, you may use it and distribute it under the same
 terms as Perl itself. Copyright 2001 AxKit.com Ltd, All rights reserved.
+
