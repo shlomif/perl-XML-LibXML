@@ -133,7 +133,7 @@ typedef ProxyNode* ProxyNodePtr;
 
 #define PmmENCODING(node)    node->encoding
 #define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
-
+#define PmmDocEncoding(node) (node->charset)
 /* creates a new proxy node from a given node. this function is aware
  * about the fact that a node may already has a proxy structure.
  */
@@ -143,7 +143,7 @@ PmmNewNode(xmlNodePtr node)
     ProxyNodePtr proxy = NULL;
 
     if ( node == NULL ) {
-        warn( "no node found\n" );
+        xs_warn( "no node found\n" );
         return NULL;
     }
 
@@ -720,7 +720,7 @@ PmmFastEncodeString( int charset,
             /* warn( "encoded string is %s" , retval); */
         }
         else {
-            xs_warn( "b0rked encoiding!\n");
+            /* warn( "b0rked encoiding!\n"); */
         }
         
         xmlBufferFree( in );
@@ -914,9 +914,9 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
 
     if ( refnode != NULL ) {
         xmlDocPtr real_doc = refnode->doc;
-        if ( real_doc && real_doc->encoding != NULL ) {
+        if ( real_doc != NULL && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc) ,
+            xmlChar * decoded = PmmFastDecodeString( PmmDocEncoding(real_doc) ,
                                                      (const xmlChar *)string,
                                                      (const xmlChar*)real_doc->encoding);
             len = xmlStrlen( decoded );
@@ -961,7 +961,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
        perl. in this cases the library assumes, all strings are in
        UTF8. if a programmer likes to have the intelligent code, he
        needs to upgrade perl */
-#ifdef HAVE_UTF8        
+
     if ( refnode != NULL ) {
         xmlDocPtr real_dom = refnode->doc;
         xs_warn("have node!");
@@ -977,15 +977,18 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                     xs_warn( "no undefs" );
 #ifdef HAVE_UTF8
                     xs_warn( "use UTF8" );
-                    if( !DO_UTF8(scalar) && real_dom->encoding != NULL ) {
+                    if( !DO_UTF8(scalar) && real_dom != NULL && real_dom->encoding != NULL ) {
                         xs_warn( "string is not UTF8\n" );
 #else
-                    if ( real_dom->encoding != NULL ) {        
+                    if ( real_dom != NULL && real_dom->encoding != NULL ) {        
 #endif
                         xs_warn( "domEncodeString!" );
-                        ts= PmmFastEncodeString( PmmNodeEncoding(real_dom),
+                      /*  if ( string == NULL || *string == 0 ) warn("string is empty" ); */
+                       
+                        ts= PmmFastEncodeString( PmmDocEncoding(real_dom),
                                                  string,
                                                  (const xmlChar*)real_dom->encoding );
+
                         xs_warn( "done!" );
                         if ( string != NULL ) {
                             xmlFree(string);
@@ -996,7 +999,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                         xs_warn( "no encoding set, use UTF8!\n" );
                     }
                 }
-                if ( string == NULL ) xs_warn( "string is NULL\n" );
+                /* if ( string == NULL ) warn( "string is NULL\n" ); */
                 return string;
             }
             else {
@@ -1009,7 +1012,6 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
         }
     }
     xs_warn("no encoding !!");
-#endif
 
     return  Sv2C( scalar, NULL ); 
 }
