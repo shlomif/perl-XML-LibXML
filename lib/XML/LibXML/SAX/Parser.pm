@@ -9,7 +9,7 @@ use XML::LibXML;
 use XML::SAX::Base;
 use XML::SAX::DocumentLocator;
 
-$VERSION = '1.49';
+$VERSION = '1.50';
 @ISA = ('XML::SAX::Base');
 
 sub _parse_characterstream {
@@ -121,23 +121,18 @@ sub process_element {
         if ($attr->isa('XML::LibXML::Namespace')) {
             # TODO This needs fixing modulo agreeing on what
             # is the right thing to do here.
-            my ($localname, $p);
-            if (my $prefix = $attr->prefix) {
-                $key = "{" . $attr->href . "}" . $prefix;
-                $localname = $prefix;
-                $p = "xmlns";
-            }
-            else {
-                $key = $attr->name;
-                $localname = $key;
-                $p = '';
-            }
+
+            my $prefix = "xmlns";
+            my $localname = $attr->prefix;
+            my $key = "{http://www.w3.org/xmlns/2000/}".$localname;
+            my $name = "xmlns:". $localname;
+
             $attribs->{$key} =
                 {
-                    Name => $attr->prefix,
+                    Name => $name,
                     Value => $attr->href,
-                    NamespaceURI => $attr->href,
-                    Prefix => $p,
+                    NamespaceURI => "http://www.w3.org/xmlns/2000/",
+                    Prefix => "xmlns",
                     LocalName => $localname,
                 };
             # push @ns_maps, $attribs->{$key};

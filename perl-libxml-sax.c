@@ -339,9 +339,11 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
             atV = newHV();
             name = *ta; ta++;
             value = *ta; ta++;
-            if (PmmDetectNamespaceDecl(name)) {
-                continue;
-            }
+/* Grant, Robin and the SAX spec say the ns node should appear in the
+ *  attr list */
+/*             if (PmmDetectNamespaceDecl(name)) { */
+/*                 continue; */
+/*             } */
             if ( name != NULL && xmlStrlen( name ) ) {
                 const xmlChar * pos = PmmDetectNamespace( name );
 
