@@ -319,6 +319,43 @@ sub XML::LibXML::Node::find {
     return $type->new(@params);
 }
 
+sub XML::LibXML::Element::getElementsByTagName {
+    my ( $node , $name ) = @_;
+    my $xpath = "descendant::$name";
+    my @nodes = $node->_findnodes($xpath);
+    if (wantarray) {
+        return @nodes;
+    }
+    else {
+        return XML::LibXML::NodeList->new(@nodes);
+    }
+}
+
+sub XML::LibXML::Element::getElementsByTagNameNS {
+    my ( $node, $nsURI, $name ) = @_;
+    my $xpath = "descendant::*[local-name()='$name' and namespace-uri()='$nsURI']";
+        my @nodes = $node->_findnodes($xpath);
+    if (wantarray) {
+        return @nodes;
+    }
+    else {
+        return XML::LibXML::NodeList->new(@nodes);
+    }
+}
+
+sub XML::LibXML::Element::getElementsByLocalName {
+    my ( $node,$name ) = @_;
+    my $xpath = "descendant::*[local-name()='$name']";
+        my @nodes = $node->_findnodes($xpath);
+    if (wantarray) {
+        return @nodes;
+    }
+    else {
+        return XML::LibXML::NodeList->new(@nodes);
+    }
+}
+
+
 sub XML::LibXML::PI::setData {
     my $pi = shift;
 

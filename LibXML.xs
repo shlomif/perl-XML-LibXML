@@ -3009,7 +3009,7 @@ removeAttributeNS( elem, nsURI, name )
         xmlUnsetNsProp( elem, ns, lname );
 
 void
-getElementsByTagName( elem, name )
+getChildrenByTagName( elem, name )
         ProxyObject* elem
         char * name 
     PREINIT:
@@ -3052,7 +3052,7 @@ getElementsByTagName( elem, name )
         }
 
 void
-getElementsByTagNameNS( node, nsURI, name )
+getChildrenByTagNameNS( node, nsURI, name )
         ProxyObject* node
         char * nsURI
         char * name 

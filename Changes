@@ -1,7 +1,14 @@
-Revision history for Perl extension XML::LibXSLT.
+Revision history for Perl extension XML::LibXML
 
 1.32
    - removed obsolete files (parser.?)
+   - fixed getElementsByTagName and getElementsByTagNameNS to fit the spec
+   - new functions in XML::LibXML::Element:
+       getChildrenByTagName
+       getChildrenByTagNameNS
+       getElementsByLocalName
+   - minor fixes and extensions of the tests
+   - more docu ;)
 
 1.31
     - Removed C-layer parser implementation.
