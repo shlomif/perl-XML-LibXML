@@ -321,7 +321,6 @@ domSetName( xmlNodePtr node, char* name ) {
   else {
     str = xmlStrdup( name );
   }
-  warn( str );
   node->name = str;
 }
 
@@ -600,22 +599,18 @@ domReplaceNode( xmlNodePtr oldnode, xmlNodePtr newnode ){
 
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
-  char* ctnt = NULL; 
-
   if ( n == NULL ) 
     return;
-
-  /* i removed the following line, so the xs file does not hide significant */
-  /* functionality. as i understand this module, it should provide */
-  /* function to make the XS code easier to understand */
-  /* ctnt = xmlEncodeEntitiesReentrant( n->doc , val ); */
+  if ( val == NULL ){
+    val = "";
+  }
   
   if( n->type == XML_ATTRIBUTE_NODE ){
     if ( n->children != NULL ) {
       n->last = NULL;
       xmlFreeNodeList( n->children );
     }
-    n->children = xmlNewText( ctnt );
+    n->children = xmlNewText( val );
     n->children->parent = n;
     n->children->doc = n->doc;
     n->last = n->children; 
@@ -623,7 +618,8 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
   else if( n->content != NULL ) {
     /* free old content */
     xmlFree( n->content );
-    n->content = xmlStrdup(ctnt);
+    n->content = xmlStrdup(val);
+
   }
 }
 
