@@ -82,7 +82,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,4,30,1],
                      [2,5,4,1],
                      [2,5,5,0], # known as broken
-                     [2,5,9,1],
+                     [2,5,10,1],
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
@@ -103,10 +103,13 @@ unless ( $is_Win32 ) { # cannot get config in W32
 
         if ( $@ ) {
             if ( $@ =~ /^VERSION/ ) {
-                die "The installed version of libxml2 is known not to work.\n".
+                die "The installed version of libxml2 is known not to work.\n\n".
+                    "The installed version was tested and prooved not as stable\n\n".
                     "  Don't expect XML::LibXML to build or work correctly.\n".
                     "  Don't report errors!!!\n".
-                    "  Check the README file for more informations\n";
+                    "  Don't send patches!\n\n".
+                    "  Check the README file for more informations and versions\n".
+                    "  that are tested with XML::LibXML\n\n"; 
             }
             if ( $@ =~ /^UNTESTED/ ) {
                 warn <<UNTESTED;

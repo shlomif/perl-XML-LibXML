@@ -17,7 +17,7 @@
     <edition>1.55</edition>
     <copyright>
       <year>2001-2002</year>
-      <holder>AxKit.com Ltd; 2002-2003 Christian Glahn</holder>
+      <holder>AxKit.com Ltd; 2001-2003 Christian Glahn</holder>
     </copyright>
   </bookinfo>
   <chapter>
@@ -56,6 +56,12 @@
       </itemizedlist>
       <para>These packages are required. If one is missing some tests will
       fail.</para>
+      <para>Again, libxml2 is required to make XML::LibXML work. The library
+      is not just requiered to build XML::LibXML, it has to be accessible
+      during runtime as well. Because of this you need to make shure libxml2
+      is installed properly. To test this, run the xmllint program on your
+      system. xmllint is shipped with libxml2 and therefore should be
+      available.</para>
     </sect1>
     <sect1>
       <title>Installation</title>
@@ -88,9 +94,8 @@
         users will need to upgrade their installation.</para>
         <para>If you already run an older version of XML::LibXML and you wish
         to upgrade to a bug fixed version of libxml2. libxml2 2.4.25 and 2.5.x
-        versions are not 100% binary compatible to older versions. So if you
-        intend to upgrade to such a version you will need to recompile
-        XML::LibXML as well.</para>
+        versions are not 100% binary compatible. So if you intend to upgrade
+        to such a version you will need to recompile XML::LibXML as well.</para>
         <para>Users of perl 5.005_03 and perl 5.6.1 with thread support will
         also like to avoid libxml2 version 2.4.25 and use later versions
         instead.</para>
@@ -130,12 +135,13 @@
             <para>version 2.5.5: tested; tests pass, but known as broken</para>
           </listitem>
           <listitem>
-            <para>version 2.5.6: tested; working</para>
-          </listitem>
-          <listitem>
-            <para>version 2.5.7: tested; working</para>
+            <para>up to version 2.5.10: tested; working</para>
           </listitem>
         </itemizedlist>
+        <para>It happens, that an older version of libxml2 passes all tests
+        under certain conditions. This is no reason to assume that version to
+        work on all platforms. If versions of libxml2 are marked as not
+        working this is done for good reasons.</para>
       </sect2>
       <sect2>
         <title>Notes for Microsoft Windows</title>
@@ -198,7 +204,10 @@ perl Makefile.PL LIBS=&#39;-L/path/to/lib&#39; INC=&#39;-I/path/to/include&#39;<
       <para>For suggestions, bugreports etc. you may contact the maintainer
       directly <email>christian.glahn@uibk.ac.at</email></para>
       <para>Also XML::LibXML issues are discussed among other things on the
-      perl XML mailing list (<email>perl-xml@listserv.ActiveState.com</email>)</para>
+      perl XML mailing list (<email>perl-xml@listserv.ActiveState.com</email>).
+      In case of problems you should check the archives of that list first.
+      Many problems are already discussed there. You can find the list&#39;s
+      archives at http://mailarchive.activestate.com/browse/perl-xml/</para>
     </sect1>
     <sect1>
       <title>Package History</title>
