@@ -15,7 +15,6 @@ BEGIN {
     my $magic        = 6;    
 
     if ( $] >= 5.008 ) {
-        plan tests => 0;
         print "# Skipping test on this platform\n";
     }
     else {
@@ -38,7 +37,8 @@ BEGIN {
     plan tests => $tests;
 }
 
-END { ok(0) unless $loaded }
+exit(0) unless $] < 5.008;
+
 use XML::LibXML::Common;
 use XML::LibXML;
 $loaded = 1;
