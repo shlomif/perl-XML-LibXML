@@ -6,27 +6,44 @@ versions of the package. It is recommended to upgrade any XML::LibXML since
 1.49 to 1.53 to avoid such problems.
 
 1.53
+   Parser
    - catalog interface
-   - toFH() fixed
    - enabled SGML parsing
-   - fixed namespace setting in XPath functions:
-     the namespaces of the document element will always be added now
    - implemented libxml2 dom recovering
-   - introduced transparent XML::GDOME import. (EXPERIMENTAL)
-   - calling external entity handlers work again
-   - fixed a bug while replacing the document element.
-   - fixed very stupid encoding bug. all UTF8 strings will now be marked as 
-     UTF8
-   - fixed namespace functions to work with empty namespaces
+   - parsing into GDOME nodes is now possible
+   - XML::LibXML::SAX is now faster
    - made XML::LibXML::SAX parser running without errors in most (all?) cases 
-     (DTD handling is still not implemented). 
-   - XML::LibXML::SAX speedups
+     (DTD handling is still not implemented).    
+
+   DOM interface
+   - Node Iterator class
+   - NodeList Iterator class
+   - introduced XML::GDOME import and export. (EXPERIMENTAL)
    - more security checks
+
+   general blur
+   - removed code shared with XML::GDOME to a separate XML::LibXML::Common
+     module (check CPAN)
    - removed some redundand code
-   - more documentation (fixes)
+   - more documentation (and docu fixes) (thanks to Petr Pajas)
+
+   major fixes:
+   - possible buffer overflow with broken XML:
+     This may effect all older versions of XML::LibXML, please upgrade!
+
+   - a bug while replacing the document element.
+   - very stupid encoding bug. all UTF8 strings will now be marked as 
+     UTF8 correctly
+   - namespace functions to work with empty namespaces
+   - toFH()
+   - namespace setting in XPath functions:
+     the namespaces of the document element will always be added now
+   - threaded perl 5.8.0 issues
+   - calling external entity handlers work again
+   - XML::LibXML::SAX::Parser will not throw warnings on DTD nodes
 
 1.52
-   - fixed some typos (thanks to randy kobes and hildo biersma)
+   - fixed some typos (thanks to Randy Kobes and Hildo Biersma)
    - fixed namespace node handling
    - fixed empty Text Node bug
    - corrected the parser default values.
@@ -36,9 +53,9 @@ versions of the package. It is recommended to upgrade any XML::LibXML since
    - fixed parser bug with broken XML declarations
    - fixed memory management within documents that have subsets
    - fixed some threaded perl issues
-     (special thanks to andreas koenig for the patch)
+     (special thanks to Andreas Koenig for the patch)
    - applied Win32 tests 
-     (special thanks to randy kobes for the patch)
+     (special thanks to Randy Kobes for the patch)
    - fixed findnodes() and find() to return empty arrays in array context
      if the statement was legal but produced no result.
    - fixed namespace handling in xpath functions
