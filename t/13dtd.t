@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 13 }
+BEGIN { plan tests => 16 }
 use XML::LibXML;
 ok(1);
 
