@@ -11,7 +11,7 @@
     specified in DOM Level2. This enables to access the nodes beside
     the root element on document level - a <i>DTD</i> for example. The
     support for these nodes is limited at the moment, so I would
-    recommend, not to use <i>node</i> functions on <i>documents<i>.
+    recommend, not to use <i>node</i> functions on <i>documents</i>.
 
     It is suggested that one should always create a node not bound to
     any document.  There is no need of really including the node to
@@ -122,6 +122,7 @@
      the moment, since there is no setAttributeNode function defined
      in <i>XML::LibXML::Element</i>, yet. 
 </method>
+
 <method name="createAttributeNS"
      synopsis="$attrnode = $doc->createAttributeNS( namespaceURI, $name [,$value] );">
      Creates an Attribute bound to a namespace.
