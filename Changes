@@ -1,6 +1,15 @@
 Revision history for Perl extension XML::LibXML
 
 1.57
+   - include Schema/RelaxNG code only with libxml2 >= 2.6.0 (to support old libxml2)
+   - applied patch to example/cb_example.pl (bug 4262)
+   - fixed insertBefore/insertAfter on empty elements (bug 3691)
+   - more DOM conformant XML::LibXML->createDocument API (by Robin Berjon)
+   - fixed encoding problems with API calls in document encoding
+   - improved support for importing DTD subsets
+   - fixed DTD validation error reporting problems with libxml2-2.6.x
+   - fixed compilation problems with libxml2-2.6.x
+   - fixed XML::LibXML::Number to support negative numbers
    - added XML Schema validation interface (XML::LibXML::Schema)
    - added XML RelaxNG validation interface (XML::LibXML::RelaxNG)
 

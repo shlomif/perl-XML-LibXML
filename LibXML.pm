@@ -125,6 +125,26 @@ sub new {
 }
 
 #-------------------------------------------------------------------------#
+# DOM Level 2 document constructor                                        #
+#-------------------------------------------------------------------------#
+
+sub createDocument {
+   my $self = shift;
+   if (!@_ or $_[0] =~ m/^\d\.\d$/) {
+     # for backward compatibility
+     return XML::LibXML::Document->new(@_);
+   }
+   else {
+     # DOM API: createDocument(namespaceURI, qualifiedName, doctype?)
+     my $doc = XML::LibXML::Document-> new;
+     my $el = $doc->createElementNS(shift, shift);
+     $doc->setDocumentElement($el);
+     $doc->setExternalSubset(shift) if @_;
+     return $doc;
+   }
+}
+
+#-------------------------------------------------------------------------#
 # callback functions                                                      #
 #-------------------------------------------------------------------------#
 sub match_callback {

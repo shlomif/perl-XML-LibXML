@@ -1,4 +1,5 @@
 use XML::LibXML;
+use IO::File;
 
 # first instanciate the parser
 my $parser = XML::LibXML->new();
@@ -29,10 +30,10 @@ sub open_uri {
 
     my $handler = new IO::File;
     if ( not $handler->open( "<$uri" ) ){
-        $file = 0;
-    }   
-   
-    return $file;
+        $handler = 0;
+    }
+    
+    return $handler;
 }
 
 sub read_uri {
@@ -40,7 +41,7 @@ sub read_uri {
     my $length  = shift;
     my $buffer = undef;
     if ( $handler ) {
-        $handler->read( $rv , $length );
+        $handler->read( $buffer, $length );
     }
     return $buffer;
 }

@@ -675,7 +675,9 @@ EOXML
     $parser->validation(1);
 
     eval { $parser->parse_string( $badxml ); };
-    ok( $@ =~ /^:0:/ );
+    # correct line number may or may not be present
+    # depending on libxml2 version
+    ok( $@ =~ /^:[03]:/ );
 
     $parser->line_numbers(1);
     eval { $parser->parse_string( $badxml ); };

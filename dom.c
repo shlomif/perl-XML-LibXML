@@ -595,7 +595,7 @@ domInsertBefore( xmlNodePtr self,
     if ( self == NULL || newChild == NULL ) {
         return NULL;
     }
-   
+
     if ( refChild != NULL ) {
         if ( refChild->parent != self
              || (  newChild->type     == XML_DOCUMENT_FRAG_NODE 
@@ -606,6 +606,10 @@ domInsertBefore( xmlNodePtr self,
         }
     }
 
+    if ( self->children == NULL ) {
+        return domAppendChild( self, newChild );
+    }
+   
     if ( !(domTestHierarchy( self, newChild )
            && domTestDocument( self, newChild ))) {
         xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");

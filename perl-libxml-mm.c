@@ -693,21 +693,19 @@ PmmFastEncodeString( int charset,
     xmlChar *retval = NULL;
     xmlBufferPtr in = NULL, out = NULL;
 
-    if ( charset == 1 ) {
+    if ( charset == XML_CHAR_ENCODING_UTF8 ) {
         /* warn("use UTF8 for encoding ... %s ", string); */
-        return xmlStrdup( string );
-    }
-
-    if ( charset > 1 ) {
-        /* warn( "use document encoding %s (%d)", encoding, charset ); */
-        coder= xmlGetCharEncodingHandler( charset );
-    }
+	return xmlStrdup( string );
+    } 
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
         /* warn("no standard encoding %s\n", encoding); */
         coder =xmlFindCharEncodingHandler( (const char *)encoding );
     }
-    else {
+    else if ( charset == XML_CHAR_ENCODING_NONE ){
         xs_warn("no encoding found \n");
+    } else {
+        /* warn( "use document encoding %s (%d)", encoding, charset ); */
+        coder= xmlGetCharEncodingHandler( charset );
     }
 
     if ( coder != NULL ) {
@@ -739,19 +737,16 @@ PmmFastDecodeString( int charset,
     xmlChar *retval = NULL;
     xmlBufferPtr in = NULL, out = NULL;
 
-    if ( charset == 1 ) {
-
-        return xmlStrdup( string );
-    }
-
-    if ( charset > 1 ) {
-        coder= xmlGetCharEncodingHandler( charset );
-    }
+    if ( charset == XML_CHAR_ENCODING_UTF8 ) {
+	return xmlStrdup( string );
+    } 
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
-        coder = xmlFindCharEncodingHandler( (const char *) encoding );
+        coder =xmlFindCharEncodingHandler( (const char *)encoding );
     }
-    else {
-        xs_warn("no encoding found\n");
+    else if ( charset == XML_CHAR_ENCODING_NONE ){
+        xs_warn("no encoding found \n");
+    } else {
+        coder= xmlGetCharEncodingHandler( charset );
     }
 
     if ( coder != NULL ) {
@@ -916,12 +911,21 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
         xmlDocPtr real_doc = refnode->doc;
         if ( real_doc != NULL && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = PmmFastDecodeString( PmmDocEncoding(real_doc) ,
-                                                     (const xmlChar *)string,
-                                                     (const xmlChar*)real_doc->encoding);
+            xmlChar * decoded = PmmDecodeString( (const xmlChar*)real_doc->encoding,
+						 (const xmlChar *)string );
             len = xmlStrlen( decoded );
 
-            if ( real_doc->charset == XML_CHAR_ENCODING_UTF8 ) {
+            if ( PmmDocEncoding(real_doc) == XML_CHAR_ENCODING_UTF8 
+		 /* most probably true, since libxml2 always 
+                  * sets doc->charset to UTF8, see tree.c:
+                  *
+		  * The in memory encoding is always UTF8
+		  * This field will never change and would
+		  * be obsolete if not for binary compatibility.
+		  */
+
+		 && (real_doc->encoding == NULL ||
+		     xmlParseCharEncoding(real_doc->encoding)==XML_CHAR_ENCODING_UTF8 )) {
                 /* create an UTF8 string. */       
                 xs_warn("set UTF8 string");
                 /* create the SV */
@@ -985,9 +989,8 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                         xs_warn( "domEncodeString!" );
                       /*  if ( string == NULL || *string == 0 ) warn("string is empty" ); */
                        
-                        ts= PmmFastEncodeString( PmmDocEncoding(real_dom),
-                                                 string,
-                                                 (const xmlChar*)real_dom->encoding );
+                        ts= PmmEncodeString( (const xmlChar*)real_dom->encoding,
+					     string );
 
                         xs_warn( "done!" );
                         if ( string != NULL ) {

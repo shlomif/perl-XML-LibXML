@@ -113,6 +113,8 @@ The following versions are tested:
    o past 2.5.0: tested; working
    o version 2.5.5: tested; tests pass, but known as broken
    o up to version 2.5.10: tested; working
+   o 2.6.0: tested; not working
+   o 2.6.1: tested; working
 
 It happens, that an older version of libxml2 passes all tests under certain
 conditions. This is no reason to assume that version to work on all platforms.

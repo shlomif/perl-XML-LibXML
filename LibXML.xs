@@ -23,6 +23,8 @@ extern "C" {
 #define DEBUG_C14N
 
 /* libxml2 stuff */
+#include <libxml/xmlversion.h>
+#include <libxml/globals.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
@@ -36,8 +38,12 @@ extern "C" {
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
+
+#if LIBXML_VERSION >= 20600
+#define HAVE_SCHEMAS
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
+#endif
 
 #ifdef LIBXML_CATALOG_ENABLED
 #include <libxml/catalog.h>
@@ -66,6 +72,7 @@ extern "C" {
 }
 #endif
 
+/*
 #ifdef VMS
 extern int xmlDoValidityCheckingDefaultVal;
 #define xmlDoValidityCheckingDefaultValue xmlDoValidityCheckingDefaultVal
@@ -79,6 +86,7 @@ LIBXML_DLL_IMPORT extern int xmlGetWarningsDefaultValue;
 LIBXML_DLL_IMPORT extern int xmlKeepBlanksDefaultValue;
 LIBXML_DLL_IMPORT extern int xmlLoadExtDtdDefaultValue;
 LIBXML_DLL_IMPORT extern int xmlPedanticParserDefaultValue;
+*/
 
 #define TEST_PERL_FLAG(flag) \
     SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
@@ -224,7 +232,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
        STRLEN n_a;
        croak("read on filehandle failed: %s", SvPV(ERRSV, n_a));
        POPs ;
-    }				  
+    }                             
 
     read_results = POPs;
 
@@ -283,9 +291,9 @@ LibXML_input_match(char const * filename)
         
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
-       	    croak("input match callback died: %s", SvPV(ERRSV, n_a));
-       	    POPs ;
-    	}				  
+            croak("input match callback died: %s", SvPV(ERRSV, n_a));
+            POPs ;
+        }                                 
 
         res = POPs;
 
@@ -340,8 +348,8 @@ LibXML_input_open(char const * filename)
 
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
-       	    croak("input callback died: %s", SvPV(ERRSV, n_a));
-       	    POPs ;
+            croak("input callback died: %s", SvPV(ERRSV, n_a));
+            POPs ;
         } 
 
         results = POPs;
@@ -399,8 +407,8 @@ LibXML_input_read(void * context, char * buffer, int len)
 
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
-       	    croak("read callback died: %s", SvPV(ERRSV, n_a));
-       	    POPs ;
+            croak("read callback died: %s", SvPV(ERRSV, n_a));
+            POPs ;
         }
 
         output = POPp;
@@ -463,8 +471,8 @@ LibXML_input_close(void * context)
 
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
-       	    croak("close callback died: %s", SvPV(ERRSV, n_a));
-       	    POPs ;
+            croak("close callback died: %s", SvPV(ERRSV, n_a));
+            POPs ;
         }
 
         PUTBACK;
@@ -508,8 +516,8 @@ LibXML_output_write_handler(void * ioref, char * buffer, int len)
 
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
-       	    croak("write method call died: %s", SvPV(ERRSV, n_a));
-       	    POPs ;
+            croak("write method call died: %s", SvPV(ERRSV, n_a));
+            POPs ;
         }
 
         FREETMPS;
@@ -576,8 +584,8 @@ LibXML_load_external_entity(
         
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
-       	    croak("external entity callback died: %s", SvPV(ERRSV, n_a));
-       	    POPs ;
+            croak("external entity callback died: %s", SvPV(ERRSV, n_a));
+            POPs ;
         }
 
         results = POPs;
@@ -1151,6 +1159,11 @@ _parse_string(self, string, dir = &PL_sv_undef)
         }
 
         ctxt->_private = (void*)self;
+
+        /* make libxml2-2.6 display line number on error */
+        if ( ctxt->input != NULL ) {
+          ctxt->input->filename = xmlStrdup((const xmlChar *) "");
+        }
         
         xs_warn( "context initialized \n");        
 
@@ -2213,10 +2226,10 @@ _toString(self, format=0)
 /*        sv_2mortal( LibXML_error );
         LibXML_croak_error();
 */
-    	if (result == NULL) {
-	        xs_warn("Failed to convert doc to string");           
+        if (result == NULL) {
+                xs_warn("Failed to convert doc to string");           
             XSRETURN_UNDEF;
-    	} else {
+        } else {
             /* warn("%s, %d\n",result, len); */
             RETVAL = C2Sv( result, self->encoding );
             xmlFree(result);
@@ -2357,9 +2370,9 @@ toStringHTML(self)
         sv_2mortal( LibXML_error );
         LibXML_croak_error();
 
-    	if (result == NULL) {
+        if (result == NULL) {
             XSRETURN_UNDEF;
-      	} else {
+        } else {
             /* warn("%s, %d\n",result, len); */
             RETVAL = newSVpvn((char *)result, (STRLEN)len);
             xmlFree(result);
@@ -3097,9 +3110,10 @@ setExternalSubset( self, extdtd )
         }
     CODE:
         if ( dtd && dtd != self->extSubset ) {
-            if ( dtd->doc != self ) {
-                croak( "can't import DTDs" );
-                domImportNode( self, (xmlNodePtr) dtd,1);
+            if ( dtd->doc == NULL ) {
+                xmlSetTreeDoc( (xmlNodePtr) dtd, self );
+            } else if ( dtd->doc != self ) {
+                domImportNode( self, (xmlNodePtr) dtd,1); 
             }
     
             if ( dtd == self->intSubset ) {
@@ -3128,11 +3142,12 @@ setInternalSubset( self, extdtd )
         }
     CODE:
         if ( dtd && dtd != self->intSubset ) {
-            if ( dtd->doc != self ) {
-                croak( "can't import DTDs" );
-                domImportNode( self, (xmlNodePtr) dtd,1);
-            }
-    
+            if ( dtd->doc == NULL ) {
+               xmlSetTreeDoc( (xmlNodePtr) dtd, self );
+            } else if ( dtd->doc != self ) {
+               domImportNode( self, (xmlNodePtr) dtd,1); 
+            }    
+
             if ( dtd == self->extSubset ) {
                 self->extSubset = NULL;
             }
@@ -3701,7 +3716,7 @@ _childNodes( self )
             xs_warn("childnodes start");
             while ( cld ) {
                 if( wantarray != G_SCALAR ) {
-	                element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
+                        element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
                     XPUSHs(sv_2mortal(element));
                 }
                 cld = cld->next;
@@ -4274,7 +4289,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         }
         else {
             xmlBufferFree( buffer );
-	        xs_warn("Failed to convert doc to string");           
+                xs_warn("Failed to convert doc to string");           
             XSRETURN_UNDEF;
         }
     OUTPUT:
@@ -5374,7 +5389,7 @@ addNewChild( self, namespaceURI, nodename )
             newNode->prev = prev;
             self->last = newNode;
         }
-     	RETVAL = PmmNodeToSv(newNode, PmmOWNERPO(PmmPROXYNODE(self)) );
+        RETVAL = PmmNodeToSv(newNode, PmmOWNERPO(PmmPROXYNODE(self)) );
     OUTPUT:
         RETVAL
 
@@ -5948,7 +5963,7 @@ parse_string(CLASS, str, ...)
     OUTPUT:
         RETVAL
 
-
+#ifdef HAVE_SCHEMAS
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::RelaxNG
 
@@ -6215,3 +6230,4 @@ validate( self, doc )
     OUTPUT:
         RETVAL
 
+#endif /* HAVE_SCHEMAS */

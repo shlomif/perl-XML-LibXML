@@ -9,3 +9,4 @@ I plan the following issues to implemented soon
 
 * xmlReader Interface.
 * RelaxNG, libxml2 Regex interface.
+* structured Error support (Petr Pajas)

@@ -9,35 +9,26 @@
 #
 use Test;
 
-BEGIN { 
-    my $tests        = 0;
+BEGIN {
+    my $tests        = 1;
     my $basics       = 0;
-    my $magic        = 7;    
+    my $magic        = 6;
 
-    if ( $] >= 5.008 ) { 
-        print "# Skipping test on this platform\n";
+    $tests += $basics;
+    $tests += $magic if $] >= 5.006;
+
+    if ( defined $ENV{TEST_LANGUAGES} ) {
+      if ( $ENV{TEST_LANGUAGES} eq "all" ) {
+	$tests += 2*$basics;
+	$tests += 2*$magic if $] >= 5.006;
+      } elsif ( $ENV{TEST_LANGUAGES} eq "EUC-JP"
+		or $ENV{TEST_LANGUAGES} eq "KOI8-R" ) {
+	$tests += $basics;
+	$tests += $magic if $] >= 5.006;
+      }
     }
-    else {
-        $tests += $basics;  
-        $tests += $magic if $] >= 5.006;
-
-        if ( defined $ENV{TEST_LANGUAGES} ) {
-            if ( $ENV{TEST_LANGUAGES} eq "all" ) {
-                $tests += 2*$basics;
-                $tests += 2*$magic if $] >= 5.006;
-            }
-            elsif ( $ENV{TEST_LANGUAGES} eq "EUC-JP"
-                    or $ENV{TEST_LANGUAGES} eq "KIO8-R" ) {
-                $tests += $basics;  
-                $tests += $magic-1 if $] >= 5.006;
-            }
-        }
-    }
-
     plan tests => $tests;
 }
-
-exit(0) unless $] < 5.008;
 
 use XML::LibXML::Common;
 use XML::LibXML;
@@ -67,7 +58,7 @@ else {
     my $elemlat1   = $dom_latin1->createElement( $tstr_iso_latin1 );
 
     $dom_latin1->setDocumentElement( $elemlat1 );
-    
+
     ok( decodeFromUTF8( 'iso-8859-1' ,$elemlat1->toString()),
         "<$tstr_iso_latin1/>");
     ok( $elemlat1->toString(0,1), "<$tstr_iso_latin1/>");
@@ -119,38 +110,38 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "EUC-JP" ) {
 
 }
 
-if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "KIO8-R" ) {
-    print "# cyrillic encoding (KIO8-R)\n";
+if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "KOI8-R" ) {
+    print "# cyrillic encoding (KOI8-R)\n";
 
-    my $tstr_kio8r       = 'проба';
-    my $domstrkio = q{<?xml version="1.0" encoding="KIO8-R"?>
+    my $tstr_koi8r       = 'проба';
+    my $domstrkoi = q{<?xml version="1.0" encoding="KOI8-R"?>
 <проба>проба</проба>
 };
     
 
     if ( $] >= 5.006 ) {
-        my ($dom_kio8, $elemkio8);
+        my ($dom_koi8, $elemkoi8);
 
-        $dom_kio8 = XML::LibXML::Document->new('1.0', 'KIO8-R');
-        $elemkio8 = $dom_kio8->createElement( $tstr_kio8r );
+        $dom_koi8 = XML::LibXML::Document->new('1.0', 'KOI8-R');
+        $elemkoi8 = $dom_koi8->createElement( $tstr_koi8r );
 
-        ok( decodeFromUTF8( 'KIO8-R' ,$elemkio8->nodeName()), 
-            $tstr_kio8r );
+        ok( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->nodeName()), 
+            $tstr_koi8r );
 
-        ok( decodeFromUTF8( 'KIO8-R' ,$elemkio8->toString()), 
-            "<$tstr_kio8r/>");
-        ok( $elemkio8->toString(0,1), "<$tstr_kio8r/>");
+        ok( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->toString()), 
+            "<$tstr_koi8r/>");
+        ok( $elemkoi8->toString(0,1), "<$tstr_koi8r/>");
 
-        $elemkio8->appendText( $tstr_kio8r );
+        $elemkoi8->appendText( $tstr_koi8r );
 
-        ok( decodeFromUTF8( 'KIO8-R' ,$elemkio8->string_value()),
-            $tstr_kio8r);
-        ok( $elemkio8->string_value(1),
-            $tstr_kio8r);
-        $dom_kio8->setDocumentElement( $elemkio8 );
+        ok( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->string_value()),
+            $tstr_koi8r);
+        ok( $elemkoi8->string_value(1),
+            $tstr_koi8r);
+        $dom_koi8->setDocumentElement( $elemkoi8 );
 
-        ok( $dom_kio8->toString(),
-            $domstrkio );
+        ok( $dom_koi8->toString(),
+            $domstrkoi );
         
     }
 }
