@@ -694,6 +694,31 @@ sub insertPI {
     $self->insertProcessingInstruction( @_ );
 }
 
+#-------------------------------------------------------------------------#
+# DOM L3 Document functions.
+# added after robins implicit feature requst
+#-------------------------------------------------------------------------#
+sub getElementsByTagName {
+    my ( $doc , $name ) = @_;
+    my $xpath = "descendant-or-self::node()/$name";
+    my @nodes = $doc->_findnodes($xpath);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
+
+sub  getElementsByTagNameNS {
+    my ( $doc, $nsURI, $name ) = @_;
+    my $xpath = "descendant-or-self::*[local-name()='$name' and namespace-uri()='$nsURI']";
+    my @nodes = $doc->_findnodes($xpath);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
+
+sub getElementsByLocalName {
+    my ( $doc,$name ) = @_;
+    my $xpath = "descendant-or-self::*[local-name()='$name']";
+    my @nodes = $doc->_findnodes($xpath);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
+
 1;
 
 #-------------------------------------------------------------------------#

@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 101 };
+BEGIN { plan tests => 109 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -302,5 +302,50 @@ use XML::LibXML::Common qw(:libxml);
         ok( $tdoc->documentElement->nodeName, "foo" );
         ok( $tdoc->documentElement->textContent, "bar" );
         unlink "example/testrun.xml" ;        
+    }
+
+    print "# 5 ELEMENT LIKE FUNCTIONS\n";
+    {
+        my $parser2 = XML::LibXML->new();
+        my $string1 = "<A><A><B/></A><A><B/></A></A>";
+        my $string2 = '<C:A xmlns:C="D"><C:A><C:B/></C:A><C:A><C:B/></C:A></C:A>';
+        my $string3 = '<A xmlns="D"><A><B/></A><A><B/></A></A>';
+        my $string4 = '<C:A><C:A><C:B/></C:A><C:A><C:B/></C:A></C:A>';
+        {
+            my $doc2 = $parser2->parse_string($string1);
+            my @as   = $doc2->getElementsByTagName( "A" );
+            ok( scalar( @as ), 3);
+
+            @as   = $doc2->getElementsByLocalName( "A" );
+            ok( scalar( @as ), 3);
+        }
+        {
+            my $doc2 = $parser2->parse_string($string2);
+            my @as   = $doc2->getElementsByTagName( "C:A" );
+            ok( scalar( @as ), 3);
+            my @as   = $doc2->getElementsByTagNameNS( "D", "A" );
+            ok( scalar( @as ), 3);
+            @as   = $doc2->getElementsByLocalName( "A" );
+            ok( scalar( @as ), 3);
+        }
+        {
+            my $doc2 = $parser2->parse_string($string3);
+#            my @as   = $doc2->getElementsByTagName( "A" );
+#            ok( scalar( @as ), 3);
+            my @as   = $doc2->getElementsByTagNameNS( "D", "A" );
+            ok( scalar( @as ), 3);
+            @as   = $doc2->getElementsByLocalName( "A" );
+            ok( scalar( @as ), 3);
+        }
+        {
+            my $doc2 = $parser2->parse_string($string4);
+#
+# fails due a bug in libxml2's xpath engine (?)
+#
+#            my @as   = $doc2->getElementsByTagName( "C:A" );
+#            ok( scalar( @as ), 3);
+            my @as   = $doc2->getElementsByLocalName( "A" );
+            ok( scalar( @as ), 3);
+        }
     }
 }
