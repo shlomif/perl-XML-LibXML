@@ -1,12 +1,13 @@
 TYPEMAP
-const char *        T_PV
-xmlDocPtr           PROXY_OBJECT
-xmlNodePtr          PROXY_OBJECT
-xmlNsPtr            O_OBJECT
-xmlParserCtxtPtr    O_OBJECT
-xmlDtdPtr           PROXY_OBJECT
-xmlNodeSetPtr       O_OBJECT
-ProxyObject *       O_OBJECT
+const char *                T_PV
+xmlDocPtr                   PROXY_OBJECT
+xmlNodePtr                  PROXY_OBJECT
+xmlNsPtr                    O_OBJECT
+xmlParserCtxtPtr            O_OBJECT
+xmlDtdPtr                   PROXY_OBJECT
+xmlNodeSetPtr               O_OBJECT
+ProxyObject *               O_OBJECT
+perlxmlParserObjectPtr      O_OBJECT
 
 
 INPUT

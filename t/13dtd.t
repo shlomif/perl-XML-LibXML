@@ -54,19 +54,14 @@ eval {
 ok($@);
 }
 
-{
-# validate a document with a <!DOCTYPE> declaration
-XML::LibXML->validation(1);
-my $xml = XML::LibXML->new->parse_file('example/article_internal.xml');
-ok($xml);
-}
+# this test fails under XML-LibXML-1.00 with a segfault because the
+# underlying DTD element in the C libxml library was freed twice
 
-{
-# validate an invalid document with <!DOCTYPE declaration
-XML::LibXML->validation(1);
-eval {
-my $xml = XML::LibXML->new->parse_file('example/article_internal_bad.xml');
-ok(0);
-};
-ok($@);
-}
+my $parser = XML::LibXML->new();
+my $doc = $parser->parse_file('example/dtd.xml');
+my @a = $doc->getChildnodes;
+ok(scalar(@a),2);
+undef @a;
+undef $doc;
+ 
+ok(1);

@@ -99,8 +99,8 @@ dom.c_1.21
 t/06nodetypes.t
    + document_fragment tests 
 
-todo:
-    make shure appendChild or similar functions do not allow
-    wrong node type to be appended
-    make the node iterator function XS to avoid GC overhead 
-    for temporary iterator nodes.
+VERSION 1.01
+
+   + multiple parser layer (it looks like overkill but it is not!)
+   + on the fly XInclude expanding while parsing
+

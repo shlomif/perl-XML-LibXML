@@ -45,7 +45,7 @@ if ( defined $dom ) {
     }	
   
     # we need to create a new document since dromeds is in ASCII ...
-    my $doc = XML::LibXML::Document->new( '1.0' );
+    my $doc = XML::LibXML::Document->new( '1.0','iso-8859-1' );
     my $elem2 = $doc->createElement( $camel );
     $doc->setDocumentElement( $elem2 ); 
 
