@@ -371,16 +371,21 @@ print "# 2 PUSH PARSER\n";
             $doc = undef;
             foreach ( @{$bad_strings{$key}} ) {
                eval { $parser->parse_chunk( $_ );};
+               if ( $@ ) { 
+                   # if we won't stop here, we will loose the error :|
+                   last; 
+               }
             }
             if ( $@ ) {
                 ok(1);
                 $parser->parse_chunk("",1); # will cause no harm anymore, but is still needed
                 next;
             }
+           
             eval {    
                 $doc = $parser->parse_chunk("",1);
             };
-            ok( $@ );
+            ok($@);
         }
 
     }
