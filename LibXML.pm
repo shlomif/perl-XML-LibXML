@@ -231,6 +231,13 @@ sub recover {
     return $self->{XML_LIBXML_RECOVER};
 }
 
+sub recover_silently {
+    my $self = shift;
+    my $arg = shift;
+    (($arg == 1) ? $self->recover(2) : $self->recover($arg)) if defined($arg);
+    return ($self->recover() == 2) ? 1 : 0;
+}
+
 sub expand_entities {
     my $self = shift;
     $self->{XML_LIBXML_EXPAND_ENTITIES} = shift if scalar @_;

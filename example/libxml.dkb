@@ -941,7 +941,24 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             document). The recover mode of XML::LibXML has problems restoring
             documents that are more like well ballanced chunks.</para>
             <para>XML::LibXML will only parse until the first fatal error
-            occours.</para>
+            occours, reporting recoverable parsing errors
+            as warnings. To suppress these warnings use 
+            $parser-&#62;recover_silently(1);
+            or, equivalently, $parser-&#62;recover(2).</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>recover_silently</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;recover_silently(1);</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>Turns the parser warnings off (or on). Defaults to on.</para>
+            <para>This allows to switch off warnings printed to STDERR when
+            parsing documents with recover(1).</para>
+            <para>Please note that calling recover_silently(0) also turns the
+            parser recover mode off and calling recover_silently(1) automatically
+            activates the parser recover mode.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
