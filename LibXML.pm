@@ -1158,7 +1158,25 @@ sub fatal_error {
 
 1;
 
-#-------------------------------------------------------------------------#
-# XML::LibXML Parser documentation                                        #
-#-------------------------------------------------------------------------#
+package XML::LibXML::RelaxNG;
+
+sub new {
+    my $class = shift;
+    my %args = @_;
+
+    my $self = undef;
+    if ( defined $args{location} ) {
+        $self = $class->parse_location( $args{location} );
+    }
+    elsif ( defined $args{string} ) {
+        $self = $class->parse_buffer( $args{string} );
+    }
+    elsif ( defined $args{DOM} ) {
+        $self = $class->parse_document( $args{DOM} );
+    }
+
+    return $self;
+}
+
+1;
 __END__

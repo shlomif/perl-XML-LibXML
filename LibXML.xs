@@ -36,6 +36,7 @@ extern "C" {
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
+#include <libxml/relaxng.h>
 
 #ifdef LIBXML_CATALOG_ENABLED
 #include <libxml/catalog.h>
@@ -5945,3 +5946,154 @@ parse_string(CLASS, str, ...)
         RETVAL = PmmNodeToSv((xmlNodePtr)res, NULL);
     OUTPUT:
         RETVAL
+
+
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::RelaxNG
+
+void 
+DESTROY( self ) 
+        xmlRelaxNGPtr self
+    CODE:
+        xmlRelaxNGFree( self );
+
+
+xmlRelaxNGPtr
+parse_location( self, url )
+        SV * self
+        char * url
+    PREINIT:
+        const char * CLASS = "XML::LibXML::RelaxNG";
+        xmlRelaxNGParserCtxtPtr rngctxt = NULL;
+        STRLEN len;
+    CODE:
+        LibXML_init_error();
+        rngctxt = xmlRelaxNGNewParserCtxt( url );
+        if ( rngctxt == NULL ) {
+            croak( "failed to initialize RelaxNG parser" );
+        }
+        /* Register Error callbacks */
+        xmlRelaxNGSetParserErrors( rngctxt,
+                                  (xmlRelaxNGValidityErrorFunc)LibXML_error_handler,
+                                  (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
+                                  rngctxt );
+
+        RETVAL = xmlRelaxNGParse( rngctxt );
+        xmlRelaxNGFreeParserCtxt( rngctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL == NULL ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+
+xmlRelaxNGPtr
+parse_buffer( self, perlstring )
+        SV * self
+        SV * perlstring
+    PREINIT:
+        const char * CLASS = "XML::LibXML::RelaxNG";
+        xmlRelaxNGParserCtxtPtr rngctxt = NULL;
+        char * string = NULL;
+        STRLEN len    = 0;
+    INIT:
+        string = SvPV( perlstring, len );
+        if ( string == NULL ) {
+            croak( "cannot parse empty string" );
+        }
+    CODE:
+        LibXML_init_error();
+        rngctxt = xmlRelaxNGNewMemParserCtxt( string,len );
+        if ( rngctxt == NULL ) {
+            croak( "failed to initialize RelaxNG parser" );
+        }
+        /* Register Error callbacks */
+        xmlRelaxNGSetParserErrors( rngctxt,
+                                  (xmlRelaxNGValidityErrorFunc)LibXML_error_handler,
+                                  (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
+                                  rngctxt );
+
+        RETVAL = xmlRelaxNGParse( rngctxt );
+        xmlRelaxNGFreeParserCtxt( rngctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL == NULL ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+
+xmlRelaxNGPtr
+parse_document( self, doc )
+        SV * self
+        xmlDocPtr doc
+    PREINIT:
+        const char * CLASS = "XML::LibXML::RelaxNG";
+        xmlRelaxNGParserCtxtPtr rngctxt = NULL;
+        STRLEN len;
+    CODE:
+        LibXML_init_error();
+        rngctxt = xmlRelaxNGNewDocParserCtxt( doc );
+        if ( rngctxt == NULL ) {
+            croak( "failed to initialize RelaxNG parser" );
+        }
+        /* Register Error callbacks */
+        xmlRelaxNGSetParserErrors( rngctxt,
+                                  (xmlRelaxNGValidityErrorFunc)  LibXML_error_handler,
+                                  (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
+                                  rngctxt );
+
+        RETVAL = xmlRelaxNGParse( rngctxt );
+        xmlRelaxNGFreeParserCtxt( rngctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL == NULL ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+int
+validate( self, doc )
+        xmlRelaxNGPtr self
+        xmlDocPtr doc
+    PREINIT:
+        xmlRelaxNGValidCtxtPtr vctxt = NULL;
+        STRLEN len;
+    CODE:
+        LibXML_init_error();
+        vctxt  = xmlRelaxNGNewValidCtxt( self );
+        if ( vctxt == NULL ) {
+            croak( "cannot initialize the validation context" );
+        }
+        /* Register Error callbacks */
+        xmlRelaxNGSetValidErrors( vctxt,
+                                  (xmlRelaxNGValidityErrorFunc)LibXML_error_handler,
+                                  (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
+                                  vctxt );
+
+        RETVAL = xmlRelaxNGValidateDoc( vctxt, doc );
+        xmlRelaxNGFreeValidCtxt( vctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL == 1 ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+        if ( RETVAL == -1 ) {
+            croak( "API Error" );
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
