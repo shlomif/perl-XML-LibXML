@@ -517,15 +517,15 @@ LibXML_parse_stream(SV * self, SV * ioref, char * directory)
     }
     /* this should be done by libxml2 !? */
     if (doc->encoding == NULL) {
-        doc->encoding = xmlStrdup("utf-8");
+        doc->encoding = xmlStrdup((const xmlChar*)"utf-8");
     }
 
     if ( directory == NULL ) {
         STRLEN len;
         SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)doc));
-        doc->URL = xmlStrdup(SvPV(newURI, len));
+        doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, len));
     } else {
-        doc->URL = xmlStrdup(directory);
+        doc->URL = xmlStrdup((const xmlChar*)directory);
     }
     
     return doc;
@@ -948,9 +948,9 @@ _parse_string(self, string, directory = NULL)
         if ( directory == NULL ) {
             STRLEN len;
             SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_dom));
-            real_dom->URL = xmlStrdup(SvPV(newURI, len));
+            real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, len));
         } else {
-            real_dom->URL = xmlStrdup(directory);
+            real_dom->URL = xmlStrdup((const xmlChar*)directory);
         }
 
         if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (real_dom->intSubset || real_dom->extSubset) )) {
@@ -1096,7 +1096,7 @@ parse_html_string(self, string)
         sv_setpvn(LibXML_error, "", 0);
         
         LibXML_init_parser(self);
-        real_dom = htmlParseDoc(ptr, NULL);
+        real_dom = htmlParseDoc((xmlChar*)ptr, NULL);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();        
 
@@ -1109,7 +1109,7 @@ parse_html_string(self, string)
         else {
             STRLEN n_a;
             SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
-            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
+            real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
             setSvNodeExtra(RETVAL,RETVAL);
@@ -1143,7 +1143,7 @@ parse_html_fh(self, fh)
         else {
             STRLEN n_a;
             SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
-            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
+            real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
             setSvNodeExtra(RETVAL,RETVAL);
@@ -1165,7 +1165,7 @@ parse_html_file(self, filename)
         sv_setpvn(LibXML_error, "", 0);
         
         LibXML_init_parser(self);
-        real_dom = htmlParseFile(filename, NULL);
+        real_dom = htmlParseFile((char*)filename, NULL);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
@@ -1204,7 +1204,7 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         }
 
         /* encode the chunk to UTF8 */
-        chunk = Sv2C(svchunk, encoding);
+        chunk = Sv2C(svchunk, (const xmlChar*)encoding);
 
         if ( chunk != NULL ) {
             LibXML_error = sv_2mortal(newSVpv("", 0));
@@ -1292,11 +1292,12 @@ decodeFromUTF8( encoding, string )
 #ifdef HAVE_UTF8
         if ( SvUTF8(string) ) {
 #endif
-            realstring = Sv2C(string,"UTF8" );
+            realstring = Sv2C(string,(const xmlChar*)"UTF8" );
             if ( realstring != NULL ) {
-                tstr =  domDecodeString( encoding, realstring );
+                tstr =  (xmlChar*)domDecodeString( (const char*)encoding,
+                                                   (const xmlChar*)realstring );
                 if ( tstr != NULL ) {
-                    RETVAL = C2Sv(tstr,(xmlChar*)encoding);
+                    RETVAL = C2Sv((const xmlChar*)tstr,(const xmlChar*)encoding);
                     xmlFree( tstr );
                 }
                 else {
@@ -1481,10 +1482,10 @@ URI (doc, new_URI=NULL)
         xmlDocPtr doc
         char * new_URI
     CODE:
-        RETVAL = xmlStrdup( doc->URL );
+        RETVAL = xmlStrdup(doc->URL );
         if (new_URI) {
-            xmlFree( (char*) doc->URL);
-            doc->URL = xmlStrdup(new_URI);
+            xmlFree( (xmlChar*) doc->URL);
+            doc->URL = xmlStrdup((xmlChar*)new_URI);
         }
     OUTPUT:
         RETVAL
@@ -1717,7 +1718,7 @@ createAttributeNS( dom, nsURI, qname, value=&PL_sv_undef )
         encname = nodeSv2C( qname , (xmlNodePtr) real_dom );
         if ( nsURI != NULL && strlen( nsURI ) != 0 ){
             lname = xmlSplitQName2(encname, &prefix);
-            ns = domNewNs (0 , prefix , nsURI);
+            ns = domNewNs (0 , prefix , (xmlChar*)nsURI);
         }
         else{
             lname = encname;
@@ -1877,7 +1878,7 @@ getEncoding( self )
         SV* self
     CODE:
         if( self != NULL && self!=&PL_sv_undef) {
-            RETVAL = xmlStrdup(((xmlDocPtr)getSvNode(self))->encoding );
+            RETVAL = xmlStrdup((xmlChar*)((xmlDocPtr)getSvNode(self))->encoding );
         }
     OUTPUT:
         RETVAL
@@ -2605,6 +2606,8 @@ int
 isEqual( self, other )
         xmlNodePtr self
         xmlNodePtr other
+    ALIAS:
+        XML::LibXML::Node::isSameNode = 1
     CODE:
         RETVAL = 0;
         if( self == other ) {
@@ -3024,8 +3027,7 @@ getAttribute( elem, pname )
         node = getSvNode( elem );
         name = nodeSv2C( pname, node );
         content = xmlGetProp( node , name );
-        if ( content != NULL ) {
-            
+        if ( content != NULL ) {     
             RETVAL  = C2Sv(content, NULL );
             xmlFree( content );
         }
