@@ -14,12 +14,15 @@ xpath.h
 typemap
 example/dromeds.xml
 example/bad.xml
+example/dtd.xml
 example/libxml.xml
 example/xml2pod.pl
 example/cb_example.pl
 example/test.html
 example/test.xhtml
 example/test.dtd
+example/test.xml
+example/test2.xml
 example/article.xml
 example/article_bad.xml
 example/complex/complex.xml
