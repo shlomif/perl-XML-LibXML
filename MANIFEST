@@ -59,3 +59,4 @@ lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/Number.pm
 lib/XML/LibXML/SAX/Generator.pm
 lib/XML/LibXML/SAX/Builder.pm
+lib/XML/LibXML/SAX/Parser.pm

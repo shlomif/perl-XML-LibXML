@@ -80,6 +80,7 @@ WriteMakefile(
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
     'AUTHOR'    => 'Matt Sergeant',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
+    'PREREQ_PM' => { 'XML::SAX' => 0 },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
     'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
     %config,
@@ -101,6 +102,21 @@ docs : pure_all
 EOF
     return $str;
 }
+
+sub MY::install {
+    package MY;
+    my $script = shift->SUPER::install(@_);
+    $script =~ s/install :: (.*)$/install :: $1 install_sax_driver/m;
+    $script .= <<"INSTALL";
+
+install_sax_driver :
+\t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
+ 
+INSTALL
+ 
+    return $script;
+}
+
 
 ###################################################################
 # Functions
