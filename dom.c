@@ -181,6 +181,11 @@ domDecodeString( const char *encoding, const xmlChar *string){
  * leader and followup has to be followups in the nodelist!!!
  * the function returns the node inserted. if a fragment was inserted,
  * the first node of the list will returned
+ *
+ * i ran into a misconception here. there should be a normalization function
+ * for the DOM, so sequences of text nodes can get replaced by a single 
+ * text node. as i see DOM Level 1 does not allow text node sequences, while
+ * Level 2 and 3 do.
  **/
 xmlNodePtr 
 insert_node_to_nodelist( xmlNodePtr lead, xmlNodePtr node, xmlNodePtr follow ){
@@ -222,49 +227,16 @@ insert_node_to_nodelist( xmlNodePtr lead, xmlNodePtr node, xmlNodePtr follow ){
       par->children = cld1;
     }
     else {
-      if( lead->type == XML_TEXT_NODE && cld1->type == XML_TEXT_NODE ){
-        xmlChar * content = cld1->content;
-        cld1->content = xmlStrdup(lead->content);
-        xmlNodeAddContent(cld1, content);
-        cld1->prev  = lead->prev;
-        if ( lead->prev == NULL ) {
-          par->children = cld1;
-        }
-        else {
-          lead->prev->next = cld1;
-        }
-        lead->next = lead->prev = lead->parent = NULL;
-        /* we won't free any nodes here, since perl stil might use them */ 
-        /* xmlFreeNode( lead ); */
-      }
-      else {
         lead->next = cld1;
         cld1->prev  = lead;
-      }
     }
   
     if ( follow == NULL ){
       par->last = cld2;
     } 
     else {
-      if( follow->type == XML_TEXT_NODE && cld2->type == XML_TEXT_NODE ){
-        xmlNodeAddContent(cld2, follow->content);
-
-        cld2->next  = follow->prev;
-        if ( follow->prev == NULL ) {
-          par->last = cld2;
-        }
-        else {
-          follow->next->prev = cld2;
-        }
-        follow->next = follow->prev = follow->parent = NULL;
-        /* we won't free any nodes here, since perl stil might use them */ 
-        /* xmlFreeNode( follow ); */
-      }
-      else {
-        follow->prev = cld2;
-        cld2->next  = follow;
-      }
+      follow->prev = cld2;
+      cld2->next  = follow;
     }
   }
 
@@ -633,7 +605,10 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
   if ( n == NULL ) 
     return;
 
-  ctnt = xmlEncodeEntitiesReentrant( n->doc , val );
+  /* i removed the following line, so the xs file does not hide significant */
+  /* functionality. as i understand this module, it should provide */
+  /* function to make the XS code easier to understand */
+  /* ctnt = xmlEncodeEntitiesReentrant( n->doc , val ); */
   
   if( n->type == XML_ATTRIBUTE_NODE ){
     if ( n->children != NULL ) {
