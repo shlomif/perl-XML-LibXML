@@ -21,3 +21,4 @@ OUTPUT
 # char* having the name of the package for the blessing.
 O_OBJECT
         sv_setref_pv( $arg, (char *)CLASS, (void*)$var );
+

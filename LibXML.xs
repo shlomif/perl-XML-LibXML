@@ -1030,7 +1030,7 @@ xmlDocPtr
 getOwnerDocument( elem )
         xmlNodePtr elem
     PREINIT:
-        const char * CLASS = "XML::LibXML::Document";
+        const char * CLASS = "XML::LibXML::NoGCDocument";
     CODE:
         RETVAL = elem->doc;
     OUTPUT:
@@ -1057,7 +1057,7 @@ getName( node )
         if( node != NULL ) {
             name =  node->name;
         }
-        RETVAL = newSVpvn( name, xmlStrlen( name ) );
+        RETVAL = newSVpvn( (char *)name, xmlStrlen( name ) );
     OUTPUT:
         RETVAL
 
@@ -1071,7 +1071,7 @@ getData( node )
             content = node->content;
         }
         if ( content != 0 ){
-            RETVAL = newSVpvn( content, xmlStrlen( content ) );
+            RETVAL = newSVpvn( (char *)content, xmlStrlen( content ) );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -1108,7 +1108,7 @@ findnodes( node, xpath )
                 element = sv_newmortal(); 
 
                 cls = domNodeTypeName( tnode );
-                XPUSHs( sv_setref_pv( element, cls, (void*)tnode ) );
+                XPUSHs( sv_setref_pv( element, (char *)cls, (void*)tnode ) );
             }
 
             xmlXPathFreeNodeSet( nodelist );
@@ -1130,7 +1130,7 @@ getChildnodes( node )
         while ( cld ) {	
             element = sv_newmortal();
             cls = domNodeTypeName( cld );
-            XPUSHs( sv_setref_pv( element, cls, (void*)cld ) );
+            XPUSHs( sv_setref_pv( element, (char *)cls, (void*)cld ) );
             cld = cld->next;
             len++;
         }
@@ -1254,7 +1254,7 @@ getElementsByTagName( elem, name )
                 element = sv_newmortal(); 
 
                 cls = domNodeTypeName( tnode ); 
-                XPUSHs( sv_setref_pv( element, cls, (void*)tnode ) );
+                XPUSHs( sv_setref_pv( element, (char *)cls, (void*)tnode ) );
             }
 
             xmlXPathFreeNodeSet( nodelist );

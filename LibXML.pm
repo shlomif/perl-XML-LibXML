@@ -129,6 +129,9 @@ sub XML_XINCLUDE_END(){20;}
 @XML::LibXML::Text::ISA         = 'XML::LibXML::Node';
 @XML::LibXML::Comment::ISA      = 'XML::LibXML::Text';
 @XML::LibXML::CDATASection::ISA = 'XML::LibXML::Text';
+@XML::LibXML::NoGCDocment       = 'XML::LibXML::Document';
+
+sub XML::LibXML::NoGCDocument::DESTROY () { }
 
 1;
 __END__
