@@ -333,7 +333,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
         case XML_DOCUMENT_NODE:
         case XML_HTML_DOCUMENT_NODE:
         case XML_DOCB_DOCUMENT_NODE:
-            dfProxy->encoding = (int)xmlParseCharEncoding( ((xmlDocPtr)node)->encoding );
+            dfProxy->encoding = (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding );
             break;
         default:
             break;
@@ -697,7 +697,7 @@ PmmFastEncodeString( int charset,
     }
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
         /* warn("no standard encoding %s\n", encoding); */
-        coder =xmlFindCharEncodingHandler( encoding );
+        coder =xmlFindCharEncodingHandler( (const char *)encoding );
     }
     else {
         xs_warn("no encoding found\n");
@@ -707,7 +707,7 @@ PmmFastEncodeString( int charset,
         xs_warn("coding machine found \n");
         in    = xmlBufferCreate();
         out   = xmlBufferCreate();
-        xmlBufferCCat( in, string );
+        xmlBufferCCat( in, (const char *) string );
         if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
             retval = xmlStrdup( out->content );
             /* warn( "encoded string is %s" , retval); */
@@ -743,7 +743,7 @@ PmmFastDecodeString( int charset,
     }
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
         /* warn("no standard encoding\n"); */
-        coder = xmlFindCharEncodingHandler( encoding );
+        coder = xmlFindCharEncodingHandler( (const char *) encoding );
     }
     else {
         xs_warn("no encoding found\n");
@@ -783,7 +783,7 @@ PmmEncodeString( const char *encoding, const xmlChar *string ){
         if( encoding != NULL ) {
             xs_warn( encoding );
             enc = xmlParseCharEncoding( encoding );
-            ret = PmmFastEncodeString( enc, string, encoding );
+            ret = PmmFastEncodeString( enc, string, (const xmlChar *)encoding );
         }
         else {
             /* if utf-8 is requested we do nothing */
@@ -809,11 +809,11 @@ PmmDecodeString( const char *encoding, const xmlChar *string){
         xs_warn( "PmmDecodeString called" );
         if( encoding != NULL ) {
             enc = xmlParseCharEncoding( encoding );
-            ret = PmmFastDecodeString( enc, string, encoding );
+            ret = (char*)PmmFastDecodeString( enc, string, (const xmlChar*)encoding );
             xs_warn( "PmmDecodeString done" );
         }
         else {
-            ret = xmlStrdup(string);
+            ret = (char*)xmlStrdup(string);
         }
     }
     return ret;
@@ -827,7 +827,7 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
     xmlCharEncoding enc;
     if ( string != NULL ) {
         if ( encoding != NULL ) {
-            enc = xmlParseCharEncoding( encoding );
+            enc = xmlParseCharEncoding( (const char*)encoding );
         }
         else {
             enc = 0;
@@ -846,7 +846,7 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
             /* string[len] = 0; */
 
             retval = NEWSV(0, len+1); 
-            sv_setpvn(retval, string, len );
+            sv_setpvn(retval, (const char*) string, len );
 #ifdef HAVE_UTF8
             xs_warn("set UTF8-SV-flag");
             SvUTF8_on(retval);
@@ -882,7 +882,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
             if ( encoding != NULL ) {        
 #endif
                 xs_warn( "domEncodeString!" );
-                ts= PmmEncodeString( encoding, string );
+                ts= PmmEncodeString( (const char *)encoding, string );
                 xs_warn( "done!" );
                 if ( string != NULL ) {
                     xmlFree(string);

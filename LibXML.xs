@@ -719,10 +719,10 @@ LibXML_init_parser( SV * self ) {
 
     return; 
 
-    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
-                              (xmlInputOpenCallback) LibXML_input_open,
-                              (xmlInputReadCallback) LibXML_input_read,
-                              (xmlInputCloseCallback) LibXML_input_close);
+/*    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,*/
+/*                              (xmlInputOpenCallback) LibXML_input_open, */
+/*                              (xmlInputReadCallback) LibXML_input_read, */
+/*                              (xmlInputCloseCallback) LibXML_input_close); */
 
 
 
@@ -746,10 +746,10 @@ void
 LibXML_cleanup_callbacks() {
     
     return;
-    xs_warn("      cleanup parser callbacks!\n"); 
+/*    xs_warn("      cleanup parser callbacks!\n"); */
 
-    xmlCleanupInputCallbacks();
-    xmlRegisterDefaultInputCallbacks();
+/*    xmlCleanupInputCallbacks(); */
+/*    xmlRegisterDefaultInputCallbacks(); */
 /*    if ( LibXML_old_ext_ent_loader != NULL ) { */
 /*        xmlSetExternalEntityLoader( NULL ); */
 /*        xmlSetExternalEntityLoader( LibXML_old_ext_ent_loader ); */
@@ -1045,7 +1045,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
     PREINIT:
         xmlParserCtxtPtr ctxt = NULL;
         STRLEN len = 0;
-        xmlChar * ptr = NULL;
+        char * ptr = NULL;
         int well_formed;
         int valid;
         int ret;
@@ -1053,7 +1053,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
         int recover ;
-        xmlChar * directory = NULL;
+        char * directory = NULL;
     CODE:
         ptr = SvPV(string, len);        
         if (len == 0) {
@@ -1061,12 +1061,12 @@ _parse_string(self, string, dir = &PL_sv_undef)
         }
   
         LibXML_init_parser(self);
-        ctxt = xmlCreateMemoryParserCtxt(ptr, len);
+        ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
         }
 
-        directory = Sv2C( dir, NULL );
+        directory = (char*)Sv2C( dir, NULL );
 
         xs_warn( "context created\n");
 
@@ -1506,8 +1506,8 @@ parse_sgml_string(self, string, encoding)
         }
         
         LibXML_init_parser(self);
-        real_doc = (xmlDocPtr) docbParseDoc((xmlChar*)ptr,
-                                            Sv2C(encoding, NULL));
+        real_doc = (xmlDocPtr) docbParseDoc((xmlChar *)ptr,
+                                            (const char *)Sv2C(encoding, NULL));
 
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();        
@@ -1549,7 +1549,7 @@ parse_sgml_file(self, fn, encoding)
     CODE:
         LibXML_init_parser(self);
         real_doc = (xmlDocPtr) docbParseFile(filename,
-                                             Sv2C(encoding, NULL));
+                                             (const char *) Sv2C(encoding, NULL));
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
@@ -1581,8 +1581,8 @@ parse_sax_sgml_file(self, fn, enc )
         SV * fn
         SV * enc
     PREINIT:
-        const char * filename = Sv2C(fn, NULL);  
-        const char * encoding = Sv2C(enc, NULL);
+        const char * filename = (const char *)Sv2C(fn, NULL);  
+        const char * encoding = (const char *)Sv2C(enc, NULL);
         xmlParserCtxtPtr ctxt;
         STRLEN len;
     CODE:
@@ -1792,7 +1792,7 @@ _push( self, pctxt, data )
     PREINIT:
         xmlParserCtxtPtr ctxt = NULL;
         STRLEN len = 0;
-        xmlChar * chunk = NULL;
+        char * chunk = NULL;
     INIT:
         ctxt = PmmSvContext( pctxt );
         if ( ctxt == NULL ) {
@@ -1810,7 +1810,7 @@ _push( self, pctxt, data )
         }
 /*        LibXML_init_error(); */
         LibXML_init_parser(self);
-        xmlParseChunk(ctxt, chunk, len, 0);
+        xmlParseChunk(ctxt, (const char *)chunk, len, 0);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
     
@@ -1973,9 +1973,9 @@ load_catalog( self, filename )
         SV * self
         SV * filename
     PREINIT:
-        const char * fn = Sv2C(filename, NULL);
+        const char * fn = (const char *) Sv2C(filename, NULL);
     INIT:
-        if ( fn == NULL || xmlStrlen( fn ) == 0 ) {
+        if ( fn == NULL || xmlStrlen( (xmlChar *)fn ) == 0 ) {
             croak( "cannot load catalog" );
         }
     CODE:
@@ -2110,8 +2110,8 @@ toFH( self, filehandler, format=0 )
         xmlRegisterDefaultOutputCallbacks();
         encoding = (self)->encoding;
         if ( encoding != NULL ) {
-            if ( xmlParseCharEncoding(encoding) != XML_CHAR_ENCODING_UTF8) {
-                handler = xmlFindCharEncodingHandler(encoding);
+            if ( xmlParseCharEncoding((const char*)encoding) != XML_CHAR_ENCODING_UTF8) {
+                handler = xmlFindCharEncodingHandler((const char*)encoding);
             }
 
         }
@@ -2136,7 +2136,7 @@ toFH( self, filehandler, format=0 )
 
         RETVAL = xmlSaveFormatFileTo( buffer, 
                                       self,
-                                      encoding,
+                                      (const char *) encoding,
                                       format);
 
         if ( intSubset != NULL ) {
@@ -2202,11 +2202,11 @@ toStringHTML(self)
         xmlDocPtr self
     PREINIT:
         xmlChar *result=NULL;
-        int len=0;
+        STRLEN len = 0;
     CODE:
         xs_warn( "use no formated toString!" );
         LibXML_init_error();
-        htmlDocDumpMemory(self, &result, &len);
+        htmlDocDumpMemory(self, &result, (int*)&len);
 
         sv_2mortal( LibXML_error );
         LibXML_croak_error();
@@ -2226,7 +2226,7 @@ const char *
 URI( self )
         xmlDocPtr self
     CODE:
-        RETVAL = xmlStrdup(self->URL );
+        RETVAL = (const char*)xmlStrdup(self->URL );
     OUTPUT:
         RETVAL
 
@@ -2252,9 +2252,9 @@ createDocument( CLASS, version="1.0", encoding=NULL )
     PREINIT:
         xmlDocPtr doc=NULL;
     CODE:
-        doc = xmlNewDoc(version);
-        if (encoding && *encoding!=0) {
-            doc->encoding = xmlStrdup(encoding);
+        doc = xmlNewDoc((const xmlChar*)version);
+        if (encoding && *encoding != 0) {
+            doc->encoding = (const xmlChar*)xmlStrdup((const xmlChar*)encoding);
         }
         RETVAL = PmmNodeToSv((xmlNodePtr)doc,NULL);
     OUTPUT:
@@ -2981,7 +2981,7 @@ encoding( self )
         XML::LibXML::Document::getEncoding    = 1
         XML::LibXML::Document::actualEncoding = 2
     CODE:
-        RETVAL = xmlStrdup((xmlChar*)self->encoding );
+        RETVAL = (char*)xmlStrdup(self->encoding );
     OUTPUT:
         RETVAL
 
@@ -2990,7 +2990,7 @@ setEncoding( self, encoding )
         xmlDocPtr self
         char *encoding
     CODE:
-        self->encoding = xmlStrdup( encoding );
+        self->encoding = xmlStrdup( (const xmlChar *)encoding );
 
 int
 standalone( self ) 
@@ -3021,7 +3021,7 @@ version( self )
     ALIAS:
         XML::LibXML::Document::getVersion = 1
     CODE:
-        RETVAL = xmlStrdup(self->version );
+        RETVAL = (char*)xmlStrdup(self->version );
     OUTPUT:
         RETVAL
 
@@ -3030,7 +3030,7 @@ setVersion( self, version )
         xmlDocPtr self
         char *version
     CODE:
-        self->version = xmlStrdup( version );
+        self->version = xmlStrdup( (const xmlChar*)version );
 
 int
 compression( self )
@@ -3143,13 +3143,13 @@ nodeName( self )
         XML::LibXML::Node::getName = 1
         XML::LibXML::Element::tagName = 2
     PREINIT:
-        char * name = NULL;
+        xmlChar * name = NULL;
     INIT:
         if( self->name == NULL ) {
             croak( "lost the name!?" );
         }
     CODE:
-        name =  domName( self );
+        name =  (xmlChar*)domName( self );
         RETVAL = C2Sv(name,NULL);
         xmlFree( name );
     OUTPUT:
@@ -3898,7 +3898,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         int format
     PREINIT:
         xmlBufferPtr buffer;
-        char *ret = NULL;
+        xmlChar *ret = NULL;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
@@ -3987,7 +3987,7 @@ _find( pnode, pxpath )
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV* element = NULL ;
-        int len = 0 ;
+        STRLEN len = 0 ;
         xmlChar * xpath = nodeSv2C(pxpath, node);
     INIT:
         if ( node == NULL ) {
@@ -4100,7 +4100,7 @@ _findnodes( pnode, perl_xpath )
         ProxyNodePtr owner = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
-        int len = 0 ;
+        STRLEN len = 0 ;
         xmlChar * xpath = nodeSv2C(perl_xpath, node);
     INIT:
         if ( node == NULL ) {
@@ -4240,7 +4240,7 @@ new(CLASS, name )
         ProxyNodePtr docfrag;
     CODE:
         docfrag = PmmNewFragment(NULL);
-        newNode = xmlNewNode( NULL, name );
+        newNode = xmlNewNode( NULL, (const xmlChar*)name );
         newNode->doc = NULL;
         xmlAddChild(PmmNODE(docfrag), newNode);
         RETVAL = PmmNodeToSv(newNode, docfrag );
@@ -5346,7 +5346,7 @@ parse_string(CLASS, str, ...)
         SV * encoding_sv;
         xmlParserInputBufferPtr buffer;
         xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
-        char * new_string;
+        xmlChar * new_string;
         STRLEN len;
     CODE:
         LibXML_init_error();
@@ -5366,8 +5366,8 @@ parse_string(CLASS, str, ...)
         if ( !buffer)
             croak("cant create buffer!\n" );
 
-        new_string = xmlStrdup(str);
-        xmlParserInputBufferPush(buffer, strlen(new_string), new_string);
+        new_string = xmlStrdup((const xmlChar*)str);
+        xmlParserInputBufferPush(buffer, xmlStrlen(new_string), (const char*)new_string);
 
         res = xmlIOParseDTD(NULL, buffer, enc);
 

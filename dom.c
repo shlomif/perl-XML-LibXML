@@ -294,7 +294,7 @@ domName(xmlNodePtr node) {
     if ( node ) {
         if (node->ns != NULL && node->ns->prefix != NULL) {
             xmlChar *tname = xmlStrdup( node->ns->prefix );
-            tname = xmlStrcat( tname , ":" );
+            tname = xmlStrcat( tname , (const xmlChar *) ":" );
             tname = xmlStrcat( tname , node->name );
             qname = tname;
         } 
@@ -615,7 +615,7 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
     if ( n == NULL ) 
         return;
     if ( val == NULL ){
-        val = "";
+        val = (xmlChar *) "";
     }
   
     if( n->type == XML_ATTRIBUTE_NODE ){
