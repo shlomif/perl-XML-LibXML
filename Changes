@@ -14,6 +14,7 @@ versions of the package. It is recommended to upgrade any XML::LibXML since
      (currently just addChild(), others will follow)
    - fixed memory leak in XML::LibXML::SAX (almost not leaking)
    - fixed namespace handling if nodes are imported to a new DOM.
+   - fixed segmentation fault during validation
    - more documentation 
 
 1.53
