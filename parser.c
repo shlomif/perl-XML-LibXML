@@ -1,10 +1,13 @@
 /* parser.c
  * $Id$
- * Author: Christian Glahn (2001) 
  *
  * This modules keeps the the c-implementation of the multiple parser
- * implementation. I think this module is required, so we keep the
- * perl implementation clear of adding c-features to
+ * implementation. I think this module is required, so we can keep the
+ * perl implementation clear of adding c-features, too
+ *
+ * phish [10-30-2001]:
+ * This file requires libxml2 2.4.7!!! anyversion <= 2.4.6 will not work,
+ * since xmlCleanupInputCallbacks is not implemented in these versions.
  *
  * TODO:
  * add all parser flags to the parser object
@@ -190,16 +193,11 @@ perlxmlCleanupLibParser ( perlxmlParserObjectPtr parser )
         xmlPedanticParserDefaultValue = 0;
         xmlDoValidityCheckingDefaultValue = 0;
 
-        /* here we should be able to unregister our callbacks.
-         * since we know the id, this function should expect this id
-         * to remove this handler set.
-         * another opinion would be a callback pop, that pops the last
-         * callback function off the callback stack
+        /* after resetting the parser defaults, we have to clean the
+         * callbacks, too.
          */
-
-        xmlRegisterInputCallbacks(NULL, NULL, NULL, NULL);
-
-/*         xmlCleanupParser(); */
+        xmlCleanupInputCallbacks();
+        xmlRegisterDefaultInputCallbacks();
     }
 }
 
