@@ -6,6 +6,12 @@ the behaviour of some functions may have changed to previous
 versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
+1.53
+   - fixed very stupid encoding bug. all UTF8 strings will now be marked as 
+     UTF8
+   - made XML::LibXML::SAX parser running without errors in most cases 
+     (DTD handling is still not implemented)
+
 1.52
    - fixed some typos (thanks to randy kobes and hildo biersma)
    - fixed namespace node handling

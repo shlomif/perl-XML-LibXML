@@ -104,8 +104,8 @@ sub start_element {
     foreach my $p ( $self->{NamespaceStack}->get_declared_prefixes() ) {
         my $uri = $self->{NamespaceStack}->get_uri($p);
         my $nodeflag = 0;
-        if ( defined $uri 
-             and defined $el->{NamespaceURI} 
+        if ( defined $uri
+             and defined $el->{NamespaceURI}
              and $uri eq $el->{NamespaceURI} ) {
             $nodeflag = 1;
         }
@@ -128,7 +128,9 @@ sub start_element {
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
-            next if $self->{USENAMESPACESTACK} == 1
+            # catch broken name/value pairs
+            next unless $attr->{Name} && $attr->{Value};
+            next if $self->{USENAMESPACESTACK}
                     and ( $attr->{Name} eq "xmlns"
                           or ( defined $attr->{Prefix}
                                and $attr->{Prefix} eq "xmlns" ) );

@@ -926,12 +926,6 @@ END()
     CODE:
         xmlCleanupParser();
 
-=head1 Some POD here
-
-Foo
-
-=cut
-
 int
 XML_ELEMENT_NODE()
     ALIAS: 
@@ -3009,9 +3003,7 @@ localname( node )
         xmlNodePtr rnode = PmmSvNode(node);
         xmlChar * lname;
     CODE:
-        lname = xmlStrdup( rnode->name );
-        RETVAL = C2Sv(lname,NULL);
-        xmlFree( lname );
+        RETVAL = C2Sv(rnode->name,NULL);
     OUTPUT:
         RETVAL
 
@@ -3026,9 +3018,7 @@ prefix( node )
     CODE:
         if( rnode->ns != NULL
             && rnode->ns->prefix != NULL ) {            
-            prefix = xmlStrdup(rnode->ns->prefix);
-            RETVAL = C2Sv(prefix, NULL);
-            xmlFree(prefix);
+            RETVAL = C2Sv(rnode->ns->prefix, NULL);
         }
         else {
             XSRETURN_UNDEF;
