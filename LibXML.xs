@@ -529,7 +529,13 @@ LibXML_init_parser( SV * self ) {
         SV * RETVAL  = NULL; /* dummy for the stupid macro */
 
         item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
-        xmlDoValidityCheckingDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
+        if ( item != NULL && SvTRUE(*item) ) {  
+            xmlDoValidityCheckingDefaultValue = 1;
+            xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
+        }
+        else {
+            xmlDoValidityCheckingDefaultValue = 0;
+        }
 
         item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_ENTITIES", 26, 0 );
         if ( item != NULL && SvTRUE(*item) ) {
@@ -1232,17 +1238,22 @@ _parse_file(self, filename)
         xmlParseDocument(ctxt);
 
         well_formed = ctxt->wellFormed;
-        valid = ctxt->valid;
+        valid       = ctxt->valid;
 
         real_dom = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
         
         sv_2mortal(LibXML_error);
         
-        if (!well_formed || (xmlDoValidityCheckingDefaultValue && (!valid|| SvCUR(LibXML_error) > 0 ) && (real_dom->intSubset || real_dom->extSubset) )) {
+        if (!well_formed
+            || (xmlDoValidityCheckingDefaultValue
+                && (!valid
+                    || SvCUR(LibXML_error) > 0 )
+                && (real_dom->intSubset
+                    || real_dom->extSubset) )) {
             xmlFreeDoc(real_dom);
-            RETVAL = &PL_sv_undef ;  
             croak("'%s'",SvPV(LibXML_error, len));
+            XSRETURN_UNDEF;
         }
         else {
             RETVAL = PmmNodeToSv((xmlNodePtr)real_dom, NULL);
@@ -2790,15 +2801,18 @@ nodeName( node )
         XML::LibXML::Element::tagName = 2
     PREINIT:
         char * name;
+        xmlNodePtr xnode = PmmSvNode(node);
+    INIT:
+        if( xnode == NULL ) {
+            croak( "lost my node" );
+        }
+        if( xnode->name == NULL ) {
+            croak( "lost the name!" );
+        }
     CODE:
-        if( node != NULL ) {
-            name =  domName( PmmSvNode(node) );
-            RETVAL = C2Sv(name,NULL);
-            xmlFree( name );
-        }
-        else {
-            XSRETURN_UNDEF;
-        }
+        name =  domName( xnode );
+        RETVAL = C2Sv(name,NULL);
+        xmlFree( name );
     OUTPUT:
         RETVAL
 
@@ -2928,6 +2942,10 @@ setName( pnode , value )
         xmlChar* string;
         xmlChar* localname;
         xmlChar* prefix;
+    INIT:
+        if( node == NULL ) {
+            croak( "lost my node" );
+        }
     CODE:
         string = nodeSv2C( value , node );
         if( node->ns ){
@@ -2984,8 +3002,14 @@ nodeType( node )
         SV* node
     ALIAS:
         XML::LibXML::Node::getType = 1
+    PREINIT:
+        xmlNodePtr xnode = PmmSvNode(node);
+    INIT:
+        if ( xnode == NULL ) {
+            croak( "lost my node" );
+        }
     CODE:
-        RETVAL =  PmmSvNode(node)->type;
+        RETVAL =  xnode->type;
     OUTPUT:
         RETVAL
 
@@ -4201,7 +4225,7 @@ getAttributeNodeNS( self,namespaceURI, attr_name )
                                    PmmOWNERPO(SvPROXYNODE(self)) );
         }
         else {
-            warn("no prop\n");
+            /* warn("no prop\n"); */
             XSRETURN_UNDEF;
         }
     OUTPUT:
