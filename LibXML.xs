@@ -20,7 +20,7 @@ extern "C" {
 #include <libxml/HTMLtree.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <libxml2/libxml/xmlIO.h>
+#include <libxml/xmlIO.h>
 /* #include <libxml/debugXML.h> */
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
