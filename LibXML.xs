@@ -702,19 +702,25 @@ DESTROY(self)
 
 
 SV *
-toString(self)
+toString(self, format=0)
         xmlDocPtr self
+        int format
     PREINIT:
         xmlChar *result;
         int len;
     CODE:
-        xmlDocDumpMemory(self, &result, &len);
-	if (result == NULL) {
-	    croak("Failed to convert doc to string");
-	} else {
+        if ( format <= 0 ) {
+            xmlDocDumpMemory(self, &result, &len);
+        }
+        else {
+            xmlDocDumpFormatMemory( self, &result, &len, format ); 
+        }
+    	if (result == NULL) {
+	        croak("Failed to convert doc to string");
+    	} else {
             RETVAL = newSVpvn((char *)result, (STRLEN)len);
-	    xmlFree(result);
-	}
+	        xmlFree(result);
+	    }
     OUTPUT:
         RETVAL
 
@@ -752,7 +758,7 @@ process_xinclude(self)
         xmlXIncludeProcess(self);
 
 xmlDocPtr
-new( CLASS, version, encoding )
+new( CLASS, version="1.0", encoding=0 )
         char * CLASS
         char * version 
         char * encoding
@@ -762,7 +768,7 @@ new( CLASS, version, encoding )
         RETVAL
 
 xmlDocPtr
-createDocument( CLASS, version, encoding )
+createDocument( CLASS, version="1.0", encoding=0 )
         char * CLASS
         char * version 
         char * encoding
@@ -1357,9 +1363,23 @@ appendTextNode( self, xmlString )
         xmlNodePtr tn;
     CODE:
         if ( self->doc != NULL && xmlString != NULL ) {
-            tn = xmlNewDocText( self->doc, xmlString ); 
+            if ( $self->doc != NULL ) {
+                tn = xmlNewDocText( self->doc, xmlString ); 
+            }
+            else {
+                /* this for people working directly with UTF8 */
+                tn = xmlNewText( xmlString );
+            }
             domAppendChild( self, tn );
         }
+
+void 
+appendTextChild( self, childname, xmlString )
+        xmlNodePtr self
+        char * childname
+        char * xmlString
+    CODE:
+        xmlNewTextChild( self, NULL, childname, xmlString );
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 
@@ -1374,18 +1394,11 @@ ProxyObject *
 new( CLASS, content )
         const char * CLASS
         char * content
-    PREINIT:
-        xmlBufferPtr in, out;
-        xmlNodePtr newNode;
     CODE:
-        in = xmlBufferCreate();
-        out =xmlBufferCreate();
-    
-        xmlBufferCat( in, content );
-        xmlCharEncInFunc( xmlGetCharEncodingHandler( xmlParseCharEncoding("UTF-8") ), 
-                          out, 
-                          in);
-        newNode = xmlNewText( out->content );
+        /* we should test if this is UTF8 ... because this WILL cause
+         * problems with iso encoded strings :(
+         */
+        newNode = xmlNewText( content );
         RETVAL = make_proxy_node(newNode);
     OUTPUT:
         RETVAL
@@ -1396,18 +1409,8 @@ ProxyObject *
 new( CLASS, content ) 
         const char * CLASS
         char * content
-    PREINIT:
-        xmlBufferPtr in, out;
-        xmlNodePtr newNode;
     CODE:
-        in = xmlBufferCreate();
-        out =xmlBufferCreate();
-    
-        xmlBufferCat( in, content );
-        xmlCharEncInFunc( xmlGetCharEncodingHandler( xmlParseCharEncoding("UTF-8") ), 
-                          out, 
-                          in);
-        newNode = xmlNewComment( out->content );
+        newNode = xmlNewComment( content );
         RETVAL = make_proxy_node(newNode);
     OUTPUT:
         RETVAL
@@ -1418,19 +1421,9 @@ ProxyObject *
 new( CLASS , content )
         const char * CLASS
         char * content
-    PREINIT:
-        xmlBufferPtr in, out;
-        xmlNodePtr newNode;
     CODE:
-        in = xmlBufferCreate();
-        out =xmlBufferCreate();
-    
-        xmlBufferCat( in, content );
-        xmlCharEncInFunc( xmlGetCharEncodingHandler( xmlParseCharEncoding("UTF-8") ), 
-                          out, 
-                          in);
-        newNode = xmlNewCDataBlock( 0 , out->content, xmlStrlen( out->content ) );
+        newNode = xmlNewCDataBlock( 0 , content, xmlStrlen( content ) );
         RETVAL = make_proxy_node(newNode);
     OUTPUT:
-    RETVAL
+        RETVAL
 
