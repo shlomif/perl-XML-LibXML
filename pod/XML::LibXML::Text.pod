@@ -1,0 +1,39 @@
+=head1 NAME
+
+XML::LibXML::Text - The DOM Text Node Class
+
+=head1 SYNOPSIS
+
+  use XML::LibXML::Text;
+
+  $node = XML::LibXML::Text->new( $content ) 
+  $node->setData( $text_content );
+
+=head1 DESCRIPTION
+
+
+
+=head2 Methods
+
+=over 4
+
+=item B<new>
+
+The constuctor of the class. It creates an unbound text node.
+
+=item B<setData>
+
+This function sets or replaces text content to a node. The
+node has to be of the type "text", "cdata" (not supported yet)
+or "comment".
+
+=back
+
+=head1 SEE ALSO
+
+XML::LibXML, XML::LibXML::Node, XML::LibXML::Element, XML::LibXML::Document, XML::LibXML::Comment
+
+=head1 VERSION
+
+0.90_a
+

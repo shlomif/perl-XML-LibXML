@@ -1,0 +1,138 @@
+=head1 NAME
+
+XML::LibXML::Node - "virtual" Base Class DOM-Nodes
+
+=head1 SYNOPSIS
+
+  use XML::LibXML::Node;
+
+  $name = $node->getName();
+  $content = $node->getData()
+  $type = $node->getType();
+  $node->unbindNode()
+  $childnode = $node->removeChild( $childnode )
+  $oldnode = $node->replaceChild( $newNode, $oldNode )
+  $childnode = $node->appendChild( $childnode )
+  $newnode =$node->cloneNode( $deep )
+  $parentnode = $node->getParentNode()
+  $nextnode = $node->getNextSibling()
+  $nextnode = $node->getPreviousSibling()
+  $childnode = $node->getFirstChild()
+  $childnode = $node->getLastChild()
+  $dom = $node->getOwnerDocument()
+  $node->setOwnerDocument( $dom );
+  @nodes = $node->findnodes( $xpath_statement );
+  @children = $node->getChildnodes();
+  $xmlstring = $node->toString();
+
+=head1 DESCRIPTION
+
+LibXML::Node defines functions that are common to all Node
+Types. A LibXML::Node should never be created standalone, but
+as an instance of a high level class such as LibXML::Element
+or LibXML::Text. The class itself should provide only common
+functionality.
+
+=head2 Methods
+
+=over 4
+
+=item B<getName>
+
+Returns the node's name
+
+=item B<getData>
+
+If the node has any content (such as stored in a I<text
+	node> ) it can get requested through this function.
+
+=item B<getType>
+
+Retrun the node's type. The possible types are described in
+the libxml2 B<tree.h> documentation.
+
+=item B<unbindNode>
+
+Unbinds the Node from its siblings and Parent, but not from the
+Document it belongs to. If the node is not inserted into the DOM afterwards it will be lost after the programm terminated.
+
+=item B<removeChild>
+
+This will unbind the Child Node from its parent I<$node> . The function returns the unbound node.
+If I<oldNode> is not a child of the given Node the
+function will fail.
+
+=item B<replaceChild>
+
+Replaces the I<$oldNode> with the I<$newNode> . The I<$oldNode> will be unbound from the Node
+
+=item B<appendChild>
+
+The function will add the I<$childnode> to the end of I<$node> 's children. The function should fail, if the new
+childnode is allready a child of I<$node>
+
+=item B<cloneNode>
+
+B<cloneNode> creates a copy of I<$node> . Wether $deep
+is set to 1 (true) the function will copy all childnodes as
+well. If $deep is 0 only the current node will be copied.
+By now the function is not aware about the CLASS that is
+blessed to the node to copy, therefor all CLASS specific
+functions will not be accesseble any more :-(
+
+=item B<getParentNode>
+
+Returns simply the Parent Node of the current node. If this function is called on the root element, the document
+will be returned as a LibXML::Node element. So be carefull :-)
+
+=item B<getNextSibling>
+
+Returns the next sibling if any .
+
+=item B<getPreviousSibling>
+
+Analogous to B<getNextSibling> the function returns the previous
+sibling if any.
+
+=item B<getFirstChild>
+
+If a node has childnodes this function will return the first
+node in the childlist.
+
+=item B<getLastChild>
+
+If the I<$node> has childnodes this function returns the
+last child node.
+
+=item B<getOwnerDocument>
+
+Through this function it is allway possible to access the
+document the current node is bound to.
+
+=item B<setOwnerDocument>
+
+This function binds a node to another DOM. This method unbinds the node first, if it is allready bound to another document.
+
+=item B<findnodes>
+
+B<findnodes> performs the xpath statement on the current node and returns the result as an array.
+
+=item B<getChildnodes>
+
+B<getChildnodes> implements a more intuitive interface to the childnodes of the current node. It enables you to pass all children directly to a I<map> or I<grep> .
+
+=item B<toString>
+
+This is the equivalent to I<XML::LibXML::Document::toString> for
+a single node. This means a node and all its childnodes will be dumped into the result string. There is no formating implemented yet, which may cause an unreadable output.
+
+=back
+
+=head1 SEE ALSO
+
+XML::LibXML, XML::LibXML::Element, XML::LibXML::Text, XML::LibXML::Comment
+
+=head1 VERSION
+
+0.90_a
+

@@ -1,0 +1,66 @@
+=head1 NAME
+
+XML::LibXML::Element - The DOM Element Class
+
+=head1 SYNOPSIS
+
+  use XML::LibXML::Element;
+
+  $node = XML::LibXML::Element->new( $name )
+  $node->setAttribute( $aname, $avalue );
+  $avalue = $node->getAttribute( $aname );
+  $node->removeAttribute( $aname );
+  @nodes = $node->getElementsByTagName($tagname);
+  $node->appendWellBalancedChunk( $chunk )
+  $node->appendTextNode( $PCDATA )
+
+=head1 DESCRIPTION
+
+
+
+=head2 Methods
+
+=over 4
+
+=item B<new>
+
+This function creates a new node unbound to any DOM.
+
+=item B<setAttribute>
+
+This method sets or replaces the node's attribute I<$aname> to the value I<$avalue>
+
+=item B<getAttribute>
+
+If I<$node> has an attribute with the name I<$aname> ,
+the value of this attribute will get returned.
+
+=item B<removeAttribute>
+
+The method removes the attribute I<$aname> from the node's
+attribute list, if the attribute can be found.
+
+=item B<getElementsByTagName>
+
+The function gives direct access to all childnodes of the current node with the same tagname. It makes things a lot easier if you need to handle big datasets.
+
+=item B<appendWellBalancedChunk>
+
+Sometimes it is nessecary to append a string coded XML Tree to a node. B<appendWellBalancedChunk> will do the trick for you.
+But this is only done if the String is I<well-balanced> .
+
+=item B<appendTextNode>
+
+This wrapper function lets you add a string directly to an element
+node.
+
+=back
+
+=head1 SEE ALSO
+
+XML::LibXML, XML::LibXML::Node, XML::LibXML::Document, XML::LibXML::Text, XML::LibXML::Comment
+
+=head1 VERSION
+
+0.90_a
+

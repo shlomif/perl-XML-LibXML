@@ -1,0 +1,343 @@
+<module name="XML::LibXML">
+<class name="XML::LibXML::Document">
+<short>DOM Document Class</short>
+<description>
+	The Document Class is the result of a parsing process. But
+	sometimes it is needed, to create a Document from scratch. The
+	provides functions that are conform to the DOM Core naming
+	style.
+
+<method name="new" 
+	synopsis="$dom = XML::LibXML::Document->new( $version, $encoding )">
+	alias for createDocument()
+</method>
+
+<method name="createDocument" 
+	synopsis="$dom = XML::LibXML::Document->createDocument( $version, $encoding );">
+	The constructor for the document class. As Parameter it takes
+	the version string and (optionally) the ecoding string.
+	Simply calling <b>createDocument</b> will create the document:
+
+<example><![CDATA[
+  <?xml version="your version" encoding="your encoding"?>
+]]></example>
+</method>
+
+<method name="toString" 
+	synopsis="$docstring = $dom->toString();">
+	<b>toString</b> is a deparsing function, so the DOM Tree can
+	be translated into a string, ready for output.
+</method>
+
+<method name="is_valid" 
+	synopsis="$bool = $dom->is_valid();">
+	Returns either TRUE or FALSE depending on the DOM Tree is a
+	valid Document or not.
+</method>
+
+<method name="getDocumentElement" 
+	synopsis="$root = $dom->getDocumentElement($name, $namespace );">
+	Returns the root element of the Document. A document can have
+	just one root element to contain the documents data.
+</method>
+
+<method name="setDocumentElement" 
+	synopsis="$dom->setDocumentElement( $root );"> 
+	This function enables you to set the root element for a
+	document. The function supports the import of a node from a
+	different document tree.
+</method>
+
+<method name="createElement" 
+	synopsis="$element = $dom->createElement( $nodename );">
+	This function creates a new Element Node bound to the DOM with
+	the name <i>$nodename</i>.
+</method>
+
+<method name="createTextNode" 
+	synopsis="$text = $dom->createTextNode( $content_text );">
+	As an equivalent of <b>createElement</b>, but it creates a
+	<b>Text Node</b> bound to the DOM.
+</method>
+
+<method name="createComment" 
+	synopsis="$comment = $dom->createComment( $comment_text );">
+	As an equivalent of <b>createElement</b>, but it creates a
+	<b>Comment Node</b> bound to the DOM.
+</method>
+
+<method name="createCDATASection" synopsis="$cdata = $dom->create( $cdata_content );">
+	Similar to createTextNode and createComment, this function creates a CDataSection 
+	bound to the current DOM.
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Comment"/>
+</also>
+<version>0.90_a</version>
+</class>
+
+<class name="XML::LibXML::Node">
+<short>"virtual" Base Class DOM-Nodes</short>
+<description>
+	LibXML::Node defines functions that are common to all Node
+	Types.  A LibXML::Node should never be created standalone, but
+	as an instance of a high level class such as LibXML::Element
+	or LibXML::Text.  The class itself should provide only common
+	functionality.
+
+<method name="getName" 
+	synopsis="$name = $node->getName();">
+	Returns the node's name
+</method>
+
+<method name="getData" synopsis="$content = $node->getData()">
+	If the node has any content (such as stored in a <i>text
+	node</i>) it can get requested through this function.
+</method>
+
+<method name="getType" 
+	synopsis="$type = $node->getType();">
+	Retrun the node's type. The possible types are described in
+	the libxml2 <b>tree.h</b> documentation.
+</method>
+
+<method name="unbindNode" 
+	synopsis="$node->unbindNode()">
+	Unbinds the Node from its siblings and Parent, but not from the
+	Document it belongs to. If the node is not inserted into the 
+	DOM afterwards it will be lost after the programm terminated.
+</method>
+
+<method name="removeChild" 
+	synopsis="$childnode = $node->removeChild( $childnode )">
+	This will unbind the Child Node from its parent <i>$node</i>. 
+	The function returns the unbound node.
+	If <i>oldNode</i> is not a child of the given Node the
+	function will fail.
+</method>
+
+<method name="replaceChild" 
+	synopsis="$oldnode = $node->replaceChild( $newNode, $oldNode )">
+	Replaces the <i>$oldNode</i> with the <i>$newNode</i>. The
+	<i>$oldNode</i>	will be unbound from the Node
+</method>
+
+<method name="appendChild"
+	synopsis="$childnode = $node->appendChild( $childnode )">
+	The function will add the <i>$childnode</i> to the end of
+	<i>$node</i>'s children. The function should fail, if the new
+	childnode is allready a child of <i>$node</i>
+</method>
+
+<method name="cloneNode" 
+	synopsis="$newnode =$node->cloneNode( $deep )">
+	<b>cloneNode</b> creates a copy of <i>$node</i>. Wether $deep
+	is set to 1 (true) the function will copy all childnodes as
+	well. If $deep is 0 only the current node will be copied.
+
+	By now the function is not aware about the CLASS that is
+	blessed to the node to copy, therefor all CLASS specific
+	functions will not be accesseble any more :-(
+</method>
+
+<method name="getParentNode" synopsis="$parentnode = $node->getParentNode()">
+	Returns simply the Parent Node of the current node. 
+ 
+ 	If this function is called on the root element, the document
+ 	will be returned as a LibXML::Node element. So be carefull :-)
+</method>
+
+<method name="getNextSibling" 
+	synopsis="$nextnode = $node->getNextSibling()">
+	Returns the next sibling if any .
+</method>
+
+<method name="getPreviousSibling" 
+	synopsis="$nextnode = $node->getPreviousSibling()">
+	Analogous to <b>getNextSibling</b> the function returns the previous
+	sibling if any.
+</method>
+
+<method name="getFirstChild" synopsis="$childnode = $node->getFirstChild()">
+	If a node has childnodes this function will return the first
+	node in the childlist. 
+</method>
+
+<method name="getLastChild" synopsis="$childnode = $node->getLastChild()">
+	If the <i>$node</i> has childnodes this function returns the
+	last child node. 
+</method>
+
+<method name="getOwnerDocument" synopsis="$dom = $node->getOwnerDocument()">
+	Through this function it is allway possible to access the
+	document the current node is bound to.
+</method>
+
+<method name="setOwnerDocument" synopsis="$node->setOwnerDocument( $dom );">
+	This function binds a node to another DOM. This method unbinds the node first, if 
+	it is allready bound to another document.
+</method>
+
+<method name="findnodes" synopsis="@nodes = $node->findnodes( $xpath_statement );">
+	<b>findnodes</b> performs the xpath statement on the current node and 
+	returns the result as an array. 
+</method>
+
+<method name="getChildnodes" synopsis="@children = $node->getChildnodes();">
+	<b>getChildnodes</b> implements a more intuitive interface to the childnodes 
+	of the current node. It enables you to pass all children directly to a <i>map</i>
+	or <i>grep</i>.
+</method>
+
+<method name="toString" synopsis="$xmlstring = $node->toString();">
+	This is the equivalent to <i>XML::LibXML::Document::toString</i> for
+	a single node. This means a node and all its childnodes will be dumped 
+	into the result string. 
+
+	There is no formating implemented yet, which may cause an unreadable 
+	output.
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Comment"/>
+</also>
+<version>0.90_a</version>
+</class>
+
+<class name="XML::LibXML::Element">
+<short>The DOM Element Class</short>
+<description>
+
+
+<method name="new" synopsis="$node = XML::LibXML::Element->new( $name )">
+	This function creates a new node unbound to any DOM.
+</method>
+
+<method name="setAttribute" synopsis="$node->setAttribute( $aname, $avalue );">
+	This method sets or replaces the node's attribute
+	<i>$aname</i> to the value <i>$avalue</i>
+</method>
+
+<method name="getAttribute" synopsis="$avalue = $node->getAttribute( $aname );">
+	If <i>$node</i> has an attribute with the name <i>$aname</i>,
+	the value of this attribute will get returned.
+</method>
+
+<method name="removeAttribute" synopsis="$node->removeAttribute( $aname );">
+	The method removes the attribute <i>$aname</i> from the node's
+	attribute list, if the attribute can be found.
+</method>
+
+<method name="getElementsByTagName" synopsis="@nodes = $node->getElementsByTagName($tagname);">
+	The function gives direct access to all childnodes of the current node with the 
+	same tagname. It makes things a lot easier if you need to handle big datasets. 
+</method>
+
+<method name="appendWellBalancedChunk" 
+	synopsis="$node->appendWellBalancedChunk( $chunk )">
+	Sometimes it is nessecary to append a string coded XML Tree to 
+	a node. <b>appendWellBalancedChunk</b> will do the trick for you.
+	But this is only done if the String is <i>well-balanced</i>. 
+</method>
+
+<method name="appendTextNode" synopsis="$node->appendTextNode( $PCDATA )">
+    This wrapper function lets you add a string directly to an element
+    node.
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Node"/>
+  <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Comment"/>
+</also>
+<version>0.90_a</version>
+</class>
+
+<class name="XML::LibXML::Text">
+<short>The DOM Text Node Class</short>
+<description>
+
+
+<method name="new" synopsis="$node = XML::LibXML::Text->new( $content ) ">
+	The constuctor of the class. It creates an unbound text node.
+</method>
+
+
+<method name="setData" synopsis="$node->setData( $text_content );">
+	This function sets or replaces text content to a node. The
+	node has to be of the type "text", "cdata" (not supported yet)
+	or "comment".
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Node"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::Comment"/>
+</also>
+<version>0.90_a</version>
+</class>
+
+<class name="XML::LibXML::Comment">
+<short>The DOM Comment Class</short>
+<description>
+	This class provides all functions of <b>XML::LibXML::Text</b>,
+	but for comment nodes. This can be done, since only the output
+	of the nodetypes is different, but not the datastructure. :-)
+
+<method name="new" synopsis="$node = XML::LibXML::Comment( $content );">
+	The constructor is the only provided function for this
+	package. It is required, because <b>libxml2</b> treats text
+	nodes and comment nodes slightly different.
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Node"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Document"/>
+</also>
+<version>0.90_a</version>
+</class>
+
+
+<class name="XML::LibXML::CDATASection">
+<short>The DOM CDATASection Class</short>
+<description>
+	This class provides all functions of <b>XML::LibXML::Text</b>,
+	but for CDATA nodes.
+
+<method name="new" synopsis="$node = XML::LibXML::Comment( $content );">
+	The constructor is the only provided function for this
+	package. It is required, because <b>libxml2</b> treats the
+	different textnode types slightly different.
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Node"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Document"/>
+</also>
+<version>0.90_a</version>
+</class>
+
+</module>

@@ -1,0 +1,92 @@
+=head1 NAME
+
+XML::LibXML::Document - DOM Document Class
+
+=head1 SYNOPSIS
+
+  use XML::LibXML::Document;
+
+  $dom = XML::LibXML::Document->new( $version, $encoding )
+  $dom = XML::LibXML::Document->createDocument( $version, $encoding );
+  $docstring = $dom->toString();
+  $bool = $dom->is_valid();
+  $root = $dom->getDocumentElement($name, $namespace );
+  $dom->setDocumentElement( $root );
+  $element = $dom->createElement( $nodename );
+  $text = $dom->createTextNode( $content_text );
+  $comment = $dom->createComment( $comment_text );
+  $cdata = $dom->create( $cdata_content );
+
+=head1 DESCRIPTION
+
+The Document Class is the result of a parsing process. But
+sometimes it is needed, to create a Document from scratch. The
+provides functions that are conform to the DOM Core naming
+style.
+
+=head2 Methods
+
+=over 4
+
+=item B<new>
+
+alias for createDocument()
+
+=item B<createDocument>
+
+The constructor for the document class. As Parameter it takes
+the version string and (optionally) the ecoding string.
+Simply calling B<createDocument> will create the document:
+
+  
+  <?xml version="your version" encoding="your encoding"?>
+
+
+=item B<toString>
+
+B<toString> is a deparsing function, so the DOM Tree can
+be translated into a string, ready for output.
+
+=item B<is_valid>
+
+Returns either TRUE or FALSE depending on the DOM Tree is a
+valid Document or not.
+
+=item B<getDocumentElement>
+
+Returns the root element of the Document. A document can have
+just one root element to contain the documents data.
+
+=item B<setDocumentElement>
+
+This function enables you to set the root element for a
+document. The function supports the import of a node from a
+different document tree.
+
+=item B<createElement>
+
+This function creates a new Element Node bound to the DOM with
+the name I<$nodename> .
+
+=item B<createTextNode>
+
+As an equivalent of B<createElement> , but it creates a B<Text Node> bound to the DOM.
+
+=item B<createComment>
+
+As an equivalent of B<createElement> , but it creates a B<Comment Node> bound to the DOM.
+
+=item B<createCDATASection>
+
+Similar to createTextNode and createComment, this function creates a CDataSection bound to the current DOM.
+
+=back
+
+=head1 SEE ALSO
+
+XML::LibXML, XML::LibXML::Element, XML::LibXML::Text, XML::LibXML::Comment
+
+=head1 VERSION
+
+0.90_a
+
