@@ -45,10 +45,6 @@ extern "C" {
 #include <libxml/xmlschemas.h>
 #endif
 
-#if LIBXML_SERRORS && LIBXML_VERSION >= 20600
-#define HAVE_SERRORS
-#endif
-
 #ifdef LIBXML_CATALOG_ENABLED
 #include <libxml/catalog.h>
 #endif
@@ -169,7 +165,6 @@ LibXML_serror2SV(SV** dest, xmlErrorPtr err, SV* prev_error) {
     HV* herror;
     SV* hr;
     herror = newHV();
-
     if (err->level == XML_ERR_NONE)
         return;
     if (prev_error != NULL && SvOK(prev_error))
@@ -214,7 +209,7 @@ LibXML_serror2SV(SV** dest, xmlErrorPtr err, SV* prev_error) {
 
 void
 LibXML_serror_handler(void *userData, xmlErrorPtr err) {
-  LibXML_serror2SV(&LibXML_error,err,LibXML_error); 
+  xmlError2Sv(&LibXML_error,err,LibXML_error); 
 }
 
 void

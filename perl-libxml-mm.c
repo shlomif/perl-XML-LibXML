@@ -5,7 +5,7 @@
  * Basic concept:
  * perl varies in the implementation of UTF8 handling. this header (together
  * with the c source) implements a few functions, that can be used from within
- * the core module inorder to avoid cascades of c pragmas
+ * the core module in order to avoid cascades of c pragmas
  */
 
 #ifdef __cplusplus
@@ -29,18 +29,14 @@ extern "C" {
 
 #endif
 
+#include "perl-libxml-mm.h"
 #include "perl-libxml-sax.h"
+#include "dom.h"
 
 #ifdef __cplusplus
 }
 #endif
 
-#ifdef XS_WARNINGS
-#define xs_warn(string) warn(string) 
-/* #define xs_warn(string) fprintf(stderr, string) */
-#else
-#define xs_warn(string)
-#endif
 
 /**
  * this is a wrapper function that does the type evaluation for the 
@@ -96,43 +92,7 @@ PmmNodeTypeName( xmlNodePtr elem ){
     return "";
 }
 
-/*
- * @node: Reference to the node the structure proxies
- * @owner: libxml defines only the document, but not the node owner
- *         (in case of document fragments, they are not the same!)
- * @count: this is the internal reference count!
- * @encoding: this value is missing in libxml2's doc structure
- *
- * Since XML::LibXML will not know, is a certain node is already
- * defined in the perl layer, it can't shurely tell when a node can be
- * safely be removed from the memory. This structure helps to keep
- * track how intense the nodes of a document are used and will not
- * delete the nodes unless they are not refered from somewhere else.
- */
-struct _ProxyNode {
-    xmlNodePtr node;
-    xmlNodePtr owner;
-    int count;
-    int encoding; 
-};
 
-/* helper type for the proxy structure */
-typedef struct _ProxyNode ProxyNode;
-
-/* pointer to the proxy structure */
-typedef ProxyNode* ProxyNodePtr;
-
-/* this my go only into the header used by the xs */
-#define SvPROXYNODE(x) ((ProxyNodePtr)SvIV(SvRV(x)))
-#define SvNAMESPACE(x) ((xmlNsPtr)SvIV(SvRV(x)))
-
-#define PmmREFCNT(node)      node->count
-#define PmmREFCNT_inc(node)  node->count++
-#define PmmNODE(thenode)     thenode->node
-#define PmmOWNER(node)       node->owner
-#define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
-
-#define PmmENCODING(node)    node->encoding
 #define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
 #define PmmDocEncoding(node) (node->charset)
 /* creates a new proxy node from a given node. this function is aware
@@ -830,7 +790,8 @@ PmmFastDecodeString( int charset,
  * while the encodig has the name of the encoding of string
  **/ 
 xmlChar*
-PmmEncodeString( const char *encoding, const xmlChar *string ){
+PmmEncodeString( const char *encoding, const xmlChar *string )
+{
     xmlCharEncoding enc;
     xmlChar *ret = NULL;
     xmlCharEncodingHandlerPtr coder = NULL;
@@ -856,7 +817,8 @@ PmmEncodeString( const char *encoding, const xmlChar *string ){
  * encoding is the coding name
  **/
 char*
-PmmDecodeString( const char *encoding, const xmlChar *string){
+PmmDecodeString( const char *encoding, const xmlChar *string )
+{
     char *ret=NULL;
     xmlCharEncoding enc;
     xmlCharEncodingHandlerPtr coder = NULL;
@@ -1127,3 +1089,52 @@ PmmNodeToGdomeSv( xmlNodePtr node )
 
     return retval;
 }
+
+#ifdef HAVE_SERRORS
+void
+xmlError2Sv(SV** dest, xmlErrorPtr err, SV* prev_error) {
+    HV* herror;
+    SV* hr;
+    herror = newHV();
+    if (err->level == XML_ERR_NONE)
+        return;
+    if (prev_error != NULL && SvOK(prev_error))
+      hv_store(herror, "_prev", 5, prev_error,0);
+    hv_store(herror, "domain", 6, newSViv(err->domain),0);
+    hv_store(herror, "code", 4, newSViv(err->code),0);
+    if (err->message) {
+        int len = strlen(err->message);
+        if (err->message[len-1] == '\n') 
+            hv_store(herror, "message", 7, newSVpvn(err->message,len-1),0);
+        else
+            hv_store(herror, "message", 7, newSVpvn(err->message,len),0);
+    }
+    hv_store(herror, "level", 5, newSViv(err->level),0);
+    if (err->file)
+        hv_store(herror, "file", 4, newSVpvn(err->file,strlen(err->file)),0);
+    hv_store(herror, "line", 4, newSViv(err->line),0);
+    if (err->str1)
+        hv_store(herror, "str1", 4, newSVpvn(err->str1,strlen(err->str1)),0);
+    if (err->str2)
+        hv_store(herror, "str2", 4, newSVpvn(err->str2,strlen(err->str2)),0);
+    if (err->str3)
+        hv_store(herror, "str3", 4, newSVpvn(err->str3,strlen(err->str3)),0);
+    hv_store(herror, "int1", 4, newSViv(err->int1),0);
+    hv_store(herror, "int2", 4, newSViv(err->int2),0);
+    if (err->node) {
+      /* hv_store(herror, "node", 4, 
+	 PmmNodeToSv( (xmlNodePtr) err->node, NULL ),0); */
+      /* Passing the node isn't at all safe at this point, so I'll just
+         pass its name
+      */
+      xmlChar* name =  (xmlChar*)domName( err->node );
+      if ( name != NULL ) {
+	hv_store(herror, "nodename", 8, C2Sv(name,NULL) ,0);
+	xmlFree( name );
+      }
+    }
+    hr = newRV_noinc((SV *)herror);
+    sv_bless(hr, gv_stashpv("XML::LibXML::Error", TRUE));
+    *dest = hr;
+}
+#endif /* HAVE_SERRORS */

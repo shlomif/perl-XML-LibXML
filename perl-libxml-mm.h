@@ -24,6 +24,14 @@ extern "C" {
 #endif
 
 /*
+ * libxml2 structured error support
+ */
+#if LIBXML_SERRORS && LIBXML_VERSION >= 20600
+#define HAVE_SERRORS
+#endif
+
+
+/*
  * NAME xs_warn 
  * TYPE MACRO
  * 
@@ -45,6 +53,19 @@ extern "C" {
 #define xs_warn(string)
 #endif
 
+/*
+ * @node: Reference to the node the structure proxies
+ * @owner: libxml defines only the document, but not the node owner
+ *         (in case of document fragments, they are not the same!)
+ * @count: this is the internal reference count!
+ * @encoding: this value is missing in libxml2's doc structure
+ *
+ * Since XML::LibXML will not know, is a certain node is already
+ * defined in the perl layer, it can't shurely tell when a node can be
+ * safely be removed from the memory. This structure helps to keep
+ * track how intense the nodes of a document are used and will not
+ * delete the nodes unless they are not refered from somewhere else.
+ */
 struct _ProxyNode {
     xmlNodePtr node;
     xmlNodePtr owner;
@@ -139,8 +160,8 @@ PmmSvOwner( SV * perlnode );
 SV*
 PmmSetSvOwner(SV * perlnode, SV * owner );
 
-void
-PmmFixOwner(ProxyNodePtr node, ProxyNodePtr newOwner );
+int
+PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent );
 
 void
 PmmFixOwnerNode(xmlNodePtr node, ProxyNodePtr newOwner );
@@ -199,10 +220,10 @@ const char*
 PmmNodeTypeName( xmlNodePtr elem );
 
 xmlChar*
-PmmEncodeString( const char *encoding, const char *string );
+PmmEncodeString( const char *encoding, const xmlChar *string );
 
 char*
-PmmDecodeString( const char *encoding, const xmlChar *string);
+PmmDecodeString( const char *encoding, const xmlChar *string );
 
 /* string manipulation will go elsewhere! */
 
@@ -243,5 +264,10 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode );
 
 xmlChar *
 nodeSv2C( SV * scalar, xmlNodePtr refnode );
+
+#ifdef HAVE_SERRORS
+void
+xmlError2Sv(SV** dest, xmlErrorPtr err, SV* prev_error);
+#endif /* HAVE_SERRORS */
 
 #endif
