@@ -14,12 +14,6 @@ example/dromeds.xml
 example/bad.xml
 example/libxml.xml
 example/xml2pod.pl
-lib/XML/LibXML/Document.pod
-lib/XML/LibXML/Comment.pod
-lib/XML/LibXML/Text.pod
-lib/XML/LibXML/CDATASection.pod
-lib/XML/LibXML/Element.pod
-lib/XML/LibXML/Node.pod
 t/01basic.t
 t/02parsestring.t
 t/03parsefile.t
