@@ -270,6 +270,7 @@ sub XML_XINCLUDE_START(){19;}
 sub XML_XINCLUDE_END(){20;}
 
 @XML::LibXML::Document::ISA         = 'XML::LibXML::Node';
+@XML::LibXML::DocumentFragment::ISA = 'XML::LibXML::Node';
 @XML::LibXML::Element::ISA          = 'XML::LibXML::Node';
 @XML::LibXML::Text::ISA             = 'XML::LibXML::Node';
 @XML::LibXML::Comment::ISA          = 'XML::LibXML::Text';

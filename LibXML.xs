@@ -1267,10 +1267,9 @@ createDocument( CLASS, version="1.0", encoding=0 )
     CODE:
         real_dom = domCreateDocument( version, encoding ); 
         ret = make_proxy_node( (xmlNodePtr)real_dom );
-        RETVAL = sv_newmortal();
+        RETVAL = NEWSV(0,0);
         sv_setref_pv( RETVAL, (char *)CLASS, (void*)ret );
         ret->extra = RETVAL;
-        SvREFCNT_inc(RETVAL);
     OUTPUT:
         RETVAL
 
@@ -1287,11 +1286,10 @@ createDocumentFragment( dom )
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
         fragment = xmlNewDocFragment( real_dom );
         ret = make_proxy_node( fragment );
-        RETVAL = sv_newmortal();
+        RETVAL = NEWSV(0,0);
         sv_setref_pv( RETVAL, (char *)CLASS, (void*)ret );
         ret->extra = RETVAL;
         # warn( "NEW FRAGMENT DOCUMENT" );
-        SvREFCNT_inc(RETVAL);
         SvREFCNT_inc(RETVAL);
     OUTPUT:
         RETVAL
@@ -1306,26 +1304,29 @@ createElement( dom, name )
         xmlDocPtr real_dom;
         xmlNodePtr docfrag = NULL;
         ProxyObject * dfProxy= NULL;
+        xmlChar * elname = NULL;
         SV * docfrag_sv = NULL;
     CODE:
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
 
         docfrag = xmlNewDocFragment( real_dom );
         dfProxy = make_proxy_node( docfrag );
-        docfrag_sv =sv_newmortal();
+        docfrag_sv = NEWSV(0,0);
         sv_setref_pv( docfrag_sv, "XML::LibXML::DocumentFragment", (void*)dfProxy );
         dfProxy->extra = docfrag_sv;
         # warn( "NEW FRAGMENT ELEMNT (%s)", name);
         # SvREFCNT_inc(docfrag_sv);    
 
-        newNode = xmlNewNode( NULL , 
-                              domEncodeString( real_dom->encoding, name ) );
+        # warn("xmlNewNode\n");
+        elname = domEncodeString( real_dom->encoding, name);
+        newNode = xmlNewNode( NULL , elname );
+        xmlFree(elname);
+        
         newNode->doc = real_dom;
         domAppendChild( docfrag, newNode );
         # warn( newNode->name );
         RETVAL = make_proxy_node(newNode);
         RETVAL->extra = docfrag_sv;
-        SvREFCNT_inc(docfrag_sv);
     OUTPUT:
         RETVAL
 
@@ -1342,6 +1343,7 @@ createElementNS( dom, nsURI, qname)
          xmlNsPtr ns = NULL;
          xmlDocPtr real_dom;
          xmlNodePtr docfrag = NULL;
+         xmlChar * encstring = NULL;
          ProxyObject * dfProxy= NULL;
          SV * docfrag_sv = NULL;
      CODE:
@@ -1349,7 +1351,7 @@ createElementNS( dom, nsURI, qname)
 
         docfrag = xmlNewDocFragment( real_dom );
         dfProxy = make_proxy_node( docfrag );
-        docfrag_sv =sv_newmortal();
+        docfrag_sv = NEWSV(0,0);
         sv_setref_pv( docfrag_sv, "XML::LibXML::DocumentFragment", (void*)dfProxy );
         dfProxy->extra = docfrag_sv;
         # warn( "NEW FRAGMENT ELEMENT NS (%s)", qname);
@@ -1357,21 +1359,22 @@ createElementNS( dom, nsURI, qname)
 
         if ( nsURI != NULL && strlen(nsURI)!=0 ){
             lname = xmlSplitQName2(qname, &prefix);
-            ns = domNewNs (0 , 
-                           domEncodeString( real_dom->encoding, prefix ) , 
-                           nsURI);
+            encstring = domEncodeString( real_dom->encoding, prefix );
+            ns = domNewNs (0 , encstring, nsURI );
+            xmlFree(encstring);
         }
         else {
             lname = qname;
         }
-        newNode = xmlNewNode( ns ,
-                              domEncodeString( real_dom->encoding, lname ) );
+        encstring = domEncodeString( real_dom->encoding, lname );
+        newNode = xmlNewNode( ns , encstring );
+        xmlFree(encstring);
+
         newNode->doc = real_dom;
         domAppendChild( docfrag, newNode );
 
         RETVAL = make_proxy_node(newNode);
         RETVAL->extra = docfrag_sv;
-        SvREFCNT_inc(docfrag_sv);
      OUTPUT:
         RETVAL
 
@@ -1385,6 +1388,7 @@ createTextNode( dom, content )
         xmlDocPtr real_dom;
         xmlNodePtr docfrag = NULL;
         ProxyObject * dfProxy= NULL;
+        xmlChar * encstring = NULL;
         SV * docfrag_sv = NULL;
     CODE:
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
@@ -1397,9 +1401,10 @@ createTextNode( dom, content )
         # warn( "NEW FRAGMENT TEXT");
         # SvREFCNT_inc(docfrag_sv);    
 
-        newNode = xmlNewDocText( real_dom, 
-                                 domEncodeString( real_dom->encoding,
-                                                  content ) );
+        encstring = domEncodeString( real_dom->encoding, content );
+        newNode = xmlNewDocText( real_dom, encstring );
+        xmlFree(encstring);
+
         domAppendChild( docfrag, newNode );
 
         RETVAL = make_proxy_node(newNode);
@@ -1487,6 +1492,8 @@ createAttribute( dom, name , value="" )
         value = domEncodeString( real_dom->encoding, value );
         
         newNode = (xmlNodePtr)xmlNewProp(NULL, name , value );
+        xmlFree(name);
+        xmlFree(value);
         newNode->doc = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
         if ( newNode->children!=NULL ) {
             newNode->children->doc = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
@@ -1527,6 +1534,10 @@ createAttributeNS( dom, nsURI, qname, value="" )
         else {
             newNode = (xmlNodePtr) xmlNewProp( NULL, lname, value );
         }
+        
+        xmlFree(lname);
+        xmlFree(value);
+
         newNode->doc = real_dom;
 
         if ( newNode->children!=NULL ) {
@@ -1595,10 +1606,17 @@ insertProcessingInstruction( dom, name, content )
     PREINIT:
         xmlNodePtr pinode = NULL;
         xmlDocPtr real_dom;
+        xmlChar * enctarg;
+        xmlChar * encdata;
     CODE:
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
-        pinode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
-                           domEncodeString( real_dom->encoding, content ) );
+        enctarg = domEncodeString( real_dom->encoding, name );
+        encdata = domEncodeString( real_dom->encoding, content );
+        pinode = xmlNewPI( enctarg, encdata );
+        
+        xmlFree(enctarg);
+        xmlFree(encdata);
+
         /* pinode = xmlNewPI( name, content ); */
         domInsertBefore( (xmlNodePtr)real_dom, 
                          pinode, 
@@ -1617,6 +1635,8 @@ createProcessingInstruction( dom, name, content="" )
         xmlDocPtr real_dom;
         xmlNodePtr docfrag = NULL;
         ProxyObject * dfProxy= NULL;
+        xmlChar * enctarg;
+        xmlChar * encdata;
         SV * docfrag_sv = NULL;
     CODE:
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
@@ -1629,8 +1649,11 @@ createProcessingInstruction( dom, name, content="" )
         # warn( "NEW FRAGMENT ELEMNT (%s)", name);
         # SvREFCNT_inc(docfrag_sv);    
 
-        newNode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
-                            domEncodeString( real_dom->encoding, content ) );
+        enctarg = domEncodeString( real_dom->encoding, name );
+        encdata = domEncodeString( real_dom->encoding, content );
+        newNode = xmlNewPI( enctarg, encdata );
+        xmlFree(enctarg);
+        xmlFree(encdata);
         /* newNode = xmlNewPI( name, content ); */
         newNode->doc = real_dom;
         domAppendChild( docfrag, newNode );
@@ -1787,13 +1810,8 @@ DESTROY( node )
             if ( SvREFCNT( node->extra ) > 0 ){
                 SvREFCNT_dec(node->extra);
             }
-            if ( real_node->type != XML_DOCUMENT_NODE ) {
-                Safefree(node);
-            }
         }
-        else if ( real_node == NULL ) {
-            Safefree(node);
-        }
+        Safefree(node);
 
 int 
 getType( node ) 
@@ -2777,6 +2795,10 @@ setAttribute( elem, name, value )
             value = domEncodeString( elem->doc->encoding, value );
         }
         xmlSetProp( elem, name, value );
+        if ( elem->doc != NULL ) {
+            xmlFree( name );
+            xmlFree( value );
+        }
 
 void
 setAttributeNS( elem, nsURI, qname, value )
@@ -2790,7 +2812,7 @@ setAttributeNS( elem, nsURI, qname, value )
         xmlNsPtr ns = NULL;
     CODE:
         if( elem->doc != NULL ) {
-            qname  = domEncodeString( elem->doc->encoding, qname );
+            qname = domEncodeString( elem->doc->encoding, qname );
             value = domEncodeString( elem->doc->encoding, value );
         }
     
@@ -2802,6 +2824,11 @@ setAttributeNS( elem, nsURI, qname, value )
         }
         else {
             xmlSetProp( elem, qname, value );
+        }
+
+        if ( elem->doc != NULL ) {
+            xmlFree( qname );
+            xmlFree( value );
         }
 
 ProxyObject *
@@ -3098,6 +3125,7 @@ appendTextNode( self, xmlString )
             if ( self->doc != NULL ) {
                 xmlString = domEncodeString( self->doc->encoding, xmlString );
                 tn = xmlNewDocText( self->doc, xmlString ); 
+                xmlFree(xmlString);
             }
             else {
                 /* this for people working directly with UTF8 */
@@ -3120,6 +3148,10 @@ appendTextChild( self, childname, xmlString )
             xmlString = domEncodeString( self->doc->encoding, xmlString );
         }
         xmlNewTextChild( self, NULL, childname, xmlString );
+        if (self->doc != NULL) {
+            xmlFree(childname);
+            xmlFree(xmlString);
+        }
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::PI
 
@@ -3355,13 +3387,14 @@ DESTROY(self)
         xmlNodePtr object;
     CODE:
         object = (xmlNodePtr)self->object;
-        if ( object != NULL && object->doc == NULL ) {
+        if ( object != NULL ) {
             # domSetOwnerDocument( (xmlNodePtr)self->object, NULL ); 
             # if( ((xmlNodePtr)self->object)->children !=NULL){
             #     warn("CLDNODES EXIST");
             #     warn(" --> %s \n", ((xmlNodePtr)self->object)->children->name );
             # }
             
+            # warn("xmlFreeNode\n");
             xmlFreeNode(self->object);
             # warn( "REAL DOCUMENT FRAGMENT DROPPED" );
         }

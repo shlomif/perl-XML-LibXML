@@ -46,6 +46,7 @@ t/14sax.t
 t/15nodelist.t
 t/16docnodes.t
 t/17callbacks.t
+t/18docfree.t
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/Comment.pod
 lib/XML/LibXML/Dtd.pod
