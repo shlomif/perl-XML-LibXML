@@ -1054,14 +1054,14 @@ process_xinclude(self)
     CODE:
         xmlXIncludeProcess((xmlDocPtr)self->object);
 
-char *
+const char *
 URI (doc, new_URI=NULL)
         xmlDocPtr doc
         char * new_URI
     CODE:
         RETVAL = doc->URL;
         if (new_URI) {
-            xmlFree(doc->URL);
+            xmlFree( (char*) doc->URL);
             doc->URL = xmlStrdup(new_URI);
         }
     OUTPUT:
