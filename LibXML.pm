@@ -4,7 +4,8 @@ package XML::LibXML;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
-            $skipDTD $skipXMLDeclaration $setTagCompression);
+            $skipDTD $skipXMLDeclaration $setTagCompression
+            $MatchCB $ReadCB $OpenCB $CloseCB );
 use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
@@ -18,6 +19,11 @@ require DynaLoader;
 $skipDTD            = 0;
 $skipXMLDeclaration = 0;
 $setTagCompression  = 0;
+
+$MatchCB = undef;
+$ReadCB  = undef;
+$OpenCB  = undef;
+$CloseCB = undef;
 
 bootstrap XML::LibXML $VERSION;
 
@@ -109,36 +115,70 @@ sub new {
 
 sub match_callback {
     my $self = shift;
-    $self->{XML_LIBXML_MATCH_CB} = shift if scalar @_;
-    return $self->{XML_LIBXML_MATCH_CB};
+    if ( ref $self ) {
+        $self->{XML_LIBXML_MATCH_CB} = shift if scalar @_;
+        return $self->{XML_LIBXML_MATCH_CB};
+    }
+    else {
+        $MatchCB = shift if scalar @_;
+        return $MatchCB;
+    }
 }
 
 sub read_callback {
     my $self = shift;
-    $self->{XML_LIBXML_READ_CB} = shift if scalar @_;
-    return $self->{XML_LIBXML_READ_CB};
+    if ( ref $self ) {
+        $self->{XML_LIBXML_READ_CB} = shift if scalar @_;
+        return $self->{XML_LIBXML_READ_CB};
+    }
+    else {
+        $ReadCB = shift if scalar @_;
+        return $ReadCB;
+    }
 }
 
 sub close_callback {
     my $self = shift;
-    $self->{XML_LIBXML_CLOSE_CB} = shift if scalar @_;
-    return $self->{XML_LIBXML_CLOSE_CB};
+    if ( ref $self ) {
+        $self->{XML_LIBXML_CLOSE_CB} = shift if scalar @_;
+        return $self->{XML_LIBXML_CLOSE_CB};
+    }
+    else {
+        $CloseCB = shift if scalar @_;
+        return $CloseCB;
+    }
 }
 
 sub open_callback {
     my $self = shift;
-    $self->{XML_LIBXML_OPEN_CB} = shift if scalar @_;
-    return $self->{XML_LIBXML_OPEN_CB};
+    if ( ref $self ) {
+        $self->{XML_LIBXML_OPEN_CB} = shift if scalar @_;
+        return $self->{XML_LIBXML_OPEN_CB};
+    }
+    else {
+        $OpenCB = shift if scalar @_;
+        return $OpenCB;
+    }
 }
 
 sub callbacks {
     my $self = shift;
-    if (@_) {
-        my ($match, $open, $read, $close) = @_;
-        @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)} = ($match, $open, $read, $close);
+    if ( ref $self ) {
+        if (@_) {
+            my ($match, $open, $read, $close) = @_;
+            @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)} = ($match, $open, $read, $close);
+        }
+        else {
+            return @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)};
+        }
     }
     else {
-        return @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)};
+        if (@_) {
+           ( $MatchCB, $OpenCB, $ReadCB, $CloseCB ) = @_;
+        }
+        else {
+            return ( $MatchCB, $OpenCB, $ReadCB, $CloseCB );
+        }
     }
 }
 
