@@ -3,7 +3,7 @@
 package XML::LibXML;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT $ORIGINAL_STRING);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
@@ -16,29 +16,84 @@ require DynaLoader;
 
 bootstrap XML::LibXML $VERSION;
 
-@EXPORT = qw( XML_ELEMENT_NODE ELEMENT_NODE
-              XML_ATTRIBUTE_NODE ATTRIBUTE_NODE
-              XML_TEXT_NODE TEXT_NODE
-              XML_CDATA_SECTION_NODE CDATA_SECTION_NODE
-              XML_ENTITY_REF_NODE ENTITY_REFERENCE_NODE
-              XML_ENTITY_NODE ENTITY_NODE
-              XML_PI_NODE PROCESSING_INSTRUCTION_NODE
-              XML_COMMENT_NODE COMMENT_NODE
-              XML_DOCUMENT_NODE DOCUMENT_NODE
-              XML_DOCUMENT_TYPE_NODE DOCUMENT_TYPE_NODE
-              XML_DOCUMENT_FRAG_NODE DOCUMENT_FRAGMENT_NODE
-              XML_NOTATION_NODE NOTATION_NODE
-              XML_HTML_DOCUMENT_NODE HTML_DOCUMENT_NODE
-              XML_DTD_NODE DTD_NODE
-              XML_ELEMENT_DECL ELEMENT_DECLARATION
-              XML_ATTRIBUTE_DECL ATTRIBUTE_DECLARATION
-              XML_ENTITY_DECL ENTITY_DECLARATION
-              XML_NAMESPACE_DECL NAMESPACE_DECLARATION
-              XML_XINCLUDE_START XINCLUDE_START
-              XML_XINCLUDE_END XINCLUDE_END
+@EXPORT = qw( XML_ELEMENT_NODE
+              XML_ATTRIBUTE_NODE
+              XML_TEXT_NODE
+              XML_CDATA_SECTION_NODE
+              XML_ENTITY_REF_NODE
+              XML_ENTITY_NODE
+              XML_PI_NODE
+              XML_COMMENT_NODE
+              XML_DOCUMENT_NODE
+              XML_DOCUMENT_TYPE_NODE
+              XML_DOCUMENT_FRAG_NODE
+              XML_NOTATION_NODE
+              XML_HTML_DOCUMENT_NODE
+              XML_DTD_NODE
+              XML_ELEMENT_DECL
+              XML_ATTRIBUTE_DECL
+              XML_ENTITY_DECL
+              XML_NAMESPACE_DECL
+              XML_XINCLUDE_START
+              XML_XINCLUDE_END
               encodeToUTF8
               decodeFromUTF8
             );
+
+@EXPORT_OK = qw(
+                ELEMENT_NODE
+                ATTRIBUTE_NODE
+                TEXT_NODE
+                CDATA_SECTION_NODE
+                ENTITY_REFERENCE_NODE
+                ENTITY_NODE
+                PROCESSING_INSTRUCTION_NODE
+                COMMENT_NODE
+                DOCUMENT_NODE
+                DOCUMENT_TYPE_NODE
+                DOCUMENT_FRAGMENT_NODE
+                NOTATION_NODE
+                HTML_DOCUMENT_NODE
+                DTD_NODE
+                ELEMENT_DECLARATION
+                ATTRIBUTE_DECLARATION
+                ENTITY_DECLARATION
+                NAMESPACE_DECLARATION
+                NAMESPACE_DECLARATION
+                XINCLUDE_END
+                XINCLUDE_START
+               );
+
+%EXPORT_TAGS = (
+                all => [@EXPORT, @EXPORT_OK],
+                w3c_typenames => [qw(
+                                     ELEMENT_NODE
+                                     ATTRIBUTE_NODE
+                                     TEXT_NODE
+                                     CDATA_SECTION_NODE
+                                     ENTITY_REFERENCE_NODE
+                                     ENTITY_NODE
+                                     PROCESSING_INSTRUCTION_NODE
+                                     COMMENT_NODE
+                                     DOCUMENT_NODE
+                                     DOCUMENT_TYPE_NODE
+                                     DOCUMENT_FRAGMENT_NODE
+                                     NOTATION_NODE
+                                     HTML_DOCUMENT_NODE
+                                     DTD_NODE
+                                     ELEMENT_DECLARATION
+                                     ATTRIBUTE_DECLARATION
+                                     ENTITY_DECLARATION
+                                     NAMESPACE_DECLARATION
+                                     NAMESPACE_DECLARATION
+                                     XINCLUDE_END
+                                     XINCLUDE_START
+                                    )],
+                encoding => [qw(
+                                encodeToUTF8
+                                decodeFromUTF8
+                               )],
+               );
 
 
 sub new {
