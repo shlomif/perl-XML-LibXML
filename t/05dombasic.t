@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>13; }
+BEGIN { plan tests=>14; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -23,6 +23,10 @@ my $file    = "example/dromeds.xml";
 
 my $dom = XML::LibXML::Document->createDocument( $vers, $enc );
 ok($dom);
+
+# this feature is for dirty people ;)
+my $dom2 = XML::LibXML::Document->createDocument( );
+ok( $dom2 );
 
 my $xs = "<?xml version=\"$vers\" encoding=\"$enc\"?>\n";
 my $str = $dom->toString;
