@@ -5020,13 +5020,14 @@ addNewChild( self, namespaceURI, nodename )
         SV * namespaceURI
         SV * nodename
     ALIAS:
-        XML::LibXML::DocumentFragment::newRawChild = 1
+        XML::LibXML::DocumentFragment::addNewChild = 1
     PREINIT:
         xmlChar * nsURI = NULL;
         xmlChar * name  = NULL;
         xmlChar * localname  = NULL;
         xmlChar * prefix     = NULL;
         xmlNodePtr newNode = NULL;
+        xmlNodePtr prev = NULL;
         xmlNsPtr ns = NULL;
     CODE:
         name = nodeSv2C(nodename, self);
@@ -5044,27 +5045,41 @@ addNewChild( self, namespaceURI, nodename )
         if ( nsURI != NULL ) {
             localname = xmlSplitQName2(name, &prefix); 
             ns = xmlSearchNsByHref(self->doc, self, nsURI);
+
+            newNode = xmlNewDocNode(self->doc,
+                                ns,
+                                localname?localname:name,
+                                NULL);
             if ( ns == NULL )  {
-                newNode = xmlNewChild( self, ns, 
-                                       localname?localname:name, NULL );
-                ns = xmlNewNs(newNode, nsURI, prefix);
-                newNode->ns = ns;
+                newNode->ns = xmlNewNs(newNode, nsURI, prefix);
             }     
-            else {
-                newNode = xmlNewChild( self, ns, 
-                                       localname?localname:name, NULL );
-            }           
 
             xmlFree(localname);
             xmlFree(prefix);
             xmlFree(nsURI);
         }
         else {
-            newNode = xmlNewChild( self, NULL, name, NULL );
+            newNode = xmlNewDocNode(self->doc,
+                                    NULL,
+                                    name,
+                                    NULL);
+        }
+        xmlFree(name);
+        /* add the node to the parent node */
+        newNode->type = XML_ELEMENT_NODE;
+        newNode->parent = self;
+        newNode->doc = self->doc;
+
+        if (self->children == NULL) {
+            self->children = newNode;
+            self->last = newNode;
+        } else {
+            prev = self->last;
+            prev->next = newNode;
+            newNode->prev = prev;
+            self->last = newNode;
         }
      	RETVAL = PmmNodeToSv(newNode, PmmOWNERPO(PmmPROXYNODE(self)) );
-   
-        xmlFree(name);        
     OUTPUT:
         RETVAL
 
