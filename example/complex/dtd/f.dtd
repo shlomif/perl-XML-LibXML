@@ -1,0 +1,2 @@
+<!ENTITY % g SYSTEM "g.dtd">
+%g;
