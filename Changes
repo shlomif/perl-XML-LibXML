@@ -12,6 +12,7 @@ manpage!
    - pretty formating to all serializing functions
      *NOTE* the XML::LibXML::Node::toString interface changed
      check the XML::LibXML::Node man page 
+   - made xpath functions verbose to perl (one can wrap evals now)
    - better libxml2 version testing
    - more documentation
 

@@ -511,7 +511,14 @@ sub findnodes {
 
 sub findvalue {
     my ($node, $xpath) = @_;
-    return $node->find($xpath)->to_literal->value;
+    my $res;
+    eval {
+        $res = $node->find($xpath);
+    };
+    if  ( $@ ) {
+        die $@;
+    }
+    return $res->to_literal->value;
 }
 
 sub find {

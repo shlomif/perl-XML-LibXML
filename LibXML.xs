@@ -3765,8 +3765,19 @@ _find( pnode, pxpath )
             domNodeNormalize( PmmOWNER(SvPROXYNODE(pnode)) );
         }
 
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        xmlSetGenericErrorFunc(PerlIO_stderr(), 
+                               (xmlGenericErrorFunc)LibXML_error_handler);
+
         found = domXPathFind( node, xpath );
         xmlFree( xpath );
+
+        xmlSetGenericErrorFunc(NULL, NULL);
+
+        if ( SvCUR( LibXML_error ) > 0 ) {
+            croak(SvPV(LibXML_error, len));
+        }
 
         if (found) {
             switch (found->type) {
@@ -3836,6 +3847,12 @@ _find( pnode, pxpath )
             }
             xmlXPathFreeObject(found);
         }
+        else {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
+        }
 
 void
 _findnodes( pnode, perl_xpath )
@@ -3863,8 +3880,17 @@ _findnodes( pnode, perl_xpath )
             domNodeNormalize( PmmOWNER(SvPROXYNODE(pnode)) );
         }
 
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        xmlSetGenericErrorFunc(PerlIO_stderr(), 
+                               (xmlGenericErrorFunc)LibXML_error_handler);
+
         nodelist = domXPathSelect( node, xpath );
         xmlFree(xpath);
+        xmlSetGenericErrorFunc(NULL, NULL);
+        if ( SvCUR( LibXML_error ) > 0 ) {
+            croak(SvPV(LibXML_error, len));
+        }
 
         if ( nodelist ) {
             if ( nodelist->nodeNr > 0 ) {
@@ -3896,6 +3922,12 @@ _findnodes( pnode, perl_xpath )
                 }
             }
             xmlXPathFreeNodeSet( nodelist );
+        }
+        else {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
         }
         
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element

@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>14 }
+BEGIN { plan tests=>15 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -90,6 +90,10 @@ ok(@none, 0);
 my @doc = $root->findnodes('document("example/test.xml")');
 ok(@doc);
 # warn($doc[0]->toString);
+
+eval { my $literal = $root->findvalue( "/-" ); };
+ok( $@ );
+
 
 sub finddoc {
     my $doc = shift;
