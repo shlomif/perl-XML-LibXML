@@ -6,6 +6,15 @@ interface to the Gnome libxml2 library. This makes it a fast
 and highly capable validating XML parser library, as well as
 a high performance DOM.
 
+IMPORTANT NOTE
+==============
+
+XML::LibXML was almost entirely reimplemented between version 1.40 
+to version 1.49. This may cause problems on some production machines.
+with version 1.50 a lot of compatibility fixes were applied, so 
+programs written for XML::LibXML 1.40 or less should run with 
+version 1.50 again.
+
 Installation
 ============
 

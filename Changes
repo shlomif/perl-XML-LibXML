@@ -1,17 +1,24 @@
 Revision history for Perl extension XML::LibXML
 
+*NOTE:* 
+The General DOM API changed from Version 1.40 to 1.49/1.50. Therefore
+the behaviour of some functions may have changed to previous
+versions. Make shure you read the informations on the XML::LibXML::DOM
+manpage!
+
 1.50
    - push parser interface
-   - basic native libxml2 SAX interface
+   - fixed major problems with the validating parser
    - XML::LibXML::Document::process_xincludes reintroduced
    - Class wide callbacks added 
    - code cleanings
    - fixed library tests and output in Makefile.PL
    - more documentation
-   - more tests
-   - importNode() bug fix
+   - importNode() bug fix 
    - fixed external entity loading for entity expansion
    - compatibility fixes
+   - basic native libxml2 SAX interface
+     THIS INTERFACE IS STILL EXPERIMENTAL, check XML::LibXML::SAX man page
    - cloneNode clones now within documents
 
 1.49

@@ -112,7 +112,11 @@ sub new {
     if ( not exists $options{XML_LIBXML_KEEP_BLANKS} ) {
         $options{XML_LIBXML_KEEP_BLANKS} = 1;
     }
+
     my $self = bless \%options, $class;
+    if ( defined $options{Handler} ) {
+        $self->set_handler( $options{Handler} );
+    }
     return $self;
 }
 
@@ -234,10 +238,11 @@ sub base_uri {
     return $self->{XML_LIBXML_BASE_URI};
 }
 
-sub set_sax_handler {
+sub set_handler {
     my $self = shift;
-    $self->{SAX} = {HANDLER    => $_[0],
-                    NAMESPACES => {},
+    $self->{HANDLER} = $_[0];
+
+    $self->{SAX} = {NAMESPACES => {},
                     ELSTACK    => []};
 }
 
@@ -350,6 +355,8 @@ sub parse_file {
     return $result;
 }
 
+sub parse_chunk { my $self = shift; return $self->parse_xml_chunk(@_); }
+
 sub parse_xml_chunk {
     my $self = shift;
     # max 2 parameter:
@@ -460,6 +467,8 @@ sub isSupported {
     my $feature = shift;
     return $self->can($feature) ? 1 : 0;
 }
+
+sub getChildNodes { my $self = shift; return $self->childNodes(); }
 
 sub childNodes {
     my $self = shift;
@@ -892,7 +901,7 @@ use Carp;
 
 sub start_document {
     my $parser = shift;
-    $parser->{SAX}->{HANDLER}->start_document({});
+    $parser->{HANDLER}->start_document({});
 }
 
 sub xml_decl {
@@ -900,12 +909,12 @@ sub xml_decl {
 
     my $decl = {version => $version};
     $decl->{encoding} = $encoding if defined $encoding;
-    $parser->{SAX}->{HANDLER}->xml_decl($decl);
+    $parser->{HANDLER}->xml_decl($decl);
 }
 
 sub end_document {
     my $parser = shift;
-    $parser->{SAX}->{HANDLER}->end_document({});
+    $parser->{HANDLER}->end_document({});
 }
 
 sub start_element {
@@ -913,7 +922,7 @@ sub start_element {
     my $saxattr = {};
     foreach my $att ( keys %attrs ) {
         next unless $att =~ /^xmlns/;
-        $parser->{SAX}->{Namespaces}->{$att} = $attrs{$att};
+        $parser->{Namespaces}->{$att} = $attrs{$att};
     }
 
     foreach my $att ( keys %attrs ) {
@@ -953,7 +962,7 @@ sub start_element {
         $elem->{NamespaceURI} = "";
     }
     push @{$parser->{SAX}->{ELSTACK}}, $elem;
-    $parser->{SAX}->{HANDLER}->start_element( { %$elem, Attributes=>$saxattr} )
+    $parser->{HANDLER}->start_element( { %$elem, Attributes=>$saxattr} )
 
 }
 
@@ -963,30 +972,30 @@ sub end_element {
     if ( $elem->{Name} ne $name ) {
         croak( "cought error where parser should work" );
     }
-    $parser->{SAX}->{HANDLER}->end_element( $elem );
+    $parser->{HANDLER}->end_element( $elem );
 }
 
 sub characters {
     my ( $parser, $data ) = @_;
-    $parser->{SAX}->{HANDLER}->characters( {Data => $data} );
+    $parser->{HANDLER}->characters( {Data => $data} );
 }
 
 sub comment {
     my ( $parser, $data ) = @_;
-    $parser->{SAX}->{HANDLER}->comment( {Data => $data} );
+    $parser->{HANDLER}->comment( {Data => $data} );
 }
 
 sub cdata_block {
     my ( $parser, $data ) = @_;
-    $parser->{SAX}->{HANDLER}->start_cdata();
-    $parser->{SAX}->{HANDLER}->characters( {Data => $data} );
-    $parser->{SAX}->{HANDLER}->end_cdata();
+    $parser->{HANDLER}->start_cdata();
+    $parser->{HANDLER}->characters( {Data => $data} );
+    $parser->{HANDLER}->end_cdata();
 }
 
 sub processing_instruction {
     my ( $parser, $target, $data ) = @_;
-    $parser->{SAX}->{HANDLER}->processing_instruction( {Target => $target,
-                                                        Data   => $data} );
+    $parser->{HANDLER}->processing_instruction( {Target => $target,
+                                                 Data   => $data} );
 }
 
 1;

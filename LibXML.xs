@@ -1947,6 +1947,7 @@ createDocument( CLASS, version="1.0", encoding=NULL )
         char * encoding
     ALIAS:
         XML::LibXML::Document::new = 1
+        XML::LibXML::createDocument = 2
     PREINIT:
         xmlDocPtr doc=NULL;
     CODE:
@@ -2597,9 +2598,10 @@ removeExternalSubset( document )
         RETVAL
 
 SV *
-importNode( dom, node ) 
+importNode( dom, node, dummy=0 ) 
         SV * dom
         SV * node
+        int dummy
     PREINIT:
         xmlNodePtr ret = NULL;
         xmlNodePtr real_node = NULL;
@@ -2689,7 +2691,15 @@ setStandalone( self, value = 0 )
         SV * self
         int value
     CODE:
-        ((xmlDocPtr)PmmSvNode(self))->standalone = value;
+        if ( value > 0 ) {
+            ((xmlDocPtr)PmmSvNode(self))->standalone = 1;
+        }
+        else if ( value < 0 ) {
+            ((xmlDocPtr)PmmSvNode(self))->standalone = -1;
+        }
+        else {
+            ((xmlDocPtr)PmmSvNode(self))->standalone = 0;
+        }
 
 char*
 version( self ) 
@@ -2936,11 +2946,11 @@ lookupNamespacePrefix( node, svuri )
         RETVAL
 
 void
-setName( pnode , value )
+setNodeName( pnode , value )
         SV * pnode
         SV* value
     ALIAS:
-        setNodeName = 1
+        setName = 1
     PREINIT:
         xmlNodePtr node = PmmSvNode(pnode);
         xmlChar* string;
@@ -2978,12 +2988,6 @@ nodeValue( proxy_node, useDomEncoding = &PL_sv_undef )
         xmlNodePtr node;
         xmlChar * content = NULL;
     CODE:
-        /* this implementation is prolly b0rked!
-         * I have to go through the spec to find out what should
-         * be returned here.
-         */
-
-        xs_warn( "getDATA" );
         content = domGetNodeValue( PmmSvNode(proxy_node) ); 
         
         if ( content != NULL ) {
