@@ -7,8 +7,6 @@ PHISHS.CHANGES
 README
 dom.c
 dom.h
-parser.c
-parser.h
 xpath.c
 xpath.h
 typemap
