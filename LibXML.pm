@@ -10,7 +10,7 @@ use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
-$VERSION = "1.50";
+$VERSION = "1.51";
 require Exporter;
 require DynaLoader;
 
@@ -944,8 +944,12 @@ sub start_element {
     my $saxattr = {};
 
     push @{$parser->{SAX}->{ELSTACK}}, $elem;
-    if ( defined $attrs ) {
+
+    if ( defined $attrs  ) {
         $parser->{HANDLER}->start_element( { %$elem, Attributes=>$attrs} )
+    }
+    else {
+        $parser->{HANDLER}->start_element( $elem )
     }
 }
 
