@@ -355,14 +355,33 @@ sub XML::LibXML::PI::setData {
     $pi->_setData( $string ) unless  $string =~ /\?>/;
 }
 
+sub XML::LibXML::Text::deleteDataString {
+    my $node = shift;
+    my $string = shift;
+    my $all    = shift;
+    my $data = $node->getData();
+    $string =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
+    if ( $all ) {
+        $data =~ s/$string//g;
+    }
+    else {
+        $data =~ s/$string//;
+    }
+    $node->setData( $data );
+}
 sub XML::LibXML::Text::replaceDataString {
-    my ( $node, $left, $right ) = @_;
+    my ( $node, $left, $right,$all ) = @_;
 
     #ashure we exchange the strings and not expressions!
     $left  =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
     $right =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
     my $datastr = $node->getData();
-    $datastr =~ s/$left/$right/;
+    if ( $all ) {
+        $datastr =~ s/$left/$right/g;
+    }
+    else{
+        $datastr =~ s/$left/$right/;
+    }
     $node->setData( $datastr );
 }
 
