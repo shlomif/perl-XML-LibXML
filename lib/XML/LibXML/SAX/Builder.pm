@@ -50,6 +50,14 @@ sub start_prefix_mapping {
     my $self = shift;
     my $ns = shift;
 
+    unless ( defined $self->{DOM} or defined $self->{Parent} ) {
+        $self->{Parent} = XML::LibXML::DocumentFragment->new();
+        $self->{NamespaceStack} = XML::NamespaceSupport->new;
+        $self->{NamespaceStack}->push_context;
+    }
+
+    $self->{USENAMESPACESTACK} = 1;
+
     $self->{NamespaceStack}->declare_prefix( $ns->{Prefix}, $ns->{NamespaceURI} );
 }
 
@@ -114,9 +122,22 @@ sub start_element {
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
-            next if defined $attr->{Prefix} and $attr->{Prefix} eq "xmlns";
-            $node->setAttributeNS($attr->{NamespaceURI} || "",
-                                  $attr->{Name}, $attr->{Value});
+            next if defined $attr->{Prefix}
+                    and $attr->{Prefix} eq "xmlns"
+                    and $self->{USENAMESPACESTACK} == 1;
+
+            if ( defined $attr->{Prefix}
+                 and $attr->{Prefix} eq "xmlns" ) {
+                # ok, the generator does not set namespaces correctly!
+                my $uri = $attr->{Value};
+                $node->setNamespace($uri,
+                                    $attr->{Localname},
+                                    $uri eq $el->{NamespaceURI} ? 1 : 0 );
+            }
+            else {
+                $node->setAttributeNS($attr->{NamespaceURI} || "",
+                                      $attr->{Name}, $attr->{Value});
+            }
         }
         else {
             $node->setAttribute($key => $attr);
