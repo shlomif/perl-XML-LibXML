@@ -295,6 +295,15 @@ sub parse_html_file {
     return $retval;
 }
 
+sub processXIncludes {
+    my $self = shift;
+    my $dom  = shift;
+
+    $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
+    $result->process_xinclude();
+    $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
+}
+
 sub XML_ELEMENT_NODE(){1;}
 sub XML_ATTRIBUTE_NODE(){2;}
 sub XML_TEXT_NODE(){3;}
@@ -511,12 +520,14 @@ Here, C<$fh> can be an IOREF, or a subclass of IO::Handle.
 
 =head1 PARSING HTML
 
-As of version 0.96, XML::LibXML is capable of parsing HTML into a regular
-XML DOM. This gives you the full power of XML::LibXML on HTML documents.
+As of version 0.96, XML::LibXML is capable of parsing HTML into a
+regular XML DOM. This gives you the full power of XML::LibXML on HTML
+documents.
 
-The methods work in exactly the same way as the methods above, and return
-exactly the same type of object. If you wish to dump the resulting document
-as HTML again, you can use C<$doc->toStringHTML()> to do that.
+The methods work in exactly the same way as the methods above, and
+return exactly the same type of object. If you wish to dump the
+resulting document as HTML again, you can use C<$doc->toStringHTML()>
+to do that.
 
 =head2 parse_html_string
 
@@ -529,6 +540,20 @@ as HTML again, you can use C<$doc->toStringHTML()> to do that.
 =head2 parse_html_file
 
   my $doc = $parser->parse_html_file($filename);
+
+=head2 Extra parsing methods
+
+B<processXIncludes>
+
+  $parser->processXIncludes( $doc );
+
+While the document class implements a separate XInclude processing,
+this method, is stricly related to the parser. The use of this method
+is only required, if the parser implements special callbacks that
+should to be used for the XInclude as well.
+
+If expand_xincludes is set to 1, the method is only required to process
+XIncludes appended to the DOM after its original parsing.
 
 =head1 XML::LibXML::Document
 
