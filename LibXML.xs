@@ -968,6 +968,7 @@ _parse_string(self, string, directory = NULL)
             }
 
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            real_dom->_private = RETVAL;
             setSvNodeExtra(RETVAL,RETVAL);
         }        
         LibXML_cleanup_callbacks();
@@ -1008,6 +1009,7 @@ _parse_fh(self, fh, directory = NULL)
                 xmlXIncludeProcess(real_dom);
 
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            real_dom->_private = RETVAL;
             setSvNodeExtra(RETVAL,RETVAL);
         }
         LibXML_cleanup_callbacks();
@@ -1066,6 +1068,7 @@ _parse_file(self, filename)
             }
 
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            real_dom->_private = RETVAL;
             setSvNodeExtra(RETVAL,RETVAL);
         }
         LibXML_cleanup_callbacks();
@@ -1112,6 +1115,7 @@ parse_html_string(self, string)
             real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            real_dom->_private = RETVAL;
             setSvNodeExtra(RETVAL,RETVAL);
         }
     OUTPUT:
@@ -1146,6 +1150,7 @@ parse_html_fh(self, fh)
             real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
             RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            real_dom->_private = RETVAL;
             setSvNodeExtra(RETVAL,RETVAL);
         }
     OUTPUT:
@@ -1177,6 +1182,7 @@ parse_html_file(self, filename)
         }
         else {
             RETVAL = nodeToSv( (xmlNodePtr)real_dom ); 
+            real_dom->_private = RETVAL;
             setSvNodeExtra(RETVAL,RETVAL);
         }
     OUTPUT:
@@ -1503,6 +1509,7 @@ createDocument( CLASS, version="1.0", encoding=0 )
     CODE:
         real_dom = domCreateDocument( version, encoding ); 
         RETVAL = nodeToSv((xmlNodePtr)real_dom);
+        real_dom->_private = RETVAL;
         setSvNodeExtra(RETVAL,RETVAL);
     OUTPUT:
         RETVAL
@@ -1544,11 +1551,12 @@ createElement( dom, name )
             if ( newNode != NULL ) {        
                 newNode->doc = real_dom;
                 domAppendChild( docfrag, newNode );
-                # warn( newNode->name );
+                xs_warn( newNode->name );
                 RETVAL = nodeToSv(newNode);
                 setSvNodeExtra(RETVAL,docfrag_sv);
             }
             else {
+                xs_warn( "no node created!" );
                 XSRETURN_UNDEF;
             }
         }
@@ -2265,6 +2273,10 @@ insertBefore( self, new, ref )
     PREINIT:
         xmlNodePtr pNode, nNode, oNode;
     CODE:
+        if ( new != NULL
+             && new != &PL_sv_undef
+             && ref != NULL
+             && ref != &PL_sv_undef ) {
         pNode = getSvNode(self);
         nNode = getSvNode(new);
         oNode = getSvNode(ref);
@@ -2274,7 +2286,7 @@ insertBefore( self, new, ref )
              && domInsertBefore( pNode, nNode, oNode ) != NULL ) {
             fix_proxy_extra(new,getSvNodeExtra(self));
         }
-
+        }
 
 void
 insertAfter( self, new, ref )
@@ -2284,6 +2296,11 @@ insertAfter( self, new, ref )
     PREINIT:
         xmlNodePtr pNode, nNode, oNode;
     CODE:
+        if ( new != NULL
+             && new != &PL_sv_undef
+             && ref != NULL
+             && ref != &PL_sv_undef ) {
+            
         pNode = getSvNode(self);
         nNode = getSvNode(new);
         oNode = getSvNode(ref);
@@ -2292,6 +2309,7 @@ insertAfter( self, new, ref )
              && nNode->type == XML_ELEMENT_NODE ) 
              && domInsertAfter( pNode, nNode, oNode ) != NULL ) {
             fix_proxy_extra(new,getSvNodeExtra(self));
+        }
         }
 
 SV*
@@ -2305,7 +2323,7 @@ getOwnerDocument( elem )
         if( self != NULL
             && self->doc != NULL
             && getSvNodeExtra(elem) != NULL ){
-            RETVAL = getSvNodeExtra(elem);
+            RETVAL = (SV*)self->doc->_private;
             SvREFCNT_inc( RETVAL );
         }
         else {
