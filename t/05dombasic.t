@@ -103,8 +103,9 @@ ok( defined $text && $text->isa( "XML::LibXML::CDATASection" ) );
       ok( defined $elem && 
           $elem->getType() == XML_ELEMENT_NODE &&
           $elem->isa( "XML::LibXML::Element" ) );
+      ok( $dom3->URI, $file );
+      $dom3->URI("foo.xml");
+      ok( $dom3->URI, "foo.xml" );
     }
 }
 
-ok(1);
-ok(1);
