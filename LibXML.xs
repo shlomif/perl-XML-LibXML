@@ -2586,6 +2586,12 @@ importNode( dom, node )
     CODE:
         real_dom = (xmlDocPtr)PmmSvNode(dom);
         real_node=  PmmSvNode(node);
+   
+        if ( real_dom == real_node ) {
+            croak( "Can't import Documents!" );
+            XSRETURN_UNDEF;
+        }
+
         ret = domImportNode( real_dom, real_node, 0 );
         if ( ret ) {
             RETVAL = PmmNodeToSv( ret, SvPROXYNODE(dom));
@@ -2608,6 +2614,12 @@ adoptNode( dom, node )
     CODE:
         real_dom = (xmlDocPtr)PmmSvNode(dom);
         real_node=  PmmSvNode(node);
+
+        if ( real_dom == real_node ) {
+            croak( "Can't adopt Documents!" );
+            XSRETURN_UNDEF;
+        }
+
         ret = domImportNode( real_dom, real_node, 1 );
         if ( ret ) {
             frag = PmmNewFragment( real_dom );
