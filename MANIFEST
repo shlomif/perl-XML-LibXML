@@ -27,6 +27,7 @@ example/complex/complex.xml
 example/complex/complex.dtd
 example/complex/dtd/f.dtd
 example/complex/dtd/g.dtd
+example/ns.xml
 t/01basic.t
 t/02parsestring.t
 t/03parsefile.t

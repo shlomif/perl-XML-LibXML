@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 33 }
+BEGIN { plan tests => 38 }
 use XML::LibXML;
 use XML::LibXML::SAX::Parser;
 use XML::LibXML::SAX::Builder;
@@ -37,6 +37,8 @@ my $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
 ok($parser);
 $parser->parse_uri("example/dromeds.xml");
 
+$parser->parse_uri("example/ns.xml");
+
 ########### Helper class #############
 
 package SAXTester;
@@ -57,7 +59,7 @@ sub end_document {
 
 sub start_element {
   my ($self, $el) = @_;
-  ok($el->{Name}, qr{^(dromedaries|species|humps|disposition)$});
+  ok($el->{LocalName}, qr{^(dromedaries|species|humps|disposition|legs)$});
   foreach my $attr (keys %{$el->{Attributes}}) {
     # warn("Attr: $attr = $el->{Attributes}->{$attr}\n");
   }

@@ -91,7 +91,10 @@ sub process_element {
     
     foreach my $attr ($element->getAttributes) {
         my $key;
-        if (my $ns = $attr->getNamespaceURI) {
+        if ($attr->isa('XML::LibXML::Namespace')) {
+            $key = "{http://www.w3.org/2000/xmlns/}" . $attr->getName;
+        }
+        elsif (my $ns = $attr->getNamespaceURI) {
             $key = "{$ns}".$attr->getLocalName;
         }
         else {
