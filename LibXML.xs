@@ -39,7 +39,7 @@ extern "C" {
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
 
-#if LIBXML_VERSION >= 20600
+#if LIBXML_VERSION >= 20510
 #define HAVE_SCHEMAS
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
