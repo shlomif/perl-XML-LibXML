@@ -3,7 +3,7 @@
 
 use Test;
 use Devel::Peek;
-BEGIN { plan tests=>86; }
+BEGIN { plan tests=>87; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -41,6 +41,7 @@ $dom->setVersion( "2.0" );
 ok( $dom->getVersion, "2.0" );
 
 print "# node creation 1 (bound element)\n";
+$dom->setEncoding("UTF8");
 
 my $elem1 = $dom->createElement( "A" );
 ok( $elem1 );
@@ -55,6 +56,9 @@ ok( $elem1->hasAttribute( $aname ) );
 my $estr = $elem1->toString();
 my $tstr = "<A $aname=\"$avalue\"/>";
 ok( $estr, $tstr );  
+
+my $owner = $elem1->getOwnerDocument();
+ok( $owner->getType, XML_DOCUMENT_NODE );
 
 $dom->setDocumentElement( $elem1 );
 my $te = $dom->getDocumentElement();
