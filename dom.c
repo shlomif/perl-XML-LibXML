@@ -8,10 +8,16 @@
 
 xmlDocPtr
 domCreateDocument( xmlChar *version, xmlChar *enc ){
-  xmlDocPtr doc = 0;
+    xmlDocPtr doc = 0;
     doc = xmlNewDoc( version );  
     doc->charset  = XML_CHAR_ENCODING_UTF8;
-    doc->encoding = xmlStrdup(enc);
+    if ( enc != NULL && *enc!= 0 ) {
+      /* if an encoding is passed, we will assume UTF8, otherwise we set 
+       * the passed encoding 
+       */
+        doc->encoding = xmlStrdup(enc);
+    }
+
     return doc;
 }
 
