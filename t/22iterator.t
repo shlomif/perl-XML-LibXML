@@ -10,20 +10,20 @@ my $doc = XML::LibXML->new->parse_string( <<EOF );
 <test>
     text
     <foo/>
-    <bar><kungfoo/></bar>
     <foo/>
     text
+    <bar><kungfoo/></bar>
 </test>
 EOF
 
 my $iter = XML::LibXML::Iterator->new( $doc->documentElement );
 
 do {
-    ok(1);
+    ok(1); # warn $iter->current->nodeName;
 }while ( $iter->next );
 
 do {
-    ok(1);
+    ok(1); # warn $iter->current->nodeName;
 }while ( $iter->previous );
 
 

@@ -13,7 +13,7 @@ use XML::LibXML::SAX::Builder;
 {
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
 
-        require Devel::Peek;
+#        require Devel::Peek;
         my $peek = 0;
     
         ok(1);
@@ -97,23 +97,23 @@ use XML::LibXML::SAX::Builder;
             
             if($peek) {
                 warn("Doc before elem\n");
-                Devel::Peek::Dump($doc);
+                # Devel::Peek::Dump($doc);
                 warn("Elem alone\n");
-                Devel::Peek::Dump($elem);
+                # Devel::Peek::Dump($elem);
             }
             
             $doc->setDocumentElement($elem);
             
             if ($peek) {
                 warn("Elem after attaching\n");
-                Devel::Peek::Dump($elem);
+                # Devel::Peek::Dump($elem);
                 warn("Doc after elem\n");
-                Devel::Peek::Dump($doc);
+                # Devel::Peek::Dump($doc);
             }
         }
         if ($peek) {
             warn("Doc should be freed\n");
-            Devel::Peek::Dump($doc);
+            # Devel::Peek::Dump($doc);
         }
         ok(1);
         check_mem();
@@ -386,8 +386,8 @@ dromeds.xml
 
                 check_mem();
             }            
+            ok(1);
         }
-
     }
 }
 
@@ -479,8 +479,8 @@ sub make_doc_elem {
 
 package sax_null;
 
-require Devel::Peek;
-use Data::Dumper;
+# require Devel::Peek;
+# use Data::Dumper;
 
 sub new {
     my $class = shift;
