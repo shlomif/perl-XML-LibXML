@@ -5,7 +5,8 @@ package XML::LibXML;
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
-            $MatchCB $ReadCB $OpenCB $CloseCB );
+            $MatchCB $ReadCB $OpenCB $CloseCB 
+            );
 use Carp;
 
 use XML::LibXML::Common qw(:encoding :libxml);
@@ -147,10 +148,24 @@ sub createDocument {
 #-------------------------------------------------------------------------#
 # callback functions                                                      #
 #-------------------------------------------------------------------------#
+
+sub input_callbacks {
+    my $self     = shift;
+    my $icbclass = shift;
+
+    if ( defined $icbclass ) {
+        $self->{XML_LIBXML_CALLBACK_STACK} = $icbclass;
+    }
+    return $self->{XML_LIBXML_CALLBACK_STACK};
+}
+
 sub match_callback {
     my $self = shift;
     if ( ref $self ) {
-        $self->{XML_LIBXML_MATCH_CB} = shift if scalar @_;
+        if ( scalar @_ ) {
+            $self->{XML_LIBXML_MATCH_CB} = shift;
+            $self->{XML_LIBXML_CALLBACK_STACK} = undef;
+        }
         return $self->{XML_LIBXML_MATCH_CB};
     }
     else {
@@ -162,7 +177,10 @@ sub match_callback {
 sub read_callback {
     my $self = shift;
     if ( ref $self ) {
-        $self->{XML_LIBXML_READ_CB} = shift if scalar @_;
+        if ( scalar @_ ) {
+            $self->{XML_LIBXML_READ_CB} = shift;
+            $self->{XML_LIBXML_CALLBACK_STACK} = undef;
+        }
         return $self->{XML_LIBXML_READ_CB};
     }
     else {
@@ -174,7 +192,10 @@ sub read_callback {
 sub close_callback {
     my $self = shift;
     if ( ref $self ) {
-        $self->{XML_LIBXML_CLOSE_CB} = shift if scalar @_;
+        if ( scalar @_ ) {
+            $self->{XML_LIBXML_CLOSE_CB} = shift;
+            $self->{XML_LIBXML_CALLBACK_STACK} = undef;
+        }
         return $self->{XML_LIBXML_CLOSE_CB};
     }
     else {
@@ -186,7 +207,10 @@ sub close_callback {
 sub open_callback {
     my $self = shift;
     if ( ref $self ) {
-        $self->{XML_LIBXML_OPEN_CB} = shift if scalar @_;
+        if ( scalar @_ ) {
+            $self->{XML_LIBXML_OPEN_CB} = shift;
+            $self->{XML_LIBXML_CALLBACK_STACK} = undef;
+        }
         return $self->{XML_LIBXML_OPEN_CB};
     }
     else {
@@ -201,6 +225,7 @@ sub callbacks {
         if (@_) {
             my ($match, $open, $read, $close) = @_;
             @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)} = ($match, $open, $read, $close);
+            $self->{XML_LIBXML_CALLBACK_STACK} = undef;
         }
         else {
             return @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)};
@@ -332,11 +357,40 @@ sub _auto_expand {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             $result = undef;
             croak $err;
         }
     }
     return $result;
+}
+
+sub _init_callbacks {
+    my $self = shift;
+    my $icb = $self->{XML_LIBXML_CALLBACK_STACK};
+    
+    unless ( defined $icb ) {
+        $self->{XML_LIBXML_CALLBACK_STACK} = XML::LibXML::InputCallback->new();
+        $icb = $self->{XML_LIBXML_CALLBACK_STACK};
+    }
+
+    my $mcb = $self->match_callback();
+    my $ocb = $self->open_callback();
+    my $rcb = $self->read_callback();
+    my $ccb = $self->close_callback();
+
+    if ( defined $mcb and defined $ocb and defined $rcb and defined $ccb ) {
+        $icb->register_callbacks( [$mcb, $ocb, $rcb, $ccb] );
+    }
+    
+    $icb->init_callbacks();
+}
+
+sub _cleanup_callbacks {
+    my $self = shift;
+    $self->{XML_LIBXML_CALLBACK_STACK}->cleanup_callbacks();
+    my $mcb = $self->match_callback();
+    $self->{XML_LIBXML_CALLBACK_STACK}->unregister_callbacks( [$mcb] );
 }
 
 sub __read {
@@ -370,14 +424,18 @@ sub parse_string {
     $self->{_State_} = 1;
     my $result;
 
+    $self->_init_callbacks();
+
     if ( defined $self->{SAX} ) {
         my $string = shift;
         $self->{SAX_ELSTACK} = [];
+        
         eval { $result = $self->_parse_sax_string($string); };
 
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             croak $err;
         }
     }
@@ -387,11 +445,13 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             croak $err;
         }
 
         $result = $self->_auto_expand( $result, $self->{XML_LIBXML_BASE_URI} );
     }
+    $self->_cleanup_callbacks();
 
     return $result;
 }
@@ -401,12 +461,16 @@ sub parse_fh {
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
+
+    $self->_init_callbacks();
+
     if ( defined $self->{SAX} ) {
         $self->{SAX_ELSTACK} = [];
         eval { $self->_parse_sax_fh( @_ );  };
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             croak $err;
         }
     }
@@ -415,11 +479,14 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             croak $err;
         }
 
         $result = $self->_auto_expand( $result, $self->{XML_LIBXML_BASE_URI} );
     }
+
+    $self->_cleanup_callbacks();
 
     return $result;
 }
@@ -429,12 +496,16 @@ sub parse_file {
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
+
+    $self->_init_callbacks();
+
     if ( defined $self->{SAX} ) {
         $self->{SAX_ELSTACK} = [];
         eval { $self->_parse_sax_file( @_ );  };
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             croak $err;
         }
     }
@@ -443,11 +514,13 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+            $self->_cleanup_callbacks();
             croak $err;
         }
 
         $result = $self->_auto_expand( $result );
     }
+    $self->_cleanup_callbacks();
 
     return $result;
 }
@@ -464,6 +537,9 @@ sub parse_xml_chunk {
     }
 
     $self->{_State_} = 1;
+
+    $self->_init_callbacks();
+
     if ( defined $self->{SAX} ) {
         eval {
             $self->_parse_sax_xml_chunk( @_ );
@@ -481,6 +557,8 @@ sub parse_xml_chunk {
         eval { $result = $self->_parse_xml_chunk( @_ ); };
     }
 
+    $self->_cleanup_callbacks();
+
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
@@ -492,21 +570,54 @@ sub parse_xml_chunk {
 
 sub parse_balanced_chunk {
     my $self = shift;
-    return $self->parse_xml_chunk( @_ );
+    $self->_init_callbacks();
+    my $rv;
+    eval {
+        $rv = $self->parse_xml_chunk( @_ );
+    };
+    $self->_cleanup_callbacks();
+    if ( $@ ) {
+        croak $@;
+    }
+    return $rv
 }
 
 # java style
 sub processXIncludes {
     my $self = shift;
     my $doc = shift;
-    return $self->_processXIncludes($doc || " ");
+    if ( $self->{_State_} != 1 ) {
+        $self->_init_callbacks();
+    }
+    my $rv;
+    eval {
+        $rv = $self->_processXIncludes($doc || " ");
+    };
+
+    if ( $self->{_State_} != 1 ) {
+        $self->_cleanup_callbacks();
+    }
+
+    if ( $@ ) {
+        croak $@;
+    }
+    return $rv;
 }
 
 # perl style
 sub process_xincludes {
     my $self = shift;
     my $doc = shift;
-    return $self->_processXIncludes($doc || " ");
+    my $rv;
+    $self->_init_callbacks();
+    eval {
+        $rv = $self->_processXIncludes($doc || " ");
+    };
+    $self->_cleanup_callbacks();
+    if ( $@ ) {
+        croak $@;
+    }
+    return $rv;
 }
 
 
@@ -531,12 +642,21 @@ sub init_push {
 sub push {
     my $self = shift;
 
+    $self->_init_callbacks();
+    
     if ( not defined $self->{CONTEXT} ) {
         $self->init_push();
     }
 
-    foreach ( @_ ) {
-        $self->_push( $self->{CONTEXT}, $_ );
+    eval {
+        foreach ( @_ ) {
+            $self->_push( $self->{CONTEXT}, $_ );
+        }
+    };
+
+    $self->_cleanup_callbacks();
+    if ( $@ ) {
+        croak $@;
     }
 }
 
@@ -1222,6 +1342,167 @@ sub new {
     }
 
     return $self;
+}
+
+1;
+
+#-------------------------------------------------------------------------#
+# XML::LibXML::InputCallback Interface                                    #
+#-------------------------------------------------------------------------#
+package XML::LibXML::InputCallback;
+
+use vars qw($_CUR_CB @_GLOBAL_CALLBACKS @_CB_STACK);
+
+$_CUR_CB = undef;
+
+@_GLOBAL_CALLBACKS = ();
+@_CB_STACK = ();
+
+#-------------------------------------------------------------------------#
+# global callbacks                                                        #
+#-------------------------------------------------------------------------#
+sub _callback_match {
+    my $uri = shift;
+    my $retval = 0;
+
+    # loop through the callbacks and and find the first matching
+    # The callbacks are stored in execution order (reverse stack order)
+    # any new global callbacks are shifted to the callback stack.
+    foreach my $cb ( @_GLOBAL_CALLBACKS ) {
+
+        # callbacks have to return 1, 0 or undef, while 0 and undef 
+        # are handled the same way. 
+        # in fact, if callbacks return other values, the global match 
+        # assumes silently that the callback failed.
+
+        $retval = $cb->[0]->($uri);
+
+        if ( defined $retval and $retval == 1 ) {
+            # make the other callbacks use this callback
+            $_CUR_CB = $cb;
+            unshift @_CB_STACK, $cb; 
+            last;
+        }
+    }
+
+    return $retval;
+}
+
+sub _callback_open {
+    my $uri = shift;
+    my $retval = undef;
+    
+    # the open callback has to return a defined value. 
+    # if one works on files this can be a file handle. But 
+    # depending on the needs of the callback it also can be a 
+    # database handle or a integer lableing a certain dataset.
+
+    if ( defined $_CUR_CB ) {
+        $retval = $_CUR_CB->[1]->( $uri );
+        
+        # reset the callbacks, if one callback cannot open an uri
+        if ( not defined $retval or $retval == 0 ) {
+            shift @_CB_STACK;
+            $_CUR_CB = $_CB_STACK[0];
+        }
+    }
+    
+    return $retval;
+}
+
+sub _callback_read {
+    my $fh = shift;
+    my $buffer = shift;
+
+    my $retval = undef;
+
+    # libxml2 expects -1 if a callback has read everything.
+
+    if ( defined $_CUR_CB ) {
+        $retval = $_CUR_CB->[2]->( $fh, $buffer );
+    }
+
+    return $retval;
+}
+
+sub _callback_close {
+    my $fh = shift;
+    my $retval = 0;
+    
+    if ( defined $_CUR_CB ) {
+        $retval = $_CUR_CB->[3]->( $fh );
+        shift @_CB_STACK;
+        $_CUR_CB = $_CB_STACK[0];
+    }
+
+    return $retval;
+}
+
+#-------------------------------------------------------------------------#
+# member functions and methods                                            #
+#-------------------------------------------------------------------------#
+
+sub new {
+    my $CLASS = shift;
+    return bless {'_CALLBACKS' => []}, $CLASS;
+}
+
+# add a callback set to the callback stack
+# synopsis: $icb->register_callbacks( [$match_cb, $open_cb, $read_cb, $close_cb] );
+sub register_callbacks {
+    my $self = shift;
+    my $cbset = shift;
+    
+    # test if callback set is complete
+    if ( ref $cbset eq "ARRAY" and scalar( @$cbset ) == 4 ) {
+        unshift @{$self->{_CALLBACKS}}, $cbset;
+    }
+}
+
+# remove a callback set to the callback stack
+# if a callback set is passed, this function will check for the match function
+sub unregister_callbacks {
+    my $self = shift;
+    my $cbset = shift;
+    if ( ref $cbset eq "ARRAY" and scalar( @$cbset ) == 4 ) {
+        $self->{_CALLBACKS} = [grep { $_->[0] != $cbset->[0] } @{$self->{_CALLBACKS}}];
+    }
+    else {
+        shift @{$self->{_CALLBACKS}};
+    }
+}
+
+# make libxml2 use the callbacks 
+sub init_callbacks {
+    my $self = shift;
+
+    $_CUR_CB           = undef;
+    @_CB_STACK         = ();
+
+    @_GLOBAL_CALLBACKS = @{ $self->{_CALLBACKS} };
+    
+    if ( defined $XML::LibXML::match_cb and 
+         defined $XML::LibXML::open_cb  and 
+         defined $XML::LibXML::read_cb  and 
+         defined $XML::LibXML::close_cb ) {
+        push @_GLOBAL_CALLBACKS, [$XML::LibXML::match_cb,
+                                  $XML::LibXML::open_cb,
+                                  $XML::LibXML::read_cb,
+                                  $XML::LibXML::close_cb];
+    }
+
+    $self->lib_init_callbacks();
+}
+
+# reset libxml2's callbacks
+sub cleanup_callbacks {
+    my $self = shift;
+    
+    $_CUR_CB           = undef;
+    @_GLOBAL_CALLBACKS = ();
+    @_CB_STACK         = ();
+
+    $self->lib_cleanup_callbacks();
 }
 
 1;

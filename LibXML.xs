@@ -75,11 +75,6 @@ extern "C" {
 #define TEST_PERL_FLAG(flag) \
     SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
 
-static SV * LibXML_match_cb = NULL;
-static SV * LibXML_read_cb  = NULL;
-static SV * LibXML_open_cb  = NULL;
-static SV * LibXML_close_cb = NULL;
-
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
 
@@ -268,22 +263,13 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
 int
 LibXML_input_match(char const * filename)
 {
-    int results = 0;
-    SV * global_cb;
-    SV * callback = NULL;
+    int results;
+    int count;
+    SV * res;
 
-    if (LibXML_match_cb && SvTRUE(LibXML_match_cb)) {
-        callback = LibXML_match_cb;
-    }
-    else if ((global_cb = perl_get_sv("XML::LibXML::match_cb", FALSE))
-             && SvTRUE(global_cb)) {
-        callback = global_cb;
-    }
+    results = 0;
 
-    if (callback) {
-        int count;
-        SV * res;
-
+    {
         dTHX;
         dSP;
 
@@ -295,7 +281,8 @@ LibXML_input_match(char const * filename)
         PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
+        count = perl_call_pv("XML::LibXML::InputCallback::_callback_match", 
+                             G_SCALAR | G_EVAL);
 
         SPAGAIN;
 
@@ -318,7 +305,6 @@ LibXML_input_match(char const * filename)
         FREETMPS;
         LEAVE;
     }
-
     return results;
 }
 
@@ -326,52 +312,40 @@ void *
 LibXML_input_open(char const * filename)
 {
     SV * results;
-    SV * global_cb;
-    SV * callback = NULL;
+    int count;
 
-    if (LibXML_open_cb && SvTRUE(LibXML_open_cb)) {
-        callback = LibXML_open_cb;
+    dTHX;
+    dSP;
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP);
+    EXTEND(SP, 1);
+    PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
+    PUTBACK;
+
+    count = perl_call_pv("XML::LibXML::InputCallback::_callback_open", 
+                              G_SCALAR | G_EVAL);
+
+    SPAGAIN;
+
+    if (count != 1) {
+        croak("open callback must return a single value");
     }
-    else if ((global_cb = perl_get_sv("XML::LibXML::open_cb", FALSE))
-            && SvTRUE(global_cb)) {
-        callback = global_cb;
+
+    if (SvTRUE(ERRSV)) {
+        croak("input callback died: %s", SvPV_nolen(ERRSV));
+        POPs ;
     }
 
-    if (callback) {
-        int count;
+    results = POPs;
 
-        dTHX;
-        dSP;
+    SvREFCNT_inc(results);
 
-        ENTER;
-        SAVETMPS;
-
-        PUSHMARK(SP);
-        EXTEND(SP, 1);
-        PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
-        PUTBACK;
-
-        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
-
-        SPAGAIN;
-
-        if (count != 1) {
-            croak("open callback must return a single value");
-        }
-
-        if (SvTRUE(ERRSV)) {
-            croak("input callback died: %s", SvPV_nolen(ERRSV));
-            POPs ;
-        }
-
-        results = POPs;
-
-        SvREFCNT_inc(results);
-
-        PUTBACK;
-        FREETMPS;
-        LEAVE;
-    }
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
 
     return (void *)results;
 }
@@ -379,21 +353,14 @@ LibXML_input_open(char const * filename)
 int
 LibXML_input_read(void * context, char * buffer, int len)
 {
-    STRLEN res_len = 0;
+    STRLEN res_len;
     const char * output;
-    SV * global_cb;
-    SV * callback = NULL;
-    SV * ctxt = (SV *)context;
+    SV * ctxt;
 
-    if (LibXML_read_cb && SvTRUE(LibXML_read_cb)) {
-        callback = LibXML_read_cb;
-    }
-    else if ((global_cb = perl_get_sv("XML::LibXML::read_cb", FALSE))
-            && SvTRUE(global_cb)) {
-        callback = global_cb;
-    }
+    res_len = 0;
+    ctxt = (SV *)context;
 
-    if (callback) {
+    {
         int count;
 
         dTHX;
@@ -408,7 +375,8 @@ LibXML_input_read(void * context, char * buffer, int len)
         PUSHs(sv_2mortal(newSViv(len)));
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
+        count = perl_call_pv("XML::LibXML::InputCallback::_callback_read", 
+                             G_SCALAR | G_EVAL);
 
         SPAGAIN;
 
@@ -435,29 +403,18 @@ LibXML_input_read(void * context, char * buffer, int len)
         FREETMPS;
         LEAVE;
     }
-
-    /* warn("read, asked for: %d, returning: [%d] %s\n", len, res_len, buffer); */
     return res_len;
 }
 
 void
 LibXML_input_close(void * context)
 {
-    SV * global_cb;
-    SV * callback = NULL;
-    SV * ctxt = (SV *)context;
+    int count;
+    SV * ctxt;
 
-    if (LibXML_close_cb && SvTRUE(LibXML_close_cb)) {
-        callback = LibXML_close_cb;
-    }
-    else if ((global_cb = perl_get_sv("XML::LibXML::close_cb", FALSE))
-            && SvTRUE(global_cb)) {
-        callback = global_cb;
-    }
+    ctxt = (SV *)context;
 
-    if (callback) {
-        int count;
-
+    {
         dTHX;
         dSP;
 
@@ -469,7 +426,8 @@ LibXML_input_close(void * context)
         PUSHs(ctxt);
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
+        count = perl_call_pv("XML::LibXML::InputCallback::_callback_close", 
+                             G_SCALAR | G_EVAL);
 
         SPAGAIN;
 
@@ -718,23 +676,6 @@ LibXML_init_parser( SV * self ) {
         else {
             xmlLoadExtDtdDefaultValue ^= XML_COMPLETE_ATTRS;
         }
-        /* now fetch the callbacks */
-
-        item = hv_fetch( real_obj, "XML_LIBXML_READ_CB", 18, 0 );
-        if ( item != NULL && SvTRUE(*item))
-            LibXML_read_cb= *item;
-
-        item = hv_fetch( real_obj, "XML_LIBXML_MATCH_CB", 19, 0 );
-        if ( item != NULL  && SvTRUE(*item))
-            LibXML_match_cb= *item;
-
-        item = hv_fetch( real_obj, "XML_LIBXML_OPEN_CB", 18, 0 );
-        if ( item != NULL  && SvTRUE(*item))
-            LibXML_open_cb = *item;
-
-        item = hv_fetch( real_obj, "XML_LIBXML_CLOSE_CB", 19, 0 );
-        if ( item != NULL  && SvTRUE(*item))
-            LibXML_close_cb = *item;
 
         item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
         if ( item != NULL  && SvTRUE(*item)) {
@@ -746,40 +687,10 @@ LibXML_init_parser( SV * self ) {
         }
     }
 
-    /*
-     * If the parser callbacks are not set, we have to check CLASS wide
-     * callbacks.
-     */
-
-    if ( LibXML_match_cb == NULL ) {
-        item2 = perl_get_sv("XML::LibXML::MatchCB", 0);
-        if ( item != NULL  && SvTRUE(item2))
-            LibXML_match_cb= item2;
-    }
-    if ( LibXML_read_cb == NULL ) {
-        item2 = perl_get_sv("XML::LibXML::ReadCB", 0);
-        if ( item2 != NULL  && SvTRUE(item2))
-            LibXML_read_cb= item2;
-    }
-    if ( LibXML_open_cb == NULL ) {
-        item2 = perl_get_sv("XML::LibXML::OpenCB", 0);
-        if ( item2 != NULL  && SvTRUE(item2))
-            LibXML_open_cb= item2;
-    }
-    if ( LibXML_close_cb == NULL ) {
-        item2 = perl_get_sv("XML::LibXML::CloseCB", 0);
-        if ( item2 != NULL  && SvTRUE(item2))
-            LibXML_close_cb= item2;
-    }
-
      /* LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();  */
      /* xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity ); */
 
 
-    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
-                              (xmlInputOpenCallback) LibXML_input_open,
-                              (xmlInputReadCallback) LibXML_input_read,
-                              (xmlInputCloseCallback) LibXML_input_close);
 
     return real_obj;
 }
@@ -798,28 +709,6 @@ LibXML_cleanup_parser() {
         xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_old_ext_ent_loader );
     }
 }
-
-void
-LibXML_cleanup_callbacks() {
-
-/*    xs_warn("      cleanup parser callbacks!\n"); */
-
-    xmlCleanupInputCallbacks();
-    xmlRegisterDefaultInputCallbacks();
-
-    LibXML_read_cb  = NULL;
-    LibXML_match_cb = NULL;
-    LibXML_open_cb  = NULL;
-    LibXML_close_cb = NULL;
-
-/*    if ( LibXML_old_ext_ent_loader != NULL ) { */
-/*        xmlSetExternalEntityLoader( NULL ); */
-/*        xmlSetExternalEntityLoader( LibXML_old_ext_ent_loader ); */
-/*        LibXML_old_ext_ent_loader = NULL; */
-/*    } */
-
-}
-
 
 int
 LibXML_test_node_name( xmlChar * name )
@@ -879,10 +768,6 @@ BOOT:
     xmlPedanticParserDefaultValue = 0;
     xmlLineNumbersDefault(0);
     xmlSetGenericErrorFunc(NULL, NULL);
-    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
-                              (xmlInputOpenCallback) LibXML_input_open,
-                              (xmlInputReadCallback) LibXML_input_read,
-                              (xmlInputCloseCallback) LibXML_input_close);
 #ifdef LIBXML_CATALOG_ENABLED
     /* xmlCatalogSetDebug(10); */
     xmlInitializeCatalog(); /* use catalog data */
@@ -1013,7 +898,6 @@ _parse_string(self, string, dir = &PL_sv_undef)
             }
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1061,7 +945,6 @@ _parse_sax_string(self, string)
             xmlFreeParserCtxt(ctxt);
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1163,7 +1046,6 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             }
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1238,7 +1120,6 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
             xmlFreeParserCtxt(ctxt);
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -1309,7 +1190,6 @@ _parse_file(self, filename_sv)
             }
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1358,7 +1238,6 @@ _parse_sax_file(self, filename_sv)
             xmlFreeParserCtxt(ctxt);
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -1399,7 +1278,6 @@ parse_html_string(self, string)
             RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1475,7 +1353,6 @@ parse_html_fh(self, fh)
             }
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1513,7 +1390,6 @@ parse_html_file(self, filename_sv)
             RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1564,7 +1440,6 @@ parse_sgml_string(self, string, enc = &PL_sv_undef)
             RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1650,7 +1525,6 @@ parse_sgml_fh(self, fh, enc = &PL_sv_undef)
             }
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1696,7 +1570,6 @@ parse_sgml_file(self, filename_sv, enc = &PL_sv_undef)
             RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -1753,7 +1626,6 @@ _parse_sax_sgml_file(self, filename_sv, enc = &PL_sv_undef)
             docbFreeParserCtxt(ctxt);
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -1818,7 +1690,6 @@ _parse_xml_chunk(self, svchunk, enc = &PL_sv_undef)
             xmlFree( chunk );
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -1888,7 +1759,6 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
             xmlFree( chunk );
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -1919,7 +1789,6 @@ _processXIncludes(self, doc)
 
         RETVAL = xmlXIncludeProcess(real_doc);
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -1963,7 +1832,6 @@ _start_push(self, with_sax=0)
 
         RETVAL = PmmContextSv( ctxt );
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
@@ -2003,7 +1871,6 @@ _push(self, pctxt, data)
 
         xmlParseChunk(ctxt, (const char *)chunk, len, 0);
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
 
@@ -2055,7 +1922,6 @@ _end_push(self, pctxt, restore)
             }
         }
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, restore);
 
@@ -2092,7 +1958,6 @@ _end_sax_push(self, pctxt)
         xmlFreeParserCtxt(ctxt);
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
 
-        LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, 0);
 
@@ -6269,3 +6134,25 @@ validate( self, doc )
         RETVAL
 
 #endif /* HAVE_SCHEMAS */
+
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::InputCallback
+
+void
+lib_cleanup_callbacks( self )
+        SV * self
+    CODE:
+        xmlCleanupInputCallbacks();
+        xmlRegisterDefaultInputCallbacks();
+
+void
+lib_init_callbacks( self )
+        SV * self
+    CODE:
+        xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
+                                  (xmlInputOpenCallback) LibXML_input_open,
+                                  (xmlInputReadCallback) LibXML_input_read,
+                                  (xmlInputCloseCallback) LibXML_input_close);
+        
+
+

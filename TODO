@@ -1,17 +1,7 @@
-for the next release:
+1.59
 
-* Add information about nested parsers in callbacks to the documenation.
-* add namespace normalization. 
-* corrected catalog support
-* parsed DTD for parser validation.
+* Add a comment on findvalue() - no list context!!! why? findvalue is
+a XPath function (in libxml2.) it must not return lists
 
+- Make warning (wg. sgml parser veraltet) - pepl
 
-
-I plan the following issues to implemented soon
-
-* better DTD Support
-* more flexible parser interface (in the binding)
-* better module support (for shared code with other XS modules using libxml2)
-
-* xmlReader Interface.
-* structured Error support (Petr Pajas)
