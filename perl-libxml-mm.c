@@ -14,6 +14,7 @@ extern "C" {
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "XSUB.h"
 
 #include <libxml/parser.h>
 
