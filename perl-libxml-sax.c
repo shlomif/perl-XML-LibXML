@@ -57,8 +57,11 @@ static U32 EncodingHash;
 SV*
 _C2Sv( const xmlChar *string, const xmlChar *dummy )
 {
+
+    dTHX;
     SV *retval = &PL_sv_undef;
     STRLEN len;
+
     if ( string != NULL ) {
         len = xmlStrlen( string );
         retval = newSVpvn( (const char *)string, len );
@@ -145,9 +148,9 @@ void
 PSaxStartPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
                  const xmlChar * uri, SV ** handler )
 {
+    dTHX;
     HV * param = newHV();
 
-    dTHX;
     dSP;
 
     hv_store(param, "NamespaceURI", 12,
@@ -181,9 +184,9 @@ void
 PSaxEndPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
                const xmlChar * uri, SV ** handler )
 {
+    dTHX;
     HV * param = newHV();
 
-    dTHX;
     dSP;
 
     hv_store(param, "NamespaceURI", 12,
@@ -519,12 +522,12 @@ PSaxStartDocument(void * ctx)
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
     int count             = 0;
+    dTHX;
     HV* real_obj          = (HV *)SvRV(sax->parser);
     HV* empty             = newHV();
     SV ** handler         = sax->handler;
 
     if ( handler != NULL ) {
-        dTHX;
         dSP;
         
         ENTER;
@@ -602,12 +605,12 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr  sax  = (PmmSAXVectorPtr)ctxt->_private;
     int count             = 0;
+    dTHX;
     SV * attrhash         = NULL;
     HV * real_obj         = (HV *)SvRV(sax->parser);
     HV * element          = NULL;
     SV ** handler         = sax->handler;
     
-    dTHX;
     dSP;
     
     ENTER;
@@ -653,10 +656,10 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr  sax  = (PmmSAXVectorPtr)ctxt->_private;
     int count             = 0;
+    dTHX;
     HV* real_obj          = (HV *)SvRV(sax->parser);
     SV ** handler         = sax->handler;
 
-    dTHX;
     dSP;
 
     ENTER;
@@ -682,6 +685,7 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     int count = 0;
+    dTHX;
     HV* real_obj = (HV *)SvRV(sax->parser);
     HV* empty = newHV();
     SV ** handler = sax->handler;
@@ -689,7 +693,6 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
     if ( ch != NULL && handler != NULL ) {
         xmlChar * data = xmlStrndup( ch, len );
 
-        dTHX;
         dSP;
 
         ENTER;
@@ -716,6 +719,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     int count = 0;
+    dTHX;
     HV* real_obj = (HV *)SvRV(sax->parser);
     HV* empty = newHV();
     SV ** handler = sax->handler;
@@ -723,7 +727,6 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     if ( ch != NULL && handler != NULL ) {
         xmlChar * data = xmlStrdup( ch );
 
-        dTHX;
         dSP;
 
         ENTER;
@@ -751,6 +754,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     int count = 0;
 
+    dTHX;
     HV* real_obj = (HV *)SvRV(sax->parser);
     HV* empty = newHV();
     SV ** handler = sax->handler;
@@ -758,7 +762,6 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     if ( ch != NULL && handler != NULL ) {
         xmlChar * data = xmlStrndup( ch, len );
 
-        dTHX;
         dSP;
 
         ENTER;
@@ -786,12 +789,12 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
     int count             = 0;
+    dTHX;
     HV* real_obj          = (HV *)SvRV(sax->parser);
     HV* empty             = newHV();
     SV ** handler         = sax->handler;
 
     if ( handler != NULL ) {
-        dTHX;
         dSP;
     
         ENTER;

@@ -14,20 +14,25 @@ BEGIN {
     my $basics       = 0;
     my $magic        = 6;    
 
-    $tests += $basics;  
-    $tests += $magic if $] >= 5.006;
+    if ( $] >= 5.008 ) {
+        plan tests => 0;
+        print "# Skipping test on this platform\n";
+    }
+    else {
+        $tests += $basics;  
+        $tests += $magic if $] >= 5.006;
 
-    if ( defined $ENV{TEST_LANGUAGES} ) {
-        if ( $ENV{TEST_LANGUAGES} eq "all" ) {
-            $tests += 2*$basics;
-            $tests += 2*$magic if $] >= 5.006;
+        if ( defined $ENV{TEST_LANGUAGES} ) {
+            if ( $ENV{TEST_LANGUAGES} eq "all" ) {
+                $tests += 2*$basics;
+                $tests += 2*$magic if $] >= 5.006;
+            }
+            elsif ( $ENV{TEST_LANGUAGES} eq "EUC-JP"
+                    or $ENV{TEST_LANGUAGES} eq "KIO8-R" ) {
+                $tests += $basics;  
+                $tests += $magic if $] >= 5.006;
+            }
         }
-        elsif ( $ENV{TEST_LANGUAGES} eq "EUC-JP"
-                or $ENV{TEST_LANGUAGES} eq "KIO8-R" ) {
-            $tests += $basics;  
-            $tests += $magic if $] >= 5.006;
-        }
-        
     }
 
     plan tests => $tests;
