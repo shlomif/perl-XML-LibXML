@@ -1333,7 +1333,7 @@
             </method>
 
             <method name="getOwnerElement"
-                    synopsis="$node = $attr->getOwnerDocument();">
+                    synopsis="$node = $attr->getOwnerElement();">
                 <p>
                     returns the node the attribute belongs to. If the
                     attribute is not bound to a node, undef will be
