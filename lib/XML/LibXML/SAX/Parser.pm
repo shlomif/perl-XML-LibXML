@@ -87,7 +87,7 @@ sub process_node {
 sub process_element {
     my ($self, $element) = @_;
     
-    my $attribs;
+    my $attribs = {};
     
     foreach my $attr ($element->getAttributes) {
         my $key;
