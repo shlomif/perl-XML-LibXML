@@ -10,7 +10,7 @@ use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
-$VERSION = "1.49";
+$VERSION = "1.50";
 require Exporter;
 require DynaLoader;
 
@@ -906,13 +906,13 @@ sub end_document {
 }
 
 sub start_element {
-    my ( $parser, $name, %attrs ) = @_;
-
+    my (  $parser, $name, %attrs ) = @_;
     my $saxattr = {};
     foreach my $att ( keys %attrs ) {
         next unless $att =~ /^xmlns/;
         $parser->{SAX}->{Namespaces}->{$att} = $attrs{$att};
     }
+
     foreach my $att ( keys %attrs ) {
         next if $att =~ /^xmlns/;
         $saxattr->{$att} = {Name         => $att,
@@ -955,10 +955,10 @@ sub start_element {
 }
 
 sub end_element {
-    my ( $parser, $name ) = @_;
+    my (  $parser, $name ) = @_;
     my $elem = pop @{$parser->{SAX}->{ELSTACK}};
     if ( $elem->{Name} ne $name ) {
-        croak( "Not Well Formed! got </$name> expected </$elem->{Name}>" );
+        croak( "cought error where parser should work" );
     }
     $parser->{SAX}->{HANDLER}->end_element( $elem );
 }
