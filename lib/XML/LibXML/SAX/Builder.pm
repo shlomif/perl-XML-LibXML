@@ -166,6 +166,16 @@ sub end_element {
     $self->{Parent} = $self->{Parent}->parentNode();
 }
 
+sub start_cdata {
+    my $self = shift;
+    $self->{IN_CDATA} = 1;
+}
+
+sub end_cdata {
+    my $self = shift;
+    $self->{IN_CDATA} = 0;
+}
+
 sub characters {
     my ($self, $chars) = @_;
     if ( not defined $self->{DOM} and not defined $self->{Parent} ) {
@@ -175,8 +185,21 @@ sub characters {
     }
     return unless $self->{Parent};
     my $node;
+
+    unless ( defined $chars and defined $chars->{Data} ) {
+        return;
+    }
+
     if ( defined $self->{DOM} ) {
-        $node = $self->{DOM}->createTextNode($chars->{Data});
+        if ( defined $self->{IN_CDATA} and $self->{IN_CDATA} == 1 ) {
+            $node = $self->{DOM}->createCDATASection($chars->{Data});
+        }
+        else {
+            $node = $self->{DOM}->createTextNode($chars->{Data});
+        }
+    }
+    elsif ( defined $self->{IN_CDATA} and $self->{IN_CDATA} == 1 ) {
+        $node = XML::LibXML::CDATASection->new($chars->{Data});
     }
     else {
         $node = XML::LibXML::Text->new($chars->{Data});
@@ -192,6 +215,10 @@ sub comment {
         $self->{Parent} = XML::LibXML::DocumentFragment->new();
         $self->{NamespaceStack} = XML::NamespaceSupport->new;
         $self->{NamespaceStack}->push_context;
+    }
+
+    unless ( defined $chars and defined $chars->{Data} ) {
+        return;
     }
 
     if ( defined $self->{DOM} ) {

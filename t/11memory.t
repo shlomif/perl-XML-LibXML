@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 22;
+        plan tests => 24;
     }
     else {
         plan tests => 0;
@@ -9,8 +9,10 @@ BEGIN {
     }
 }
 use XML::LibXML;
+use XML::LibXML::SAX::Builder;
 {
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
+
         require Devel::Peek;
         my $peek = 0;
     
@@ -116,6 +118,15 @@ use XML::LibXML;
         ok(1);
         check_mem();
 
+        {
+            my $doc = XML::LibXML->createDocument;
+            for (1..$times_through)        {
+                make_doc2( $doc );
+            }
+        }
+        ok(1);
+        check_mem();
+
         print("# DTD string parsing\n");
 
         my $dtdstr;
@@ -207,28 +218,136 @@ dromeds.xml
 
         }
 
-        {
-            print "# ENCODING TESTS \n";
-            my $string = "test ä ø is a test string to test iso encoding";
-            my $encstr = encodeToUTF8( "iso-8859-1" , $string );
-            for ( 1..$times_through ) {
-                my $str = encodeToUTF8( "iso-8859-1" , $string );
-            }
-            ok(1);
-            check_mem();
+#        {
+#            print "# ENCODING TESTS \n";
+#            my $string = "test ä ø is a test string to test iso encoding";
+#            my $encstr = encodeToUTF8( "iso-8859-1" , $string );
+#            for ( 1..$times_through ) {
+#                my $str = encodeToUTF8( "iso-8859-1" , $string );
+#            }
+#            ok(1);
+#            check_mem();
 
-            for ( 1..$times_through ) {
-                my $str = encodeToUTF8( "iso-8859-2" , "abc" );
+#            for ( 1..$times_through ) {
+#                my $str = encodeToUTF8( "iso-8859-2" , "abc" );
+#            }
+#            ok(1);
+#            check_mem();
+#    
+#            for ( 1..$times_through ) {
+#                my $str = decodeFromUTF8( "iso-8859-1" , $encstr );
+#            }
+#            ok(1);
+#            check_mem();
+#        }
+        {
+            print "# NAMESPACE TESTS \n";
+
+            my $string = '<foo:bar xmlns:foo="bar"><foo:a/><foo:b/></foo:bar>';
+
+            my $doc = XML::LibXML->new()->parse_string( $string );
+
+            for (1..$times_through) {
+                my @ns = $doc->documentElement()->getNamespaces();
+                # warn "ns : " . $_->localname . "=>" . $_->href foreach @ns;
+                my $prefix = $_->localname foreach @ns;
+                my $name = $doc->documentElement->nodeName;
+            }  
+            check_mem();
+            ok(1);
+        }   
+
+        {
+            print "# SAX PARSER\n";
+
+        my %xmlStrings = (
+            "SIMPLE"      => "<xml1><xml2><xml3></xml3></xml2></xml1>",
+            "SIMPLE TEXT" => "<xml1> <xml2>some text some text some text </xml2> </xml1>",
+            "SIMPLE COMMENT" => "<xml1> <xml2> <!-- some text --> <!-- some text --> <!--some text--> </xml2> </xml1>",
+            "SIMPLE CDATA" => "<xml1> <xml2><![CDATA[some text some text some text]]></xml2> </xml1>",
+            "SIMPLE ATTRIBUTE" => '<xml1  attr0="value0"> <xml2 attr1="value1"></xml2> </xml1>',
+            "NAMESPACES SIMPLE" => '<xml:xml1 xmlns:xml="foo"><xml:xml2/></xml:xml1>',
+            "NAMESPACES ATTRIBUTE" => '<xml:xml1 xmlns:xml="foo"><xml:xml2 xml:foo="bar"/></xml:xml1>',
+        );
+
+            my $handler = sax_null->new;
+            my $parser  = XML::LibXML->new;
+            $parser->set_handler( $handler );
+
+            check_mem();
+       
+            foreach my $key ( keys %xmlStrings )  {
+                print "# $key \n";
+                for (1..$times_through) {
+                    my $doc = $parser->parse_string( $xmlStrings{$key} );
+                }
+
+                check_mem();
             }
             ok(1);
-            check_mem();
-    
-            for ( 1..$times_through ) {
-                my $str = decodeFromUTF8( "iso-8859-1" , $encstr );
-            }
-            ok(1);
-            check_mem();
         }
+
+        {
+            print "# PUSH PARSER\n";
+
+        my %xmlStrings = (
+            "SIMPLE"      => ["<xml1>","<xml2><xml3></xml3></xml2>","</xml1>"],
+            "SIMPLE TEXT" => ["<xml1> ","<xml2>some text some text some text"," </xml2> </xml1>"],
+            "SIMPLE COMMENT" => ["<xml1","> <xml2> <!","-- some text --> <!-- some text --> <!--some text-","-> </xml2> </xml1>"],
+            "SIMPLE CDATA" => ["<xml1> ","<xml2><!","[CDATA[some text some text some text]","]></xml2> </xml1>"],
+            "SIMPLE ATTRIBUTE" => ['<xml1 ','attr0="value0"> <xml2 attr1="value1"></xml2>',' </xml1>'],
+            "NAMESPACES SIMPLE" => ['<xml:xml1 xmlns:x','ml="foo"><xml:xml2','/></xml:xml1>'],
+            "NAMESPACES ATTRIBUTE" => ['<xml:xml1 xmlns:xml="foo">','<xml:xml2 xml:foo="bar"/></xml',':xml1>'],
+        );
+
+            my $handler = sax_null->new;
+            my $parser  = XML::LibXML->new;
+
+            check_mem();
+       
+            foreach my $key ( keys %xmlStrings )  {
+                print "# $key \n";
+                for (1..$times_through) {
+                    map { $parser->push( $_ ) } @{$xmlStrings{$key}};
+                    my $doc = $parser->finish_push();
+                }
+
+                check_mem();
+            }
+            ok(1);
+        }
+
+        {
+            print "# SAX PUSH PARSER\n";
+
+        my %xmlStrings = (
+            "SIMPLE"      => ["<xml1>","<xml2><xml3></xml3></xml2>","</xml1>"],
+            "SIMPLE TEXT" => ["<xml1> ","<xml2>some text some text some text"," </xml2> </xml1>"],
+            "SIMPLE COMMENT" => ["<xml1","> <xml2> <!","-- some text --> <!-- some text --> <!--some text-","-> </xml2> </xml1>"],
+            "SIMPLE CDATA" => ["<xml1> ","<xml2><!","[CDATA[some text some text some text]","]></xml2> </xml1>"],
+            "SIMPLE ATTRIBUTE" => ['<xml1 ','attr0="value0"> <xml2 attr1="value1"></xml2>',' </xml1>'],
+            "NAMESPACES SIMPLE" => ['<xml:xml1 xmlns:x','ml="foo"><xml:xml2','/></xml:xml1>'],
+            "NAMESPACES ATTRIBUTE" => ['<xml:xml1 xmlns:xml="foo">','<xml:xml2 xml:foo="bar"/></xml',':xml1>'],
+        );
+
+            my $handler = sax_null->new;
+            my $parser  = XML::LibXML->new;
+            $parser->set_handler( $handler );
+
+            check_mem();
+       
+            foreach my $key ( keys %xmlStrings )  {
+                print "# $key \n";
+                for (1..$times_through) {
+                    map { $parser->push( $_ ) } @{$xmlStrings{$key}};
+                    my $doc = $parser->finish_push();
+                }
+
+                check_mem();
+            }
+            ok(1);
+        }
+
     }
 }
 
@@ -273,6 +392,15 @@ sub make_doc {
     return $document
 }
 
+sub make_doc2 {
+    my $docA = shift;
+    my $docB = XML::LibXML::Document->new;
+    my $e1   = $docB->createElement( "A" );
+    my $e2   = $docB->createElement( "B" );
+    $e1->appendChild( $e2 );
+    $docA->setDocumentElement( $e1 );
+}
+
 sub check_mem {
     my $initialise = shift;
     # Log Memory Usage
@@ -309,3 +437,77 @@ sub make_doc_elem {
     $doc->setDocumentElement( $node1 );
 }
 
+package sax_null;
+
+require Devel::Peek;
+use Data::Dumper;
+
+sub new {
+    my $class = shift;
+    bless {}, $class;
+}
+
+sub start_document {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub xml_decl {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub start_element {
+    my $self = shift;
+    my $dummy = shift;
+    # warn Dumper( $dummy );
+}
+
+sub end_element {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub start_cdata {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub end_cdata {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub start_prefix_mapping {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub end_prefix_mapping {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub characters {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub comment {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+
+sub end_document {
+    my $self = shift;
+    my $dummy = shift;
+}
+
+sub error {
+    my $self = shift;
+    my $msg  = shift;
+    die( $msg );
+}
+
+1;

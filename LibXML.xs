@@ -1152,13 +1152,8 @@ _parse_sax_string(self, string)
        
         PmmSAXInitContext( ctxt, self );
 
-        xmlFree(ctxt->sax);
-        ctxt->sax = PSaxGetHandler();
-
         RETVAL = xmlParseDocument(ctxt);
 
-        xmlFree( ctxt->sax );
-        ctxt->sax = NULL;
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
 
@@ -1313,8 +1308,6 @@ _parse_sax_file(self, filename)
         
         xmlParseDocument(ctxt);
 
-        xmlFree(ctxt->sax);
-        ctxt->sax = NULL;
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
                 
@@ -1596,13 +1589,10 @@ parse_sax_sgml_file(self, fn, enc )
             croak("Could not create file parser context for file '%s' : %s", filename, strerror(errno));
         }
 
-        ctxt->sax = PSaxGetHandler();
         PmmSAXInitContext( ctxt, self );
 
         docbParseDocument(ctxt);
 
-        xmlFree(ctxt->sax);
-        ctxt->sax = NULL;
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
                 
@@ -1711,7 +1701,6 @@ _parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
                 croak("Couldn't create memory parser context: %s", strerror(errno));
             }   
             PmmSAXInitContext( ctxt, self );         
-            ctxt->sax = PSaxGetHandler();
 
             LibXML_init_parser(self);
             handler = PSaxGetHandler();
@@ -1778,17 +1767,13 @@ _start_push( self, with_sax=0 )
     CODE:
         /* create empty context */
         LibXML_init_parser(self);
+        ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
+
         if ( with_sax == 1 ) {
-            ctxt = xmlCreatePushParserCtxt( PSaxGetHandler(),
-                                            NULL,
-                                            NULL,
-                                            0,
-                                            NULL );
             PmmSAXInitContext( ctxt, self );
         }
-        else {
-            ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
-        }
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser(); 
         sv_2mortal(LibXML_error);
 
         RETVAL = PmmContextSv( ctxt );
@@ -1796,7 +1781,7 @@ _start_push( self, with_sax=0 )
         RETVAL
 
 int
-_push( self, pctxt, data ) 
+_push( self, pctxt, data )
         SV * self
         SV * pctxt
         SV * data
@@ -1819,14 +1804,11 @@ _push( self, pctxt, data )
             xs_warn( "empty string" );
             XSRETURN_UNDEF;
         }
-
-        LibXML_init_error();
-        
+/*        LibXML_init_error(); */
+        LibXML_init_parser(self);
         xmlParseChunk(ctxt, chunk, len, 0);
-
         LibXML_cleanup_callbacks();
-        LibXML_cleanup_parser();    
-
+        LibXML_cleanup_parser();
         sv_2mortal(LibXML_error); 
 
         RETVAL = 1;
@@ -1852,17 +1834,11 @@ _end_push( self, pctxt, restore )
         }
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
-
-        LibXML_init_error();
-        /* LibXML_init_parser(self); */
-
+        LibXML_init_parser(self); 
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
-        LibXML_cleanup_parser();    
-
+        LibXML_cleanup_parser();
         sv_2mortal(LibXML_error);
-
-
         if ( ctxt->node != NULL && restore == 0 ) {
             xmlFreeParserCtxt(ctxt);            
             LibXML_croak_error();
@@ -1899,19 +1875,14 @@ _end_sax_push( self, pctxt )
         }
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
-
-        LibXML_init_error();
-        /* LibXML_init_parser(self); */
+        LibXML_init_parser(self); 
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
+
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
-
-        sv_2mortal(LibXML_error);
+        sv_2mortal(LibXML_error); 
 
         PmmSAXCloseContext(ctxt);
-
-        xmlFree(ctxt->sax);
-        ctxt->sax = NULL;
         xmlFreeParserCtxt(ctxt);
         XSRETURN_UNDEF;
 
@@ -3793,9 +3764,20 @@ addChild( self, nNode )
         xmlNodePtr nNode
     PREINIT:
         xmlNodePtr retval = NULL;
+        ProxyNodePtr proxy;
     CODE:
         xmlUnlinkNode(nNode);
+        proxy = PmmPROXYNODE(nNode);
         retval = xmlAddChild( self, nNode );
+
+        if ( retval == NULL ) {
+            croak( "ERROR!\n" );
+        }
+
+        if ( retval != nNode ) {
+            xs_warn( "node was lost during operation\n" );
+            PmmNODE(proxy) = NULL;
+        }
 
         RETVAL = PmmNodeToSv( retval,
                               PmmOWNERPO(PmmPROXYNODE(self)) );

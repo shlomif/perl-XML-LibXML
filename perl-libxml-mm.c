@@ -140,9 +140,14 @@ PmmNewNode(xmlNodePtr node)
 {
     ProxyNodePtr proxy = NULL;
 
+    if ( node == NULL ) {
+        warn( "no node found\n" );
+        return NULL;
+    }
+
     if ( node->_private == NULL ) {
-        proxy = (ProxyNodePtr)malloc(sizeof(ProxyNode));
-        /* proxy = (ProxyNodePtr)Newz(0, proxy, 0, ProxyNode); */
+        proxy = (ProxyNodePtr)malloc(sizeof(struct _ProxyNode)); 
+        /* proxy = (ProxyNodePtr)Newz(0, proxy, 0, ProxyNode);  */
         if (proxy != NULL) {
             proxy->node  = node;
             proxy->owner   = NULL;
@@ -235,6 +240,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
             libnode = PmmNODE( node );
             if ( libnode != NULL ) {
                 if ( libnode->_private != node ) {
+                    warn( "lost node\n" );
                     libnode = NULL;
                 }
                 else {
@@ -262,6 +268,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
                 
                 PmmFreeNode( libnode );
             }
+            /* Safefree( node ); */
             free( node );
         }
     }
@@ -576,17 +583,14 @@ PmmNewContext(xmlParserCtxtPtr node)
 {
     ProxyNodePtr proxy = NULL;
 
-    if ( node->_private == NULL ) {
-        proxy = (ProxyNodePtr)malloc(sizeof(ProxyNode));
-        if (proxy != NULL) {
-            proxy->node  = (xmlNodePtr)node;
-            proxy->owner   = NULL;
-            proxy->count   = 0;
-            node->_private = (void*) proxy;
-        }
+    proxy = (ProxyNodePtr)xmlMalloc(sizeof(ProxyNode));
+    if (proxy != NULL) {
+        proxy->node  = (xmlNodePtr)node;
+        proxy->owner   = NULL;
+        proxy->count   = 1;
     }
     else {
-        proxy = (ProxyNodePtr)node->_private;
+        warn( "empty context" );
     }
     return proxy;
 }
@@ -602,12 +606,13 @@ PmmContextREFCNT_dec( ProxyNodePtr node )
             xs_warn( "NODE DELETATION\n" );
             libnode = (xmlParserCtxtPtr)PmmNODE( node );
             if ( libnode != NULL ) {
+                free( libnode->_private );
                 libnode->_private = NULL;
-                PmmNODE( node ) = NULL;
+                PmmNODE( node )   = NULL;
                 xmlFreeParserCtxt(libnode);
             }
-            free( node );
         }
+        xmlFree( node );
     }
     return retval;
 }
@@ -618,6 +623,7 @@ PmmContextSv( xmlParserCtxtPtr ctxt )
     ProxyNodePtr dfProxy= NULL;
     SV * retval = &PL_sv_undef;
     const char * CLASS = "XML::LibXML::ParserContext";
+    void * saxvector = NULL;
 
     if ( ctxt != NULL ) {
         dfProxy = PmmNewContext(ctxt);
@@ -921,7 +927,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
             }
 
             /* retval = C2Sv( decoded, real_doc->encoding ); */
-            /* xmlFree( decoded ); */
+            xmlFree( decoded );
         }
         else {
             retval = newSVpvn( (const char *)string, xmlStrlen(string) );
@@ -946,7 +952,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
     if ( refnode != NULL ) {
         xmlDocPtr real_dom = refnode->doc;
         xs_warn("have node!");
-        if (real_dom != NULL &&real_dom->encoding != NULL ) {
+        if (real_dom != NULL && real_dom->encoding != NULL ) {
             xs_warn("encode string!");
             /*  speed things a bit up.... */
             if ( scalar != NULL && scalar != &PL_sv_undef ) {
