@@ -103,11 +103,21 @@ sub process_element {
     my ($self, $element) = @_;
 
     my $attribs = {};
-    my @ns_maps;
+    my @ns_maps = $element->getNamespaces;
+
+    foreach my $ns (@ns_maps) {
+        $self->start_prefix_mapping(
+            {
+                NamespaceURI => $ns->href,
+                Prefix       => ( defined $ns->localname  ? $ns->localname : ''),
+            }
+        );
+    }
 
     foreach my $attr ($element->attributes) {
         my $key;
         # warn("Attr: $attr -> ", $attr->getName, " = ", $attr->getData, "\n");
+        # this isa dump thing...
         if ($attr->isa('XML::LibXML::Namespace')) {
             # TODO This needs fixing modulo agreeing on what
             # is the right thing to do here.
@@ -130,7 +140,7 @@ sub process_element {
                     Prefix => $p,
                     LocalName => $localname,
                 };
-            push @ns_maps, $attribs->{$key};
+            # push @ns_maps, $attribs->{$key};
         }
         else {
             my $ns = $attr->namespaceURI || '';
@@ -156,15 +166,6 @@ sub process_element {
         LocalName => $element->localname,
     };
 
-    foreach my $ns (@ns_maps) {
-        $self->start_prefix_mapping(
-            {
-                NamespaceURI => $ns->{Value},
-                Prefix => (($ns->{LocalName} eq 'xmlns') ? '' : $ns->{LocalName}),
-            }
-        );
-    }
-
     $self->start_element($node);
 
     foreach my $child ($element->childNodes) {
@@ -176,16 +177,15 @@ sub process_element {
     delete $end_node->{Attributes};
 
     $self->end_element($end_node);
-    
+
     foreach my $ns (@ns_maps) {
         $self->end_prefix_mapping(
             {
-                NamespaceURI => $ns->{Value},
-                Prefix => (($ns->{LocalName} eq 'xmlns') ? '' : $ns->{LocalName}),
+                NamespaceURI => $ns->href,
+                Prefix       => ( defined $ns->localname  ? $ns->localname : ''),
             }
         );
     }
-
 }
 
 1;
