@@ -356,9 +356,6 @@ PmmCloneNode( xmlNodePtr node, int recursive )
     if ( node != NULL ) {
         switch ( node->type ) {
         case XML_ELEMENT_NODE:
-            retval = xmlCopyNode( node, recursive );
-            xmlReconciliateNs(retval->doc, retval);
-            break;
 		case XML_TEXT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_ENTITY_REF_NODE:
@@ -370,7 +367,6 @@ PmmCloneNode( xmlNodePtr node, int recursive )
             break;
 		case XML_ATTRIBUTE_NODE:
             retval = (xmlNodePtr) xmlCopyProp( NULL, (xmlAttrPtr) node );
-            xmlReconciliateNs(retval->doc, retval);
             break;
         case XML_DOCUMENT_NODE:
 		case XML_HTML_DOCUMENT_NODE:
