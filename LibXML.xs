@@ -3202,7 +3202,7 @@ ownerNode( elem )
         SV* elem
     ALIAS:
         XML::LibXML::Node::getOwner = 1
-        XML::LibXML::Node::getOwnerElement = 1
+        XML::LibXML::Node::getOwnerElement = 2
     CODE:
         if( PmmSvOwner(elem) != NULL ){
             RETVAL = PmmNodeToSv(PmmSvOwner(elem), NULL);
