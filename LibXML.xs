@@ -592,7 +592,7 @@ LibXML_init_callbacks() {
 void
 LibXML_cleanup_callbacks() {
     xmlSetGenericErrorFunc(NULL, NULL);
-    return;
+    return; 
 /*   warn("      cleanup parser callbacks!\n"); */
 
     xmlCleanupInputCallbacks();
@@ -618,7 +618,7 @@ BOOT:
                               (xmlInputOpenCallback) LibXML_input_open,
                               (xmlInputReadCallback) LibXML_input_read,
                               (xmlInputCloseCallback) LibXML_input_close);
-    xmlSetGenericErrorFunc(PerlIO_stderr(), 
+    xmlSetGenericErrorFunc( NULL , 
                            (xmlGenericErrorFunc)LibXML_error_handler);
     xmlDoValidityCheckingDefaultValue = 0;
     xmlSubstituteEntitiesDefaultValue = 1;
@@ -1077,6 +1077,7 @@ _parse_xml_chunk( self, chunk, encoding="UTF-8" )
 
         if ( chunk != NULL ) {
             LibXML_error = sv_2mortal(newSVpv("", 0));
+            LibXML_init_callbacks();
             rv = domReadWellBalancedString( NULL, chunk );
             LibXML_cleanup_callbacks();
             LibXML_cleanup_parser();    
