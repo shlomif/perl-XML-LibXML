@@ -34,7 +34,7 @@ eval {
     print "running xml2-config... ";
     my $ver = backtick("$xml2cfg --version");
     my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-    die "VERSION" unless $major > 2 || $minor > 4 || $point >= 8;
+    die "VERSION" unless $major > 2 || $minor > 4 || $point >= 20;
     $config{LIBS} ||= backtick("$xml2cfg --libs");
     $config{INC}  ||= backtick("$xml2cfg --cflags");
     print "ok\n";
