@@ -759,6 +759,9 @@ domNodeTypeName( xmlNodePtr elem ){
     case XML_DOCUMENT_FRAG_NODE:
       name = "XML::LibXML::DocumentFragment";
       break;
+    case XML_NAMESPACE_DECL:
+      name = "XML::LibXML::Namespace";
+      break;
     default:
       name = "XML::LibXML::Node";
       break;

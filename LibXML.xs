@@ -2106,6 +2106,7 @@ getAttributes( node )
     PREINIT:
         xmlAttrPtr attr = NULL;
         xmlNodePtr real_node = NULL;
+        xmlNsPtr ns = NULL;
         SV * element;
         int len=0;
         const char * CLASS = "XML::LibXML::Attr";
@@ -2116,21 +2117,37 @@ getAttributes( node )
         attr      = real_node->properties;
         while ( attr != NULL ) {
             ProxyObject * proxy=NULL;
-            element = sv_newmortal();   
-            proxy = make_proxy_node((xmlNodePtr)attr);
-            if ( node->extra != NULL ) {
-                proxy->extra = node->extra;
-                SvREFCNT_inc(node->extra);
-            }
             if ( wantarray != G_SCALAR ) {
+                element = sv_newmortal();   
+                proxy = make_proxy_node((xmlNodePtr)attr);
+                if ( node->extra != NULL ) {
+                    proxy->extra = node->extra;
+                    SvREFCNT_inc(node->extra);
+                }
                 XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
             }
             attr = attr->next;
             len++;
-         }
-         if( wantarray == G_SCALAR ) {
+        }
+        ns = real_node->nsDef;
+        while ( ns != NULL ) {
+            ProxyObject * proxy = NULL;
+            const char * CLASS = "XML::LibXML::Namespace";
+            if ( wantarray != G_SCALAR ) {
+                element = sv_newmortal();
+                proxy = make_proxy_node((xmlNodePtr)ns);
+                if ( node->extra != NULL ) {
+                    proxy->extra = node->extra;
+                    SvREFCNT_inc(node->extra);
+                }
+                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
+            }
+            ns = ns->next;
+            len++;
+        }
+        if( wantarray == G_SCALAR ) {
             XPUSHs( newSViv( len ) );
-         }
+        }
 
 void
 getAttributesNS( node,nsURI )
@@ -2150,24 +2167,58 @@ getAttributesNS( node,nsURI )
         while ( attr != NULL ) {
             if( attr->ns != NULL && xmlStrcmp( nsURI, attr->ns->href ) == 0 ){ 
                 ProxyObject * proxy;
-                element = sv_newmortal();
-                
-                proxy = make_proxy_node((xmlNodePtr)attr);
-                if ( node->extra != NULL ) {
-                    proxy->extra = node->extra;
-                    SvREFCNT_inc(node->extra);
-                }
                 if( wantarray != G_SCALAR ) {
+                    element = sv_newmortal();
+                    
+                    proxy = make_proxy_node((xmlNodePtr)attr);
+                    if ( node->extra != NULL ) {
+                        proxy->extra = node->extra;
+                        SvREFCNT_inc(node->extra);
+                    }
                     XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
                 }
                 len++;
             }
             attr = attr->next;
         }
-         if( wantarray == G_SCALAR ) {
+        if( wantarray == G_SCALAR ) {
             XPUSHs( newSViv( len ) );
-         }
+        }
 
+void
+getNamespaces ( node )
+        ProxyObject * node
+    ALIAS:
+        XML::LibXML::Node::namespaces = 1
+    PREINIT:
+        xmlNsPtr ns = NULL;
+        xmlNodePtr real_node = NULL;
+        SV * element;
+        int len=0;
+        const char * CLASS = "XML::LibXML::Namespace";
+        int wantarray = GIMME_V;
+    PPCODE:
+        real_node = (xmlNodePtr) node->object;
+        
+        ns = real_node->nsDef;
+        while ( ns != NULL ) {
+            ProxyObject * proxy = NULL;
+            if ( wantarray != G_SCALAR ) {
+                element = sv_newmortal();
+                proxy = make_proxy_node((xmlNodePtr)ns);
+                if ( node->extra != NULL ) {
+                    proxy->extra = node->extra;
+                    SvREFCNT_inc(node->extra);
+                }
+                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
+            }
+            ns = ns->next;
+            len++;
+        }
+        if( wantarray == G_SCALAR ) {
+            XPUSHs( newSViv( len ) );
+        }
+        
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
 ProxyObject *
@@ -2794,3 +2845,42 @@ DESTROY(self)
         }
         self->object = NULL;
         Safefree( self );
+
+MODULE = XML::LibXML        PACKAGE = XML::LibXML::Namespace
+
+char *
+getName(self)
+        xmlNsPtr self
+    ALIAS:
+        XML::LibXML::Namespace::name = 1
+        XML::LibXML::Namespace::prefix = 2
+    CODE:
+        RETVAL = (char*)self->prefix;
+    OUTPUT:
+        RETVAL
+
+char *
+getData(self)
+        xmlNsPtr self
+    ALIAS:
+        XML::LibXML::Namespace::value = 1
+        XML::LibXML::Namespace::getValue = 2
+        XML::LibXML::Namespace::uri = 3
+    CODE:
+        RETVAL = (char*)self->href;
+    OUTPUT:
+        RETVAL
+
+void
+DESTROY(self)
+        ProxyObject* self
+    CODE:
+        if ( (xmlNodePtr)self->object != NULL ) {
+            xmlFreeNs((xmlNsPtr)self->object);
+        }
+        if( self->extra != NULL ) {
+            SvREFCNT_dec(self->extra);
+        }
+        self->object = NULL;
+        Safefree(self);
+
