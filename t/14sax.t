@@ -1,10 +1,15 @@
 use Test;
-BEGIN { plan tests => 19 }
+BEGIN { plan tests => 33 }
 use XML::LibXML;
-use XML::LibXML::SAX::Generator;
+use XML::LibXML::SAX::Parser;
 use XML::LibXML::SAX::Builder;
+use XML::SAX;
 use IO::File;
 ok(1);
+
+ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)));
+
+local $XML::SAX::ParserPackage = 'XML::LibXML::SAX::Parser';
 
 my $sax = SAXTester->new;
 ok($sax);
@@ -13,19 +18,24 @@ my $str = join('', IO::File->new("example/dromeds.xml")->getlines);
 my $doc = XML::LibXML->new->parse_string($str);
 ok($doc);
 
-my $generator = XML::LibXML::SAX::Generator->new(Handler => $sax);
+my $generator = XML::LibXML::SAX::Parser->new(Handler => $sax);
 ok($generator);
 
 $generator->generate($doc);
 
 my $builder = XML::LibXML::SAX::Builder->new();
 ok($builder);
-my $gen2 = XML::LibXML::SAX::Generator->new(Handler => $builder);
+my $gen2 = XML::LibXML::SAX::Parser->new(Handler => $builder);
 my $dom2 = $gen2->generate($doc);
 ok($dom2);
 
 ok($dom2->toString, $str);
 # warn($dom2->toString);
+
+########### XML::SAX Tests ###########
+my $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
+ok($parser);
+$parser->parse_uri("example/dromeds.xml");
 
 ########### Helper class #############
 
