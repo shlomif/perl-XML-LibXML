@@ -293,20 +293,19 @@ xmlChar *
 PmmGenNsName( const xmlChar * name, xmlChar * nsURI ) {
     int namelen = 0;
     int urilen = 0;
-    xmlChar * retval;
+    xmlChar * retval = NULL;
     namelen = xmlStrlen( name );
     if ( nsURI != NULL ) {
         urilen = xmlStrlen( nsURI );
     }
-    retval = (xmlChar *)xmlMalloc( (namelen + urilen + 2) * sizeof(xmlChar));
-    *retval = 0;
 
-    xmlStrncat( retval, "{",1 );
+
+    retval =xmlStrncat( retval, "{",1 );
     if ( nsURI != NULL ) {
-        xmlStrncat( retval, nsURI, urilen );
+        retval =xmlStrncat( retval, nsURI, urilen );
     } 
-    xmlStrncat( retval, "}",1 );
-    xmlStrncat( retval, name, namelen );
+    retval = xmlStrncat( retval, "}",1 );
+    retval = xmlStrncat( retval, name, namelen );
     return retval;
 }
 
@@ -326,16 +325,13 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
 
     if ( attr != NULL ) {
         while ( *ta != NULL ) {
-            if ( PmmDetectNamespaceDecl( *ta ) ) {
-                name = *ta; ta++;
-                value = *ta; ta++;
-                PmmAddNamespace(sax, name, value);                
-            }
-            else {
-                ta++;ta++;
+            name = *ta; ta++;
+            value = *ta; ta++;
+            if (PmmDetectNamespaceDecl(name)) {
+                PmmAddNamespace(sax, name, value);  
             }
         }
-        
+
         ta = attr;
 
         while ( *ta != NULL ) {
@@ -525,7 +521,6 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr) {
  
     dTHX;
     dSP;
-
     
     ENTER;
     SAVETMPS;
@@ -540,6 +535,8 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr) {
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::start_element", 0 );
+
+    SPAGAIN ;
 
     FREETMPS ;
     LEAVE ;

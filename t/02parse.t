@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 41 };
+BEGIN { plan tests => 42 };
 use XML::LibXML;
 
 ##
@@ -225,6 +225,12 @@ print "# 7. SAX parser\n";
     my $handler = XML::LibXML::SAX::Builder->new();
     my $generator = XML::LibXML::SAX->new( Handler=>$handler );
 
+
+    my $string1  = q{<bar>foo</bar>};
+
+    $doc = $generator->parse_string( $string1 );
+    ok( $doc );
+
     my $string  = q{<bar foo="bar">foo</bar>};
 
     $doc = $generator->parse_string( $string );
@@ -238,7 +244,12 @@ print "# 7. SAX parser\n";
     my $root = $doc->documentElement;
     my @attrs = $root->attributes;
     ok( scalar @attrs );
-    ok( $attrs[0]->nodeType, XML_NAMESPACE_DECL );
+    if ( scalar @attrs ) {
+        ok( $attrs[0]->nodeType, XML_NAMESPACE_DECL );
+    }
+    else {
+        ok(0);
+    }
 
     $doc = $generator->parse_uri( "example/test.xml" );
 
