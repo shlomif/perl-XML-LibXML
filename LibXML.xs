@@ -4424,6 +4424,21 @@ getNamespace( node )
         }
     OUTPUT:
         RETVAL
+
+
+SV * 
+nodePath( self )
+        xmlNodePtr self
+    PREINIT:
+        xmlChar * path = NULL;
+    CODE:
+        path = xmlGetNodePath( self );
+        if ( path == NULL ) {
+            croak( "cannot calculate path for the given node" );
+        }
+        RETVAL = nodeC2Sv( path, self );
+    OUTPUT:
+        RETVAL
         
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
