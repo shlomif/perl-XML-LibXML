@@ -76,7 +76,7 @@ sub start_element {
 sub end_element {
     my ($self, $el) = @_;
     return unless $self->{Parent};
-    $self->{Parent} = $self->{Parent}->getParentNode();
+    $self->{Parent} = $self->{Parent}->parentNode();
 }
 
 sub characters {

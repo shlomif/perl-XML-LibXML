@@ -118,6 +118,7 @@ PmmFreeNode( xmlNodePtr node )
 {
     switch( node->type ) {
     case XML_DOCUMENT_NODE:
+    case XML_HTML_DOCUMENT_NODE:
         xs_warn("XML_DOCUMENT_NODE\n");
         xmlFreeDoc( (xmlDocPtr) node );
         break;
@@ -130,9 +131,9 @@ PmmFreeNode( xmlNodePtr node )
         if ( node->doc ) {
             if ( node->doc->extSubset != (xmlDtdPtr)node 
                  && node->doc->intSubset != (xmlDtdPtr)node ) {
-                xs_warn( "should free DTD\n");
+                xs_warn( "XML_DTD_NODE\n");
                 node->doc = NULL;
-                // xmlFreeDtd( (xmlDtdPtr)node );
+                xmlFreeDtd( (xmlDtdPtr)node );
             }
         }
         break;

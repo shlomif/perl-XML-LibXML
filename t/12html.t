@@ -7,10 +7,10 @@ ok(1);
 my $html = "example/test.html";
 
 my $parser = XML::LibXML->new();
-my $doc = $parser->parse_html_file($html);
-ok($doc);
-
-undef $doc;
+{
+    my $doc = $parser->parse_html_file($html);
+    ok($doc);
+}
 
 my $fh = IO::File->new($html) || die "Can't open $html: $!";
 

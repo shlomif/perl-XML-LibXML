@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 12;
+        plan tests => 18;
     }
     else {
         plan tests => 0;
@@ -116,6 +116,66 @@ use XML::LibXML;
         }
         ok(1);
         check_mem();
+
+        print("# DTD string parsing\n");
+
+        my $dtdstr;
+        {
+            local $/; local *DTD;
+            open(DTD, 'example/test.dtd') || die $!;
+            $dtdstr = <DTD>;
+            $dtdstr =~ s/\r//g;
+            $dtdstr =~ s/[\r\n]*$//;
+            close DTD;
+        }
+
+        ok($dtdstr);
+
+        for ( 1..$times_through ) {
+            my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
+        }
+        ok(1);
+        check_mem();
+
+        print( "# DTD URI parsing \n");
+        # parse a DTD from a SYSTEM ID
+        for ( 1..$times_through ) {
+            my $dtd = XML::LibXML::Dtd->new('ignore', 'example/test.dtd');
+        }
+        ok(1);
+        check_mem();
+
+        print("# Document validation\n");
+        {
+            print "# is_valid()\n";
+            my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
+            my $xml = XML::LibXML->new->parse_file('example/article_bad.xml');
+            for ( 1..$times_through ) {
+                $xml->is_valid($dtd);
+            }
+            ok(1);
+            check_mem();
+        
+            print "# validate() \n";
+            for ( 1..$times_through ) {
+                eval { $xml->validate($dtd);};
+            }
+            ok(1);
+            check_mem();
+                
+        }
+
+        print "# FIND NODES \n";
+        {
+            my $str = "<foo><bar><foo/></bar></foo>";
+            my $doc = XML::LibXML->new->parse_string( $str );
+            for ( 1..$times_through ) {
+                my @nodes = $doc->findnodes("/foo/bar/foo");
+            }
+            ok(1);
+            check_mem();
+
+        }
     }
 }
 

@@ -2307,6 +2307,67 @@ setCompression( self, zLevel )
     CODE:
         xmlSetDocCompressMode((xmlDocPtr)PmmSvNode(self), zLevel);
 
+
+int
+is_valid(self, ...)
+        SV * self
+    PREINIT:
+        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(self);
+        xmlValidCtxt cvp;
+        xmlDtdPtr dtd;
+        SV * dtd_sv;
+    CODE:
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        cvp.userData = (void*)PerlIO_stderr();
+        cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
+        cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
+        if (items > 1) {
+            dtd_sv = ST(1);
+            if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
+                dtd = (xmlDtdPtr)PmmSvNode(dtd_sv);
+            }
+            RETVAL = xmlValidateDtd(&cvp, doc, dtd);
+        }
+        else {
+            RETVAL = xmlValidateDocument(&cvp, doc);
+        }
+    OUTPUT:
+        RETVAL
+
+int
+validate(self, ...)
+        SV * self
+    PREINIT:
+        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(self);
+        xmlValidCtxt cvp;
+        xmlDtdPtr dtd;
+        SV * dtd_sv;
+        STRLEN n_a;
+    CODE:
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        cvp.userData = (void*)PerlIO_stderr();
+        cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
+        cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
+        if (items > 1) {
+            dtd_sv = ST(1);
+            if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
+                dtd = (xmlDtdPtr)PmmSvNode(dtd_sv);
+            }
+            else {
+                croak("is_valid: argument must be a DTD object");
+            }
+            RETVAL = xmlValidateDtd(&cvp, doc , dtd);
+        }
+        else {
+            RETVAL = xmlValidateDocument(&cvp, doc);
+        }
+        if (RETVAL == 0) {
+            croak(SvPV(LibXML_error, n_a));
+        }
+    OUTPUT:
+        RETVAL
+
+
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Node
 
 void
@@ -3244,17 +3305,25 @@ _find( pnode, xpath )
         }
 
 void
-_findnodes( pnode, xpath )
+_findnodes( pnode, perl_xpath )
         SV* pnode
-        char * xpath 
+        SV * perl_xpath 
     PREINIT:
         xmlNodePtr node = PmmSvNode(pnode);
         ProxyNodePtr owner = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
         int len = 0 ;
+        xmlChar * xpath = nodeSv2C(perl_xpath, node);
+    INIT:
+        if ( !(xpath && xmlStrlen(xpath)) ) {
+            xs_warn( "bad xpath\n" );
+            if ( xpath ) 
+                xmlFree(xpath);
+            XSRETURN_UNDEF;
+        }
     PPCODE:
-       if ( node->doc ) {
+        if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement(node->doc ) );
         }
         else {
@@ -3262,6 +3331,8 @@ _findnodes( pnode, xpath )
         }
 
         nodelist = domXPathSelect( node, xpath );
+        xmlFree(xpath);
+
         if ( nodelist ) {
             if ( nodelist->nodeNr > 0 ) {
                 int i = 0 ;
@@ -4319,3 +4390,70 @@ _isEqual(self, ref)
     OUTPUT:
        RETVAL
 
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::Dtd
+
+SV *
+new(CLASS, external, system)
+        char * CLASS
+        char * external
+        char * system
+    ALIAS:
+        parse_uri = 1
+    PREINIT:
+        xmlDtdPtr dtd = NULL;
+    CODE:
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        dtd = xmlParseDTD((const xmlChar*)external, (const xmlChar*)system);
+        if ( dtd == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        RETVAL = PmmNodeToSv( (xmlNodePtr) dtd, NULL );
+    OUTPUT:
+        RETVAL
+
+SV *
+parse_string(CLASS, str, ...)
+        char * CLASS
+        char * str
+    PREINIT:
+        STRLEN n_a;
+        xmlDtdPtr res;
+        SV * encoding_sv;
+        xmlParserInputBufferPtr buffer;
+        xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
+        char * new_string;
+    CODE:
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        if (items > 2) {
+            encoding_sv = ST(2);
+            if (items > 3) {
+                croak("parse_string: too many parameters");
+            }
+            /* warn("getting encoding...\n"); */
+            enc = xmlParseCharEncoding(SvPV(encoding_sv, n_a));
+            if (enc == XML_CHAR_ENCODING_ERROR) {
+                croak("Parse of encoding %s failed: %s", SvPV(encoding_sv, n_a), SvPV(LibXML_error, n_a));
+            }
+        }
+        buffer = xmlAllocParserInputBuffer(enc);
+        /* buffer = xmlParserInputBufferCreateMem(str, xmlStrlen(str), enc); */
+        if ( !buffer)
+            croak("cant create buffer!\n" );
+
+        new_string = xmlStrdup(str);
+        xmlParserInputBufferPush(buffer, strlen(new_string), new_string);
+
+        res = xmlIOParseDTD(NULL, buffer, enc);
+
+        /* NOTE: For some reason freeing this InputBuffer causes a segfault! */
+        /* xmlFreeParserInputBuffer(buffer); */
+        xmlFree(new_string);
+        if (res != NULL) {
+            RETVAL = PmmNodeToSv((xmlNodePtr)res, NULL);
+        }
+        else {
+            croak("couldn't parse DTD: %s", SvPV(LibXML_error, n_a));
+        }
+    OUTPUT:
+        RETVAL
