@@ -773,7 +773,7 @@ DESTROY(self)
     CODE:
         if ( self->object != NULL ) {
             xmlFreeDoc((xmlDocPtr)self->object);
-            # warn( "REAL DOCUMENT DROP SUCCEEDS" );
+            #warn( "REAL DOCUMENT DROP SUCCEEDS" );
         }        
         self->object = NULL;
         Safefree( self );
