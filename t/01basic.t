@@ -13,4 +13,5 @@ my $tstr1 = "test";
 my $tstr2 = "täst";
 
 ok( decodeFromUTF8( 'UTF-8' , encodeToUTF8('UTF-8', $tstr1 ) ) eq $tstr1 );
-ok( decodeFromUTF8( 'iso-8859-1' , encodeToUTF8('iso-8859-1', $tstr2 ) ) eq $tstr2 );
+ok( decodeFromUTF8( 'iso-8859-1' , encodeToUTF8('iso-8859-1', $tstr2 ) ), $tstr2 );
+# warn "# $tstr2\n";

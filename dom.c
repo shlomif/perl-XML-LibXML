@@ -7,6 +7,8 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include <stdio.h>
+
 xmlDocPtr
 domCreateDocument( xmlChar *version, xmlChar *enc ){
     xmlDocPtr doc = NULL;
@@ -412,7 +414,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     }
     
     if ( new == old ) {
-        /* dom level 2 throws no exception if new and old are equal */ 
+        /* dom level 2 throws no exception if new and old are equal */
         return new;
     }
 

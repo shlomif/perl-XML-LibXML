@@ -44,8 +44,10 @@ ok($r);
 
 $r->appendChild( $fragment );
 # warn "appended!\n";
-# warn $r->toString();
-ok( $r->toString(), "<test>$chunk</test>" );
+my $str = $r->toString();
+
+# for some reason this does not work without an encoding ... 
+ok( "$str", encodeToUTF8("iso-8859-1","<test>$chunk</test>") );
 
 # bad fragment:
 

@@ -60,8 +60,8 @@ domAppendChild( xmlNodePtr self,
                 xmlNodePtr newChild );
 xmlNodePtr
 domReplaceChild( xmlNodePtr self,
-                 xmlNodePtr oldChlid,
-                 xmlNodePtr newChild );
+                 xmlNodePtr newChlid,
+                 xmlNodePtr oldChild );
 xmlNodePtr
 domRemoveChild( xmlNodePtr self,
                xmlNodePtr Child );

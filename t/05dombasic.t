@@ -73,10 +73,10 @@ $node = $dom2->createElement( $testtxt );
 $dom2->setDocumentElement( $node );
 my $node2 = $dom->importNode( $node );
 if ( defined $node2 ){
-    warn "node not defined " unless defined $node2;
+    warn " # node not defined " unless defined $node2;
     my $tdoc = $node2->getOwnerDocument();
-    warn "doc not defined " unless defined $tdoc;
-    warn "wrong doc" if $tdoc->isEqual( $dom2 );
+    warn "# doc not defined " unless defined $tdoc;
+    warn "# wrong doc" if $tdoc->isEqual( $dom2 );
     ok( defined $node2 && defined $tdoc && $tdoc->isEqual( $dom ) == 1 );
 }
 else {
@@ -95,6 +95,8 @@ ok( defined $text && $text->isa( "XML::LibXML::CDATASection" ) );
 # PI tests
 my $pi = $dom->createPI( "test", "test" );
 ok( $pi );
+
+
 $dom->appendChild( $pi );
 my @clds = $dom->childNodes();
 my $cnt_dn = scalar( @clds );

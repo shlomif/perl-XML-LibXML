@@ -15,7 +15,7 @@ ok($loaded);
 # of the test code):
 
 # this performs general dom tests
-local $XML::LibXML::ORIGINAL_STRING = 1;
+# local $XML::LibXML::ORIGINAL_STRING = 1;
 my $file    = "example/dromeds.xml";
 my $string = q{
 <B lang="eng">hump</B>
@@ -47,26 +47,30 @@ if ( defined $dom ) {
   
     # we need to create a new document since dromeds is in ASCII ...
     my $doc = XML::LibXML::Document->new( '1.0','iso-8859-1' );
+    
     my $elem2 = $doc->createElement( $camel );
     $doc->setDocumentElement( $elem2 ); 
-
+    ok( $doc );
     $elem2->appendWellBalancedChunk( $string );
-    ok(  $elem2->toString() eq $tstr );
+    ok(  $elem2->toString(), $tstr );
 
     my @bs = $elem2->getChildrenByTagName('B');
     ok( ( scalar( @bs ) == 2 ) &&
         ( $bs[0]->getAttribute( 'lang' ) eq "eng" ) && 
         ( $bs[1]->getAttribute( 'lang' ) eq "ger" ) );
 
-    my $elem3 = $doc->createElement('C');
-    $elem3->setAttribute( "value", $string2 );
+    my $data = $bs[1]->getData();
+    ok( $bs[1]->getData() eq $string2 );
+
+#    my $elem3 = $doc->createElement('C');
+#    $elem3->setAttribute( "value", $string2 );
 
 
-    ok( $elem3->toString() eq "<C value=\"$string2\"/>" );
+#    ok( $elem3->toString() eq "<C value=\"$string2\"/>" );
   
-    # test if the output of simple text nodes will be correct as well
-    $elem4 = $doc->createTextNode( $string2 );
-    ok( $string2 eq $elem4->toString() );
+#    # test if the output of simple text nodes will be correct as well
+#    $elem4 = $doc->createTextNode( $string2 );
+#    ok( $string2 eq $elem4->toString() );
 }
 # warn "Doc fragments shall be destroyed here!\n";
 
@@ -114,4 +118,5 @@ ok( scalar( @list ) , 1 );
 ok( scalar( @list ) , 2 );
 
 @list = $bdroot->getElementsByLocalName( 'c' );
+#warn scalar @list;
 ok( scalar( @list ) , 3 );

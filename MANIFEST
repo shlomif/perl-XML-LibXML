@@ -9,6 +9,8 @@ dom.c
 dom.h
 xpath.c
 xpath.h
+perl-libxml-mm.c
+perl-libxml-mm.h
 typemap
 example/dromeds.xml
 example/bad.xml

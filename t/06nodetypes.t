@@ -34,13 +34,15 @@ if( defined $dom ) {
 # node creation 1 (bound element)
 my $elem1 = $dom->createElement( "A" );
 if ( defined $elem1 ) {
-  ok( $elem1->getType() == XML_ELEMENT_NODE );
-  ok( $elem1->getName() eq "A" );
+    ok( $elem1->getType() == XML_ELEMENT_NODE );
+    ok( $elem1->getName() eq "A" );
 
-  # set, reset and remove attribute
-  $elem1->setAttribute( $aname, $avalue );
-  ok( $elem1->getAttribute( $aname ) eq $avalue );
-  ok( $elem1->hasAttribute( $aname ) );
+    # warn "# Attribute tests";
+
+    # set, reset and remove attribute
+    $elem1->setAttribute( $aname, $avalue );
+    ok( $elem1->getAttribute( $aname ) eq $avalue );
+    ok( $elem1->hasAttribute( $aname ) );
  
   # toString test
   my $estr = $elem1->toString();
@@ -60,13 +62,17 @@ if ( defined $elem1 ) {
   ok( $elem1->getAttribute( $aname ) eq $bvalue );
   $elem1->removeAttribute( $aname );
   ok( not $elem1->hasAttribute( $aname ) );
-
+    
+    # warn "# attribute w/out document";
+    # warn "# new";
     my $attr = XML::LibXML::Attr->new( 'test', 'value' );
     ok( defined $attr && $attr->name() eq 'test' && $attr->getValue() eq 'value' );
 
+    # warn "# reset";
     $attr->setValue( 'other' );
+    # warn "# reset done";
     # warn $attr->value . "\n";
-    ok( $attr->getValue() eq 'other' );
+    ok( $attr->getValue(), 'other' );
 
     my $attr2 = $dom->createAttribute( "deutsch", "überflieger" );
     ok( defined $attr2 &&
@@ -80,6 +86,7 @@ if ( defined $elem1 ) {
   ###################################################
   # child node functions:
   my $text = $dom->createTextNode( $testtxt );
+    # warn "# child functions";
   ok( defined $text && $text->getType == XML_TEXT_NODE );
   ok( defined $text && $text->getData() eq $testtxt );
 
@@ -133,35 +140,38 @@ if ( defined $elem1 ) {
   }
   ok( $str eq 'tcd' ); 
 
-  # reverse traversing
-  $str = "";
-  my $rem = undef;
-  $c = $elem1->getLastChild();
-  while ( $c ) {
-    if( $c->getType() == XML_TEXT_NODE ){
-	ok( $c->isa( "XML::LibXML::Text" ) );
-	$str .='t';
+    # reverse traversing
+    $str = "";
+    my $rem = undef;
+    $c = $elem1->getLastChild();
+    while ( $c ) {
+        if( $c->getType() == XML_TEXT_NODE ){
+	        ok( $c->isa( "XML::LibXML::Text" ) );
+        	$str .='t';
+        }
+        elsif( $c->getType() == XML_COMMENT_NODE ){
+	        ok( $c->isa( "XML::LibXML::Comment" ) );
+	        $rem = $c;
+	        $str .='c';
+        }
+        elsif( $c->getType() == XML_CDATA_SECTION_NODE ){
+        	ok( $c->isa( "XML::LibXML::CDATASection" ) );
+        	$str .='d';
+        }
+        else{
+	        $str .= '?';
+        }
+        $c = $c->getPreviousSibling();
     }
-    elsif( $c->getType() == XML_COMMENT_NODE ){
-	ok( $c->isa( "XML::LibXML::Comment" ) );
-	$rem = $c;
-	$str .='c';
-    }
-    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){
-	ok( $c->isa( "XML::LibXML::CDATASection" ) );
-	$str .='d';
-    }
-    else{
-	$str .= '?';
-    }
-    $c = $c->getPreviousSibling();
-  }
-  ok( $str , 'dct' ); 
+    ok( $str , 'dct' ); 
 
-  # replace test
-  my $elem3 = $dom->createElement( "C" );
-  $elem1->replaceChild( $elem3, $rem );
-	
+
+      # replace test
+    # warn "# replace test";
+
+    my $elem3 = $dom->createElement( "C" );
+    my $tn = $elem1->replaceChild( $elem3, $rem );
+
   $str = "";
   $c = $elem1->getLastChild();
 
@@ -179,6 +189,7 @@ if ( defined $elem1 ) {
       not defined $rem->getPreviousSibling() );
 
   # remove test
+  # warn "# remove test\n";
 
   $elem1->removeChild( $elem3 );
   $str = "";
@@ -218,7 +229,7 @@ if ( defined $elem1 ) {
 
   my $testtxt = "täst";
   my $elem = $dom->createElement( $testtxt );
-  ok( $elem->getName() eq $testtxt );
+  ok( $elem->getName(), $testtxt );
   $elem->appendTextNode( $testtxt );
   $elem->appendTextChild($testtxt, $testtxt);
   $elem->setAttribute( 'test', $testtxt );

@@ -16,6 +16,13 @@ while($_ = shift) {
 
 my $DEBUG = delete $config{DEBUG};
 
+# $config{DEFINE} .= " -DXS_WARNINGS";
+if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
+    warn "enable native perl UTF8\n";
+
+    $config{DEFINE} .= " -DHAVE_UTF8";
+}
+
 # get libs and inc from gnome-config
 eval {
     print "running xml2-config... ";
