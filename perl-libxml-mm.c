@@ -73,11 +73,14 @@ Sv2C( SV* scalar, const xmlChar *encoding )
         STRLEN len;
         xmlChar* string = xmlStrdup((xmlChar*)SvPV(scalar, len));
         if ( xmlStrlen(string) > 0 ) {
+            xmlChar* ts;
             xs_warn( "no undefs" );
 #ifdef HAVE_UTF8
             xs_warn( "use UTF8" );
             if( !SvUTF8(scalar) && encoding != NULL ) {
-                xmlChar* ts;
+#else
+            if ( encoding != NULL ) {
+#endif
                 xs_warn( "domEncodeString!" );
                 ts= domEncodeString( encoding, string );
                 xs_warn( "done!" );
@@ -85,7 +88,6 @@ Sv2C( SV* scalar, const xmlChar *encoding )
                     xmlFree(string);
                 string=ts;
             }
-#endif
             retval = xmlStrdup(string);
             xmlFree(string);
         }
