@@ -354,7 +354,6 @@ SRC
             }
         }
         else {
-            print " posix link ";
             $result = try_link(<<"SRC", $libs);
 blank() { return 0; }
 int t() { ${func}(); return 0; }
