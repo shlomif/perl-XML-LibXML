@@ -5,7 +5,7 @@ package XML::LibXML::SAX;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '0.01';
+$VERSION = '1.00';
 
 use XML::LibXML;
 use XML::SAX::Base;
@@ -42,7 +42,7 @@ sub _parse_systemid {
     my $self = shift;
     my $fh = IO::File->new(shift);
     $self->{ParserOptions}{LibParser}      = XML::LibXML->new;
-    $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_fh;
+    $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_file;
     $self->{ParserOptions}{ParseFuncParam} = $fh;
     return $self->_parse;
 }
