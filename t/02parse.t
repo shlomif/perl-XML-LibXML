@@ -774,7 +774,8 @@ EOXML
 
 }
 
-if ( XML::LibXML::LibXML_VERSION >= 20600 )
+print "# " . XML::LibXML::LIBXML_VERSION . "\n";
+if ( XML::LibXML::LIBXML_VERSION >= 20600 )
 {
     print "# 8 Clean Namespaces\n";
 

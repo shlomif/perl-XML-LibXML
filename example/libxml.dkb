@@ -12,7 +12,7 @@
         <surname>Glahn</surname>
       </author>
     </authorgroup>
-    <edition>1.57</edition>
+    <edition>1.58</edition>
     <copyright>
       <year>2001-2004</year>
       <holder>AxKit.com Ltd; 2002-2004 Christian Glahn</holder>
@@ -155,7 +155,7 @@
             <para>version 2.6.5: tested; not working (broken XIncludes)</para>
           </listitem>
           <listitem>
-            <para>up to version 2.6.7: tested; working</para>
+            <para>up to version 2.6.8: tested; working</para>
           </listitem>
         </itemizedlist>
         <para>It happens, that an older version of libxml2 passes all tests
@@ -178,7 +178,7 @@
         that OS prior to version 10.2.2. Since I don&#39;t have full access to
         this OS, help/ patches from OS X gurus are highly apprecheated.</para>
         <para>It is confirmed that XML::LibXML builds and runs without
-        problems with Mac OS X 10.2.6.</para>
+        problems since Mac OS X 10.2.6.</para>
       </sect2>
       <sect2>
         <title>Notes for HPUX</title>
@@ -1122,7 +1122,9 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                 <funcsynopsisinfo>$parser-&#62;read_callback($subref);</funcsynopsisinfo>
               </funcsynopsis>
               <para>Read a certain number of bytes from the resource. This
-              callback is called even if the entire Document has already read.</para>
+              callback is called even if the entire Document has already read.
+              This callback has to return a string which will be parsed by the
+              libxml2 parser.</para>
             </listitem>
           </varlistentry>
           <varlistentry>
@@ -1135,6 +1137,12 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             </listitem>
           </varlistentry>
         </variablelist>
+        <para>It is important that one must not create a new parser instance
+        and parse some XML data from within any callback. This is forbidden,
+        because the new parser will override the existing callbacks and will
+        leave the calling parser in an undefined state. Most likely memory
+        violations will follow and break the running parsing process without
+        returning control to the perl layer. </para>
         <para>The following example explains the concept a bit. It is a purely
         fictitious example that uses a MyScheme::Handler object that responds
         to methods similar to an IO::Handle.</para>
@@ -2400,10 +2408,17 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           </funcsynopsis>
           <para>The method inserts <function>$newNode</function> before
           <function>$refNode</function>. If <function>$refNode</function> is
-          undefined, the newNode will be set as the new first child of the
+          undefined, the newNode will be set as the new last child of the
           parent node. This function differs from the DOM L2 specification, in
           the case, if the new node is not part of the document, the node will
-          be imported first.</para>
+          be imported first, automatically.</para>
+          <para>$refNode has to be passed to the function even if it is
+          undefined:</para>
+          <programlisting> $node-&#62;insertBefore( $newNode, undef ); # the same as $node-&#62;appendChild( $newNode );
+ $node-&#62;insertBefore( $newNode ); # wrong</programlisting>
+          <para>Note, that the reference node has to be a direct child of the
+          node the function is called on. Also, $newChild is not allowed to be
+          an ancestor of the new parent node.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -2418,6 +2433,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <function>$refNode</function>. If <function>$refNode</function> is
           undefined, the newNode will be set as the new last child of the
           parent node.</para>
+          <para>Note, that $refNode has to be passed explicitly even if it is
+          undef.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -2684,7 +2701,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
     </variablelist>
     <variablelist>
       <varlistentry>
-        <term>removeChildNode</term>
+        <term>removeChildNodes</term>
         <listitem>
           <funcsynopsis>
             <funcsynopsisinfo>$node-&#62;removeChildNodes();</funcsynopsisinfo>

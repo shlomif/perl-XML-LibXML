@@ -87,6 +87,7 @@ delete $config{SKIP_SAX_INSTALL};
 unless ( $is_Win32 ) { # cannot get config in W32
     my @blacklist = (
                      [2,4,22,0],
+                     [2,4,25,0], # broken xpaths
                      [2,4,28,1],
                      [2,4,29,0],
                      [2,4,30,0],
@@ -99,7 +100,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,3,0],
                      [2,6,4,0], # schema error
                      [2,6,5,0], # broken xincludes
-                     [2,6,7,1],
+                     [2,6,8,1],
 
                     );
     my $xml2cfg = "xml2-config";

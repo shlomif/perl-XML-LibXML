@@ -7,6 +7,7 @@ Revision history for Perl extension XML::LibXML
    - minor code cleanups
    - updated libxml2 blacklist.
    - fixed croak while requesting nodeName() of CDATA sections (bug 1694).
+   - more documentation updates
 
 1.57
    - added cloneNode to XML::LibXML::Document

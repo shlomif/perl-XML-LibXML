@@ -669,13 +669,17 @@ LibXML_init_parser( SV * self ) {
         item = hv_fetch( real_obj, "XML_LIBXML_PEDANTIC", 19, 0 );
         if ( item != NULL && SvTRUE(*item) ) {
 #ifdef LIBXML_THREAD_ENABLED
+#if LIBXML_VERSION != 20507
             xmlThrDefPedanticParserDefaultValue( 1 );
+#endif
 #endif
             xmlPedanticParserDefaultValue = 1;
         }
         else {
 #ifdef LIBXML_THREAD_ENABLED
+#if LIBXML_VERSION != 20507
             xmlThrDefPedanticParserDefaultValue( 0 );
+#endif
 #endif
             xmlPedanticParserDefaultValue = 0;
         }
@@ -3929,8 +3933,9 @@ insertAfter( self, nNode, ref )
         SV* ref
     PREINIT:
         xmlNodePtr oNode = NULL, rNode;
-    CODE:
+    INIT:
         oNode = PmmSvNode(ref);
+    CODE:
         if ( self->type    == XML_DOCUMENT_NODE
              && nNode->type == XML_ELEMENT_NODE ) {
             xs_warn( "NOT_SUPPORTED_ERR\n" );
@@ -4305,7 +4310,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         xmlSaveNoEmptyTags = oldTagFlag;
 
         if ( ret != NULL ) {
-            if ( useDomEncoding!= &PL_sv_undef && SvTRUE(useDomEncoding) ) {
+            if ( useDomEncoding != &PL_sv_undef && SvTRUE(useDomEncoding) ) {
                 RETVAL = nodeC2Sv((xmlChar*)ret, PmmNODE(PmmPROXYNODE(self))) ;
             }
             else {
