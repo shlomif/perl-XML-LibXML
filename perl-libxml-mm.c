@@ -180,7 +180,7 @@ nodeToSv( xmlNodePtr node )
 {
     ProxyObject * dfProxy= NULL;
     SV * retval = &PL_sv_undef;
-    char * CLASS = "XML::LibXML::Node";
+    const char * CLASS = "XML::LibXML::Node";
     
     if ( node != NULL ) {
         /* find out about the class */

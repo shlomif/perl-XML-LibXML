@@ -1,7 +1,7 @@
 use Test;
 use Devel::Peek;
 
-BEGIN { plan tests => 10 };
+BEGIN { plan tests => 13 };
 use XML::LibXML;
 ok(1);
 
@@ -23,6 +23,10 @@ EOT
 ok($@);
 
 # warn "doc is: ", $doc2->toString, "\n";
+
+eval { my $fail = $parser->parse_string(""); };
+# warn "# $@\n";
+ok($@);
 
 ## 
 # phish: parse_xml_chunk tests
@@ -57,4 +61,16 @@ ok( !$fragment );
 
 $badchunk = "foo</bar>foobar";
 $fragment = $parser->parse_xml_chunk( $badchunk );
+ok( !$fragment );
+
+$badchunk = "";
+eval {
+    $fragment = $parser->parse_xml_chunk( $badchunk );
+};
+ok( !$fragment );
+
+$badchunk = undef;
+eval {
+    $fragment = $parser->parse_xml_chunk( $badchunk );
+};
 ok( !$fragment );

@@ -497,6 +497,9 @@ LibXML_parse_stream(SV * self, SV * ioref, char * directory)
             xmlFreeParserCtxt(ctxt);
         }
     }
+    else {
+        croak( "Empty Stream" );
+    }
     
     if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (doc->intSubset || doc->extSubset) )) {
         xmlFreeDoc(doc);
@@ -549,6 +552,9 @@ LibXML_parse_html_stream(SV * self, SV * ioref)
             well_formed = ctxt->wellFormed;
             htmlFreeParserCtxt(ctxt);
         }
+    }
+    else {
+        croak( "Empty Stream" );
     }
     
     if (!well_formed) {
@@ -793,7 +799,7 @@ _parse_fh(self, fh, directory = NULL)
 
         LibXML_init_parser(self);
         real_dom = LibXML_parse_stream(self, fh, directory);
-
+        
         sv_2mortal(LibXML_error);
         
         if (real_dom == NULL) {
@@ -996,9 +1002,15 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         xmlNodePtr fragment= NULL;
         ProxyObject *ret=NULL;
         xmlNodePtr rv_end = NULL;
+        char * ptr;
+        STRLEN len;
     CODE:
         if ( encoding == NULL ) encoding = "UTF-8";
-
+        ptr = SvPV(svchunk, len);
+        if (len == 0) {
+            croak("Empty string");
+        }
+    
         chunk = Sv2C(svchunk, encoding);
 
         if ( chunk != NULL ) {
@@ -1079,11 +1091,11 @@ decodeFromUTF8( encoding, string )
 #ifdef HAVE_UTF8
         if ( SvUTF8(string) ) {
 #endif
-        realstring = Sv2C(string,"UTF8" );
-        tstr =  domDecodeString( encoding, realstring );
-        RETVAL = C2Sv(tstr,(xmlChar*)encoding);
-        xmlFree( realstring ); 
-        xmlFree( tstr );
+            realstring = Sv2C(string,"UTF8" );
+            tstr =  domDecodeString( encoding, realstring );
+            RETVAL = C2Sv(tstr,(xmlChar*)encoding);
+            xmlFree( realstring ); 
+            xmlFree( tstr );
 #ifdef HAVE_UTF8
         }
 #endif
