@@ -2,6 +2,7 @@
 #
 
 package XML::LibXML::Iterator;
+
 use strict;
 
 use overload
@@ -211,8 +212,7 @@ into a subtree or find a parent. It is not even required to care about
 the boundaries of a certain level. The iterator will get the next node
 for you until there is no node left to handle.
 
-In short: An iterator will answer the question about what is next to
-do.
+In short: An iterator will answer the question about what to do next.
 
 =head2 How to use XML::LibXML::Iterator?
 
@@ -225,10 +225,111 @@ Once XML::LibXML::Iterator is initialized the tree can be traversed by
 using either next() or previous(). Both function will return a
 XML::LibXML::Node object if there is such object available.
 
-Since the current object in the iterator is always available via the
-current() function, the position of the iterator can be changed inside
-a method or function.
+Since the current object hold by the iterator class is always
+available via the current() function.
 
+The following example may clearify this:
+
+  # get the document from wherever you like
+  my $doc = XML::LibXML->new->parse_stream( *SOMEINPUT );
+
+  # get the iterator for the document root.
+  my $iter = XML::LibXML::Iterator->new( $doc->documentElement );
+
+  # walk through the document
+  while ( $iter->next() ) {
+     my $curnode = $iter->current();
+     print $curnode->nodeType();
+  }
+
+  # now get back to the beginning
+  $iter->first();
+  my $curnode = $iter->current();
+  print $curnode->nodeType();
+
+Actually the functions next(), previous(), first(), last() and
+current() do return the node which is current after the
+operation. E.g. next() moves to the next node if possible and then
+returns the node. Thus the while-loop in the example can be written
+as
+
+  while ( $iter->next() ) {
+     print $_->nodeType();
+  }
+
+Note, that just relieing on the return value of next() and previous()
+is somewhat dangerous, because both functions return B<undef> in case
+of reaching the iteration boundaries. That means it is not possible
+to iterate past the last element or before the first one.
+
+=head2 Complex Iterations
+
+By default XML::LibXML::Iterator will access all nodes of a given DOM
+tree. An interation based on the default iterator will access each
+single node in the given subtree once. The order how the nodes will be
+accessed is given by the following order:
+
+  node -> node's childnodes -> node's next sibling
+
+This is great for a wide range of scripts. Nevertheless this is
+limited for some applications. XML::LibXML::Iterator allows to change
+that behaviour. This is done by resetting XML::LibXML::Iterator's
+iterator function. By using the method iterator_function() to override
+the default iterator function, it is possible to implement iterations
+based on any iteration rule imaginable.
+
+A valid iterator function has to take two parameters: As the first
+parameter it will recieve the iterator object itself, as second the
+direction of the iteration will be passed. The direction is either 1
+(for next()) or -1 (for previous()). As the iterator-function is
+called by next() and previous() the interator-function has to be aware
+about the iteration boundaries. In case the iteration would pass the
+boundary for that operation, the function has to return
+undefined. Also the iterator function has to return the new current node,
+instead of setting it itself.
+
+*DEVELOPER NOTE* In order a single stepping is rather limited, the
+direction is given by the sign of the passed integer value. The value
+of the passed parameter will be used as an indication how many steps
+should be done.  Therefor the interation direction should be tested
+relative to '0' and not as a equation. A basic template for a iterator
+function therefore will look like this:
+
+   sub iterator_func_templ {
+      my $iter = shift;
+      my $step = shift;
+      my $node = undef;
+      my $current = $iter->current();
+
+      if ( $step > 0 ) {
+          # move forward
+      }
+      else {
+          # move backward
+          $step *= -1; # remove the sign
+      }
+
+      return $node;
+   }
+
+=head2 Repeated Operation
+
+Another feature of XML::LibXML::Iterator is the ability to repeat a
+single operation on all nodes in scope. Instead of writing a loop one
+can specify the opeation as a function, that it applied on each node
+found. The function that does the trick, is named iterate().
+
+iterate() takes again two parameter: First the iterator object, second
+the node to operate on. iterate() will iterate through the entire
+document starting with the first node. If one has already started an
+iteration, the internal position will be reset to the first node.
+
+The following example will show how this works:
+
+  $iter->iterate( sub {shift; map {$_->setNodeName( lc $_->nodeName ) if $_->nodeType != NAMESPACE_DECLARATION } ($_[0], $_[0]->attributes);  } );
+
+This extra long line lowercases all tagnames and the names of the
+attributes in a given subtree.
 
 =head2 Functions
 
@@ -260,10 +361,6 @@ iterator function, the other is used by iterate(). The first function
 will be called for each call of next() or previous(). It is used to
 find out about the next node recognized by the iterator.
 
-The iterator function has to take two parameters: As the first
-parameter it will recieve the iterator object, as second the direction
-of the iteration will be passed. The direction is either 1 (for next())
-or -1 (for previous()).
 
 The iterators iterate() function will take a function reference that
 takes as well two parameters. The first parameter is again the
