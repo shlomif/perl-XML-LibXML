@@ -1537,15 +1537,24 @@ createElement( dom, name )
         setSvNodeExtra(docfrag_sv, docfrag_sv);
 
         elname = nodeSv2C( name , (xmlNodePtr) real_dom );
+        if ( elname != NULL || xmlStrlen(elname) > 0 ) {
+            newNode = xmlNewNode(NULL , elname);
+            xmlFree(elname);
 
-        newNode = xmlNewNode(NULL , elname);
-        xmlFree(elname);
-        
-        newNode->doc = real_dom;
-        domAppendChild( docfrag, newNode );
-        # warn( newNode->name );
-        RETVAL = nodeToSv(newNode);
-        setSvNodeExtra(RETVAL,docfrag_sv);
+            if ( newNode != NULL ) {        
+                newNode->doc = real_dom;
+                domAppendChild( docfrag, newNode );
+                # warn( newNode->name );
+                RETVAL = nodeToSv(newNode);
+                setSvNodeExtra(RETVAL,docfrag_sv);
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
     OUTPUT:
         RETVAL
 
