@@ -670,6 +670,14 @@ LibXML_init_parser( SV * self ) {
             xmlPedanticParserDefaultValue = 0;
         }
 
+        item =  hv_fetch( real_obj, "XML_LIBXML_LINENUMBERS", 22, 0 );
+        if ( item != NULL && SvTRUE(*item) ) {
+            xmlLineNumbersDefault( 1 );
+        }
+        else {
+            xmlLineNumbersDefault( 0 );
+        }
+
         item = hv_fetch( real_obj, "XML_LIBXML_EXT_DTD", 18, 0 );
         if ( item != NULL && SvTRUE(*item) )
             xmlLoadExtDtdDefaultValue |= 1;
@@ -758,6 +766,7 @@ LibXML_cleanup_parser() {
     xmlGetWarningsDefaultValue = 0;
     xmlLoadExtDtdDefaultValue = 5;
     xmlPedanticParserDefaultValue = 0;
+    xmlLineNumbersDefault( 0 );
     xmlDoValidityCheckingDefaultValue = 0;
 
     if (LibXML_old_ext_ent_loader != NULL ) {
@@ -1077,6 +1086,7 @@ BOOT:
     xmlKeepBlanksDefaultValue = 1;
     xmlLoadExtDtdDefaultValue = 5;
     xmlPedanticParserDefaultValue = 0;
+    xmlLineNumbersDefault(0);
     xmlSetGenericErrorFunc(NULL, NULL);
 #ifdef LIBXML_CATALOG_ENABLED
     /* xmlCatalogSetDebug(10); */
@@ -4696,6 +4706,14 @@ nodePath( self )
             croak( "cannot calculate path for the given node" );
         }
         RETVAL = nodeC2Sv( path, self );
+    OUTPUT:
+        RETVAL
+
+int
+line_number( self )
+        xmlNodePtr self
+    CODE:
+        RETVAL = xmlGetLineNo( self );
     OUTPUT:
         RETVAL
         

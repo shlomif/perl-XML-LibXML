@@ -229,6 +229,12 @@ sub pedantic_parser {
     return $self->{XML_LIBXML_PEDANTIC};
 }
 
+sub line_numbers {
+    my $self = shift;
+    $self->{XML_LIBXML_LINENUMBERS} = shift if scalar @_;
+    return $self->{XML_LIBXML_LINENUMBERS};
+}
+
 sub load_ext_dtd {
     my $self = shift;
     $self->{XML_LIBXML_EXT_DTD} = shift if scalar @_;

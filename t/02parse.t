@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 469 };
+BEGIN { plan tests => 476 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
@@ -647,11 +647,65 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
                     SIMPLE => '<?xml version="1.0"?>'."\n<A/>\n",
                   );
     my $parser = XML::LibXML->new;
+
     $parser->validation(1);
     my $doc;
     eval { $doc = $parser->parse_string($badstrings{SIMPLE}); };
     ok( $@ );
     my $ql;
+}
+
+{
+    print "# 7 LINE NUMBERS\n";
+
+    my $goodxml = <<EOXML;
+<?xml version="1.0"?>
+<foo>
+    <bar/>
+</foo>
+EOXML
+
+    my $badxml = <<EOXML;
+<?xml version="1.0"?>
+<!DOCTYPE foo [<!ELEMENT foo EMPTY>]>
+<bar/>
+EOXML
+
+    my $parser = XML::LibXML->new;
+    $parser->validation(1);
+
+    eval { $parser->parse_string( $badxml ); };
+    ok( $@ =~ /^:0:/ );
+
+    $parser->line_numbers(1);
+    eval { $parser->parse_string( $badxml ); };
+    ok( $@ =~ /^:3:/ );
+
+    # switch off validation for the following tests
+    $parser->validation(0);
+
+    my $doc;
+    eval { $doc = $parser->parse_string( $goodxml ); };
+
+    my $root = $doc->documentElement();
+    ok( $root->line_number(), 2);
+
+    my @kids = $root->childNodes();
+    ok( $kids[1]->line_number(),3 );
+
+    my $newkid = $root->appendChild( $doc->createElement( "bar" ) );
+    ok( $newkid->line_number(), 0 );
+
+    $parser->line_numbers(0);
+    eval { $doc = $parser->parse_string( $goodxml ); };
+
+    my $root = $doc->documentElement();
+    ok( $root->line_number(), 0);
+
+    my @kids = $root->childNodes();
+    ok( $kids[1]->line_number(), 0 );
+
+
 }
 
 sub tsub {

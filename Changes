@@ -1,6 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
-1.56 emergency release
+1.56 
+   - added line number interface (thanks to Peter Haworth)
    - patch to make perl 5.8.1 and XML::LibXML work together (thanks to François Pons)
    - added getElementById to XML::LibXML::Document (thanks to Robin Berjon)
    - fixes symbol problem with versions of libxml2 compiled without 

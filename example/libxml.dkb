@@ -913,6 +913,20 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
           </listitem>
         </varlistentry>
         <varlistentry>
+          <term>line_numbers</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;line_numbers(1)</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>If this option is activated XML::LibXML will store the line
+            number of a node. This gives more information where a validation
+            error occoured. It could be also used to find out about the
+            position of a node after parsing (see also
+            XML::LibXML::Node::line_number()) </para>
+            <para>By default line numbering is switched off (0).</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
           <term>load_ext_dtd</term>
           <listitem>
             <funcsynopsis>
@@ -1974,6 +1988,22 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           in the libxml2 <emphasis>tree.h</emphasis> documentation. The return
           value of this function is a numeric value. Therefore it differst
           with the result of perl ref function.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>line_number</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$lineno = $node-&#62;line_number();</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This function returns the line number where the tag was found
+          during parsing. If a node is added to the document the line number
+          is 0. Problems may occour, if a node from one document is passed to
+          another one. </para>
+          <para>Note: line_number() is special to XML::LibXML and not part of
+          the DOM specification. </para>
+          <para>If the line_numbers flag of the parser was not activated
+          before parsing, line_number() will always return 0.</para>
         </listitem>
       </varlistentry>
     </variablelist>
