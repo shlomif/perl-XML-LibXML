@@ -573,24 +573,24 @@ LibXML_init_parser( SV * self ) {
      * callbacks.
      */
     if ( LibXML_match_cb == NULL ) {
-        item = perl_get_sv("XML::LibXML::MatchCB", 0);
-        if ( item != NULL  && SvTRUE(*item)) 
-            LibXML_match_cb= *item;
+        SV *item = perl_get_sv("XML::LibXML::MatchCB", 0);
+        if ( item != NULL  && SvTRUE(item)) 
+            LibXML_match_cb= item;
     }
     if ( LibXML_read_cb == NULL ) {
-        item = perl_get_sv("XML::LibXML::ReadCB", 0);
-        if ( item != NULL  && SvTRUE(*item)) 
-            LibXML_read_cb= *item;
+        SV *item = perl_get_sv("XML::LibXML::ReadCB", 0);
+        if ( item != NULL  && SvTRUE(item)) 
+            LibXML_read_cb= item;
     }
     if ( LibXML_open_cb == NULL ) {
-        item = perl_get_sv("XML::LibXML::OpenCB", 0);
-        if ( item != NULL  && SvTRUE(*item)) 
-            LibXML_open_cb= *item;
+        SV *item = perl_get_sv("XML::LibXML::OpenCB", 0);
+        if ( item != NULL  && SvTRUE(item)) 
+            LibXML_open_cb= item;
     }
     if ( LibXML_close_cb == NULL ) {
-        item = perl_get_sv("XML::LibXML::CloseCB", 0);
-        if ( item != NULL  && SvTRUE(*item)) 
-            LibXML_close_cb= *item;
+        SV *item = perl_get_sv("XML::LibXML::CloseCB", 0);
+        if ( item != NULL  && SvTRUE(item)) 
+            LibXML_close_cb= item;
     }
 
     return; 
