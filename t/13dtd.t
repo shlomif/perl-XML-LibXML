@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 16 }
+BEGIN { plan tests => 17 }
 use XML::LibXML;
 ok(1);
 
@@ -64,7 +64,11 @@ ok($dtdstr);
     my $parser = XML::LibXML->new();
     ok($parser->validation(1));
     # this one is OK as it's well formed (no DTD)
-    $parser->parse_file('example/article_bad.xml');
+
+    eval{
+        $parser->parse_file('example/article_bad.xml');
+    };
+    ok($@);
     eval {
         $parser->parse_file('example/article_internal_bad.xml');
     };
