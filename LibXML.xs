@@ -79,7 +79,7 @@ static SV * LibXML_error    = NULL;
 
 #define LibXML_init_error() LibXML_error = NEWSV(0, 512); \
                             sv_setpvn(LibXML_error, "", 0);
-
+// #define LibXML_init_error()
 #define LibXML_croak_error() if ( SvCUR( LibXML_error ) > 0 ) { \
                                  croak("%s",SvPV(LibXML_error, len)); \
                              } 
@@ -109,7 +109,10 @@ LibXML_error_handler(void * ctxt, const char * msg, ...)
         sv_catsv(LibXML_error, sv); /* remember the last error */
     }
     else {
-        croak(SvPV(sv, PL_na));
+        /* warn("%s", SvPV(sv, PL_na)); */
+
+        //warn("%s", SvPV(sv, PL_na)); 
+       croak("%s",SvPV(sv, PL_na));
     }
     SvREFCNT_dec(sv);
 }
@@ -130,7 +133,7 @@ LibXML_validity_error(void * ctxt, const char * msg, ...)
         sv_catsv(LibXML_error, sv); /* remember the last error */
     }
     else {
-        croak(SvPV(sv, PL_na));
+        croak("%s",SvPV(sv, PL_na));
     }
     SvREFCNT_dec(sv);
 }
@@ -518,7 +521,7 @@ LibXML_load_external_entity(
     STRLEN results_len;
     const char * results_pv;
     xmlParserInputBufferPtr input_buf;
-    
+
     if (ctxt->_private == NULL) {
         return xmlNewInputFromFile(ctxt, URL);
     }
@@ -548,10 +551,10 @@ LibXML_load_external_entity(
         
         count = perl_call_sv(*func, G_SCALAR | G_EVAL);
         
-        SPAGAIN;
-        
+        SPAGAIN;       
+
         if (!count) {
-            croak("external entity handler did not return a value");
+            croak("external entity handler did not return a value"); 
         }
         
         if (SvTRUE(ERRSV)) {
@@ -669,6 +672,16 @@ LibXML_init_parser( SV * self ) {
         item = hv_fetch( real_obj, "XML_LIBXML_CLOSE_CB", 19, 0 );
         if ( item != NULL  && SvTRUE(*item)) 
             LibXML_close_cb = *item;
+
+        item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
+        if ( item != NULL  && SvTRUE(*item)) {
+            LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader(); 
+            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
+        }
+        else {
+            LibXML_old_ext_ent_loader =  NULL; 
+        }
+
     }
 
     /*
@@ -696,9 +709,9 @@ LibXML_init_parser( SV * self ) {
             LibXML_close_cb= item2;
     }
 
+     // LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader(); 
+     // xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
 
-    LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
-    xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
     return; 
 
     xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
@@ -718,8 +731,10 @@ LibXML_cleanup_parser() {
     xmlLoadExtDtdDefaultValue = 5;
     xmlPedanticParserDefaultValue = 0;
     xmlDoValidityCheckingDefaultValue = 0;
-    xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_old_ext_ent_loader );
 
+    if (LibXML_old_ext_ent_loader != NULL ) {
+        xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_old_ext_ent_loader );
+    }
 }
 
 void
@@ -992,6 +1007,10 @@ BOOT:
     xmlLoadExtDtdDefaultValue = 5;
     xmlPedanticParserDefaultValue = 0;
 
+    /* xmlCatalogSetDebug(10); */
+    xmlInitializeCatalog(); /* use catalog data */
+
+
 void
 END()
     CODE:
@@ -1079,7 +1098,7 @@ _parse_string(self, string, directory = NULL)
                     && (real_dom->intSubset || real_dom->extSubset) ) ) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef;    
-            croak(SvPV(LibXML_error, len));
+            croak("%s",SvPV(LibXML_error, len));
         }
         else if (xmlDoValidityCheckingDefaultValue
                  && (real_dom->intSubset || real_dom->extSubset) ) {
@@ -1961,7 +1980,7 @@ export_GDOME( dummy, sv_libxml, deep=1 )
 
 
 int
-load_default_catalog( self, filename )
+load_catalog( self, filename )
         SV * self
         SV * filename
     PREINIT:
@@ -1971,17 +1990,7 @@ load_default_catalog( self, filename )
             croak( "cannot load catalog" );
         }
     CODE:
-        warn("load defualt catalog %s", fn );
-        xmlCatalogSetDebug(10);
-        warn("set properties");
-        /* xmlInitializeCatalog(); */
-        warn("effective load");
         RETVAL = xmlLoadCatalog( fn );
-		/* xmlCatalogAdd(BAD_CAST "catalog", BAD_CAST fn, NULL); */
-        xmlCatalogDump(stderr);
-        warn("done %d", RETVAL);
-        /* xmlCatalogSetDefaults(XML_CATA_ALLOW_ALL); */
-        warn("done");
     OUTPUT:
         RETVAL
 
@@ -2452,7 +2461,7 @@ createElementNS( pdoc, nsURI, name )
             newNode->doc = doc;
             
             ns = xmlSearchNsByHref( doc, newNode, eURI );
-            if ( ns == NULL ) {
+            if ( ns == NULL ) { 
                 /* create a new NS if the NS does not already exists */
                 ns = xmlNewNs(newNode, eURI , prefix );
             }
@@ -3128,7 +3137,7 @@ validate(self, ...)
             RETVAL = xmlValidateDocument(&cvp, doc);
         }
         if (RETVAL == 0) {
-            croak(SvPV(LibXML_error, n_a));
+            croak("%s",SvPV(LibXML_error, n_a));
         }
     OUTPUT:
         RETVAL

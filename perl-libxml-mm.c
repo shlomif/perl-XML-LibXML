@@ -589,7 +589,7 @@ PmmContextSv( xmlParserCtxtPtr ctxt )
 
         retval = NEWSV(0,0);
         sv_setref_pv( retval, CLASS, (void*)dfProxy );
-        PmmREFCNT_inc(dfProxy);            
+        PmmREFCNT_inc(dfProxy); 
     }         
     else {
         xs_warn( "no node found!" );
@@ -608,6 +608,21 @@ PmmSvContext( SV * scalar )
          && sv_isa( scalar, "XML::LibXML::ParserContext" )
          && SvPROXYNODE(scalar) != NULL  ) {
         retval = (xmlParserCtxtPtr)PmmNODE( SvPROXYNODE(scalar) );
+    }
+    else {
+        if ( scalar == NULL
+             && scalar == &PL_sv_undef ) {
+            warn( "no scalar!" );
+        }
+        else if ( ! sv_isa( scalar, "XML::LibXML::ParserContext" ) ) {
+            warn( "bad object" );
+        }
+        else if (SvPROXYNODE(scalar) == NULL) {
+            warn( "empty object" );
+        }
+        else {
+            warn( "nothing was wrong!");
+        }
     }
     return retval;
 }
@@ -861,7 +876,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
             }
 
             /* retval = C2Sv( decoded, real_doc->encoding ); */
-            //xmlFree( decoded );
+            /* xmlFree( decoded ); */
         }
         else {
             retval = newSVpvn( (const char *)string, xmlStrlen(string) );

@@ -37,10 +37,16 @@ sub new {
         $options{XML_LIBXML_KEEP_BLANKS} = 1;
     }
 
+    if ( defined $options{catalog} ) {
+        $class->load_catalog( $options{catalog} );
+        delete $options{catalog};
+    }
+
     my $self = bless \%options, $class;
     if ( defined $options{Handler} ) {
         $self->set_handler( $options{Handler} );
     }
+
     return $self;
 }
 
@@ -395,35 +401,6 @@ sub __write {
     }
 }
 
-# catalog interfaces
-sub default_catalog {
-    my $self = shift;
-    my $catalog = shift;
-    if ( ref( $catalog ) != "XML::LibXML::Catalog" ) {
-        croak "structure is not a catalog";
-    }
-    return $self->_default_catalog( $catalog );
-}
-
-# this will go to xs!
-sub load_catalog {
-    my $self     = shift;
-    my $filename = shift;
-
-    return undef;
-}
-
-sub use_catalog {
-    my $self = shift; # parser
-    my $catalog = shift;
-    if ( ref $self ) {
-        if ( ref( $catalog ) != "XML::LibXML::Catalog" ) {
-            croak "structure is not a catalog";
-        }
-        return 1;
-    }
-    return undef;
-}
 
 1;
 
@@ -1034,6 +1011,19 @@ Expands XIinclude tags imidiatly while parsing the document. This flag
 ashures that the parser callbacks are used while parsing the included
 Document.
 
+=head2 load_catalog
+
+  $parser->load_catalog( $catalog_file );
+
+Will use $catalog_file as a catalog during all parsing
+processes. Using a catalog will significantly speed up parsing
+processes if many external ressources are loaded into the parsed
+documents (such as DTDs or XIncludes)
+
+Note that catalogs will not be available if an external entity handler
+was specified. At the current state it is not possible to make use of
+both types of resolving systems at the same time.
+
 =head2 base_uri
 
   $parser->base_uri( $your_base_uri );
@@ -1096,6 +1086,19 @@ a string containing the resource at the given URI.
 Note that you do not need to enable this - if not supplied libxml will
 get the resource either directly from the filesystem, or using an internal
 http client library.
+
+=head2 catalog
+
+  my $parser = XML::LibXML->new( catalog => $private_catalog );
+
+Alternatively to ext_ent_handler the catalog parameter allows to use
+libxml2's catalog interface directly. The parameter takes a filename
+to a catalog file. This catalog is loaded by libxml2 and will be used
+during parsing processes.
+
+Note that catalogs will not be available if an external entity handler
+was specified. At the current state it is not possible to make use of
+both types of resolving systems at the same time.
 
 =head1 DEFAULT VALUES
 
