@@ -3862,8 +3862,6 @@ cloneNode( self, deep=0 )
                 xmlSetTreeDoc(ret, doc);
             }
             
-            # make namespaces available
-            ret->ns = self->ns;
             docfrag = PmmNewFragment( doc );
             xmlAddChild( PmmNODE(docfrag), ret );
             RETVAL = PmmNodeToSv(ret, docfrag);
@@ -4215,24 +4213,19 @@ getNamespaces( pnode )
         }
 
 SV *
-getNamespace( pnode )
-        SV * pnode
+getNamespace( node )
+        xmlNodePtr node
     ALIAS:  
         localNamespace = 1
         localNS        = 2
     PREINIT:
-        xmlNodePtr node;
         xmlNsPtr ns = NULL;
         xmlNsPtr newns = NULL;
         const char * class = "XML::LibXML::Namespace";
-    INIT:
-        node = PmmSvNode(pnode);
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
         ns = node->ns;
         if ( ns != NULL ) {
+            warn( "node has namespace! %s", ns->prefix );
             newns = xmlCopyNamespace(ns);
             if ( newns != NULL ) {
                 RETVAL = NEWSV(0,0);
@@ -4241,6 +4234,10 @@ getNamespace( pnode )
                                        (void*)newns
                                       );
             }
+        }
+        else {
+            warn( "node has no namespace!" );
+            XSRETURN_UNDEF;
         }
     OUTPUT:
         RETVAL
