@@ -378,17 +378,6 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
     warn(buffer);
 }
 
-xmlParserCtxtPtr
-LibXML_get_context(SV * self)
-{
-    SV ** ctxt_sv;
-    ctxt_sv = hv_fetch((HV *)SvRV(self), "_context", 8, 0);
-    if (!ctxt_sv) {
-        croak("cannot fetch context!");
-    }
-    return (xmlParserCtxtPtr)SvIV((SV*)SvRV(*ctxt_sv));
-}
-
 int
 LibXML_read_perl (SV * ioref, char * buffer, int len)
 {

@@ -103,6 +103,7 @@ domImportNode( xmlDocPtr document, xmlNodePtr node, int move );
 
 xmlNodeSetPtr
 domGetElementsByTagName( xmlNodePtr self, xmlChar* name );
+
 xmlNodePtr
 domSetOwnerDocument( xmlNodePtr self, xmlDocPtr doc );
 

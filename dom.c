@@ -522,19 +522,19 @@ domGetElementsByTagName( xmlNodePtr n, xmlChar* name ){
 
 xmlNodePtr
 domSetOwnerDocument( xmlNodePtr self, xmlDocPtr newDoc ) {
-  if ( newDoc == NULL ) {
-    return NULL;
-  }
-
-  if ( self!= NULL ) {
-    xmlNodePtr pNode = self->children;
-
-    self->doc = newDoc;
-    while ( pNode != NULL ) {
-      domSetOwnerDocument( pNode, newDoc );
-      pNode = pNode->next;
+    if ( newDoc == NULL ) {
+        return NULL;
     }
-   }
 
-  return self;
+    if ( self != NULL ) {
+        xmlNodePtr pNode = self->children;
+
+        self->doc = newDoc;
+        while ( pNode != NULL ) {
+            domSetOwnerDocument( pNode, newDoc );
+            pNode = pNode->next;
+        }
+    }
+
+    return self;
 }
