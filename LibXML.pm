@@ -341,7 +341,7 @@ XML::LibXML - Interface to the gnome libxml2 library
   my $parser = XML::LibXML->new();
 
   my $doc = $parser->parse_string(<<'EOT');
-  <xml/>
+  <some-xml/>
   EOT
 
 =head1 DESCRIPTION
