@@ -57,8 +57,8 @@ Note that you have to rebuild XML::LibXML once you upgrade libxml2. This avoids
 problems with binary incompatibilities between releases of the library.
 
 
-Note On libxml2 Versions
-========================
+Notes On libxml2 Versions
+=========================
 
 libxml2 claims binary compatibility between its patch levels. This is not all
 true:
@@ -107,8 +107,9 @@ all!
 
 The following versions are tested:
 
-   o prior to 2.4.25: tested; not working.
-   o past 2.4.25: tested; working
+   o past 2.4.20: tested; working.
+   o 2.4.25: tested; not working
+   o past 2.4.25: tested, working
    o past 2.5.0: tested; working
    o version 2.5.5: tested; tests pass, but known as broken
    o up to version 2.5.10: tested; working

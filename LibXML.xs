@@ -658,11 +658,15 @@ LibXML_init_parser( SV * self ) {
 
         item = hv_fetch( real_obj, "XML_LIBXML_PEDANTIC", 19, 0 );
         if ( item != NULL && SvTRUE(*item) ) {
+#ifdef LIBXML_THREAD_ENABLED
             xmlThrDefPedanticParserDefaultValue( 1 );
+#endif
             xmlPedanticParserDefaultValue = 1;
         }
         else {
+#ifdef LIBXML_THREAD_ENABLED
             xmlThrDefPedanticParserDefaultValue( 0 );
+#endif
             xmlPedanticParserDefaultValue = 0;
         }
 

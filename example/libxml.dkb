@@ -85,7 +85,7 @@
       libxml2. This avoids problems with binary incompatibilities between
       releases of the library.</para>
       <sect2>
-        <title>Note On libxml2 Versions</title>
+        <title>Notes On libxml2 Versions</title>
         <para>libxml2 claims binary compatibility between its patch levels.
         This is not all true:</para>
         <para>First of all XML::LibXML requires at least libxml2 2.4.25. For
@@ -123,10 +123,13 @@
         <para>The following versions are tested:</para>
         <itemizedlist>
           <listitem>
-            <para>prior to 2.4.25: tested; not working.</para>
+            <para>past 2.4.20: tested; working.</para>
           </listitem>
           <listitem>
-            <para>past 2.4.25: tested; working</para>
+            <para>2.4.25: tested; not working</para>
+          </listitem>
+          <listitem>
+            <para>past 2.4.25: tested, working</para>
           </listitem>
           <listitem>
             <para>past 2.5.0: tested; working</para>

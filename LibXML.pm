@@ -14,7 +14,7 @@ use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
 
-$VERSION = "1.55";
+$VERSION = "1.56";
 require Exporter;
 require DynaLoader;
 
@@ -669,7 +669,8 @@ sub toString {
         }
     }
     else {
-        $retval =  $self->_toString($flag||0);
+        $flag ||= 0 unless defined $flag;
+        $retval =  $self->_toString($flag);
     }
 
     return $retval;
