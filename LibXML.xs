@@ -4201,6 +4201,7 @@ _find( pnode, pxpath )
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV* element = NULL ;
+        STRLEN n_a;
         STRLEN len = 0 ;
         xmlChar * xpath = nodeSv2C(pxpath, node);
     INIT:
@@ -4304,6 +4305,9 @@ _find( pnode, pxpath )
             }
             xmlXPathFreeObject(found);
         }
+        else {
+            LibXML_croak_error();
+        }
 
 void
 _findnodes( pnode, perl_xpath )
@@ -4379,6 +4383,9 @@ _findnodes( pnode, perl_xpath )
                 }
             }
             xmlXPathFreeNodeSet( nodelist );
+        }
+        else {
+            LibXML_croak_error();
         }
 
 void
