@@ -317,7 +317,7 @@ sub _auto_expand {
          and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
         $self->{_State_} = 1;
         eval { $self->processXIncludes($result); };
-            my $err = $@;
+	my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
             $result = undef;
@@ -407,7 +407,7 @@ sub parse_fh {
             croak $err;
         }
 
-        $result = $self->_auto_expand( $result,, $self->{XML_LIBXML_BASE_URI} );
+        $result = $self->_auto_expand( $result, $self->{XML_LIBXML_BASE_URI} );
     }
 
     return $result;

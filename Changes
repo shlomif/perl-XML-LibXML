@@ -1,6 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
 1.57
+   - added cloneNode to XML::LibXML::Document
    - include Schema/RelaxNG code only with libxml2 >= 2.6.0 (to support old libxml2)
    - applied patch to example/cb_example.pl (bug 4262)
    - fixed insertBefore/insertAfter on empty elements (bug 3691)

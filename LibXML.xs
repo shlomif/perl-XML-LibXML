@@ -3422,6 +3422,21 @@ validate(self, ...)
     OUTPUT:
         RETVAL
 
+SV*
+cloneNode( self, deep=0 ) 
+        xmlDocPtr self
+        int deep
+    PREINIT:
+        xmlDocPtr ret = NULL;
+    CODE:
+        ret = xmlCopyDoc( self, deep );
+        if ( ret == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        RETVAL = PmmNodeToSv((xmlNodePtr)ret, NULL); 
+    OUTPUT:
+        RETVAL
+
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Node
 

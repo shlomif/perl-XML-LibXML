@@ -2,7 +2,7 @@
 
 use Test;
 
-BEGIN { plan tests => 5 };
+BEGIN { plan tests => 12 };
 use XML::LibXML;
 
 my $string = "<foo><bar/></foo>";
@@ -25,4 +25,19 @@ my $parser = XML::LibXML->new();
     ok($doc);
     my $test = "<?xml version=\"1.0\"?>\n<doc>This is a valid document &foo; !</doc>\n";
     ok( $doc->toString, $test );
+}
+
+{
+    my $doc = $parser->parse_string( $string );
+    ok($doc);
+    my $dclone = $doc->cloneNode(1); # deep
+    ok( ! $dclone->isSameNode($doc) );
+    ok( $dclone->getDocumentElement() );
+    ok( $doc->toString() eq $dclone->toString() );
+
+    my $clone = $doc->cloneNode(); # shallow
+    ok( ! $clone->isSameNode($doc) );
+    ok( ! $clone->getDocumentElement() );
+    $doc->getDocumentElement()->unbindNode();
+    ok( $doc->toString() eq $clone->toString() );
 }
