@@ -17,8 +17,6 @@ ok($loaded);
 
 # this script performs element node tests
 
-local $XML::LibXML::ORIGINAL_STRING = 1;
-
 my $version = "1.0";
 my $enc1    = "iso-8859-1";
 my $enc2    = "iso-8859-2";

@@ -21,8 +21,6 @@ my $enc     = "iso-8859-1";
 my $testtxt = "test";
 my $file    = "example/dromeds.xml";
 
-local $XML::LibXML::ORIGINAL_STRING = 1;
-
 my $dom = XML::LibXML::Document->createDocument( $version, $enc );
 ok($dom);
 
