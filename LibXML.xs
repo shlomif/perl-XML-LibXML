@@ -2131,16 +2131,10 @@ getAttributes( node )
         }
         ns = real_node->nsDef;
         while ( ns != NULL ) {
-            ProxyObject * proxy = NULL;
             const char * CLASS = "XML::LibXML::Namespace";
             if ( wantarray != G_SCALAR ) {
                 element = sv_newmortal();
-                proxy = make_proxy_node((xmlNodePtr)ns);
-                if ( node->extra != NULL ) {
-                    proxy->extra = node->extra;
-                    SvREFCNT_inc(node->extra);
-                }
-                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
+                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)ns ) );
             }
             ns = ns->next;
             len++;
@@ -2187,30 +2181,21 @@ getAttributesNS( node,nsURI )
 
 void
 getNamespaces ( node )
-        ProxyObject * node
+        xmlNodePtr node
     ALIAS:
         XML::LibXML::Node::namespaces = 1
     PREINIT:
         xmlNsPtr ns = NULL;
-        xmlNodePtr real_node = NULL;
-        SV * element;
         int len=0;
         const char * CLASS = "XML::LibXML::Namespace";
         int wantarray = GIMME_V;
+        SV * element;
     PPCODE:
-        real_node = (xmlNodePtr) node->object;
-        
-        ns = real_node->nsDef;
+        ns = node->nsDef;
         while ( ns != NULL ) {
-            ProxyObject * proxy = NULL;
             if ( wantarray != G_SCALAR ) {
                 element = sv_newmortal();
-                proxy = make_proxy_node((xmlNodePtr)ns);
-                if ( node->extra != NULL ) {
-                    proxy->extra = node->extra;
-                    SvREFCNT_inc(node->extra);
-                }
-                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
+                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)ns ) );
             }
             ns = ns->next;
             len++;
@@ -2848,19 +2833,28 @@ DESTROY(self)
 
 MODULE = XML::LibXML        PACKAGE = XML::LibXML::Namespace
 
-char *
-getName(self)
+SV *
+getName (self)
         xmlNsPtr self
     ALIAS:
         XML::LibXML::Namespace::name = 1
-        XML::LibXML::Namespace::prefix = 2
+    CODE:
+        RETVAL = newSVpv("xmlns:", 0);
+        sv_catpv(RETVAL, (char*)self->prefix);
+    OUTPUT:
+        RETVAL
+        
+char *
+prefix (self)
+        xmlNsPtr self
     CODE:
         RETVAL = (char*)self->prefix;
     OUTPUT:
         RETVAL
 
+
 char *
-getData(self)
+getData (self)
         xmlNsPtr self
     ALIAS:
         XML::LibXML::Namespace::value = 1
@@ -2870,17 +2864,4 @@ getData(self)
         RETVAL = (char*)self->href;
     OUTPUT:
         RETVAL
-
-void
-DESTROY(self)
-        ProxyObject* self
-    CODE:
-        if ( (xmlNodePtr)self->object != NULL ) {
-            xmlFreeNs((xmlNsPtr)self->object);
-        }
-        if( self->extra != NULL ) {
-            SvREFCNT_dec(self->extra);
-        }
-        self->object = NULL;
-        Safefree(self);
 
