@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>11 }
+BEGIN { plan tests=>12 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -84,4 +84,7 @@ ok(@b, 1);
 @none = (@none, $root->findnodes('//foo'));
 ok(@none, 0);
 
+my @doc = $root->findnodes('document("example/test.xml")');
+ok(@doc);
+warn($doc[0]->toString);
 
