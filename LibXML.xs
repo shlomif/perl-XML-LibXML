@@ -2993,8 +2993,9 @@ SV*
 parentNode( self )
         SV *self
     ALIAS:
-        XML::LibXML::Attr::ownerElement  = 1
-        XML::LibXML::Node::getParentNode = 2
+        XML::LibXML::Attr::ownerElement    = 1
+        XML::LibXML::Node::getParentNode   = 2
+        XML::LibXML::Attr::getOwnerElement = 3
     CODE:
         RETVAL = PmmNodeToSv( PmmSvNode(self)->parent,
                               PmmOWNERPO( SvPROXYNODE(self) ) ); 
@@ -3177,6 +3178,7 @@ ownerNode( elem )
         SV* elem
     ALIAS:
         XML::LibXML::Node::getOwner = 1
+        XML::LibXML::Node::getOwnerElement = 1
     CODE:
         if( PmmSvOwner(elem) != NULL ){
             RETVAL = PmmNodeToSv(PmmSvOwner(elem), NULL);
