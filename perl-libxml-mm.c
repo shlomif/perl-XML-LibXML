@@ -742,11 +742,9 @@ PmmFastDecodeString( int charset,
     }
 
     if ( charset > 1 ) {
-        /* warn( "use document encoding %s", encoding ); */
         coder= xmlGetCharEncodingHandler( charset );
     }
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
-        /* warn("no standard encoding\n"); */
         coder = xmlFindCharEncodingHandler( (const char *) encoding );
     }
     else {
@@ -760,7 +758,7 @@ PmmFastDecodeString( int charset,
         
         xmlBufferCat( in, string );        
         if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
-            retval = xmlStrdup(out->content);
+            retval = xmlCharStrndup(xmlBufferContent(out), xmlBufferLength(out));
         }
         else {
             xs_warn("decoding error \n");
@@ -806,7 +804,6 @@ char*
 PmmDecodeString( const char *encoding, const xmlChar *string){
     char *ret=NULL;
     xmlCharEncoding enc;
-    xmlBufferPtr in = NULL, out = NULL;
     xmlCharEncodingHandlerPtr coder = NULL;
 
     if ( string != NULL ) {

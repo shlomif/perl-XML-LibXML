@@ -4111,7 +4111,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         int format
     PREINIT:
         xmlBufferPtr buffer;
-        xmlChar *ret = NULL;
+        const xmlChar *ret = NULL;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
@@ -4135,23 +4135,23 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
             xmlIndentTreeOutput = t_indent_var;
         }
 
-        if ( buffer->content != 0 ) {
-            ret= xmlStrdup( buffer->content );
+        if ( xmlBufferLength(buffer) > 0 ) {
+            ret = xmlBufferContent( buffer );
         }
         
-        xmlBufferFree( buffer );
         xmlSaveNoEmptyTags = oldTagFlag;
 
         if ( ret != NULL ) {
             if ( useDomEncoding!= &PL_sv_undef && SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv(ret, PmmNODE(PmmPROXYNODE(self))) ;
+                RETVAL = nodeC2Sv((xmlChar*)ret, PmmNODE(PmmPROXYNODE(self))) ;
             }
             else {
-                RETVAL = C2Sv(ret, NULL) ;
-            }
-            xmlFree( ret );
+                RETVAL = C2Sv((xmlChar*)ret, NULL) ;
+            }        
+            xmlBufferFree( buffer );
         }
         else {
+            xmlBufferFree( buffer );
 	        xs_warn("Failed to convert doc to string");           
             XSRETURN_UNDEF;
         }
