@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 use XML::LibXML;
+use XML::LibXML::Common qw(:libxml);
 use File::Path;
 use File::Basename;
 
