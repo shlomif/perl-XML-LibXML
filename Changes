@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+1.57
+   - added XML Schema validation interface (XML::LibXML::Schema)
+   - added XML RelaxNG validation interface (XML::LibXML::RelaxNG)
+
 1.56 
    - added line number interface (thanks to Peter Haworth)
    - patch to make perl 5.8.1 and XML::LibXML work together (thanks to François Pons)
