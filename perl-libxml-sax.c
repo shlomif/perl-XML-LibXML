@@ -683,9 +683,9 @@ PSaxGetHandler()
     retval->processingInstruction = (processingInstructionSAXFunc)&PSaxProcessingInstruction;
 
     /* warning functions should be internal */
-    retval->warning    = &PmmSaxWarning;
-    retval->error      = &PmmSaxError;
-    retval->fatalError = &PmmSaxFatalError;
+    retval->warning    = (warningSAXFunc)&PmmSaxWarning;
+    retval->error      = (errorSAXFunc)&PmmSaxError;
+    retval->fatalError = (fatalErrorSAXFunc)&PmmSaxFatalError;
 
     return retval;
 }
