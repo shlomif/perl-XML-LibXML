@@ -1026,7 +1026,7 @@ _parse_string(self, string, directory = NULL)
             croak(SvPV(LibXML_error, len));
         }
         else if (xmlDoValidityCheckingDefaultValue
-                 && SvLEN(LibXML_error) > 0
+                 && SvCUR(LibXML_error) > 0
                  && (real_dom->intSubset || real_dom->extSubset) ) {
             croak(SvPV(LibXML_error, len));
         }
@@ -1061,7 +1061,7 @@ _parse_fh(self, fh, directory = NULL)
             croak(SvPV(LibXML_error, len));
         }
         else if (xmlDoValidityCheckingDefaultValue
-                 && SvLEN(LibXML_error) > 0
+                 && SvCUR(LibXML_error) > 0
                  && (real_dom->intSubset || real_dom->extSubset)  ) {
             croak(SvPV(LibXML_error, len));
         }
@@ -1106,10 +1106,10 @@ _parse_file(self, filename)
         
         sv_2mortal(LibXML_error);
         
-        if (!well_formed || (xmlDoValidityCheckingDefaultValue && (!valid|| SvLEN(LibXML_error) > 0 ) && (real_dom->intSubset || real_dom->extSubset) )) {
+        if (!well_formed || (xmlDoValidityCheckingDefaultValue && (!valid|| SvCUR(LibXML_error) > 0 ) && (real_dom->intSubset || real_dom->extSubset) )) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef ;  
-            croak(SvPV(LibXML_error, len));
+            croak("'%s'",SvPV(LibXML_error, len));
         }
         else {
             RETVAL = PmmNodeToSv((xmlNodePtr)real_dom, NULL);
