@@ -89,11 +89,83 @@
                 manualy before they are passed to any DOM functions.
             </p>
 
-            <p><st>NOTE:</st> XML::LibXML's magic encoding may not work 
-               on all plattforms. Some platforms are known to have a broken
-               iconv(), which is partly used by libxml2.
+            <p>
+                <st>NOTE:</st> XML::LibXML's magic encoding may not
+                work on all plattforms. Some platforms are known to
+                have a broken iconv(), which is partly used by
+                libxml2. To test if your platform works correctly with
+                your language encoding, build a simple document in the
+                particular encoding and try to parse it with
+                XML::LibXML.  If your document gets parsed with out
+                causing any segmentation faults, bus errors or
+                whatever your OS throws. An example for such a test
+                can be found in test 19encoding.t of the distribution.
             </p>
         </description>
+        <also>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Comment"/>
+            <item name="XML::LibXML::CDATASection"/>
+            <item name="XML::LibXML::Attribute"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::SAX">
+
+        <short>XML::LibXML direct SAX parser</short>
+
+        <description>
+            <p>
+                XML::LibXML provides an interface to libxml2 direct
+                SAX interface. Through this interface it is possible
+                to generate SAX events directly while parsing a
+                document. While using the SAX parser XML::LibXML will
+                not create a DOM Document tree.
+            </p>
+
+            <p>
+                Such an interface is useful if very large XML
+                documents have to be processed and no DOM functions
+                are required. By using this interface it is possible
+                to read data stored within a XML document directly
+                into the application datastructures without loading
+                the document into memory.
+            </p>
+
+            <p>
+                The SAX interface of XML::LibXML is based on the
+                famous XML::SAX interface. It uses the generic
+                interface as provided by XML::SAX::Base.
+            </p>
+
+            <p>
+                Additionaly to the generic functions, that are only
+                able to process entire documents, XML::LibXML::SAX
+                provides <st>parse_chunk()</st>. This method allows to
+                generate SAX events from well ballanced data such as
+                is often provided by databases.
+            </p>
+
+            <p>
+                <st>NOTE:</st> At the moment XML::LibXML provides only
+                an incomplete interface to libxml2's native SAX
+                implementaion. The current implementation is not
+                tested in production environment. It may causes
+                significant memory problems or shows wrong behaviour.
+            </p>
+
+        </description>
+
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::SAX"/>
+            <item name="XML::LibXML::SAX::Parser"/>
+            <item name="XML::LibXML::SAX::Builder"/>
+        </also>        
     </package>
 
     <package name="XML::LibXML::Document">
