@@ -577,9 +577,8 @@ sub attributes {
 }
 
 sub iterator {
-    my $self = shift;
-    require XML::LibXML::Iterator;
-    return XML::LibXML::Iterator->new( $self );
+    warn "this function is obsolete!\nIt was disabled in version 1.54\n";
+    return undef;
 }
 
 

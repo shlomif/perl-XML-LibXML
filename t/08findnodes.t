@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>36}
+BEGIN { plan tests=>35}
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -10,8 +10,6 @@ ok($loaded);
 # everywhere.
 
 my $file    = "example/dromeds.xml";
-$itervar    = undef;
-
 
 # init the file parser
 my $parser = XML::LibXML->new();
@@ -49,9 +47,6 @@ if ( defined $dom ) {
     
     my $telem = $dom->createElement('test');
     $telem->appendWellBalancedChunk('<b>c</b>');
-
-    $telem->iterator->iterate( sub { shift; $itervar.=$_[0]->getName(); } );
-    ok( $itervar, 'testbtext' );
   
     finddoc($dom);
     ok(1);
