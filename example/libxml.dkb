@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-"http://www.oasis-open.org/docbook/xml/4.0/docbookx.dtd">
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <book lang="en-us">
   <title>XML::LibXML</title>
   <bookinfo>
@@ -58,8 +58,8 @@
       fail.</para>
       <para>Again, libxml2 is required to make XML::LibXML work. The library
       is not just requiered to build XML::LibXML, it has to be accessible
-      during runtime as well. Because of this you need to make sure libxml2
-      is installed properly. To test this, run the xmllint program on your
+      during runtime as well. Because of this you need to make sure libxml2 is
+      installed properly. To test this, run the xmllint program on your
       system. xmllint is shipped with libxml2 and therefore should be
       available.</para>
     </sect1>
@@ -395,7 +395,7 @@ EOT</programlisting>
       The functiones XML::LibXML::LIBXML_DOTTED_VERSION and
       XML::LibXML::LIBXML_VERSION provide this version information. Both
       functions simply pass through the values of the similar named macros of
-      libxml2. </para>
+      libxml2.</para>
       <variablelist>
         <varlistentry>
           <term>XML::LibXML::LIBXML_DOTTED_VERSION</term>
@@ -405,7 +405,7 @@ EOT</programlisting>
             </funcsynopsis>
             <para>Returns the Versionstring of the libxml2 version XML::LibXML
             was compiled for. This will be &#34;2.6.2&#34; for &#34;libxml2
-            2.6.2&#34;. </para>
+            2.6.2&#34;.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -467,12 +467,10 @@ EOT</programlisting>
       this exchange is pretty similar to the function cloneNode(): The
       particular node is copied on the lowlevel to the opposite DOM
       implementation.</para>
-
       <para>Since the DOM implementations cannot coexist within one document,
-      one is forced to copy each node that should be used. Because you are 
-      always keeping two nodes this may cause quite an impact on a
-      machines memory usage.</para>
-
+      one is forced to copy each node that should be used. Because you are
+      always keeping two nodes this may cause quite an impact on a machines
+      memory usage.</para>
       <para>XML::LibXML provides two functions to export or import GDOME
       nodes: import_GDOME() and export_GDOME(). Both function have two
       parameters: the node and a flag for recursive import. The flag works as
@@ -481,9 +479,9 @@ EOT</programlisting>
       explicitly, however, XML::LibXML allows also the transparent import of
       XML::GDOME nodes in functions such as appendChild(), insertAfter() and
       so on. While native nodes are automaticly adopted in most functions
-      XML::GDOME nodes are always cloned in advance. Thus if the original
-      node is modified after the operation, the node in the XML::LibXML
-      document will not have this information.</para>
+      XML::GDOME nodes are always cloned in advance. Thus if the original node
+      is modified after the operation, the node in the XML::LibXML document
+      will not have this information.</para>
       <variablelist>
         <varlistentry>
           <term>import_GDOME</term>
@@ -527,8 +525,8 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
     <sect1>
       <title>Parsing</title>
       <para>A XML document is read into a datastructure such as a DOM tree by
-      a piece of software, called a parser. XML::LibXML currently provides four
-      diffrent parser interfaces:</para>
+      a piece of software, called a parser. XML::LibXML currently provides
+      four diffrent parser interfaces:</para>
       <itemizedlist>
         <listitem>
           <para>A DOM Pull-Parser</para>
@@ -791,8 +789,8 @@ my $doc = $parser-&#62;parse_chunk(&#34;&#34;, 1); # terminate the parsing</prog
             </listitem>
           </varlistentry>
         </variablelist>
-        <para>Internally XML::LibXML provides three functions that control
-        the push parser process:</para>
+        <para>Internally XML::LibXML provides three functions that control the
+        push parser process:</para>
         <variablelist>
           <varlistentry>
             <term>start_push</term>
@@ -832,9 +830,8 @@ my $doc = $parser-&#62;parse_chunk(&#34;&#34;, 1); # terminate the parsing</prog
 if ( $@ ) {
    # ...
 }</programlisting>
-              <para>This can be annoying if the closing tag is missed 
-	      by accident.
-              The following code will restore the document:</para>
+              <para>This can be annoying if the closing tag is missed by
+              accident. The following code will restore the document:</para>
               <programlisting>eval {
     $parser-&#62;push( &#34;&#60;foo&#62;&#34;, &#34;bar&#34; );
     $doc = $parser-&#62;finish_push(1);   # will return the data parsed
@@ -940,8 +937,8 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             <para>The recover mode helps to recover documents that are almost
             wellformed very efficiently. That is for example a document that
             forgets to close the document tag (or any other tag inside the
-            document). The recover mode of XML::LibXML has problems restoring 
-	    documents that are more like well ballanced chunks.</para>
+            document). The recover mode of XML::LibXML has problems restoring
+            documents that are more like well ballanced chunks.</para>
             <para>XML::LibXML will only parse until the first fatal error
             occours.</para>
           </listitem>
@@ -992,20 +989,6 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>line_numbers</term>
-          <listitem>
-            <funcsynopsis>
-              <funcsynopsisinfo>$parser-&#62;line_numbers(1)</funcsynopsisinfo>
-            </funcsynopsis>
-            <para>If this option is activated XML::LibXML will store the line
-            number of a node. This gives more information where a validation
-            error occoured. It could be also used to find out about the
-            position of a node after parsing (see also
-            XML::LibXML::Node::line_number())</para>
-            <para>By default line numbering is switched off (0).</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
           <term>load_ext_dtd</term>
           <listitem>
             <funcsynopsis>
@@ -1030,9 +1013,9 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             <funcsynopsis>
               <funcsynopsisinfo>$parser-&#62;expand_xinclude(1);</funcsynopsisinfo>
             </funcsynopsis>
-           <para>Expands XIinclude tags immediately while parsing the document.
-           This flag assures that the parser callbacks are used while parsing
-           the included document.</para>
+            <para>Expands XIinclude tags immediately while parsing the
+            document. This flag assures that the parser callbacks are used
+            while parsing the included document.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -1237,8 +1220,8 @@ $errstring = $parser-&#62;get_last_error();</programlisting>
       interface. It uses the generic interface as provided by XML::SAX::Base.</para>
       <para>Additionally to the generic functions, which are only able to
       process entire documents, XML::LibXML::SAX provides
-      <emphasis>parse_chunk()</emphasis>. This method generates SAX
-      events from well ballanced data such as is often provided by databases.</para>
+      <emphasis>parse_chunk()</emphasis>. This method generates SAX events
+      from well ballanced data such as is often provided by databases.</para>
       <para><emphasis>NOTE:</emphasis> At the moment XML::LibXML provides only
       an incomplete interface to libxml2&#39;s native SAX implementaion. The
       current implementation is not tested in production environment. It may
@@ -1293,8 +1276,8 @@ my $doc = $builder-&#62;result();</programlisting>
       new member variables as they were hash keys.</para>
       <para>The DOM interface of XML::LibXML does not intend to implement a
       full DOM interface as it is done by XML::GDOME and used for full
-      featured application. Moreover, it offers an simple way to build or 
-	modify documents that are created by XML::LibXML&#39;s parser.</para>
+      featured application. Moreover, it offers an simple way to build or
+      modify documents that are created by XML::LibXML&#39;s parser.</para>
       <para>Another target of the XML::LibXML interface is to make the
       interfaces of libxml2 available to the perl community. This includes
       also some workarounds to some features where libxml2 assumes more
@@ -1372,8 +1355,8 @@ my $doc = $builder-&#62;result();</programlisting>
     style.</para>
     <para>It inherits all functions from <function>XML::LibXML::Node</function>
     as specified in the DOM specification. This enables access to the nodes
-    besides the root element on document level - a <function>DTD</function> for
-    example. The support for these nodes is limited at the moment.</para>
+    besides the root element on document level - a <function>DTD</function>
+    for example. The support for these nodes is limited at the moment.</para>
     <para>While generaly nodes are bound to a document in the DOM concept it
     is suggested that one should always create a node not bound to any
     document. There is no need of really including the node to the document,
@@ -1381,9 +1364,9 @@ my $doc = $builder-&#62;result();</programlisting>
     strings have the correct encoding. If an unbound textnode with an iso
     encoded string is created (e.g. with $CLASS-&#62;new()), the
     <function>toString</function> function may not return the expected result.</para>
-    <para>All this seems like a limitation as long as UTF8 encoding is assured.
-    If iso encoded strings come into play it is much safer to use the node
-    creation functions of <emphasis>XML::LibXML::Document</emphasis>.</para>
+    <para>All this seems like a limitation as long as UTF8 encoding is
+    assured. If iso encoded strings come into play it is much safer to use the
+    node creation functions of <emphasis>XML::LibXML::Document</emphasis>.</para>
     <variablelist>
       <varlistentry>
         <term>new</term>
@@ -1443,12 +1426,12 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
           <para>From time to time it is useful to change the effective
           encoding of a document. This method provides the interface to
           manipulate the encoding of a document.</para>
-          <para>Note that this function has to be used very carefully, 
-          since you
-          can&#39;t simply convert one encoding in any other, since some (or
-          even all) characters may not exist in the new encoding. XML::LibXML
-          will not test if the operation is allowed or possible for the given
-          document. The only switching assured to work is to UTF8.</para>
+          <para>Note that this function has to be used very carefully, since
+          you can&#39;t simply convert one encoding in any other, since some
+          (or even all) characters may not exist in the new encoding.
+          XML::LibXML will not test if the operation is allowed or possible
+          for the given document. The only switching assured to work is to
+          UTF8.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -1494,11 +1477,11 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
           <funcsynopsis>
             <funcsynopsisinfo>my $compression = $doc-&#62;compression;</funcsynopsisinfo>
           </funcsynopsis>
-          <para>libxml2 allows reading of documents directly from gziped files.
-          In this case the compression variable is set to the compression
-          level of that file (0-8). If XML::LibXML parsed a different source
-          or the file wasn&#39;t compressed, the returned value will be
-          <emphasis>-1</emphasis>.</para>
+          <para>libxml2 allows reading of documents directly from gziped
+          files. In this case the compression variable is set to the
+          compression level of that file (0-8). If XML::LibXML parsed a
+          different source or the file wasn&#39;t compressed, the returned
+          value will be <emphasis>-1</emphasis>.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -1621,7 +1604,7 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
             <funcsynopsisinfo>$bool = $dom-&#62;is_valid();</funcsynopsisinfo>
           </funcsynopsis>
           <para>Returns either TRUE or FALSE depending on whether the DOM Tree
-	  is a valid Document or not.</para>
+          is a valid Document or not.</para>
           <para>You may also pass in a XML::LibXML::Dtd object, to validate
           against an external DTD:</para>
           <programlisting> if (!$dom-&#62;is_valid($dtd)) {
@@ -1763,8 +1746,8 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
           references by using this function. If one wants to add a entity
           reference to the document, this reference has to be created by this
           function.</para>
-          <para>An entity reference is unique to a document and cannot be 
-	  passed to other documents as other nodes can be passed.</para>
+          <para>An entity reference is unique to a document and cannot be
+          passed to other documents as other nodes can be passed.</para>
           <para><emphasis>NOTE:</emphasis> A text content containing something
           that looks like an entity reference, will not be expanded to a real
           entity reference unless it is a predefined entity</para>
@@ -1950,8 +1933,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <funcsynopsis>
             <funcsynopsisinfo>my @nodelist = $doc-&#62;getElementsByLocalName($localname);</funcsynopsisinfo>
           </funcsynopsis>
-          <para>This allows the fetching of all nodes from a given document 
-	  with the given Localname.</para>
+          <para>This allows the fetching of all nodes from a given document
+          with the given Localname.</para>
           <para>In SCALAR context this function returns a
           <function>XML::LibXML::NodeList</function> object.</para>
         </listitem>
@@ -1962,7 +1945,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <funcsynopsis>
             <funcsynopsisinfo>my $node = $doc-&#62;getElementsById($id);</funcsynopsisinfo>
           </funcsynopsis>
-          <para>This allows the fetching of the node at a given position in the DOM.</para>
+          <para>This allows the fetching of the node at a given position in
+          the DOM.</para>
           <para>Note: The Id of a node might change while manipulating the
           document.</para>
         </listitem>
@@ -2104,8 +2088,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           </funcsynopsis>
           <para>Retrun the node&#39;s type. The possible types are described
           in the libxml2 <emphasis>tree.h</emphasis> documentation. The return
-          value of this function is a numeric value. Therefore it differs
-          from the result of perl ref function.</para>
+          value of this function is a numeric value. Therefore it differs from
+          the result of perl ref function.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -2212,12 +2196,12 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           is assured.</para>
           <para>addChild() uses libxml2&#39;s own xmlAddChild() function. Thus
           it has to be used with extra care: If a text node is added to a node
-          and the node itself or its last childnode is as well a text node, the
-          node to add will be merged with the one already available. The
+          and the node itself or its last childnode is as well a text node,
+          the node to add will be merged with the one already available. The
           current node will be removed from memory after this action. Because
           perl is not aware of this action, the perl instance is still
-          available. XML::LibXML will catch the loss of a node and refuse 
-	  to run any function called on that node.</para>
+          available. XML::LibXML will catch the loss of a node and refuse to
+          run any function called on that node.</para>
           <programlisting> my $t1 = $doc-&#62;createTextNode( &#34;foo&#34; );
  my $t2 = $doc-&#62;createTextNode( &#34;bar&#34; );
  $t1-&#62;addChild( $t2 );       # is ok
@@ -2229,9 +2213,9 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <para>Although this sounds like a lot of trouble, addChild() is
           useful if a document is built from a stream, such as happens
           sometimes in SAX handlers or filters.</para>
-          <para>If you are not sure about the source of your nodes, you
-          better stay with appendChild(), because this function is more user
-          friendly in the sense of being more error tolerant.</para>
+          <para>If you are not sure about the source of your nodes, you better
+          stay with appendChild(), because this function is more user friendly
+          in the sense of being more error tolerant.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -2252,8 +2236,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           element name; addNewChild() will determine the correct prefix if
           nessecary.</para>
           <para>The function returns the newly created node.</para>
-          <para>This function is very useful for DOM building, where a
-          created node can be directly associated with its parent.
+          <para>This function is very useful for DOM building, where a created
+          node can be directly associated with its parent.
           <emphasis>NOTE</emphasis> this function is not part of the DOM
           specification and its use will limit your code to XML::LibXML.</para>
         </listitem>
@@ -2377,8 +2361,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
             <funcsynopsisinfo>$node = $node-&#62;getOwner;</funcsynopsisinfo>
           </funcsynopsis>
           <para>This function returns the node the current node is associated
-          with. In most cases this will be a document node or a
-          document fragment node.</para>
+          with. In most cases this will be a document node or a document
+          fragment node.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -2639,8 +2623,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <para>Find a namespace prefix by its URI starting at the current
           node.</para>
           <para><emphasis>NOTE</emphasis> Only the namespace URIs are meant to
-          be unique. The prefix is only document related. Also the document 
-	  might have more than a single prefix defined for a namespace.</para>
+          be unique. The prefix is only document related. Also the document
+          might have more than a single prefix defined for a namespace.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -2651,9 +2635,9 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <funcsynopsis>
             <funcsynopsisinfo>$iter = $node-&#62;iterator;</funcsynopsisinfo>
           </funcsynopsis>
-          <para>This function is deprecated since XML::LibXML 1.54. 
-	  It is only a dummy function that will get removed entirely in 
-	  one of the next versions.</para>
+          <para>This function is deprecated since XML::LibXML 1.54. It is only
+          a dummy function that will get removed entirely in one of the next
+          versions.</para>
           <para>To make use of iterator functions use XML::LibXML::Iterator
           Module available on CPAN.</para>
         </listitem>
@@ -2683,8 +2667,8 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           return these namespaces. Note, that this will not return all
           namespaces that are in scope, but only the ones declared explicitly
           for that node.</para>
-          <para>Although getNamespaces is available for all nodes, it only 
-	  makes sense if used with element nodes.</para>
+          <para>Although getNamespaces is available for all nodes, it only
+          makes sense if used with element nodes.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -2697,9 +2681,10 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           </funcsynopsis>
           <para>This function is not specified for any DOM level: It removes
           all childnodes from a node in a single step. Other than the libxml2
-          function itself (xmlFreeNodeList), this function will not immediately
-          remove the nodes from the memory. This saves one from getting memory
-          violations, if there are nodes still referred to from the Perl level.</para>
+          function itself (xmlFreeNodeList), this function will not
+          immediately remove the nodes from the memory. This saves one from
+          getting memory violations, if there are nodes still referred to from
+          the Perl level.</para>
         </listitem>
       </varlistentry>
     </variablelist>
