@@ -734,7 +734,7 @@ minimal. It should be noted that namespace nodes are <b>not</b> a sub
 class of XML::LibXML::Node.
 
 <method name="getName" synopsis="print $ns->getName()">
-  Returns the prefix for the given namespace.
+  Returns "xmlns:prefix", where prefix is the prefix for this namespace.
 </method>
 
 <method name="name" synopsis="print $ns->name()">
@@ -742,7 +742,7 @@ class of XML::LibXML::Node.
 </method>
 
 <method name="prefix" synopsis="print $ns->prefix()">
-  Alias for getName()
+  Returns the prefix bound to this namespace declaration.
 </method>
 
 <method name="getData" synopsis="print $ns->getData()">
