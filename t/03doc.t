@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 62 };
+BEGIN { plan tests => 63 };
 use XML::LibXML;
 
 {
@@ -174,6 +174,9 @@ use XML::LibXML;
     @cn = $doc->childNodes;
     ok( scalar(@cn) , 1);
     ok($cn[0]->isSameNode($node2));
+
+    my $node3 = $doc->createElementNS( "http://foo", "bar" );
+    ok($node3);
 
     print "# 3.2 Processing Instructions\n"; 
     {

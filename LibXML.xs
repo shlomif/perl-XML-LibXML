@@ -2196,21 +2196,28 @@ createElementNS( pdoc, nsURI, name )
         SV * nsURI
         SV * name
     PREINIT:
-        xmlChar * ename;
-        xmlChar * prefix;
-        xmlChar * localname;
-        xmlChar * eURI;
-        xmlNsPtr ns = NULL;
-        xmlDocPtr doc;
-        ProxyNodePtr docfrag = NULL;
-        xmlNodePtr newNode = NULL;
+        xmlChar * ename        = NULL;
+        xmlChar * prefix       = NULL;
+        xmlChar * localname    = NULL;
+        xmlChar * eURI         = NULL;
+        const xmlChar * pchar  = NULL;
+        xmlNsPtr ns            = NULL;
+        xmlDocPtr doc          = NULL;
+        ProxyNodePtr docfrag   = NULL;
+        xmlNodePtr newNode     = NULL;
     CODE:
         doc = (xmlDocPtr)PmmSvNode( pdoc );
         ename = nodeSv2C( name , (xmlNodePtr) doc );
         eURI  = Sv2C( nsURI , NULL );
 
         if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
-            localname = xmlSplitQName2(ename, &prefix);
+            pchar = xmlStrchr( ename, ':' );
+            if ( pchar != NULL ) {
+                localname = xmlSplitQName2(ename, &prefix);
+            }
+            else {
+                localname = xmlStrdup( ename );
+            }
 
             newNode = xmlNewNode( NULL , localname );
             newNode->doc = doc;
@@ -2225,7 +2232,9 @@ createElementNS( pdoc, nsURI, name )
                 xmlFreeNode( newNode );
                 xmlFree(eURI);
                 xmlFree(localname);
-                xmlFree(prefix);
+                if ( prefix != NULL ) {
+                    xmlFree(prefix);
+                }
                 xmlFree(ename);
                 XSRETURN_UNDEF;
             }
@@ -2408,6 +2417,7 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
         xmlChar * name = NULL;
         xmlChar * value = NULL;
         xmlChar * prefix = NULL;
+        const xmlChar * pchar = NULL;
         xmlChar * localname = NULL;
         xmlChar * nsURI = NULL;
         xmlAttrPtr self = NULL;
@@ -2420,7 +2430,13 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
         if ( nsURI ) {
             xmlNodePtr root = xmlDocGetRootElement( doc );
             if ( root ) {
-                localname = xmlSplitQName2(name, &prefix);
+                pchar = xmlStrchr(name, ':');
+                if ( pchar != NULL ) {
+                    localname = xmlSplitQName2(name, &prefix);
+                }
+                else {
+                    localname = xmlStrdup( name );
+                }
                 ns = xmlSearchNsByHref( doc, root, nsURI );
                 if ( ns == NULL ) {
                     /* create a new NS if the NS does not already exists */
@@ -2430,7 +2446,9 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
                 if ( ns == NULL ) { 
                     xmlFree(nsURI);
                     xmlFree(localname);
-                    xmlFree(prefix);
+                    if ( prefix ) {
+                        xmlFree(prefix);
+                    }
                     xmlFree(name);
                     xmlFree(value);
                     XSRETURN_UNDEF;
@@ -2442,7 +2460,9 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
                 RETVAL = PmmNodeToSv((xmlNodePtr)self, NULL );
                 xmlFree(nsURI);
                 xmlFree(name);
-                xmlFree(prefix);
+                if ( prefix ) {
+                    xmlFree(prefix);
+                }
                 xmlFree(localname);
                 xmlFree(value);
             }   
@@ -3783,6 +3803,8 @@ _find( pnode, pxpath )
         xmlFree( xpath );
 
         xmlSetGenericErrorFunc(NULL, NULL);
+        
+        sv_2mortal( LibXML_error );
 
         if ( SvCUR( LibXML_error ) > 0 ) {
             croak(SvPV(LibXML_error, len));
@@ -3897,6 +3919,9 @@ _findnodes( pnode, perl_xpath )
         nodelist = domXPathSelect( node, xpath );
         xmlFree(xpath);
         xmlSetGenericErrorFunc(NULL, NULL);
+
+        sv_2mortal( LibXML_error );
+
         if ( SvCUR( LibXML_error ) > 0 ) {
             croak(SvPV(LibXML_error, len));
         }
@@ -4217,39 +4242,59 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlChar * nsURI = nodeSv2C( namespaceURI, node );
         xmlChar * name  = NULL;
         xmlChar * value = NULL;
+        const xmlChar * pchar = NULL;
         xmlNsPtr ns;
     CODE:
         if ( nsURI && xmlStrlen(nsURI) ) {
             ns = xmlSearchNsByHref( node->doc, node, nsURI );
             if ( !ns ) {
                 /* create new ns */
-                xmlChar * localname;
-                xmlChar * prefix;
+                xmlChar * localname = NULL;
+                xmlChar * prefix = NULL;
 
                 name  = nodeSv2C( attr_name, node );
                 if ( ! name ) {
                     xmlFree(nsURI);
                     XSRETURN_UNDEF;
                 }
-                localname = xmlSplitQName2(name, &prefix); 
+
+                pchar = xmlStrchr(name, ':');
+                if ( pchar ) {
+                    localname = xmlSplitQName2(name, &prefix); 
+                }
+                else {
+                    localname = xmlStrdup( name );
+                }
             
                 xmlFree( name );
                 name = localname;
             
                 ns = xmlNewNs(node, nsURI , prefix );
-                xmlFree( prefix );
+                if ( prefix ) {
+                    xmlFree( prefix );
+                }
             }
             else {
-                xmlChar * localname;
-                xmlChar * prefix;
+                xmlChar * localname = NULL;
+                xmlChar * prefix = NULL;
 
                 name  = nodeSv2C( attr_name, node );
                 if (!name) {
                     xmlFree(nsURI);
                     XSRETURN_UNDEF;
                 }
-                localname = xmlSplitQName2(name, &prefix); 
-                xmlFree(prefix);
+
+                pchar = xmlStrchr(name, ':');
+                if ( pchar ) {
+                    localname = xmlSplitQName2(name, &prefix); 
+                }
+                else {
+                    localname = xmlStrdup( name );
+                }
+
+                if ( prefix ) {
+                    xmlFree(prefix);
+                }
                 xmlFree(name);
                 name = localname;
             }

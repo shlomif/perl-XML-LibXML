@@ -13,6 +13,7 @@ manpage!
      (very special thanks to andreas koenig for the patch)
    - fixed findnodes() and find() to return empty arrays in array context
      if the statement was legal but produced no result.
+   - fixed local namespace handling in DOM functions
    - pretty formating to all serializing functions
      *NOTE* the XML::LibXML::Node::toString interface changed
      check the XML::LibXML::Node man page 
