@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 4 };
+BEGIN { plan tests => 5 };
 use XML::LibXML;
 ok(1);
 
@@ -12,6 +12,11 @@ ok($doc);
 
 eval {
     $parser->parse_file("example/bad.xml");
+};
+ok($@);
+
+eval {
+    $parser->parse_file("does_not_exist.xml");
 };
 ok($@);
 
