@@ -6,6 +6,7 @@ use strict;
 use vars qw($VERSION @ISA);
 
 use XML::LibXML;
+use XML::LibXML::Common qw(:libxml);
 use XML::SAX::Base;
 use XML::SAX::DocumentLocator;
 
@@ -94,7 +95,7 @@ sub process_node {
         # ignore!
         # i may want to handle this one day, dunno yet
     }
-    else if ($node->type == XML_DTD_NODE ) {
+    elsif ($node->type == XML_DTD_NODE ) {
         # ignore!
         # i will support DTDs, but had no time yet.
     }
