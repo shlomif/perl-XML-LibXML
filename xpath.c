@@ -127,9 +127,7 @@ xmlXPathObjectPtr
 domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
     xmlXPathObjectPtr res = NULL;
   
-    if ( refNode != NULL && refNode->doc != NULL && path != NULL ) {
-        /* we can only do a path in a valid document! 
-         */
+    if ( refNode != NULL && path != NULL ) {
         xmlXPathContextPtr ctxt;
         xmlXPathCompExprPtr comp;
     
