@@ -147,6 +147,8 @@ sub process_element {
         $self->process_node($child);
     }
     
+    delete $node->{Attributes};
+
     $self->end_element($node);
 }
 
