@@ -7,6 +7,7 @@ use vars qw($VERSION @ISA);
 
 use XML::LibXML;
 use XML::SAX::Base;
+use XML::SAX::DocumentLocator;
 
 $VERSION = '1.00';
 @ISA = ('XML::SAX::Base');
@@ -19,14 +20,14 @@ sub _parse_characterstream {
 sub _parse_bytestream {
     my ($self, $fh, $options) = @_;
     my $parser = XML::LibXML->new();
-    my $doc = $parser->parse_fh($fh);
+    my $doc = exists($options->{Source}{SystemId}) ? $parser->parse_fh($fh, $options->{Source}{SystemId}) : $parser->parse_fh($fh);
     $self->generate($doc);
 }
 
 sub _parse_string {
     my ($self, $str, $options) = @_;
     my $parser = XML::LibXML->new();
-    my $doc = $parser->parse_string($str);
+    my $doc = exists($options->{Source}{SystemId}) ? $parser->parse_string($str, $options->{Source}{SystemId}) : $parser->parse_string($str);
     $self->generate($doc);
 }
 
@@ -95,6 +96,7 @@ sub process_element {
     my ($self, $element) = @_;
 
     my $attribs = {};
+    my @ns_maps;
 
     foreach my $attr ($element->getAttributes) {
         my $key;
@@ -121,6 +123,7 @@ sub process_element {
                     Prefix => $p,
                     LocalName => $localname,
                 };
+            push @ns_maps, $attribs->{$key};
         }
         else {
             my $ns = $attr->getNamespaceURI || '';
@@ -146,15 +149,36 @@ sub process_element {
         LocalName => $element->getLocalName,
     };
 
+    foreach my $ns (@ns_maps) {
+        $self->start_prefix_mapping(
+            {
+                NamespaceURI => $ns->{Value},
+                Prefix => (($ns->{LocalName} eq 'xmlns') ? '' : $ns->{LocalName}),
+            }
+        );
+    }
+
     $self->start_element($node);
 
     foreach my $child ($element->childNodes) {
         $self->process_node($child);
     }
 
-    delete $node->{Attributes};
+    my $end_node = { %$node };
 
-    $self->end_element($node);
+    delete $end_node->{Attributes};
+
+    $self->end_element($end_node);
+    
+    foreach my $ns (@ns_maps) {
+        $self->end_prefix_mapping(
+            {
+                NamespaceURI => $ns->{Value},
+                Prefix => (($ns->{LocalName} eq 'xmlns') ? '' : $ns->{LocalName}),
+            }
+        );
+    }
+
 }
 
 1;
@@ -179,6 +203,19 @@ documents into a DOM and traverses the DOM tree. The reason being
 that libxml2's stream based parsing is extremely primitive,
 and would require an extreme amount of work to allow SAX2
 parsing in a stream manner.
+
+=head1 WARNING
+
+WARNING WARNING WARNING
+
+This is NOT a streaming SAX parser. As I said above, this parser
+reads the entire document into a DOM and serialises it. Some
+people couldn't read that in the paragraph above so I've added
+this warning.
+
+There are many reasons, but if you want to write a proper SAX
+parser using the libxml2 library, please feel free and send it
+along to me.
 
 =head1 API
 
