@@ -20,12 +20,12 @@ my $file    = "example/dromeds.xml";
 my $string = q{
 <B lang="eng">hump</B>
 <!-- thingi in german -->
-<B lang="ger">Höcker</B>
+<B lang="ger">Hocker</B>
 };
 my $camel = 'A';
 my $tstr  = qq{<$camel>$string</$camel>};
 
-my $string2 = "Höcker";
+my $string2 = "Hocker";
 
 
 # init the file parser

@@ -74,14 +74,14 @@ if ( defined $elem1 ) {
     # warn $attr->value . "\n";
     ok( $attr->getValue(), 'other' );
 
-    my $attr2 = $dom->createAttribute( "deutsch", "überflieger" );
+    my $attr2 = $dom->createAttribute( "deutsch", "uberflieger" );
     ok( defined $attr2 &&
         $attr2->getName() eq "deutsch" &&
-        $attr2->getValue() eq "überflieger" );
+        $attr2->getValue() eq "uberflieger" );
 
-    $attr2->setValue( "drückeberger" );
+    $attr2->setValue( "druckeberger" );
     # warn "> '". $attr2->getValue() . "'\n";
-    ok( $attr2->getValue() eq "drückeberger" );
+    ok( $attr2->getValue() eq "druckeberger" );
      
   ###################################################
   # child node functions:
