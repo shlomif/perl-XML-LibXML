@@ -759,15 +759,12 @@ LibXML_init_parser( SV * self ) {
      /* LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();  */
      /* xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity ); */
 
+    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
+                              (xmlInputOpenCallback) LibXML_input_open,
+                              (xmlInputReadCallback) LibXML_input_read,
+                              (xmlInputCloseCallback) LibXML_input_close);
+    
     return; 
-
-/*    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,*/
-/*                              (xmlInputOpenCallback) LibXML_input_open, */
-/*                              (xmlInputReadCallback) LibXML_input_read, */
-/*                              (xmlInputCloseCallback) LibXML_input_close); */
-
-
-
 }
 
 void
