@@ -95,12 +95,12 @@ sub process_node {
         # ignore!
         # i may want to handle this one day, dunno yet
     }
-    elsif ($node->type == XML_DTD_NODE ) {
+    elsif ($node_type == XML_DTD_NODE ) {
         # ignore!
         # i will support DTDs, but had no time yet.
     }
     else {
-        warn("unsupported node type: $node_type");
+        # warn("unsupported node type: $node_type");
     }
 }
 
@@ -126,35 +126,59 @@ sub process_element {
         if ($attr->isa('XML::LibXML::Namespace')) {
             # TODO This needs fixing modulo agreeing on what
             # is the right thing to do here.
-            my $prefix = "xmlns";
-            my $localname = $attr->localname;
-            my $key = "{http://www.w3.org/xmlns/2000/}";
-            my $name = "xmlns";
-
-            if ( defined $localname ) {
-                $key .= $localname;
-                $name.= ":".$localname;
+            unless ( defined $attr->name ) {
+                ## It's an atter like "xmlns='foo'"
+                $attribs->{"{}xmlns"} =
+                  {     
+                   Name         => "xmlns",
+                   LocalName    => "xmlns",
+                   Prefix       => "",     
+                   Value        => $attr->href,
+                   NamespaceURI => "",
+                  };
             }
+            else {
+                my $prefix = "xmlns";
+                my $localname = $attr->localname;
+                my $key = "{http://www.w3.org/2000/xmlns/}";
+                my $name = "xmlns";
+
+                if ( defined $localname ) {
+                    $key .= $localname;
+                    $name.= ":".$localname;
+                }
+
+                $attribs->{$key} =
+                  {
+                   Name         => $name,
+                   Value        => $attr->href,
+                   NamespaceURI => "http://www.w3.org/2000/xmlns/",
+                   Prefix       => $prefix,
+                   LocalName    => $localname,
+                  };
+            }
+        }
+        else {
+            my $ns = $attr->namespaceURI;
+            my $ns = $attr->namespaceURI;
+            $ns = '' unless defined $ns;
+            $key = "{$ns}".$attr->localname;
+            ## Not sure why, but $attr->name is coming through stripped
+            ## of its prefix, so we need to hand-assemble a real name.
+            my $name = $attr->name;
+            $name = "" unless defined $name;
+
+            my $prefix = $attr->prefix;
+            $prefix = "" unless defined $prefix;
+            $name = "$prefix:$name"
+              if index( $name, ":" ) < 0 && length $prefix;
 
             $attribs->{$key} =
                 {
                     Name => $name,
-                    Value => $attr->href,
-                    NamespaceURI => "http://www.w3.org/xmlns/2000/",
-                    Prefix => $prefix,
-                    LocalName => $localname,
-                };
-            # push @ns_maps, $attribs->{$key};
-        }
-        else {
-            my $ns = $attr->namespaceURI || '';
-            $key = "{$ns}".$attr->localname;
-            $attribs->{$key} =
-                {
-                    Name => $attr->name,
                     Value => $attr->value,
                     NamespaceURI => $ns,
-                    Prefix => $attr->prefix || "",
+                    Prefix => $prefix,
                     LocalName => $attr->localname,
                 };
         }

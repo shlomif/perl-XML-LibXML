@@ -12,6 +12,7 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
     xmlXPathObjectPtr obj = NULL, obj2 = NULL;
     xmlChar *base = NULL, *URI = NULL;
 
+
     if ((nargs < 1) || (nargs > 2)) {
         ctxt->error = XPATH_INVALID_ARITY;
         return;
@@ -29,6 +30,11 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
 
         obj2 = valuePop(ctxt);
     }
+
+
+    /* first assure the XML::LibXML error handler is deactivated 
+       otherwise strange things might happen
+     */
 
     if (ctxt->value->type == XPATH_NODESET) {
         int i;
@@ -60,6 +66,9 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
         if (obj2 != NULL)
             xmlXPathFreeObject(obj2);
         valuePush(ctxt, ret);
+
+        /* reset the error old error handler before leaving
+         */
         return;
     }
     /*
@@ -70,6 +79,10 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
         ctxt->error = XPATH_INVALID_TYPE;
         if (obj2 != NULL)
             xmlXPathFreeObject(obj2);
+
+        /* reset the error old error handler before leaving
+         */
+
         return;
     }
     obj = valuePop(ctxt);
@@ -114,6 +127,9 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
     xmlXPathFreeObject(obj);
     if (obj2 != NULL)
         xmlXPathFreeObject(obj2);
+
+    /* reset the error old error handler before leaving
+     */
 }
 
 
@@ -197,7 +213,7 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
             froot->doc = NULL;
             tdoc->children = NULL;
             tdoc->last     = NULL;
-            froot->parent  = NULL;
+            xmlSetTreeDoc(froot, NULL);
             refNode->doc = NULL;
 
             xmlFreeDoc( tdoc );

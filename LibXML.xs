@@ -1885,6 +1885,7 @@ _push( self, pctxt, data )
         LibXML_cleanup_parser();
     
         sv_2mortal(LibXML_error); 
+
         if ( ctxt->wellFormed == 0 ) {
             LibXML_croak_error();
         }
@@ -3358,8 +3359,13 @@ nodeName( self )
         }
     CODE:
         name =  (xmlChar*)domName( self );
-        RETVAL = C2Sv(name,NULL);
-        xmlFree( name );
+        if ( name != NULL ) {
+            RETVAL = C2Sv(name,NULL);
+            xmlFree( name );
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
     OUTPUT:
         RETVAL
 
@@ -3369,10 +3375,19 @@ localname( self )
     ALIAS:
         XML::LibXML::Node::getLocalName = 1
         XML::LibXML::Attr::name         = 2
+        XML::LibXML::Node::localName    = 3
     PREINIT:
         xmlChar * lname;
     CODE:
-        RETVAL = C2Sv(self->name,NULL);
+        if (    self->type == XML_ELEMENT_NODE
+             || self->type == XML_ATTRIBUTE_NODE
+             || self->type == XML_ELEMENT_DECL
+             || self->type == XML_ATTRIBUTE_DECL ) {
+            RETVAL = C2Sv(self->name,NULL);
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
     OUTPUT:
         RETVAL
 
@@ -5665,6 +5680,7 @@ new(CLASS, external, system)
         if ( dtd == NULL ) {
             XSRETURN_UNDEF;
         }
+        xmlSetTreeDoc((xmlNodePtr)dtd, NULL);
         RETVAL = PmmNodeToSv( (xmlNodePtr) dtd, NULL );
     OUTPUT:
         RETVAL
