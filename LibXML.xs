@@ -3087,6 +3087,8 @@ is_valid(self, ...)
          */
         cvp.nodeNr = 0;
         cvp.nodeTab = NULL;
+        cvp.vstateNr = 0;
+        cvp.vstateTab = NULL;
 
         if (items > 1) {
             dtd_sv = ST(1);
@@ -3120,6 +3122,8 @@ validate(self, ...)
          */
         cvp.nodeNr = 0;
         cvp.nodeTab = NULL;
+        cvp.vstateNr = 0;
+        cvp.vstateTab = NULL;
 
         if (items > 1) {
             dtd_sv = ST(1);
@@ -3130,7 +3134,6 @@ validate(self, ...)
                 croak("is_valid: argument must be a DTD object");
             }
             RETVAL = xmlValidateDtd(&cvp, self , dtd);
-
         }
         else {
             RETVAL = xmlValidateDocument(&cvp, self);
