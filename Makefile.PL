@@ -291,7 +291,7 @@ sub MY::manifypods {
     $str .= <<EOF;
 
 docs : pure_all
-\t\@$^X -Iblib/arch -Iblib/lib example/xmllibxmldocs.pl example/libxml.dkb lib/XML/LibXML/
+\t\@$^X -Iblib/arch -Iblib/lib example/xmllibxmldocs.pl docs/libxml.dbk lib/XML/LibXML/
 \t\@$^X -pi.old -e 's/a/a/' Makefile.PL
 \t\@echo "==> YOU MUST NOW RE-RUN $^X Makefile.PL <=="
 \t\@false

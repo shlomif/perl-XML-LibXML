@@ -116,7 +116,7 @@ sub set_general_info {
 
     my ( $version ) = $infonode->findnodes( "edition" );
     if ( defined $version ) {
-        $infostr .= "=head1 VERSION\n\n" . $version->string_value() . "\n\n";
+        $infostr .= "\n=head1 VERSION\n\n" . $version->string_value() . "\n\n";
     }
 
     my ( $copyright ) = $infonode->findnodes( "copyright" );
