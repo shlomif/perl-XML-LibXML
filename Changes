@@ -12,8 +12,11 @@ Revision history for Perl extension XML::LibXML
    - minor fixes and extensions of the tests
    - more docu ;)
    - SAX added comment and PI support
+   - SAX added start_prefix_mapping/end_prefix_mapping
    - Fixed find() bug with no results
    - Added use IO::Handle so FH reads work
+   - A number of segfault fixes
+   - constants added without XML_ prefix
 
 1.31
     - Removed C-layer parser implementation.
