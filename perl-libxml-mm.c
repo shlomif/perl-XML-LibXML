@@ -190,7 +190,7 @@ nodeToSv( xmlNodePtr node )
 
         dfProxy = make_proxy_node(node);
         retval = NEWSV(0,0);
-        sv_setref_pv( retval, CLASS, (void*)dfProxy );
+        sv_setref_pv( retval, (char*)CLASS, (void*)dfProxy );
     }
 
     return retval;
