@@ -3234,9 +3234,9 @@ to_number ( node )
         RETVAL
 
 void
-_find( pnode, xpath )
+_find( pnode, pxpath )
         SV* pnode
-        char * xpath
+        SV * pxpath
     PREINIT:
         xmlNodePtr node = PmmSvNode(pnode);
         ProxyNodePtr owner = NULL;
@@ -3244,6 +3244,14 @@ _find( pnode, xpath )
         xmlNodeSetPtr nodelist = NULL;
         SV* element = NULL ;
         int len = 0 ;
+        xmlChar * xpath = nodeSv2C(pxpath, node);
+    INIT:
+        if ( !(xpath && xmlStrlen(xpath)) ) {
+            xs_warn( "bad xpath\n" );
+            if ( xpath ) 
+                xmlFree(xpath);
+            XSRETURN_UNDEF;
+        }
     PPCODE:
         if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement( node->doc ) );
@@ -3253,64 +3261,70 @@ _find( pnode, xpath )
         }
 
         found = domXPathFind( node, xpath );
+        xmlFree( xpath );
+
         if (found) {
             switch (found->type) {
                 case XPATH_NODESET:
                     /* return as a NodeList */
                     /* access ->nodesetval */
-                    XPUSHs(newSVpv("XML::LibXML::NodeList", 0));
+                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::NodeList", 0)));
                     nodelist = found->nodesetval;
-                    if ( nodelist && nodelist->nodeNr > 0 ) {
-                        int i = 0 ;
-                        const char * cls = "XML::LibXML::Node";
-                        xmlNodePtr tnode;
-                        SV * element;
+                    if ( nodelist ) {
+                        if ( nodelist->nodeNr > 0 ) {
+                            int i = 0 ;
+                            const char * cls = "XML::LibXML::Node";
+                            xmlNodePtr tnode;
+                            SV * element;
                         
-                        owner = PmmOWNERPO(SvPROXYNODE(pnode));
-                        len = nodelist->nodeNr;
-                        for( i ; i < len; i++){
-                            /* we have to create a new instance of an
-                             * objectptr. and then
-                             * place the current node into the new
-                             * object. afterwards we can
-                             * push the object to the array!
-                             */
-                            tnode = nodelist->nodeTab[i];
+                            owner = PmmOWNERPO(SvPROXYNODE(pnode));
+                            len = nodelist->nodeNr;
+                            for( i ; i < len; i++){
+                                /* we have to create a new instance of an
+                                 * objectptr. and then
+                                 * place the current node into the new
+                                 * object. afterwards we can
+                                 * push the object to the array!
+                                 */
+                                tnode = nodelist->nodeTab[i];
 
-                            /* let's be paranoid */
-                            if (tnode->type == XML_NAMESPACE_DECL) {
-                                element = sv_newmortal();
-                                cls = domNodeTypeName( tnode );
-                                element = sv_setref_pv( element,
-                                                        (char *)cls,
-                                                        (void *)xmlCopyNamespace((xmlNsPtr)tnode)
-                                                      );
+                                /* let's be paranoid */
+                                if (tnode->type == XML_NAMESPACE_DECL) {
+                                    element = sv_newmortal();
+                                    cls = domNodeTypeName( tnode );
+                                    element = sv_setref_pv( element,
+                                                            (const char *)cls,
+                                                            (void *)xmlCopyNamespace((xmlNsPtr)tnode)
+                                                          );
+                                }
+                                else {
+                                    element = PmmNodeToSv(tnode, owner);
+                                }
+    
+                                XPUSHs( sv_2mortal(element) );
                             }
-                            else {
-                                element = PmmNodeToSv(tnode, owner);
-                            }
-
-                            XPUSHs( sv_2mortal(element) );
                         }
+                        xmlXPathFreeNodeSet( found->nodesetval );  
+                        found->nodesetval = NULL;
                     }
                     break;
                 case XPATH_BOOLEAN:
                     /* return as a Boolean */
                     /* access ->boolval */
-                    XPUSHs(newSVpv("XML::LibXML::Boolean", 0));
-                    XPUSHs(newSViv(found->boolval));
+                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Boolean", 0)));
+                    XPUSHs(sv_2mortal(newSViv(found->boolval)));
                     break;
                 case XPATH_NUMBER:
                     /* return as a Number */
                     /* access ->floatval */
-                    XPUSHs(newSVpv("XML::LibXML::Number", 0));
-                    XPUSHs(newSVnv(found->floatval));
+                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Number", 0)));
+                    XPUSHs(sv_2mortal(newSVnv(found->floatval)));
                     break;
                 case XPATH_STRING:
                     /* access ->stringval */
                     /* return as a Literal */
-                    XPUSHs(newSVpv("XML::LibXML::Literal", 0));
-                    XPUSHs(newSVpv(found->stringval, 0));
+                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
+                    XPUSHs(sv_2mortal(newSVpv(found->stringval, 0)));
                     break;
                 default:
                     croak("Unknown XPath return type");
@@ -3365,7 +3379,7 @@ _findnodes( pnode, perl_xpath )
                         element = sv_newmortal();
                         cls = domNodeTypeName( tnode );
                         element = sv_setref_pv( element,
-                                                (char *)cls,
+                                                (const char *)cls,
                                                 (void *)xmlCopyNamespace((xmlNsPtr)tnode)
                                               );
                     }

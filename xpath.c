@@ -125,12 +125,7 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
 
 xmlXPathObjectPtr
 domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
-    xmlNodeSetPtr rv ;
     xmlXPathObjectPtr res = NULL;
-    void * xslt_lib;
-    char * error;
-  
-    rv = xmlXPathNodeSetCreate( 0 );
   
     if ( refNode != NULL && refNode->doc != NULL && path != NULL ) {
         /* we can only do a path in a valid document! 
@@ -155,13 +150,19 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
             ctxt->nsNr++;
         }
 
-        xmlXPathRegisterFunc(ctxt, (const xmlChar *) "document",
-            perlDocumentFunction);
+        xmlXPathRegisterFunc(ctxt,
+                             (const xmlChar *) "document",
+                             perlDocumentFunction);
+       
 
         comp = xmlXPathCompile( path );
         if (comp != NULL) {
             res = xmlXPathCompiledEval(comp, ctxt);
             xmlXPathFreeCompExpr(comp);
+        }
+
+        if (ctxt->namespaces != NULL) {
+            xmlFree( ctxt->namespaces );
         }
 
         xmlXPathFreeContext(ctxt);
@@ -174,8 +175,6 @@ domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
     xmlNodeSetPtr rv ;
     xmlXPathObjectPtr res;
   
-    rv = xmlXPathNodeSetCreate( 0 );
-    
     res = domXPathFind( refNode, path );
     
     if (res != NULL) {
@@ -186,7 +185,6 @@ domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
         	   not kill it */
         rv = res->nodesetval;  
         res->nodesetval = 0 ;
-    
     }
 
     xmlXPathFreeObject(res);

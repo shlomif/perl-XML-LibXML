@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 18;
+        plan tests => 19;
     }
     else {
         plan tests => 0;
@@ -171,6 +171,17 @@ use XML::LibXML;
             my $doc = XML::LibXML->new->parse_string( $str );
             for ( 1..$times_through ) {
                 my @nodes = $doc->findnodes("/foo/bar/foo");
+            }
+            ok(1);
+            check_mem();
+
+        }
+
+        {
+            my $str = "<foo><bar><foo/></bar></foo>";
+            my $doc = XML::LibXML->new->parse_string( $str );
+            for ( 1..$times_through ) {
+                my $nodes = $doc->find("/foo/bar/foo");
             }
             ok(1);
             check_mem();
