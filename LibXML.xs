@@ -786,12 +786,14 @@ LibXML_test_node_name( xmlChar * name )
     int len = 0; 
 
     if ( cur == NULL || *cur == 0 ) {
+        /* warn("name is empty" ); */
         return(0);
     }
 
     tc = domParseChar( cur, &len );
 
     if ( !( IS_LETTER( tc ) || (tc == '_') || (tc == ':')) ) {
+        /* warn( "is not a letter\n" ); */
         return(0);
     }
 
@@ -804,12 +806,14 @@ LibXML_test_node_name( xmlChar * name )
         if (!(IS_LETTER(tc) || IS_DIGIT(tc) || (tc == '_') ||
              (tc == '-') || (tc == ':') || (tc == '.') ||
              IS_COMBINING(tc) || IS_EXTENDER(tc)) ) {
+            /* warn( "is not a letter\n" ); */
             return(0);
         }
         tc = 0;
         cur += len;
     }
     
+    /* warn("name is ok"); */
     return(1);
 }
 

@@ -66,7 +66,9 @@ sub _parse {
         croak( "SAX Exception not implemented, yet; Data ended before document ended\n" );
     }
 
-    return $self->end_document({}); }
+    return $self->end_document({});
+}
+
 
 1;
 
