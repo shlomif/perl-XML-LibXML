@@ -17,6 +17,8 @@ ok($loaded);
 
 # this script performs element node tests
 
+local $XML::LibXML::ORIGINAL_STRING = 1;
+
 my $vers   = "1.0";
 my $enc    = "iso-8859-1";
 my $aname  = "test";
@@ -60,9 +62,7 @@ if ( defined $elem1 ) {
   ok( not $elem1->hasAttribute( $aname ) );
 
     my $attr = XML::LibXML::Attr->new( 'test', 'value' );
-    ok( defined $attr
-        && $attr->getName() eq 'test'
-        && $attr->getValue() eq 'value' );
+    ok( defined $attr && $attr->name() eq 'test' && $attr->getValue() eq 'value' );
 
     $attr->setValue( 'other' );
     # warn $attr->value . "\n";

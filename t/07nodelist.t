@@ -15,6 +15,7 @@ ok($loaded);
 # of the test code):
 
 # this performs general dom tests
+local $XML::LibXML::ORIGINAL_STRING = 1;
 my $file    = "example/dromeds.xml";
 my $string = q{
 <B lang="eng">hump</B>

@@ -22,6 +22,8 @@ $dom = $parser->parse_file("example/test.xml");
 
 ok($dom);
 
+#warn $dom->toString();
+
 my $root = $dom->getDocumentElement();
 
 my @nodes = $root->findnodes( 'xml/xsl' );
@@ -32,8 +34,13 @@ open(F, "complex.xml") || die "Cannot open complex.xml: $!";
 local $/;
 my $str = <F>;
 close F;
-$dom = $parser->parse_string($str);
+
+my $parser2 = XML::LibXML->new();
+$parser2->expand_xinclude( 1 );
+$dom = $parser2->parse_string($str);
 ok($dom);
+
+# warn $dom->toString() , "\n";
 
 $using_globals = 1;
 $XML::LibXML::match_cb = \&match;
@@ -61,7 +68,7 @@ sub close {
 }
 
 sub open {
-# warn("open: $_[0]\n");
+ #warn("open: $_[0]\n");
     $file = new IO::File;
     if ( $file->open( "<$_[0]" ) ){
 #        warn "open!\n";
@@ -83,6 +90,7 @@ sub read {
     if ( $_[0] ) {
 #        warn "read $_[1] bytes!\n";
         $n = $_[0]->read( $rv , $_[1] );
+#        warn "read!" if $n > 0;
         ok($using_globals, defined($XML::LibXML::read_cb)) if $n > 0
     }
     return $rv;

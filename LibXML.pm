@@ -51,22 +51,26 @@ sub new {
 
 sub match_callback {
     my $self = shift;
-    return $self->{XML_LIBXML_MATCH_CB} = shift;
+    $self->{XML_LIBXML_MATCH_CB} = shift if scalar @_;
+    return $self->{XML_LIBXML_MATCH_CB};
 }
 
 sub read_callback {
     my $self = shift;
-    return $self->{XML_LIBXML_READ_CB} = shift;
+    $self->{XML_LIBXML_READ_CB} = shift if scalar @_;
+    return $self->{XML_LIBXML_READ_CB};
 }
 
 sub close_callback {
     my $self = shift;
-    return $self->{XML_LIBXML_CLOSE_CB} = shift;
+    $self->{XML_LIBXML_CLOSE_CB} = shift if scalar @_;
+    return $self->{XML_LIBXML_CLOSE_CB};
 }
 
 sub open_callback {
     my $self = shift;
-    return $self->{XML_LIBXML_OPEN_CB} = shift;
+    $self->{XML_LIBXML_OPEN_CB} = shift if scalar @_;
+    return $self->{XML_LIBXML_OPEN_CB};
 }
 
 sub callbacks {
@@ -123,43 +127,48 @@ sub expand_xinclude  {
     return $self->{XML_LIBXML_EXPAND_XINCLUDE};
 }
 
-sub init_parser {
-    my $self = shift;
-    $self->_match_callback( $self->{XML_LIBXML_MATCH_CB} )
-      if $self->{XML_LIBXML_MATCH_CB};
-    $self->_read_callback( $self->{XML_LIBXML_READ_CB} )
-      if $self->{XML_LIBXML_READ_CB};
-    $self->_open_callback( $self->{XML_LIBXML_OPEN_CB} )
-      if $self->{XML_LIBXML_OPEN_CB};
-    $self->_close_callback( $self->{XML_LIBXML_CLOSE_CB} )
-      if $self->{XML_LIBXML_CLOSE_CB};
-
-    $self->_validation( $self->{XML_LIBXML_VALIDATION} )
-      if exists $self->{XML_LIBXML_VALIDATION};
-    $self->_expand_entities( $self->{XML_LIBXML_EXPAND_ENTITIES} )
-      if exists $self->{XML_LIBXML_EXPAND_ENTITIES};
-    $self->_keep_blanks( $self->{XML_LIBXML_KEEP_BLANKS} )
-      if exists $self->{XML_LIBXML_KEEP_BLANKS};
-    $self->_pedantic_parser( $self->{XML_LIBXML_PEDANTIC} )
-      if exists $self->{XML_LIBXML_PEDANTIC};
-    $self->_load_ext_dtd( $self->{XML_LIBXML_EXT_DTD} )
-      if exists $self->{XML_LIBXML_EXT_DTD};
-    $self->_complete_attributes( $self->{XML_LIBXML_COMPLETE_ATTR} )
-      if exists $self->{XML_LIBXML_COMPLETE_ATTR};
-}
-
 sub parse_string {
     my $self = shift;
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
     eval {
-        $self->init_parser();
         $result = $self->_parse_string( @_ );
         $result->_fix_extra;
-        if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
-            $result->process_xinclude();
-        }
+    };
+    my $err = $@;
+    $self->{_State_} = 0;
+    if ($err) {
+        croak $err;
+    }
+    return $result;
+}
+
+sub parse_fh {
+    my $self = shift;
+    croak("parse already in progress") if $self->{_State_};
+    $self->{_State_} = 1;
+    my $result;
+    eval {
+        $result = $self->_parse_fh( @_ );
+        $result->_fix_extra;
+    };
+    my $err = $@;
+    $self->{_State_} = 0;
+    if ($err) {
+        croak $err;
+    }
+    return $result;
+}
+
+sub parse_file {
+    my $self = shift;
+    croak("parse already in progress") if $self->{_State_};
+    $self->{_State_} = 1;
+    my $result;
+    eval {
+        $result = $self->_parse_file(@_);
+        $result->_fix_extra;
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -178,16 +187,10 @@ sub parse_xml_chunk {
     $self->{_State_} = 1;
     my $result;
     eval {
-        $self->init_parser();
         $result = $self->_parse_xml_chunk( @_ );
         if ( $result ) {
             $result->_fix_extra;
         }
-
-        # we should include this to document fragments as well ...
-        # if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
-        #     $result->process_xinclude();
-        # }
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -195,85 +198,6 @@ sub parse_xml_chunk {
         croak $err;
     }
     return $result;
-}
-
-sub parse_fh {
-    my $self = shift;
-    croak("parse already in progress") if $self->{_State_};
-    $self->{_State_} = 1;
-    my $result;
-    eval {
-        $self->init_parser();
-        $result = $self->_parse_fh( @_ );
-        $result->_fix_extra;
-        if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
-            warn "use xinclude!" ;
-            $result->process_xinclude();
-        }
-    };
-    my $err = $@;
-    $self->{_State_} = 0;
-    if ($err) {
-        croak $err;
-    }
-    return $result;
-}
-
-sub parse_file {
-    my $self = shift;
-    croak("parse already in progress") if $self->{_State_};
-    $self->{_State_} = 1;
-    my $result;
-    eval {
-        $self->init_parser();
-        $result = $self->_parse_file(@_);
-        $result->_fix_extra;
-        if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
-            # warn "use xinclude!" ;
-            $result->process_xinclude();
-        }
-    };
-    my $err = $@;
-    $self->{_State_} = 0;
-    if ($err) {
-        croak $err;
-    }
-    return $result;
-}
-
-sub parse_html_string {
-    my $self = shift;
-
-    $self->init_parser();
-    my $retval = $self->_parse_html_string( @_ );
-
-    return $retval;
-}
-
-sub parse_html_fh {
-    my $self = shift;
-
-    $self->init_parser();
-    my $retval = $self->_parse_html_fh( @_ );
-
-    return $retval;
-}
-
-sub parse_html_file {
-    my $self = shift;
-
-    $self->init_parser();
-    my $retval = $self->_parse_html_file( @_ );
-
-    return $retval;
-}
-
-sub processXIncludes {
-    my $self = shift;
-    my $dom  = shift;
-
-    $self->init_parser();
-    $dom->process_xinclude();
 }
 
 sub __read {

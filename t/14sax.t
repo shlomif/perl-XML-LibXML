@@ -49,6 +49,8 @@ EOT
 package SAXTester;
 use Test;
 
+# local $XML::LibXML::ORIGINAL_STRING = 1;
+
 sub new {
     my $class = shift;
     return bless {}, $class;
