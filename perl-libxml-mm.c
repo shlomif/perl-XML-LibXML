@@ -347,17 +347,31 @@ void
 PmmFixOwnerList( xmlNodePtr list, ProxyNodePtr parent )
 {
     if ( list ) {
-        xmlNodePtr iterator;
-        for ( iterator = list; iterator != NULL ; iterator = iterator->next ){
+        xmlNodePtr iterator = list;
+        while ( iterator != NULL ) {
+            switch ( iterator->type ) {
+            case XML_ENTITY_DECL:
+            case XML_ATTRIBUTE_DECL:
+            case XML_NAMESPACE_DECL:
+            case XML_ELEMENT_DECL:
+                iterator = iterator->next;
+                continue;
+                break;
+            default:
+                break;
+            }
+
             if ( iterator->_private != NULL ) {
                 PmmFixOwner( (ProxyNodePtr)iterator->_private, parent );
             }
             else {
                 if ( iterator->type != XML_ATTRIBUTE_NODE
-                     &&  iterator->properties != NULL )
+                     &&  iterator->properties != NULL ){
                     PmmFixOwnerList( (xmlNodePtr)iterator->properties, parent );
+                }
                 PmmFixOwnerList(iterator->children, parent);
             }
+            iterator = iterator->next;
         }
     }
 }
@@ -381,42 +395,50 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
 {
     ProxyNodePtr oldParent = NULL;
 
-    xs_warn("fix");
     if ( nodetofix != NULL ) {
-        if ( PmmNODE(nodetofix)->type != XML_DOCUMENT_NODE ) {
-            xs_warn("node is there");
+        switch ( PmmNODE(nodetofix)->type ) {
+        case XML_ENTITY_DECL:
+        case XML_ATTRIBUTE_DECL:
+        case XML_NAMESPACE_DECL:
+        case XML_ELEMENT_DECL:
+        case XML_DOCUMENT_NODE:
+            return(0);
+        default:
+            break;
+        }
 
-            if ( PmmOWNER(nodetofix) )
-                oldParent = PmmOWNERPO(nodetofix);
-            
-            /* The owner data is only fixed if the node is neither a
-             * fragment nor a document. Also no update will happen if
-             * the node is already his owner or the owner has not
-             * changed during previous operations.
-             */
-            if( oldParent != parent ) {
-                if ( parent && parent != nodetofix ){
-                    PmmOWNER(nodetofix) = PmmNODE(parent);
+        if ( PmmOWNER(nodetofix) ) {
+            oldParent = PmmOWNERPO(nodetofix);
+        }
+        
+        /* The owner data is only fixed if the node is neither a
+         * fragment nor a document. Also no update will happen if
+         * the node is already his owner or the owner has not
+         * changed during previous operations.
+         */
+        if( oldParent != parent ) {
+            if ( parent && parent != nodetofix ){
+                PmmOWNER(nodetofix) = PmmNODE(parent);
                     PmmREFCNT_inc( parent );
-                }
-                else {
-                    PmmOWNER(nodetofix) = NULL;
-                }
-
-                if ( oldParent && oldParent != nodetofix )
-                    PmmREFCNT_dec(oldParent);
-
-                if ( PmmNODE(nodetofix)->type != XML_ATTRIBUTE_NODE
-                     && PmmNODE(nodetofix)->properties != NULL )
-                    PmmFixOwnerList( (xmlNodePtr)PmmNODE(nodetofix)->properties,
-                                     parent );
-                PmmFixOwnerList(PmmNODE(nodetofix)->children, parent);
             }
             else {
-                xs_warn( "node doesn't need to get fixed" );
+                PmmOWNER(nodetofix) = NULL;
             }
-            return(1);
+            
+            if ( oldParent && oldParent != nodetofix )
+                PmmREFCNT_dec(oldParent);
+            
+            if ( PmmNODE(nodetofix)->type != XML_ATTRIBUTE_NODE
+                 && PmmNODE(nodetofix)->properties != NULL ) {
+                PmmFixOwnerList( (xmlNodePtr)PmmNODE(nodetofix)->properties,
+                                 parent );
+            }
+            PmmFixOwnerList(PmmNODE(nodetofix)->children, parent);
         }
+        else {
+            xs_warn( "node doesn't need to get fixed" );
+        }
+        return(1);
     }
     return(0);
 }
