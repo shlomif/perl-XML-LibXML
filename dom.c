@@ -82,39 +82,41 @@ xmlChar*
 domEncodeString( const char *encoding, const char *string ){
     xmlCharEncoding enc;
     xmlChar *ret = NULL;
+    xmlBufferPtr in, out;
+    xmlCharEncodingHandlerPtr coder = NULL;
     
     if ( string != NULL ) {
         if( encoding != NULL ) {
             enc = xmlParseCharEncoding( encoding );
-            if ( enc > 0 ) {
-                if( enc > 1 ) {
-                    xmlBufferPtr in, out;
-                    xmlCharEncodingHandlerPtr coder ;
-                    in  = xmlBufferCreate();
-                    out = xmlBufferCreate();
-                    
-                    coder = xmlGetCharEncodingHandler( enc );
-                    
-                    xmlBufferCCat( in, string );
-                    
-                    if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
-                        ret = xmlStrdup( out->content );
-                    }
-                    else {
-                        /* printf("encoding error\n"); */
-                    }
-                    
-                    xmlBufferFree( in );
-                    xmlBufferFree( out );
-                }
-                else {
-                    /* if utf-8 is requested we do nothing */
-                    ret = xmlStrdup( string );
-                }
+            if ( enc > 1 ) {
+                coder= xmlGetCharEncodingHandler( enc );
+            }
+            else if ( enc == 1 ) {
+                ret = xmlStrdup( string );
+            }
+            else if ( enc == XML_CHAR_ENCODING_ERROR ){
+                coder = xmlFindCharEncodingHandler( encoding );
             }
             else {
-                
-                /* printf( "encoding error: no enciding\n" ); */
+                /* fprintf(stderr, "NO XML ENCODING!\n"); */ 
+            }
+
+            if ( coder != NULL ) {
+                in    = xmlBufferCreate();
+                out   = xmlBufferCreate();
+                xmlBufferCCat( in, string );
+                if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
+                    ret = xmlStrdup( out->content );
+                }
+                else {
+                    /* fprintf(stderr, "b0rked encoiding!\n"); */
+                }
+                    
+                xmlBufferFree( in );
+                xmlBufferFree( out );
+            }
+            else {
+                /*  fprintf(stderr, "no coder found\n"); */
             }
         }
         else {
@@ -133,44 +135,44 @@ domEncodeString( const char *encoding, const char *string ){
 char*
 domDecodeString( const char *encoding, const xmlChar *string){
     char *ret=NULL;
+    xmlCharEncoding enc;
     xmlBufferPtr in, out;
-    
+    xmlCharEncodingHandlerPtr coder = NULL;
+
     if ( string != NULL ) {
         if( encoding != NULL ) {
-            xmlCharEncoding enc = xmlParseCharEncoding( encoding );
-            /*      printf("encoding: %d\n", enc ); */
-            if ( enc > 0 ) {
-                if( enc > 1 ) {
-                    xmlBufferPtr in, out;
-                    xmlCharEncodingHandlerPtr coder;
-                    in  = xmlBufferCreate();
-                    out = xmlBufferCreate();
-                    
-                    coder = xmlGetCharEncodingHandler( enc );
-                    xmlBufferCat( in, string );        
-                    
-                    if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
-                        ret=xmlStrdup(out->content);
-                    }
-                    else {
-                        /* printf("decoding error \n"); */
-                    }
-                    
-                    xmlBufferFree( in );
-                    xmlBufferFree( out );
-                }
-                else {
-                    ret = xmlStrdup(string);
-                }
+            enc = xmlParseCharEncoding( encoding );
+            if ( enc > 1 ) {
+                coder= xmlGetCharEncodingHandler( enc );
+            }
+            else if ( enc == 1 ) {
+                ret = xmlStrdup( string );
+            }
+            else if ( enc == XML_CHAR_ENCODING_ERROR ) {
+                coder = xmlFindCharEncodingHandler( encoding );
             }
             else {
-                /* warn( "decoding error:no encoding\n" ); */
-                ret = xmlStrdup( string );
+                /*  fprintf(stderr, "NO XML ENCODING!\n"); */
+            }
+
+            if ( coder != NULL ) {
+                in  = xmlBufferCreate();
+                out = xmlBufferCreate();
+                    
+                xmlBufferCat( in, string );        
+                if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
+                    ret=xmlStrdup(out->content);
+                }
+                else {
+                    /* printf("decoding error \n"); */
+                }
+            
+                xmlBufferFree( in );
+                xmlBufferFree( out );
             }
         }
         else {
-            /* if utf-8 is requested we do nothing */
-            ret = xmlStrdup( string );
+            ret = xmlStrdup(string);
         }
     }
     return ret;
