@@ -152,6 +152,97 @@ domRemoveNode( xmlNodePtr self, xmlNodePtr old ) {
   return old ;
 }
 
+xmlNodePtr
+domInsertBefore( xmlNodePtr self, 
+                 xmlNodePtr newChild,
+                 xmlNodePtr refChild ){
+  if ( self == NULL ) {
+    return NULL;
+  }
+
+  if ( refChild == NULL && newChild != NULL ) {
+    /* insert newChild as first Child */
+    if ( self->children == NULL ) {
+      return domAppendChild( self, newChild );
+    }
+    
+    domUnbindNode( newChild );
+
+    newChild->next = self->children;
+    self->children->prev = newChild;
+   
+    self->children = newChild;
+
+    return newChild;
+  }
+
+  if ( newChild != NULL && 
+       self == refChild->parent &&
+       refChild != newChild ) {
+    /* find the refchild, to avoid spoofed parents */
+    xmlNodePtr hn = self->children;
+    while ( hn ) {
+      if ( hn == refChild ) {
+        /* found refChild */
+        newChild = domUnbindNode( newChild );
+        newChild->parent = self;
+        newChild->next = refChild;
+        newChild->prev = refChild->prev;
+        if ( refChild->prev != NULL ) {
+          refChild->prev->next = newChild;
+        }
+        refChild->prev = newChild;
+        if ( refChild == self->children ) {
+          self->children = newChild;
+        }
+        return newChild;
+      }
+      hn = hn->next;
+    }
+  }
+  return NULL;
+}
+
+xmlNodePtr
+domInsertAfter( xmlNodePtr self, 
+                xmlNodePtr newChild,
+                xmlNodePtr refChild ){
+  if ( self == NULL ) {
+    return NULL;
+  }
+
+  if ( refChild == NULL ) {
+    return domAppendChild( self, newChild );
+  }
+
+  if ( newChild != NULL && 
+       self == refChild->parent &&
+       refChild != newChild ) {
+    /* find the refchild, to avoid spoofed parents */
+    xmlNodePtr hn = self->children;
+    while ( hn ) {
+      if ( hn == refChild ) {
+        /* found refChild */
+        newChild = domUnbindNode( newChild );
+        newChild->parent = self;
+        newChild->prev = refChild;
+        newChild->next = refChild->next;
+        if ( refChild->next != NULL ) {
+          refChild->next->prev = newChild;
+        }
+        refChild->next = newChild;
+
+        if ( refChild == self->last ) {
+          self->last = newChild;
+        }
+        return newChild;
+      }
+      hn = hn->next;
+    }
+  }
+  return NULL;
+}
+
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
   if ( n == 0 ) 

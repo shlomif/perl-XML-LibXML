@@ -50,14 +50,18 @@ xmlNodePtr
 domReplaceChild( xmlNodePtr self,
                  xmlNodePtr oldChlid,
                  xmlNodePtr newChild );
-/* xmlNodePtr */
-/* domInsertBefore( xmlNodePtr self,  */
-/* 		 xmlNodePtr newChild, */
-/* 		 xmlNodePtr refChild ); */
 xmlNodePtr
 domRemoveNode( xmlNodePtr self,
                xmlNodePtr Child );
+xmlNodePtr
+domInsertBefore( xmlNodePtr self, 
+                 xmlNodePtr newChild,
+                 xmlNodePtr refChild );
 
+xmlNodePtr
+domInsertAfter( xmlNodePtr self, 
+                xmlNodePtr newChild,
+                xmlNodePtr refChild );
 
 /* A.3 extra functionality not specified in DOM L1/2*/
 void

@@ -21,6 +21,8 @@ XML::LibXML::Node - "virtual" Base Class DOM-Nodes
   $childnode = $node->getLastChild()
   $dom = $node->getOwnerDocument()
   $node->setOwnerDocument( $dom );
+  $node->insertBefore( $newNode, $refNode )
+  $node->insertAfter( $newNode, $refNode )
   @nodes = $node->findnodes( $xpath_statement );
   @children = $node->getChildnodes();
   $xmlstring = $node->toString();
@@ -112,6 +114,16 @@ document the current node is bound to.
 =item B<setOwnerDocument>
 
 This function binds a node to another DOM. This method unbinds the node first, if it is allready bound to another document.
+
+=item B<insertBefore>
+
+The method inserts I<$newNode> before I<$refNode> . If I<$refNode> is undefined, the newNode will be set as the new
+first child of the parent node.
+
+=item B<insertAfter>
+
+The method inserts I<$newNode> after I<$refNode> . If I<$refNode> is undefined, the newNode will be set as the new
+last child of the parent node.
 
 =item B<findnodes>
 

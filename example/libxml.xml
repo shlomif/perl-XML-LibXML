@@ -183,6 +183,18 @@
 	it is allready bound to another document.
 </method>
 
+<method name="insertBefore" synopsis="$node->insertBefore( $newNode, $refNode )">
+    The method inserts <i>$newNode</i> before <i>$refNode</i>. If
+    <i>$refNode</i> is undefined, the newNode will be set as the new
+    first child of the parent node.
+</method>
+
+<method name="insertAfter" synopsis="$node->insertAfter( $newNode, $refNode )">
+    The method inserts <i>$newNode</i> after <i>$refNode</i>. If
+    <i>$refNode</i> is undefined, the newNode will be set as the new
+    last child of the parent node.
+</method>
+
 <method name="findnodes" synopsis="@nodes = $node->findnodes( $xpath_statement );">
 	<b>findnodes</b> performs the xpath statement on the current node and 
 	returns the result as an array. 

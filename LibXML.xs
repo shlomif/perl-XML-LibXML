@@ -679,10 +679,10 @@ void
 DESTROY(self)
         xmlDocPtr self
     CODE:
-        if (self == NULL) {
-            XSRETURN_UNDEF;
-        }
-        xmlFreeDoc(self);
+        /* if (self == NULL) { */
+        /*    XSRETURN_UNDEF; */
+        /* } */
+        /* xmlFreeDoc(self); */
 
 SV *
 toString(self)
@@ -839,7 +839,6 @@ void
 DESTROY( node )
         xmlNodePtr node 
     CODE:
-        if ( node->parent == 0 ) {
         /**
          * this block should remove old (unbound) nodes from the system
          * but for some reason this condition is not valid ... :(
@@ -848,7 +847,7 @@ DESTROY( node )
         /*domUnbindNode( node );  * before freeing we unbind the node from
 		                          * possible siblings */
         /* xmlFreeNode( node ); */
-    }
+    
 	
 int 
 getType( node ) 
@@ -978,11 +977,27 @@ getLastChild( elem )
         RETVAL
 
 
+void
+insertBefore( self, new, ref ) 
+        xmlNodePtr self
+        xmlNodePtr new
+        xmlNodePtr ref
+    CODE:
+        domInsertBefore( self, new, ref );
+
+void
+insertAfter( self, new, ref )
+        xmlNodePtr self
+        xmlNodePtr new
+        xmlNodePtr ref
+    CODE:
+        domInsertAfter( self, new, ref );
+
 xmlDocPtr
 getOwnerDocument( elem )
         xmlNodePtr elem
     PREINIT:
-        const char * CLASS = "XML::LibXML::NoGCDocument";
+        const char * CLASS = "XML::LibXML::Document";
     CODE:
         RETVAL = elem->doc;
     OUTPUT:
