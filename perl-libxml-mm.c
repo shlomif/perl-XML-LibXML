@@ -37,7 +37,7 @@ struct _ProxyObject {
 typedef struct _ProxyObject ProxyObject;
 
 SV*
-C2Sv( xmlChar *string, const xmlChar *encoding )
+C2Sv( const xmlChar *string, const xmlChar *encoding )
 {
     SV *retval = &PL_sv_undef;
 
@@ -93,6 +93,59 @@ Sv2C( SV* scalar, const xmlChar *encoding )
 }
 
 
+SV*
+nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
+{
+    /* this is a little helper function to avoid to much redundand
+       code in LibXML.xs */
+    SV* retval;
+
+    if ( refnode != NULL ) {
+        xmlDocPtr real_dom = refnode->doc;
+        if ( real_dom->encoding != NULL ) {
+
+            xmlChar * decoded = domDecodeString( (const char *)real_dom->encoding ,
+                                                 (const xmlChar *)string );
+
+            retval = C2Sv( decoded, real_dom->encoding );
+            xmlFree( decoded );
+        }
+        else {
+            retval = C2Sv(string, NULL);
+        }
+    }
+    else {
+        retval = C2Sv(string, NULL);
+    }
+
+    return retval;
+}
+
+xmlChar *
+nodeSv2C( SV * scalar, xmlNodePtr refnode )
+{
+    /* this function requires conditionized compiling, because we
+       request a function, that does not exists in earlier versions of
+       perl. in this cases the library assumes, all strings are in
+       UTF8. if a programmer likes to have the intelligent code, he
+       needs to upgrade perl */
+#ifdef HAVE_UTF8        
+    if ( refnode != NULL ) {
+        xmlDocPtr real_dom = refnode->doc;
+        xs_warn("have node!");
+
+        if (real_dom != NULL && real_dom->encoding != NULL
+             && !SvUTF8(scalar) ) {
+            xs_warn("encode string!");
+            return Sv2C(scalar,real_dom->encoding);
+        }
+    }
+    xs_warn("no encoding !!");
+#endif
+
+    return  Sv2C( scalar, NULL ); 
+}
+
 ProxyObject *
 make_proxy_node (xmlNodePtr node)
 {
@@ -113,6 +166,10 @@ free_proxy_node ( SV* nodesv )
     p = (ProxyObject*)SvIV((SV*)SvRV(nodesv));
     if ( p != NULL ) {
         p->object = NULL;
+        if ( p->extra != NULL ) {
+            /* in this case the owner SV needs to be decreased */
+            
+        }
         p->extra = NULL;
         Safefree( p );
     }

@@ -66,7 +66,7 @@ typedef struct _ProxyObject ProxyObject;
  *
  */
 SV*
-C2Sv( xmlChar *string, const xmlChar *encoding );
+C2Sv( const xmlChar *string, const xmlChar *encoding );
 
 /*
  * NAME sv_to_c_string
@@ -83,6 +83,12 @@ C2Sv( xmlChar *string, const xmlChar *encoding );
  */
 xmlChar *
 Sv2C( SV* scalar, const xmlChar *encoding );
+
+SV*
+nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode );
+
+xmlChar *
+nodeSv2C( SV * scalar, xmlNodePtr refnode );
 
 ProxyObject *
 make_proxy_node (xmlNodePtr node);

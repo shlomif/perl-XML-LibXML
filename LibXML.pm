@@ -135,7 +135,6 @@ sub parse_string {
     my $result;
     eval {
         $result = $self->_parse_string( @_ );
-        $result->_fix_extra;
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -152,7 +151,6 @@ sub parse_fh {
     my $result;
     eval {
         $result = $self->_parse_fh( @_ );
-        $result->_fix_extra;
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -169,7 +167,6 @@ sub parse_file {
     my $result;
     eval {
         $result = $self->_parse_file(@_);
-        $result->_fix_extra;
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -189,9 +186,6 @@ sub parse_xml_chunk {
     my $result;
     eval {
         $result = $self->_parse_xml_chunk( @_ );
-        if ( $result ) {
-            $result->_fix_extra;
-        }
     };
     my $err = $@;
     $self->{_State_} = 0;

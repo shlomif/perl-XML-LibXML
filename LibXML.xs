@@ -769,11 +769,8 @@ _parse_string(self, string, directory = NULL)
                 xmlXIncludeProcess(real_dom);
             }
 
-            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-            RETVAL = sv_newmortal();
-            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
-            proxy->extra = RETVAL;
-            SvREFCNT_inc(RETVAL);
+            RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            setSvNodeExtra(RETVAL,RETVAL);
         }        
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser(); 
@@ -812,12 +809,8 @@ _parse_fh(self, fh, directory = NULL)
             if ( item != NULL && SvTRUE(*item) ) 
                 xmlXIncludeProcess(real_dom);
 
-            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-
-            RETVAL = sv_newmortal();
-            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
-            proxy->extra = RETVAL;
-            SvREFCNT_inc(RETVAL);
+            RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            setSvNodeExtra(RETVAL,RETVAL);
         }
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
@@ -874,12 +867,8 @@ _parse_file(self, filename)
                 xmlXIncludeProcess(real_dom);
             }
 
-            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-
-            RETVAL = sv_newmortal();
-            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
-            proxy->extra = RETVAL;
-            SvREFCNT_inc(RETVAL);
+            RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            setSvNodeExtra(RETVAL,RETVAL);
         }
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
@@ -924,11 +913,8 @@ parse_html_string(self, string)
             SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
             real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
-            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-             RETVAL = sv_newmortal();
-            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
-            proxy->extra = RETVAL;
-            SvREFCNT_inc(RETVAL);
+            RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            setSvNodeExtra(RETVAL,RETVAL);
         }
     OUTPUT:
         RETVAL
@@ -941,7 +927,6 @@ parse_html_fh(self, fh)
         char * CLASS = "XML::LibXML::Document";
         STRLEN len;
         xmlDocPtr real_dom;
-        ProxyObject* proxy;
     CODE:
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
@@ -962,11 +947,8 @@ parse_html_fh(self, fh)
             SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
             real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
-            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-             RETVAL = sv_newmortal();
-            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
-            proxy->extra = RETVAL;
-            SvREFCNT_inc(RETVAL);
+            RETVAL = nodeToSv((xmlNodePtr)real_dom);
+            setSvNodeExtra(RETVAL,RETVAL);
         }
     OUTPUT:
         RETVAL
@@ -996,22 +978,20 @@ parse_html_file(self, filename)
             croak(SvPV(LibXML_error, len));
         }
         else {
-            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-             RETVAL = sv_newmortal();
-            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
-            proxy->extra = RETVAL;
-            SvREFCNT_inc(RETVAL);
+            RETVAL = nodeToSv( (xmlNodePtr)real_dom ); 
+            setSvNodeExtra(RETVAL,RETVAL);
         }
     OUTPUT:
         RETVAL
 
 SV*
-_parse_xml_chunk( self, chunk, encoding="UTF-8" )
+_parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         SV * self
-        char * chunk
+        SV * svchunk
         char * encoding
     PREINIT:
         char * CLASS = "XML::LibXML::DocumentFragment";
+        xmlChar *chunk;
         xmlNodePtr rv = NULL;
         xmlNodePtr fragment= NULL;
         ProxyObject *ret=NULL;
@@ -1019,7 +999,7 @@ _parse_xml_chunk( self, chunk, encoding="UTF-8" )
     CODE:
         if ( encoding == NULL ) encoding = "UTF-8";
 
-        chunk = domEncodeString( encoding, chunk );
+        chunk = Sv2C(svchunk, encoding);
 
         if ( chunk != NULL ) {
             LibXML_error = sv_2mortal(newSVpv("", 0));
@@ -1112,12 +1092,6 @@ decodeFromUTF8( encoding, string )
 
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Document
-
-void
-_fix_extra(node_sv)
-        SV * node_sv
-    CODE:
-        setSvNodeExtra(node_sv,node_sv);
 
 void
 DESTROY(self)
@@ -1333,16 +1307,9 @@ createElement( dom, name )
         docfrag = xmlNewDocFragment( real_dom );
         docfrag_sv = nodeToSv(docfrag);
         setSvNodeExtra(docfrag_sv, docfrag_sv);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(name) ) {
-#endif
-            elname = xmlStrdup(Sv2C(name,NULL));
-#ifdef HAVE_UTF8
-        }
-        else {
-            elname = Sv2C(name,real_dom->encoding);
-        }
-#endif
+
+        elname = nodeSv2C( name , (xmlNodePtr) real_dom );
+
         newNode = xmlNewNode(NULL , elname);
         xmlFree(elname);
         
@@ -1371,16 +1338,9 @@ createElementNS( dom, nsURI, qname)
          SV * docfrag_sv = NULL;
      CODE:
         real_dom = (xmlDocPtr)getSvNode(dom);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(qname) ) {
-#endif
-            quali_name = Sv2C(qname,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            quali_name = Sv2C(qname,real_dom->encoding);
-        }
-#endif
+
+        quali_name = nodeSv2C( qname , (xmlNodePtr) real_dom );
+
         docfrag = xmlNewDocFragment( real_dom );
         docfrag_sv = nodeToSv(docfrag);
         setSvNodeExtra(docfrag_sv, docfrag_sv);
@@ -1418,16 +1378,8 @@ createTextNode( dom, content )
  
         docfrag = xmlNewDocFragment( real_dom );
         docfrag_sv =nodeToSv(docfrag);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(content) ) {
-#endif
-            encstring = Sv2C(content,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encstring = Sv2C(content,real_dom->encoding);
-        }
-#endif
+        encstring = nodeSv2C( content , (xmlNodePtr) real_dom );
+
         newNode = xmlNewDocText( real_dom, encstring );
         xmlFree(encstring);
         newNode->doc = real_dom;
@@ -1454,16 +1406,7 @@ createComment( dom , content )
 
         docfrag = xmlNewDocFragment( real_dom );
         docfrag_sv =nodeToSv(docfrag);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(content) ) {
-#endif
-            encstring = Sv2C(content,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encstring = Sv2C(content,real_dom->encoding);
-        }
-#endif
+        encstring = nodeSv2C( content , (xmlNodePtr) real_dom );
         newNode = xmlNewDocComment( real_dom, encstring );
         xmlFree( encstring );
         newNode->doc = real_dom;
@@ -1489,16 +1432,7 @@ createCDATASection( dom, content )
  
         docfrag = xmlNewDocFragment( real_dom );
         docfrag_sv =nodeToSv(docfrag);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(content) ) {
-#endif
-            encstring = Sv2C(content,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encstring = Sv2C(content,real_dom->encoding);
-        }
-#endif
+        encstring = nodeSv2C( content , (xmlNodePtr) real_dom );
         newNode = domCreateCDATASection( real_dom, encstring );
         xmlFree(encstring);
         newNode->doc = real_dom;
@@ -1521,26 +1455,8 @@ createAttribute( dom, name , value=&PL_sv_undef )
         xmlChar *encval  = NULL;
     CODE:
         real_dom = (xmlDocPtr)getSvNode(dom);  
-#ifdef HAVE_UTF8
-        if ( SvUTF8(name) ) {
-#endif
-            encname = Sv2C(name,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encname = Sv2C(name,real_dom->encoding);
-        }
-#endif
-#ifdef HAVE_UTF8
-        if ( SvUTF8(value) ) {
-#endif
-            encval = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encval = Sv2C(value,real_dom->encoding);
-        }
-#endif
+        encname = nodeSv2C( name , (xmlNodePtr) real_dom );
+        encval  = nodeSv2C( value , (xmlNodePtr) real_dom );
 
         newNode = (xmlNodePtr)xmlNewProp(NULL, encname , encval );
         xmlFree(encname);
@@ -1571,33 +1487,17 @@ createAttributeNS( dom, nsURI, qname, value=&PL_sv_undef )
         xmlDocPtr real_dom;
     CODE:
         real_dom = (xmlDocPtr)getSvNode(dom);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(qname) ) {
-#endif
-            encname = Sv2C(qname,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encname = Sv2C(qname,real_dom->encoding);
-        }
-#endif
-         if ( nsURI != NULL && strlen( nsURI ) != 0 ){
+        encname = nodeSv2C( qname , (xmlNodePtr) real_dom );
+        if ( nsURI != NULL && strlen( nsURI ) != 0 ){
             lname = xmlSplitQName2(encname, &prefix);
             ns = domNewNs (0 , prefix , nsURI);
         }
         else{
             lname = encname;
         }
-#ifdef HAVE_UTF8
-        if ( SvUTF8(value) ) {
-#endif
-            encval = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encval = Sv2C(value,real_dom->encoding);
-        }
-#endif
+
+        encval = nodeSv2C( value , (xmlNodePtr) real_dom );
+
         if ( ns != NULL ) {
             newNode = (xmlNodePtr) xmlNewNsProp(NULL, ns, lname , encval );
         }
@@ -1674,26 +1574,8 @@ insertProcessingInstruction( dom, name, content )
         xmlChar * encdata;
     CODE:
         real_dom = (xmlDocPtr)getSvNode(dom);
-#ifdef HAVE_UTF8
-        if ( SvUTF8(name) ) {
-#endif
-            enctarg = Sv2C(name,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            enctarg = Sv2C(name,real_dom->encoding);
-        }
-#endif
-#ifdef HAVE_UTF8
-        if ( SvUTF8(content) ) {
-#endif
-            encdata = Sv2C(content,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encdata = Sv2C(content,real_dom->encoding);
-        }
-#endif
+        enctarg = nodeSv2C( name , (xmlNodePtr) real_dom );
+        encdata = nodeSv2C( content , (xmlNodePtr) real_dom );
         pinode = xmlNewPI( enctarg, encdata );
         xmlFree(enctarg);
         xmlFree(encdata);
@@ -1719,26 +1601,10 @@ createProcessingInstruction( dom, name, content=&PL_sv_undef )
         real_dom = (xmlDocPtr)getSvNode(dom);
         docfrag = xmlNewDocFragment( real_dom );
         docfrag_sv = nodeToSv((xmlNodePtr)docfrag );
-#ifdef HAVE_UTF8
-        if ( SvUTF8(name) ) {
-#endif
-            enctarg = Sv2C(name,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            enctarg = Sv2C(name,real_dom->encoding);
-        }
-#endif
-#ifdef HAVE_UTF8
-        if ( SvUTF8(content) ) {
-#endif
-            encdata = Sv2C(content,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            encdata = Sv2C(content,real_dom->encoding);
-        }
-#endif
+
+        enctarg = nodeSv2C( name , (xmlNodePtr) real_dom );
+        encdata = nodeSv2C( content , (xmlNodePtr) real_dom );
+
         newNode = xmlNewPI( enctarg, encdata );
         xmlFree(enctarg);
         xmlFree(encdata);
@@ -2259,26 +2125,14 @@ setName( node , value )
     PREINIT:
         xmlChar* string;
     CODE:
-#ifdef HAVE_UTF8
-        if ( SvUTF8(value) ) {
-#endif
-        string = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-        }
-        else {
-            xmlChar* strEncoded = domEncodeString( node->doc->encoding, 
-                                                   Sv2C(value,NULL) );
-            xmlFree( string );
-            string = strEncoded;
-        }
-#endif
+        string = nodeSv2C( value , node );
         domSetName( node, string );
-        /* free the string here, too? */
         xmlFree(string);
 
 SV*
-getData( proxy_node ) 
-        SV* proxy_node 
+getData( proxy_node, useDomEncoding = &PL_sv_undef ) 
+        SV * proxy_node 
+        SV * useDomEncoding
     ALIAS:
         XML::LibXML::Attr::value     = 1
         XML::LibXML::Node::nodeValue = 2
@@ -2334,7 +2188,12 @@ getData( proxy_node )
 
         if ( content != NULL ){
             xs_warn ( "content follows"); xs_warn( content );
-            RETVAL = C2Sv(content, NULL);
+            if ( SvTRUE(useDomEncoding) ) {
+                RETVAL = nodeC2Sv(content, node);
+            }
+            else {
+                RETVAL = C2Sv(content, NULL);
+            }
             xmlFree(content);
         }
         else {
@@ -2481,8 +2340,9 @@ getChildnodes( node )
         }
 
 SV*
-toString( self )
+toString( self, useDomEncoding = &PL_sv_undef )
         xmlNodePtr self
+        SV * useDomEncoding
     PREINIT:
         xmlBufferPtr buffer;
         char *ret = NULL;
@@ -2495,7 +2355,12 @@ toString( self )
         xmlBufferFree( buffer );
 
         if ( ret != NULL ) {
-            RETVAL = C2Sv(ret, NULL) ;
+            if ( SvTRUE(useDomEncoding) ) {
+                RETVAL = nodeC2Sv(ret, self) ;
+            }
+            else {
+                RETVAL = C2Sv(ret, NULL) ;
+            }
             xmlFree( ret );
         }
         else {
@@ -2710,22 +2575,7 @@ getNamespace ( node, perlprefix )
         SV * element;
     PPCODE:
         if ( node != NULL && perlprefix != NULL && perlprefix != &PL_sv_undef ) {
-            real_dom = node->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(perlprefix) ) {
-#endif
-                    prefix = Sv2C(perlprefix,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    prefix = Sv2C(perlprefix,real_dom->encoding);
-                }
-#endif
-            }
-            else {
-                prefix = Sv2C(perlprefix,NULL);
-            }
+            prefix = nodeSv2C( perlprefix, node );
 
             ns = node->nsDef;
             while ( ns != NULL ) {
@@ -2748,13 +2598,19 @@ getNamespace ( node, perlprefix )
         }
 
 SV*
-string_value ( node )
+string_value ( node, useDomEncoding = &PL_sv_undef )
         xmlNodePtr node
+        SV * useDomEncoding
     ALIAS:
         to_literal = 1
     CODE:
         /* we can't just return a string, because of UTF8! */
-        RETVAL = C2Sv(xmlXPathCastNodeToString(node), NULL);
+        if ( SvTRUE(useDomEncoding) ) {
+            RETVAL = nodeC2Sv(xmlXPathCastNodeToString(node), node);
+        }
+        else {
+            RETVAL = C2Sv(xmlXPathCastNodeToString(node), NULL);
+        }
     OUTPUT:
         RETVAL
 
@@ -2776,7 +2632,6 @@ new(CLASS, name )
     PREINIT:
         xmlNodePtr newNode;
     CODE:
-        # CLASS = "XML::LibXML::Element";
         newNode = xmlNewNode( 0, name );
         if( newNode != NULL ) {
             # init the keeping fragment
@@ -2807,33 +2662,14 @@ setAttribute( perlelem, name, value )
         SV* name
         SV* value
     PREINIT:
-        xmlDocPtr real_dom;
         xmlNodePtr elem;
         xmlChar* xname; 
         xmlChar* xvalue;
     CODE:
         if ( elem = getSvNode(perlelem) ) {
-            real_dom= elem->doc;        
-#ifdef HAVE_UTF8
-            if ( SvUTF8(name) ) {
-#endif
-                xname  = Sv2C(name, NULL);
-#ifdef HAVE_UTF8
-            }
-            else {
-                xname = Sv2C(name,real_dom ? real_dom->encoding : NULL);
-            }
-#endif
-#ifdef HAVE_UTF8
-            if ( SvUTF8(value) ) {
-#endif
-                xvalue = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-            }
-            else {
-                xvalue = Sv2C(value,real_dom ? real_dom->encoding : NULL);
-            }
-#endif
+            xname  = nodeSv2C( name , elem );
+            xvalue = nodeSv2C( value , elem );
+            
             xmlSetProp( elem, xname, xvalue );
             xmlFree( xname );
             xmlFree( xvalue );
@@ -2853,33 +2689,8 @@ setAttributeNS( elem, nsURI, qname, value )
         xmlChar *lname  = NULL;
         xmlNsPtr ns     = NULL;
     CODE:
-        real_dom = elem->doc;
-        if ( real_dom ) {
-#ifdef HAVE_UTF8
-            if ( SvUTF8(qname) ) {
-#endif
-                xqname = Sv2C(qname,NULL);
-#ifdef HAVE_UTF8
-            }
-            else {
-                xqname = Sv2C(qname,real_dom->encoding);
-            }
-#endif
-#ifdef HAVE_UTF8
-            if ( SvUTF8(value) ) {
-#endif
-                xvalue = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-            }
-            else {
-                xvalue = Sv2C(value,real_dom->encoding);
-            }
-#endif
-        }
-        else {
-            xvalue = Sv2C(value,NULL);
-            xqname = Sv2C(qname,NULL);
-        }
+        xqname  = nodeSv2C( qname , elem );
+        xvalue  = nodeSv2C( value , elem );
  
         if ( nsURI != NULL && xmlStrlen(nsURI) != 0 ) {
             lname = xmlSplitQName2(xqname, &prefix);
@@ -2926,22 +2737,7 @@ hasAttribute( elem, pname )
         xmlDocPtr real_dom = NULL;
     CODE:
         if ( elem != NULL && pname != NULL && pname!=&PL_sv_undef ){
-            real_dom = elem->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(pname) ) {
-#endif
-                    name = Sv2C(pname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    name = Sv2C(pname,real_dom->encoding);
-               }
-#endif
-            }
-            else {
-                name = Sv2C(pname,NULL);
-            }
+            name  = nodeSv2C( pname , elem );
         
             /**
              * xmlHasProp() returns the attribute node, which is not
@@ -2969,26 +2765,10 @@ hasAttributeNS( elem, nsURI, pname )
         xmlAttrPtr att = NULL;
     CODE:
         if ( elem != NULL && pname != NULL && pname!=&PL_sv_undef ){
-            real_dom = elem->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(pname) ) {
-#endif
-                    name = Sv2C(pname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    name = Sv2C(pname,real_dom->encoding);
-               }
-#endif
-            }
-            else {
-                name = Sv2C(pname,NULL);
-            }
-        
-
+            name  = nodeSv2C( pname , elem );
             /**
-             * domHasNsProp() returns the attribute node, which is not exactly what 
+             * domHasNsProp() returns the attribute node, which is not
+             * exactly what
              * we want as a boolean value 
              **/
             att = domHasNsProp( elem, name, nsURI );
@@ -3002,57 +2782,54 @@ hasAttributeNS( elem, nsURI, pname )
         RETVAL
 
 SV*
-getAttribute( elem, name ) 
-        ProxyObject* elem
-        char * name 
+getAttribute( elem, pname ) 
+        SV * elem
+        SV * pname 
     PREINIT:
-	    char * content = NULL;
+        xmlNodePtr node;
+        xmlChar * name;
+	    xmlChar * content = NULL;
     CODE:
-        content = xmlGetProp( elem->object, name );
+        node = getSvNode( elem );
+        name = nodeSv2C( pname, node );
+        content = xmlGetProp( node , name );
         if ( content != NULL ) {
-            if ( (TEST_PERL_FLAG("XML::LibXML::ORIGINAL_STRING"))
-                 && (((xmlNodePtr)elem->object)->doc != NULL) ){
-                xmlChar* deccontent = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
-               xmlFree( content);
-               content = deccontent;
-            }
-
-            RETVAL  = newSVpvn( content, xmlStrlen( content ) );
+            
+            RETVAL  = C2Sv(content, NULL );
             xmlFree( content );
         }
         else {
-            RETVAL = &PL_sv_undef;
+            XSRETURN_UNDEF;
         }
+        xmlFree(name);
     OUTPUT:
         RETVAL
 
 SV*
-getAttributeNS( elem, nsURI ,name ) 
-        ProxyObject* elem
+getAttributeNS( elem, nsURI ,pname ) 
+        SV* elem
         char * nsURI
-        char * name 
+        SV * pname 
     PREINIT:
         xmlAttrPtr att;
-	    char * content = NULL;
+        xmlNodePtr node;
+        xmlChar * name;
+	    xmlChar * content = NULL;
     CODE:
-        att = domHasNsProp( elem->object, name, nsURI );
+        node = getSvNode( elem );
+        name = nodeSv2C( pname, node );
+        att = domHasNsProp( node, name, nsURI );
         if ( att != NULL && att->children != NULL ) {
             content = xmlStrdup( att->children->content ); 
         }
         if ( content != NULL ) {
-            if ( (TEST_PERL_FLAG("XML::LibXML::ORIGINAL_STRING")) 
-                 && (((xmlNodePtr)elem->object)->doc != NULL) ){
-                xmlChar *deccontent = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
-                xmlFree( content );
-                content = deccontent;
-            }
-
-            RETVAL  = newSVpvn( content, xmlStrlen( content ) );
+            RETVAL  = C2Sv(content,NULL);
             xmlFree( content );
         }
         else {
-            RETVAL = &PL_sv_undef;
+            XSRETURN_UNDEF;
         }
+        xmlFree( name ); 
     OUTPUT:
         RETVAL
 
@@ -3069,23 +2846,7 @@ getAttributeNode( elemnode, pname )
     CODE:
         elem = getSvNode(elemnode);
         if ( elem != NULL ) {
-            real_dom = elem->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(pname) ) {
-#endif
-                    name = Sv2C(pname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    name = Sv2C(pname,real_dom->encoding);
-               }
-#endif
-            }
-            else {
-                name = Sv2C(pname,NULL);
-            }
-
+            name  = nodeSv2C( pname , elem );
             attrnode = xmlHasProp( elem, name );
             if ( attrnode != NULL ) {
                 RETVAL = nodeToSv((xmlNodePtr)attrnode);
@@ -3115,22 +2876,7 @@ getAttributeNodeNS( elemobj, nsURI, pname )
     CODE:
         elem = getSvNode(elemobj);
         if ( elem != NULL ) {
-            real_dom = elem->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(pname) ) {
-#endif
-                    name = Sv2C(pname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    name = Sv2C(pname,real_dom->encoding);
-               }
-#endif
-            }
-            else {
-                name = Sv2C(pname,NULL);
-            }
+            name  = nodeSv2C( pname ,elem );
 
             attrnode = domHasNsProp( elem, name, nsURI );
             if ( attrnode != NULL ) {
@@ -3157,22 +2903,8 @@ removeAttribute( elem, pname )
         xmlDocPtr real_dom = NULL;
     CODE:
         if ( elem != NULL && pname != NULL && pname!=&PL_sv_undef ){
-            real_dom = elem->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(pname) ) {
-#endif
-                    name = Sv2C(pname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    name = Sv2C(pname,real_dom->encoding);
-               }
-#endif
-            }
-            else {
-                name = Sv2C(pname,NULL);
-            }
+            name  = nodeSv2C( pname , elem );
+
             xmlRemoveProp( xmlHasProp( elem, name ) );	
             xmlFree(name);
         }
@@ -3190,22 +2922,7 @@ removeAttributeNS( elem, nsURI, pname )
         xmlDocPtr real_dom = NULL;
     CODE:
         if ( elem != NULL && pname != NULL && pname!=&PL_sv_undef ){
-            real_dom = elem->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(pname) ) {
-#endif
-                    name = Sv2C(pname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    name = Sv2C(pname,real_dom->encoding);
-               }
-#endif
-            }
-            else {
-                name = Sv2C(pname,NULL);
-            }
+            name  = nodeSv2C( pname , elem );
 
             if ( nsURI != NULL ) {
                 lname = xmlSplitQName2(name, &prefix);
@@ -3224,19 +2941,23 @@ removeAttributeNS( elem, nsURI, pname )
         
 
 void
-getChildrenByTagName( elem, name )
-        ProxyObject* elem
-        char * name 
+getChildrenByTagName( elem, pname )
+        SV* elem
+        SV * pname 
     PREINIT:
+        xmlNodePtr node;
         xmlNodeSetPtr nodelist;
         SV * element;
         int len = 0;
         int wantarray = GIMME_V;
+        xmlChar * name;
     PPCODE:
-        nodelist = domGetElementsByTagName( elem->object , name );
+        node = getSvNode(elem);
+        name  = nodeSv2C( pname , node );
+        nodelist = domGetElementsByTagName( node , name );
+        xmlFree(name);
         if ( nodelist && nodelist->nodeNr > 0 ) {
             int i = 0 ;
-            const char * cls = "XML::LibXML::Node";
             xmlNodePtr tnode;
 
             len = nodelist->nodeNr;
@@ -3250,8 +2971,8 @@ getChildrenByTagName( elem, name )
                     tnode = nodelist->nodeTab[i];
                     element = nodeToSv(tnode);
                 
-                    if ( elem->extra != NULL ) {
-                        setSvNodeExtra(element, elem->extra);
+                    if ( getSvNodeExtra != NULL ) {
+                        setSvNodeExtra(element, getSvNodeExtra(elem));
                     }
                     XPUSHs( element );
                 }
@@ -3260,23 +2981,27 @@ getChildrenByTagName( elem, name )
                 XPUSHs( newSViv( len ) );
             }
             xmlXPathFreeNodeSet( nodelist );
-        }
+        }         
 
 void
-getChildrenByTagNameNS( node, nsURI, name )
-        ProxyObject* node
+getChildrenByTagNameNS( elem, nsURI, pname )
+        SV* elem
         char * nsURI
-        char * name 
+        SV * pname 
     PREINIT:
+        xmlNodePtr node;
         xmlNodeSetPtr nodelist;
+        xmlChar * name;
         SV * element;
         int len = 0;
         int wantarray = GIMME_V;
     PPCODE:
-        nodelist = domGetElementsByTagNameNS( node->object , nsURI , name );
+        node = getSvNode(elem);
+        name = nodeSv2C(pname,node);
+        nodelist = domGetElementsByTagNameNS( node , nsURI , name );
+        xmlFree(name);
         if ( nodelist && nodelist->nodeNr > 0 ) {
             int i = 0 ;
-            const char * cls = "XML::LibXML::Node";
             xmlNodePtr tnode;
 
             len = nodelist->nodeNr;
@@ -3290,8 +3015,8 @@ getChildrenByTagNameNS( node, nsURI, name )
                     tnode = nodelist->nodeTab[i];
                     element = nodeToSv(tnode);
                 
-                    if ( node->extra != NULL ) {
-                        setSvNodeExtra(element, node->extra);
+                    if ( getSvNodeExtra(elem) != NULL ) {
+                        setSvNodeExtra(element, getSvNodeExtra(elem));
                     }
                     XPUSHs( element );
                 }
@@ -3314,22 +3039,7 @@ appendWellBalancedChunk( self, chunk )
         if ( self != NULL 
              && chunk != NULL
              && chunk != &PL_sv_undef ) {
-            real_dom = self->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(chunk) ) {
-#endif
-                    encvalue = Sv2C(chunk,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    encvalue = Sv2C(chunk,real_dom->encoding);
-                }
-#endif
-            }
-            else {
-                encvalue = Sv2C(chunk,NULL);
-            }
+            encvalue = nodeSv2C(chunk, self);
 
             LibXML_error = sv_2mortal(newSVpv("", 0));
             rv = domReadWellBalancedString( self->doc, encvalue );
@@ -3356,22 +3066,7 @@ appendTextNode( self, xmlString )
         if ( self != NULL 
              && xmlString != NULL
              && xmlString != &PL_sv_undef ) {
-            real_dom = self->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(xmlString) ) {
-#endif
-                    encvalue = Sv2C(xmlString,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    encvalue = Sv2C(xmlString,real_dom->encoding);
-                }
-#endif
-            }
-            else {
-                encvalue = Sv2C(xmlString,NULL);
-            }
+            encvalue = nodeSv2C(xmlString, self);
 
             domAppendChild( self, xmlNewText( encvalue ) );
             xmlFree(encvalue);
@@ -3388,33 +3083,9 @@ appendTextChild( self, childname, xmlString )
         xmlDocPtr real_dom = NULL;
     CODE:
         if ( self != NULL ) {
-            real_dom = self->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-               if ( SvUTF8(childname) ) {
-#endif
-                    encname = Sv2C(childname,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    encname = Sv2C(childname,real_dom->encoding);
-                }
-#endif
-#ifdef HAVE_UTF8
-                if ( SvUTF8(xmlString) ) {
-#endif
-                    enccontent = Sv2C(xmlString,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    enccontent = Sv2C(xmlString,real_dom->encoding);
-                }
-#endif
-            }
-            else {
-                encname = Sv2C(childname,NULL);
-                enccontent = Sv2C(xmlString,NULL);
-            }
+            enccontent = nodeSv2C(xmlString, self);
+            encname = nodeSv2C(childname, self);
+
             xmlNewTextChild( self, NULL, encname, enccontent );
             xmlFree(encname);
             xmlFree(enccontent);
@@ -3431,22 +3102,7 @@ _setData( node, value )
         xmlChar * encstr;
     CODE:
         if ( node != NULL ) {
-            real_dom = node->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(value) ) {
-#endif
-                    encstr = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    encstr = Sv2C(value,real_dom->encoding);
-                }
-#endif
-            }
-            else {
-                encstr = Sv2C(value, NULL);
-            }
+            encstr = nodeSv2C(value,node);
             domSetNodeValue( node, encstr );
             xmlFree( encstr );
         }
@@ -3461,26 +3117,10 @@ setData( node, value )
         XML::LibXML::Attr::setValue = 1 
         # XML::LibXML::PI::_setData = 2
     PREINIT:
-        xmlDocPtr real_dom = NULL;
         xmlChar * encstr = NULL;
     CODE:
         if ( node != NULL ) {
-            real_dom = node->doc;
-            if ( real_dom != NULL ) {
-#ifdef HAVE_UTF8
-                if ( SvUTF8(value) ) {
-#endif
-                    encstr = Sv2C(value,NULL);
-#ifdef HAVE_UTF8
-                }
-                else {
-                    encstr = Sv2C(value,real_dom->encoding);
-                }
-#endif
-            }
-            else {
-                encstr = Sv2C(value, NULL);
-            }
+            encstr = nodeSv2C(value,node);
             domSetNodeValue( node, encstr );
             xmlFree(encstr);
         }
@@ -3488,14 +3128,17 @@ setData( node, value )
 SV *
 new( CLASS, content )
         const char * CLASS
-        char * content
+        SV * content
     PREINIT:
+        xmlChar * data;
         xmlNodePtr newNode;
     CODE:
         /* we should test if this is UTF8 ... because this WILL cause
          * problems with iso encoded strings :(
          */
-        newNode = xmlNewText( content );
+        data = Sv2C(content, NULL);
+        newNode = xmlNewText( data );
+        xmlFree(data);
         if( newNode != NULL ) {
             # init the keeping fragment
             xmlNodePtr docfrag = NULL;
@@ -3521,11 +3164,14 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Comment
 SV *
 new( CLASS, content ) 
         const char * CLASS
-        char * content
+        SV * content
     PREINIT:
+        xmlChar * encstring;
         xmlNodePtr newNode;
     CODE:
-        newNode = xmlNewComment( content );
+        encstring = Sv2C(content, NULL);
+        newNode = xmlNewComment( encstring );
+        xmlFree(encstring);
         if( newNode != NULL ) {
             xmlNodePtr docfrag = NULL;
             SV * docfrag_sv = NULL;
@@ -3550,12 +3196,14 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::CDATASection
 SV *
 new( CLASS , content )
         const char * CLASS
-        char * content
+        SV * content
     PREINIT:
+        xmlChar * encstring;
         xmlNodePtr newNode;
     CODE:
-        RETVAL = NULL;
-        newNode = xmlNewCDataBlock( 0 , content, xmlStrlen( content ) );
+        encstring = Sv2C(content, NULL);
+        newNode = xmlNewCDataBlock( 0 , encstring, xmlStrlen( encstring ) );
+        xmlFree(encstring);
         if ( newNode != NULL ){
             # init the keeping fragment
             xmlNodePtr docfrag = NULL;
@@ -3644,13 +3292,6 @@ getParentElement( attrnode )
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::DocumentFragment
 
-void
-_fix_extra(node)
-        SV * node;
-    CODE:
-        /* _fix_extra: prolly not really required!? */
-        setSvNodeExtra(node,node);
-
 SV*
 new( CLASS )
         char * CLASS
@@ -3699,19 +3340,19 @@ getName (self)
     OUTPUT:
         RETVAL
         
-char *
+SV *
 prefix (self)
         xmlNsPtr self
     ALIAS:
         XML::LibXML::Namespace::getLocalName = 1
         XML::LibXML::Namespace::localName = 2
     CODE:
-        RETVAL = (char*)self->prefix;
+        RETVAL = C2Sv(self->prefix, NULL);
     OUTPUT:
         RETVAL
 
 
-char *
+SV *
 getData (self)
         xmlNsPtr self
     ALIAS:
@@ -3719,7 +3360,7 @@ getData (self)
         XML::LibXML::Namespace::getValue = 2
         XML::LibXML::Namespace::uri = 3
     CODE:
-        RETVAL = (char*)self->href;
+        RETVAL = C2Sv(self->href, NULL);
     OUTPUT:
         RETVAL
 
