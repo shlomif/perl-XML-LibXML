@@ -113,6 +113,7 @@ domEncodeString( const char *encoding, const char *string ){
                 }
             }
             else {
+                
                 /* printf( "encoding error: no enciding\n" ); */
             }
         }
