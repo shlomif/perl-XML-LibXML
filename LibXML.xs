@@ -433,7 +433,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
 }
 
 xmlDocPtr
-LibXML_parse_stream(SV * self, SV * ioref)
+LibXML_parse_stream(SV * self, SV * ioref, char * directory)
 {
     xmlDocPtr doc = NULL;
     xmlParserCtxtPtr ctxt;
@@ -442,6 +442,16 @@ LibXML_parse_stream(SV * self, SV * ioref)
     char buffer[1024];
     int read_length;
     int ret = -1;
+    char current_dir[512];
+    
+    if (directory == NULL) {
+        if (getcwd(current_dir, 512) != 0) {
+            directory = current_dir;
+        }
+        else {
+            warn("couldn't get current directory: %s\n", strerror(errno));
+        }
+    }
     
     read_length = LibXML_read_perl(ioref, buffer, 4);
     if (read_length > 0) {
@@ -449,11 +459,14 @@ LibXML_parse_stream(SV * self, SV * ioref)
         if (ctxt == NULL) {
             croak("Could not create push parser context: %s", strerror(errno));
         }
+        ctxt->directory = directory;
         ctxt->_private = (void*)self;
         while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
             xmlParseChunk(ctxt, buffer, read_length, 0);
         }
         ret = xmlParseChunk(ctxt, buffer, 0, 1);
+
+        ctxt->directory = NULL;
 
         /* jsut being paranoid */
         if ( ret == 0 ) {
@@ -500,6 +513,7 @@ LibXML_parse_html_stream(SV * self, SV * ioref)
             }   
         }
         ret = htmlParseChunk(ctxt, buffer, 0, 1);
+
         if ( ret == 0 ) {
             doc = ctxt->myDoc;
             well_formed = ctxt->wellFormed;
@@ -778,9 +792,10 @@ get_last_error(CLASS)
 
 
 SV*
-_parse_string(self, string)
+_parse_string(self, string, directory = NULL)
         SV * self
         SV * string
+        char * directory
     PREINIT:
         xmlParserCtxtPtr ctxt;
         char * CLASS = "XML::LibXML::Document";
@@ -800,6 +815,7 @@ _parse_string(self, string)
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
         }
+        ctxt->directory = directory;
 
         # warn( "context created\n");
 
@@ -812,6 +828,8 @@ _parse_string(self, string)
         ret = xmlParseDocument(ctxt);
 
         # warn( "document parsed \n");
+
+        ctxt->directory = NULL;
 
         well_formed = ctxt->wellFormed;
         valid = ctxt->valid;
@@ -839,9 +857,10 @@ _parse_string(self, string)
         RETVAL
 
 SV*
-_parse_fh(self, fh)
+_parse_fh(self, fh, directory = NULL)
         SV * self
         SV * fh
+        char * directory
     PREINIT:
         char * CLASS = "XML::LibXML::Document";
         STRLEN len;
@@ -851,7 +870,7 @@ _parse_fh(self, fh)
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
         
-        real_dom = LibXML_parse_stream(self, fh);
+        real_dom = LibXML_parse_stream(self, fh, directory);
 
         sv_2mortal(LibXML_error);
         

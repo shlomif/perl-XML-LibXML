@@ -535,11 +535,24 @@ block.
 
   my $doc = $parser->parse_string($string);
 
+or, passing in a directory to use as the "base":
+
+  my $doc = $parser->parse_string($string, $dir);
+
 =head2 parse_fh
 
   my $doc = $parser->parse_fh($fh);
 
 Here, C<$fh> can be an IOREF, or a subclass of IO::Handle.
+
+And again, you can pass in a directory as the "base":
+
+  my $doc = $parser->parse_fh($fh, $dir);
+
+Note in the above two cases, $dir must end in a trailing slash,
+otherwise the parent of that directory is used. This can actually
+be useful, in that it will accept the filename of what you're
+parsing.
 
 =head2 parse_file
 
