@@ -586,18 +586,14 @@ spec it fetches all descendants of a node with a given tagname. If one
 is as confused with <i>tagname</i> as I was, tagname is a qualified
 tagname which is in case of namespace useage prefix and local name
 
-    If this function is called in SCALAR context, it returns the number of 
-    Elements found.
-
+In SCALAR context this function returns a <i>XML::LibXML::NodeList</i> object.
 </method>
 
 <method name="getElementsByTagNameNS" 
     synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$localname);">
     Namespace version of <i>getElementsByTagName</i> as found in the DOM spec.
 
-    If this function is called in SCALAR context, it returns the number of 
-    Elements found.
-
+In SCALAR context this function returns a <i>XML::LibXML::NodeList</i> object.
 </method>
 
 <method name="getElementsByLocalName" 
@@ -607,8 +603,7 @@ tagname which is in case of namespace useage prefix and local name
     tags matching the given local-name. This alows one to select tags with 
     the same local name across namespace borders. 
 
-    If this function is called in SCALAR context, it returns the number of 
-    Elements found.
+In SCALAR context this function returns a <i>XML::LibXML::NodeList</i> object.
 </method>
 
 <method name="appendWellBalancedChunk" 
