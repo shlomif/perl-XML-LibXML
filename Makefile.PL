@@ -76,9 +76,15 @@ if ( $] >= 5.006 ) {
 #
 # NOTE: All versions, the tests pass will be marked as working.
 #
+
+$skipsaxinstall = $ENV{SKIP_SAX_INSTALL} || $config{SKIP_SAX_INSTALL};
+delete $config{SKIP_SAX_INSTALL};
+
 unless ( $is_Win32 ) { # cannot get config in W32
     my @blacklist = (
-                     [2,4,24,0],
+                     [2,4,20,0],
+                     [2,4,24,1],
+                     [2,4,25,0],
                      [2,4,30,1],
                      [2,5,4,1],
                      [2,5,5,0], # known as broken
@@ -282,18 +288,21 @@ EOF
 }
 
 sub MY::install {
-    package MY;
-    my $script = shift->SUPER::install(@_);
-    $script =~ s/install :: (.*)$/install :: $1 install_sax_driver/m;
-    $script .= <<"INSTALL";
+   package MY;
+   my $script = shift->SUPER::install(@_);
+   unless ( $::skipsaxinstall ) {
+     $script =~ s/install :: (.*)$/install :: $1 install_sax_driver/m;
+     $script .= <<"INSTALL";
 
 install_sax_driver :
 \t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
 \t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
- 
+
 INSTALL
- 
-    return $script;
+   } else {
+     warn "Note: 'make install' will skip XML::LibXML::SAX registration with XML::SAX!\n";
+   }
+   return $script;
 }
 # -------------------------------------------------------------------------- #
 

@@ -11,10 +11,10 @@
 #include <libxml/globals.h>
 #include <stdio.h>
 
-#define warn(string) fprintf(stderr, string) 
+/* #define warn(string) fprintf(stderr, string) */
 
 #ifdef XS_WARNINGS
-#define xs_warn(string) fprintf(stderr, string) 
+#define xs_warn(string) warn(string) 
 #else
 #define xs_warn(string)
 #endif
@@ -553,7 +553,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
 
     if ( !(domTestHierarchy(self, new)
            && domTestDocument(self, new))){
-        xs_warn("HIERARCHIY_REQUEST_ERR\n"); 
+        xs_warn("HIERARCHY_REQUEST_ERR\n"); 
         xmlGenericError(xmlGenericErrorContext,"HIERARCHY_REQUEST_ERR\n");
         return NULL;
     }
@@ -978,6 +978,20 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
 }
 
 int
+domNodeNormalizeList( xmlNodePtr nodelist )
+{
+    if ( nodelist == NULL ) 
+        return(0);
+
+    while ( nodelist ){
+        if ( domNodeNormalize( nodelist ) == 0 )
+            return(0);
+        nodelist = nodelist->next;
+    }
+    return(1);
+}
+
+int
 domNodeNormalize( xmlNodePtr node )
 {
     xmlNodePtr next = NULL;
@@ -1008,20 +1022,6 @@ domNodeNormalize( xmlNodePtr node )
     default:
         break;
     }    
-    return(1);
-}
-
-int
-domNodeNormalizeList( xmlNodePtr nodelist )
-{
-    if ( nodelist == NULL ) 
-        return(0);
-
-    while ( nodelist ){
-        if ( domNodeNormalize( nodelist ) == 0 )
-            return(0);
-        nodelist = nodelist->next;
-    }
     return(1);
 }
 

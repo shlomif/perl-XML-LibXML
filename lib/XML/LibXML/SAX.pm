@@ -10,7 +10,7 @@ $VERSION = '1.00';
 use XML::LibXML;
 use XML::SAX::Base;
 
-@ISA = qw(XML::SAX::Base);
+use base qw(XML::SAX::Base);
 
 use Carp;
 use IO::File;

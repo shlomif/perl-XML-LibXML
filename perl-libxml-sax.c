@@ -367,7 +367,9 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name )
                  _C2Sv(name, NULL), NameHash);
 
         localname = xmlSplitQName(NULL, name, &prefix);
+        if (localname != NULL) xmlFree(localname);
         ns = PmmGetNsMapping( sax->ns_stack, prefix );
+        if (prefix != NULL) xmlFree(prefix);
 
         if ( ns != NULL ) {
             hv_store(retval, "NamespaceURI", 12,

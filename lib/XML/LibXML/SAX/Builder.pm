@@ -39,6 +39,7 @@ sub start_document {
     $self->{NamespaceStack} = XML::NamespaceSupport->new;
     $self->{NamespaceStack}->push_context;
     $self->{Parent} = undef;
+    return ();
 }
 
 sub xml_decl {
@@ -51,6 +52,7 @@ sub xml_decl {
     if ( defined $decl->{Encoding} ) {
         $self->{DOM}->setEncoding( $decl->{Encoding} );
     }
+    return ();
 }
 
 sub end_document {
@@ -72,6 +74,7 @@ sub start_prefix_mapping {
     $self->{USENAMESPACESTACK} = 1;
 
     $self->{NamespaceStack}->declare_prefix( $ns->{Prefix}, $ns->{NamespaceURI} );
+    return ();
 }
 
 
@@ -79,6 +82,7 @@ sub end_prefix_mapping {
     my $self = shift;
     my $ns = shift;
     $self->{NamespaceStack}->undeclare_prefix( $ns->{Prefix} );
+    return ();
 }
 
 
@@ -169,6 +173,7 @@ sub start_element {
             $node->setAttribute($key => $attr);
         }
     }
+    return ();
 }
 
 sub end_element {
@@ -177,16 +182,19 @@ sub end_element {
 
     $self->{NamespaceStack}->pop_context;
     $self->{Parent} = $self->{Parent}->parentNode();
+    return ();
 }
 
 sub start_cdata {
     my $self = shift;
     $self->{IN_CDATA} = 1;
+    return ();
 }
 
 sub end_cdata {
     my $self = shift;
     $self->{IN_CDATA} = 0;
+    return ();
 }
 
 sub characters {
@@ -220,6 +228,7 @@ sub characters {
     }
 
     $self->{Parent}->addChild($node);
+    return ();
 }
 
 sub comment {
@@ -248,6 +257,7 @@ sub comment {
     else {
         $self->{DOM}->addChild($comment);
     }
+    return ();
 }
 
 sub processing_instruction {
@@ -262,6 +272,7 @@ sub processing_instruction {
     else {
         $self->{DOM}->addChild( $PI );
     }
+    return ();
 }
 
 sub warning {

@@ -115,6 +115,7 @@ The following versions are tested:
    o up to version 2.5.10: tested; working
    o 2.6.0: tested; not working
    o 2.6.1: tested; working
+   o 2.6.3: tested; working, except for SEGV in bad xml tests (fixed in CVS)
 
 It happens, that an older version of libxml2 passes all tests under certain
 conditions. This is no reason to assume that version to work on all platforms.

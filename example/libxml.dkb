@@ -737,10 +737,10 @@ my $doc = $parser-&#62;parse_chunk(&#34;&#34;, 1); # terminate the parsing</prog
         the push parser process:</para>
         <variablelist>
           <varlistentry>
-            <term>start_push</term>
+            <term>init_push</term>
             <listitem>
               <funcsynopsis>
-                <funcsynopsisinfo>$parser-&#62;start_push();</funcsynopsisinfo>
+                <funcsynopsisinfo>$parser-&#62;init_push();</funcsynopsisinfo>
               </funcsynopsis>
               <para>Initializes the push parser.</para>
             </listitem>
@@ -916,6 +916,20 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
               <funcsynopsisinfo>$parser-&#62;pedantic_parser(1)</funcsynopsisinfo>
             </funcsynopsis>
             <para>You can make XML::LibXML more pedantic if you want to.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>line_numbers</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;line_numbers(1)</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>If this option is activated XML::LibXML will store the line
+            number of a node. This gives more information where a validation
+            error occoured. It could be also used to find out about the
+            position of a node after parsing (see also
+            XML::LibXML::Node::line_number()) </para>
+            <para>By default line numbering is switched off (0).</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -1982,6 +1996,22 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           descendants of the given node as spacified in DOM.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>line_number</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$lineno = $node-&#62;line_number();</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This function returns the line number where the tag was found
+          during parsing. If a node is added to the document the line number
+          is 0. Problems may occour, if a node from one document is passed to
+          another one.</para>
+          <para>Note: line_number() is special to XML::LibXML and not part of
+          the DOM specification.</para>
+          <para>If the line_numbers flag of the parser was not activated
+          before parsing, line_number() will always return 0.</para>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <variablelist>
       <varlistentry>
@@ -2005,9 +2035,9 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <para>This function returns the line number where the tag was found
           during parsing. If a node is added to the document the line number
           is 0. Problems may occour, if a node from one document is passed to
-          another one.</para>
+          another one. </para>
           <para>Note: line_number() is special to XML::LibXML and not part of
-          the DOM specification.</para>
+          the DOM specification. </para>
           <para>If the line_numbers flag of the parser was not activated
           before parsing, line_number() will always return 0.</para>
         </listitem>

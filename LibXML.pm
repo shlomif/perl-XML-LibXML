@@ -14,7 +14,7 @@ use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
 
-$VERSION = "1.56";
+$VERSION = "1.57";
 require Exporter;
 require DynaLoader;
 
@@ -317,7 +317,7 @@ sub _auto_expand {
          and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
         $self->{_State_} = 1;
         eval { $self->processXIncludes($result); };
-	my $err = $@;
+        my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
             $result = undef;
@@ -361,9 +361,8 @@ sub parse_string {
     if ( defined $self->{SAX} ) {
         my $string = shift;
         $self->{SAX_ELSTACK} = [];
-        eval {
-            $self->_parse_sax_string($string);
-        };
+        eval { $result = $self->_parse_sax_string($string); };
+
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
@@ -643,14 +642,6 @@ sub find {
 sub setOwnerDocument {
     my ( $self, $doc ) = @_;
     $doc->adoptNode( $self );
-}
-
-sub toStringC14N {
-    my $self = shift;
-    my ($comments, $xpath) = @_;
-
-    $comments = 0 unless defined $comments;
-    return $self->_toStringC14N( $comments, $xpath );
 }
 
 sub serialize_c14n {

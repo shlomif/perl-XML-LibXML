@@ -54,6 +54,7 @@ my $htmldoc;
 
 $parser->recover(1);
 eval {
+    local $SIG{'__WARN__'} = sub { };
     $htmldoc = $parser->parse_html_string( $strhref );
 };
 

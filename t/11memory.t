@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 24;
+        plan tests => 26;
     }
     else {
         plan tests => 0;
@@ -159,16 +159,27 @@ use XML::LibXML::SAX::Builder;
         {
             print "# is_valid()\n";
             my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
-            my $xml = XML::LibXML->new->parse_file('example/article_bad.xml');
+            my $xml;
+            eval {
+                local $SIG{'__WARN__'} = sub { };
+                $xml = XML::LibXML->new->parse_file('example/article_bad.xml');
+            };
             for ( 1..$times_through ) {
-                $xml->is_valid($dtd);
+                my $good;
+                eval {
+                    local $SIG{'__WARN__'} = sub { };
+                    $good = $xml->is_valid($dtd);
+                };
             }
             ok(1);
             check_mem();
         
             print "# validate() \n";
             for ( 1..$times_through ) {
-                eval { $xml->validate($dtd);};
+                eval {
+                    local $SIG{'__WARN__'} = sub { };
+                    $xml->validate($dtd);
+                };
             }
             ok(1);
             check_mem();
@@ -266,8 +277,8 @@ dromeds.xml
             "SIMPLE COMMENT" => "<xml1> <xml2> <!-- some text --> <!-- some text --> <!--some text--> </xml2> </xml1>",
             "SIMPLE CDATA" => "<xml1> <xml2><![CDATA[some text some text some text]]></xml2> </xml1>",
             "SIMPLE ATTRIBUTE" => '<xml1  attr0="value0"> <xml2 attr1="value1"></xml2> </xml1>',
-            "NAMESPACES SIMPLE" => '<xml:xml1 xmlns:xml="foo"><xml:xml2/></xml:xml1>',
-            "NAMESPACES ATTRIBUTE" => '<xml:xml1 xmlns:xml="foo"><xml:xml2 xml:foo="bar"/></xml:xml1>',
+            "NAMESPACES SIMPLE" => '<xm:xml1 xmlns:xm="foo"><xm:xml2/></xm:xml1>',
+            "NAMESPACES ATTRIBUTE" => '<xm:xml1 xmlns:xm="foo"><xm:xml2 xm:foo="bar"/></xm:xml1>',
         );
 
             my $handler = sax_null->new;
@@ -296,8 +307,8 @@ dromeds.xml
             "SIMPLE COMMENT" => ["<xml1","> <xml2> <!","-- some text --> <!-- some text --> <!--some text-","-> </xml2> </xml1>"],
             "SIMPLE CDATA" => ["<xml1> ","<xml2><!","[CDATA[some text some text some text]","]></xml2> </xml1>"],
             "SIMPLE ATTRIBUTE" => ['<xml1 ','attr0="value0"> <xml2 attr1="value1"></xml2>',' </xml1>'],
-            "NAMESPACES SIMPLE" => ['<xml:xml1 xmlns:x','ml="foo"><xml:xml2','/></xml:xml1>'],
-            "NAMESPACES ATTRIBUTE" => ['<xml:xml1 xmlns:xml="foo">','<xml:xml2 xml:foo="bar"/></xml',':xml1>'],
+            "NAMESPACES SIMPLE" => ['<xm:xml1 xmlns:x','m="foo"><xm:xml2','/></xm:xml1>'],
+            "NAMESPACES ATTRIBUTE" => ['<xm:xml1 xmlns:xm="foo">','<xm:xml2 xm:foo="bar"/></xm',':xml1>'],
         );
 
             my $handler = sax_null->new;
@@ -334,7 +345,7 @@ dromeds.xml
 
                 check_mem();
             }            
-
+            ok(1);
         }
 
         {
@@ -352,8 +363,8 @@ dromeds.xml
             "SIMPLE COMMENT" => ["<xml1","> <xml2> <!","-- some text --> <!-- some text --> <!--some text-","-> </xml2> </xml1>"],
             "SIMPLE CDATA" => ["<xml1> ","<xml2><!","[CDATA[some text some text some text]","]></xml2> </xml1>"],
             "SIMPLE ATTRIBUTE" => ['<xml1 ','attr0="value0"> <xml2 attr1="value1"></xml2>',' </xml1>'],
-            "NAMESPACES SIMPLE" => ['<xml:xml1 xmlns:x','ml="foo"><xml:xml2','/></xml:xml1>'],
-            "NAMESPACES ATTRIBUTE" => ['<xml:xml1 xmlns:xml="foo">','<xml:xml2 xml:foo="bar"/></xml',':xml1>'],
+            "NAMESPACES SIMPLE" => ['<xm:xml1 xmlns:x','m="foo"><xm:xml2','/></xm:xml1>'],
+            "NAMESPACES ATTRIBUTE" => ['<xm:xml1 xmlns:xm="foo">','<xm:xml2 xm:foo="bar"/></xm',':xml1>'],
         );
        
             foreach my $key ( keys %xmlStrings )  {
