@@ -107,17 +107,16 @@ EOF
 #  - these should really be in MakeMaker... But &shrug;
 ###################################################################
 
-use vars qw/$LINK $DEVNULL $CC $is_Win32/;
+use Cwd;
+
+use vars qw/$DEVNULL $is_Win32/;
 
 BEGIN {
     $is_Win32 = ($^O =~ /Win32/);
     if ($is_Win32) {
-        $CC = "$Config{cc} -c $Config{ccflags} -I$Config{incpath} %s conftest.c ";
-        $LINK = "LINK $Config{ccdlflags} $Config{ldflags} conftest.obj $Config{libs} %s %s ";
         $DEVNULL = 'DEVNULL';
     }
     else {
-        $LINK = "$Config{cc} $Config{ccdlflags} -o conftest $Config{ccflags} -I$Config{incpath} $Config{ldflags} %s %s conftest.c $Config{libs} %s";
         $DEVNULL = eval { File::Spec->devnull };
         if ($@) { $DEVNULL = '/dev/null' }
     }
@@ -132,6 +131,27 @@ sub rm_f {
     if (@realfiles) {
         chmod(0777, @realfiles);
         unlink(@realfiles);
+    }
+}
+
+sub rm_fr {
+    my @files = @_;
+    my @realfiles;
+    foreach (@files) {
+        push @realfiles, glob($_);
+    }
+    foreach my $file (@realfiles) {
+        if (-d $file) {
+            # warn("$file is a directory\n");
+            rm_fr("$file/*");
+            rm_fr("$file/.exists");
+            rmdir($file) || die "Couldn't remove $file: $!";
+        }
+        else {
+            # warn("removing $file\n");
+            chmod(0777, $file);
+            unlink($file);
+        }
     }
 }
 
@@ -186,24 +206,38 @@ sub backtick {
 sub try_link0 {
     my ($src, $opt) = @_;
     my $cfile = gensym();
-    open($cfile, ">conftest.c") || die "Cannot write to file conftest.c";
+    mkdir(".testlink", 0777) || die "Cannot create .testlink dir: $!";
+    chdir(".testlink");
+    open($cfile, ">Conftest.xs") || die "Cannot write to file Conftest.xs: $!";
     print $cfile $src;
     close($cfile);
-    if ($is_Win32) {
-        xsystem(sprintf($CC, $config{INC}));
-        xsystem(sprintf($LINK, $config{LIBS}, $opt));
-    }
-    else {
-        xsystem(sprintf($LINK, $config{INC}, $config{LIBS}, $opt));      
-    }
+    open($cfile, ">Conftest.pm") || die "Cannot write to file Conftest.pm: $!";
+    print $cfile <<EOT;
+package Conftest;
+$VERSION = 1.0;
+require DynaLoader;
+bootstrap Conftest $VERSION;
+1;
+EOT
+    close($cfile);
+    open($cfile, ">Makefile.PL") || die "Cannot write to file Makefile.PL: $!";
+    print $cfile <<EOT;
+use ExtUtils::MakeMaker;
+WriteMakefile(NAME => "Conftest", VERSION_FROM => "Conftest.pm");
+EOT
+    close($cfile);
+    xsystem("$^X Makefile.PL " . join(' ', map { "$_=$config{$_}" } keys %config));
+    xsystem($Config{make});
 }
 
 sub try_link {
+    my $start_dir = cwd();
     my $result = eval {
         try_link0(@_);
     };
     warn $@ if $DEBUG && $@;
-    rm_f("conftest*");
+    chdir($start_dir);
+    rm_fr(".testlink");
     return $result;
 }
 

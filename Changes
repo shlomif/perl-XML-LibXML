@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXSLT.
 
+0.98
+    - New have_library implementation
+
 0.97
     - Addition of Dtd string parser
     - Added support for namespace nodes (e.g. $element->getNamespaces())
