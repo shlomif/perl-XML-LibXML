@@ -617,9 +617,9 @@ PSaxStartDocument(void * ctx)
                      _C2Sv((const xmlChar *)"1.0", NULL), VersionHash);
         }
         
-        if ( ctxt->encoding != NULL ) {
+        if ( ctxt->input->encoding != NULL ) {
             hv_store(empty, "Encoding", 8,
-                     _C2Sv(ctxt->encoding, NULL), EncodingHash);
+                     _C2Sv(ctxt->input->encoding, NULL), EncodingHash);
         }
 
         rv = newRV_noinc((SV*)empty);
