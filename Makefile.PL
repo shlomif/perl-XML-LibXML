@@ -86,9 +86,12 @@ delete $config{SKIP_SAX_INSTALL};
 
 unless ( $is_Win32 ) { # cannot get config in W32
     my @blacklist = (
-                     [2,4,25,0],
-                     [2,4,30,1],
-                     [2,5,4,1],
+                     [2,4,22,0],
+                     [2,4,28,1],
+                     [2,4,29,0],
+                     [2,4,30,0],
+                     [2,5,0,1],
+                     [2,5,1,0], # all pre 2.5.4 version have broken attr output
                      [2,5,5,0], # tests pass, but known as broken
                      [2,5,11,1],
                      [2,6,0,0],

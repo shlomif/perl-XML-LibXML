@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+1.58
+   - minor code cleanups
+   - updated libxml2 blacklist.
+   - fixed croak while requesting nodeName() of CDATA sections (bug 1694).
+
 1.57
    - added cloneNode to XML::LibXML::Document
    - include Schema/RelaxNG code only with libxml2 >= 2.6.0 (to support old libxml2)
@@ -23,6 +28,7 @@ Revision history for Perl extension XML::LibXML
      * general error reporting code cleanup/rewrite, try preventing 
        possible memory leaks
      * recover(1) now triggers warnings (disable with $SIG{__WARN__}=sub {})
+       (fixes bug 1968, too)
      * slighlty more strict parse_string behavior (now same as when
        parsing fh, etc): e.g. parse_string("<foo:bar>"), i.e prefix without 
        NS declaration, raises error unless recover(1) is used

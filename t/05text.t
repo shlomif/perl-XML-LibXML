@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 24 };
+BEGIN { plan tests => 29 };
 use XML::LibXML;
 
 my $doc = XML::LibXML::Document->new();
@@ -15,6 +15,7 @@ my $doc = XML::LibXML::Document->new();
     my $foo = "foobar";
     my $textnode = $doc->createTextNode($foo);
     ok( $textnode );
+    ok( $textnode->nodeName(), text );
     ok( $textnode->nodeValue(), $foo );
 
     print "# 2. substring\n";
@@ -92,4 +93,22 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::Text->new("foo");
     ok($node);
     ok($node->nodeValue, "foo" );
+}
+
+{
+    print "# CDATA node name test\n";
+
+    my $node = XML::LibXML::CDATASection->new("test");
+
+    ok( $node->string_value(), "test" );
+    ok( $node->nodeName(), "cdata" );
+}
+
+{
+    print "# Comment node name test\n";
+
+    my $node = XML::LibXML::Comment->new("test");
+
+    ok( $node->string_value(), "test" );
+    ok( $node->nodeName(), "comment" );
 }

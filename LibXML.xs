@@ -72,23 +72,6 @@ extern "C" {
 }
 #endif
 
-/* These globals are now declared in libxml2's globals.h */
-#if 0
-#ifdef VMS
-extern int xmlDoValidityCheckingDefaultVal;
-#define xmlDoValidityCheckingDefaultValue xmlDoValidityCheckingDefaultVal
-extern int xmlSubstituteEntitiesDefaultVal;
-#define xmlSubstituteEntitiesDefaultValue xmlSubstituteEntitiesDefaultVal
-#else
-LIBXML_DLL_IMPORT extern int xmlDoValidityCheckingDefaultValue;
-LIBXML_DLL_IMPORT extern int xmlSubstituteEntitiesDefaultValue;
-#endif
-LIBXML_DLL_IMPORT extern int xmlGetWarningsDefaultValue;
-LIBXML_DLL_IMPORT extern int xmlKeepBlanksDefaultValue;
-LIBXML_DLL_IMPORT extern int xmlLoadExtDtdDefaultValue;
-LIBXML_DLL_IMPORT extern int xmlPedanticParserDefaultValue;
-#endif
-
 #define TEST_PERL_FLAG(flag) \
     SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
 
@@ -4272,6 +4255,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
         buffer = xmlBufferCreate();
+
         if ( format <= 0 ) {
             xmlNodeDump( buffer,
                          self->doc,

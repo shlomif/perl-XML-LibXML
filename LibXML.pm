@@ -942,6 +942,10 @@ package XML::LibXML::CDATASection;
 use vars qw(@ISA);
 @ISA     = ('XML::LibXML::Text');
 
+sub nodeName {
+    return "cdata";
+}
+
 1;
 
 #-------------------------------------------------------------------------#
