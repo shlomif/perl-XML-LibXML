@@ -30,10 +30,6 @@ BEGIN {
         
     }
 
-    if ( $] > 5.007 ) {
-	    print "1..0 # Skipping tests on this platform\n";
-        exit(0)
-    }
     plan tests => $tests;
 }
 

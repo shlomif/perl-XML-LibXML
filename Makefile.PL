@@ -5,8 +5,6 @@ use Config;
 use Symbol;
 use File::Spec;
 
-my $is_win32 = ($^O =~ /Win32/i);
-
 $|=0;
 
 my %config;
@@ -23,20 +21,19 @@ my $DEBUG = delete $config{DEBUG};
 # $config{DEFINE} .= " -DXS_WARNINGS";
 
 if ( $] >= 5.006 ) {
-# if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
     warn "enable native perl UTF8\n";
-
     $config{DEFINE} .= " -DHAVE_UTF8";
 }
 
 # get libs and inc from gnome-config
 
-unless ( $win32 ) {
+unless ( $is_Win32 ) {
     eval {
         my $xml2cfg = "xml2-config";
         if ( defined $ENV{XMLPREFIX} ) {
             $xml2cfg = $ENV{XMLPREFIX} . '/bin/' . $xml2cfg;
         }
+
         print "running xml2-config... ";
         my $ver = backtick("$xml2cfg --version");
         my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
@@ -57,7 +54,7 @@ unless ( $win32 ) {
         # backtick fails if gnome-config didn't exist...
         $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lz -lm';
         $config{INC} = '-I/usr/local/include -I/usr/include';
-        
+
         print <<OPT;
 options:
   LIBS='$config{LIBS}'
@@ -71,15 +68,19 @@ OPT
 
 
 if ($config{LIBS} !~ /\-lxml2\b/) {
-    $config{LIBS} .= $is_win32 ? '-llibxml2' : ' -lxml2';
+    $config{LIBS} .= $is_Win32 ? '-llibxml2' : ' -lxml2';
 }
 
 if ($config{LIBS} !~ /\-lz\b/) {
-    $config{LIBS} .= $is_win32 ? '-lzlib' :' -lz';
+    $config{LIBS} .= $is_Win32 ? '-lzlib' :' -lz';
 }
 
 if ($config{LIBS} !~ /\-lm\b/) {
-    $config{LIBS} .= $is_win32 ? '' :' -lm';
+    $config{LIBS} .= $is_Win32 ? '' :' -lm';
+}
+
+if ( $config{DEBUG} ) {
+    warn "win32 compile\n" if $is_Win32;
 }
 
 unless (have_library("xml2") or have_library("libxml2")) {
@@ -108,7 +109,8 @@ WriteMakefile(
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
     'AUTHOR'    => 'Matt Sergeant',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
-    'PREREQ_PM' => { 'XML::SAX' => 0, 'XML::NamespaceSupport' => '1.07' },
+    'PREREQ_PM' => { 'XML::SAX' => 0,
+                     'XML::NamespaceSupport' => '1.07',  },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
     'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
     %config,
@@ -313,7 +315,7 @@ EOT
     my $quote = $is_Win32 ? '"' : "'";
     xsystem("$^X Makefile.PL " . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config));
     xsystem("$Config{make} test ${quote}OTHERLDFLAGS=${opt}${quote}");
-}
+} # end try_link0
 
 sub try_link {
     my $start_dir = cwd();
@@ -352,7 +354,7 @@ SRC
             }
         }
         else {
-
+            print " posix link ";
             $result = try_link(<<"SRC", $libs);
 blank() { return 0; }
 int t() { ${func}(); return 0; }
