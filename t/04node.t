@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 115 };
+BEGIN { plan tests => 117 };
 use XML::LibXML;
 
 my $xmlstring = q{<foo>bar<foobar/><bar foo="foobar"/><!--foo--><![CDATA[&foo bar]]></foo>};
@@ -109,6 +109,15 @@ print "# 1.1 Node Attributes\n";
             ok( scalar(@cn), 1);
             ok( $cn[0]->nodeName, "bar" );
             ok( !$cn[0]->isSameNode( $c1node ) );
+        }
+
+        print "# 1.3 Node Value\n";
+        my $string2 = "<foo>bar<tag>foo</tag></foo>";
+        {
+            my $doc2 = $parser->parse_string( $string2 );
+            my $root = $doc2->documentElement;
+            ok( not defined $root->nodeValue );
+            ok( $root->textContent, "barfoo");
         }
     }
 

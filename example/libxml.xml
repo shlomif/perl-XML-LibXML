@@ -392,17 +392,30 @@
 
             <method name="getData" synopsis="$content = $node->getData()">
                 <p>
-                    If the node has any content (such as stored in a
-                    <em>text node</em>) it can get requested through
-                    this function.
+                    Alias to <st>nodeValue</st>
                 </p>
             </method>
 
             <method name="nodeValue" synopsis="$content = $node->nodeValue;">
                 <p>
-                    Alias for <st>getData</st>
+                    If the node has any content (such as stored in a
+                    <em>text node</em>) it can get requested through
+                    this function.
+                </p>
+                <p>
+                    <st>NOTE:</st> Element Nodes have no content per
+                    definition. To get the text value of an Element
+                    use textContent()
                 </p>
             </method>
+
+            <method name="textContent" synopsis="$content = $node->textContent;">
+                <p>
+                    this function returns the content of all text
+                    nodes in the descendants of the given node as
+                    spacified in DOM.
+                </p>
+            </method>            
 
             <method name="getType" 
                     synopsis="$type = $node->getType();">
