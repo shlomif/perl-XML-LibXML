@@ -9,7 +9,7 @@ use XML::LibXML;
 use XML::SAX::Base;
 use XML::SAX::DocumentLocator;
 
-$VERSION = '1.00';
+$VERSION = '1.40';
 @ISA = ('XML::SAX::Base');
 
 sub _parse_characterstream {
