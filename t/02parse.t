@@ -5,7 +5,7 @@
 # it relies on the success of t/01basic.t
 
 use Test;
-use Devel::Peek;
+use IO::File;
 
 BEGIN { plan tests => 28 };
 use XML::LibXML;
