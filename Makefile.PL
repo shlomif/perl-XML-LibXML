@@ -108,7 +108,7 @@ WriteMakefile(
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
     'AUTHOR'    => 'Matt Sergeant',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
-    'PREREQ_PM' => { 'XML::SAX' => 0 },
+    'PREREQ_PM' => { 'XML::SAX' => 0, 'XML::NamespaceSupport => '1.07' },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
     'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
     %config,
