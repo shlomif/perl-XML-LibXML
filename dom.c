@@ -92,12 +92,12 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
 
        if ( cur->type == XML_DOCUMENT_FRAG_NODE ) {
            c1 = cur->children;
-	   while ( c1 ){
+           while ( c1 ){
                c1->parent = p;
                c1 = c1->next;
-	   }  
+           }  
            c1 = cur->children;
-	   c2 = cur->last;
+           c2 = cur->last;
            cur->last = cur->children = NULL;
        }
        else {
@@ -109,15 +109,15 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
                leader->next = c1;
 	       c1->prev = leader;
            }
-	   else if ( p ) {
+           else if ( p ) {
                p->children = c1;
            }
 	   
            if ( followup ) {
                followup->prev = c2;
-	       c2->next = followup;
+               c2->next = followup;
            }
-	   else if ( p ) {
+           else if ( p ) {
                p->last = c2;
            }
        }
@@ -204,6 +204,35 @@ domTestDocument(xmlNodePtr cur, xmlNodePtr ref)
     return 1;
 }
 
+void
+domUnlinkNode( xmlNodePtr node ) {
+    if ( node == NULL ) {
+        return;
+    }
+
+    if ( node->prev != NULL ) {
+        node->prev->next = node->next;
+    }
+
+    if ( node->next != NULL ) {
+        node->next->prev = node->prev;
+    }
+
+    if ( node->parent != NULL ) {
+        if ( node == node->parent->last ) {
+            node->parent->last = node->prev;
+        }
+
+        if ( node == node->parent->children ) {
+            node->parent->children = node->next;
+        }
+    }
+
+    node->prev   = NULL;
+    node->next   = NULL;
+    node->parent = NULL;
+}
+
 xmlNodePtr
 domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
     xmlNodePtr return_node = node;
@@ -211,7 +240,7 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
     if ( move ) {
         return_node = node;
         if ( node->type != XML_DTD_NODE ) {
-            xmlUnlinkNode( node );
+            domUnlinkNode( node );
         }
     }
     else {
@@ -285,7 +314,7 @@ domAppendChild( xmlNodePtr self,
     }
 
     if ( newChild->doc == self->doc ){
-        xmlUnlinkNode( newChild );
+        domUnlinkNode( newChild ); 
     }
     else {
         xs_warn("WRONG_DOCUMENT_ERR - non conform implementation\n"); 
@@ -293,13 +322,20 @@ domAppendChild( xmlNodePtr self,
     }
  
     if ( self->children != NULL ) {
+        warn("unlink node!\n");
         domAddNodeToList( newChild, self->last, NULL );
     }
     else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
-	newChild->children->parent = self;
+        xmlNodePtr c1;
+        newChild->children->parent = self;
         self->children = newChild->children;
-        self->last     = newChild->last;
-        domAddNodeToList( newChild, self->last, NULL );
+        c1 = newChild->children;
+        while ( c1 ){
+            c1->parent = self;
+            c1 = c1->next;
+        }  
+        self->last = newChild->last;
+        newChild->last = newChild->children = NULL;
     }
     else {
         self->children = newChild;
@@ -317,7 +353,7 @@ domRemoveChild( xmlNodePtr self, xmlNodePtr old ) {
 	 && old->type != XML_ATTRIBUTE_NODE
 	 && old->type != XML_NAMESPACE_DECL
          && (self == old->parent)) {
-        xmlUnlinkNode( old );
+        domUnlinkNode( old );
     }
     return old ;
 }
@@ -347,7 +383,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     }
     
     if ( new->doc == self->doc ) {
-        xmlUnlinkNode( new );
+        domUnlinkNode( new );
     }
     else {
         /* WRONG_DOCUMENT_ERR - non conform implementation */
@@ -395,7 +431,7 @@ domInsertBefore( xmlNodePtr self,
     }
 
     if ( self->doc == newChild->doc ){
-        xmlUnlinkNode( newChild );
+        domUnlinkNode( newChild );
     }
     else {
         newChild = domImportNode( self->doc, newChild, 1 );
@@ -435,7 +471,7 @@ domInsertAfter( xmlNodePtr self,
     }
 
     if ( self->doc == newChild->doc ){
-        xmlUnlinkNode( newChild );
+        domUnlinkNode( newChild );
     }
     else {
         newChild = domImportNode( self->doc, newChild, 1 );
@@ -470,7 +506,12 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
     prev = oldNode->prev;
     next = oldNode->next;
 
-    xmlUnlinkNode( oldNode );
+    if ( oldNode->_private == NULL ) {
+        xmlUnlinkNode( oldNode );
+    }
+    else {
+        domUnlinkNode( oldNode );
+    }
 
     if( prev == NULL && next == NULL ) {
         /* oldNode was the only child */
