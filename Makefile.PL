@@ -82,7 +82,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,4,30,1],
                      [2,5,4,1],
                      [2,5,5,0], # known as broken
-                     [2,5,8,1],
+                     [2,5,9,1],
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
