@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>35}
+BEGIN { plan tests => 44 };
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -122,6 +122,70 @@ foreach my $xp ( @badxpath ) {
     ok($@);
 }
 
+
+{
+    # as reported by jian lou:
+    # 1. getElementByTagName("myTag") is not working is
+    # "myTag" is a node directly under root. Same problem
+    # for findNodes("//myTag")
+    # 2. When I add new nodes into DOM tree by
+    # appendChild(). Then try to find them by
+    # getElementByTagName("newNodeTag"), the newly created
+    # nodes are not returned. ...
+    #
+    # this seems not to be a problem by XML::LibXML itself, but newer versions
+    # of libxml2 (newer is 2.4.27 or later)
+    #
+    my $doc = XML::LibXML->createDocument();
+    my $root= $doc->createElement( "A" );
+    $doc->setDocumentElement($root);
+
+    my $b= $doc->createElement( "B" );
+    $root->appendChild( $b );
+
+    my @list = $doc->findnodes( '//A' );
+    ok( scalar @list );
+    ok( $list[0]->isSameNode( $root ) );
+
+    @list = $doc->findnodes( '//B' );
+    ok( scalar @list );
+    ok( $list[0]->isSameNode( $b ) );
+
+
+    # @list = $doc->getElementsByTagName( "A" );
+    # ok( scalar @list );
+    # ok( $list[0]->isSameNode( $root ) );        
+
+    @list = $root->getElementsByTagName( 'B' );
+    ok( scalar @list );
+    ok( $list[0]->isSameNode( $b ) );
+}
+
+{
+    print "# test potential unbinding-segfault-problem \n";
+    my $doc = XML::LibXML->createDocument();
+    my $root= $doc->createElement( "A" );
+    $doc->setDocumentElement($root);
+
+    my $b= $doc->createElement( "B" );
+    $root->appendChild( $b );
+    my $c= $doc->createElement( "C" );
+    $b->appendChild( $c );
+    $b= $doc->createElement( "B" );
+    $root->appendChild( $b );
+    $c= $doc->createElement( "C" );
+    $b->appendChild( $c );
+    
+    my @list = $root->findnodes( "B" );
+    ok( scalar(@list) , 2 );
+    foreach my $node ( @list ) {
+        my @subnodes = $node->findnodes( "C" );
+        $node->unbindNode() if ( scalar( @subnodes ) );
+        ok(1);
+    }
+}
+
+# --------------------------------------------------------------------------- #
 sub finddoc {
     my $doc = shift;
     return unless defined $doc;

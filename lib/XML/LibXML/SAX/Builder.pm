@@ -10,13 +10,18 @@ sub new {
     return bless {@_}, $class;
 }
 
+sub result { $_[0]->{LAST_DOM}; }
+
 sub done {
     my ($self) = @_;
     my $dom = $self->{DOM};
     $dom = $self->{Parent} unless defined $dom; # this is for parsing document chunks
+
     delete $self->{NamespaceStack};
     delete $self->{Parent};
     delete $self->{DOM};
+
+    $self->{LAST_DOM} = $dom;
 
     return $dom;
 }

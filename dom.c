@@ -8,7 +8,7 @@
 #include <libxml/xmlIO.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
-
+#include <libxml/globals.h>
 #include <stdio.h>
 
 #define warn(string) fprintf(stderr, string) 
@@ -510,6 +510,11 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     if( old == self->children && old == self->last ) {
         domRemoveChild( self, old );
         domAppendChild( self, new );
+    }
+    else if ( new->type == XML_DOCUMENT_FRAG_NODE 
+              && new->children == NULL ) {
+        /* want to replace with an empty fragment, then remove ... */
+        domRemoveChild( self, old );
     }
     else {
         domAddNodeToList(new, old->prev, old->next );

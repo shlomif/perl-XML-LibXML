@@ -56,7 +56,6 @@ t/17callbacks.t
 t/18docfree.t
 t/19encoding.t
 t/20extras.t
-t/22iterator.t
 t/23rawfunctions.t
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/Comment.pod
@@ -71,7 +70,6 @@ lib/XML/LibXML/Text.pod
 lib/XML/LibXML/DocumentFragment.pod
 lib/XML/LibXML/Namespace.pod
 lib/XML/LibXML/NodeList.pm
-lib/XML/LibXML/Iterator.pm
 lib/XML/LibXML/Literal.pm
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/Number.pm

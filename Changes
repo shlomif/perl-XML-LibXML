@@ -5,6 +5,7 @@ Version 1.54 fixes potentional buffer overflows were possible with earlier
 versions of the package. 
 
 1.54
+   - fixed problem with empty document fragments
    - bad tag and attribute names cannot be created anymore
    - Catalog interface is aware about libxml2 configuration
    - XML::LibXML should work now on systems without having zlib installed

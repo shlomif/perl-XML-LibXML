@@ -119,6 +119,7 @@ LibXML_error_handler(void * ctxt, const char * msg, ...)
     else {
        croak("%s",SvPV(sv, PL_na));
     }
+
     SvREFCNT_dec(sv);
 }
 
@@ -599,6 +600,8 @@ LibXML_init_parser( SV * self ) {
     /* we fetch all switches and callbacks from the hash */
     SV** item    = NULL;
     SV*  item2   = NULL;
+    
+    xmlGetWarningsDefaultValue = 0;
 
     if ( self != NULL ) {
         /* first fetch the values from the hash */
@@ -1050,6 +1053,7 @@ BOOT:
     xmlKeepBlanksDefaultValue = 1;
     xmlLoadExtDtdDefaultValue = 5;
     xmlPedanticParserDefaultValue = 0;
+    xmlSetGenericErrorFunc(NULL, NULL);
 #ifdef LIBXML_CATALOG_ENABLED
     /* xmlCatalogSetDebug(10); */
     xmlInitializeCatalog(); /* use catalog data */
@@ -1677,7 +1681,9 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
             LibXML_cleanup_parser();    
 
             sv_2mortal(LibXML_error);
-            LibXML_croak_error();
+            if ( (int) rv == -1 ) {
+                LibXML_croak_error();
+            }
 
             if ( rv != NULL ) {
                 /* now we append the nodelist to a document
@@ -1844,14 +1850,16 @@ _push( self, pctxt, data )
             xs_warn( "empty string" );
             XSRETURN_UNDEF;
         }
-/*        LibXML_init_error(); */
+        LibXML_init_error(); 
         LibXML_init_parser(self);
         xmlParseChunk(ctxt, (const char *)chunk, len, 0);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
     
         sv_2mortal(LibXML_error); 
-        LibXML_croak_error();
+        if ( ctxt->wellFormed == 0 ) {
+            LibXML_croak_error();
+        }
 
         RETVAL = 1;
     OUTPUT:
@@ -1876,6 +1884,7 @@ _end_push( self, pctxt, restore )
         }
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
+        LibXML_init_error(); 
         LibXML_init_parser(self); 
 
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
@@ -3839,7 +3848,13 @@ replaceNode( self,nNode )
         if ( self->doc != nNode->doc ) {
             domImportNode( self->doc, nNode, 1 );
         }
-        ret = xmlReplaceNode( self, nNode );
+
+        if ( self->type != XML_ATTRIBUTE_NODE ) {
+              ret = domReplaceChild( self->parent, nNode, self);
+        }
+        else {
+             ret = xmlReplaceNode( self, nNode );
+        }
         if ( ret ) {
             if ( ret->type == XML_ATTRIBUTE_NODE ) {
                 docfrag = NULL;
@@ -4101,7 +4116,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
-
+    
         if ( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
@@ -4119,6 +4134,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
                          self, 0, format);
             xmlIndentTreeOutput = t_indent_var;
         }
+
         if ( buffer->content != 0 ) {
             ret= xmlStrdup( buffer->content );
         }

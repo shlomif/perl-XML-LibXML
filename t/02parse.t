@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 460 };
+BEGIN { plan tests => 469 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
@@ -35,6 +35,7 @@ XML_DECL. '<foobar>foo<!----></foobar>',
 XML_DECL. '<foobar foo="bar"/>',
 XML_DECL. '<foobar foo="\'bar>"/>',
 XML_DECL. '<bar:foobar foo="bar"><bar:foo/></bar:foobar>',
+'<bar:foobar/>'
                     );
 
 my @goodWFNSStrings = (
@@ -319,14 +320,23 @@ my $badXInclude = q{
 print "# 2 PUSH PARSER\n";
 
 {
+    my $pparser = XML::LibXML->new();
     print "# 2.1 PARSING WELLFORMED DOCUMENTS\n";
-    foreach my $key ( keys %goodPushWF ) {
+    foreach my $key ( qw(single1 single2 single3 single4 single5 single6 
+                         single7 single8 single9 multiple1 multiple2 multiple3
+                         multiple4 multiple5 multiple6 multiple7 multiple8 
+                         multiple9 multiple10 comment1 comment2 comment3
+                         comment4 comment5 attr1 attr2 attr3 prefix1 prefix2 
+                         prefix3 ns1 ns2 ns3 ns4 ns5 ns6 dtd1 dtd2) ) {
+        print "# key is $key\n";
         foreach ( @{$goodPushWF{$key}} ) {
-            $parser->parse_chunk( $_ );
+            $pparser->parse_chunk( $_ );
         }
 
         my $doc;
-        eval {$doc = $parser->parse_chunk("",1); };
+        eval {$doc = $pparser->parse_chunk("",1); };
+        print "# caught an error $@ \n" if $@; 
+        print "# document seems to be ok \n" if $doc;
         ok($doc && !$@);      
     }
 
@@ -424,7 +434,7 @@ print "# 3 SAX PARSER\n";
         ok( $doc );
 
         # skip the nested node tests until there is a xmlNormalizeNs().
-        ok(1),next if $i > 2;
+        #ok(1),next if $i > 2;
 
         ok( $doc->toString(), $str );
         $i++
@@ -452,8 +462,8 @@ print "# 3 SAX PARSER\n";
     # libxml2 will only do some fixing. this will lead to multiple 
     # declarations, if a node with a new namespace is added.
 
-    # my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
-    my $vstring = qr(<foo xmlns:bar="http://foo.bar">bar<bar:bi( xmlns:bar="http://foo.bar")?/></foo>);
+    my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
+    # my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi xmlns:bar="http://foo.bar"/></foo>};
     ok($root->toString, $vstring );
 
     print "# 3.3 INTERNAL SUBSETS\n";
@@ -496,7 +506,7 @@ print "# 4 SAXY PUSHER\n";
 
 print "# 5 PARSE WELL BALANCED CHUNKS\n";
 {
-    my $MAX_WF_C = 10;
+    my $MAX_WF_C = 11;
     my $MAX_WB_C = 16;
 
     my %chunks = ( 
@@ -509,7 +519,8 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
                     wellformed7  => '<A><K/></A>',
                     wellformed8  => '<A xmlns="E"/>',
                     wellformed9  => '<F:A xmlns:F="G" F:A="B">D</F:A>',
-                    wellformed10 => '<!--D-->',                    
+                    wellformed10 => '<!--D-->',      
+                    wellformed11  => '<A xmlns:F="E"/>',              
                     wellbalance1 => '<A/><A/>',
                     wellbalance2 => '<A></A><A></A>',
                     wellbalance3 => '<A B="C"/><A B="H"/>',
@@ -541,19 +552,21 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
     );
 
 
-    my $parser = XML::LibXML->new;
+    my $pparser = XML::LibXML->new;
     
     print "# 5.1 DOM CHUNK PARSER\n";
 
     for ( 1..$MAX_WF_C ) {
-        my $frag = $parser->parse_xml_chunk($chunks{'wellformed'.$_});
+        my $frag = $pparser->parse_xml_chunk($chunks{'wellformed'.$_});
         ok($frag);
         if ( $frag->nodeType == XML_DOCUMENT_FRAG_NODE
              && $frag->hasChildNodes ) {
             if ( $frag->firstChild->isSameNode( $frag->lastChild ) ) {
+                print "# well formness test $_\n";
                 if ( $chunks{'wellformed'.$_} =~ /\<A\>\<\/A\>/ ) {
-                    $_--;
+                    $_--; # because we cannot distinguish between <a/> and <a></a>
                 }
+  
                 ok($frag->toString,$chunks{'wellformed'.$_});                
                 next;
             }
@@ -562,7 +575,7 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
     }
 
     for ( 1..$MAX_WB_C ) {
-        my $frag = $parser->parse_xml_chunk($chunks{'wellbalance'.$_});
+        my $frag = $pparser->parse_xml_chunk($chunks{'wellbalance'.$_});
         ok($frag);
         if ( $frag->nodeType == XML_DOCUMENT_FRAG_NODE
              && $frag->hasChildNodes ) {
@@ -575,20 +588,21 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
         ok(0);
     }
 
-    eval { my $fail = $parser->parse_xml_chunk(undef); };
+    eval { my $fail = $pparser->parse_xml_chunk(undef); };
     ok($@);
 
-    eval { my $fail = $parser->parse_xml_chunk(""); };
+    eval { my $fail = $pparser->parse_xml_chunk(""); };
     ok($@);
 
     foreach my $str ( @badWBStrings ) {
-        eval { my $fail = $parser->parse_xml_chunk($str); };  
+        eval { my $fail = $pparser->parse_xml_chunk($str); };  
         ok($@);
     }
 
     print "# 5.2 SAX CHUNK PARSER\n";
 
     my $handler = XML::LibXML::SAX::Builder->new();
+    my $parser = XML::LibXML->new;
     $parser->set_handler( $handler );
     for ( 1..$MAX_WF_C ) {
         my $frag = $parser->parse_xml_chunk($chunks{'wellformed'.$_});

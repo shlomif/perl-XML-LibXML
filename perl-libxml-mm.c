@@ -404,8 +404,10 @@ PmmSvNodeExt( SV* perlnode, int copy )
         xs_warn("   perlnode found\n" );
         if ( sv_derived_from(perlnode, "XML::LibXML::Node")  ) {
             proxy = SvPROXYNODE(perlnode);
-            xs_warn( "is a xmlNodePtr structure\n" );
-            retval = PmmNODE( proxy ) ;
+            if ( proxy != NULL ) {
+                xs_warn( "is a xmlNodePtr structure\n" );
+                retval = PmmNODE( proxy ) ;
+            }
 
             if ( retval != NULL
                  && ((ProxyNodePtr)retval->_private) != proxy ) {

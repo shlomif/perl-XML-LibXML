@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>21; }
+BEGIN { plan tests=>22; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -116,4 +116,18 @@ EOX
     my @attrb = $d->attributes;
     ok( scalar(@attrb), 1 );
     ok( $attrb[0]->nodeType, 18 );
+}
+
+print "# 6. lossless stetting of namespaces with setAttribute\n";
+# reported by Kurt George Gjerde
+
+{
+    my $doc = XML::LibXML->createDocument; 
+    my $root = $doc->createElementNS('http://example.com', 'document');
+    $root->setAttribute('xmlns:xxx', 'http://example.com');
+    $root->setAttribute('xmlns:yyy', 'http://yonder.com');
+    $doc->setDocumentElement( $root );
+
+    my $strnode = $root->toString();
+    ok ( $strnode =~ /xmlns:xxx/ and $strnode =~ /xmlns=/ );
 }

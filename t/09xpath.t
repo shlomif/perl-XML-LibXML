@@ -1,7 +1,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 20 };
+BEGIN { plan tests => 22 };
 use XML::LibXML;
 
 my $xmlstring = <<EOSTR;
@@ -63,4 +63,21 @@ ok($doc);
     ok( $result == 0 );
 }
 
+{
+    # test the strange segfault after xpathing
+    my $root = $doc->documentElement();
+    foreach my $bar ( $root->findnodes( 'bar' )  ) {
+        $root->removeChild($bar);
+    }
+    ok(1);
+    # warn $root->toString();
+    
 
+    $doc =  $parser->parse_string( $xmlstring );
+    my @bars = $doc->findnodes( '//bar' );
+    
+    foreach my $node ( @bars ) {
+        $node->parentNode()->removeChild( $node );
+    }
+    ok(1);
+}

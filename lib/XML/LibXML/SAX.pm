@@ -1,5 +1,5 @@
 # $Id$
-
+# Copyright (c) 2001-2002, AxKit.com Ltd. All rights reserved.
 package XML::LibXML::SAX;
 
 use strict;
