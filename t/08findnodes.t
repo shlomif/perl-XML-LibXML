@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>18 }
+BEGIN { plan tests=>36}
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -7,7 +7,7 @@ ok($loaded);
 
 # to test if findnodes works.
 # i added findnodes to the node class, so a query can be started
-# everywhere. Since I use only the 
+# everywhere.
 
 my $file    = "example/dromeds.xml";
 $itervar    = undef;
@@ -91,12 +91,6 @@ my @doc = $root->findnodes('document("example/test.xml")');
 ok(@doc);
 # warn($doc[0]->toString);
 
-eval { my $literal = $root->findvalue( "/-" ); };
-ok( $@ );
-
-eval { my @nodes = $root->findnodes( "/-" ); };
-ok( $@ );
-
 # this query should result an empty array!
 my @nodes = $root->findnodes( "/humpty/dumpty" );
 ok( scalar(@nodes), 0 );
@@ -111,7 +105,27 @@ my $docstring = q{
 my @ns = $root->findnodes('namespace::*');
 ok(scalar(@ns), 2 );
 
+print "#bad xpaths\n";
 
+my @badxpath = (
+    'abc:::def',
+    'foo///bar',
+    '...',
+    '/-',
+               );
+
+foreach my $xp ( @badxpath ) {
+    eval { $res = $root->findnodes( $xp ); };
+    ok($@);
+    eval { $res = $root->find( $xp ); };
+    ok($@);
+    eval { $res = $root->findvalue( $xp ); };
+    ok($@);
+    eval { $res = $root->findnodes( encodeToUTF8( "iso-8859-1", $xp ) ); };
+    ok($@);
+    eval { $res = $root->find( encodeToUTF8( "iso-8859-1", $xp ) );};
+    ok($@);
+}
 
 sub finddoc {
     my $doc = shift;
