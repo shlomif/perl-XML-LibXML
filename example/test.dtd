@@ -1,4 +1,4 @@
-<!ELEMENT article (pubData*, pubArticleID*, pubDate+, pubName+, section+, memo*, headline1*, headline2*, byline*, lead*, rest*, graphics*, keywords*, caption*)>
+<!ELEMENT article (pubData* , pubArticleID* , pubDate+ , pubName+ , section+ , memo* , headline1* , headline2* , byline* , lead* , rest* , graphics* , keywords* , caption*)>
 <!ELEMENT pubData (#PCDATA)>
 <!ELEMENT pubArticleID (#PCDATA)>
 <!ELEMENT pubDate (#PCDATA)>
