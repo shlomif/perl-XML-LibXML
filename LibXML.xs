@@ -98,7 +98,8 @@ static SV * LibXML_close_cb = NULL;
 
 static SV * LibXML_error    = NULL;
 
-#define LibXML_init_error() LibXML_error = NEWSV(0, 512); \
+#define LibXML_init_error() if (LibXML_error == NULL || !SvOK(LibXML_error)) \
+                            LibXML_error = NEWSV(0,512); \
                             sv_setpvn(LibXML_error, "", 0); \
                             xmlSetGenericErrorFunc( NULL ,  \
                                 (xmlGenericErrorFunc)LibXML_error_handler);
@@ -1177,7 +1178,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
         real_doc = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         if ( real_doc == NULL ) {
             LibXML_croak_error();
@@ -1254,7 +1255,7 @@ _parse_sax_string(self, string)
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser(); 
     OUTPUT:
@@ -1275,7 +1276,7 @@ _parse_fh(self, fh, directory = NULL)
         LibXML_init_parser(self);
         real_doc = LibXML_parse_stream(self, fh, directory);
         
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
         recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
@@ -1316,7 +1317,7 @@ _parse_sax_fh(self, fh, directory = NULL)
         LibXML_init_parser(self);
         LibXML_parse_sax_stream(self, fh, directory);
         
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
@@ -1351,7 +1352,7 @@ _parse_file(self, filename)
         real_doc = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
         
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         if ( real_doc == NULL ) {
             LibXML_croak_error();
@@ -1408,7 +1409,7 @@ _parse_sax_file(self, filename)
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
                 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
@@ -1439,7 +1440,7 @@ parse_html_string(self, string)
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();        
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if (real_doc == NULL) {
             LibXML_croak_error();
@@ -1489,7 +1490,7 @@ parse_html_fh(self, fh)
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
 
         if (real_doc == NULL) {
@@ -1539,7 +1540,7 @@ parse_html_file(self, filename)
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if (real_doc == NULL) {
             LibXML_croak_error();
@@ -1588,7 +1589,7 @@ parse_sgml_fh(self, fh, encoding)
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         if (real_doc == NULL) {
             LibXML_croak_error();
@@ -1648,7 +1649,7 @@ parse_sgml_string(self, string, encoding)
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();        
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if (real_doc == NULL) {
             LibXML_croak_error();
@@ -1697,7 +1698,7 @@ parse_sgml_file(self, fn, encoding)
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         if (real_doc == NULL) {
             LibXML_croak_error();
@@ -1751,7 +1752,7 @@ parse_sax_sgml_file(self, fn, enc )
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
                 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
         
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
@@ -1791,7 +1792,7 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
             LibXML_cleanup_callbacks();
             LibXML_cleanup_parser();    
 
-            sv_2mortal(LibXML_error);
+            /* sv_2mortal(LibXML_error); */
             if ( (int) rv == -1 ) {
                 LibXML_croak_error();
             }
@@ -1901,7 +1902,7 @@ _processXIncludes( self, doc )
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
-        sv_2mortal( LibXML_error );
+        /* sv_2mortal(LibXML_error); */
 
         LibXML_croak_error();
 
@@ -1931,7 +1932,7 @@ _start_push( self, with_sax=0 )
         }
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser(); 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         RETVAL = PmmContextSv( ctxt );
     OUTPUT:
@@ -1967,7 +1968,7 @@ _push( self, pctxt, data )
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
     
-        sv_2mortal(LibXML_error); 
+        /* sv_2mortal(LibXML_error); */ 
 
         if ( ctxt->wellFormed == 0 ) {
             LibXML_croak_error();
@@ -2003,7 +2004,7 @@ _end_push( self, pctxt, restore )
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
     
         if ( SvCUR( LibXML_error ) > 0 && restore == 0 ) { 
             xmlFreeDoc( ctxt->myDoc );
@@ -2048,7 +2049,7 @@ _end_sax_push( self, pctxt )
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
@@ -2223,7 +2224,7 @@ _toString(self, format=0)
         }
 
         xmlSaveNoEmptyTags = oldTagFlag;
-/*        sv_2mortal( LibXML_error );
+/*        sv_2mortal(LibXML_error);
         LibXML_croak_error();
 */
         if (result == NULL) {
@@ -2307,7 +2308,7 @@ toFH( self, filehandler, format=0 )
     
         xmlIndentTreeOutput = t_indent_var;
         xmlSaveNoEmptyTags = oldTagFlag;
-        sv_2mortal( LibXML_error );
+        /* sv_2mortal(LibXML_error); */
         LibXML_croak_error();
     OUTPUT:
         RETVAL    
@@ -2344,7 +2345,7 @@ toFile( self, filename, format=0 )
 
         xmlSaveNoEmptyTags = oldTagFlag;   
 
-        sv_2mortal( LibXML_error );
+        /* sv_2mortal(LibXML_error); */
         LibXML_croak_error();
 
         if ( RETVAL > 0 ) 
@@ -2407,7 +2408,6 @@ createDocument( CLASS, version="1.0", encoding=NULL )
         char * encoding
     ALIAS:
         XML::LibXML::Document::new = 1
-        XML::LibXML::createDocument = 2
     PREINIT:
         xmlDocPtr doc=NULL;
     CODE:
@@ -3376,7 +3376,7 @@ is_valid(self, ...)
         else {
             RETVAL = xmlValidateDocument(&cvp, self);
         }
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
     OUTPUT:
         RETVAL
 
@@ -3414,7 +3414,7 @@ validate(self, ...)
         else {
             RETVAL = xmlValidateDocument(&cvp, self);
         }
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if (RETVAL == 0) {
             LibXML_croak_error();
@@ -4507,7 +4507,7 @@ _find( pnode, pxpath )
         found = domXPathFind( node, xpath );
         xmlFree( xpath );
 
-        sv_2mortal( LibXML_error );
+        /* sv_2mortal(LibXML_error); */
         LibXML_croak_error();
 
         if (found) {
@@ -4623,7 +4623,7 @@ _findnodes( pnode, perl_xpath )
         nodelist = domXPathSelect( node, xpath );
         xmlFree(xpath);
 
-        sv_2mortal( LibXML_error );
+        /* sv_2mortal(LibXML_error); */
         LibXML_croak_error();
 
         if ( nodelist ) {
@@ -5968,7 +5968,7 @@ parse_string(CLASS, str, ...)
         /* xmlFreeParserInputBuffer(buffer); */
         xmlFree(new_string);
 
-        sv_2mortal( LibXML_error );
+        /* sv_2mortal(LibXML_error); */
         LibXML_croak_error();
 
         if (res == NULL) {
@@ -6012,7 +6012,7 @@ parse_location( self, url )
         RETVAL = xmlRelaxNGParse( rngctxt );
         xmlRelaxNGFreeParserCtxt( rngctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL == NULL ) {
             LibXML_croak_error();
@@ -6051,7 +6051,7 @@ parse_buffer( self, perlstring )
         RETVAL = xmlRelaxNGParse( rngctxt );
         xmlRelaxNGFreeParserCtxt( rngctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL == NULL ) {
             LibXML_croak_error();
@@ -6084,7 +6084,7 @@ parse_document( self, doc )
         RETVAL = xmlRelaxNGParse( rngctxt );
         xmlRelaxNGFreeParserCtxt( rngctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL == NULL ) {
             LibXML_croak_error();
@@ -6115,7 +6115,7 @@ validate( self, doc )
         RETVAL = xmlRelaxNGValidateDoc( vctxt, doc );
         xmlRelaxNGFreeValidCtxt( vctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL == 1 ) {
             LibXML_croak_error();
@@ -6161,7 +6161,7 @@ parse_location( self, url )
         RETVAL = xmlSchemaParse( rngctxt );
         xmlSchemaFreeParserCtxt( rngctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL == NULL ) {
             LibXML_croak_error();
@@ -6200,7 +6200,7 @@ parse_buffer( self, perlstring )
         RETVAL = xmlSchemaParse( rngctxt );
         xmlSchemaFreeParserCtxt( rngctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL == NULL ) {
             LibXML_croak_error();
@@ -6232,7 +6232,7 @@ validate( self, doc )
         RETVAL = xmlSchemaValidateDoc( vctxt, doc );
         xmlSchemaFreeValidCtxt( vctxt );
 
-        sv_2mortal(LibXML_error);
+        /* sv_2mortal(LibXML_error); */
 
         if ( RETVAL > 0 ) {
             LibXML_croak_error();
