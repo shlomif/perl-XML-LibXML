@@ -18,8 +18,8 @@ typemap
 example/dromeds.xml
 example/bad.xml
 example/dtd.xml
-example/libxml.xml
-example/xml2pod.pl
+example/libxml.dkb
+example/xmllibxmldocs.pl
 example/cb_example.pl
 example/test.html
 example/test.xhtml
