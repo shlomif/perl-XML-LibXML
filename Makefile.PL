@@ -68,6 +68,10 @@ DEATH
 
 # have_library("xml2", "ghttp_get_header_names");
 
+print "creating POD files\n";
+
+system($^X, "example/xml2pod.pl");
+
 WriteMakefile(
     'NAME'	=> 'XML::LibXML',
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION

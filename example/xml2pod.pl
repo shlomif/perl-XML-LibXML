@@ -9,7 +9,7 @@ use XML::LibXML;
 # the data into different POD Files. 
 
 {
-  my $xml_file = "./libxml.xml";
+  my $xml_file = "example/libxml.xml";
 
   # init the file parser
   my $parser = XML::LibXML->new();
@@ -97,7 +97,10 @@ sub handle_class {
   }
   
   # print the data to a separated POD File
-  open FILE , "> ".$node->getAttribute("name").".pod" ||
+  my $filename = $node->getAttribute("name");
+  $filename =~ s/::/\//g;
+  print("writing file: lib/${filename}.pod\n");
+  open FILE , "> lib/${filename}.pod" ||
     do{
       warn "cannot open file...\n"; 
       return ; # don't proceed if there is no open descriptor
