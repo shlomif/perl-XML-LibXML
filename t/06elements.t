@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 51 };
+BEGIN { plan tests => 55 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -16,6 +16,7 @@ my $attname1  = "A";
 my $attvalue1 = "a";
 my $attname2  = "B";
 my $attvalue2 = "b";
+my $attname3  = "C";
 
 print "# 1. bound node\n";
 {
@@ -46,6 +47,14 @@ print "# 1. bound node\n";
 
     my $tattr = $elem->getAttributeNode($attname2);
     ok($tattr->isSameNode($attr2));
+
+    $elem->setAttribute($attname2, "");    
+    ok($elem->hasAttribute($attname2) );
+    ok($elem->getAttribute($attname2), "");
+    
+    $elem->setAttribute($attname3, "");    
+    ok($elem->hasAttribute($attname3) );
+    ok($elem->getAttribute($attname3), "");
 
     print "# 1.1 Namespaced Attributes\n";
 
