@@ -975,15 +975,13 @@ toStringHTML(self)
 
 int
 is_valid(self, ...)
-        ProxyObject* self
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr real_dom;
         xmlValidCtxt cvp;
         ProxyObject * dtd_proxy;
         xmlDtdPtr dtd;
         SV * dtd_sv;
     CODE:
-        real_dom = (xmlDocPtr)self->object;
         LibXML_error = sv_2mortal(newSVpv("", 0));
         if (items > 1) {
             dtd_sv = ST(1);
@@ -999,13 +997,50 @@ is_valid(self, ...)
             cvp.userData = (void*)PerlIO_stderr();
             cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
             cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
-            RETVAL = xmlValidateDtd(&cvp, real_dom , dtd);
+            RETVAL = xmlValidateDtd(&cvp, self, dtd);
         }
         else {
-            RETVAL = xmlValidateDocument(&cvp, real_dom);
+            RETVAL = xmlValidateDocument(&cvp, self);
         }
     OUTPUT:
         RETVAL
+
+int
+validate(self, ...)
+        xmlDocPtr self
+    PREINIT:
+        xmlValidCtxt cvp;
+        ProxyObject * dtd_proxy;
+        xmlDtdPtr dtd;
+        SV * dtd_sv;
+        STRLEN n_a;
+    CODE:
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        if (items > 1) {
+            dtd_sv = ST(1);
+            if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
+                dtd_proxy = (ProxyObject*)SvIV((SV*)SvRV( dtd_sv ));
+                if (dtd_proxy != NULL) {
+                    dtd = (xmlDtdPtr)dtd_proxy->object;
+                }
+            }
+            else {
+                croak("is_valid: argument must be a DTD object");
+            }
+            cvp.userData = (void*)PerlIO_stderr();
+            cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
+            cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
+            RETVAL = xmlValidateDtd(&cvp, self , dtd);
+        }
+        else {
+            RETVAL = xmlValidateDocument(&cvp, self);
+        }
+        if (RETVAL == 0) {
+            croak(SvPV(LibXML_error, n_a));
+        }
+    OUTPUT:
+        RETVAL
+        
 
 void
 process_xinclude(self)
@@ -1414,6 +1449,7 @@ parse_string(CLASS, str, ...)
         SV * encoding_sv;
         xmlParserInputBufferPtr buffer;
         xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
+        char * new_string;
     CODE:
         LibXML_error = sv_2mortal(newSVpv("", 0));
         if (items > 2) {
@@ -1430,7 +1466,8 @@ parse_string(CLASS, str, ...)
         /* warn("make buffer\n"); */
         buffer = xmlAllocParserInputBuffer(enc);
         /* xmlParserInputBufferCreateMem(str, strlen(str), enc); */
-        xmlParserInputBufferPush(buffer, strlen(str), str);
+        new_string = xmlStrdup(str);
+        xmlParserInputBufferPush(buffer, strlen(new_string), new_string);
         /* warn("parse\n"); */
         res = xmlIOParseDTD(NULL, buffer, enc);
         /* warn("free : 0x%x\n", buffer); */
