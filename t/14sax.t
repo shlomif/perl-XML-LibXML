@@ -1,6 +1,9 @@
 use Test;
-BEGIN { plan tests => 46 }
+
+BEGIN { plan tests => 48 }
+
 use XML::LibXML;
+use XML::LibXML::SAX;
 use XML::LibXML::SAX::Parser;
 use XML::LibXML::SAX::Builder;
 use XML::SAX;
@@ -49,12 +52,30 @@ $parser->set_handler($sax);
 
 $parser->parse_uri("example/ns.xml");
 
+########### Namespace test ( empty namespaces ) ########
+
+{
+    my $h = "SAXNS2Tester";
+    my $xml = "<a xmlns='A'><b/></a>";
+    my @tests = (
+sub {
+    XML::LibXML::SAX        ->new( Handler => $h )->parse_string( $xml );
+},
+
+sub {
+    XML::LibXML::SAX::Parser->new( Handler => $h )->parse_string( $xml );
+},
+);  
+    
+    $_->() for @tests;
+
+}
+
+
 ########### Helper class #############
 
 package SAXTester;
 use Test;
-
-# local $XML::LibXML::ORIGINAL_STRING = 1;
 
 sub new {
     my $class = shift;
@@ -88,6 +109,8 @@ sub characters {
   # warn("characters: $chars->{Data}\n");
 }
 
+1;
+
 package SAXNSTester;
 use Test;
 
@@ -118,3 +141,21 @@ sub end_prefix_mapping {
     ok($node->{NamespaceURI} =~ /^(urn:camels|urn:mammals|urn:a)$/);
 }
 
+1;
+
+package SAXNS2Tester;
+use Test;
+
+#sub new {
+#    my $class = shift;
+#    return bless {}, $class;
+#}
+
+sub start_element {
+    my $self = shift;
+    my ( $elt ) = @_;
+    ok $elt->{NamespaceURI} eq "A"
+        if $elt->{Name} eq "b"
+}
+
+1;
