@@ -414,6 +414,45 @@ sub setDocumentElement {
     $doc->_setDocumentElement($element);
 }
 
+sub toString {
+    my $self = shift;
+    my $flag = shift;
+
+    my $retval = "";
+
+    if ( defined $XML::LibXML::skipXMLDeclaration
+         and $XML::LibXML::skipXMLDeclaration == 1 ) {
+        foreach ( $self->childNodes ){
+            next if defined $XML::LibXML::skipDTD
+                    and $XML::LibXML::skipDTD == 1
+                    and $_->nodeType == XML::LibXML::XML_DTD_NODE();
+
+            $retval .= $_->toString;
+        }
+    }
+    elsif ( defined $XML::LibXML::skipDTD
+         and $XML::LibXML::skipDTD == 1 ) {
+        # no chance to get the XML Decl from libxml2
+        $retval = '<?xml version="' . $self->version .'"';
+        my $standalone = $self->standalone;
+        my $encoding = $self->encoding;
+
+        $retval .= ' encoding="' . $encoding . '"' if defined $encoding;
+        $retval .= ' standalone="' .($standalone ? "yes" : "no" ). '"'
+          if defined $standalone && $standalone >= 0;
+        $retval .= "?>\n";
+        foreach ( $self->childNodes ){
+            next if $_->nodeType == XML::LibXML::XML_DTD_NODE();
+            $retval .= $_->toString(1);
+        }
+        $retval .= "\n";
+    }
+    else {
+        $retval =  $self->_toString($flag);
+    }
+    return $retval;
+}
+
 1;
 
 package XML::LibXML::DocumentFragment;
@@ -928,6 +967,43 @@ should to be used for the XInclude as well.
 If expand_xincludes is set to 1, the method is only required to process
 XIncludes appended to the DOM after its original parsing.
 
+=head1 SERIALIZATION
+
+The oposite of parsing is serialization. In XML::LibXML this can be
+done by using the functions toString(), toFile() and toFH(). All
+serialization functions understand the flag setTagCompression. if this
+Flag is set to 1 empty tags are displayed as <foo></foo>
+rather than <foo/>.
+
+toString() additionally checks two other flags:
+
+skipDTD and skipXMLDeclaration
+
+If skipDTD is specified and any DTD node is found in the document this
+will not be serialized.
+
+If skipXMLDeclaration is set to 1 the documents xml declaration is not
+serialized. This flag will cause the document to be serialized as UTF8
+even if the document has an other encoding specified.
+
+XML::LibXML does not define these flags itself, therefore they have to
+specify them manually by the caller:
+
+ local $XML::LibXML::skipXMLDeclaration = 1;
+ local $XML::LibXML::skipDTD = 1;
+ local $XML::LibXML::setTagCompression = 1;
+
+will cause the serializer to avoid the XML declaration for a document,
+skip the DTD if found, and expand empty tags.
+
+*NOTE* $XML::LibXML::skipXMLDeclaration and $XML::LibXML::skipDTD are
+only recognized by the Documents toString() function.
+
+Additionally it is possible to serialize single nodes by using
+toString() for the node. Since a node has no DTD and no XML
+Declaration the related flags will take no effect. Nevertheless
+setTagCompression is supported.
+
 =head1 XML::LibXML::Document
 
 The objects returned above have a few methods available to them:
@@ -950,6 +1026,7 @@ L<"XML::LibXML::Dtd">.
 
 Process any xinclude tags in the file. (currently using B<only> libxml2's
 default callbacks)
+
 
 =head1 XML::LibXML::Dtd
 

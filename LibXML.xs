@@ -1362,15 +1362,22 @@ decodeFromUTF8( encoding, string )
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Document
 
 SV *
-toString(self, format=0)
+_toString(self, format=0)
         SV * self
         int format
     PREINIT:
         xmlDocPtr real_dom;
         xmlChar *result=NULL;
         int len=0;
+        SV* internalFlag = NULL;
+        int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
         real_dom = (xmlDocPtr)PmmNODE(SvPROXYNODE(self));
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        if( internalFlag ) {
+            xmlSaveNoEmptyTags = SvTRUE(internalFlag);
+        }
+
         if ( format <= 0 ) {
             # warn( "use no formated toString!" );
             xmlDocDumpMemory(real_dom, &result, &len);
@@ -1382,6 +1389,8 @@ toString(self, format=0)
             xmlDocDumpFormatMemory( real_dom, &result, &len, format ); 
             xmlIndentTreeOutput = t_indent_var;
         }
+
+        xmlSaveNoEmptyTags = oldTagFlag;
 
     	if (result == NULL) {
 	        # warn("Failed to convert doc to string");           
@@ -1403,7 +1412,14 @@ toFH( self, filehandler, format=1 )
         xmlOutputBufferPtr buffer;
         const xmlChar * encoding = NULL;
         xmlCharEncodingHandlerPtr handler = NULL;
+        SV* internalFlag = NULL;
+        int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        if( internalFlag ) {
+            xmlSaveNoEmptyTags = SvTRUE(internalFlag);
+        }
+
         xmlRegisterDefaultOutputCallbacks();
         encoding = ((xmlDocPtr) PmmSvNode(self))->encoding;
         if ( encoding != NULL ) {
@@ -1422,7 +1438,7 @@ toFH( self, filehandler, format=1 )
                                      (xmlDocPtr)PmmSvNode(self),
                                      encoding,
                                      format);
-
+        xmlSaveNoEmptyTags = oldTagFlag;
         xmlOutputBufferClose( buffer );
     OUTPUT:
         RETVAL    
@@ -1431,8 +1447,18 @@ int
 toFile( self, filename )
         SV * self
         char * filename
+    PREINIT:
+        SV* internalFlag = NULL;
+        int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
-        RETVAL = xmlSaveFile( filename, (xmlDocPtr)PmmSvNode(self) );   
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        if( internalFlag ) {
+            xmlSaveNoEmptyTags = SvTRUE(internalFlag);
+        }
+
+        RETVAL = xmlSaveFile( filename, (xmlDocPtr)PmmSvNode(self) );
+
+        xmlSaveNoEmptyTags = oldTagFlag;   
         if ( RETVAL > 0 ) 
             RETVAL = 1;
         else 
@@ -2733,7 +2759,14 @@ toString( self, useDomEncoding = &PL_sv_undef )
     PREINIT:
         xmlBufferPtr buffer;
         char *ret = NULL;
+        SV* internalFlag = NULL;
+        int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+
+        if ( internalFlag ) {
+            xmlSaveNoEmptyTags = SvTRUE(internalFlag);
+        }
         buffer = xmlBufferCreate();
         xmlNodeDump( buffer,
                      PmmNODE(SvPROXYNODE(self))->doc,
@@ -2743,9 +2776,10 @@ toString( self, useDomEncoding = &PL_sv_undef )
         }
         
         xmlBufferFree( buffer );
+        xmlSaveNoEmptyTags = oldTagFlag;
 
         if ( ret != NULL ) {
-            if ( SvTRUE(useDomEncoding) ) {
+            if ( useDomEncoding!= &PL_sv_undef && SvTRUE(useDomEncoding) ) {
                 RETVAL = nodeC2Sv(ret, PmmNODE(SvPROXYNODE(self))) ;
             }
             else {
