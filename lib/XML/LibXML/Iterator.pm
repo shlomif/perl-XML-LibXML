@@ -21,6 +21,8 @@ use overload
   },
 ;
 
+use XML::NodeFilter qw(:results);
+
 sub new {
     my $class = shift;
     my $node  = shift;
@@ -32,6 +34,8 @@ sub new {
     $self->{FIRST} = $node;
     $self->first;
     $self->{ITERATOR} = \&default_iterator;
+
+    $self->{FILTERS} = [];
 
     return $self;
 }
@@ -51,12 +55,36 @@ sub iterator_function {
     }
 }
 
+sub set_filter {
+    my $self = shift;
+    $self->{FILTERS} = [ @_ ];
+}
+
+sub add_filter {
+    my $self = shift;
+    push @{$self->{FILTERS}}, @_;
+}
+
 sub current  { return $_[0]->{CURRENT}; }
 sub index    { return $_[0]->{INDEX}; }
 
 sub next     {
     my $self = shift;
-    my $node = $self->{ITERATOR}->( $self, 1 );
+    my @filters = @{$self->{FILTERS}};
+    my $node = undef;
+    my $fv = FILTER_SKIP;
+    unless ( scalar @filters > 0 ) {
+        $fv = FILTER_DECLINED;
+    }
+    while ( 1 ) {
+        $node = $self->{ITERATOR}->( $self, 1 );
+        last unless defined $node;
+        foreach my $f ( @filters ) {
+            $fv = $f->accept_node( $node );
+            last if $fv;
+        }
+        last if $fv == FILTER_ACCEPT or $fv == FILTER_DECLINED;
+    }
 
     if ( defined $node ) {
         $self->{CURRENT} = $node;
@@ -68,8 +96,21 @@ sub next     {
 
 sub previous {
     my $self = shift;
-
-    my $node = $self->{ITERATOR}->( $self, -1 );
+    my @filters = @{$self->{FILTERS}};
+    my $node = undef;
+    my $fv = FILTER_SKIP;
+    unless ( scalar @filters > 0 ) {
+        $fv = FILTER_DECLINED;
+    }
+    while ( 1 ) {
+        $node = $self->{ITERATOR}->( $self, -1 );
+        last unless defined $node;
+        foreach my $f ( @filters ) {
+            $fv = $f->accept_node( $node );
+            last if $fv;
+        }
+        last if $fv == FILTER_ACCEPT or $fv == FILTER_DECLINED;
+    }
 
     if ( defined $node ) {
         $self->{CURRENT} = $node;
@@ -85,7 +126,24 @@ sub first {
     if ( scalar @_ ) {
         $self->{FIRST} = shift;
     }
+
     $self->{CURRENT} = $self->{FIRST};
+
+    # this logic is required if the node is not allowed to be shown
+    my @filters = @{$self->{FILTERS}||[]};
+    my $fv = FILTER_DECLINED;
+
+    foreach my $f ( @filters ) {
+        $fv = $f->accept_node( $self->{CURRENT} );
+        last if $fv;
+    }
+
+    $fv ||= FILTER_ACCEPT;
+
+    unless ( $fv == FILTER_ACCEPT ) {
+        return undef;
+    }
+
     $self->{INDEX}   = 0;
     return $self->current;
 }
@@ -262,6 +320,17 @@ is somewhat dangerous, because both functions return B<undef> in case
 of reaching the iteration boundaries. That means it is not possible
 to iterate past the last element or before the first one.
 
+=head2 Node Filters
+
+XML::LibXML::Iterator accepts XML::NodeFilters to limit the nodes made
+available to the caller. Any nodefilter applied to
+XML::LibXML::Iterator will test if a node returned by the iteration
+function is visible to the caller.
+
+Different to the DOM Traversal Specification, XML::LibXML::Iterator
+allows filter stacks. This means it is possible to apply more than a
+single node filter to your node iterator.
+
 =head2 Complex Iterations
 
 By default XML::LibXML::Iterator will access all nodes of a given DOM
@@ -271,11 +340,12 @@ accessed is given by the following order:
 
   node -> node's childnodes -> node's next sibling
 
-This is great for a wide range of scripts. Nevertheless this is
-limited for some applications. XML::LibXML::Iterator allows to change
-that behaviour. This is done by resetting XML::LibXML::Iterator's
-iterator function. By using the method iterator_function() to override
-the default iterator function, it is possible to implement iterations
+In combination with XML::Nodefilter this is best for a wide range of
+scripts and applications. Nevertheless this is still to restrictive
+for some applications. XML::LibXML::Iterator allows to change that
+behaviour. This is done by resetting XML::LibXML::Iterator's iterator
+function. By using the method iterator_function() to override the
+default iterator function, it is possible to implement iterations
 based on any iteration rule imaginable.
 
 A valid iterator function has to take two parameters: As the first
@@ -351,22 +421,25 @@ attributes in a given subtree.
 
 =item iterator_function($funcion_ref)
 
+=item set_filter(@filter_list)
+
+=item add_filter(@filter_list)
+
 =item iterate($function_ref)
 
 =back
 
+=head1 SEE ALSO
 
-XML::LibXML::Iterator knows two types of callback. One is knows as the
-iterator function, the other is used by iterate(). The first function
-will be called for each call of next() or previous(). It is used to
-find out about the next node recognized by the iterator.
+L<XML::LibXML::Node>, L<XML::NodeFilter>
 
+=head1 AUTHOR
 
-The iterators iterate() function will take a function reference that
-takes as well two parameters. The first parameter is again the
-iterator object. The second parameter is the node to operate on. The
-iterate function can do any operation on the node as
-prefered. Appending new nodes or removing the current node will not
-confuse the iteration process: The iterator preloads the next object
-before calling the iteration function. Thus the Iterator will not find
-nodes appended by the iteration function.
+Christian Glahn, E<lt>christian.glahn@uibk.ac.atE<gt>
+
+=head1 COPYRIGHT
+
+(c) 2002, Christian Glahn. All rights reserved.
+
+This package is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
