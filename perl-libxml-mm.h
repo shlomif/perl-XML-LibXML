@@ -93,6 +93,15 @@ PmmSetSvOwner(SV * perlnode, SV * owner );
 void
 PmmFixOwner(ProxyNodePtr node, ProxyNodePtr newOwner );
 
+int
+PmmContextREFCNT_dec( ProxyNodePtr node );
+
+SV*
+PmmContextSv( xmlParserCtxtPtr ctxt );
+
+xmlParserCtxtPtr
+PmmSvContext( SV * perlctxt );
+
 /**
  * NAME domNodeTypeName
  * TYPE function

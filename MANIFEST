@@ -11,6 +11,8 @@ xpath.c
 xpath.h
 perl-libxml-mm.c
 perl-libxml-mm.h
+perl-libxml-sax.c
+perl-libxml-sax.h
 typemap
 example/dromeds.xml
 example/bad.xml

@@ -28,6 +28,7 @@ extern "C" {
 
 /* XML::LibXML stuff */
 #include "perl-libxml-mm.h"
+#include "perl-libxml-sax.h"
 
 #include "dom.h"
 #include "xpath.h"
@@ -688,6 +689,54 @@ LibXML_parse_stream(SV * self, SV * ioref, char * directory)
     return doc;
 }
 
+void
+LibXML_parse_sax_stream(SV * self, SV * ioref, char * directory)
+{
+    xmlParserCtxtPtr ctxt;
+    char buffer[1024];
+    int read_length;
+    int ret = -1;
+    char current_dir[512];
+    
+    if (directory == NULL) {
+        if (getcwd(current_dir, 512) != 0) {
+            directory = current_dir;
+        }
+        else {
+            warn("couldn't get current directory: %s\n", strerror(errno));
+        }
+    }
+    
+    read_length = LibXML_read_perl(ioref, buffer, 4);
+    if (read_length > 0) {
+        ctxt = xmlCreatePushParserCtxt(PSaxGetHandler(),
+                                       NULL,
+                                       buffer,
+                                       read_length,
+                                       NULL);
+        if (ctxt == NULL) {
+            croak("Could not create push parser context: %s", strerror(errno));
+        }
+        ctxt->directory = directory;
+        ctxt->_private = (void*)self;
+        while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
+            xmlParseChunk(ctxt, buffer, read_length, 0);
+        }
+        ret = xmlParseChunk(ctxt, buffer, 0, 1);
+
+        ctxt->directory = NULL;
+
+        xmlFree(ctxt->sax);
+        ctxt->sax = NULL;
+        xmlFreeParserCtxt(ctxt);
+
+    }
+    else {
+        croak( "Empty Stream" );
+    }
+
+}
+
 xmlDocPtr
 LibXML_parse_html_stream(SV * self, SV * ioref)
 {
@@ -965,7 +1014,6 @@ _parse_string(self, string, directory = NULL)
         char * directory
     PREINIT:
         xmlParserCtxtPtr ctxt;
-        char * CLASS = "XML::LibXML::Document";
         STRLEN len;
         char * ptr;
         int well_formed;
@@ -1038,13 +1086,50 @@ _parse_string(self, string, directory = NULL)
     OUTPUT:
         RETVAL
 
+int
+_parse_sax_string(self, string)
+        SV * self
+        SV * string
+    PREINIT:
+        xmlParserCtxtPtr ctxt;
+        STRLEN len;
+        char * ptr;
+        int well_formed;
+        int ret;
+    INIT:
+        ptr = SvPV(string, len);
+        if (len == 0) {
+            croak("Empty string");
+            XSRETURN_UNDEF;
+        }
+    CODE:
+        ctxt = xmlCreateMemoryParserCtxt(ptr, len);
+        if (ctxt == NULL) {
+            croak("Couldn't create memory parser context: %s", strerror(errno));
+        }
+
+        ctxt->_private = (void*)self;
+
+        ctxt->sax = PSaxGetHandler();
+
+        LibXML_init_parser(self);
+        RETVAL = xmlParseDocument(ctxt);
+        xmlFree( ctxt->sax );
+        ctxt->sax = NULL;
+        xmlFreeParserCtxt(ctxt);
+
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser(); 
+
+    OUTPUT:
+        RETVAL
+
 SV*
 _parse_fh(self, fh, directory = NULL)
         SV * self
         SV * fh
         char * directory
     PREINIT:
-        char * CLASS = "XML::LibXML::Document";
         STRLEN len;
         xmlDocPtr real_dom;
     CODE:
@@ -1073,13 +1158,30 @@ _parse_fh(self, fh, directory = NULL)
     OUTPUT:
         RETVAL
 
+void
+_parse_sax_fh(self, fh, directory = NULL)
+        SV * self
+        SV * fh
+        char * directory
+    PREINIT:
+    CODE:  warn $@;
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        LibXML_init_parser(self);
+        LibXML_parse_sax_stream(self, fh, directory);
+        
+        sv_2mortal(LibXML_error);
+        
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+
 SV*
 _parse_file(self, filename)
         SV * self
         const char * filename
     PREINIT:
         xmlParserCtxtPtr ctxt;
-        char * CLASS = "XML::LibXML::Document";
         int well_formed = 0;
         int valid = 0;
         STRLEN len;
@@ -1119,13 +1221,44 @@ _parse_file(self, filename)
     OUTPUT:
         RETVAL
 
+void
+_parse_sax_file(self, filename)
+        SV * self
+        const char * filename
+    PREINIT:
+        xmlParserCtxtPtr ctxt;
+        STRLEN len;
+    CODE:
+        LibXML_init_parser(self);
+        ctxt = xmlCreateFileParserCtxt(filename);
+
+        if (ctxt == NULL) {
+            croak("Could not create file parser context for file '%s' : %s", filename, strerror(errno));
+        }
+
+        ctxt->sax = PSaxGetHandler();
+        ctxt->_private = (void*)self;
+        
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        xmlParseDocument(ctxt);
+
+        xmlFree(ctxt->sax);
+        ctxt->sax = NULL;
+        xmlFreeParserCtxt(ctxt);
+                
+        sv_2mortal(LibXML_error);
+        
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+
 SV*
 parse_html_string(self, string)
         SV * self
         SV * string
     PREINIT:
         htmlParserCtxtPtr ctxt;
-        char * CLASS = "XML::LibXML::Document";
         STRLEN len;
         char * ptr;
         int well_formed;
@@ -1166,7 +1299,6 @@ parse_html_fh(self, fh)
         SV * self
         SV * fh
     PREINIT:
-        char * CLASS = "XML::LibXML::Document";
         STRLEN len;
         xmlDocPtr real_dom;
     CODE:
@@ -1199,7 +1331,6 @@ parse_html_file(self, filename)
         SV * self
         const char * filename
     PREINIT:
-        char * CLASS = "XML::LibXML::Document";
         STRLEN len;
         xmlDocPtr real_dom;
     CODE:
@@ -1229,7 +1360,6 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         SV * svchunk
         char * encoding
     PREINIT:
-        char * CLASS = "XML::LibXML::DocumentFragment";
         xmlChar *chunk;
         xmlNodePtr rv = NULL;
         xmlNodePtr fragment= NULL;
@@ -1284,6 +1414,49 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
     OUTPUT:
         RETVAL
 
+void
+_parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
+        SV * self
+        SV * svchunk
+        char * encoding
+    PREINIT:
+        xmlChar *chunk;
+        char * ptr;
+        STRLEN len;
+        int retCode              = -1;
+        xmlNodePtr nodes         = NULL;
+        xmlSAXHandlerPtr handler = NULL;
+    INIT:
+        if ( encoding == NULL ) encoding = "UTF-8";
+        ptr = SvPV(svchunk, len);
+        if (len == 0) {
+            croak("Empty string");
+        }
+    CODE:
+        /* encode the chunk to UTF8 */
+        chunk = Sv2C(svchunk, (const xmlChar*)encoding);
+
+        if ( chunk != NULL ) {
+            LibXML_error = sv_2mortal(newSVpv("", 0));
+
+            LibXML_init_parser(self);
+            handler = PSaxGetHandler();
+
+            retCode = xmlParseBalancedChunkMemory( NULL, 
+                                                   handler,
+                                                   NULL,
+                                                   0,
+                                                   chunk,
+                                                   &nodes );       
+            xmlFree( handler );            
+            LibXML_cleanup_callbacks();
+            LibXML_cleanup_parser();    
+            xmlFree( chunk );
+
+            if ( retCode == -1 ) {
+                croak(SvPV(LibXML_error, len)); 
+            }
+        }
 
 int
 _processXIncludes( self, dom )
@@ -1377,6 +1550,158 @@ decodeFromUTF8( encoding, string )
         xs_warn( "decoding done" );
     OUTPUT:
         RETVAL
+
+SV*
+_start_push( self, with_sax=0 ) 
+        SV * self
+        int with_sax
+    PREINIT:
+        xmlParserCtxtPtr ctxt = NULL;
+    CODE:
+        /* create empty context */
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        if ( with_sax == 1 ) {
+            ctxt = xmlCreatePushParserCtxt( PSaxGetHandler(),
+                                            NULL,
+                                            NULL,
+                                            0,
+                                            NULL );
+        }
+        else {
+            ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
+        }
+
+        sv_2mortal(LibXML_error);
+
+        RETVAL = PmmContextSv( ctxt );
+    OUTPUT:
+        RETVAL
+
+int
+_push( self, pctxt, data ) 
+        SV * self
+        SV * pctxt
+        SV * data
+    PREINIT:
+        xmlParserCtxtPtr ctxt = NULL;
+        STRLEN len = 0;
+        xmlChar * chunk = NULL;
+    INIT:
+        ctxt = PmmSvContext( pctxt );
+        if ( ctxt == NULL ) {
+            croak( "parser context already freed" );
+            XSRETURN_UNDEF;
+        }
+        if ( data == &PL_sv_undef ) {
+            XSRETURN_UNDEF;
+        }
+    CODE:
+        chunk = SvPV( data, len );
+        if ( len <= 0 ) {
+            xs_warn( "empty string" );
+            XSRETURN_UNDEF;
+        }
+
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        LibXML_init_parser(self);
+
+        ctxt->_private = (void*)self;
+        xmlParseChunk(ctxt, chunk, len, 0);
+
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();    
+
+        sv_2mortal(LibXML_error);
+
+        RETVAL = 1;
+    OUTPUT:
+        RETVAL
+
+SV*
+_end_push( self, pctxt, restore ) 
+        SV * self
+        SV * pctxt
+        int restore
+    PREINIT:
+        xmlParserCtxtPtr ctxt = NULL;
+        xmlDocPtr doc = NULL;
+    INIT:
+        ctxt = PmmSvContext( pctxt );
+        if ( ctxt == NULL ) {
+            croak( "parser context already freed" );
+            XSRETURN_UNDEF;
+        }
+    CODE:
+        PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
+
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        LibXML_init_parser(self);
+        xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();    
+
+        sv_2mortal(LibXML_error);
+
+        if ( ctxt->node != NULL && restore == 0 ) {
+            xmlFreeParserCtxt(ctxt);
+            croak( "document is not wellformed" );
+        }
+
+        doc = ctxt->myDoc;
+        xmlFreeParserCtxt(ctxt);
+        if ( doc == NULL ){
+            croak( "no document found!" );
+            XSRETURN_UNDEF;
+        }
+        RETVAL = PmmNodeToSv( (xmlNodePtr) doc, NULL );
+    OUTPUT:
+        RETVAL
+
+void
+_end_sax_push( self, pctxt ) 
+        SV * self
+        SV * pctxt
+    PREINIT:
+        xmlParserCtxtPtr ctxt = NULL;
+        xmlDocPtr doc = NULL;
+    INIT:
+        ctxt = PmmSvContext( pctxt );
+        if ( ctxt == NULL ) {
+            croak( "parser context already freed" );
+            XSRETURN_UNDEF;
+        }
+    CODE:
+        PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
+
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        LibXML_init_parser(self);
+        xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();    
+
+        sv_2mortal(LibXML_error);
+
+        xmlFree(ctxt->sax);
+        ctxt->sax = NULL;
+        xmlFreeParserCtxt(ctxt);
+        XSRETURN_UNDEF;
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::ParserContext
+
+void
+DESTROY( self ) 
+        SV * self
+    CODE:
+        PmmContextREFCNT_dec( SvPROXYNODE( self ) );
+
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Document
 
@@ -2697,7 +3022,6 @@ _attributes( node )
         xmlNsPtr ns = NULL;
         SV * element;
         int len=0;
-        const char * CLASS = "XML::LibXML::Attr";
         int wantarray = GIMME_V;
     PPCODE:
         real_node = PmmSvNode(node);

@@ -3,7 +3,8 @@
 package XML::LibXML;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
+            $skipDTD $skipXMLDeclaration $setTagCompression);
 use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
@@ -14,9 +15,9 @@ require DynaLoader;
 
 @ISA = qw(DynaLoader Exporter);
 
-$XML::LibXML::skipDTD            = 0;
-$XML::LibXML::skipXMLDeclaration = 0;
-$XML::LibXML::setTagCompression  = 0;
+$skipDTD            = 0;
+$skipXMLDeclaration = 0;
+$setTagCompression  = 0;
 
 bootstrap XML::LibXML $VERSION;
 
@@ -190,6 +191,30 @@ sub base_uri {
     return $self->{XML_LIBXML_BASE_URI};
 }
 
+sub set_sax_handler {
+    my $self = shift;
+    $self->{SAX} = {HANDLER => $_[0]};
+}
+
+sub _auto_expand {
+    my ( $self, $result, $uri ) = @_;
+
+    $result->setBaseURI( $uri ) if defined $uri;
+
+    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
+         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
+        $self->{_State_} = 1;
+        eval { $self->processXIncludes($result); };
+            my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            $result = undef;
+            croak $err;
+        }
+    }
+    return $result;
+}
+
 sub parse_string {
     my $self = shift;
     croak("parse already in progress") if $self->{_State_};
@@ -201,30 +226,27 @@ sub parse_string {
     $self->{_State_} = 1;
     my $result;
 
-    eval {
-        $result = $self->_parse_string( @_ );
-    };
+    if ( defined $self->{SAX} ) {
+        my $string = shift;
+        eval { $self->_parse_sax_string($string); };
 
-    my $err = $@;
-    $self->{_State_} = 0;
-    if ($err) {
-        croak $err;
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            croak $err;
+        }
     }
+    else {
+        eval { $result = $self->_parse_string( @_ ); };
 
-    my $uri = $self->{XML_LIBXML_BASE_URI};
-    $result->setBaseURI( $uri ) if defined $uri;
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            croak $err;
+        }
 
-    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
-         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
-         $self->{_State_} = 1;
-         eval { $self->processXIncludes($result); };
-         my $err = $@;
-         $self->{_State_} = 0;
-         if ($err) {
-             $result = undef;
-             croak $err;
-         }
-     }
+        $result = $self->_auto_expand( $result, $self->{XML_LIBXML_BASE_URI} );
+    }
 
     return $result;
 }
@@ -234,29 +256,24 @@ sub parse_fh {
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
-    eval {
-        $result = $self->_parse_fh( @_ );
-    };
-    my $err = $@;
-    $self->{_State_} = 0;
-    if ($err) {
-        croak $err;
-    }
-
-    my $uri = $self->{XML_LIBXML_BASE_URI} ;
-    $result->setBaseURI( $uri ) if defined $uri;
-
-    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
-         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
-         $self->{_State_} = 1;
-         eval { $self->processXIncludes($result); };
-         my $err = $@;
-         $self->{_State_} = 0;
-         if ($err) {
-            $result = undef;
+    if ( defined $self->{SAX} ) {
+        eval { $self->_parse_sax_fh( @_ );  };
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
             croak $err;
-         }
-     }
+        }
+    }
+    else {
+        eval { $result = $self->_parse_fh( @_ ); };
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            croak $err;
+        }
+
+        $result = $self->_auto_expand( $result,, $self->{XML_LIBXML_BASE_URI} );
+    }
 
     return $result;
 }
@@ -266,30 +283,24 @@ sub parse_file {
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
-    eval {
-        $result = $self->_parse_file(@_);
-    };
-    my $err = $@;
-    $self->{_State_} = 0;
-    if ($err) {
-        croak $err;
+    if ( defined $self->{SAX} ) {
+        eval { $self->_parse_sax_file( @_ );  };
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            croak $err;
+        }
     }
+    else {
+        eval { $result = $self->_parse_file(@_); };
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            croak $err;
+        }
 
-    # files will not get a base dir, since they are based by their
-    # filename.
-
-    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
-         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
-
-         $self->{_State_} = 1;
-         eval { $self->processXIncludes($result); };
-         my $err = $@;
-         $self->{_State_} = 0;
-         if ($err) {
-             $result = undef;
-             croak $err;
-         }
-     }
+        $result = $self->_auto_expand( $result );
+    }
 
     return $result;
 }
@@ -306,10 +317,13 @@ sub parse_xml_chunk {
     }
 
     $self->{_State_} = 1;
+    if ( defined $self->{SAX} ) {
+        eval { $result = $self->_parse_sax_xml_chunk( @_ ); };
+    }
+    else {
+        eval { $result = $self->_parse_xml_chunk( @_ ); };
+    }
 
-    eval {
-        $result = $self->_parse_xml_chunk( @_ );
-    };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
@@ -323,6 +337,59 @@ sub processXIncludes {
     my $self = shift;
     my $doc = shift;
     return $self->_processXIncludes($doc || " ");
+}
+
+sub init_push {
+    my $self = shift;
+
+    if ( defined $self->{CONTEXT} ) {
+        delete $self->{COMTEXT};
+    }
+
+    if ( defined $self->{SAX} ) {
+        $self->{CONTEXT} = $self->_start_push(1);
+    }
+    else {
+        $self->{CONTEXT} = $self->_start_push(0);
+    }
+}
+
+
+sub push {
+    my $self = shift;
+
+    if ( not defined $self->{CONTEXT} ) {
+        if ( defined $self->{SAX} ) {
+            $self->{CONTEXT} = $self->_start_push(1);
+        }
+        else {
+            $self->{CONTEXT} = $self->_start_push(0);
+        }
+    }
+
+    foreach ( @_ ) {
+        $self->_push( $self->{CONTEXT}, $_ );
+    }
+}
+
+sub finish_push {
+    my $self = shift;
+    my $restore = shift || 0;
+    return undef unless defined $self->{CONTEXT};
+
+    my $retval;
+
+    if ( defined $self->{SAX} ) {
+        eval { $retval = $self->_end_sax_push( $self->{CONTEXT} ); };
+    }
+    else {
+        eval { $retval = $self->_end_push( $self->{CONTEXT}, $restore ); };
+    }
+    delete $self->{CONTEXT};
+    if ( $@ ) {
+        croak( $@ );
+    }
+    return $retval;
 }
 
 sub __read {
@@ -436,6 +503,11 @@ sub toString {
     }
 
     return $retval;
+}
+
+sub process_xinclude {
+    my $self = shift;
+    XML::LibXML->new->processXIncludes( $self );
 }
 
 1;
@@ -763,6 +835,57 @@ sub removeNamedItemNS {
 
 1;
 
+package XML::LibXML::_SAXParser;
+
+# this is pseudo class!!!
+
+sub start_document {
+    my $parser = shift;
+    warn "start DOCUMENT!";
+}
+
+sub xml_decl {
+    my ( $parser, $version, $encoding ) = @_;
+    warn "xml declaration $version, $encoding\n";
+}
+
+sub end_document {
+    my $parser = shift;
+    warn "end DOCUMENT!";
+}
+
+sub start_element {
+    my ( $parser, $name, %attrs ) = @_;
+    warn "start ELEMENT $name!";
+    warn "   " . join " ", map { $_ . "=\"".$attrs{$_}."\"" } keys %attrs ;
+}
+
+sub end_element {
+    my ( $parser, $name ) = @_;
+    warn "end ELEMENT $name!";
+}
+
+sub characters {
+    my ( $parser, $data ) = @_;
+    warn "characters '$data'\n";
+}
+
+sub comment {
+    my ( $parser, $data ) = @_;
+    warn "comment '$data'\n";
+}
+
+sub cdata_block {
+    my ( $parser, $data ) = @_;
+    warn "cdata '$data'\n";
+}
+
+sub processing_instruction {
+    my ( $parser, $target, $data ) = @_;
+    warn "processing instruction '$target' -> '$data'\n";
+}
+
+1;
 __END__
 
 =head1 NAME
@@ -960,6 +1083,60 @@ should to be used for the XInclude as well.
 
 If expand_xincludes is set to 1, the method is only required to process
 XIncludes appended to the DOM after its original parsing.
+
+=head1 PUSH PARSER
+
+XML::LibXML supports also a push parser interface. This allows one to
+parse large documents without actually loading the entire document
+into memory.
+
+The interface is devided into two parts:
+
+=over 4
+
+=item * pushing the data into the parser
+
+=item * finish the parse
+
+=back
+
+The user has no chance to access the document while still pushing the
+data to the parser. The resulting document will be returned when the
+parser is told to finish the parsing process.
+
+=over 4
+
+=item $parser->push( @data )
+
+This function pushs the data stored inside the array to libxml2's
+parse. Each entry in @data must be a normal scalar!
+
+=item $parser->finish( $restore );
+
+This function returns the result of the parsing process. If this
+function is called without a parameter it will complain about non
+wellformed documents. If $restore is 1, the push parser can be used to
+restore broken or non well formed (XML) documents as the following
+example shows:
+
+  $parser->push( "<foo>", "bar" );
+  eval { $doc = $parser->finish; };      # will complain
+  if ( $@ ) {
+     # ...
+  }
+
+This can be anoing if the closing tag misses by accident. The
+following code will restore the document:
+
+  $parser->push( "<foo>", "bar" );
+  eval { $doc = $parser->finish(1); };      # will not complain
+
+  warn $doc->toString(); # returns "<foo>bar</foo>"
+
+of course finish() will return nothing if there was no data pushed to
+the parser before.
+
+=back
 
 =head1 SERIALIZATION
 

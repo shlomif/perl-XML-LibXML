@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+1.50
+   - push parser interface
+   - basic native libxml2 SAX interface
+   - XML::LibXML::Document::process_xincludes reintroduced
+   - code cleanings
+   - more documentation
+
 1.49
    - memory management has been completely rewritten.
         now the module should not cause that many memory leaks 
