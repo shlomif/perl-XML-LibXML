@@ -1,5 +1,5 @@
 <module name="XML::LibXML">
-    <version>1.41</version>
+    <version>1.49</version>
     <authors>
         <author>Matt Sergeant</author>
         <author>Christian Glahn</author>
@@ -19,8 +19,27 @@
                 XML::LibXML's DOM implementation tries to follow the
                 various DOM specs although not all interfaces are
                 implemented yet. Also there some efford is taken to
-                also to follow the XPath DOM extensions.
+                also to follow the XPath DOM extensions. There are 
+                many functions that are specified for DOM and already 
+		present in XML::LibXML's DOM API, but still not 
+                documented.
             </p>
+            <p>
+		Although XML::LibXML provides the more important interfaces 
+                to node structures, there are not all node types implemented 
+                (yet). The more common functions are provided by 
+                XML::LibXML::Node, so it should be possible to access most 
+		parts of the document. Since XML::LibXML wraps only the 
+		document structure provided by libxml2, XML::LibXML::Node 
+		will not work properly with nodes found in a DTD, since they
+		are not nodes in context of libxml2. 
+            </p>
+            <p>
+                Besides that XML::LibXML's DOM Api should provide
+                a more perlish interface to the DOM structure libxml2 
+                generates. 
+            </p>
+
         </description>
     </package>
     <package name="XML::LibXML::Document">
@@ -51,6 +70,10 @@
                 textnode with an iso encoded string is created
                 (e.g. with $CLASS->new()), the <em>toString</em>
                 function may not return the expected result.
+            </p>
+            <p><st>NOTE:</st> XML::LibXML magic encoding may not work 
+               on all plattforms. Some platforms are known to have a broken
+               iconv(), which is partly used by libxml2.
             </p>
             <p>
                 This seems like a limitation as long UTF8 encoding is
@@ -274,6 +297,13 @@
                     not be copied, but removed from the original
                     document.
                 </p>
+                <p>
+		<st>NOTE:</st> Don't try to use importNode() to import 
+		subtrees that contain an entity reference - even if 
+		the entity reference is the root node of the subtree. 
+		This will cause serious problems to your program. This is
+		a limitation of libxml2 and not of XML::LibXML itself.
+		</p>
             </method>
 
         </description>
@@ -328,12 +358,20 @@
                 </p>
             </method>
 
+            <method name="isSameNode"
+                    synopsis="$bool = $node->isSameNode( $other_node );">
+                <p>
+                    returns TRUE (1) if the given nodes refer to the same
+                    nodestructure, otherwise FALSE (0) is returned.
+                </p>
+            </method>
             <method name="isEqual"
                     synopsis="$bool = $node->isEqual( $other_node );">
                 <p>
-                    returns TRUE (1) if documents refer to the same
-                    nodestructure, otherwise FALSE (0) is returned.
+                   depraced version of isSameNode().
                 </p>
+		<p><st>NOTE</st> isEqual will change behaviour to 
+		   follow the DOM specification</p>
             </method>
 
             <method name="getData" synopsis="$content = $node->getData()">
@@ -401,6 +439,14 @@
                     imported first.
                 </p>
             </method>
+            <method name="replaceNode" synopsis="$node->replaceNode($newNode);">
+		<p>
+		    This function is very similar to replaceChild(), but it 
+		    replaces the node itself rather than a childnode. This is 
+		    useful if a node found by any XPath function, should be 
+                    replaced.
+		</p>
+            </method>
 
             <method name="appendChild"
                     synopsis="$childnode = $node->appendChild( $childnode )">
@@ -415,6 +461,13 @@
                 </p>
             </method>
 
+            <method name="addSibling" synopsis="$node->addSibling($newNode);">
+                <p>
+		    addSibling() allows to add an additional node to the end of 
+                    a nodelist, defined by the given node.
+		</p>
+	    </method>
+
             <method name="cloneNode" 
                     synopsis="$newnode =$node->cloneNode( $deep )">
                 <p>
@@ -423,6 +476,13 @@
                     the function will copy all childnodes as well. If
                     $deep is 0 only the current node will be copied.
                 </p>
+            </method>
+            <method name="attributes" synopsis="@attrs =$node->attributes;">
+		<p>
+		    This function returns all attributes assigned to the 
+                    given node. if this function is called in scalar context, 
+		    it will return a XML::LibXML::NodeList.  
+		</p>
             </method>
 
             <method name="getParentNode" 
@@ -553,11 +613,6 @@
                     case, if the new node is not part of the document,
                     the node will be imported first.
                 </p>
-                <p>
-                    If $refNode is defined but is not a childnode of
-                    the current node, this function will fail. An
-                    undefined $newNode has no effect.
-                </p>
             </method>
 
             <method name="insertAfter"
@@ -567,11 +622,6 @@
                     <em>$refNode</em>. If <em>$refNode</em> is
                     undefined, the newNode will be set as the new last
                     child of the parent node.
-                </p>
-                <p>
-                    If $refNode is defined but is not a childnode of
-                    the current node, this function will fail. An
-                    undefined $newNode has no effect.
                 </p>
             </method>
 
@@ -623,6 +673,14 @@
             <method name="getChildnodes"
                     synopsis="@children = $node->getChildnodes();">
                 <p>
+                    Alias for <st>childNodes()</st>
+                </p>
+            
+            </method>
+
+            <method name="childNodes"
+                    synopsis="@childnodes = $node->childNodes;">
+                <p>
                     <st>getChildnodes</st> implements a more intuitive
                     interface to the childnodes of the current
                     node. It enables you to pass all children directly
@@ -630,14 +688,7 @@
                     function is called in scalar context, the number
                     of childnodes will be returned.
                 </p>
-            </method>
-
-            <method name="childNodes"
-                    synopsis="@childnodes = $node->childNodes;">
-                <p>
-                    Alias for <st>getChildnodes()</st>
-                </p>
-            </method>
+                </method>
 
             <method name="toString"
                     synopsis="$xmlstring = $node->toString();">
@@ -698,25 +749,12 @@
             </method>
 
 
-            <method name="getAttributes"
-                    synopsis="@attributelist = $node->getAttributes;">
-                <p>
-                    returns all attribute nodes of the current node. 
-                </p>
-            </method>
-
-            <method name="attributes"
-                    synopsis="@attributelist = $node->attributes;">
-                <p>
-                    Alias for <st>getAttributes()</st>
-                </p>
-            </method>
-
 
             <method name="getAttributesNS" 
                     synopsis="@attributelist = $node->attributesNS( $URI );">
                 <p>
                     returns all attributes for the given namespace.
+                    (not implemented yet)
                 </p>
             </method>
 
@@ -754,6 +792,15 @@
                     return value of the nodehandler while processing
                     the last child of the current node.
                 </p>
+            </method>
+
+            <method name="normalize" synopsis="$node->normalize">
+                 <p>
+                   This function normalizes adjacent textnodes. This
+                   function is not as strict as libxml2's
+                   xmlTextMerge() function, since it will not free a
+                   node that is still refered by the perl layer.
+                 </p>
             </method>
 
         </description>

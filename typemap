@@ -1,12 +1,7 @@
 TYPEMAP
 const char *                T_PV
-xmlDocPtr                   PROXY_OBJECT
-xmlNodePtr                  PROXY_OBJECT
-xmlNsPtr                    O_OBJECT
 xmlParserCtxtPtr            O_OBJECT
-xmlDtdPtr                   PROXY_OBJECT
 xmlNodeSetPtr               O_OBJECT
-ProxyObject *               O_OBJECT
 perlxmlParserObjectPtr      O_OBJECT
 
 
@@ -19,14 +14,6 @@ O_OBJECT
             XSRETURN_UNDEF;
     }
 
-PROXY_OBJECT
-    if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
-            $var = ($type)(((ProxyObject *)SvIV((SV*)SvRV( $arg )))->object);
-    else{
-            warn( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
-            XSRETURN_UNDEF;
-    }
-
 OUTPUT
 
 # The Perl object is blessed into 'CLASS', which should be a
@@ -34,6 +21,4 @@ OUTPUT
 O_OBJECT
         sv_setref_pv( $arg, (char *)CLASS, (void*)$var );
 
-PROXY_OBJECT
-        sv_setref_pv( $arg, (char *)CLASS, (void*)$var );
 

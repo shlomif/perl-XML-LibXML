@@ -1,5 +1,16 @@
 Revision history for Perl extension XML::LibXML
 
+1.49
+   - memory management has been completely rewritten.
+        now the module should not cause that many memory leaks 
+   - ownerDocument fixed
+   - parser validation bug fixed (reported by Erik Ray)
+   - made parse_xml_chunk() reporting errors
+   - DOM API is more Level 3 conform
+   - fixed the PI interface
+   - xpath.pl example 
+   - namespace fixes
+
 1.40
    - new parsefunction: $parser->parse_xml_chunk($string);
    - appendChild( $doc_fragment ) bug fixed

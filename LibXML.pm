@@ -8,11 +8,15 @@ use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
-$VERSION = "1.40";
+$VERSION = "1.49";
 require Exporter;
 require DynaLoader;
 
 @ISA = qw(DynaLoader Exporter);
+
+$XML::LibXML::skipDTD            = 0;
+$XML::LibXML::skipXMLDeclaration = 0;
+$XML::LibXML::setTagCompression  = 0;
 
 bootstrap XML::LibXML $VERSION;
 
@@ -95,12 +99,10 @@ bootstrap XML::LibXML $VERSION;
                                )],
                );
 
-
 sub new {
     my $class = shift;
     my %options = @_;
     my $self = bless \%options, $class;
-
     return $self;
 }
 
@@ -182,19 +184,48 @@ sub expand_xinclude  {
     return $self->{XML_LIBXML_EXPAND_XINCLUDE};
 }
 
+sub base_uri {
+    my $self = shift;
+    $self->{XML_LIBXML_BASE_URI} = shift if scalar @_;
+    return $self->{XML_LIBXML_BASE_URI};
+}
+
 sub parse_string {
     my $self = shift;
     croak("parse already in progress") if $self->{_State_};
+
+    unless ( defined $_[0] and length $_[0] ) {
+        croak("Empty String");
+    }
+
     $self->{_State_} = 1;
     my $result;
+
     eval {
         $result = $self->_parse_string( @_ );
     };
+
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
         croak $err;
     }
+
+    my $uri = $self->{XML_LIBXML_BASE_URI};
+    $result->setBaseURI( $uri ) if defined $uri;
+
+    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
+         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
+         $self->{_State_} = 1;
+         eval { $self->processXIncludes($result); };
+         my $err = $@;
+         $self->{_State_} = 0;
+         if ($err) {
+             $result = undef;
+             croak $err;
+         }
+     }
+
     return $result;
 }
 
@@ -211,6 +242,22 @@ sub parse_fh {
     if ($err) {
         croak $err;
     }
+
+    my $uri = $self->{XML_LIBXML_BASE_URI} ;
+    $result->setBaseURI( $uri ) if defined $uri;
+
+    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
+         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
+         $self->{_State_} = 1;
+         eval { $self->processXIncludes($result); };
+         my $err = $@;
+         $self->{_State_} = 0;
+         if ($err) {
+            $result = undef;
+            croak $err;
+         }
+     }
+
     return $result;
 }
 
@@ -227,6 +274,23 @@ sub parse_file {
     if ($err) {
         croak $err;
     }
+
+    # files will not get a base dir, since they are based by their
+    # filename.
+
+    if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
+         and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
+
+         $self->{_State_} = 1;
+         eval { $self->processXIncludes($result); };
+         my $err = $@;
+         $self->{_State_} = 0;
+         if ($err) {
+             $result = undef;
+             croak $err;
+         }
+     }
+
     return $result;
 }
 
@@ -235,9 +299,14 @@ sub parse_xml_chunk {
     # max 2 parameter:
     # 1: the chunk
     # 2: the encoding of the string
-    croak("parse already in progress") if $self->{_State_};
+    croak("parse already in progress") if $self->{_State_};    my $result;
+
+    unless ( defined $_[0] and length $_[0] ) {
+        croak("Empty String");
+    }
+
     $self->{_State_} = 1;
-    my $result;
+
     eval {
         $result = $self->_parse_xml_chunk( @_ );
     };
@@ -246,26 +315,53 @@ sub parse_xml_chunk {
     if ($err) {
         croak $err;
     }
+
     return $result;
+}
+
+sub processXIncludes {
+    my $self = shift;
+    my $doc = shift;
+    return $self->_processXIncludes($doc || " ");
 }
 
 sub __read {
     read($_[0], $_[1], $_[2]);
 }
 
-@XML::LibXML::Document::ISA         = 'XML::LibXML::Node';
-@XML::LibXML::DocumentFragment::ISA = 'XML::LibXML::Node';
-@XML::LibXML::Element::ISA          = 'XML::LibXML::Node';
-@XML::LibXML::Text::ISA             = 'XML::LibXML::Node';
-@XML::LibXML::Comment::ISA          = 'XML::LibXML::Text';
-@XML::LibXML::CDATASection::ISA     = 'XML::LibXML::Text';
-@XML::LibXML::Attr::ISA             = 'XML::LibXML::Node';
-@XML::LibXML::DocumentFragment::ISA = 'XML::LibXML::Node';
-@XML::LibXML::Dtd::ISA              = 'XML::LibXML::Node';
-@XML::LibXML::PI::ISA               = 'XML::LibXML::Node';
+sub __write {
+    if ( ref( $_[0] ) ) {
+        $_[0]->write( $_[1], $_[2] );
+    }
+    else {
+        $_[0]->write( $_[1] );
+    }
+}
 
 
-sub XML::LibXML::Node::iterator {
+1;
+
+package XML::LibXML::Node;
+
+sub isSupported {
+    my $self    = shift;
+    my $feature = shift;
+    return $self->can($feature) ? 1 : 0;
+}
+
+sub childNodes {
+    my $self = shift;
+    my @children = $self->_childNodes();
+    return wantarray ? @children : XML::LibXML::NodeList->new( @children );
+}
+
+sub attributes {
+    my $self = shift;
+    my @attr = $self->_attributes();
+    return wantarray ? @attr : XML::LibXML::NamedNodeMap->new( @attr );
+}
+
+sub iterator {
     my $self = shift;
     my $funcref = shift;
     my $child = undef;
@@ -277,7 +373,7 @@ sub XML::LibXML::Node::iterator {
     return $rv;
 }
 
-sub XML::LibXML::Node::findnodes {
+sub findnodes {
     my ($node, $xpath) = @_;
     my @nodes = $node->_findnodes($xpath);
     if (wantarray) {
@@ -288,12 +384,12 @@ sub XML::LibXML::Node::findnodes {
     }
 }
 
-sub XML::LibXML::Node::findvalue {
+sub findvalue {
     my ($node, $xpath) = @_;
     return $node->find($xpath)->to_literal->value;
 }
 
-sub XML::LibXML::Node::find {
+sub find {
     my ($node, $xpath) = @_;
     my ($type, @params) = $node->_find($xpath);
     if ($type) {
@@ -302,44 +398,237 @@ sub XML::LibXML::Node::find {
     return undef;
 }
 
-sub XML::LibXML::Element::getElementsByTagName {
+1;
+
+package XML::LibXML::Document;
+
+use vars qw(@ISA);
+@ISA = 'XML::LibXML::Node';
+
+sub setDocumentElement {
+    my $doc = shift;
+    my $element = shift;
+
+    my $oldelem = $doc->documentElement;
+    if ( defined $oldelem ) {
+        $doc->removeChild($oldelem);
+    }
+
+    $doc->_setDocumentElement($element);
+}
+
+sub toString {
+    my $self = shift;
+    my $flag = shift;
+
+    my $retval = "";
+
+    if ( defined $XML::LibXML::skipXMLDeclaration
+         and $XML::LibXML::skipXMLDeclaration == 1 ) {
+        foreach ( $self->childNodes ){
+            next if $_->nodeType == XML::LibXML::XML_DTD_NODE()
+                    and $XML::LibXML::skipDTD;
+            $retval .= $_->toString;
+        }
+    }
+    else {
+        $retval =  $self->_toString($flag||0);
+    }
+
+    return $retval;
+}
+
+1;
+
+package XML::LibXML::DocumentFragment;
+
+use vars qw(@ISA);
+@ISA = ('XML::LibXML::Node');
+
+sub toString {
+    my $self = shift;
+    my $enc  = shift;
+    my $retval = "";
+    if ( $self->hasChildNodes() ) {
+        foreach my $n ( $self->childNodes() ) {
+            $retval .= $n->toString($enc);
+        }
+    }
+    return $retval;
+}
+
+1;
+
+package XML::LibXML::Element;
+
+use vars qw(@ISA);
+@ISA = ('XML::LibXML::Node');
+
+sub setNamespace {
+    my $self = shift;
+    my $n = $self->nodeName;
+    if ( $self->_setNamespace(@_) ){
+        if ( scalar @_ < 3 || $_[2] == 1 ){
+            $self->setNodeName( $n );
+        }
+        return 1;
+    }
+    return 0;
+}
+
+sub setAttribute {
+    my ( $self, $name, $value ) = @_;
+    if ( $name =~ /^xmlns/ ) {
+        # user wants to set a namespace ...
+
+        (my $lname = $name )=~s/^xmlns://;
+        my $nn = $self->nodeName;
+        if ( $nn =~ /^$lname\:/ ) {
+            $self->setNamespace($value, $lname);
+        }
+        else {
+            # use a ($active = 0) namespace
+            $self->setNamespace($value, $lname, 0);
+        }
+    }
+    else {
+        $self->_setAttribute($name, $value);
+    }
+}
+
+sub getElementsByTagName {
     my ( $node , $name ) = @_;
     my $xpath = "descendant::$name";
     my @nodes = $node->_findnodes($xpath);
-    if (wantarray) {
-        return @nodes;
-    }
-    else {
-        return XML::LibXML::NodeList->new(@nodes);
-    }
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
-sub XML::LibXML::Element::getElementsByTagNameNS {
+sub  getElementsByTagNameNS {
     my ( $node, $nsURI, $name ) = @_;
     my $xpath = "descendant::*[local-name()='$name' and namespace-uri()='$nsURI']";
-        my @nodes = $node->_findnodes($xpath);
-    if (wantarray) {
-        return @nodes;
-    }
-    else {
-        return XML::LibXML::NodeList->new(@nodes);
-    }
+    my @nodes = $node->_findnodes($xpath);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
-sub XML::LibXML::Element::getElementsByLocalName {
+sub getElementsByLocalName {
     my ( $node,$name ) = @_;
     my $xpath = "descendant::*[local-name()='$name']";
         my @nodes = $node->_findnodes($xpath);
-    if (wantarray) {
-        return @nodes;
-    }
-    else {
-        return XML::LibXML::NodeList->new(@nodes);
-    }
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
+sub getChildrenByTagName {
+    my ( $node, $name ) = @_;
+    my @nodes = grep { $_->nodeName eq $name } $node->childNodes();
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
 
-sub XML::LibXML::PI::setData {
+sub appendWellBalancedChunk {
+    my ( $self, $chunk ) = @_;
+
+    my $local_parser = XML::LibXML->new();
+    my $frag = $local_parser->parse_xml_chunk( $chunk );
+
+    $self->appendChild( $frag );
+}
+
+1;
+
+package XML::LibXML::Text;
+
+use vars qw(@ISA);
+@ISA = ('XML::LibXML::Node');
+
+sub attributes { return undef; }
+
+sub deleteDataString {
+    my $node = shift;
+    my $string = shift;
+    my $all    = shift;
+    my $data = $node->nodeValue();
+    $string =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\\$1/g;
+    if ( $all ) {
+        $data =~ s/$string//g;
+    }
+    else {
+        $data =~ s/$string//;
+    }
+    $node->setData( $data );
+}
+
+sub replaceDataString {
+    my ( $node, $left, $right,$all ) = @_;
+
+    #ashure we exchange the strings and not expressions!
+    $left  =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\\$1/g;
+    my $datastr = $node->nodeValue();
+    if ( $all ) {
+        $datastr =~ s/$left/$right/g;
+    }
+    else{
+        $datastr =~ s/$left/$right/;
+    }
+    $node->setData( $datastr );
+}
+
+sub replaceDataRegEx {
+    my ( $node, $leftre, $rightre, $flags ) = @_;
+    return unless defined $leftre;
+    $rightre ||= "";
+
+    my $datastr = $node->nodeValue();
+    my $restr   = "s/" . $leftre . "/" . $rightre . "/";
+    $restr .= $flags if defined $flags;
+
+    eval '$datastr =~ '. $restr;
+
+    $node->setData( $datastr );
+}
+
+1;
+
+package XML::LibXML::Comment;
+
+use vars qw(@ISA);
+@ISA = ('XML::LibXML::Text');
+
+1;
+
+package XML::LibXML::CDATASection;
+
+use vars qw(@ISA);
+@ISA     = ('XML::LibXML::Text');
+
+1;
+
+package XML::LibXML::Attr;
+use vars qw( @ISA ) ;
+@ISA = ('XML::LibXML::Node') ;
+
+sub setNamespace {
+    my ($self,$href,$prefix) = @_;
+    my $n = $self->nodeName;
+    if ( $self->_setNamespace($href,$prefix) ) {
+        $self->setNodeName($n);
+        return 1;
+    }
+
+    return 0;
+}
+
+1;
+
+package XML::LibXML::Dtd;
+use vars qw( @ISA );
+@ISA = ('XML::LibXML::Node');
+
+1;
+
+package XML::LibXML::PI;
+use vars qw( @ISA );
+@ISA = ('XML::LibXML::Node');
+
+sub setData {
     my $pi = shift;
 
     my $string = "";
@@ -355,60 +644,125 @@ sub XML::LibXML::PI::setData {
     $pi->_setData( $string ) unless  $string =~ /\?>/;
 }
 
-sub XML::LibXML::Text::deleteDataString {
-    my $node = shift;
-    my $string = shift;
-    my $all    = shift;
-    my $data = $node->getData();
-    $string =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
-    if ( $all ) {
-        $data =~ s/$string//g;
-    }
-    else {
-        $data =~ s/$string//;
-    }
-    $node->setData( $data );
-}
-sub XML::LibXML::Text::replaceDataString {
-    my ( $node, $left, $right,$all ) = @_;
+1;
 
-    #ashure we exchange the strings and not expressions!
-    $left  =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
-    $right =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
-    my $datastr = $node->getData();
-    if ( $all ) {
-        $datastr =~ s/$left/$right/g;
-    }
-    else{
-        $datastr =~ s/$left/$right/;
-    }
-    $node->setData( $datastr );
-}
+package XML::LibXML::Namespace;
 
-sub XML::LibXML::Text::replaceDataRegEx {
-    my ( $node, $leftre, $rightre, $flags ) = @_;
-    return unless defined $leftre;
-    $rightre ||= "";
+# this is infact not a node!
+sub prefix { return "xmlns"; }
 
-    my $datastr = $node->getData();
-    my $restr   = "s/" . $leftre . "/" . $rightre . "/";
-    $restr .= $flags if defined $flags;
-
-    eval '$datastr =~ '. $restr;
-
-    $node->setData( $datastr );
-}
-
-sub XML::LibXML::DocumentFragment::toString {
+sub nodeName {
     my $self = shift;
-    my $enc  = shift;
-    if ( $self->hasChildNodes() ) {
-        return join( "", grep {defined $_} map( {$_->toString($enc)}  $self->childNodes() ) );
+    my $nsP  = $self->name;
+    return length($nsP) ? "xmlns:$nsP" : "xmlns";
+}
+
+sub isEqualNode {
+    my ( $self, $ref ) = @_;
+    if ( ref($ref) eq "XML::LibXML::Namespace" ) {
+        return $self->_isEqual($ref);
     }
-    return "";
+    return 0;
+}
+
+sub isSameNode {
+    my ( $self, $ref ) = @_;
+    if ( $$self == $$ref ){
+        return 1;
+    }
+    return 0;
 }
 
 1;
+
+package XML::LibXML::NamedNodeMap;
+
+sub new {
+    my $class = shift;
+    my $self = bless { Nodes => [@_] }, $class;
+    $self->{NodeMap} = { map { $_->nodeName => $_ } @_ };
+    return $self;
+}
+
+sub length     { return scalar( @{$_[0]->{Nodes}} ); }
+sub nodes      { return $_[0]->{Nodes}; }
+sub item       { $_[0]->{Nodes}->[$_[1]]; }
+
+sub getNamedItem {
+    my $self = shift;
+    my $name = shift;
+
+    return $self->{NodeMap}->{$name};
+}
+
+sub setNamedItem {
+    my $self = shift;
+    my $node = shift;
+
+    my $retval;
+    if ( defined $node ) {
+        if ( scalar @{$self->{Nodes}} ) {
+            my $name = $node->nodeName();
+            if ( $name =~ /^xmlns/ ) {
+                warn "not done yet\n";
+            }
+            elsif ( exists $self->{NodeMap}->{$name} ) {
+                $retval = $self->{NodeMap}->{$name}->replaceNode( $node );
+            }
+            else {
+                $self->{Nodes}->[0]->addSibling($node);
+            }
+            $self->{NodeMap}->{$name} = $node;
+            push @{$self->{Nodes}}, $node;
+        }
+        else {
+            # not done yet
+            # can this be properly be done???
+        }
+    }
+    return $retval;
+}
+
+sub removeNamedItem {
+    my $self = shift;
+    my $name = shift;
+    my $retval;
+    if ( $name =~ /^xmlns/ ) {
+        warn "not done yet\n";
+    }
+    elsif ( exists $self->{NodeMap}->{$name} ) {
+        $retval = $self->{NodeMap}->{$name};
+        $retval->unbindNode;
+        delete $self->{NodeMap}->{$name};
+        $self->{Nodes} = [grep {not($retval->isSameNode($_))} @{$self->{Nodes}}];
+    }
+
+    return $retval;
+}
+
+sub getNamedItemNS {
+    my $self = shift;
+    my $nsURI = shift;
+    my $name = shift;
+    return undef;
+}
+
+sub setNamedItemNS {
+    my $self = shift;
+    my $nsURI = shift;
+    my $node = shift;
+    return undef;
+}
+
+sub removeNamedItemNS {
+    my $self = shift;
+    my $nsURI = shift;
+    my $name = shift;
+    return undef;
+}
+
+1;
+
 __END__
 
 =head1 NAME
@@ -607,6 +961,43 @@ should to be used for the XInclude as well.
 If expand_xincludes is set to 1, the method is only required to process
 XIncludes appended to the DOM after its original parsing.
 
+=head1 SERIALIZATION
+
+The oposite of parsing is serialization. In XML::LibXML this can be
+done by using the functions toString(), toFile() and toFH(). All
+serialization functions understand the flag setTagCompression. if this
+Flag is set to 1 empty tags are displayed as <foo></foo>
+rather than <foo/>.
+
+toString() additionally checks two other flags:
+
+skipDTD and skipXMLDeclaration
+
+If skipDTD is specified and any DTD node is found in the document this
+will not be serialized.
+
+If skipXMLDeclaration is set to 1 the documents xml declaration is not
+serialized. This flag will cause the document to be serialized as UTF8
+even if the document has an other encoding specified.
+
+XML::LibXML does not define these flags itself, therefore they have to
+specify them manually by the caller:
+
+ local $XML::LibXML::skipXMLDeclaration = 1;
+ local $XML::LibXML::skipDTD = 1;
+ local $XML::LibXML::setTagCompression = 1;
+
+will cause the serializer to avoid the XML declaration for a document,
+skip the DTD if found, and expand empty tags.
+
+*NOTE* $XML::LibXML::skipXMLDeclaration and $XML::LibXML::skipDTD are
+only recognized by the Documents toString() function.
+
+Additionally it is possible to serialize single nodes by using
+toString() for the node. Since a node has no DTD and no XML
+Declaration the related flags will take no effect. Nevertheless
+setTagCompression is supported.
+
 =head1 XML::LibXML::Document
 
 The objects returned above have a few methods available to them:
@@ -629,6 +1020,7 @@ L<"XML::LibXML::Dtd">.
 
 Process any xinclude tags in the file. (currently using B<only> libxml2's
 default callbacks)
+
 
 =head1 XML::LibXML::Dtd
 
@@ -843,7 +1235,7 @@ Copyright 2001, AxKit.com Ltd. All rights reserved.
 
 =head1 SEE ALSO
 
-L<XML::LibXSLT>, L<XML::LibXML::Document>,
+L<XML::LibXSLT>, L<XML::LibXML::DOM>, L<XML::LibXML::Document>,
 L<XML::LibXML::Element>, L<XML::LibXML::Node>,
 L<XML::LibXML::Text>, L<XML::LibXML::Comment>,
 L<XML::LibXML::CDATASection>, L<XML::LibXML::Attribute>

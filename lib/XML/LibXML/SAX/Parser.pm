@@ -20,31 +20,20 @@ sub _parse_characterstream {
 sub _parse_bytestream {
     my ($self, $fh, $options) = @_;
     my $parser = XML::LibXML->new();
-    if (exists($options->{Source}{SystemId})) {
-        $self->{SystemId} = $options->{Source}{SystemId};
-        $self->generate($parser->parse_fh($fh, $self->{SystemId}));
-    }
-    else {
-        $self->generate($parser->parse_fh($fh));
-    }
+    my $doc = exists($options->{Source}{SystemId}) ? $parser->parse_fh($fh, $options->{Source}{SystemId}) : $parser->parse_fh($fh);
+    $self->generate($doc);
 }
 
 sub _parse_string {
     my ($self, $str, $options) = @_;
     my $parser = XML::LibXML->new();
-    if (exists($options->{Source}{SystemId})) {
-        $self->{SystemId} = $options->{Source}{SystemId};
-        $self->generate($parser->parse_string($str, $self->{SystemId}));
-    }
-    else {
-        $self->generate($parser->parse_string($str));
-    }
+    my $doc = exists($options->{Source}{SystemId}) ? $parser->parse_string($str, $options->{Source}{SystemId}) : $parser->parse_string($str);
+    $self->generate($doc);
 }
 
 sub _parse_systemid {
     my ($self, $sysid, $options) = @_;
     my $parser = XML::LibXML->new();
-    $self->{SystemId} = $sysid;
     my $doc = $parser->parse_file($sysid);
     $self->generate($doc);
 }
@@ -53,17 +42,7 @@ sub generate {
     my $self = shift;
     my ($node) = @_;
 
-    if ( $node->getType() == XML_DOCUMENT_NODE ||
-    	$node->getType() == XML_HTML_DOCUMENT_NODE ||
-        $node->getType() == XML_DOCUMENT_FRAG_NODE ) {
-        $self->set_document_locator(
-            {
-                SystemId => $self->{SystemId},
-                PublicId => '',
-                LineNumber => 0,
-                ColumnNumber => 0,
-            }
-        );
+    if ( $node->getType() == XML_DOCUMENT_NODE ) {
         $self->start_document({});
         $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
         $self->process_node($node);
@@ -80,7 +59,7 @@ sub process_node {
     }
     elsif ($node_type == XML_TEXT_NODE || $node_type == XML_CDATA_SECTION_NODE) {
         # warn($node->getData . "\n");
-        $self->characters( { Data => $node->getData } );
+        $self->characters( { Data => $node->nodeValue } );
     }
     elsif ($node_type == XML_ELEMENT_NODE) {
         # warn("<" . $node->getName . ">\n");
@@ -95,7 +74,6 @@ sub process_node {
     }
 #    elsif ($node_type == XML_DOCUMENT_NODE) {
     elsif ($node_type == XML_DOCUMENT_NODE
-           || $node_type == XML_HTML_DOCUMENT_NODE
            || $node_type == XML_DOCUMENT_FRAG_NODE) {
         # some times it is just usefull to generate SAX events from
         # a document fragment (very good with filters).
@@ -120,43 +98,43 @@ sub process_element {
     my $attribs = {};
     my @ns_maps;
 
-    foreach my $attr ($element->getAttributes) {
+    foreach my $attr ($element->attributes) {
         my $key;
         # warn("Attr: $attr -> ", $attr->getName, " = ", $attr->getData, "\n");
         if ($attr->isa('XML::LibXML::Namespace')) {
             # TODO This needs fixing modulo agreeing on what
             # is the right thing to do here.
             my ($localname, $p);
-            if (my $prefix = $attr->getLocalName) {
-                $key = "{" . $attr->getNamespaceURI . "}" . $prefix;
+            if (my $prefix = $attr->prefix) {
+                $key = "{" . $attr->href . "}" . $prefix;
                 $localname = $prefix;
                 $p = "xmlns";
             }
             else {
-                $key = $attr->getName;
+                $key = $attr->name;
                 $localname = $key;
                 $p = '';
             }
             $attribs->{$key} =
                 {
-                    Name => $attr->getName,
-                    Value => $attr->getData,
-                    NamespaceURI => $attr->getNamespaceURI,
+                    Name => $attr->prefix,
+                    Value => $attr->href,
+                    NamespaceURI => $attr->href,
                     Prefix => $p,
                     LocalName => $localname,
                 };
             push @ns_maps, $attribs->{$key};
         }
         else {
-            my $ns = $attr->getNamespaceURI || '';
-            $key = "{$ns}".$attr->getLocalName;
+            my $ns = $attr->namespaceURI || '';
+            $key = "{$ns}".$attr->localname;
             $attribs->{$key} =
                 {
-                    Name => $attr->getName,
-                    Value => $attr->getData,
-                    NamespaceURI => $attr->getNamespaceURI,
-                    Prefix => $attr->getPrefix,
-                    LocalName => $attr->getLocalName,
+                    Name => $attr->name,
+                    Value => $attr->value,
+                    NamespaceURI => $attr->namespaceURI,
+                    Prefix => $attr->prefix,
+                    LocalName => $attr->localname,
                 };
         }
         # use Data::Dumper;
@@ -164,11 +142,11 @@ sub process_element {
     }
 
     my $node = {
-        Name => $element->getName,
+        Name => $element->nodeName,
         Attributes => $attribs,
-        NamespaceURI => $element->getNamespaceURI,
-        Prefix => $element->getPrefix,
-        LocalName => $element->getLocalName,
+        NamespaceURI => $element->namespaceURI,
+        Prefix => $element->prefix,
+        LocalName => $element->localname,
     };
 
     foreach my $ns (@ns_maps) {

@@ -1,4 +1,5 @@
 <!DOCTYPE doc [
 <!ELEMENT doc (#PCDATA)>
+<!ENTITY foo " test ">
 ]>
 <doc>This is a valid document !</doc>

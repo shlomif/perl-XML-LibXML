@@ -58,6 +58,8 @@ sub handle_package {
 
     # open traget file
     my $fn = $node->getAttribute("name") . ".pod";
+    $fn =~ s/^XML::LibXML::// if $target_dir =~ /XML\/LibXML\//;
+
     open(OSTDOUT , ">&STDOUT");
     open(STDOUT,"> $target_dir/$fn")|| die "cannot create file $fn ($!)";
 

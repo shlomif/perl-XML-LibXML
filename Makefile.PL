@@ -18,7 +18,7 @@ my $DEBUG = delete $config{DEBUG};
 
 # $config{DEFINE} .= " -DXS_WARNINGS";
 
-if ( $] > 5.006 ) {
+if ( $] >= 5.006 ) {
 # if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
     warn "enable native perl UTF8\n";
 
@@ -113,7 +113,7 @@ sub MY::manifypods {
     $str .= <<EOF;
 
 docs : pure_all
-\t\@$^X -Iblib/arch -Iblib/lib example/xml2pod.pl example/libxml.xml lib
+\t\@$^X -Iblib/arch -Iblib/lib example/xml2pod.pl example/libxml.xml lib/XML/LibXML/
 \t\@$^X -pi.old -e 's/a/a/' Makefile.PL
 \t\@echo "==> YOU MUST NOW RE-RUN $^X Makefile.PL <=="
 \t\@false

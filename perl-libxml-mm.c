@@ -12,6 +12,9 @@
 extern "C" {
 #endif
 
+#include <stdarg.h>
+#include <stdlib.h>
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -30,12 +33,340 @@ extern "C" {
 #define xs_warn(string)
 #endif
 
-struct _ProxyObject {
-    void * object;
-    SV * extra;
+/*
+ * @node: Reference to the node the structure proxies
+ * @owner: libxml defines only the document, but not the node owner
+ *         (in case of document fragments, they are not the same!)
+ * @count: this is the internal reference count!
+ *
+ * Since XML::LibXML will not know, is a certain node is already
+ * defined in the perl layer, it can't shurely tell when a node can be
+ * safely be removed from the memory. This structure helps to keep
+ * track how intense the nodes of a document are used and will not
+ * delete the nodes unless they are not refered from somewhere else.
+ */
+struct _ProxyNode {
+    xmlNodePtr node;
+    xmlNodePtr owner;
+    int count;
 };
 
-typedef struct _ProxyObject ProxyObject;
+/* helper type for the proxy structure */
+typedef struct _ProxyNode ProxyNode;
+
+/* pointer to the proxy structure */
+typedef ProxyNode* ProxyNodePtr;
+
+/* this my go only into the header used by the xs */
+#define SvPROXYNODE(x) ((ProxyNodePtr)SvIV(SvRV(x)))
+#define SvNAMESPACE(x) ((xmlNsPtr)SvIV(SvRV(x)))
+
+#define PmmREFCNT(node)      node->count
+#define PmmREFCNT_inc(node)  node->count++
+#define PmmNODE(thenode)     thenode->node
+#define PmmOWNER(node)       node->owner
+#define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
+
+/* creates a new proxy node from a given node. this function is aware
+ * about the fact that a node may already has a proxy structure.
+ */
+ProxyNodePtr
+PmmNewNode(xmlNodePtr node)
+{
+    ProxyNodePtr proxy;
+
+    if ( node->_private == NULL ) {
+        proxy = (ProxyNodePtr)malloc(sizeof(ProxyNode));
+        // proxy = (ProxyNodePtr)Newz(0, proxy, 0, ProxyNode);
+        if (proxy != NULL) {
+            proxy->node  = node;
+            proxy->owner   = NULL;
+            proxy->count   = 0;
+            node->_private = (void*) proxy;
+        }
+    }
+    else {
+        proxy = (ProxyNodePtr)node->_private;
+    }
+    return proxy;
+}
+
+ProxyNodePtr
+PmmNewFragment(xmlDocPtr doc) 
+{
+    ProxyNodePtr retval;
+    xmlNodePtr frag = NULL;
+
+    xs_warn("new frag\n");
+    frag   = xmlNewDocFragment( doc );
+    retval = PmmNewNode(frag);
+
+    if ( doc ) {
+        xs_warn("inc document\n");
+        PmmREFCNT_inc(((ProxyNodePtr)doc->_private));
+        retval->owner = (xmlNodePtr)doc;
+    }
+
+    return retval;
+}
+
+/* frees the node if nessecary. this method is aware, that libxml2
+ * has several diffrent nodetypes.
+ */
+void
+PmmFreeNode( xmlNodePtr node )
+{
+    switch( node->type ) {
+    case XML_DOCUMENT_NODE:
+    case XML_HTML_DOCUMENT_NODE:
+        xs_warn("XML_DOCUMENT_NODE\n");
+        xmlFreeDoc( (xmlDocPtr) node );
+        break;
+    case XML_ATTRIBUTE_NODE:
+        xs_warn("XML_ATTRIBUTE_NODE\n");
+        if ( node->parent == NULL ) {
+            xs_warn( "free node\n");
+            node->ns = NULL;
+            xmlFreeProp( (xmlAttrPtr) node );
+        }
+        break;
+    case XML_DTD_NODE:
+        if ( node->doc ) {
+            if ( node->doc->extSubset != (xmlDtdPtr)node 
+                 && node->doc->intSubset != (xmlDtdPtr)node ) {
+                xs_warn( "XML_DTD_NODE\n");
+                node->doc = NULL;
+                xmlFreeDtd( (xmlDtdPtr)node );
+            }
+        }
+        break;
+    case XML_DOCUMENT_FRAG_NODE:
+        xs_warn("XML_DOCUMENT_FRAG_NODE\n");
+    default:
+        xmlFreeNode( node);
+        break;
+    }
+}
+
+/* decrements the proxy counter. if the counter becomes zero or less,
+   this method will free the proxy node. If the node is part of a
+   subtree, PmmREFCNT_def will fix the reference counts and delete
+   the subtree if it is not required any more.
+ */
+int
+PmmREFCNT_dec( ProxyNodePtr node ) 
+{ 
+    xmlNodePtr libnode;
+    ProxyNodePtr owner; 
+    int retval = 0;
+    if ( node ) {
+        retval = PmmREFCNT(node)--;
+        if ( PmmREFCNT(node) <= 0 ) {
+            xs_warn( "NODE DELETATION\n" );
+            libnode = PmmNODE( node );
+            libnode->_private = NULL;
+            PmmNODE( node ) = NULL;
+            if ( PmmOWNER(node) && PmmOWNERPO(node) ) {
+                xs_warn( "DOC NODE!\n" );
+                owner = PmmOWNERPO(node);
+                PmmOWNER( node ) = NULL;
+                if ( libnode->parent == NULL ) {
+                    /* this is required if the node does not directly
+                     * belong to the document tree
+                     */
+                    xs_warn( "REAL DELETE" );
+                    PmmFreeNode( libnode );
+                }            
+                PmmREFCNT_dec( owner );
+            }
+            else {
+                xs_warn( "STANDALONE REAL DELETE" );
+                PmmFreeNode( libnode );
+            }
+            free( node );
+        }
+    }
+    return retval;
+}
+
+/* @node: the node that should be wrapped into a SV
+ * @owner: perl instance of the owner node (may be NULL)
+ *
+ * This function will create a real perl instance of a given node.
+ * the function is called directly by the XS layer, to generate a perl
+ * instance of the node. All node reference counts are updated within
+ * this function. Therefore this function returns a node that can
+ * directly be used as output.
+ *
+ * if @ower is NULL or undefined, the node is ment to be the root node
+ * of the tree. this node will later be used as an owner of other
+ * nodes.
+ */
+SV*
+PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner ) 
+{
+    ProxyNodePtr dfProxy= NULL;
+    SV * retval = &PL_sv_undef;
+    const char * CLASS = "XML::LibXML::Node";
+
+    if ( node != NULL ) {
+        /* find out about the class */
+        CLASS = domNodeTypeName( node );
+        xs_warn(" return new perl node\n");
+        xs_warn( CLASS );
+
+        if ( node->_private ) {
+            dfProxy = PmmNewNode(node);
+        }
+        else {
+            dfProxy = PmmNewNode(node);
+            if ( dfProxy != NULL ) {
+                if ( owner != NULL ) {
+                    dfProxy->owner = PmmNODE( owner );
+                    PmmREFCNT_inc( owner );
+                }
+                else {
+                   xs_warn("node contains himself");
+                }
+            }
+            else {
+                xs_warn("proxy creation failed!\n");
+            }
+        }
+
+        retval = NEWSV(0,0);
+        sv_setref_pv( retval, CLASS, (void*)dfProxy );
+        PmmREFCNT_inc(dfProxy);            
+    }         
+    else {
+        xs_warn( "no node found!" );
+    }
+
+    return retval;
+}
+
+/* extracts the libxml2 node from a perl reference
+ */
+xmlNodePtr
+PmmSvNode( SV* perlnode ) 
+{
+    xmlNodePtr retval = NULL;
+
+    if ( perlnode != NULL
+         && perlnode != &PL_sv_undef
+         && sv_derived_from(perlnode, "XML::LibXML::Node")
+         && SvPROXYNODE(perlnode) != NULL  ) {
+        retval = PmmNODE( SvPROXYNODE(perlnode) ) ;
+    }
+
+    return retval;
+}
+
+
+/* extracts the libxml2 owner node from a perl reference
+ */
+xmlNodePtr
+PmmSvOwner( SV* perlnode ) 
+{
+    xmlNodePtr retval = NULL;
+    if ( perlnode != NULL
+         && perlnode != &PL_sv_undef
+         && SvPROXYNODE(perlnode) != NULL  ) {
+        retval = PmmOWNER( SvPROXYNODE(perlnode) );
+    }
+    return retval;
+}
+
+/* reverse to PmmSvOwner(). sets the owner of the current node. this
+ * will increase the proxy count of the owner.
+ */
+SV* 
+PmmSetSvOwner( SV* perlnode, SV* extra )
+{
+    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {        
+        PmmOWNER( SvPROXYNODE(perlnode)) = PmmNODE( SvPROXYNODE(extra) );
+        PmmREFCNT_inc( SvPROXYNODE(extra) );
+    }
+    return perlnode;
+}
+
+void
+PmmFixOwnerList( xmlNodePtr list, ProxyNodePtr parent )
+{
+    if ( list ) {
+        xmlNodePtr iterator;
+        for ( iterator = list; iterator != NULL ; iterator = iterator->next ){
+            if ( iterator->_private != NULL ) {
+                PmmFixOwner( (ProxyNodePtr)iterator->_private, parent );
+            }
+            else {
+                if ( iterator->type != XML_ATTRIBUTE_NODE
+                     &&  iterator->properties != NULL )
+                    PmmFixOwnerList( (xmlNodePtr)iterator->properties, parent );
+                PmmFixOwnerList(iterator->children, parent);
+            }
+        }
+    }
+}
+
+/**
+ * this functions fixes the reference counts for an entire subtree.
+ * it is very important to fix an entire subtree after node operations
+ * where the documents or the owner node may get changed. this method is
+ * aware about nodes that already belong to a certain owner node. 
+ *
+ * the method uses the internal methods PmmFixNode and PmmChildNodes to
+ * do the real updates.
+ * 
+ * in the worst case this traverses the subtree twice durig a node 
+ * operation. this case is only given when the node has to be
+ * adopted by the document. Since the ownerdocument and the effective 
+ * owner may differ this double traversing makes sense.
+ */ 
+int
+PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent ) 
+{
+    ProxyNodePtr oldParent = NULL;
+
+    xs_warn("fix");
+    if ( nodetofix != NULL ) {
+        if ( PmmNODE(nodetofix)->type != XML_DOCUMENT_NODE ) {
+            xs_warn("node is there");
+
+            if ( PmmOWNER(nodetofix) )
+                oldParent = PmmOWNERPO(nodetofix);
+            
+            /* The owner data is only fixed if the node is neither a
+             * fragment nor a document. Also no update will happen if
+             * the node is already his owner or the owner has not
+             * changed during previous operations.
+             */
+            if( oldParent != parent ) {
+                if ( parent && parent != nodetofix ){
+                    PmmOWNER(nodetofix) = PmmNODE(parent);
+                    PmmREFCNT_inc( parent );
+                }
+                else {
+                    PmmOWNER(nodetofix) = NULL;
+                }
+
+                if ( oldParent && oldParent != nodetofix )
+                    PmmREFCNT_dec(oldParent);
+
+                if ( PmmNODE(nodetofix)->type != XML_ATTRIBUTE_NODE
+                     && PmmNODE(nodetofix)->properties != NULL )
+                    PmmFixOwnerList( (xmlNodePtr)PmmNODE(nodetofix)->properties,
+                                     parent );
+                PmmFixOwnerList(PmmNODE(nodetofix)->children, parent);
+            }
+            else {
+                xs_warn( "node doesn't need to get fixed" );
+            }
+            return(1);
+        }
+    }
+    return(0);
+}
 
 SV*
 C2Sv( const xmlChar *string, const xmlChar *encoding )
@@ -49,7 +380,7 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
             xs_warn("set UTF8 string");
             len = xmlStrlen( string );
             /* create the SV */
-            retval = newSVpvn( (char *)xmlStrdup(string), len );
+            retval = newSVpvn( (const char *)string, len );
 #ifdef HAVE_UTF8
             xs_warn("set UTF8-SV-flag");
             SvUTF8_on(retval);
@@ -58,7 +389,7 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
         else {
             /* just create an ordinary string. */
             xs_warn("set ordinary string");
-            retval = newSVpvn( (char *)xmlStrdup(string), xmlStrlen( string ) );
+            retval = newSVpvn( (const char *)string, xmlStrlen( string ) );
         }
     }
 
@@ -72,7 +403,10 @@ Sv2C( SV* scalar, const xmlChar *encoding )
     xs_warn("sv2c start!");
     if ( scalar != NULL && scalar != &PL_sv_undef ) {
         STRLEN len;
-        xmlChar* string = xmlStrdup((xmlChar*)SvPV(scalar, len));
+        char * t_pv =SvPV(scalar, len);
+        xmlChar* string = xmlStrdup((xmlChar*)t_pv);
+        /* Safefree( t_pv ); */
+
         if ( xmlStrlen(string) > 0 ) {
             xmlChar* ts;
             xs_warn( "no undefs" );
@@ -106,13 +440,13 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
     SV* retval;
 
     if ( refnode != NULL ) {
-        xmlDocPtr real_dom = refnode->doc;
-        if ( real_dom->encoding != NULL ) {
+        xmlDocPtr real_doc = refnode->doc;
+        if ( real_doc && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = domDecodeString( (const char *)real_dom->encoding ,
+            xmlChar * decoded = domDecodeString( (const char *)real_doc->encoding ,
                                                  (const xmlChar *)string );
 
-            retval = C2Sv( decoded, real_dom->encoding );
+            retval = C2Sv( decoded, real_doc->encoding );
             xmlFree( decoded );
         }
         else {
@@ -138,9 +472,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
     if ( refnode != NULL ) {
         xmlDocPtr real_dom = refnode->doc;
         xs_warn("have node!");
-
-        if (real_dom != NULL && real_dom->encoding != NULL
-             && !DO_UTF8(scalar) ) {
+        if (real_dom != NULL &&real_dom->encoding != NULL ) {
             xs_warn("encode string!");
             return Sv2C(scalar,real_dom->encoding);
         }
@@ -149,133 +481,4 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
 #endif
 
     return  Sv2C( scalar, NULL ); 
-}
-
-ProxyObject *
-make_proxy_node (xmlNodePtr node)
-{
-    ProxyObject * proxy;
- 
-    proxy = (ProxyObject*)New(0, proxy, 1, ProxyObject);
-    if (proxy != NULL) {
-        proxy->object = (void*)node;
-        proxy->extra = NULL;
-    }
-    return proxy;
-}
-
-void
-free_proxy_node ( SV* nodesv )
-{
-    ProxyObject * p;
-    p = (ProxyObject*)SvIV((SV*)SvRV(nodesv));
-    if ( p != NULL ) {
-        p->object = NULL;
-        if ( p->extra != NULL ) {
-            /* in this case the owner SV needs to be decreased */
-            
-        }
-        p->extra = NULL;
-        Safefree( p );
-    }
-}
-
-SV*
-nodeToSv( xmlNodePtr node ) 
-{
-    ProxyObject * dfProxy= NULL;
-    SV * retval = &PL_sv_undef;
-    const char * CLASS = "XML::LibXML::Node";
-    
-    if ( node != NULL ) {
-        /* find out about the class */
-        CLASS = domNodeTypeName(node);
-
-        dfProxy = make_proxy_node(node);
-        retval = NEWSV(0,0);
-        sv_setref_pv( retval, (char*)CLASS, (void*)dfProxy );
-    }
-
-    return retval;
-}
-
-xmlNodePtr
-getSvNode( SV* perlnode ) 
-{
-    xmlNodePtr retval = NULL;
-
-    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
-        retval = (xmlNodePtr)((ProxyObject*)SvIV((SV*)SvRV(perlnode)))->object;
-    }
-    return retval;
-}
-
-
-SV*
-getSvNodeExtra( SV* perlnode ) 
-{
-    SV * retval = NULL;
-    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
-        retval = (SV*)((ProxyObject*)SvIV((SV*)SvRV(perlnode)))->extra;
-    }
-    return retval;
-}
-
-SV* 
-setSvNodeExtra( SV* perlnode, SV* extra )
-{
-    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
-        (SV*)((ProxyObject*)SvIV((SV*)SvRV(perlnode)))->extra = extra;
-        SvREFCNT_inc(extra);
-    }
-    return perlnode;
-}
-
-void
-fix_proxy_extra( SV* nodetofix, SV* parent ) 
-{
-    SV * oldParent = NULL;
-    xs_warn("fix");
-    if ( nodetofix != NULL
-         && nodetofix != &PL_sv_undef ) {
-        xs_warn("node is there");
-        /* this following condition will be removed w/ the new MM */
-        if ( parent != NULL && parent != &PL_sv_undef ) {
-            xs_warn("parent is there, too");
-            /* we are paranoid about circular references! */
-            /* and test if we from within deal with the same dom. */
-            oldParent = getSvNodeExtra(nodetofix);
-            
-            /* check if our node is a document or a fragment!!!! */
-            if ( getSvNode(nodetofix)->type != XML_DOCUMENT_FRAG_NODE
-                 && getSvNode(nodetofix)->type != XML_DOCUMENT_NODE
-                 && getSvNode(nodetofix) != getSvNode(parent)
-                 && getSvNode(oldParent) !=  getSvNode(parent) ) {
-
-                /* if we deal with different DOM's we need to update
-                 * the extra entry
-                 */ 
-                xs_warn("ok, switch parents");
-
-                /* new MM needs to test if the node is still w/ in the 
-                 * same subtree in this case.
-                 */
-
-                setSvNodeExtra(nodetofix, parent);
-
-                /* decrease the old parent and increase the new parent */
-                if ( oldParent != NULL && oldParent != &PL_sv_undef ) {
-                    SvREFCNT_dec(oldParent);
-                }
-                
-                if ( parent != NULL && parent != &PL_sv_undef ) {
-                    xs_warn("increase parent!");
-                    SvREFCNT_inc(parent);
-                }                    
-            } /* otherwise there is nothing to do */
-            else {
-                xs_warn("illegal node to fix!");
-            }
-        }
-    }
 }
