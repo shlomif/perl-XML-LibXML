@@ -40,10 +40,9 @@ sub _parse_string {
 
 sub _parse_systemid {
     my $self = shift;
-    my $fh = IO::File->new(shift);
     $self->{ParserOptions}{LibParser}      = XML::LibXML->new;
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_file;
-    $self->{ParserOptions}{ParseFuncParam} = $fh;
+    $self->{ParserOptions}{ParseFuncParam} = shift;
     return $self->_parse;
 }
 
