@@ -77,7 +77,7 @@ PmmNewNode(xmlNodePtr node)
 
     if ( node->_private == NULL ) {
         proxy = (ProxyNodePtr)malloc(sizeof(ProxyNode));
-        // proxy = (ProxyNodePtr)Newz(0, proxy, 0, ProxyNode);
+        /* proxy = (ProxyNodePtr)Newz(0, proxy, 0, ProxyNode); */
         if (proxy != NULL) {
             proxy->node  = node;
             proxy->owner   = NULL;

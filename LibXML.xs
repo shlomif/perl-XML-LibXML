@@ -2820,7 +2820,7 @@ insertBefore( self, new, ref )
         else {
             pNode = PmmSvNode(self);
             nNode = PmmSvNode(new);
-            oNode = PmmSvNode(ref); // may is NULL
+            oNode = PmmSvNode(ref); /* may is NULL */
    
             if ( pNode->type    == XML_DOCUMENT_NODE
                  && nNode->type == XML_ELEMENT_NODE ) {
@@ -2858,7 +2858,7 @@ insertAfter( self, new, ref )
         else {            
             pNode = PmmSvNode(self);
             nNode = PmmSvNode(new);
-            oNode = PmmSvNode(ref); // may be null
+            oNode = PmmSvNode(ref); /* may be null */
 
             if ( pNode->type    == XML_DOCUMENT_NODE
                  && nNode->type == XML_ELEMENT_NODE ) {
@@ -3620,7 +3620,6 @@ setAttributeNode( self, attr_node )
         }
         else {
             xmlAddChild( node, (xmlNodePtr)attr );
-            // in this case we need also to fix the parents.
         }
         PmmFixOwner( SvPROXYNODE(attr_node), SvPROXYNODE(self) );
 
@@ -3678,7 +3677,7 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         if ( nsURI && xmlStrlen(nsURI) ) {
             ns = xmlSearchNsByHref( node->doc, node, nsURI );
             if ( !ns ) {
-                // create new ns
+                /* create new ns */
                 xmlChar * localname;
                 xmlChar * prefix;
 
@@ -3840,7 +3839,6 @@ setAttributeNodeNS( self, attr_node )
         else {
             xmlAddChild( node, (xmlNodePtr)attr );
             xmlReconciliateNs(node->doc, node);
-            // in this case we need also to fix the parents.
         }
         PmmFixOwner( SvPROXYNODE(attr_node), SvPROXYNODE(self) );
         if ( ret == NULL ) {
