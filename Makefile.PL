@@ -28,8 +28,8 @@ if ( $] >= 5.006 ) {
 # get libs and inc from gnome-config
 eval {
     my $xml2cfg = "xml2-config";
-    if ( defined $config{XMLPREFIX} ) {
-        $xml2cfg = $config{XMLPREFIX} . '/' . $xml2cfg;
+    if ( defined $ENV{XMLPREFIX} ) {
+        $xml2cfg = $ENV{XMLPREFIX} . '/bin/' . $xml2cfg;
     }
     print "running xml2-config... ";
     my $ver = backtick("$xml2cfg --version");

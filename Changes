@@ -7,19 +7,24 @@ versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
 1.50
-   - push parser interface
    - fixed major problems with the validating parser
-   - XML::LibXML::Document::process_xincludes reintroduced
-   - Class wide callbacks added 
-   - code cleanings
-   - fixed library tests and output in Makefile.PL
-   - more documentation
-   - importNode() bug fix 
+   - fixed default behaviour of the generic parser
+   - fixed attribute setting of the string parser
    - fixed external entity loading for entity expansion
+   - fixed nodeValue() to handle entities and entity refs correctly
    - compatibility fixes
+   - importNode() bug fix 
+   - fixed library tests and output in Makefile.PL
+   - added setOwnerDocument() again
+   - XML::LibXML::Document::process_xincludes reintroduced
+   - global callbacks reintroduced
+     NOTE: the Interface changed here, read XML::LibXML manpage!
+   - code cleanings
+   - push parser interface
    - basic native libxml2 SAX interface
      THIS INTERFACE IS STILL EXPERIMENTAL
    - cloneNode clones now within documents
+   - more documentation
 
 1.49
    - memory management has been completely rewritten.

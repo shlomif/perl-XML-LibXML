@@ -19,7 +19,9 @@ Installation
 ============
 
 Prior to installation you MUST have installed the libxml2
-library.
+library. You can get the latest libxml2 version from 
+
+      http://xmlsoft.org
 
 Then run:
 
@@ -32,6 +34,18 @@ Parser documentation is in perldoc XML::LibXML. DOM documentation
 starts in perldoc XML::LibXML::Document and perldoc
 XML::LibXML::Node.
 
+If your libxml2 installation is not within your $PATH. you can set 
+the environment variable XMLPREFIX=$YOURLIBXMLPREFIX to make 
+XML::LibXML recognize the correct libxml2 version in use.
+
+e.g.
+
+$ XMLPREFIX=/usr/brand-new perl Makefile.PL
+
+will ask '/usr/brand-new/bin/xml2-config' about your real libxml2 configuration.
+
 This is free software, you may use it and distribute it under the same
-terms as Perl itself. Copyright 2001 AxKit.com Ltd, All rights reserved.
+terms as Perl itself. 
+
+Copyright 2001-2002 AxKit.com Ltd, All rights reserved.
 
