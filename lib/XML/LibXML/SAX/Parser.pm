@@ -9,7 +9,7 @@ use XML::LibXML;
 use XML::SAX::Base;
 use XML::SAX::DocumentLocator;
 
-$VERSION = '1.40';
+$VERSION = '1.49';
 @ISA = ('XML::SAX::Base');
 
 sub _parse_characterstream {
@@ -42,7 +42,8 @@ sub generate {
     my $self = shift;
     my ($node) = @_;
 
-    if ( $node->getType() == XML_DOCUMENT_NODE ) {
+    if ( $node->getType() == XML_DOCUMENT_NODE
+         || $node_type == XML_HTML_DOCUMENT_NODE ) {
         $self->start_document({});
         $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
         $self->process_node($node);
@@ -57,7 +58,8 @@ sub process_node {
     if ($node_type == XML_COMMENT_NODE) {
         $self->comment( { Data => $node->getData } );
     }
-    elsif ($node_type == XML_TEXT_NODE || $node_type == XML_CDATA_SECTION_NODE) {
+    elsif ($node_type == XML_TEXT_NODE
+           || $node_type == XML_CDATA_SECTION_NODE) {
         # warn($node->getData . "\n");
         $self->characters( { Data => $node->nodeValue } );
     }
@@ -72,8 +74,8 @@ sub process_node {
             $self->process_node($kid);
         }
     }
-#    elsif ($node_type == XML_DOCUMENT_NODE) {
     elsif ($node_type == XML_DOCUMENT_NODE
+           || $node_type == XML_HTML_DOCUMENT_NODE
            || $node_type == XML_DOCUMENT_FRAG_NODE) {
         # some times it is just usefull to generate SAX events from
         # a document fragment (very good with filters).

@@ -3,13 +3,24 @@ Revision history for Perl extension XML::LibXML
 1.49
    - memory management has been completely rewritten.
         now the module should not cause that many memory leaks 
+        (special thanks to Merijn Broeren and Petr Pajas for providing 
+         testcases)
+   - more libxml2 functions are used
+   - DOM API is more Level 3 conform
    - ownerDocument fixed
    - parser validation bug fixed (reported by Erik Ray)
-   - made parse_xml_chunk() reporting errors
-   - DOM API is more Level 3 conform
+   - made parse_xml_chunk() report errors
    - fixed the PI interface
    - xpath.pl example 
-   - namespace fixes
+   - better namespace support
+   - improved NamedNodeMap support
+   - restructured the interfaces
+   - HTML document nodes are recognized as HTML doc nodes instead of plain nodes
+   - XML::LibXML::SAX::Parser able to handle HTML docs now 
+     (patch by D. Hageman [dhageman@dracken.com])
+   - added serialization flags ($setTagCompression, $skipDtd and 
+     $skipXMLDeclaration)
+   - more documentation
 
 1.40
    - new parsefunction: $parser->parse_xml_chunk($string);

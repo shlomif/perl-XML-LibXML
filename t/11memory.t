@@ -64,7 +64,7 @@ use XML::LibXML;
         ok(1);
 
         check_mem();
-
+if( $ENV{DUMMY_VAR} ) {
         # multiple parses
         print("# MULTIPLE PARSES\n");
         for (1..$times_through) {
@@ -164,13 +164,33 @@ use XML::LibXML;
             check_mem();
                 
         }
-
+}
         print "# FIND NODES \n";
+        my $xml=<<'dromeds.xml';
+<?xml version="1.0" encoding="UTF-8"?>
+<dromedaries>
+    <species name="Camel">
+      <humps>1 or 2</humps>
+      <disposition>Cranky</disposition>
+    </species>                         
+    <species name="Llama">
+      <humps>1 (sort of)</humps>
+      <disposition>Aloof</disposition>
+    </species>                        
+    <species name="Alpaca">
+      <humps>(see Llama)</humps>
+      <disposition>Friendly</disposition>
+    </species>                           
+</dromedaries>
+dromeds.xml
+
         {
-            my $str = "<foo><bar><foo/></bar></foo>";
+            # my $str = "<foo><bar><foo/></bar></foo>";
+            my $str = $xml;
             my $doc = XML::LibXML->new->parse_string( $str );
             for ( 1..$times_through ) {
-                my @nodes = $doc->findnodes("/foo/bar/foo");
+                 processMessage($xml, '/dromedaries/species' );
+#                my @nodes = $doc->findnodes("/foo/bar/foo");
             }
             ok(1);
             check_mem();
@@ -188,6 +208,18 @@ use XML::LibXML;
 
         }
     }
+}
+
+sub processMessage {
+      my ($msg, $xpath) = @_;
+      my $parser = XML::LibXML->new();
+                                      
+      my $doc  = $parser->parse_string($msg);
+      my $elm  = $doc->getDocumentElement;   
+      my $node = $doc->findnodes($xpath);      
+      my $text = $node->to_literal->value;
+#      undef $doc;   # comment this line to make memory leak much worse
+#      undef $parser;
 }
 
 sub make_doc {
