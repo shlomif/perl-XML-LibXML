@@ -129,7 +129,7 @@ sub start_element {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
             # catch broken name/value pairs
-            next unless $attr->{Name} && $attr->{Localname};
+            next unless $attr->{Name} ;
             next if $self->{USENAMESPACESTACK}
                     and ( $attr->{Name} eq "xmlns"
                           or ( defined $attr->{Prefix}
