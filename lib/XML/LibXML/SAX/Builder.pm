@@ -15,7 +15,6 @@ sub start_document {
     $self->{DOM} = XML::LibXML::Document->createDocument();
 
     if ( defined $self->{Encoding} ) {
-        warn "use encoding!";
         $self->xml_decl({Version => ($self->{Version} || '1.0') , Encoding => $self->{Encoding}});
     }
 
