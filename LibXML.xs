@@ -2847,6 +2847,9 @@ getName (self)
 char *
 prefix (self)
         xmlNsPtr self
+    ALIAS:
+        XML::LibXML::Namespace::getLocalName = 1
+        XML::LibXML::Namespace::localName = 2
     CODE:
         RETVAL = (char*)self->prefix;
     OUTPUT:
@@ -2862,6 +2865,22 @@ getData (self)
         XML::LibXML::Namespace::uri = 3
     CODE:
         RETVAL = (char*)self->href;
+    OUTPUT:
+        RETVAL
+
+char *
+getNamespaceURI (self)
+        xmlNsPtr self
+    CODE:
+        RETVAL = "http://www.w3.org/2000/xmlns/";
+    OUTPUT:
+        RETVAL
+
+char *
+getPrefix (self)
+        xmlNsPtr self
+    CODE:
+        RETVAL = "xmlns";
     OUTPUT:
         RETVAL
 
