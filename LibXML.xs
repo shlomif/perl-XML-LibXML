@@ -639,7 +639,7 @@ LibXML_init_parser( SV * self ) {
     HV* real_obj = NULL;
     SV** item    = NULL;
     SV*  item2   = NULL;
-    xmlInitParser();    
+    /* xmlInitParser(); */ /* useless call */
     xmlGetWarningsDefaultValue = 0;
 
     if ( self != NULL ) {
@@ -801,11 +801,11 @@ LibXML_cleanup_parser() {
 void
 LibXML_cleanup_callbacks() {
 
-    return;
 /*    xs_warn("      cleanup parser callbacks!\n"); */
 
-/*    xmlCleanupInputCallbacks();*/
-/*    xmlRegisterDefaultInputCallbacks();*/
+    xmlCleanupInputCallbacks();
+    xmlRegisterDefaultInputCallbacks();
+
 /*    if ( LibXML_old_ext_ent_loader != NULL ) { */
 /*        xmlSetExternalEntityLoader( NULL ); */
 /*        xmlSetExternalEntityLoader( LibXML_old_ext_ent_loader ); */
