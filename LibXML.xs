@@ -791,10 +791,6 @@ toString(self, format=0)
             xmlIndentTreeOutput = t_indent_var;
         }
 
-        if ( real_dom->encoding != NULL ) {
-            result = domDecodeString( real_dom->encoding, result );
-        }
-
     	if (result == NULL) {
 	        # warn("Failed to convert doc to string");           
             RETVAL = &PL_sv_undef;
