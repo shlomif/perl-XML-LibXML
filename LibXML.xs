@@ -1363,7 +1363,7 @@ appendTextNode( self, xmlString )
         xmlNodePtr tn;
     CODE:
         if ( self->doc != NULL && xmlString != NULL ) {
-            if ( $self->doc != NULL ) {
+            if ( self->doc != NULL ) {
                 tn = xmlNewDocText( self->doc, xmlString ); 
             }
             else {
@@ -1394,6 +1394,8 @@ ProxyObject *
 new( CLASS, content )
         const char * CLASS
         char * content
+    PREINIT:
+        xmlNodePtr newNode;
     CODE:
         /* we should test if this is UTF8 ... because this WILL cause
          * problems with iso encoded strings :(
@@ -1409,6 +1411,8 @@ ProxyObject *
 new( CLASS, content ) 
         const char * CLASS
         char * content
+    PREINIT:
+        xmlNodePtr newNode;
     CODE:
         newNode = xmlNewComment( content );
         RETVAL = make_proxy_node(newNode);
@@ -1421,6 +1425,8 @@ ProxyObject *
 new( CLASS , content )
         const char * CLASS
         char * content
+    PREINIT:
+        xmlNodePtr newNode;
     CODE:
         newNode = xmlNewCDataBlock( 0 , content, xmlStrlen( content ) );
         RETVAL = make_proxy_node(newNode);
