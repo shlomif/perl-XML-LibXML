@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 17 }
+BEGIN { plan tests => 19 }
 use XML::LibXML;
 ok(1);
 
@@ -87,3 +87,15 @@ undef @a;
 undef $doc;
  
 ok(1);
+
+##
+# Tests for ticket 2021
+{
+    my $dtd = XML::LibXML::Dtd->new("","");
+    ok( $dtd, undef );
+}
+
+{
+    my $dtd = XML::LibXML::Dtd->new('', 'example/test.dtd');
+    ok($dtd);
+}

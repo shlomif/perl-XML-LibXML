@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 127 };
+BEGIN { plan tests => 130 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -188,6 +188,24 @@ print "# 1.1 Node Attributes\n";
         my @cn2 = $node->childNodes;
         ok(scalar(@cn), 5);
         ok( $cn2[3]->isSameNode($inode) );
+    }
+
+    {
+        print "\n# insertAfter Tests\n";
+        my $anode = $doc->createElement("a");
+        my $bnode = $doc->createElement("b");
+        my $cnode = $doc->createElement("c");
+        my $dnode = $doc->createElement("d");
+
+        $anode->insertAfter( $bnode, undef );
+        ok( $anode->toString(), '<a><b/></a>' );
+
+        $anode->insertAfter( $dnode, undef );
+        ok( $anode->toString(), '<a><b/><d/></a>' );
+
+        $anode->insertAfter( $cnode, $bnode );
+        ok( $anode->toString(), '<a><b/><c/><d/></a>' );
+        
     }
 
     {
