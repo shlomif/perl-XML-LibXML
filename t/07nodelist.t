@@ -48,7 +48,7 @@ if ( defined $dom ) {
     my $doc = XML::LibXML::Document->new( '1.0' );
     my $elem2 = $doc->createElement( $camel );
     $doc->setDocumentElement( $elem2 ); 
-    
+
     $elem2->appendWellBalancedChunk( $string );
     ok(  $elem2->toString() eq $tstr );
 
