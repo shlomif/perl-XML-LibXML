@@ -668,6 +668,9 @@ _parse_string(self, string)
         ProxyObject * proxy;
     CODE:
         ptr = SvPV(string, len);
+        if (len == 0) {
+            croak("Empty string");
+        }
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
@@ -791,6 +794,9 @@ parse_html_string(self, string)
         ProxyObject * proxy;
     CODE:
         ptr = SvPV(string, len);
+        if (len == 0) {
+            croak("Empty string");
+        }
         
         LibXML_error = newSVpv("", 0);
         
