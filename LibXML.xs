@@ -365,7 +365,12 @@ LibXML_error_handler(void * ctxt, const char * msg, ...)
     sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
     va_end(args);
     
-    sv_catsv(LibXML_error, sv); /* remember the last error */
+    if (LibXML_error != NULL) {
+        sv_catsv(LibXML_error, sv); /* remember the last error */
+    }
+    else {
+        croak(SvPV(sv, PL_na));
+    }
     SvREFCNT_dec(sv);
 }
 
@@ -381,7 +386,12 @@ LibXML_validity_error(void * ctxt, const char * msg, ...)
     sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
     va_end(args);
     
-    sv_catsv(LibXML_error, sv);
+    if (LibXML_error != NULL) {
+        sv_catsv(LibXML_error, sv); /* remember the last error */
+    }
+    else {
+        croak(SvPV(sv, PL_na));
+    }
     SvREFCNT_dec(sv);
 }
 
