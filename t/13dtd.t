@@ -18,7 +18,7 @@ ok($dtdstr);
     # parse a DTD from a SYSTEM ID
     my $dtd = XML::LibXML::Dtd->new('ignore', 'example/test.dtd');
     ok($dtd);
-    my $newstr = $dtd->toString;
+    my $newstr = $dtd->toString();
     $newstr =~ s/\r//g;
     $newstr =~ s/^.*?\n//;
     $newstr =~ s/\n^.*\Z//m;

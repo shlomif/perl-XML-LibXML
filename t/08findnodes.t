@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 44 };
+BEGIN { plan tests => 46 };
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -38,6 +38,8 @@ if ( defined $dom ) {
 
 
     @list   = $elem->findnodes( 'species/@name' );
+    # warn $elem->toString();
+
     ok( scalar @list && $list[0]->toString() eq ' name="Camel"' );
 
     my $x = XML::LibXML::Text->new( 1234 );
@@ -183,6 +185,20 @@ foreach my $xp ( @badxpath ) {
         $node->unbindNode() if ( scalar( @subnodes ) );
         ok(1);
     }
+}
+
+{
+    print "# findnode remove problem\n";
+
+    my $xmlstr = "<a><b><c>1</c><c>2</c></b></a>";
+    
+    my $doc       = $parser->parse_string( $xmlstr );
+    my $root      = $doc->documentElement;
+    my ( $lastc ) = $root->findnodes( 'b/c[last()]' );
+    ok( $lastc );
+
+    $root->removeChild( $lastc );
+    ok( $root->toString(), $xmlstr );
 }
 
 # --------------------------------------------------------------------------- #

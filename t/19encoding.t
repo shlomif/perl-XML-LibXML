@@ -14,7 +14,7 @@ BEGIN {
     my $basics       = 0;
     my $magic        = 7;    
 
-    if ( $] >= 5.008 ) {
+    if ( $] >= 5.008 ) { 
         print "# Skipping test on this platform\n";
     }
     else {
