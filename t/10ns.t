@@ -1,6 +1,7 @@
 use Test;
 BEGIN { plan tests=>16; }
 use XML::LibXML;
+use XML::LibXML::Common qw(:libxml);
 
 my $parser = XML::LibXML->new();
 

@@ -7,6 +7,8 @@ versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
 1.53
+   - catalog interface
+   - toFH() fixed
    - enabled SGML parsing
    - fixed namespace setting in XPath functions:
      the namespaces of the document element will always be added now

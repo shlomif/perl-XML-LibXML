@@ -49,6 +49,7 @@ struct _ProxyNode {
     xmlNodePtr node;
     xmlNodePtr owner;
     int count;
+    int encoding;
 };
 
 /* helper type for the proxy structure */
@@ -65,7 +66,7 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmNODE(xnode)       xnode->node
 #define PmmOWNER(node)       node->owner
 #define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
-
+#define PmmENCODING(node)    node->encoding
 
 ProxyNodePtr
 PmmNewNode(xmlNodePtr node);

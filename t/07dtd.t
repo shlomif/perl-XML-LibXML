@@ -4,6 +4,7 @@ use Test;
 
 BEGIN { plan tests => 20 };
 use XML::LibXML;
+use XML::LibXML::Common qw(:libxml);
 
 {
     my $doc = XML::LibXML::Document->new;

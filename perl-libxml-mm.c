@@ -98,6 +98,7 @@ PmmNodeTypeName( xmlNodePtr elem ){
  * @owner: libxml defines only the document, but not the node owner
  *         (in case of document fragments, they are not the same!)
  * @count: this is the internal reference count!
+ * @encoding: this value is missing in libxml2's doc structure
  *
  * Since XML::LibXML will not know, is a certain node is already
  * defined in the perl layer, it can't shurely tell when a node can be
@@ -109,6 +110,7 @@ struct _ProxyNode {
     xmlNodePtr node;
     xmlNodePtr owner;
     int count;
+    int encoding; 
 };
 
 /* helper type for the proxy structure */
@@ -126,6 +128,9 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmNODE(thenode)     thenode->node
 #define PmmOWNER(node)       node->owner
 #define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
+
+#define PmmENCODING(node)    node->encoding
+#define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
 
 /* creates a new proxy node from a given node. this function is aware
  * about the fact that a node may already has a proxy structure.
@@ -298,7 +303,17 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 
         retval = NEWSV(0,0);
         sv_setref_pv( retval, CLASS, (void*)dfProxy );
-        PmmREFCNT_inc(dfProxy);            
+        PmmREFCNT_inc(dfProxy); 
+
+        switch ( node->type ) {
+        case XML_DOCUMENT_NODE:
+        case XML_HTML_DOCUMENT_NODE:
+        case XML_DOCB_DOCUMENT_NODE:
+            dfProxy->encoding = (int)xmlParseCharEncoding( ((xmlDocPtr)node)->encoding );
+            break;
+        default:
+            break;
+        }
     }
     else {
         xs_warn( "no node found!" );
@@ -607,7 +622,7 @@ PmmFastEncodeString( int charset,
     xmlBufferPtr in = NULL, out = NULL;
 
     if ( charset == 1 ) {
-        xs_warn("use UTF8 for encoding ...");
+        /* warn("use UTF8 for encoding ... %s ", string); */
         return xmlStrdup( string );
     }
 
@@ -824,7 +839,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
         xmlDocPtr real_doc = refnode->doc;
         if ( real_doc && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = PmmFastDecodeString( (int)real_doc->charset ,
+            xmlChar * decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc) ,
                                                      (const xmlChar *)string,
                                                      (const xmlChar*)real_doc->encoding);
             len = xmlStrlen( decoded );
@@ -888,7 +903,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                     if ( real_dom->encoding != NULL ) {        
 #endif
                         xs_warn( "domEncodeString!" );
-                        ts= PmmFastEncodeString( real_dom->charset,
+                        ts= PmmFastEncodeString( PmmNodeEncoding(real_dom),
                                                  string,
                                                  (const xmlChar*)real_dom->encoding );
                         xs_warn( "done!" );

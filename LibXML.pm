@@ -7,6 +7,8 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
             $MatchCB $ReadCB $OpenCB $CloseCB );
 use Carp;
+
+use XML::LibXML::Common qw(:encoding :libxml :w3c);
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
@@ -26,85 +28,6 @@ $OpenCB  = undef;
 $CloseCB = undef;
 
 bootstrap XML::LibXML $VERSION;
-
-@EXPORT = qw( XML_ELEMENT_NODE
-              XML_ATTRIBUTE_NODE
-              XML_TEXT_NODE
-              XML_CDATA_SECTION_NODE
-              XML_ENTITY_REF_NODE
-              XML_ENTITY_NODE
-              XML_PI_NODE
-              XML_COMMENT_NODE
-              XML_DOCUMENT_NODE
-              XML_DOCUMENT_TYPE_NODE
-              XML_DOCUMENT_FRAG_NODE
-              XML_NOTATION_NODE
-              XML_HTML_DOCUMENT_NODE
-              XML_DTD_NODE
-              XML_ELEMENT_DECL
-              XML_ATTRIBUTE_DECL
-              XML_ENTITY_DECL
-              XML_NAMESPACE_DECL
-              XML_XINCLUDE_START
-              XML_XINCLUDE_END
-              encodeToUTF8
-              decodeFromUTF8
-            );
-
-@EXPORT_OK = qw(
-                ELEMENT_NODE
-                ATTRIBUTE_NODE
-                TEXT_NODE
-                CDATA_SECTION_NODE
-                ENTITY_REFERENCE_NODE
-                ENTITY_NODE
-                PROCESSING_INSTRUCTION_NODE
-                COMMENT_NODE
-                DOCUMENT_NODE
-                DOCUMENT_TYPE_NODE
-                DOCUMENT_FRAGMENT_NODE
-                NOTATION_NODE
-                HTML_DOCUMENT_NODE
-                DTD_NODE
-                ELEMENT_DECLARATION
-                ATTRIBUTE_DECLARATION
-                ENTITY_DECLARATION
-                NAMESPACE_DECLARATION
-                NAMESPACE_DECLARATION
-                XINCLUDE_END
-                XINCLUDE_START
-               );
-
-%EXPORT_TAGS = (
-                all => [@EXPORT, @EXPORT_OK],
-                w3c_typenames => [qw(
-                                     ELEMENT_NODE
-                                     ATTRIBUTE_NODE
-                                     TEXT_NODE
-                                     CDATA_SECTION_NODE
-                                     ENTITY_REFERENCE_NODE
-                                     ENTITY_NODE
-                                     PROCESSING_INSTRUCTION_NODE
-                                     COMMENT_NODE
-                                     DOCUMENT_NODE
-                                     DOCUMENT_TYPE_NODE
-                                     DOCUMENT_FRAGMENT_NODE
-                                     NOTATION_NODE
-                                     HTML_DOCUMENT_NODE
-                                     DTD_NODE
-                                     ELEMENT_DECLARATION
-                                     ATTRIBUTE_DECLARATION
-                                     ENTITY_DECLARATION
-                                     NAMESPACE_DECLARATION
-                                     NAMESPACE_DECLARATION
-                                     XINCLUDE_END
-                                     XINCLUDE_START
-                                    )],
-                encoding => [qw(
-                                encodeToUTF8
-                                decodeFromUTF8
-                               )],
-               );
 
 sub new {
     my $class = shift;
@@ -477,6 +400,35 @@ sub __write {
     }
 }
 
+# catalog interfaces
+sub default_catalog {
+    my $self = shift;
+    my $catalog = shift;
+    if ( ref( $catalog ) != "XML::LibXML::Catalog" ) {
+        croak "structure is not a catalog";
+    }
+    return $self->_default_catalog( $catalog );
+}
+
+# this will go to xs!
+sub load_catalog {
+    my $self     = shift;
+    my $filename = shift;
+
+    return undef;
+}
+
+sub use_catalog {
+    my $self = shift; # parser
+    my $catalog = shift;
+    if ( ref $self ) {
+        if ( ref( $catalog ) != "XML::LibXML::Catalog" ) {
+            croak "structure is not a catalog";
+        }
+        return 1;
+    }
+    return undef;
+}
 
 1;
 

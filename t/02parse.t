@@ -9,6 +9,7 @@ use IO::File;
 
 BEGIN { plan tests => 42 };
 use XML::LibXML;
+use XML::LibXML::Common qw(:libxml);
 
 ##
 # test values

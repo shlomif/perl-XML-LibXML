@@ -13,6 +13,7 @@ use Test;
 
 BEGIN { plan tests => 121 };
 use XML::LibXML;
+use XML::LibXML::Common qw(:libxml);
 
 my $xmlstring = q{<foo>bar<foobar/><bar foo="foobar"/><!--foo--><![CDATA[&foo bar]]></foo>};
 

@@ -1,6 +1,7 @@
 /* $Id$ */
 #include <libxml/tree.h>
 #include <libxml/encoding.h>
+#include <libxml/xmlerror.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/xmlIO.h>
@@ -147,19 +148,24 @@ int
 domIsParent( xmlNodePtr cur, xmlNodePtr ref ) {
     xmlNodePtr helper = NULL;
 
-    if ( cur == NULL || ref == NULL ) 
+    if ( cur == NULL
+         || ref == NULL
+         || cur->doc != ref->doc
+         || ref->children == NULL
+         || cur->parent == (xmlNodePtr)cur->doc
+         || cur->parent == NULL ) {
         return 0;
+    }
 
-    if( cur->doc != ref->doc)
-        return 0;
-
-    if( ref->type == XML_DOCUMENT_NODE )
+    if( ref->type == XML_DOCUMENT_NODE ) {
         return 1;
+    }
 
     helper= cur;
-    while ( helper && (xmlDocPtr) helper != ref->doc ) {
-        if( helper == ref )
+    while ( helper && (xmlDocPtr) helper != cur->doc ) {
+        if( helper == ref ) {
             return 1;
+        }
         helper = helper->parent;
     }
 
@@ -169,27 +175,22 @@ domIsParent( xmlNodePtr cur, xmlNodePtr ref ) {
 int
 domTestHierarchy(xmlNodePtr cur, xmlNodePtr ref) 
 {
-    if ( !ref || !cur )
+    if ( !ref || !cur || cur->type == XML_ATTRIBUTE_NODE ) {
         return 0;
-    
+    }
+
     switch ( ref->type ){
     case XML_ATTRIBUTE_NODE:
     case XML_DOCUMENT_NODE:
         return 0;
         break;
-    case XML_DOCUMENT_FRAG_NODE:
-	if ( ref->children == NULL )
-            return 0;
-	break;
     default:
         break;
     }
     
-    if ( cur->type == XML_ATTRIBUTE_NODE )
+    if ( domIsParent( cur, ref ) ) {
         return 0;
-
-    if ( domIsParent( cur, ref ) )
-	return 0;
+    }
 
     return 1;
 }
@@ -203,9 +204,9 @@ domTestDocument(xmlNodePtr cur, xmlNodePtr ref)
         case XML_ELEMENT_NODE:
         case XML_ENTITY_NODE:
         case XML_ENTITY_REF_NODE:
-	case XML_TEXT_NODE:
-	case XML_CDATA_SECTION_NODE:
-	case XML_NAMESPACE_DECL:
+        case XML_TEXT_NODE:
+        case XML_CDATA_SECTION_NODE:
+        case XML_NAMESPACE_DECL:
             return 0;
             break;
         default:
@@ -217,7 +218,10 @@ domTestDocument(xmlNodePtr cur, xmlNodePtr ref)
 
 void
 domUnlinkNode( xmlNodePtr node ) {
-    if ( node == NULL ) {
+    if ( node == NULL
+         || ( node->prev      == NULL
+              && node->next   == NULL
+              && node->parent == NULL ) ) {
         return;
     }
 
@@ -321,6 +325,7 @@ domAppendChild( xmlNodePtr self,
     if ( !(domTestHierarchy(self, newChild)
            && domTestDocument(self, newChild))){
         xs_warn("HIERARCHIY_REQUEST_ERR\n"); 
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
         return NULL;
     }
 
@@ -329,11 +334,11 @@ domAppendChild( xmlNodePtr self,
     }
     else {
         xs_warn("WRONG_DOCUMENT_ERR - non conform implementation\n"); 
+        /* xmlGenericError(xmlGenericErrorContext,"WRONG_DOCUMENT_ERR\n"); */
         newChild= domImportNode( self->doc, newChild, 1 );
     }
  
     if ( self->children != NULL ) {
-        xs_warn("unlink node!\n");
         domAddNodeToList( newChild, self->last, NULL );
     }
     else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
@@ -354,7 +359,7 @@ domAppendChild( xmlNodePtr self,
         newChild->parent= self;
     }
  
-    xmlReconciliateNs(self->doc, newChild);     
+    // xmlReconciliateNs(self->doc, newChild);     
 
     return newChild;
 }
@@ -392,6 +397,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     if ( !(domTestHierarchy(self, new)
            && domTestDocument(self, new))){
         xs_warn("HIERARCHIY_REQUEST_ERR\n"); 
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
         return NULL;
     }
     
@@ -435,11 +441,13 @@ domInsertBefore( xmlNodePtr self,
        || (  newChild->type     == XML_DOCUMENT_FRAG_NODE 
           && newChild->children == NULL ) ) {
         /* NOT_FOUND_ERR */
+        xmlGenericError(xmlGenericErrorContext,"NOT_FOUND_ERR\n");
         return NULL;
     }
 
     if ( !(domTestHierarchy( self, newChild )
            && domTestDocument( self, newChild ))) {
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
         return NULL;
     }
 
@@ -451,7 +459,7 @@ domInsertBefore( xmlNodePtr self,
     }
     
     domAddNodeToList(newChild, refChild->prev, refChild);
-    xmlReconciliateNs(self->doc, newChild);     
+    // xmlReconciliateNs(self->doc, newChild);     
 
     return newChild;
 }
@@ -476,12 +484,13 @@ domInsertAfter( xmlNodePtr self,
     if ( refChild->parent != self
        || (  newChild->type     == XML_DOCUMENT_FRAG_NODE 
           && newChild->children == NULL ) ) {
-        /* NOT_FOUND_ERR */
+        xmlGenericError(xmlGenericErrorContext,"NOT_FOUND_ERR\n");
         return NULL;
     }
 
     if ( !(domTestHierarchy( self, newChild )
            && domTestDocument( self, newChild ))) {
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
         return NULL;
     }
 
@@ -493,7 +502,7 @@ domInsertAfter( xmlNodePtr self,
     }
 
     domAddNodeToList(newChild, refChild, refChild->next);
-    xmlReconciliateNs(self->doc, newChild);     
+    // xmlReconciliateNs(self->doc, newChild);     
 
     return newChild;
 }
@@ -516,6 +525,7 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
          * wrong node type
          * new node is parent of itself
          */
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
         return NULL;
     }
         
@@ -538,7 +548,7 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
         domAddNodeToList( newNode, prev,  next );
     }
 
-    xmlReconciliateNs(newNode->doc, newNode); 
+    // xmlReconciliateNs(newNode->doc, newNode); 
 
     return oldNode;
 }
@@ -744,10 +754,7 @@ domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace) {
          *   - same attribute names
          *   - and the attribute carrying that namespace
          *         or
-         
-         SJT: This following condition is wrong IMHO; I reported it as a bug on libxml2
-         
-         *         no namespace on the attribute and the element carrying it
+         *   - no namespace on the attribute and the element carrying it
          */
         if ((xmlStrEqual(prop->name, name)) &&
             (/* ((prop->ns == NULL) && (node->ns != NULL) &&
