@@ -93,20 +93,23 @@ unless ( $is_Win32 ) { # cannot get config in W32
         $xml2cfg = $libprefix . '/bin/' . $xml2cfg;
     }
 
-    print "running xml2-config...";
-    eval {
-        try_libconfig( $xml2cfg, \%config, @blacklist );
-    };
+    # if a user defined INC and LIBS on the command line we must not 
+    # override them
+    if ( not defined $config{LIBS} and not defined $config{INC} ) {
+        print "running xml2-config...";
+        eval {
+            try_libconfig( $xml2cfg, \%config, @blacklist );
+        };
 
-    if ( $@ ) {
-        if ( $@ =~ /^VERSION/ ) {
-            die "The installed version of libxml2 is known not to work.\n".
-                 "  Don't expect XML::LibXML to build or work correctly.\n".
-                 "  Don't report errors!!!\n".
-                 "  Check the README file for more informations\n";
-        }
-        if ( $@ =~ /^UNTESTED/ ) {
-            warn <<UNTESTED;
+        if ( $@ ) {
+            if ( $@ =~ /^VERSION/ ) {
+                die "The installed version of libxml2 is known not to work.\n".
+                    "  Don't expect XML::LibXML to build or work correctly.\n".
+                    "  Don't report errors!!!\n".
+                    "  Check the README file for more informations\n";
+            }
+            if ( $@ =~ /^UNTESTED/ ) {
+                warn <<UNTESTED;
 WARNING!
 The installed version of libxml2 was not tested with this version of XML::LibXML.
 
@@ -116,13 +119,13 @@ The installed version of libxml2 was not tested with this version of XML::LibXML
     Check the README file for more informations
 END OF WARNING
 UNTESTED
-        }
+            }
 
-        if ( not defined $config{LIBS} and not defined $config{INC} ) {
-            warn "\nusing fallback values for LIBS and INC\n";
-            $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lz -lm';
-            $config{INC} = '-I/usr/local/include -I/usr/include';
-            print <<OPT;
+            if ( not defined $config{LIBS} and not defined $config{INC} ) {
+                warn "\nusing fallback values for LIBS and INC\n";
+                $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lm';
+                $config{INC} = '-I/usr/local/include -I/usr/include';
+                print <<OPT;
 options:
   LIBS='$config{LIBS}'
   INC='$config{INC}'
@@ -130,6 +133,7 @@ If this is wrong, Re-run as:
   \$ $^X Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'
 
 OPT
+            }
         }
     }
 }
