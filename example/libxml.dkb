@@ -355,9 +355,15 @@ EOT</programlisting>
           </listitem>
         </varlistentry>
         <varlistentry>
+          <term>XML::LibXML::RelaxNG</term>
+          <listitem>
+            <para>XML::LibXML frontend for RelaxNG schema validation</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
           <term>XML::LibXMLguts</term>
           <listitem>
-            <para>Internal of the Perl Layer for libxml2</para>
+            <para>Internal of the Perl Layer for libxml2 (not done yet)</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -922,7 +928,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             number of a node. This gives more information where a validation
             error occoured. It could be also used to find out about the
             position of a node after parsing (see also
-            XML::LibXML::Node::line_number()) </para>
+            XML::LibXML::Node::line_number())</para>
             <para>By default line numbering is switched off (0).</para>
           </listitem>
         </varlistentry>
@@ -1999,9 +2005,9 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <para>This function returns the line number where the tag was found
           during parsing. If a node is added to the document the line number
           is 0. Problems may occour, if a node from one document is passed to
-          another one. </para>
+          another one.</para>
           <para>Note: line_number() is special to XML::LibXML and not part of
-          the DOM specification. </para>
+          the DOM specification.</para>
           <para>If the line_numbers flag of the parser was not activated
           before parsing, line_number() will always return 0.</para>
         </listitem>
@@ -3323,6 +3329,47 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
     </variablelist>
   </chapter>
   <chapter>
+    <title>XML::LibXML Processing Instructions</title>
+    <titleabbrev>XML::LibXML::PI</titleabbrev>
+    <para>Processing instructions are implemented with XML::LibXML with read
+    and write access. The PI data is the PI without the PI target (as
+    specified in XML 1.0 [17]) as a string. This string can be accessed with
+    getData as implemented in XML::LibXML::Node.</para>
+    <para>The write access is aware about the fact, that many processing
+    instructions have attribute like data. Therefore setData() provides
+    besides the DOM spec conform Interface to pass a set of named parameter.
+    So the code segment</para>
+    <programlisting>my $pi = $dom-&#62;createProcessingInstruction(&#34;abc&#34;);
+$pi-&#62;setData(foo=&#62;&#39;bar&#39;, foobar=&#62;&#39;foobar&#39;);
+$dom-&#62;appendChild( $pi );</programlisting>
+    <para>will result the following PI in the DOM:</para>
+    <programlisting>&#60;?abc foo=&#34;bar&#34; foobar=&#34;foobar&#34;?&#62;</programlisting>
+    <para>Which is how it is specified in the DOM specification. This three
+    step interface creates temporary a node in perl space. This can be avoided
+    while using the insertProcessingInstruction() method. Instead of the three
+    calls described above, the call</para>
+    <programlisting>$dom-&#62;insertProcessingInstruction(&#34;abc&#34;,&#39;foo=&#34;bar&#34; foobar=&#34;foobar&#34;&#39;);</programlisting>
+    <para>will have the same result as above.</para>
+    <para>XML::LibXML::PI&#39;s implementation of setData() differs a bit from
+    the the standard version as available in XML::LibXML::Node():</para>
+    <variablelist>
+      <varlistentry>
+        <term>setData</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$pinode-&#62;setData( $data_string );
+$pinode-&#62;setData( name=&#62;string_value [...] );</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This method allows to change the content data of a PI.
+          Additionaly to the interface specified for DOM Level2, the method
+          provides a named parameter interface to set the data. This
+          parameterlist is converted into a string before it is appended to
+          the PI.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </chapter>
+  <chapter>
     <title>XML::LibXML DTD Handling</title>
     <titleabbrev>XML::LibXML::Dtd</titleabbrev>
     <para>This class holds a DTD. You may parse a DTD from either a string, or
@@ -3361,42 +3408,44 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
     </variablelist>
   </chapter>
   <chapter>
-    <title>XML::LibXML Processing Instructions</title>
-    <titleabbrev>XML::LibXML::PI</titleabbrev>
-    <para>Processing instructions are implemented with XML::LibXML with read
-    and write access. The PI data is the PI without the PI target (as
-    specified in XML 1.0 [17]) as a string. This string can be accessed with
-    getData as implemented in XML::LibXML::Node.</para>
-    <para>The write access is aware about the fact, that many processing
-    instructions have attribute like data. Therefore setData() provides
-    besides the DOM spec conform Interface to pass a set of named parameter.
-    So the code segment</para>
-    <programlisting>my $pi = $dom-&#62;createProcessingInstruction(&#34;abc&#34;);
-$pi-&#62;setData(foo=&#62;&#39;bar&#39;, foobar=&#62;&#39;foobar&#39;);
-$dom-&#62;appendChild( $pi );</programlisting>
-    <para>will result the following PI in the DOM:</para>
-    <programlisting>&#60;?abc foo=&#34;bar&#34; foobar=&#34;foobar&#34;?&#62;</programlisting>
-    <para>Which is how it is specified in the DOM specification. This three
-    step interface creates temporary a node in perl space. This can be avoided
-    while using the insertProcessingInstruction() method. Instead of the three
-    calls described above, the call</para>
-    <programlisting>$dom-&#62;insertProcessingInstruction(&#34;abc&#34;,&#39;foo=&#34;bar&#34; foobar=&#34;foobar&#34;&#39;);</programlisting>
-    <para>will have the same result as above.</para>
-    <para>XML::LibXML::PI&#39;s implementation of setData() differs a bit from
-    the the standard version as available in XML::LibXML::Node():</para>
+    <title>RelaxNG Schema Validation</title>
+    <titleabbrev>XML::LibXML::RelaxNG</titleabbrev>
+    <para>The XML::LibXML::RelaxNG class is a tiny frontend to libxml2&#39;s
+    RelaxNG implementation. Currently it supports only schema parsing and
+    document validation. </para>
     <variablelist>
       <varlistentry>
-        <term>setData</term>
+        <term>new</term>
         <listitem>
           <funcsynopsis>
-            <funcsynopsisinfo>$pinode-&#62;setData( $data_string );
-$pinode-&#62;setData( name=&#62;string_value [...] );</funcsynopsisinfo>
+            <funcsynopsisinfo>$rngschema = XML::LibXML::RelaxNG-&#62;new( location =&#62; $filename_or_url );
+$rngschema = XML::LibXML::RelaxNG-&#62;new( string =&#62; $xmlschemastring );
+$rngschema = XML::LibXML::RelaxNG-&#62;new( DOM =&#62; $doc );</funcsynopsisinfo>
           </funcsynopsis>
-          <para>This method allows to change the content data of a PI.
-          Additionaly to the interface specified for DOM Level2, the method
-          provides a named parameter interface to set the data. This
-          parameterlist is converted into a string before it is appended to
-          the PI.</para>
+          <para>The constructor of XML::LibXML::RelaxNG may get called with
+          either one of three parameters. The parameter tells the class from
+          which source it should generate a validation schema. It is
+          important, that each schema only have a single source. </para>
+          <para>The location parameter allows to parse a schema from the
+          filesystem or a URL. </para>
+          <para>The string parameter will parse the schema from the given XML
+          string.</para>
+          <para>The DOM parameter allows to parse the schema from a preparsed
+          XML::LibXML::Document. </para>
+          <para>Note that the constructor will die() if the schema does not
+          meed the constraints of the RelaxNG specification.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>validate</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>eval { $rngschema-&#62;validate( $doc ); };</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This function allows to validate a document against the given
+          RelaxNG schema. If this function succeeds, it will return 0,
+          otherwise it will die() and report the errors found. Because of this
+          validate() should be always evaluated. </para>
         </listitem>
       </varlistentry>
     </variablelist>
