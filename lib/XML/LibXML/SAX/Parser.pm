@@ -40,12 +40,13 @@ sub _parse_systemid {
 sub generate {
     my $self = shift;
     my ($node) = @_;
-    
-    $self->start_document({});
-    $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
-    $self->process_node($node);
-    
-    $self->end_document({});
+
+    if ( $node->getType() == XML_DOCUMENT_NODE ) {
+        $self->start_document({});
+        $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
+        $self->process_node($node);
+        $self->end_document({});
+    }
 }
 
 sub process_node {
@@ -65,13 +66,17 @@ sub process_node {
         # warn("</" . $node->getName . ">\n");
     }
     elsif ($node_type == XML_ENTITY_REF_NODE) {
-        foreach my $kid ($node->getChildnodes) {
+        foreach my $kid ($node->childNodes) {
             # warn("child of entity ref: " . $kid->getType() . " called: " . $kid->getName . "\n");
             $self->process_node($kid);
         }
     }
-    elsif ($node_type == XML_DOCUMENT_NODE) {
-        foreach my $kid ($node->getChildnodes) {
+#    elsif ($node_type == XML_DOCUMENT_NODE) {
+    elsif ($node_type == XML_DOCUMENT_NODE
+           || $node_type == XML_DOCUMENT_FRAG_NODE) {
+        # some times it is just usefull to generate SAX events from
+        # a document fragment (very good with filters).
+        foreach my $kid ($node->childNodes) {
             $self->process_node($kid);
         }
     }
@@ -88,7 +93,7 @@ sub process_node {
 
 sub process_element {
     my ($self, $element) = @_;
-    
+
     my $attribs = {};
 
     foreach my $attr ($element->getAttributes) {
@@ -132,7 +137,7 @@ sub process_element {
         # use Data::Dumper;
         # warn("Attr made: ", Dumper($attribs->{$key}), "\n");
     }
-    
+
     my $node = {
         Name => $element->getName,
         Attributes => $attribs,
@@ -140,13 +145,13 @@ sub process_element {
         Prefix => $element->getPrefix,
         LocalName => $element->getLocalName,
     };
-    
+
     $self->start_element($node);
-    
-    foreach my $child ($element->getChildnodes) {
+
+    foreach my $child ($element->childNodes) {
         $self->process_node($child);
     }
-    
+
     delete $node->{Attributes};
 
     $self->end_element($node);

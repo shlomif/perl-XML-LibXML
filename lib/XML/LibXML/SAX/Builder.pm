@@ -6,13 +6,31 @@ use XML::LibXML;
 
 sub new {
     my $class = shift;
-    return bless {}, $class;
+    return bless {@_}, $class;
 }
 
 sub start_document {
     my ($self, $doc) = @_;
-    $self->{DOM} = XML::LibXML::Document->createDocument( );
+
+    $self->{DOM} = XML::LibXML::Document->createDocument({});
+
+    if ( defined $self->{Encoding} ) {
+        $self->xml_decl({Version => ($self->{Version} || '1.0') , Encoding => $self->{Encoding}});
+    }
+
     $self->{Parent} = undef;
+}
+
+sub xml_decl {
+    my $self = shift;
+    my $decl = shift;
+
+    if ( defined $decl->{Version} ) {
+        $self->{DOM}->setVersion( $decl->{Version} );
+    }
+    if ( defined $decl->{Encoding} ) {
+        $self->{DOM}->setEncoding( $decl->{Encoding} );
+    }
 }
 
 sub end_document {
@@ -31,7 +49,7 @@ sub start_element {
     else {
         $node = $self->{DOM}->createElement($el->{Name});
     }
-    
+
     # do attributes
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
@@ -43,7 +61,7 @@ sub start_element {
             $node->setAttribute($key => $attr);
         }
     }
-    
+
     # append
     if ($self->{Parent}) {
         $self->{Parent}->appendChild($node);
