@@ -622,6 +622,50 @@ domReplaceNode( xmlNodePtr oldnode, xmlNodePtr newnode ){
     return oldnode;
 }
 
+xmlChar*
+domGetNodeValue( xmlNodePtr n ) {
+    xmlChar * retval = NULL;
+    if( n != NULL ) {
+        if ( n->type != XML_ATTRIBUTE_NODE ){
+            if ( n->content != NULL ) {
+                retval = xmlStrdup(n->content);
+            }
+            else {
+                if ( n->children != NULL ) {
+                    xmlNodePtr cnode = n->children;
+                    xs_warn ( "oh the node has children ..." );
+                    /* ok then toString in this case ... */
+                    while (cnode) {
+                        xmlBufferPtr buffer = xmlBufferCreate();
+                        /* buffer = xmlBufferCreate(); */
+                        xmlNodeDump( buffer, n->doc, cnode, 0, 0 );
+                        if ( buffer->content != NULL ) {
+                            xs_warn( "add item" );
+                            if ( retval != NULL ) {
+                                retval = xmlStrcat( retval, buffer->content );
+                            }
+                            else {
+                                retval = xmlStrdup( buffer->content );
+                            }
+                        }
+                        xmlBufferFree( buffer );
+                        cnode = cnode->next;
+                    }
+                }
+            }                    
+        }
+        else if ( n->children != NULL ) {
+            xs_warn("copy kiddies content!");
+            retval = xmlStrdup(n->children->content);
+        }
+        else {
+            xs_warn( "no bloddy data!" );
+        }
+    }
+
+    return retval;
+}
+
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
     if ( n == NULL ) 

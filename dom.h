@@ -76,6 +76,8 @@ domInsertAfter( xmlNodePtr self,
                 xmlNodePtr refChild );
 
 /* A.3 extra functionality not specified in DOM L1/2*/
+xmlChar*
+domGetNodeValue( xmlNodePtr self );
 void
 domSetNodeValue( xmlNodePtr self, xmlChar* value );
 void
