@@ -2,4 +2,4 @@
 <!ELEMENT doc (#PCDATA)>
 <!ENTITY foo " test ">
 ]>
-<doc>This is a valid document !</doc>
+<doc>This is a valid document &foo; !</doc>

@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 31 };
+BEGIN { plan tests => 32 };
 use XML::LibXML;
 
 ##
@@ -101,6 +101,14 @@ $fh = IO::File->new($badfile2);
 
 eval { my $doc = $parser->parse_fh($fh); };
 ok($@);
+
+{
+    $parser->expand_entities(1);
+    $doc = $parser->parse_file( "example/dtd.xml" );
+    my @cn = $doc->documentElement->childNodes;
+    ok( scalar @cn, 1 );
+    $parser->expand_entities(0);
+}
 
 print "# 5. x-include processing\n";
 
