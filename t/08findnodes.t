@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>12 }
+BEGIN { plan tests=>14 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -53,7 +53,11 @@ if ( defined $dom ) {
     $telem->iterator( sub { $itervar.=$_[0]->getName(); } );
     ok( $itervar, 'testbtext' );
 
+    print "# get the document\n";
+    ($telem) = $elem->findnodes( "/" );
+    ok( $telem );
 }
+ok( $dom );
 
 # test to make sure that multiple array findnodes() returns
 # don't segfault perl; it'll happen after the second one if it does

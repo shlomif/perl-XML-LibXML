@@ -226,9 +226,7 @@ setSvNodeExtra( SV* perlnode, SV* extra )
 {
     if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
         (SV*)((ProxyObject*)SvIV((SV*)SvRV(perlnode)))->extra = extra;
-        if ( perlnode != extra ) { /* different objects */
-           SvREFCNT_inc(extra);
-        }
+        SvREFCNT_inc(extra);
     }
     return perlnode;
 }

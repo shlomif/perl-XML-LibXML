@@ -2411,7 +2411,6 @@ _findnodes( node, xpath )
             int i = 0 ;
             const char * cls = "XML::LibXML::Node";
             xmlNodePtr tnode;
-            
             len = nodelist->nodeNr;
             for( i ; i < len; i++){
                /* we have to create a new instance of an objectptr. and then 
