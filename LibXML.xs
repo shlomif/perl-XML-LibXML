@@ -694,8 +694,11 @@ _parse_string(self, string)
             croak(SvPV(LibXML_error, len));
         }
         else {
+            STRLEN n_a;
+            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
+            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
+            SvREFCNT_dec(newURI);
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
-
             RETVAL = sv_newmortal();
             sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
             proxy->extra = RETVAL;
@@ -725,6 +728,10 @@ _parse_fh(self, fh)
             croak(SvPV(LibXML_error, len));
         }
         else {
+            STRLEN n_a;
+            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
+            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
+            SvREFCNT_dec(newURI);
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
@@ -809,6 +816,10 @@ parse_html_string(self, string)
             croak(SvPV(LibXML_error, len));
         }
         else {
+            STRLEN n_a;
+            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
+            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
+            SvREFCNT_dec(newURI);
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
@@ -840,6 +851,10 @@ parse_html_fh(self, fh)
             croak(SvPV(LibXML_error, len));
         }
         else {
+            STRLEN n_a;
+            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
+            real_dom->URL = xmlStrdup(SvPV(newURI, n_a));
+            SvREFCNT_dec(newURI);
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
@@ -913,8 +928,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Document
 void
 DESTROY(self)
         ProxyObject* self
-    PREINIT:
-        xmlDocPtr real_node;
     CODE:
         if ( self->object != NULL ) {
             xmlFreeDoc((xmlDocPtr)self->object);
