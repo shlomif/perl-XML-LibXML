@@ -267,13 +267,16 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
         }
     }
 
+
     /* tell all children about the new boss */ 
     if ( node && doc && node->doc != doc ) {
         xmlSetTreeDoc(return_node, doc);
     }
- 
-    xmlReconciliateNs( return_node->doc, return_node );
-    
+
+    if ( doc != NULL && return_node != NULL ) {
+        xmlReconciliateNs(doc, return_node);     
+    }
+
     return return_node;
 }
 
@@ -461,7 +464,7 @@ domInsertBefore( xmlNodePtr self,
     }
     
     domAddNodeToList(newChild, refChild->prev, refChild);
-     xmlReconciliateNs(self->doc, newChild);     
+    xmlReconciliateNs(self->doc, newChild);     
 
     return newChild;
 }

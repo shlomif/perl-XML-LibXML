@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>16; }
+BEGIN { plan tests=>21; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -92,4 +92,28 @@ print "# 4. post creation namespace setting\n";
     ok( $e2->setNamespace("http://kungfoo", "bar") );
     ok( $a->setNamespace("http://kungfoo", "bar") );
     ok( $a->nodeName, "bar:kung" );
+}
+
+print "# 5. importing namespaces\n";
+
+{
+
+    my $doca = XML::LibXML->createDocument;
+    my $docb = XML::LibXML->new()->parse_string( <<EOX );
+<x:a xmlns:x="http://foo.bar"><x:b/></x:a>
+EOX
+
+    my $b = $docb->documentElement->firstChild;
+
+    my $c = $doca->importNode( $b );
+
+    my @attra = $c->attributes;
+    ok( scalar(@attra), 1 );
+    ok( $attra[0]->nodeType, 18 );
+    my $d = $doca->adoptNode($b);
+
+    ok( $d->isSameNode( $b ) );
+    my @attrb = $d->attributes;
+    ok( scalar(@attrb), 1 );
+    ok( $attrb[0]->nodeType, 18 );
 }

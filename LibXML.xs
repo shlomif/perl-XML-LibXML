@@ -685,13 +685,13 @@ LibXML_init_parser( SV * self ) {
         else {
             LibXML_old_ext_ent_loader =  NULL; 
         }
-
     }
 
     /*
      * If the parser callbacks are not set, we have to check CLASS wide
      * callbacks.
      */
+
     if ( LibXML_match_cb == NULL ) {
         item2 = perl_get_sv("XML::LibXML::MatchCB", 0);
         if ( item != NULL  && SvTRUE(item2)) 
@@ -859,7 +859,8 @@ LibXML_parse_sax_stream(SV * self, SV * ioref, char * directory)
     
     read_length = LibXML_read_perl(ioref, buffer, 4);
     if (read_length > 0) {
-        ctxt = xmlCreatePushParserCtxt(PSaxGetHandler(),
+        xmlSAXHandlerPtr sax = PSaxGetHandler();
+        ctxt = xmlCreatePushParserCtxt(sax,
                                        NULL,
                                        buffer,
                                        read_length,
@@ -879,6 +880,8 @@ LibXML_parse_sax_stream(SV * self, SV * ioref, char * directory)
 
         xmlFree(ctxt->sax);
         ctxt->sax = NULL;
+
+        xmlFree(sax);
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
 
@@ -1133,6 +1136,7 @@ _parse_sax_string(self, string)
         char * ptr;
         int well_formed;
         int ret;
+        xmlSAXHandlerPtr sax = NULL;
     INIT:
         ptr = SvPV(string, len);
         if (len == 0) {
@@ -1145,12 +1149,12 @@ _parse_sax_string(self, string)
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
         }
-
+       
         PmmSAXInitContext( ctxt, self );
 
+        xmlFree(ctxt->sax);
         ctxt->sax = PSaxGetHandler();
 
-        /* LibXML_init_parser(self); */
         RETVAL = xmlParseDocument(ctxt);
 
         xmlFree( ctxt->sax );
@@ -1158,9 +1162,9 @@ _parse_sax_string(self, string)
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
 
+        sv_2mortal(LibXML_error);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser(); 
-
     OUTPUT:
         RETVAL
 
@@ -2028,7 +2032,7 @@ void
 DESTROY( self ) 
         SV * self
     CODE:
-        warn( "DROP PARSER CONTEXT!" );
+        xs_warn( "DROP PARSER CONTEXT!" );
         PmmContextREFCNT_dec( SvPROXYNODE( self ) );
 
 

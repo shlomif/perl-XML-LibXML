@@ -32,7 +32,8 @@ sub _parse_bytestream {
 
 sub _parse_string {
     my ( $self, $string ) = @_;
-    $self->{ParserOptions}{LibParser}      = XML::LibXML->new;
+#    $self->{ParserOptions}{LibParser}      = XML::LibXML->new;
+    $self->{ParserOptions}{LibParser}      = XML::LibXML->new()     unless defined $self->{ParserOptions}{LibParser};
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_string;
     $self->{ParserOptions}{ParseFuncParam} = $string;
     return $self->_parse;

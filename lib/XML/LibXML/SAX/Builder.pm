@@ -101,15 +101,18 @@ sub start_element {
     }
 
     # build namespaces
+    my $skip_ns= 0;
     foreach my $p ( $self->{NamespaceStack}->get_declared_prefixes() ) {
+         $skip_ns= 1;
         my $uri = $self->{NamespaceStack}->get_uri($p);
         my $nodeflag = 0;
         if ( defined $uri
              and defined $el->{NamespaceURI}
              and $uri eq $el->{NamespaceURI} ) {
-            $nodeflag = 1;
+#            $nodeflag = 1;
+            next;
         }
-        $node->setNamespace($uri, $p, $nodeflag );
+        $node->setNamespace($uri, $p, 0 );
     }
 
     # append
@@ -137,7 +140,7 @@ sub start_element {
 
 
             if ( defined $attr->{Prefix}
-                 and $attr->{Prefix} eq "xmlns" ) {
+                 and $attr->{Prefix} eq "xmlns" and $skip_ns == 0 ) {
                 # ok, the generator does not set namespaces correctly!
                 my $uri = $attr->{Value};
                 $node->setNamespace($uri,

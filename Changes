@@ -7,11 +7,13 @@ versions of the package. It is recommended to upgrade any XML::LibXML since
 
 1.54
    - Catalog interface is aware about libxml2 configuration
-   - XML::LibXML should work now on system without having zlib installed
+   - XML::LibXML should work now on system without having zlib installed (?)
    - fixed memory management problem introduced in 1.53
    - fixed default iterator of XML::LibXML::Iterator
    - interface for raw libxml2 DOM building functions 
-     (currently just addChild())
+     (currently just addChild(), others will follow)
+   - fixed memory leak in XML::LibXML::SAX (almost not leaking)
+   - fixed namespace handling if nodes are imported to a new DOM.
    - more documentation 
 
 1.53
