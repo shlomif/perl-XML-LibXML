@@ -14,6 +14,7 @@ example/dromeds.xml
 example/bad.xml
 example/libxml.xml
 example/xml2pod.pl
+example/test.html
 t/01basic.t
 t/02parsestring.t
 t/03parsefile.t
@@ -22,3 +23,7 @@ t/05dombasic.t
 t/06nodetypes.t
 t/07nodelist.t
 t/08findnodes.t
+t/09append.t
+t/10ns.t
+t/11memory.t
+t/12html.t
