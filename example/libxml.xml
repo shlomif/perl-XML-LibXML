@@ -7,8 +7,19 @@
 	provides functions that are conform to the DOM Core naming
 	style.
 
+    It is suggested, allways to create a node unbound of a document.
+    There is no need of really including the node to the document, but
+    since the node is once bound to a document, it is quite save that
+    all strings have the correct encoding. If an unbound textnode with
+    an iso encoded string is created (e.g. with $CLASS->new()), the
+    <i>toString</i> function may not return the expected result.
+
+    This seems like a limitation as long UTF8 encoding is ashured. If
+    iso encoded strings come into play it is much saver to use the
+    node creation functions of <b>XML::LibXML::Document</b>. 
+
 <method name="new" 
-	synopsis="$dom = XML::LibXML::Document->new( $version, $encoding )">
+	synopsis="$dom = XML::LibXML::Document->new( $version, $encoding );">
 	alias for createDocument()
 </method>
 
@@ -21,12 +32,43 @@
 <example><![CDATA[
   <?xml version="your version" encoding="your encoding"?>
 ]]></example>
+
+     Both parameter are optional. The default value for <b>$version</b> is
+     <i>1.0</i>, of course. If the <b>$encoding</b> parameter is not set,
+     the encoding will be left unset, which means UTF8 is implied.
+
+     The parameter less call of <b>createDocument</b> wil result the 
+     following code:
+
+<example><![CDATA[
+  <?xml version="1.0"?>
+]]></example>
+</method>
+
+<method name="getEncoding" synopsis="$strEncoding = $doc->getEncoding();">
+    returns the encoding string of the document
+</method>
+
+<method name="getVersion" synopsis="$strVersion = $doc->getVersion();">
+    returns the version string of the document
+</method>
+
+<method name="isEqual" synopsis="$bool = $doc->isEqual( $other_doc );">
+    returns TRUE (1) if documents refer to the same documentstructure,
+    otherwise FALSE (0) is returned.
 </method>
 
 <method name="toString" 
-	synopsis="$docstring = $dom->toString();">
+	synopsis="$docstring = $dom->toString([$format]);">
 	<b>toString</b> is a deparsing function, so the DOM Tree can
 	be translated into a string, ready for output.
+
+    The optional <b>$format</b> parameter sets the indenting of the 
+    output. This parameter is expected to be an <i>integer</i> value,
+    that specifies the number of linebreaks for each node.
+
+    For more information about the formatted output check the documentation
+    of <i>xmlDocDumpFormatMemory</i> in <i>libxml2/tree.h</i>.
 </method>
 
 <method name="is_valid" 
@@ -95,6 +137,11 @@
 	Returns the node's name
 </method>
 
+<method name="isEqual" synopsis="$bool = $node->isEqual( $other_node );">
+    returns TRUE (1) if documents refer to the same nodestructure,
+    otherwise FALSE (0) is returned.
+</method>
+
 <method name="getData" synopsis="$content = $node->getData()">
 	If the node has any content (such as stored in a <i>text
 	node</i>) it can get requested through this function.
@@ -139,10 +186,6 @@
 	<b>cloneNode</b> creates a copy of <i>$node</i>. Wether $deep
 	is set to 1 (true) the function will copy all childnodes as
 	well. If $deep is 0 only the current node will be copied.
-
-	By now the function is not aware about the CLASS that is
-	blessed to the node to copy, therefor all CLASS specific
-	functions will not be accesseble any more :-(
 </method>
 
 <method name="getParentNode" synopsis="$parentnode = $node->getParentNode()">
@@ -178,12 +221,14 @@
 	document the current node is bound to.
 </method>
 
-<method name="setOwnerDocument" synopsis="$node->setOwnerDocument( $dom );">
-	This function binds a node to another DOM. This method unbinds the node first, if 
-	it is allready bound to another document.
+<method name="setOwnerDocument" 
+    synopsis="$node->setOwnerDocument( $dom );">
+	This function binds a node to another DOM. This method unbinds the
+	node first, if it is allready bound to another document.
 </method>
 
-<method name="insertBefore" synopsis="$node->insertBefore( $newNode, $refNode )">
+<method name="insertBefore" 
+    synopsis="$node->insertBefore( $newNode, $refNode )">
     The method inserts <i>$newNode</i> before <i>$refNode</i>. If
     <i>$refNode</i> is undefined, the newNode will be set as the new
     first child of the parent node.
@@ -195,15 +240,16 @@
     last child of the parent node.
 </method>
 
-<method name="findnodes" synopsis="@nodes = $node->findnodes( $xpath_statement );">
+<method name="findnodes" 
+    synopsis="@nodes = $node->findnodes( $xpath_statement );">
 	<b>findnodes</b> performs the xpath statement on the current node and 
 	returns the result as an array. 
 </method>
 
 <method name="getChildnodes" synopsis="@children = $node->getChildnodes();">
-	<b>getChildnodes</b> implements a more intuitive interface to the childnodes 
-	of the current node. It enables you to pass all children directly to a <i>map</i>
-	or <i>grep</i>.
+	<b>getChildnodes</b> implements a more intuitive interface to the
+	childnodes of the current node. It enables you to pass all
+	children directly to a <i>map</i> or <i>grep</i>.
 </method>
 
 <method name="toString" synopsis="$xmlstring = $node->toString();">
@@ -213,6 +259,20 @@
 
 	There is no formating implemented yet, which may cause an unreadable 
 	output.
+</method>
+
+<method name="importNode"
+    synopsis="$document->importNode( $node [, $move] );">
+    <b>THIS FUNCTION IS NOT IMPLEMENTED YET</b>
+
+    If a node is not part of a document, it can be imported to another
+    document. As specified in DOM  Level 2 Specification the Node will
+    not be altered or removed from its original document by default. 
+    (<i>$node->cloneNode(1)</i> will get called implicitly). 
+
+    Sometimes it is nessecary to <i>move</i> a node between
+    documents. In such a case the node will not be copied, but removed
+    from the original document.
 </method>
 
 </description>
@@ -229,7 +289,6 @@
 <short>The DOM Element Class</short>
 <description>
 
-
 <method name="new" synopsis="$node = XML::LibXML::Element->new( $name )">
 	This function creates a new node unbound to any DOM.
 </method>
@@ -239,7 +298,8 @@
 	<i>$aname</i> to the value <i>$avalue</i>
 </method>
 
-<method name="getAttribute" synopsis="$avalue = $node->getAttribute( $aname );">
+<method name="getAttribute" 
+    synopsis="$avalue = $node->getAttribute( $aname );">
 	If <i>$node</i> has an attribute with the name <i>$aname</i>,
 	the value of this attribute will get returned.
 </method>
@@ -249,9 +309,11 @@
 	attribute list, if the attribute can be found.
 </method>
 
-<method name="getElementsByTagName" synopsis="@nodes = $node->getElementsByTagName($tagname);">
-	The function gives direct access to all childnodes of the current node with the 
-	same tagname. It makes things a lot easier if you need to handle big datasets. 
+<method name="getElementsByTagName" 
+    synopsis="@nodes = $node->getElementsByTagName($tagname);">
+	The function gives direct access to all childnodes of the current
+	node with the same tagname. It makes things a lot easier if you
+	need to handle big datasets.
 </method>
 
 <method name="appendWellBalancedChunk" 
@@ -261,9 +323,21 @@
 	But this is only done if the String is <i>well-balanced</i>. 
 </method>
 
-<method name="appendTextNode" synopsis="$node->appendTextNode( $PCDATA )">
+<method name="appendText" 
+    synopsis="$node->appendText( $PCDATA );">
+    alias for appendTextNode().
+</method>
+
+<method name="appendTextNode" synopsis="$node->appendTextNode( $PCDATA );">
     This wrapper function lets you add a string directly to an element
     node.
+</method>
+
+<method name="appendTextChild" 
+    synopsis="$node->appendTextChild( $childname , $PCDATA )">
+    Somewhat similar with <i>appendTextNode</i>: It lets you set an
+    Element, that contains only a <i>text node</i> directly by
+    specifying the name and the text content.
 </method>
 
 </description>
