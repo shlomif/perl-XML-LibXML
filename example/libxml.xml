@@ -731,7 +731,9 @@ by $node->getNamespaces().
 
 The namespace node API is not part of any current DOM API, and so it is quite
 minimal. It should be noted that namespace nodes are <b>not</b> a sub
-class of XML::LibXML::Node.
+class of XML::LibXML::Node, however Namespace nodes act a lot like
+attribute nodes, and similarly named methods will return what you would
+expect if you treated the namespace node as an attribute.
 
 <method name="getName" synopsis="print $ns->getName()">
   Returns "xmlns:prefix", where prefix is the prefix for this namespace.
@@ -743,6 +745,10 @@ class of XML::LibXML::Node.
 
 <method name="prefix" synopsis="print $ns->prefix()">
   Returns the prefix bound to this namespace declaration.
+</method>
+
+<method name="getLocalName" synopsis="$localname = $ns->getLocalName()">
+  Alias for prefix()
 </method>
 
 <method name="getData" synopsis="print $ns->getData()">
@@ -759,6 +765,16 @@ class of XML::LibXML::Node.
 
 <method name="uri" synopsis="print $ns->uri()">
   Alias for getData()
+</method>
+
+<method name="getNamespaceURI" 
+    synopsis="$known_uri = $ns->getNamespaceURI()">
+  Returns the string "http://www.w3.org/2000/xmlns/"
+</method>
+
+<method name="getPrefix"
+    synopsis="$known_prefix = $ns->getPredix()">
+  Returns the string "xmlns"
 </method>
 
 </description>
