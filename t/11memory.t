@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 8;
+        plan tests => 9;
     }
     else {
         print "1..0 # Skipping test on this platform\n";
@@ -9,29 +9,37 @@ BEGIN {
 }
 use XML::LibXML;
 if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
+    require Devel::Peek;
+    my $peek = 0;
+    
     ok(1);
+
+    my $times_through = $ENV{MEMORY_TIMES} || 100_000;
     
-    warn("BASELINE\n");
+    print("# BASELINE\n");
+    check_mem(1);
+
+    print("# MAKE DOC IN SUB\n");
+    {
+        my $doc = make_doc();
+        ok($doc);
+    
+        ok($doc->toString);
+    }
     check_mem();
 
-    warn("MAKE DOC IN SUB\n");
-    my $doc = make_doc();
-    ok($doc);
-
-    ok($doc->toString);
-    
-    check_mem();
-
-    warn("SET DOCUMENT ELEMENT\n");
-    $doc2 = XML::LibXML::Document->new();
-    make_doc_elem( $doc2 );
-    ok( $doc2 );
-    ok( $doc2->documentElement );
+    print("# SET DOCUMENT ELEMENT\n");
+    {
+        my $doc2 = XML::LibXML::Document->new();
+        make_doc_elem( $doc2 );
+        ok( $doc2 );
+        ok( $doc2->documentElement );
+    }
     check_mem();
 
     # multiple parsers:
-    warn("MULTIPLE PARSERS\n");
-    for (1..100000) {
+    print("# MULTIPLE PARSERS\n");
+    for (1..$times_through) {
         my $parser = XML::LibXML->new();
     }
     ok(1);
@@ -39,8 +47,8 @@ if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
     check_mem();
 
     # multiple parses
-    warn("MULTIPLE PARSES\n");
-    for (1..100000) {
+    print("# MULTIPLE PARSES\n");
+    for (1..$times_through) {
         my $parser = XML::LibXML->new();
         my $dom = $parser->parse_string("<sometag>foo</sometag>");
     }
@@ -49,16 +57,48 @@ if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
     check_mem();
 
     # multiple failing parses
-    warn("MULTIPLE FAILURES\n");
-    for (1..100000) {
+    print("# MULTIPLE FAILURES\n");
+    for (1..$times_through) {
         # warn("$_\n") unless $_ % 100;
         my $parser = XML::LibXML->new();
         eval {
-        my $dom = $parser->parse_string("<sometag>foo</somtag>"); # That's meant to be an error, btw!
+        my $dom = $parser->parse_string("<sometag>foo</somtag>"); # Thats meant to be an error, btw!
         };
     }
     ok(1);
     
+    check_mem();
+
+    # building custom docs
+    print("# CUSTOM DOCS\n");
+    my $doc = XML::LibXML::Document->new();
+    for (1..$times_through) {
+        {
+            my $elem = $doc->createElement('x');
+            
+            if($peek) {
+            warn("Doc before elem\n");
+            Devel::Peek::Dump($doc);
+            warn("Elem alone\n");
+            Devel::Peek::Dump($elem);
+            }
+            
+            # $doc->setDocumentElement($elem);
+            
+            if ($peek) {
+            warn("Elem after attaching\n");
+            Devel::Peek::Dump($elem);
+            warn("Doc after elem\n");
+            Devel::Peek::Dump($doc);
+            }
+        }
+        if ($peek) {
+        warn("Doc should be freed\n");
+        Devel::Peek::Dump($doc);
+        }
+    }
+    ok(1);
+
     check_mem();
 
 }
@@ -82,19 +122,29 @@ sub make_doc {
 }
 
 sub check_mem {
+    my $initialise = shift;
     # Log Memory Usage
     local $^W;
     my %mem;
-    if (open(FH, "/proc/self/statm")) {
-        @mem{qw(Total Resident Shared)} = split /\s+/, <FH>;
+    if (open(FH, "/proc/self/status")) {
+        my $units;
+        while (<FH>) {
+            if (/^VmSize.*?(\d+)\W*(\w+)$/) {
+                $mem{Total} = $1;
+                $units = $2;
+            }
+            if (/^VmRSS:.*?(\d+)/) {
+                $mem{Resident} = $1;
+            }
+        }
         close FH;
 
         if ($LibXML::TOTALMEM != $mem{Total}) {
-            warn("Mem difference! : ", $mem{Total} - $LibXML::TOTALMEM, "\n");
+            warn("LEAK! : ", $mem{Total} - $LibXML::TOTALMEM, " $units\n") unless $initialise;
             $LibXML::TOTALMEM = $mem{Total};
         }
 
-        warn("Mem Total: $mem{Total} Shared: $mem{Shared}\n");
+        print("# Mem Total: $mem{Total} $units, Resident: $mem{Resident} $units\n");
     }
 }
 
