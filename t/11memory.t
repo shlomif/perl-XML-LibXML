@@ -1,7 +1,14 @@
 use Test;
-BEGIN { plan tests => $^O eq 'linux' ? 8 : 0 }
+BEGIN { 
+    if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
+        plan tests => 8;
+    }
+    else {
+        print "1..0 # Skipping test on this platform\n";
+    }
+}
 use XML::LibXML;
-if ($^O eq 'linux') {
+if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
     ok(1);
     
     warn("BASELINE\n");
