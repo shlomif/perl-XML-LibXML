@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 55 };
+BEGIN { plan tests => 58 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -80,11 +80,19 @@ print "# 1. bound node\n";
     $elem->removeAttributeNS( $nsURI.".x", $foo);
     ok( !$elem->hasAttributeNS($nsURI.".x", $foo) );
 
+    # warn $elem->toString;
+    print "# set attribute ".$prefix . ":". $attname1."\n";
+
     $elem->setAttributeNS( $nsURI, $prefix . ":". $attname1, $attvalue2 );
+    # warn $elem->toString;
+
 
     $elem->removeAttributeNS("",$attname1);
+    # warn $elem->toString;
+
     ok( $elem->hasAttribute($attname1) );
     ok( $elem->hasAttributeNS($nsURI,$attname1) );
+    # warn $elem->toString;
 } 
 
 print "# 2. unbound node\n";
@@ -116,7 +124,8 @@ print "# 2. unbound node\n";
     # warn $elem->toString() , "\n";
 }
 
-print "# 3. Namespace switching\n";
+print "# 3. Namespace handling\n";
+print "# 3.1 Namespace switching\n";
 {
     my $elem = XML::LibXML::Element->new($foo);
     ok($elem);
@@ -133,6 +142,27 @@ print "# 3. Namespace switching\n";
     ok( not defined $nsAttr->ownerDocument);
     # warn $elem->toString() , "\n";
 } 
+
+print "# 3.2 default Namespace and Attributes\n";
+{
+    my $doc  = XML::LibXML::Document->new();
+    my $elem = $doc->createElementNS( "foo", "root" );
+    $doc->setDocumentElement( $elem );
+
+    $elem->setNamespace( "foo", "bar" );
+
+    $elem->setAttributeNS( "foo", "x:attr",  "test" );
+    $elem->setAttributeNS( undef, "attr2",  "test" );
+
+    ok( $elem->getAttributeNS( "foo", "attr" ), "test" );
+    ok( $elem->getAttributeNS( "", "attr2" ), "test" );
+
+    # warn $doc->toString;
+    # actually this doesn't work correctly with libxml2 <= 2.4.23
+    $elem->setAttributeNS( "foo", "attr2",  "bar" );
+    ok( $elem->getAttributeNS( "foo", "attr2" ), "bar" );
+    # warn $doc->toString;
+}
 
 print "# 4. Text Append and Normalization\n";
 

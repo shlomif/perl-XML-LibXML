@@ -769,7 +769,7 @@ is therefore a shortcut for
     </package>
 
     <package name="XML::LibXML::Node">
-        <short>"virtual" Base Class DOM-Nodes</short>
+        <short>abstract Base Class DOM-Nodes</short>
         <description>
             <p>
                 LibXML::Node defines functions that are common to all
@@ -1225,6 +1225,18 @@ is therefore a shortcut for
                 <p>
                     Although getNamespaces is available for all nodes,
                     it makes only sense if used with element nodes.
+                </p>
+            </method>
+
+            <method name="removeChildNodes" synopsis="$node->removeChildNodes();">
+                <p>
+                    This function is not specified for any DOM level:
+                    It removes all childnodes from a node in a single
+                    step.  Other than the libxml2 function itself
+                    (xmlFreeNodeList), this function will not
+                    imediatly remove the nodes from the memory. This
+                    safes one from getting memory violations, if there are 
+                    nodes still refered from the Perl level. 
                 </p>
             </method>
 

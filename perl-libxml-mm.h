@@ -125,6 +125,9 @@ PmmSetSvOwner(SV * perlnode, SV * owner );
 void
 PmmFixOwner(ProxyNodePtr node, ProxyNodePtr newOwner );
 
+void
+PmmFixOwnerNode(xmlNodePtr node, ProxyNodePtr newOwner );
+
 int
 PmmContextREFCNT_dec( ProxyNodePtr node );
 

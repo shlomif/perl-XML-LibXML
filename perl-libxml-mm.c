@@ -508,6 +508,19 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
     return(0);
 }
 
+void
+PmmFixOwnerNode( xmlNodePtr node, ProxyNodePtr parent )
+{
+    if ( node != NULL && parent != NULL ) {
+        if ( node->_private != NULL ) {
+            PmmFixOwner( node->_private, parent );
+        }
+        else {
+            PmmFixOwnerList(node->children, parent );
+        } 
+    }
+} 
+
 ProxyNodePtr
 PmmNewContext(xmlParserCtxtPtr node)
 {

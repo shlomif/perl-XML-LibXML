@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 118 };
+BEGIN { plan tests => 121 };
 use XML::LibXML;
 
 my $xmlstring = q{<foo>bar<foobar/><bar foo="foobar"/><!--foo--><![CDATA[&foo bar]]></foo>};
@@ -212,7 +212,20 @@ print "# 1.1 Node Attributes\n";
 
     }
 
-    print "# 2.2 Invalid Operations\n";    
+    print "# 2.2 Invalid Operations\n";
+
+
+    print "# 2.3 DOM extensions \n";
+    {
+        my $str = "<foo><bar/>com</foo>";
+        my $doc = XML::LibXML->new->parse_string( $str );
+        my $elem= $doc->documentElement;
+        ok( $elem );
+        ok( $elem->hasChildNodes );
+        $elem->removeChildNodes;
+        ok( $elem->hasChildNodes,0 );
+        $elem->toString;
+    }    
 }
 
 print "# 3   Standalone With NameSpaces\n\n"; 

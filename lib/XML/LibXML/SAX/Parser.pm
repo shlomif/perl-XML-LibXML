@@ -94,6 +94,10 @@ sub process_node {
         # ignore!
         # i may want to handle this one day, dunno yet
     }
+    else if ($node->type == XML_DTD_NODE ) {
+        # ignore!
+        # i will support DTDs, but had no time yet.
+    }
     else {
         warn("unsupported node type: $node_type");
     }

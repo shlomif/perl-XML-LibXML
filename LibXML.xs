@@ -22,6 +22,7 @@ extern "C" {
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
+#include <libxml/DOCBparser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xmlIO.h>
@@ -910,6 +911,57 @@ LibXML_parse_html_stream(SV * self, SV * ioref)
     return doc;
 }
 
+
+xmlDocPtr
+LibXML_parse_sgml_stream(SV * self, SV * ioref, SV * enc )
+{
+    xmlDocPtr doc = NULL;
+    htmlParserCtxtPtr ctxt;
+    int well_formed = 0;
+    char buffer[1024];
+    int read_length;
+    int ret = -1;
+
+    const xmlChar * encoding = Sv2C( enc, NULL );
+
+    read_length = LibXML_read_perl(ioref, buffer, 4);
+    if (read_length > 0) {
+        ctxt = docbCreatePushParserCtxt(NULL, NULL, buffer, read_length,
+                                        NULL,
+                                        xmlParseCharEncoding( (const char*)encoding ));
+        if (ctxt == NULL) {
+            croak("Could not create sgml push parser context: %s",
+                  strerror(errno));
+        }
+
+        ctxt->_private = (void*)self;
+
+        while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
+            ret = docbParseChunk(ctxt, buffer, read_length, 0);
+            if ( ret != 0 ) {
+                break;
+            }   
+        }
+        ret = docbParseChunk(ctxt, buffer, 0, 1);
+
+        if ( ret == 0 ) {
+            doc = ctxt->myDoc;
+            well_formed = ctxt->wellFormed;
+            docbFreeParserCtxt(ctxt);
+        }
+    }
+    else {
+        croak( "Empty Stream" );
+    }
+    
+    if (!well_formed) {
+        xmlFreeDoc(doc);
+        return NULL;
+    }
+    
+    return doc;
+}
+
 MODULE = XML::LibXML         PACKAGE = XML::LibXML
 
 PROTOTYPES: DISABLE
@@ -1533,7 +1585,7 @@ parse_html_fh(self, fh)
         }
     OUTPUT:
         RETVAL
-        
+       
 SV*
 parse_html_file(self, filename)
         SV * self
@@ -1572,6 +1624,183 @@ parse_html_file(self, filename)
         }
     OUTPUT:
         RETVAL
+
+SV*
+parse_sgml_fh(self, fh, encoding)
+        SV * self
+        SV * fh
+        SV * encoding
+    PREINIT:
+        STRLEN len;
+        xmlDocPtr real_dom;
+        HV* real_obj = (HV *)SvRV(self);
+        SV** item    = NULL;
+    CODE:
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
+        LibXML_init_parser(self);
+        real_dom = LibXML_parse_sgml_stream(self, fh, encoding);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+        
+        sv_2mortal(LibXML_error);
+        
+        if (!real_dom || ((*SvPV(LibXML_error, len)) != '\0')) {
+            RETVAL = &PL_sv_undef;    
+            croak(SvPV(LibXML_error, len));
+        }
+        else {
+            STRLEN n_a;
+            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
+            real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
+            SvREFCNT_dec(newURI);
+            item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
+
+            if ( item != NULL && SvTRUE(*item) ) {  
+                RETVAL = PmmNodeToGdomeSv( (xmlNodePtr)real_dom );
+            }
+            else {
+                RETVAL = PmmNodeToSv((xmlNodePtr)real_dom, NULL);
+            }
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+parse_sgml_string(self, string, encoding)
+        SV * self
+        SV * string
+        SV * encoding
+    PREINIT:
+        htmlParserCtxtPtr ctxt;
+        STRLEN len;
+        char * ptr;
+        int well_formed;
+        int ret;
+        xmlDocPtr real_dom;
+        HV* real_obj = (HV *)SvRV(self);
+        SV** item    = NULL;
+    CODE:
+        ptr = SvPV(string, len);
+        if (len == 0) {
+            croak("Empty string");
+        }
+        
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
+        LibXML_init_parser(self);
+        real_dom = (xmlDocPtr) docbParseDoc((xmlChar*)ptr,
+                                            Sv2C(encoding, NULL));
+
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();        
+
+        sv_2mortal(LibXML_error);
+        
+        if (!real_dom) {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
+        }
+        else {
+            STRLEN n_a;
+            SV * newURI = newSVpvf("unknown-%12.12d", real_dom);
+            real_dom->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
+            SvREFCNT_dec(newURI);
+
+            item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );            
+            if ( item != NULL && SvTRUE(*item) ) {  
+                RETVAL = PmmNodeToGdomeSv( (xmlNodePtr)real_dom );
+            }
+            else {
+                RETVAL = PmmNodeToSv((xmlNodePtr)real_dom, NULL);
+            }
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+parse_sgml_file(self, fn, encoding)
+        SV * self
+        SV * fn
+        SV * encoding
+    PREINIT:
+        const char * filename = (const char*)Sv2C( fn, NULL );
+        STRLEN len;
+        xmlDocPtr real_dom;
+        HV* real_obj = (HV *)SvRV(self);
+        SV** item    = NULL;
+    CODE:
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
+        LibXML_init_parser(self);
+        real_dom = (xmlDocPtr) docbParseFile(filename,
+                                             Sv2C(encoding, NULL));
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+
+        sv_2mortal(LibXML_error);
+        
+        if (!real_dom) {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
+        }
+        else {
+            item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
+
+            if ( item != NULL && SvTRUE(*item) ) {  
+                RETVAL = PmmNodeToGdomeSv( (xmlNodePtr)real_dom );
+            }
+            else {
+                RETVAL = PmmNodeToSv((xmlNodePtr)real_dom, NULL);
+            }
+        }
+    OUTPUT:
+        RETVAL
+
+
+void
+parse_sax_sgml_file(self, fn, enc )
+        SV * self
+        SV * fn
+        SV * enc
+    PREINIT:
+        const char * filename = Sv2C(fn, NULL);  
+        const char * encoding = Sv2C(enc, NULL);
+        xmlParserCtxtPtr ctxt;
+        STRLEN len;
+    CODE:
+        LibXML_init_parser(self);
+        ctxt = (xmlParserCtxtPtr) docbCreateFileParserCtxt(filename, encoding);
+
+        if (ctxt == NULL) {
+            croak("Could not create file parser context for file '%s' : %s", filename, strerror(errno));
+        }
+
+        ctxt->sax = PSaxGetHandler();
+        PmmSAXInitContext( ctxt, self );
+        
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+
+        docbParseDocument(ctxt);
+
+        xmlFree(ctxt->sax);
+        ctxt->sax = NULL;
+        PmmSAXCloseContext(ctxt);
+        xmlFreeParserCtxt(ctxt);
+                
+        sv_2mortal(LibXML_error);
+        
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+
 
 SV*
 _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
@@ -1634,7 +1863,7 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
                 }
             }
             else {
-                warn( "bad chunk" );
+                xs_warn( "bad chunk" );
                 croak(SvPV(LibXML_error, len));
                 XSRETURN_UNDEF;
             }
@@ -3771,6 +4000,53 @@ removeChild( pparen, child )
         RETVAL
 
 void
+removeChildNodes( pparen )
+        SV * pparen
+    PREINIT:
+        xmlNodePtr paren, elem, fragment;
+        ProxyNodePtr docfrag;
+    INIT:
+        if ( pparen == NULL
+             || pparen == &PL_sv_undef ) {
+            XSRETURN_UNDEF;
+        }
+        paren = PmmSvNode( pparen );
+        if ( paren == NULL ) {
+            croak( "In Scalar there was no node" );
+            XSRETURN_UNDEF;
+        }
+    CODE:
+        docfrag  = PmmNewFragment( paren->doc );
+        fragment = PmmNODE( docfrag );
+        elem = paren->children;
+        while ( elem ) {
+            xmlUnlinkNode( elem );
+            if ( elem->type != XML_ATTRIBUTE_NODE ) {
+                /* this following piece is the function of domAppendChild()
+                 * but in this special case we can avoid most of the logic of
+                 * that function.
+                 */ 
+                if ( fragment->children != NULL ) {
+                    xs_warn("unlink node!\n");
+                    domAddNodeToList( elem, fragment->last, NULL );
+                }
+                else {
+                    fragment->children = elem;
+                    fragment->last     = elem;
+                    elem->parent= fragment;
+                }
+            }
+            PmmFixOwnerNode( elem, docfrag );
+            elem = elem->next;
+        }
+
+        paren->children = paren->last = NULL;
+        if ( PmmREFCNT(docfrag) <= 0 ) {
+            xs_warn( "have not references left" );
+            PmmREFCNT_dec( docfrag );
+        }
+
+void
 unbindNode( proxyelem )
         SV* proxyelem
     PREINIT:
@@ -3782,17 +4058,18 @@ unbindNode( proxyelem )
             XSRETURN_UNDEF;
         }
     CODE:
-        if ( elem->type != XML_ATTRIBUTE_NODE ) {
-            if ( elem->doc != NULL ) 
-                dfProxy = PmmNewFragment(elem->doc);
-            else 
-                dfProxy = PmmNewFragment(NULL);
-        }
-
-        xmlUnlinkNode( elem );
-        if ( elem->type != XML_ATTRIBUTE_NODE )            
-            domAppendChild( PmmNODE(dfProxy), elem );
-        if ( elem->_private != NULL ) {
+        if ( elem->type != XML_DOCUMENT_NODE
+             || elem->type != XML_DOCUMENT_FRAG_NODE ) {
+            if ( elem->type != XML_ATTRIBUTE_NODE ) {
+                if ( elem->doc != NULL ) 
+                    dfProxy = PmmNewFragment(elem->doc);
+                else 
+                    dfProxy = PmmNewFragment(NULL);
+            }
+            xmlUnlinkNode( elem );
+            if ( elem->type != XML_ATTRIBUTE_NODE ) {
+                domAppendChild( PmmNODE(dfProxy), elem );
+            }
             PmmFixOwner( SvPROXYNODE(proxyelem), dfProxy );
         }
 
@@ -4259,7 +4536,33 @@ getNamespaces( pnode )
             }
             ns = ns->next;
         }
-    
+
+SV *
+getNamespace( pnode )
+        SV * pnode
+    ALIAS:  
+        localNamespace = 1
+        localNS        = 2
+    PREINIT:
+        xmlNodePtr node;
+        xmlNsPtr ns = NULL;
+        xmlNsPtr newns = NULL;
+        const char * class = "XML::LibXML::Namespace";
+    CODE:
+        node = PmmSvNode(pnode);
+        ns = node->ns;
+        if ( ns != NULL ) {
+            newns = xmlCopyNamespace(ns);
+            if ( newns != NULL ) {
+                RETVAL = NEWSV(0,0);
+                RETVAL = sv_setref_pv( RETVAL,
+                                       (const char *)class,
+                                       (void*)newns
+                                      );
+            }
+        }
+    OUTPUT:
+        RETVAL
         
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
@@ -4296,8 +4599,18 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
         }
 
         nsPrefix = nodeSv2C(namespacePrefix, node);
-        if ( ns = xmlSearchNsByHref(node->doc, node, nsURI) )
-            RETVAL = 1;
+        if ( ns = xmlSearchNsByHref(node->doc, node, nsURI) ) {
+            if ( ns->prefix == nsPrefix               /* both are NULL then */
+                 || xmlStrEqual( ns->prefix, nsPrefix ) ) {            
+                RETVAL = 1;
+            }
+            else if ( ns = xmlNewNs( node, nsURI, nsPrefix ) ) {
+                RETVAL = 1;
+            }
+            else {
+                RETVAL = 0;
+            }
+        }
         else if ( ns = xmlNewNs( node, nsURI, nsPrefix ) )
             RETVAL = 1;
         else
@@ -4514,10 +4827,17 @@ getAttributeNS( self, namespaceURI, attr_name )
             xmlFree(nsURI);
             XSRETURN_UNDEF;
         }
-        
-        ret = xmlGetNsProp( node, name, nsURI );
+        if ( nsURI && xmlStrlen(nsURI) ) {     
+            ret = xmlGetNsProp( node, name, nsURI );
+        }
+        else {
+            ret = xmlGetProp( node, name );
+        }
+
         xmlFree( name );
-        xmlFree( nsURI );
+        if ( nsURI ) {
+            xmlFree( nsURI );
+        }
         if ( ret ) {
             RETVAL = nodeC2Sv( ret, node );
             xmlFree( ret );
@@ -4540,75 +4860,65 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlChar * name  = NULL;
         xmlChar * value = NULL;
         const xmlChar * pchar = NULL;
-        xmlNsPtr ns;
+        xmlNsPtr ns         = NULL;
+        xmlChar * localname = NULL;
+        xmlChar * prefix    = NULL;
+    INIT:
+        name  = nodeSv2C( attr_name, node );        
+        if ( !name && !xmlStrlen( name ) ) {
+            if ( nsURI ) {
+                xmlFree( nsURI);
+            }
+            croak( "no name" );
+            XSRETURN_UNDEF;
+        }
+        localname = xmlSplitQName2(name, &prefix); 
+        if ( localname ) {
+            xmlFree( name ); 
+            name = localname;
+        }
     CODE:
+        value = nodeSv2C( attr_value, node ); 
+
         if ( nsURI && xmlStrlen(nsURI) ) {
+            xs_warn( "found uri" );
+
             ns = xmlSearchNsByHref( node->doc, node, nsURI );
             if ( !ns ) {
                 /* create new ns */
-                xmlChar * localname = NULL;
-                xmlChar * prefix = NULL;
-
-                name  = nodeSv2C( attr_name, node );
-                if ( ! name ) {
-                    xmlFree(nsURI);
-                    XSRETURN_UNDEF;
+                 if ( prefix && xmlStrlen( prefix ) ) {
+                    ns = xmlNewNs(node, nsURI , prefix );
+                 }
+                 else {
+                    ns = NULL;
+                 }
+            }
+            else if ( !ns->prefix ) {
+                if ( ns->next && ns->next->prefix ) {
+                    ns = ns->next;
                 }
-
-                pchar = xmlStrchr(name, ':');
-                if ( pchar ) {
-                    localname = xmlSplitQName2(name, &prefix); 
+                else if ( prefix && xmlStrlen( prefix ) ) {
+                    ns = xmlNewNs(node, nsURI , prefix );
                 }
                 else {
-                    localname = xmlStrdup( name );
-                }
-            
-                xmlFree( name );
-                name = localname;
-            
-                ns = xmlNewNs(node, nsURI , prefix );
-                if ( prefix ) {
-                    xmlFree( prefix );
+                    ns = NULL;
                 }
             }
-            else {
-                xmlChar * localname = NULL;
-                xmlChar * prefix = NULL;
+        }
 
-                name  = nodeSv2C( attr_name, node );
-                if (!name) {
-                    xmlFree(nsURI);
-                    XSRETURN_UNDEF;
-                }
-
-                pchar = xmlStrchr(name, ':');
-                if ( pchar ) {
-                    localname = xmlSplitQName2(name, &prefix); 
-                }
-                else {
-                    localname = xmlStrdup( name );
-                }
-
-                if ( prefix ) {
-                    xmlFree(prefix);
-                }
-                xmlFree(name);
-                name = localname;
-            }
-            xmlFree(nsURI);
-
-            value = nodeSv2C( attr_value, node );
-         
-            xmlSetNsProp( node, ns, name, value );
+        if ( nsURI && xmlStrlen(nsURI) && !ns ) {
+            xs_warn( "bad ns attribute!" );
         }
         else {
-            name  = nodeSv2C( attr_name, node );
-            if (!name) {
-                xmlFree(nsURI);
-                XSRETURN_UNDEF;
-            }
-            value = nodeSv2C( attr_value, node ); 
-            xmlSetProp( node, name, value );            
+            /* warn( "set attribute %s->%s", name, value ); */
+            xmlSetNsProp( node, ns, name, value );            
+        }
+        
+        if ( prefix ) {
+            xmlFree( prefix );
+        }
+        if ( nsURI ) {
+            xmlFree( nsURI );
         }
         xmlFree( name );
         xmlFree( value );
@@ -4634,7 +4944,7 @@ removeAttributeNS( self, namespaceURI, attr_name )
             xattr = xmlHasNsProp( node, name, nsURI );
         }
         else {
-            xattr = xmlHasProp( node, name );
+            xattr = xmlHasNsProp( node, name, NULL );
         }
         if ( xattr ) {
             xmlUnlinkNode((xmlNodePtr)xattr);

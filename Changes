@@ -7,6 +7,9 @@ versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
 1.53
+   - enabled SGML parsing
+   - fixed namespace setting in XPath functions:
+     the namespaces of the document element will always be added now
    - implemented libxml2 dom recovering
    - introduced transparent XML::GDOME import. (EXPERIMENTAL)
    - calling external entity handlers work again
