@@ -7,8 +7,16 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 460 };
-use XML::LibXML;
+BEGIN { use XML::LibXML;
+    if ( XML::LibXML::LIBXML_VERSION >= 20600 ) {
+        plan tests => 468; 
+    }
+    else {
+        plan tests => 460;
+        print "# skip NS cleaning tests\n";
+    }
+};
+
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
 use XML::LibXML::SAX::Builder;
@@ -711,6 +719,59 @@ EOXML
     ok( $kids[1]->line_number(), 0 );
 
 
+}
+
+if ( XML::LibXML::LibXML_VERSION >= 20600 )
+{
+    print "# 8 Clean Namespaces\n";
+
+    my ( $xsDoc1, $xsDoc2 );
+    $xsDoc1 = q{<A:B xmlns:A="http://D"><A:C xmlns:A="http://D"></A:C></A:B>};
+    $xsDoc2 = q{<A:B xmlns:A="http://D"><A:C xmlns:A="http://E"/></A:B>};
+
+    my $parser = XML::LibXML->new();
+    $parser->clean_namespaces(1);
+
+    my $fn1 = "example/xmlns/goodguy.xml";
+    my $fn2 = "example/xmlns/badguy.xml";
+
+    ok( $parser->parse_string( $xsDoc1 )->documentElement->toString(),
+        q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
+    ok( $parser->parse_string( $xsDoc2 )->documentElement->toString(), 
+        $xsDoc2 );
+
+    ok( $parser->parse_file( $fn1  )->documentElement->toString(), 
+        q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
+    ok( $parser->parse_file( $fn2 )->documentElement->toString() , 
+        $xsDoc2 );
+    
+    my $fh1 = IO::File->new($fn1);  
+    my $fh2 = IO::File->new($fn2);  
+
+    ok( $parser->parse_fh( $fh1  )->documentElement->toString(), 
+        q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
+    ok( $parser->parse_fh( $fh2 )->documentElement->toString() , 
+        $xsDoc2 );
+
+    my @xaDoc1 = ('<A:B xmlns:A="http://D">','<A:C xmlns:A="h','ttp://D"/>' ,'</A:B>');
+    my @xaDoc2 = ('<A:B xmlns:A="http://D">','<A:C xmlns:A="h','ttp://E"/>' , '</A:B>');
+
+    my $doc;
+
+    foreach ( @xaDoc1 ) {
+        $parser->parse_chunk( $_ );
+    }
+    $doc = $parser->parse_chunk( "", 1 );
+    ok( $doc->documentElement->toString(), 
+        q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
+
+
+    foreach ( @xaDoc2 ) {
+        $parser->parse_chunk( $_ );
+    }
+    $doc = $parser->parse_chunk( "", 1 );
+    ok( $doc->documentElement->toString() , 
+        $xsDoc2 );
 }
 
 sub tsub {

@@ -1,6 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
 1.58
+   - added NSCLEAN feature to the parser interface (bug 4560)
    - minor code cleanups
    - updated libxml2 blacklist.
    - fixed croak while requesting nodeName() of CDATA sections (bug 1694).

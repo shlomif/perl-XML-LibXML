@@ -285,6 +285,11 @@ sub gdome_dom {
     return $self->{XML_LIBXML_GDOME};
 }
 
+sub clean_namespaces {
+    my $self = shift;
+    $self->{XML_LIBXML_NSCLEAN} = shift if scalar @_;
+    return $self->{XML_LIBXML_NSCLEAN};
+}
 
 #-------------------------------------------------------------------------#
 # set the optional SAX(2) handler                                         #

@@ -952,6 +952,12 @@ _parse_string(self, string, dir = &PL_sv_undef)
             xs_warn( "context initialized\n" );
 
             {
+#if LIBXML_VERSION > 20600
+                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NSCLEAN;
+                }
+#endif
                 xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
             }
@@ -1085,9 +1091,15 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             }
             ctxt->_private = (void*)self;
             xs_warn( "context initialized \n");
-
             {
                 int ret;
+#if LIBXML_VERSION > 20600
+                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NSCLEAN;
+                }
+#endif
+
                 while ((read_length = LibXML_read_perl(fh, buffer, 1024))) {
                     ret = xmlParseChunk(ctxt, buffer, read_length, 0);
                     if ( ret != 0 ) {
@@ -1242,6 +1254,12 @@ _parse_file(self, filename_sv)
             xs_warn( "context initialized \n");
 
             {
+#if LIBXML_VERSION > 20600
+                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NSCLEAN;
+                }
+#endif
                 xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
             }
@@ -1903,7 +1921,14 @@ _start_push(self, with_sax=0)
 
         /* create empty context */
         ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
-
+#if LIBXML_VERSION > 20600
+        {
+                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NSCLEAN;
+                }
+        }
+#endif
         if ( with_sax == 1 ) {
             PmmSAXInitContext( ctxt, self );
         }

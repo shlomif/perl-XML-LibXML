@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <book lang="en-us">
   <title>XML::LibXML</title>
   <bookinfo>
@@ -133,7 +131,7 @@
             <para>past 2.4.25: tested, working</para>
           </listitem>
           <listitem>
-            <para>past 2.5.0: tested; working</para>
+            <para>past 2.5.0: tested; brocken Attribute handling</para>
           </listitem>
           <listitem>
             <para>version 2.5.5: tested; tests pass, but known as broken</para>
@@ -1062,6 +1060,18 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             <para>To make use of this function, one has to install libgdome
             and configure XML::LibXML to use this library. For this you need
             to rebuild XML::LibXML!</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>clean_namespaces</term>
+          <listitem>
+            <funcsynopsis>
+              <funcsynopsisinfo>$parser-&#62;clean_namespaces( 1 );</funcsynopsisinfo>
+            </funcsynopsis>
+            <para>libxml2 2.6.0 and later allows to strip redundant namespace
+            declarations from the DOM tree. To do this, one has to set
+            clean_namespaces() to 1 (TRUE). By default no namespace cleanup is
+            done.</para>
           </listitem>
         </varlistentry>
       </variablelist>
