@@ -300,7 +300,7 @@ sub processXIncludes {
     my $dom  = shift;
 
     $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-    $result->process_xinclude();
+    $dom->process_xinclude();
     $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
 }
 
@@ -333,6 +333,7 @@ sub XML_XINCLUDE_END(){20;}
 @XML::LibXML::Attr::ISA             = 'XML::LibXML::Node';
 @XML::LibXML::DocumentFragment::ISA = 'XML::LibXML::Node';
 @XML::LibXML::Dtd::ISA              = 'XML::LibXML::Node';
+@XML::LibXML::PI::ISA               = 'XML::LibXML::Node';
 
 
 sub XML::LibXML::Node::iterator {

@@ -13,7 +13,7 @@ extern "C" {
 #include <libxml/HTMLtree.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <libxml/debugXML.h>
+/* #include <libxml/debugXML.h> */
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
@@ -1561,6 +1561,58 @@ getDocumentElement( dom )
     OUTPUT:
         RETVAL
 
+void
+addProcessingInstruction( dom, name, content )
+        SV * dom
+        char * name 
+        char * content
+    PREINIT:
+        xmlNodePtr pinode = NULL;
+        xmlDocPtr real_dom;
+    CODE:
+        real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
+        /* pinode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
+                            domEncodeString( real_dom->encoding, content ) );*/
+        pinode = xmlNewPI( name, content );
+        domInsertBefore( (xmlNodePtr)real_dom, 
+                         pinode, 
+                         domDocumentElement( real_dom ) );
+
+ProxyObject *
+createProcessingInstruction( dom, name, content )
+        SV * dom
+        char * name 
+        char * content
+    PREINIT:
+        char * CLASS = "XML::LibXML::Element";
+        xmlNodePtr newNode;
+        xmlDocPtr real_dom;
+        xmlNodePtr docfrag = NULL;
+        ProxyObject * dfProxy= NULL;
+        SV * docfrag_sv = NULL;
+    CODE:
+        real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
+
+        docfrag = xmlNewDocFragment( real_dom );
+        dfProxy = make_proxy_node( docfrag );
+        docfrag_sv =sv_newmortal();
+        sv_setref_pv( docfrag_sv, "XML::LibXML::DocumentFragment", (void*)dfProxy );
+        dfProxy->extra = docfrag_sv;
+        # warn( "NEW FRAGMENT ELEMNT (%s)", name);
+        # SvREFCNT_inc(docfrag_sv);    
+
+        /* newNode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
+                            domEncodeString( real_dom->encoding, content ) );*/
+        newNode = xmlNewPI( name, content );
+        newNode->doc = real_dom;
+        domAppendChild( docfrag, newNode );
+        # warn( newNode->name );
+        RETVAL = make_proxy_node(newNode);
+        RETVAL->extra = docfrag_sv;
+        SvREFCNT_inc(docfrag_sv);
+    OUTPUT:
+        RETVAL
+
 ProxyObject *
 importNode( dom, node, move=0 ) 
         SV * dom
@@ -1788,7 +1840,10 @@ replaceChild( paren, newChild, oldChild )
             CLASS = domNodeTypeName( ret );
             RETVAL = make_proxy_node(ret);
             
-            if ( paren->extra != NULL ){
+            if ( ((xmlNodePtr)paren->object)->type == XML_DOCUMENT_NODE ) {
+                pproxy = paren;
+            }
+            else if ( paren->extra != NULL ){
                 pproxy = (ProxyObject*)SvIV((SV*)SvRV(paren->extra));
             }
             if (  newChild->extra != NULL ) {
@@ -1824,11 +1879,23 @@ appendChild( parent, child )
     PREINIT:
         ProxyObject* pproxy = NULL;
         ProxyObject* cproxy = NULL;
+        xmlNodePtr test = NULL;
     CODE:
-        domAppendChild( parent->object, child->object );
+        test = domAppendChild( parent->object, child->object );
         # update the proxies if nessecary
+       # if ( test == NULL ) {
+       #     croak( "child was not appended\n" );
+       # }
 
-        if ( parent->extra != NULL ){
+
+        if ( parent == NULL ) {
+            croak("parent problem!\n");
+        }
+
+        if ( ((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE ) {
+            pproxy = parent;
+        }
+        else if ( parent->extra != NULL ){
             pproxy = (ProxyObject*)SvIV((SV*)SvRV(parent->extra));
         }
         if ( child->extra != NULL ) {
@@ -1848,6 +1915,9 @@ appendChild( parent, child )
                 # warn("increase child documents");   
                 SvREFCNT_inc(child->extra);
             }
+        }
+        else {
+            # warn( "object failure\n" );
         }
 
 ProxyObject *
@@ -2011,7 +2081,10 @@ insertBefore( self, new, ref )
         ProxyObject* cproxy= NULL; 
     CODE:
         domInsertBefore( self->object, new->object, ref );
-        if ( self->extra != NULL ){
+        if ( ((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE ) {
+            pproxy = self;
+        }
+        else if ( self->extra != NULL ){
             pproxy = (ProxyObject*)SvIV((SV*)SvRV(self->extra));
         }
         if ( new->extra != NULL ) {
@@ -2044,7 +2117,10 @@ insertAfter( self, new, ref )
         ProxyObject* cproxy= NULL; 
     CODE:
         domInsertAfter( self->object, new->object, ref );
-        if ( self->extra != NULL ){
+        if ( ((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE ) {
+            pproxy = self;
+        }
+        else if ( self->extra != NULL ){
             pproxy = (ProxyObject*)SvIV((SV*)SvRV(self->extra));
         }
         if ( new->extra != NULL ) {
@@ -3013,6 +3089,52 @@ appendTextChild( self, childname, xmlString )
         }
         xmlNewTextChild( self, NULL, childname, xmlString );
 
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::PI
+
+ProxyObject *
+new( CLASS, name, content )
+        const char * CLASS
+        char * name
+        char * content
+    PREINIT:
+        xmlNodePtr newNode;
+    CODE:
+        /* we should test if this is UTF8 ... because this WILL cause
+         * problems with iso encoded strings :(
+         */
+        newNode = xmlNewPI( name, content );
+        if( newNode != NULL ) {
+            # init the keeping fragment
+            xmlNodePtr docfrag = NULL;
+            ProxyObject * dfProxy = NULL; 
+            SV * docfrag_sv = NULL;
+
+            docfrag = xmlNewDocFragment(NULL);
+            dfProxy = make_proxy_node( docfrag );
+
+            docfrag_sv = sv_newmortal(); 
+            sv_setref_pv( docfrag_sv, 
+                          "XML::LibXML::DocumentFragment", 
+                          (void*)dfProxy );
+            dfProxy->extra = docfrag_sv;
+            # warn( "NEW FRAGMENT TEXT");
+            # SvREFCNT_inc(docfrag_sv);
+                     
+            domAppendChild( docfrag, newNode );            
+
+            RETVAL = make_proxy_node(newNode);
+            RETVAL->extra = docfrag_sv;
+            SvREFCNT_inc(docfrag_sv);
+        }
+    OUTPUT:
+        RETVAL
+
+void
+setData( node, value )
+        xmlNodePtr node
+        char * value
+    CODE:
+        domSetNodeValue( node, value );
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 
