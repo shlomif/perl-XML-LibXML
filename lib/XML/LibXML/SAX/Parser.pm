@@ -42,8 +42,8 @@ sub generate {
     my $self = shift;
     my ($node) = @_;
 
-    if ( $node->getType() == XML_DOCUMENT_NODE
-         || $node_type == XML_HTML_DOCUMENT_NODE ) {
+    if ( $node->nodeType() == XML_DOCUMENT_NODE
+         || $node->nodeType == XML_HTML_DOCUMENT_NODE ) {
         $self->start_document({});
         $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
         $self->process_node($node);
@@ -54,7 +54,7 @@ sub generate {
 sub process_node {
     my ($self, $node) = @_;
 
-    my $node_type = $node->getType();
+    my $node_type = $node->nodeType();
     if ($node_type == XML_COMMENT_NODE) {
         $self->comment( { Data => $node->getData } );
     }
