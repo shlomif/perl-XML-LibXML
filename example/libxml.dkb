@@ -2294,7 +2294,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           </funcsynopsis>
           <para>The method inserts <function>$newNode</function> before
           <function>$refNode</function>. If <function>$refNode</function> is
-          undefined, the newNode will be set as the new first child of the
+          undefined, the $newNode will be set as the last child of the
           parent node. This function differs from the DOM L2 specification, in
           the case, if the new node is not part of the document, the node will
           be imported first.</para>
