@@ -1069,6 +1069,7 @@ _parse_string(self, string, directory = NULL)
             croak("Empty string");
         }
 
+        LibXML_init_parser(self);
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
@@ -1083,7 +1084,6 @@ _parse_string(self, string, directory = NULL)
         sv_setpvn(LibXML_error, "", 0);
         
         # warn( "context initialized \n");        
-        LibXML_init_parser(self);
         ret = xmlParseDocument(ctxt);
 
         # warn( "document parsed \n");

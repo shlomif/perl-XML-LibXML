@@ -109,6 +109,9 @@ bootstrap XML::LibXML $VERSION;
 sub new {
     my $class = shift;
     my %options = @_;
+    if ( not exists $options{XML_LIBXML_KEEP_BLANKS} ) {
+        $options{XML_LIBXML_KEEP_BLANKS} = 1;
+    }
     my $self = bless \%options, $class;
     return $self;
 }

@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 33 };
+BEGIN { plan tests => 35 };
 use XML::LibXML;
 
 ##
@@ -83,6 +83,18 @@ ok($@);
 eval { $parser->parse_file($badfile2); };
 ok($@);
 
+{
+    my $str = "<a>    <b/> </a>";
+    my $tstr= "<a><b/></a>";
+    $parser->keep_blanks(0);
+    my $docA = $parser->parse_string($str);
+    my $docB = $parser->parse_file("example/test3.xml");
+    $XML::LibXML::skipXMLDeclaration = 1;
+    ok( $docA->toString, $tstr );
+    ok( $docB->toString, $tstr );
+    $XML::LibXML::skipXMLDeclaration = 0;
+}
+
 print "# 4. Parse A Handle\n";
 
 my $fh = IO::File->new($goodfile);
@@ -134,9 +146,10 @@ my $badXInclude = q{
 
 {
     $parser->base_uri( "example/" );
-
+    $parser->keep_blanks(0);
     my $doc = $parser->parse_string( $goodXInclude );
     ok($doc);
+
     my $i;
     eval { $i = $parser->processXIncludes($doc); };
     ok( $i );
