@@ -2378,6 +2378,7 @@ getData( proxy_node, useDomEncoding = &PL_sv_undef )
         XML::LibXML::Attr::value     = 1
         XML::LibXML::Node::nodeValue = 2
         XML::LibXML::Attr::getValue  = 3
+        XML::LibXML::Text::data      = 4
     PREINIT:
         xmlNodePtr node;
         xmlChar * content = NULL;

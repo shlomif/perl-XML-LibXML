@@ -17,7 +17,9 @@ while($_ = shift) {
 my $DEBUG = delete $config{DEBUG};
 
 # $config{DEFINE} .= " -DXS_WARNINGS";
-if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
+
+if ( $] > 5.006 ) {
+# if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
     warn "enable native perl UTF8\n";
 
     $config{DEFINE} .= " -DHAVE_UTF8";
@@ -25,12 +27,16 @@ if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
 
 # get libs and inc from gnome-config
 eval {
+    my $xml2cfg = "xml2-config";
+    if ( defined $config{XMLPREFIX} ) {
+        $xml2cfg = $config{XMLPREFIX} . '/' . $xml2cfg;
+    }
     print "running xml2-config... ";
-    my $ver = backtick('xml2-config --version');
+    my $ver = backtick("$xml2cfg --version");
     my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
     die "VERSION" unless $major > 2 || $minor > 4 || $point >= 8;
-    $config{LIBS} ||= backtick('xml2-config --libs');
-    $config{INC} ||= backtick('xml2-config --cflags');
+    $config{LIBS} ||= backtick("$xml2cfg --libs");
+    $config{INC}  ||= backtick("$xml2cfg --cflags");
     print "ok\n";
 };
 if ($@) {
