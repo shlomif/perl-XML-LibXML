@@ -364,84 +364,79 @@ LibXML_get_context(SV * self)
     return (xmlParserCtxtPtr)SvIV((SV*)SvRV(*ctxt_sv));
 }
 
-xmlDocPtr
-LibXML_parse_stream(SV * self, SV * ioref)
+int
+LibXML_read_perl (SV * ioref, char * buffer, int len)
 {
     dSP;
     
-    xmlDocPtr doc;
-    xmlParserCtxtPtr ctxt;
-    int well_formed;
-    
-    SV * tbuff;
-    SV * tsize;
-    
-    int done = 0;
+    int cnt;
+    SV * read_results;
+    STRLEN read_length;
+    char * chars;
+    SV * tbuff = NEWSV(0,0);
+    SV * tsize = newSViv(len);
     
     ENTER;
     SAVETMPS;
     
-    tbuff = newSV(0);
-    tsize = newSViv(BUFSIZE);
+    PUSHMARK(SP);
+    EXTEND(SP, 3);
+    PUSHs(ioref);
+    PUSHs(tbuff);
+    PUSHs(tsize);
+    PUTBACK;
     
-    ctxt = LibXML_get_context(self);
+    cnt = perl_call_method("read", G_SCALAR);
     
-    while (!done) {
-        int cnt;
-        SV * read_results;
-        STRLEN read_length;
-        char * chars;
-        
-        SAVETMPS;
-        
-        PUSHMARK(SP);
-        EXTEND(SP, 3);
-        PUSHs(ioref);
-        PUSHs(tbuff);
-        PUSHs(tsize);
-        PUTBACK;
-        
-        cnt = perl_call_method("read", G_SCALAR);
-        
-        SPAGAIN;
-        
-        if (cnt != 1) {
-            croak("read method call failed");
+    SPAGAIN;
+    
+    if (cnt != 1) {
+        croak("read method call failed");
+    }
+    
+    read_results = POPs;
+    
+    if (!SvOK(read_results)) {
+        croak("read error");
+    }
+    
+    read_length = SvIV(read_results);
+    
+    chars = SvPV(tbuff, read_length);
+    strncpy(buffer, chars, read_length);
+    
+    FREETMPS;
+    LEAVE;
+    
+    return read_length;
+}
+
+xmlDocPtr
+LibXML_parse_stream(SV * self, SV * ioref)
+{
+    xmlDocPtr doc;
+    xmlParserCtxtPtr ctxt;
+    int well_formed;
+    char buffer[BUFSIZE];
+    int read_length;
+    int ret = -1;
+    
+    ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, 0, NULL);
+    ctxt->_private = (void*)self;
+    
+    read_length = LibXML_read_perl(ioref, buffer, 4);
+    if (read_length > 0) {
+        xmlParseChunk(ctxt, buffer, read_length, 0);
+        while(read_length = LibXML_read_perl(ioref, buffer, BUFSIZE)) {
+            xmlParseChunk(ctxt, buffer, read_length, 0);
         }
-        
-        read_results = POPs;
-        
-        if (!SvOK(read_results)) {
-            croak("read error");
-        }
-        
-        read_length = SvIV(read_results);
-        
-        chars = SvPV(tbuff, read_length);
-        
-        if (read_length > 0) {
-            if (read_length == BUFSIZE) {
-                xmlParseChunk(ctxt, chars, read_length, 0);
-            }
-            else {
-                xmlParseChunk(ctxt, chars, read_length, 1);
-                done = 1;
-            }
-        }
-        else {
-            done = 1;
-        }
-        
-        PUTBACK;
-        
-        FREETMPS;
+        ret = xmlParseChunk(ctxt, buffer, 0, 1);
     }
     
     doc = ctxt->myDoc;
     well_formed = ctxt->wellFormed;
     
-    FREETMPS;
-    LEAVE;
+    xmlFreeParserCtxt(ctxt);
     
     if (!well_formed) {
         xmlFreeDoc(doc);
@@ -586,30 +581,6 @@ load_ext_dtd(self, ...)
     OUTPUT:
         RETVAL
 
-void
-_prepare(self)
-        SV * self
-    PREINIT:
-        xmlParserCtxtPtr ctxt;
-        SV * ctxt_sv;
-    CODE:
-        sv_setpvn(LibXML_error, "", 0);
-        ctxt = xmlCreatePushParserCtxt(NULL, NULL, "", 0, NULL);
-        ctxt->_private = (void*)self;
-        ctxt_sv = NEWSV(0, 0);
-        sv_setref_pv(ctxt_sv, "XML::LibXML::Context", (void*)ctxt);
-        hv_store((HV *)SvRV(self), "_context", 8, ctxt_sv, 0);
-
-void
-_release(self)
-        SV * self
-    PREINIT:
-        xmlParserCtxtPtr ctxt;
-        SV * hval;
-    CODE:
-        hval = hv_delete((HV *)SvRV(self), "_context", 8, 0);
-        ctxt = (xmlParserCtxtPtr)SvIV( (SV*)SvRV(hval) );
-
 char *
 get_last_error(CLASS)
         char * CLASS
@@ -630,13 +601,19 @@ _parse_string(self, string)
         STRLEN len;
         char * ptr;
         int well_formed;
+        int ret;
     CODE:
         ptr = SvPV(string, len);
-        ctxt = LibXML_get_context(self);
-        xmlParseChunk(ctxt, ptr, len, 0);
-        xmlParseChunk(ctxt, ptr, 0, 1);
+        ctxt = xmlCreateMemoryParserCtxt(ptr, len);
+        ctxt->_private = (void*)self;
+        
+        ret = xmlParseDocument(ctxt);
+        
         well_formed = ctxt->wellFormed;
         RETVAL = ctxt->myDoc;
+        
+        xmlFreeParserCtxt(ctxt);
+        
         if (!well_formed) {
             xmlFreeDoc(RETVAL);
             croak(SvPV(LibXML_error, len));
@@ -672,42 +649,18 @@ _parse_file(self, filename)
         STRLEN len;
         char chars[BUFSIZE];
     CODE:
-        if ((filename[0] == '-') && (filename[1] == 0)) {
-            f = PerlIO_stdin();
-        } else {
-            /* f = PerlIO_open(filename, "r");*/ /* should not use this */
-
-            /* somewhere hides an bad code section, which confuses the parser
-             * while reading a file NOT using xmlParseFile(). 
-             * basicly it seems to be an encoding problem, that makes
-             * me guess, the whole filehandle parsing has to be rewritten
-             */
-
-            f = NULL;
-            RETVAL = xmlParseFile( filename );
-        }
-        if (f != NULL) {
-            ctxt = LibXML_get_context(self);
-            res = PerlIO_read(f, chars, 4);
-            if (res > 0) {
-                xmlParseChunk(ctxt, chars, res, 0);
-                while ((res = PerlIO_read(f, chars, BUFSIZE)) > 0) {
-                    xmlParseChunk(ctxt, chars, res, 0);
-                }
-                xmlParseChunk(ctxt, chars, 0, 1);
-                RETVAL = ctxt->myDoc;
-                ret = ctxt->wellFormed;
-                if (!ret) {
-                    PerlIO_close(f);
-                    xmlFreeDoc(RETVAL);
-                    croak(SvPV(LibXML_error, len));
-		        }
-            }
-            PerlIO_close(f);
-        }
-        else {
-            if ( RETVAL == NULL ) 
-                croak("cannot open input file %s", filename);
+        ctxt = xmlCreateFileParserCtxt(filename);
+        ctxt->_private = (void*)self;
+        
+        xmlParseDocument(ctxt);
+        RETVAL = ctxt->myDoc;
+        ret = ctxt->wellFormed;
+        
+        xmlFreeParserCtxt(ctxt);
+        
+        if (!ret) {
+            xmlFreeDoc(RETVAL);
+            croak(SvPV(LibXML_error, len));
         }
     OUTPUT:
         RETVAL
@@ -858,14 +811,6 @@ getDocumentElement( dom )
         }
     OUTPUT:
         RETVAL
-
-MODULE = XML::LibXML         PACKAGE = XML::LibXML::Context
-
-void
-DESTROY(self)
-        xmlParserCtxtPtr self
-    CODE:
-        xmlFreeParserCtxt(self);
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Dtd
 
