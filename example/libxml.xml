@@ -1,891 +1,1423 @@
 <module name="XML::LibXML">
-<class name="XML::LibXML::Document">
-<short>DOM Document Class</short>
-<description>
-	The Document Class is the result of a parsing process. But
-	sometimes it is necessary to create a Document from
-	scratch. The DOM Document Class provides functions that are
-	conform to the DOM Core naming style.
+    <version>1.41</version>
+    <authors>
+        <author>Matt Sergeant</author>
+        <author>Christian Glahn</author>
+    </authors>
+    <package name="XML::LibXML::DOM">
+        <short>XML::LibXML DOM implementation</short>
+        <description>
+            <p>
+                XML::LibXML implements a native DOM so the parsed
+                structures are accessable from the perl layer. The
+                current implementation offers an alternative interface
+                to many DOM functions in addition to the specified
+                functions. These functions will be removed in future
+                versions or renamed to perl style names.
+            </p>
+            <p>
+                XML::LibXML's DOM implementation tries to follow the
+                various DOM specs although not all interfaces are
+                implemented yet. Also there some efford is taken to
+                also to follow the XPath DOM extensions.
+            </p>
+        </description>
+    </package>
+    <package name="XML::LibXML::Document">
+        <short>DOM Document Class</short>
+        <description>
+            <p>
+                The Document Class is the result of a parsing
+                process. But sometimes it is necessary to create a
+                Document from scratch. The DOM Document Class provides
+                functions that are conform to the DOM Core naming
+                style.
+            </p>
+            <p>
+                It inherits all functions from
+                <em>XML::LibXML::Node</em> as specified in DOM
+                Level2. This enables to access the nodes beside the
+                root element on document level - a <em>DTD</em> for
+                example. The support for these nodes is limited at the
+                moment, so I would recommend, not to use <em>node</em>
+                functions on <em>documents</em>.
+            </p>
+            <p>
+                It is suggested that one should always create a node
+                not bound to any document.  There is no need of really
+                including the node to the document, but once the node
+                is bound to a document, it is quite safe that all
+                strings have the correct encoding.  If an unbound
+                textnode with an iso encoded string is created
+                (e.g. with $CLASS->new()), the <em>toString</em>
+                function may not return the expected result.
+            </p>
+            <p>
+                This seems like a limitation as long UTF8 encoding is
+                assured. If iso encoded strings come into play it is
+                much safer to use the node creation functions of
+                <st>XML::LibXML::Document</st>.
+            </p>
 
-    It inherits all functions from <i>XML::LibXML::Node</i> as
-    specified in DOM Level2. This enables to access the nodes beside
-    the root element on document level - a <i>DTD</i> for example. The
-    support for these nodes is limited at the moment, so I would
-    recommend, not to use <i>node</i> functions on <i>documents</i>.
+            <method name="new" 
+                    synopsis="$dom = XML::LibXML::Document->new( $version, $encoding );">
+                <p>
+                    alias for createDocument()
+                </p>
+            </method>
 
-    It is suggested that one should always create a node not bound to
-    any document.  There is no need of really including the node to
-    the document, but once the node is bound to a document, it is
-    quite safe that all strings have the correct encoding.  If an
-    unbound textnode with an iso encoded string is created (e.g. with
-    $CLASS->new()), the <i>toString</i> function may not return the
-    expected result.
+            <method name="createDocument" 
+                    synopsis="$dom = XML::LibXML::Document->createDocument( $version, $encoding );">
+                <p>
+                    The constructor for the document class. As
+                    Parameter it takes the version string and
+                    (optionally) the ecoding string.  Simply calling
+                    <st>createDocument</st> will create the document:
+                </p>
+
+                <example><![CDATA[
+ <?xml version="your version" encoding="your encoding"?>
+                    ]]></example>
+
+                <p>
+                    Both parameter are optional. The default value for
+                    <st>$version</st> is <em>1.0</em>, of course. If
+                    the <st>$encoding</st> parameter is not set, the
+                    encoding will be left unset, which means UTF8 is
+                    implied (and set).
+                </p>
+                <p>
+                    The call of <st>createDocument</st> without any
+                    parameter will result the following code:
+                </p>
+                <example><![CDATA[
+ <?xml version="1.0"?>
+                    ]]></example>
+            </method>
+
+            <method name="getEncoding"
+                    synopsis="$strEncoding = $doc->getEncoding();">
+                <p>
+                    returns the encoding string of the document
+                </p>
+            </method>
+
+            <method name="getVersion"
+                    synopsis="$strVersion = $doc->getVersion();">
+                <p>
+                    returns the version string of the document
+                </p>
+            </method>
+
+            <method name="toString" 
+                    synopsis="$docstring = $dom->toString([$format]);">
+                <p>
+                    <st>toString</st> is a deparsing function, so the
+                    DOM Tree can be translated into a string, ready
+                    for output.
+                </p>
+                <p>
+                    The optional <st>$format</st> parameter sets the
+                    indenting of the output. This parameter is
+                    expected to be an <em>integer</em> value, that
+                    specifies the number of linebreaks for each node.
+                </p>
+                <p>
+                    For more information about the formatted output
+                    check the documentation of
+                    <em>xmlDocDumpFormatMemory</em> in
+                    <em>libxml2/tree.h</em>.
+                </p>
+            </method>
+            
+            <method name="toStringHTML"
+                    synopsis="$document->toStringHTML();">
+                <p>
+                    <st>toStringHTML</st> deparses the tree to a
+                    string as HTML. With this method indenting is
+                    automatic and managed by libxml2 internally.
+                </p>
+            </method>
+
+            <method name="is_valid" 
+                    synopsis="$bool = $dom->is_valid();">
+                <p>
+                    Returns either TRUE or FALSE depending on the DOM Tree is a
+                    valid Document or not.
+                </p>
+                <p>
+                    You may also pass in a XML::LibXML::Dtd object, to
+                    validate against an external DTD:
+                </p>
+                <example>
+ if (!$dom->is_valid($dtd)) {
+     warn("document is not valid!");
+ }
+                </example>
+            </method>
+
+            <method name="validate"
+                    synopsis="$dom->validate();">
+                <p>
+                    This is an exception throwing equivalent of
+                    is_valid. If the document is not valid it will
+                    throw an exception containing the error. This
+                    allows you much better error reporting than simply
+                    is_valid or not.
+                </p>
+                <p>
+                    Again, you may pass in a DTD object
+                </p>
+            </method>
+
+            <method name="getDocumentElement" 
+                    synopsis="$root = $dom->getDocumentElement($name, $namespace );">
+                <p>
+                    Returns the root element of the Document. A
+                    document can have just one root element to contain
+                    the documents data.
+                </p>
+            </method>
+
+            <method name="doumentElement" 
+                    synopsis="$root = $dom->documentElement;">
+                <p>
+                    Alias for <st>getDocumentElement</st>.
+                </p>
+            </method>
+
+            <method name="setDocumentElement" 
+                    synopsis="$dom->setDocumentElement( $root );"> 
+                <p>
+                    This function enables you to set the root element for a
+                    document. The function supports the import of a node from a
+                    different document tree.
+                </p>
+            </method>
+
+            <method name="createElement" 
+                    synopsis="$element = $dom->createElement( $nodename );">
+                <p>
+                    This function creates a new Element Node bound to
+                    the DOM with the name <em>$nodename</em>.
+                </p>
+            </method>
+
+            <method name="createElementNS" 
+                    synopsis="$element = $dom->createElementNS( $namespaceURI, $qname );">
+                <p>
+                    This function creates a new Element Node bound to
+                    the DOM with the name <em>$nodename</em> and
+                    placed in the given namespace.
+                </p>
+            </method>
+
+            <method name="createTextNode" 
+                    synopsis="$text = $dom->createTextNode( $content_text );">
+                <p>
+                    As an equivalent of <st>createElement</st>, but it
+                    creates a <st>Text Node</st> bound to the DOM.
+                </p>
+            </method>
+
+            <method name="createComment" 
+                    synopsis="$comment = $dom->createComment( $comment_text );">
+                <p>
+                    As an equivalent of <st>createElement</st>, but it
+                    creates a <st>Comment Node</st> bound to the DOM.
+                </p>
+            </method>
+
+            <method name="createAttribute"
+                    synopsis="$attrnode = $doc->createAttribute($name [,$value]);">
+                <p>
+                    Creates a new Attribute node. 
+                </p>
+            </method>
+
+            <method name="createDocumentFragment"
+                    synopsis="$fragment = $doc->createDocumentFragment()">
+                <p>
+                    This function creates a DocumentFragment. 
+                </p>
+            </method>
+
+            <method name="createAttributeNS"
+                    synopsis="$attrnode = $doc->createAttributeNS( namespaceURI, $name [,$value] );">
+                <p>
+                    Creates an Attribute bound to a namespace.
+                </p>
+            </method>
+
+            <method name="createCDATASection"
+                    synopsis="$cdata = $dom->create( $cdata_content );">
+                <p>
+                    Similar to createTextNode and createComment, this
+                    function creates a CDataSection bound to the
+                    current DOM.
+                </p>
+            </method>
+
+            <method name="importNode"
+                    synopsis="$document->importNode( $node [, $move] );">
+                <p>
+                    If a node is not part of a document, it can be
+                    imported to another document. As specified in DOM
+                    Level 2 Specification the Node will not be altered
+                    or removed from its original document by
+                    default. (<em>$node->cloneNode(1)</em> will get
+                    called implicitly).
+                </p>
+                <p>
+                    Sometimes it is nessecary to <em>move</em> a node
+                    between documents. In such a case the node will
+                    not be copied, but removed from the original
+                    document.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Attr"/>
+            <item name="XML::LibXML::Comment"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::Node">
+        <short>"virtual" Base Class DOM-Nodes</short>
+        <description>
+            <p>
+                LibXML::Node defines functions that are common to all
+                Node Types.  A LibXML::Node should never be created
+                standalone, but as an instance of a high level class
+                such as LibXML::Element or LibXML::Text.  The class
+                itself should provide only common functionality. In
+                XML::LibXML each node is part either of a document or
+                a document-fragment.  Because of this there is no node
+                without a parent. This may causes confusion with
+                "unbound" nodes.
+            </p>
+
+            <method name="getName" 
+                    synopsis="$name = $node->getName();">
+                <p>
+                    Returns the node's name. This Function is aware
+                    about namesaces and returns the full name of the
+                    current node (<em>prefix:localname</em>)
+                </p>
+            </method>
+
+            <method name="nodeName"
+                    synopsis="$name = $node->nodeName;">
+                <p>
+                    Alias for <st>getName()</st>.
+                </p>
+            </method>
+
+            <method name="setName"
+                    synopsis="$node->setName( $newName );"> 
+                <p>
+                    In very limited situation it is usefull to change
+                    a nodes name. In the DOM specification this should
+                    throw an error. This Function is not aware about
+                    namespaces yet.
+                </p>
+            </method>
+
+            <method name="isEqual"
+                    synopsis="$bool = $node->isEqual( $other_node );">
+                <p>
+                    returns TRUE (1) if documents refer to the same
+                    nodestructure, otherwise FALSE (0) is returned.
+                </p>
+            </method>
+
+            <method name="getData" synopsis="$content = $node->getData()">
+                <p>
+                    If the node has any content (such as stored in a
+                    <em>text node</em>) it can get requested through
+                    this function.
+                </p>
+            </method>
+
+            <method name="nodeValue" synopsis="$content = $node->nodeValue;">
+                <p>
+                    Alias for <st>getData</st>
+                </p>
+            </method>
+
+            <method name="getType" 
+                    synopsis="$type = $node->getType();">
+                <p>
+                    Retrun the node's type. The possible types are
+                    described in the libxml2 <st>tree.h</st>
+                    documentation. The return value of this function
+                    is a numeric value. Therefore it differst with the
+                    result of perl ref function.
+                </p>
+            </method>
+
+            <method name="nodeType"
+                    synopsis="$type = $node->nodeType;">
+                <p>
+                    Alias for <st>getType</st>.
+                </p>
+            </method>
+
+            <method name="unbindNode" synopsis="$node->unbindNode()"> 
+                <p>
+                    Unbinds the Node from its siblings and Parent, but
+                    not from the Document it belongs to. If the node
+                    is not inserted into the DOM afterwards it will be
+                    lost after the programm terminated. From a low
+                    level view, the unbound node is stripped from the
+                    context it is and inserted into a (hidden)
+                    document-fragment.
+                </p>
+            </method>
+
+            <method name="removeChild" 
+                    synopsis="$childnode = $node->removeChild( $childnode )">
+                <p>
+                    This will unbind the Child Node from its parent
+                    <em>$node</em>. The function returns the unbound
+                    node.  If <em>oldNode</em> is not a child of the
+                    given Node the function will fail.
+                </p>
+            </method>
+
+            <method name="replaceChild" 
+                    synopsis="$oldnode = $node->replaceChild( $newNode, $oldNode )">
+                <p>
+                    Replaces the <em>$oldNode</em> with the
+                    <em>$newNode</em>. The <em>$oldNode</em> will be
+                    unbound from the Node. This function differs from
+                    the DOM L2 specification, in the case, if the new
+                    node is not part of the document, the node will be
+                    imported first.
+                </p>
+            </method>
+
+            <method name="appendChild"
+                    synopsis="$childnode = $node->appendChild( $childnode )">
+                <p>
+                    The function will add the <em>$childnode</em> to
+                    the end of <em>$node</em>'s children. The function
+                    should fail, if the new childnode is allready a
+                    child of <em>$node</em>. This function differs
+                    from the DOM L2 specification, in the case, if the
+                    new node is not part of the document, the node
+                    will be imported first.
+                </p>
+            </method>
+
+            <method name="cloneNode" 
+                    synopsis="$newnode =$node->cloneNode( $deep )">
+                <p>
+                    <st>cloneNode</st> creates a copy of
+                    <em>$node</em>. Wether $deep is set to 1 (true)
+                    the function will copy all childnodes as well. If
+                    $deep is 0 only the current node will be copied.
+                </p>
+            </method>
+
+            <method name="getParentNode" 
+                    synopsis="$parentnode = $node->getParentNode();">
+                <p>
+                    Returns simply the Parent Node of the current node. 
+                </p>
+            </method>
+
+            <method name="parentNode" synopsis="$parentnode = $node->parentNode;">
+                <p>
+                    Alias for <st>getParentNode()</st>
+                </p>
+            </method>
+
+            <method name="getNextSibling" 
+                    synopsis="$nextnode = $node->getNextSibling()">
+                <p>
+                    Returns the next sibling if any .
+                </p>
+            </method>
+
+            <method name="nextSibling" 	
+                    synopsis="$nextnode = $node->nextSibling()">
+                <p>
+                    Alias for <st>getNextSibling()</st>
+                </p>
+            </method>
+
+            <method name="getPreviousSibling" 
+                    synopsis="$nextnode = $node->getPreviousSibling()">
+                <p>
+                    Analogous to <st>getNextSibling</st> the function
+                    returns the previous sibling if any.
+                </p>
+            </method>
+
+            <method name="previousSibling" 	
+                    synopsis="$prevnode = $node->previousSibling()">
+                <p>
+                    Alias for <st>getPreviousSibling()</st>
+                </p>
+            </method>
+
+            <method name="hasChildNodes"
+                    synopsis="$boolean = $node->hasChildNodes();"> 
+                <p>
+                    If the current node has Childnodes this function
+                    returns TRUE (1), otherwise it returns FALSE (0,
+                    not undef).
+                </p>
+            </method>
+
+            <method name="getFirstChild"
+                    synopsis="$childnode = $node->getFirstChild()">
+                <p>
+                    If a node has childnodes this function will return
+                    the first node in the childlist.
+                </p>
+            </method>
+
+            <method name="firstChild" 	synopsis="$childnode = $node->firstChild;">
+                <p>
+                    Alias for <st>getFirstChild()</st>
+                </p>
+            </method>
+
+            <method name="getLastChild"
+                    synopsis="$childnode = $node->getLastChild()">
+                <p>
+                    If the <em>$node</em> has childnodes this function
+                    returns the last child node.
+                </p>
+            </method>
+
+            <method name="lastChild" synopsis="$childnode = $node->lastChild;">
+                <p>
+                    Alias for <st>getLastChild()</st>
+                </p>
+            </method>
+
+            <method name="getOwnerDocument"
+                    synopsis="$dom = $node->getOwnerDocument()">
+                <p>
+                    Through this function it is allways possible to
+                    access the document the current node is bound to.
+                </p>
+            </method>
+
+            <method name="ownerDocument"
+                    synopsis="$documentnode = $node->ownerDocument;">
+                <p>
+                    Alias for <st>getOwnerDocument()</st>
+                </p>
+            </method>
+
+            <method name="getOwner"
+                    synopsis="$node = $node->getOwner;">
+                <p>
+                    This function returns the node the current node is
+                    associated with. In the very most cases this will
+                    be a document node or a document fragment node.
+                </p>
+            </method>
+
+            <method name="setOwnerDocument" 
+                    synopsis="$node->setOwnerDocument( $dom );">
+                <p>
+                    This function binds a node to another DOM. This
+                    method unbinds the node first, if it is allready
+                    bound to another document.
+                </p>
+                <p>
+                    Note that this is only safe with single nodes but not 
+                    with subtrees. In case of subtrees one should use 
+                    XML::LibXML::Document's importNode method.
+                </p>
+            </method>
+
+            <method name="insertBefore" 
+                    synopsis="$node->insertBefore( $newNode, $refNode )"> 
+                <p>
+                    The method inserts <em>$newNode</em> before
+                    <em>$refNode</em>. If <em>$refNode</em> is
+                    undefined, the newNode will be set as the new
+                    first child of the parent node.  This function
+                    differs from the DOM L2 specification, in the
+                    case, if the new node is not part of the document,
+                    the node will be imported first.
+                </p>
+            </method>
+
+            <method name="insertAfter"
+                    synopsis="$node->insertAfter( $newNode, $refNode )">
+                <p>
+                    The method inserts <em>$newNode</em> after
+                    <em>$refNode</em>. If <em>$refNode</em> is
+                    undefined, the newNode will be set as the new last
+                    child of the parent node.
+                </p>
+            </method>
+
+            <method name="findnodes" 
+                    synopsis="@nodes = $node->findnodes( $xpath_statement );">
+                <p>
+                    <st>findnodes</st> performs the xpath statement on
+                    the current node and returns the result as an
+                    array. In scalar context returns a
+                    <em>XML::LibXML::NodeList</em> object.
+                </p>
+            </method>
+
+            <method name="find"
+                    synopsis="$result = $node->find( $xpath );">
+                <p>
+                    <st>find</st> performs the xpath expression using
+                    the current node as the context of the expression,
+                    and returns the result depending on what type of
+                    result the XPath expression had. For example, the
+                    XPath "1 * 3 + 52" results in a
+                    <em>XML::LibXML::Number</em> object being
+                    returned. Other expressions might return a
+                    <em>XML::LibXML::Boolean</em> object, or a
+                    <em>XML::LibXML::Literal</em> object (a
+                    string). Each of those objects uses Perl's
+                    overload feature to "do the right thing" in
+                    different contexts.
+                </p>
+            </method>
+
+            <method name="findvalue"
+                    synopsis="print $node->findvalue( $xpath );">
+                <p>
+                    <st>findvalue</st> is exactly equivalent to:
+                </p>
+                <example>
+ $node->find( $xpath )-&gt;to_literal;
+                </example>
+                <p>
+                    That is, it returns the literal value of the
+                    results. This enables you to ensure that you get a
+                    string back from your search, allowing certain
+                    shortcuts. This could be used as the equivalent of
+                    &lt;xsl:value-of select="some_xpath"/&gt;.
+                </p>
+            </method>
+
+            <method name="getChildnodes"
+                    synopsis="@children = $node->getChildnodes();">
+                <p>
+                    <st>getChildnodes</st> implements a more intuitive
+                    interface to the childnodes of the current
+                    node. It enables you to pass all children directly
+                    to a <em>map</em> or <em>grep</em>. If this
+                    function is called in scalar context, the number
+                    of childnodes will be returned.
+                </p>
+            </method>
+
+            <method name="childNodes"
+                    synopsis="@childnodes = $node->childNodes;">
+                <p>
+                    Alias for <st>getChildnodes()</st>
+                </p>
+            </method>
+
+            <method name="toString"
+                    synopsis="$xmlstring = $node->toString();">
+                <p>
+                    This is the equivalent to
+                    <em>XML::LibXML::Document::toString</em> for a
+                    single node. This means a node and all its
+                    childnodes will be dumped into the result string.
+                </p>
+                <p>
+                    There is no formating implemented yet, which may
+                    cause an unreadable output.
+                </p>
+            </method>
+
+            <method name="getLocalName" 
+                    synopsis="$name = $node->getLocalName();">
+                <p>
+                    Returns the local name of a tag. This is the part
+                    behind the colon.
+                </p>
+            </method>
+
+            <method name="localname" synopsis="$localname = $node->localname;">
+                <p>
+                    Alias for <st>getLocalName()</st>
+                </p>
+            </method>
+
+            <method name="getPrefix" 
+                    synopsis="$name = $node->getPrefix();">
+                <p>
+                    Returns the prefix of a tag. This is the part
+                    before the colon.
+                </p>
+            </method>
+
+            <method name="prefix" synopsis="$nameprefix = $node->prefix;">
+                <p>
+                    Alias for <st>getPrefix()</st>
+                </p>
+            </method>
+
+            <method name="getNamespaceURI"
+                    synopsis="$uri = $node->getNamespaceURI()">
+                <p>
+                    returns the URI of the current namespace.
+                </p>
+            </method>
+
+
+            <method name="hasAttributes"
+                    synopsis="$boolean = $node->hasAttributes();">
+                <p>
+                    returns 1 (TRUE) if the current node has any
+                    attributes set, otherwise 0 (FALSE) is returned.
+                </p>
+            </method>
+
+
+            <method name="getAttributes"
+                    synopsis="@attributelist = $node->getAttributes;">
+                <p>
+                    returns all attribute nodes of the current node. 
+                </p>
+            </method>
+
+            <method name="attributes"
+                    synopsis="@attributelist = $node->attributes;">
+                <p>
+                    Alias for <st>getAttributes()</st>
+                </p>
+            </method>
+
+
+            <method name="getAttributesNS" 
+                    synopsis="@attributelist = $node->attributesNS( $URI );">
+                <p>
+                    returns all attributes for the given namespace.
+                </p>
+            </method>
+
+            <method name="getNamespaces"
+                    synopsis="@nslist = $node->getNamespaces();">
+                <p>
+                    returns all the namespace declaration nodes bound
+                    to this node. The items are instances of the class
+                    XML::LibXML::Namespace.
+                </p>
+            </method>
+
+            <method name="iterator"
+                    synopsis="$node->iterator( \&amp;nodehandler );">
+                <p>
+                    This is little helper function, that lets one
+                    define a function, that will be processed on the
+                    current node and all its children. The function
+                    will recieve as its only parameter the node to
+                    proceed. The function uses inorder proceeding to
+                    traverse the subtree. Therefore you can't reach
+                    the childnodes anymore, if the nodehandler removes
+                    childnodes.
+                </p>
+
+                <example><![CDATA[
+ $node->iterator( sub { print $_[0]->nodeName(),"\n"; } );
+                ]]></example>
+
+                <p>
+                    The example will print all node names in the current subtree.
+                </p>
+                <p>
+                    The <st>iterator</st> function will return the
+                    return value of the nodehandler while processing
+                    the last child of the current node.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Comment"/>
+            <item name="XML::LibXML::Attr"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::Element">
+        <short>The DOM Element Class</short>
+        <description>
+
+            <method name="new"
+                    synopsis="$node = XML::LibXML::Element->new( $name )">
+                <p>
+                    This function creates a new node unbound to any DOM.
+                </p>
+            </method>
+
+            <method name="setAttribute"
+                    synopsis="$node->setAttribute( $aname, $avalue );">
+                <p>
+                    This method sets or replaces the node's attribute
+                    <em>$aname</em> to the value <em>$avalue</em>
+                </p>
+            </method>
+
+            <method name="setAttributeNS"
+                    synopsis="$node->setAttributeNS( $nsURI, $aname, $avalue );">
+                <p>
+                    Namespaceversion of <em>setAttribute</em>.
+                </p>
+            </method>
+
+            <method name="getAttribute" 
+                    synopsis="$avalue = $node->getAttribute( $aname );">
+                <p>
+                    If <em>$node</em> has an attribute with the name
+                    <em>$aname</em>, the value of this attribute will
+                    get returned.
+                </p>
+            </method>
+
+            <method name="getAttributeNS"
+                    synopsis="$avalue = $node->setAttributeNS( $nsURI, $aname );">
+                <p>
+                    Namespaceversion of <em>getAttribute</em>.
+                </p>
+            </method>
+
+            <method name="getAttributeNode"
+                    synopsis="$attrnode = $node->getAttributeNode( $aname );">
+                <p>
+                    Returns the attribute as a node if the attribute
+                    exists. If the Attribute does not exists
+                    <em>undef</em> will be returned.
+                </p>
+            </method>
+
+            <method name="getAttributeNodeNS"
+                    synopsis="$attrnode = $node->getAttributeNodeNS( $namespaceURI, $aname );">
+                <p>
+                    Namespaceversion of <em>getAttributeNode</em>. 
+                </p>
+            </method>
+
+            <method name="removeAttribute"
+                    synopsis="$node->removeAttribute( $aname );">
+                <p>
+                    The method removes the attribute <em>$aname</em>
+                    from the node's attribute list, if the attribute
+                    can be found.
+                </p>
+            </method>
+
+            <method name="removeAttributeNS"
+                    synopsis="$node->removeAttributeNS( $nsURI, $aname );">
+                <p>
+                    Namespace version of <em>removeAttribute</em>
+                </p>
+            </method>
+
+            <method name="hasAttribute"
+                    synopsis="$boolean = $node->hasAttribute( $aname );">
+                <p>
+                    This funcion tests if the named attribute is set
+                    for the node. If the attribute is specified, TRUE
+                    (1) will be returned, otherwise the returnvalue is
+                    FALSE (0).
+                </p>
+            </method>
+
+            <method name="hasAttributeNS"
+                    synopsis="$boolean = $node->hasAttributeNS( $nsURI, $aname );">
+                <p>
+                    namespace version of <em>hasAttribute</em>
+                </p>
+            </method>
+
+            <method name="getChildrenByTagName" 
+                    synopsis="@nodes = $node->getChildrenByTagName($tagname);">
+                <p>
+                    The function gives direct access to all childnodes
+                    of the current node with the same tagname. It
+                    makes things a lot easier if you need to handle
+                    big datasets.
+                </p>
+                <p>
+                    If this function is called in SCALAR context, it
+                    returns the number of Elements found.
+                </p>
+            </method>
+
+            <method name="getChildrenByTagNameNS" 
+                    synopsis="@nodes = $node->getChildrenByTagNameNS($nsURI,$tagname);">
+                <p>
+                    Namespace version of <em>getChildrenByTagName</em>.
+                </p>
+                <p>
+                    If this function is called in SCALAR context, it
+                    returns the number of Elements found.
+                </p>
+            </method>
+
+            <method name="getElementsByTagName"
+                    synopsis="@nodes = $node-&gt;getElementsByTagName($tagname);">
+                <p>
+                    This function is part of the spec it fetches all
+                    descendants of a node with a given tagname. If one
+                    is as confused with <em>tagname</em> as I was,
+                    tagname is a qualified tagname which is in case of
+                    namespace useage prefix and local name
+                </p>
+                <p>
+                    In SCALAR context this function returns a
+                    <em>XML::LibXML::NodeList</em> object.
+                </p>
+            </method>
+
+            <method name="getElementsByTagNameNS" 
+                    synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$localname);">
+                <p>
+                    Namespace version of <em>getElementsByTagName</em>
+                    as found in the DOM spec.
+                </p>
+                <p>
+                    In SCALAR context this function returns a
+                    <em>XML::LibXML::NodeList</em> object.
+                </p>
+            </method>
+
+            <method name="getElementsByLocalName" 
+                    synopsis="@nodes = $node->getElementsByLocalName($localname);">
+                <p>
+                    This function is not found in the DOM
+                    specification. It is a mix of getElementsByTagName
+                    and getElementsByTagNameNS. It will fetch all tags
+                    matching the given local-name. This alows one to
+                    select tags with the same local name across
+                    namespace borders.
+                </p>
+                <p>
+                    In SCALAR context this function returns a
+                    <em>XML::LibXML::NodeList</em> object.
+                </p>
+            </method>
+
+            <method name="appendWellBalancedChunk" 
+                    synopsis="$node->appendWellBalancedChunk( $chunk )">
+                <p>
+                    Sometimes it is nessecary to append a string coded
+                    XML Tree to a
+                    node. <st>appendWellBalancedChunk</st> will do the
+                    trick for you.  But this is only done if the
+                    String is <em>well-balanced</em>.
+                </p>
+            </method>
+
+            <method name="appendText" 
+                    synopsis="$node->appendText( $PCDATA );">
+                <p>
+                    alias for appendTextNode().
+                </p>
+            </method>
+
+            <method name="appendTextNode"
+                    synopsis="$node->appendTextNode( $PCDATA );">
+                <p>
+                    This wrapper function lets you add a string
+                    directly to an element node.
+                </p>
+            </method>
+
+            <method name="appendTextChild" 
+                    synopsis="$node->appendTextChild( $childname , $PCDATA )">
+                <p>
+                    Somewhat similar with <em>appendTextNode</em>: It
+                    lets you set an Element, that contains only a
+                    <em>text node</em> directly by specifying the name
+                    and the text content.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::Attr"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Comment"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::Text">
+        <short>The DOM Text Node Class</short>
+        <description>
+            <p>
+                Different to the DOM specification XML::LibXML
+                implements the text node as the base class of all
+                character data node. Therefor there exists no
+                CharacterData class. This allow one to use all methods
+                that are available for textnodes as well for Comments
+                or CDATA-sections.
+            </p>
+
+            <method name="new"
+                    synopsis="$text = XML::LibXML::Text->new( $content ); ">
+                <p>
+                    The constuctor of the class. It creates an unbound text node.
+                </p>
+            </method>
+
+            <method name="data"
+                    synopsis="$nodedata = $text->data;">
+                <p>
+                    Although there exists the <em>nodeValue</em>
+                    attribute in the Node class, the DOM specification
+                    defines data as a separate
+                    attribute. <em>XML::LibXML</em> implements these
+                    two attributes not as different attributes, but as
+                    aliases, such as <em>libxml2</em> does. Therefore 
+                </p>
+                <example><![CDATA[
+ $text->data
+                ]]></example>
+                <p>and</p>
+                <example><![CDATA[
+ $text->nodeValue
+                ]]></example>
+                <p>
+                    will have the same result and are not different
+                    entities.
+                </p>
+            </method>
+
+            <method name="setData($string)"
+                    synopsis="$text->setData( $text_content );">
+                <p>
+                    This function sets or replaces text content to a
+                    node. The node has to be of the type "text",
+                    "cdata" or "comment".
+                </p>
+            </method>
+
+            <method name="substringData($offset,$length)"
+                    synopsis="$text->substringData($offset, $length);">
+                <p>
+                    Extracts a range of data from the node. (DOM Spec)
+                    This function takes the two parameters $offset and
+                    $length and returns the substring if available.
+                </p>
+                <p>
+                    If the node contains no data or $offset referes to
+                    an nonexisting string index, this function will
+                    return <st>undef</st>. If $length is out of range
+                    <em>substringData</em> will return the data
+                    starting at $offset instead of causing an error.
+                </p>
+            </method>
+
+            <method name="appendData($string)"
+                    synopsis="$text->appendData( $somedata );">
+                <p>
+                    Appends a string to the end of the existing
+                    data. If the current text node contains no data,
+                    this function has the same effect as
+                    <em>setData</em>.
+                </p>
+            </method>
+
+            <method name="insertData($offset,$string)"
+                    synopsis="$text->insertData($offset, $string);">
+                <p>
+                    Inserts the parameter $string at the given $offset
+                    of the existing data of the node. This operation
+                    will not remove existing data, but change the
+                    order of the existing data.
+                </p>
+                <p>
+                    The $offset has to be a positive value. If $offset
+                    is out of range, <em>insertData</em> will have the
+                    same behaviour as <em>appendData</em>.
+                </p>
+            </method>
+
+            <method name="deleteData($offset, $length)"
+                    synopsis="$text->deleteData($offset, $length);">
+                <p>
+                    This method removes a chunk from the existing node
+                    data at the given offset. The $length parameter
+                    tells, how many characters should be removed from
+                    the string.
+                </p>
+            </method>
+
+            <method name="deleteDataString($string, [$all])"
+                    synopsis="$text->deleteDataString($remstring, $all);">
+                <p>
+                    This method removes a chunk from the existing node
+                    data. Since the DOM spec is quite unhandy if you
+                    already know <em>which</em> string to remove from
+                    a text node, this method allows more perlish code :)
+                </p>
+                <p>
+                    The functions takes two parameters:
+                    <st>$string</st> and optional the <st>$all</st>
+                    flag. If $all is not set, <st>undef</st> or
+                    <st>0</st>, <em>deleteDataString</em> will remove
+                    only the first occourance of $string. If $all is
+                    <st>TRUE</st> <em>deleteDataString</em> will
+                    remove all occourences of <st>$string</st> from
+                    the node data.
+                </p>
+            </method>
+
+            <method name="replaceData($offset, $length, $string)"
+                    synopsis="$text->replaceData($offset, $length, $string);">
+                <p>
+                    The DOM style version to replace node data.
+                </p>
+            </method>
+
+            <method name="replaceDataString($oldstring, $newstring, [$all])"
+                    synopsis="$text->replaceDataString($old, $new, $flag);">
+                <p>
+                    The more programmer friendly version of replaceData() :)
+                </p>
+                <p>
+                    Instead of giving offsets and length one can
+                    specify the exact string (<st>$oldstring</st>) to
+                    be replaced. Additionally the <st>$all</st> flag
+                    allows to replace all occourences of
+                    <st>$oldstring</st>.
+                </p>
+            </method>
+            
+            <method name="replaceDataRegEx( $search_cond, $replace_cond, $reflags )"
+                    synopsis="$text->replaceDataRegEx( $search_cond, $replace_cond, $reflags );">
+                <p>
+                    This method replaces the node's data by a
+                    <em>simple</em> regular expression. Optional, this
+                    function allows to pass some flags that will be
+                    added as flag to the replace statement.
+                </p>
+                <p>
+                    <st>NOTE:</st> This is a shortcut for
+                </p>
+                <example><![CDATA[
+ my $datastr = $node->getData();
+ $datastr =~ s/somecond/replacement/g; # 'g' is just an example for any flag
+ $node->setData( $datastr );
+                    ]]></example>
+
+                <p>
+                    This function can make things easier to read for
+                    simple replacements. For more complex variants it
+                    is recommented to use the code snippet above.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::Comment"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::Comment">
+        <short>The DOM Comment Class</short>
+        <description>
+            <p>
+                This class provides all functions of
+                <st>XML::LibXML::Text</st>, but for comment
+                nodes. This can be done, since only the output of the
+                nodetypes is different, but not the datastructure. :-)
+            </p>
+
+            <method name="new" synopsis="$node = XML::LibXML::Comment( $content );">
+                <p>
+                    The constructor is the only provided function for
+                    this package. It is required, because
+                    <st>libxml2</st> treats text nodes and comment
+                    nodes slightly different.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::CDATASection">
+        <short>The DOM CDATASection Class</short>
+        <description>
+            <p>
+                This class provides all functions of
+                <st>XML::LibXML::Text</st>, but for CDATA nodes.
+            </p>
+           
+            <method name="new" synopsis="$node = XML::LibXML::Comment( $content );">
+                <p>
+                    The constructor is the only provided function for
+                    this package. It is required, because
+                    <st>libxml2</st> treats the different textnode
+                    types slightly different.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::Attr">
+        <short>The DOM Attribute Class</short>
+        <description>
+            <p>
+                This is the interface to handle Attributes like
+                ordinary nodes. The naming of the class relies on the
+                W3C DOM documentation.
+            </p>
+
+            <method name="new" 
+                    synopsis="$attr = XML::LibXML::Attr->new($name [,$value]);">
+                <p>
+                    Class constructor. If you need to work with iso
+                    encoded strings, you should <st>allways</st> use
+                    the <em>createAttrbute</em> of
+                    <st>XML::LibXML::Document</st>.
+                </p>
+            </method>
+
+            <method name="getValue" synopsis="$string = $attr->getValue();">
+                <p>
+                    Returns the value stored for the attribute. If
+                    undef is returned, the attribute has no value,
+                    which is different of being <em>not
+                    specified</em>.
+                </p>
+            </method>
+
+
+            <method name="value" synopsis="$value = $attr->value;">
+                <p>
+                    Alias for <st>getValue()</st>
+                </p>
+            </method>
+
+
+            <method name="setValue" synopsis="$attr->setValue( $string );">
+                <p>
+                    This is needed to set a new attributevalue. If iso
+                    encoded strings are passed as parameter, the node
+                    has to be bound to a document, otherwise the
+                    encoding might be wrong done.
+                </p>
+            </method>
+
+            <method name="getOwnerElement"
+                    synopsis="$node = $attr->getOwnerDocument();">
+                <p>
+                    returns the node the attribute belongs to. If the
+                    attribute is not bound to a node, undef will be
+                    returned. Overwriting the underlaying
+                    implementation, the <st>parentNode</st> function
+                    will return undef, instead of the owner element.
+                </p>
+            </method>
+
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::DocumentFragment"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::DocumentFragment">
+        <short>DOM L2 Implementation of a Document Fragment</short>
+        <description>
+            <p>
+                This class is a helper class as described in the DOM
+                Level 2 Specification.  It is implamented as a node
+                without name. All adding, inserting or replacing
+                functions are aware about document fragments now.
+            </p>
+            <p>
+                As well <st>all</st> unbound nodes (all nodes that
+                does not belong to any document subtree) are implicit
+                member of document fragments.
+            </p>
+        </description>
+        <also>
+            <item name="XML::LibXML"/>
+            <item name="XML::LibXML::Node"/>
+            <item name="XML::LibXML::Element"/>
+            <item name="XML::LibXML::Document"/>
+            <item name="XML::LibXML::Text"/>
+            <item name="XML::LibXML::Comment"/>
+            <item name="XML::LibXML::CDATASection"/>
+        </also>
+    </package>
+
+    <package name="XML::LibXML::Namespace">
+        <short>A Namespace Class to hold namespace nodes</short>
+        <description>
+            <p>
+                Namespace nodes are returned by both
+                $element->findnodes('namespace::foo') or by
+                $node->getNamespaces().
+            </p>
+            <p>
+                The namespace node API is not part of any current DOM
+                API, and so it is quite minimal. It should be noted
+                that namespace nodes are <st>not</st> a sub class of
+                XML::LibXML::Node, however Namespace nodes act a lot
+                like attribute nodes, and similarly named methods will
+                return what you would expect if you treated the
+                namespace node as an attribute.
+            </p>
+            
+            <method name="getName" synopsis="print $ns->getName()">
+                <p>
+                    Returns "xmlns:prefix", where prefix is the prefix
+                    for this namespace.
+                </p>
+            </method>
+
+            <method name="name" synopsis="print $ns->name()">
+                <p>
+                    Alias for getName()
+                </p>
+            </method>
+
+            <method name="prefix" synopsis="print $ns->prefix()">
+                <p>
+                    Returns the prefix bound to this namespace declaration.
+                </p>
+            </method>
+
+            <method name="getLocalName" synopsis="$localname = $ns->getLocalName()">
+                <p>
+                    Alias for prefix()
+                </p>
+            </method>
+
+            <method name="getData" synopsis="print $ns->getData()">
+                <p>
+                    Returns the URI of the namespace.
+                </p>
+            </method>
+
+            <method name="getValue" synopsis="print $ns->getValue()">
+                <p>
+                    Alias for getData()
+                </p>
+            </method>
+
+            <method name="value" synopsis="print $ns->value()">
+                <p>
+                    Alias for getData()
+                </p>
+            </method>
+
+            <method name="uri" synopsis="print $ns->uri()">
+                <p>
+                    Alias for getData()
+                </p>
+            </method>
+
+            <method name="getNamespaceURI" 
+                    synopsis="$known_uri = $ns->getNamespaceURI()">
+                <p>
+                    Returns the string "http://www.w3.org/2000/xmlns/"
+                </p>
+            </method>
+
+            <method name="getPrefix"
+                    synopsis="$known_prefix = $ns->getPredix()">
+                <p>
+                    Returns the string "xmlns"
+                </p>
+            </method>
+        </description>
+    </package>
+
+    <package name="XML::LibXML::Dtd">
+        <short>A Class implementing Dtd Nodes</short>
+        <description>
+            <p>
+                This class holds a DTD. You may parse a DTD from
+                either a string, or from an external SYSTEM
+                identifier.
+            </p>
+            <p>
+                No support is available as yet for parsing from a
+                filehandle.
+            </p>
+            <p>
+                XML::LibXML::Dtd is a sub-class of Node, so all the
+                methods available to nodes (particularly toString())
+                are available to Dtd objects.
+            </p>
+
+            <method name="new" 
+                    synopsis="$dtd = XML::LibXML::Dtd->new($public_id, $system_id)">
+                <p>
+                    Parse a DTD from the system identifier, and return
+                    a DTD object that you can pass to $doc->is_valid()
+                    or $doc->validate().
+                </p>
   
-    This seems like a limitation as long UTF8 encoding is assured. If
-    iso encoded strings come into play it is much safer to use the
-    node creation functions of <b>XML::LibXML::Document</b>. 
-
-<method name="new" 
-	synopsis="$dom = XML::LibXML::Document->new( $version, $encoding );">
-	alias for createDocument()
-</method>
-
-<method name="createDocument" 
-	synopsis="$dom = XML::LibXML::Document->createDocument( $version, $encoding );">
-	The constructor for the document class. As Parameter it takes
-	the version string and (optionally) the ecoding string.
-	Simply calling <b>createDocument</b> will create the document:
-
-<example><![CDATA[
-  <?xml version="your version" encoding="your encoding"?>
-]]></example>
-
-     Both parameter are optional. The default value for <b>$version</b> is
-     <i>1.0</i>, of course. If the <b>$encoding</b> parameter is not set,
-     the encoding will be left unset, which means UTF8 is implied (and set).
-
-     The call of <b>createDocument</b> without any parameter will result the
-     following code:
-
-<example><![CDATA[
-  <?xml version="1.0"?>
-]]></example>
-</method>
-
-<method name="getEncoding" synopsis="$strEncoding = $doc->getEncoding();">
-    returns the encoding string of the document
-</method>
-
-<method name="getVersion" synopsis="$strVersion = $doc->getVersion();">
-    returns the version string of the document
-</method>
-
-<method name="toString" 
-	synopsis="$docstring = $dom->toString([$format]);">
-	<b>toString</b> is a deparsing function, so the DOM Tree can
-	be translated into a string, ready for output.
-
-    The optional <b>$format</b> parameter sets the indenting of the 
-    output. This parameter is expected to be an <i>integer</i> value,
-    that specifies the number of linebreaks for each node.
-
-    For more information about the formatted output check the documentation
-    of <i>xmlDocDumpFormatMemory</i> in <i>libxml2/tree.h</i>.
-</method>
-
-<method name="toStringHTML"
-    synopsis="$document->toStringHTML();">
-    <b>toStringHTML</b> deparses the tree to a string as HTML. With 
-    this method indenting is automatic and managed by libxml2 internally.
-</method>
-
-<method name="is_valid" 
-	synopsis="$bool = $dom->is_valid();">
-	Returns either TRUE or FALSE depending on the DOM Tree is a
-	valid Document or not.
-  
-  You may also pass in a XML::LibXML::Dtd object, to validate
-  against an external DTD:
-  <example>
-  if (!$dom->is_valid($dtd)) {
-    warn("document is not valid!");
-  }
-  </example>
-</method>
-
-<method name="validate"
-    synopsis="$dom->validate();">
-  This is an exception throwing equivalent of is_valid. If the document
-  is not valid it will throw an exception containing the error. This
-  allows you much better error reporting than simply is_valid or not.
-  
-  Again, you may pass in a DTD object.
-</method>
-
-<method name="getDocumentElement" 
-	synopsis="$root = $dom->getDocumentElement($name, $namespace );">
-	Returns the root element of the Document. A document can have
-	just one root element to contain the documents data.
-</method>
-
-<method name="doumentElement" 
-    synopsis="$root = $dom->documentElement;">
-    Alias for <b>getDocumentElement</b>.
-</method>
-
-<method name="setDocumentElement" 
-	synopsis="$dom->setDocumentElement( $root );"> 
-	This function enables you to set the root element for a
-	document. The function supports the import of a node from a
-	different document tree.
-</method>
-
-<method name="createElement" 
-	synopsis="$element = $dom->createElement( $nodename );">
-	This function creates a new Element Node bound to the DOM with
-	the name <i>$nodename</i>.
-</method>
-
-<method name="createElementNS" 
-	synopsis="$element = $dom->createElementNS( $namespaceURI, $qname );">
-    This function creates a new Element Node bound to the DOM with
-    the name <i>$nodename</i> and placed in the given namespace.
-</method>
-
-<method name="createTextNode" 
-	synopsis="$text = $dom->createTextNode( $content_text );">
-	As an equivalent of <b>createElement</b>, but it creates a
-	<b>Text Node</b> bound to the DOM.
-</method>
-
-<method name="createComment" 
-	synopsis="$comment = $dom->createComment( $comment_text );">
-	As an equivalent of <b>createElement</b>, but it creates a
-	<b>Comment Node</b> bound to the DOM.
-</method>
-
-<method name="createAttribute"
-     synopsis="$attrnode = $doc->createAttribute($name [,$value]);">
-     Creates a new Attribute node. 
-</method>
-
-<method name="createDocumentFragment"
-    synopsis="$fragment = $doc->createDocumentFragment()">
-    This function creates a DocumentFragment. 
-</method>
-
-<method name="createAttributeNS"
-     synopsis="$attrnode = $doc->createAttributeNS( namespaceURI, $name [,$value] );">
-     Creates an Attribute bound to a namespace.
-</method>
-
-<method name="createCDATASection" synopsis="$cdata = $dom->create( $cdata_content );">
-	Similar to createTextNode and createComment, this function creates a CDataSection 
-	bound to the current DOM.
-</method>
-
-<method name="importNode"
-    synopsis="$document->importNode( $node [, $move] );">
-
-    If a node is not part of a document, it can be imported to another
-    document. As specified in DOM  Level 2 Specification the Node will
-    not be altered or removed from its original document by default. 
-    (<i>$node->cloneNode(1)</i> will get called implicitly). 
-
-    Sometimes it is nessecary to <i>move</i> a node between
-    documents. In such a case the node will not be copied, but removed
-    from the original document.
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Text"/>
-  <item name="XML::LibXML::Attr"/>
-  <item name="XML::LibXML::Comment"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::Node">
-<short>"virtual" Base Class DOM-Nodes</short>
-<description>
-	LibXML::Node defines functions that are common to all Node Types.
-	A LibXML::Node should never be created standalone, but as an
-	instance of a high level class such as LibXML::Element or
-	LibXML::Text.  The class itself should provide only common
-	functionality. In XML::LibXML each node is part either of a
-	document or a document-fragment.  Because of this there is no node
-	without a parent. This may causes confusion with "unbound" nodes.
-
-
-<method name="getName" 
-	synopsis="$name = $node->getName();"> Returns the node's
-	name. This Function is aware about namesaces and returns the full
-	name of the current node (<i>prefix:localname</i>)
-</method>
-
-<method name="nodeName"
-    synopsis="$name = $node->nodeName;">
-    Alias for <b>getName()</b>.
-</method>
-
-<method name="setName"
-    synopsis="$node->setName( $newName );"> 
-    In very limited situation it is usefull to change a nodes name. In
-    the DOM specification this should throw an error. This Function is 
-    not aware about namespaces yet. 
-</method>
-
-<method name="isEqual" synopsis="$bool = $node->isEqual( $other_node );">
-    returns TRUE (1) if documents refer to the same nodestructure,
-    otherwise FALSE (0) is returned.
-</method>
-
-<method name="getData" synopsis="$content = $node->getData()">
-	If the node has any content (such as stored in a <i>text
-	node</i>) it can get requested through this function.
-</method>
-
-<method name="nodeValue" synopsis="$content = $node->nodeValue;">
-    Alias for <b>getData</b>
-</method>
-
-<method name="getType" 
-	synopsis="$type = $node->getType();">
-	Retrun the node's type. The possible types are described in
-	the libxml2 <b>tree.h</b> documentation. The return value of this 
-    function is a numeric value. Therefore it differst with the result
-    of perl ref function.
-</method>
-
-<method name="nodeType"
-    synopsis="$type = $node->nodeType;">
-    Alias for <b>getType</b>.
-</method>
-
-<method name="unbindNode" synopsis="$node->unbindNode()"> 
-Unbinds the Node from its siblings and Parent, but not from the
-Document it belongs to. If the node is not inserted into the DOM
-afterwards it will be lost after the programm terminated. From a low
-level view, the unbound node is stripped from the context it is and
-inserted into a (hidden) document-fragment.
-</method>
-
-<method name="removeChild" 
-	synopsis="$childnode = $node->removeChild( $childnode )">
-	This will unbind the Child Node from its parent <i>$node</i>. 
-	The function returns the unbound node.
-	If <i>oldNode</i> is not a child of the given Node the
-	function will fail.
-</method>
-
-<method name="replaceChild" 
-	synopsis="$oldnode = $node->replaceChild( $newNode, $oldNode )">
-	Replaces the <i>$oldNode</i> with the <i>$newNode</i>. The
-	<i>$oldNode</i>	will be unbound from the Node. This function 
-    differs from the DOM L2 specification, in the case, if the new
-    node is not part of the document, the node will be imported 
-    first.
-</method>
-
-<method name="appendChild"
-	synopsis="$childnode = $node->appendChild( $childnode )">
-	The function will add the <i>$childnode</i> to the end of
-	<i>$node</i>'s children. The function should fail, if the new
-	childnode is allready a child of <i>$node</i>. This function 
-    differs from the DOM L2 specification, in the case, if the new
-    node is not part of the document, the node will be imported 
-    first.
-</method>
-
-<method name="cloneNode" 
-	synopsis="$newnode =$node->cloneNode( $deep )">
-	<b>cloneNode</b> creates a copy of <i>$node</i>. Wether $deep
-	is set to 1 (true) the function will copy all childnodes as
-	well. If $deep is 0 only the current node will be copied.
-</method>
-
-<method name="getParentNode" synopsis="$parentnode = $node->getParentNode();">
-	Returns simply the Parent Node of the current node. 
-</method>
-
-<method name="parentNode" synopsis="$parentnode = $node->parentNode;">
-   Alias for <b>getParentNode()</b>
-</method>
-
-<method name="getNextSibling" 
-	synopsis="$nextnode = $node->getNextSibling()">
-	Returns the next sibling if any .
-</method>
-
-<method name="nextSibling" 	synopsis="$nextnode = $node->nextSibling()">
-   Alias for <b>getNextSibling()</b>
-</method>
-
-<method name="getPreviousSibling" 
-	synopsis="$nextnode = $node->getPreviousSibling()">
-	Analogous to <b>getNextSibling</b> the function returns the previous
-	sibling if any.
-</method>
-
-<method name="previousSibling" 	synopsis="$prevnode = $node->previousSibling()">
-   Alias for <b>getPreviousSibling()</b>
-</method>
-
-<method name="hasChildNodes"
-    synopsis="$boolean = $node->hasChildNodes();"> 
-    If the current node has Childnodes this function returns TRUE (1),
-    otherwise it returns FALSE (0, not undef).
-</method>
-
-<method name="getFirstChild" synopsis="$childnode = $node->getFirstChild()">
-	If a node has childnodes this function will return the first
-	node in the childlist. 
-</method>
-
-<method name="firstChild" 	synopsis="$childnode = $node->firstChild;">
-   Alias for <b>getFirstChild()</b>
-</method>
-
-
-<method name="getLastChild" synopsis="$childnode = $node->getLastChild()">
-	If the <i>$node</i> has childnodes this function returns the
-	last child node. 
-</method>
-
-<method name="lastChild" synopsis="$childnode = $node->lastChild;">
-   Alias for <b>getLastChild()</b>
-</method>
-
-<method name="getOwnerDocument" synopsis="$dom = $node->getOwnerDocument()">
-	Through this function it is allway possible to access the
-	document the current node is bound to.
-</method>
-
-
-<method name="ownerDocument" synopsis="$documentnode = $node->ownerDocument;">
-   Alias for <b>getOwnerDocument()</b>
-</method>
-
-<method name="getOwner" synopsis="$node = $node->getOwner;">
-   This function returns the node the current node is associated
-   with. In the very most cases this will be a document node or a
-   document fragment node.
-</method>
-
-<method name="setOwnerDocument" 
-    synopsis="$node->setOwnerDocument( $dom );">
-	This function binds a node to another DOM. This method unbinds the
-	node first, if it is allready bound to another document.
-</method>
-
-<method name="insertBefore" 
-    synopsis="$node->insertBefore( $newNode, $refNode )"> 
-    The method inserts <i>$newNode</i> before <i>$refNode</i>. If
-    <i>$refNode</i> is undefined, the newNode will be set as the new
-    first child of the parent node.  This function differs from the
-    DOM L2 specification, in the case, if the new node is not part of
-    the document, the node will be imported first.
-</method>
-
-<method name="insertAfter" synopsis="$node->insertAfter( $newNode, $refNode )">
-    The method inserts <i>$newNode</i> after <i>$refNode</i>. If
-    <i>$refNode</i> is undefined, the newNode will be set as the new
-    last child of the parent node.
-</method>
-
-<method name="findnodes" 
-    synopsis="@nodes = $node->findnodes( $xpath_statement );">
-	<b>findnodes</b> performs the xpath statement on the current node and 
-	returns the result as an array. In scalar context returns a
-	<i>XML::LibXML::NodeList</i> object.
-</method>
-
-<method name="find"
-    synopsis="$result = $node->find( $xpath );">
-        <b>find</b> performs the xpath expression using the current
-        node as the context of the expression, and returns the result
-        depending on what type of result the XPath expression had. For
-        example, the XPath "1 * 3 + 52" results in a
-        <i>XML::LibXML::Number</i> object being returned. Other
-        expressions might return a <i>XML::LibXML::Boolean</i> object,
-        or a <i>XML::LibXML::Literal</i> object (a string). Each of
-        those objects uses Perl's overload feature to "do the right thing"
-        in different contexts.
-</method>
-
-<method name="findvalue"
-    synopsis="print $node->findvalue( $xpath );">
-        <b>findvalue</b> is exactly equivalent to:
-<example>
-$node->find( $xpath )->to_literal;
-</example>
-        That is, it returns the literal value of the results. This enables
-        you to ensure that you get a string back from your search, allowing
-        certain shortcuts. This could be used as the equivalent of
-        &lt;xsl:value-of select="some_xpath"/>.
-</method>
-
-<method name="getChildnodes" synopsis="@children = $node->getChildnodes();">
-	<b>getChildnodes</b> implements a more intuitive interface to the
-	childnodes of the current node. It enables you to pass all
-	children directly to a <i>map</i> or <i>grep</i>. If this function is 
-    called in scalar context, the number of childnodes will be returned.
-</method>
-
-<method name="childNodes" synopsis="@childnodes = $node->childNodes;">
-   Alias for <b>getChildnodes()</b>
-</method>
-
-<method name="toString" synopsis="$xmlstring = $node->toString();">
-	This is the equivalent to <i>XML::LibXML::Document::toString</i> for
-	a single node. This means a node and all its childnodes will be dumped 
-	into the result string. 
-
-	There is no formating implemented yet, which may cause an unreadable 
-	output.
-</method>
-
-<method name="getLocalName" 
-    synopsis="$name = $node->getLocalName();">
-    Returns the local name of a tag. This is the part behind the colon.
-</method>
-
-<method name="localname" synopsis="$localname = $node->localname;">
-   Alias for <b>getLocalName()</b>
-</method>
-
-<method name="getPrefix" 
-    synopsis="$name = $node->getPrefix();">
-    Returns the prefix of a tag. This is the part before the colon.
-</method>
-
-<method name="prefix" synopsis="$nameprefix = $node->prefix;">
-   Alias for <b>getPrefix()</b>
-</method>
-
-<method name="getNamespaceURI" synopsis="$uri = $node->getNamespaceURI()">
-    returns the URI of the current namespace.
-</method>
-
-
-<method name="hasAttributes" synopsis="$boolean = $node->hasAttributes();">
-   returns 1 (TRUE) if the current node has any attributes set, otherwise
-   0 (FALSE) is returned.
-</method>
-
-
-<method name="getAttributes" synopsis="@attributelist = $node->getAttributes;">
-   returns all attribute nodes of the current node. 
-</method>
-
-<method name="attributes" synopsis="@attributelist = $node->attributes;">
-   Alias for <b>getAttributes()</b>
-</method>
-
-
-<method name="getAttributesNS" 
-    synopsis="@attributelist = $node->attributesNS( $URI );">
-   returns all attributes for the given namespace.
-</method>
-
-<method name="getNamespaces"
-    synopsis="@nslist = $node->getNamespaces();">
-  returns all the namespace declaration nodes bound to this node. The items
-  are instances of the class XML::LibXML::Namespace.
-</method>
-
-<method name="iterator" synopsis="$node->iterator( \&amp;nodehandler );">
-   This is little helper function, that lets one define a function, that
-   will be processed on the current node and all its children. The function
-   will recieve as its only parameter the node to proceed. The function uses
-   inorder proceeding to traverse the subtree. Therefore you can't reach the 
-   childnodes anymore, if the nodehandler removes childnodes. 
-
-<example>
-   $node->iterator( sub { print $_[0]->nodeName(), "\n"; } );    
-</example>
-
-   The example will print all node names in the current subtree.
-
-   The <b>iterator</b> function will return the return value of the
-   nodehandler while processing the last child of the current node.
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Text"/>
-  <item name="XML::LibXML::Comment"/>
-  <item name="XML::LibXML::Attr"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::Element">
-<short>The DOM Element Class</short>
-<description>
-
-<method name="new" synopsis="$node = XML::LibXML::Element->new( $name )">
-	This function creates a new node unbound to any DOM.
-</method>
-
-<method name="setAttribute" synopsis="$node->setAttribute( $aname, $avalue );">
-	This method sets or replaces the node's attribute
-	<i>$aname</i> to the value <i>$avalue</i>
-</method>
-
-<method name="setAttributeNS" synopsis="$node->setAttributeNS( $nsURI, $aname, $avalue );">
-	Namespaceversion of <i>setAttribute</i>.
-</method>
-
-<method name="getAttribute" 
-    synopsis="$avalue = $node->getAttribute( $aname );">
-	If <i>$node</i> has an attribute with the name <i>$aname</i>,
-	the value of this attribute will get returned.
-</method>
-
-<method name="getAttributeNS" synopsis="$avalue = $node->setAttributeNS( $nsURI, $aname );">
-	Namespaceversion of <i>getAttribute</i>.
-</method>
-
-<method name="getAttributeNode"
-    synopsis="$attrnode = $node->getAttributeNode( $aname );">
-
-    Returns the attribute as a node if the attribute exists. If the
-    Attribute does not exists <i>undef</i> will be returned. 
-</method>
-
-<method name="getAttributeNodeNS"
-    synopsis="$attrnode = $node->getAttributeNodeNS( $namespaceURI, $aname );">
-    Namespaceversion of <i>getAttributeNode</i>. 
-</method>
-
-<method name="removeAttribute" synopsis="$node->removeAttribute( $aname );">
-	The method removes the attribute <i>$aname</i> from the node's
-	attribute list, if the attribute can be found.
-</method>
-
-<method name="removeAttributeNS" synopsis="$node->removeAttributeNS( $nsURI, $aname );">
-    Namespace version of <i>removeAttribute</i>
-</method>
-
-<method name="hasAttribute" synopsis="$boolean = $node->hasAttribute( $aname );">
-    This funcion tests if the named attribute is set for the node. If
-    the attribute is specified, TRUE (1) will be returned, otherwise
-    the returnvalue is FALSE (0).
-</method>
-
-<method name="hasAttributeNS" synopsis="$boolean = $node->hasAttributeNS( $nsURI, $aname );">
-    namespace version of <i>hasAttribute</i>
-</method>
-
-<method name="getChildrenByTagName" 
-    synopsis="@nodes = $node->getChildrenByTagName($tagname);">
-	The function gives direct access to all childnodes of the current
-	node with the same tagname. It makes things a lot easier if you
-	need to handle big datasets.
-
-    If this function is called in SCALAR context, it returns the number of 
-    Elements found.
-</method>
-
-<method name="getChildrenByTagNameNS" 
-    synopsis="@nodes = $node->getChildrenByTagNameNS($nsURI,$tagname);">
-    Namespace version of <i>getChildrenByTagName</i>.
-
-    If this function is called in SCALAR context, it returns the number of 
-    Elements found.
-</method>
-
-<method name="getElementsByTagName" synopsis="@nodes =
-$node->getElementsByTagName($tagname);"> This function is part of the
-spec it fetches all descendants of a node with a given tagname. If one
-is as confused with <i>tagname</i> as I was, tagname is a qualified
-tagname which is in case of namespace useage prefix and local name
-
-In SCALAR context this function returns a <i>XML::LibXML::NodeList</i> object.
-</method>
-
-<method name="getElementsByTagNameNS" 
-    synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$localname);">
-    Namespace version of <i>getElementsByTagName</i> as found in the DOM spec.
-
-In SCALAR context this function returns a <i>XML::LibXML::NodeList</i> object.
-</method>
-
-<method name="getElementsByLocalName" 
-    synopsis="@nodes = $node->getElementsByLocalName($localname);">
-    This function is not found in the DOM specification. It is a mix of
-    getElementsByTagName and getElementsByTagNameNS. It will fetch all 
-    tags matching the given local-name. This alows one to select tags with 
-    the same local name across namespace borders. 
-
-In SCALAR context this function returns a <i>XML::LibXML::NodeList</i> object.
-</method>
-
-<method name="appendWellBalancedChunk" 
-	synopsis="$node->appendWellBalancedChunk( $chunk )">
-	Sometimes it is nessecary to append a string coded XML Tree to 
-	a node. <b>appendWellBalancedChunk</b> will do the trick for you.
-	But this is only done if the String is <i>well-balanced</i>. 
-</method>
-
-<method name="appendText" 
-    synopsis="$node->appendText( $PCDATA );">
-    alias for appendTextNode().
-</method>
-
-<method name="appendTextNode" synopsis="$node->appendTextNode( $PCDATA );">
-    This wrapper function lets you add a string directly to an element
-    node.
-</method>
-
-<method name="appendTextChild" 
-    synopsis="$node->appendTextChild( $childname , $PCDATA )">
-    Somewhat similar with <i>appendTextNode</i>: It lets you set an
-    Element, that contains only a <i>text node</i> directly by
-    specifying the name and the text content.
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Node"/>
-  <item name="XML::LibXML::Document"/>
-  <item name="XML::LibXML::Attr"/>
-  <item name="XML::LibXML::Text"/>
-  <item name="XML::LibXML::Comment"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::Text">
-<short>The DOM Text Node Class</short>
-<description>
-
-
-<method name="new" synopsis="$node = XML::LibXML::Text->new( $content ) ">
-	The constuctor of the class. It creates an unbound text node.
-</method>
-
-
-<method name="setData" synopsis="$node->setData( $text_content );">
-	This function sets or replaces text content to a node. The
-	node has to be of the type "text", "cdata" (not supported yet)
-	or "comment".
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Node"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Document"/>
-  <item name="XML::LibXML::Comment"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::Comment">
-<short>The DOM Comment Class</short>
-<description>
-	This class provides all functions of <b>XML::LibXML::Text</b>,
-	but for comment nodes. This can be done, since only the output
-	of the nodetypes is different, but not the datastructure. :-)
-
-<method name="new" synopsis="$node = XML::LibXML::Comment( $content );">
-	The constructor is the only provided function for this
-	package. It is required, because <b>libxml2</b> treats text
-	nodes and comment nodes slightly different.
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Node"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Text"/>
-  <item name="XML::LibXML::Document"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-
-<class name="XML::LibXML::CDATASection">
-<short>The DOM CDATASection Class</short>
-<description>
-	This class provides all functions of <b>XML::LibXML::Text</b>,
-	but for CDATA nodes.
-
-<method name="new" synopsis="$node = XML::LibXML::Comment( $content );">
-	The constructor is the only provided function for this
-	package. It is required, because <b>libxml2</b> treats the
-	different textnode types slightly different.
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Node"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Text"/>
-  <item name="XML::LibXML::Document"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::Attr">
-<short>The DOM Attribute Class</short>
-<description>
-    This is the interface to handle Attributes like ordinary
-    nodes. The naming of the class relies on the W3C DOM
-    documentation.
-
-<method name="new" synopsis="$attr = XML::LibXML::Attr->new($name [,$value]);">
-    Class constructor. If you need to work with iso encoded strings,
-    you should <b>allways</b> use the <i>createAttrbute</i> of
-    <b>XML::LibXML::Document</b>.
-</method>
-
-<method name="getValue" synopsis="$string = $attr->getValue();">
-    Returns the value stored for the attribute. If undef is returned,
-    the attribute has no value, which is different of being <i>not
-    specified</i>.
-</method>
-
-
-<method name="value" synopsis="$value = $attr->value;">
-   Alias for <b>getValue()</b>
-</method>
-
-
-<method name="setValue" synopsis="$attr->setValue( $string );">
-    This is needed to set a new attributevalue. If iso encoded strings
-    are passed as parameter, the node has to be bound to a document,
-    otherwise the encoding might be wrong done.
-</method>
-
-<method name="getOwnerElement" synopsis="$node = $attr->getOwnerDocument();">
-    returns the node the attribute belongs to. If the attribute is not
-    bound to a node, undef will be returned. Overwriting the underlaying
-    implementation, the <b>parentNode</b> function will return undef, instead
-    of the owner element.
-</method>
-
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Node"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Document"/>
-  <item name="XML::LibXML::DocumentFragment"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::DocumentFragment">
-<short>DOM L2 Implementation of a Document Fragment</short>
-<description>
-This class is a helper class as described in the DOM Level 2 Specification.
-It is implamented as a node without name. All adding, inserting or replacing
-functions are aware about document fragments now. 
-
-As well <b>all</b> unbound nodes (all nodes that does not belong to any 
-document subtree) are implicit member of document fragments.
-</description>
-<also>
-  <item name="XML::LibXML"/>
-  <item name="XML::LibXML::Node"/>
-  <item name="XML::LibXML::Element"/>
-  <item name="XML::LibXML::Document"/>
-  <item name="XML::LibXML::Text"/>
-  <item name="XML::LibXML::Comment"/>
-  <item name="XML::LibXML::CDATASection"/>
-</also>
-<version>0.95</version>
-</class>
-
-<class name="XML::LibXML::Namespace">
-<short>A Namespace Class to hold namespace nodes</short>
-<description>
-Namespace nodes are returned by both $element->findnodes('namespace::foo') or
-by $node->getNamespaces().
-
-The namespace node API is not part of any current DOM API, and so it is quite
-minimal. It should be noted that namespace nodes are <b>not</b> a sub
-class of XML::LibXML::Node, however Namespace nodes act a lot like
-attribute nodes, and similarly named methods will return what you would
-expect if you treated the namespace node as an attribute.
-
-<method name="getName" synopsis="print $ns->getName()">
-  Returns "xmlns:prefix", where prefix is the prefix for this namespace.
-</method>
-
-<method name="name" synopsis="print $ns->name()">
-  Alias for getName()
-</method>
-
-<method name="prefix" synopsis="print $ns->prefix()">
-  Returns the prefix bound to this namespace declaration.
-</method>
-
-<method name="getLocalName" synopsis="$localname = $ns->getLocalName()">
-  Alias for prefix()
-</method>
-
-<method name="getData" synopsis="print $ns->getData()">
-  Returns the URI of the namespace.
-</method>
-
-<method name="getValue" synopsis="print $ns->getValue()">
-  Alias for getData()
-</method>
-
-<method name="value" synopsis="print $ns->value()">
-  Alias for getData()
-</method>
-
-<method name="uri" synopsis="print $ns->uri()">
-  Alias for getData()
-</method>
-
-<method name="getNamespaceURI" 
-    synopsis="$known_uri = $ns->getNamespaceURI()">
-  Returns the string "http://www.w3.org/2000/xmlns/"
-</method>
-
-<method name="getPrefix"
-    synopsis="$known_prefix = $ns->getPredix()">
-  Returns the string "xmlns"
-</method>
-
-</description>
-
-</class>
-
-<class name="XML::LibXML::Dtd">
-<short>A Class implementing Dtd Nodes</short>
-<description>
-
-  This class holds a DTD. You may parse a DTD from either a string,
-  or from an external SYSTEM identifier.
-
-  No support is available as yet for parsing from a filehandle.
-  
-  XML::LibXML::Dtd is a sub-class of Node, so all the methods available
-  to nodes (particularly toString()) are available to Dtd objects.
-
-<method name="new" 
-  synopsis="$dtd = XML::LibXML::Dtd->new($public_id, $system_id)">
-  Parse a DTD from the system identifier, and return a DTD object that
-  you can pass to $doc->is_valid() or $doc->validate().
-  
-  <example>
-  my $dtd = XML::LibXML::Dtd->new(
-              "SOME // Public / ID / 1.0",
-              "test.dtd"
-              );
-  my $doc = XML::LibXML->new->parse_file("test.xml");
-  $doc->validate($dtd);
-  </example>
-</method>
-
-<method name="parse_string"
-  synopsis="$dtd = XML::LibXML::Dtd->parse_string($dtd_str)">
-  The same as new() above, except you can parse a DTD from a string.
-</method>
-
-</description>
-</class>
-
+                <example><![CDATA[
+ my $dtd = XML::LibXML::Dtd->new(
+                      "SOME // Public / ID / 1.0",
+                      "test.dtd"
+                                );
+ my $doc = XML::LibXML->new->parse_file("test.xml");
+ $doc->validate($dtd);
+                    ]]></example>
+            </method>
+
+            <method name="parse_string"
+                    synopsis="$dtd = XML::LibXML::Dtd->parse_string($dtd_str)">
+                <p>
+                    The same as new() above, except you can parse a
+                    DTD from a string.
+                </p>
+            </method>
+        </description>
+    </package>
 </module>
