@@ -273,7 +273,9 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
         xmlSetTreeDoc(return_node, doc);
     }
 
-    if ( doc != NULL && return_node != NULL ) {
+    if ( doc != NULL 
+         && return_node != NULL
+         && return_node->type != XML_ENTITY_REF_NODE ) {
         xmlReconciliateNs(doc, return_node);     
     }
 
@@ -364,7 +366,9 @@ domAppendChild( xmlNodePtr self,
         newChild->parent= self;
     }
  
-    xmlReconciliateNs(self->doc, newChild);     
+    if ( newChild->type != XML_ENTITY_REF_NODE ) {
+        xmlReconciliateNs(self->doc, newChild);     
+    }
 
     return newChild;
 }
@@ -464,7 +468,9 @@ domInsertBefore( xmlNodePtr self,
     }
     
     domAddNodeToList(newChild, refChild->prev, refChild);
-    xmlReconciliateNs(self->doc, newChild);     
+    if ( newChild->type != XML_ENTITY_REF_NODE ) {
+        xmlReconciliateNs(self->doc, newChild);     
+    }
 
     return newChild;
 }
@@ -507,7 +513,9 @@ domInsertAfter( xmlNodePtr self,
     }
 
     domAddNodeToList(newChild, refChild, refChild->next);
-    xmlReconciliateNs(self->doc, newChild);     
+    if ( newChild->type != XML_ENTITY_REF_NODE ) {
+        xmlReconciliateNs(self->doc, newChild);     
+    }
 
     return newChild;
 }
@@ -553,7 +561,9 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
         domAddNodeToList( newNode, prev,  next );
     }
 
-    xmlReconciliateNs(newNode->doc, newNode); 
+    if ( newNode->type != XML_ENTITY_REF_NODE ) {
+        xmlReconciliateNs(newNode->doc, newNode); 
+    }
 
     return oldNode;
 }
