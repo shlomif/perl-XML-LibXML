@@ -30,6 +30,7 @@ extern "C" {
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
+#include <libxml/catalog.h>
 
 /* GDOME support
  * libgdome installs only the core functions to the system.
@@ -2227,7 +2228,7 @@ export_GDOME( dummy, sv_libxml, deep=1 )
         croak( "GDOME Support not compiled" );
 #endif
         if ( sv_libxml == NULL || sv_libxml == &PL_sv_undef ) {
-            croak( "no XML::LibXML data found" );    
+            croak( "no XML::LibXML data found" );  
         }
         node = PmmSvNode( sv_libxml );
         if ( node == NULL ) {
@@ -2242,6 +2243,50 @@ export_GDOME( dummy, sv_libxml, deep=1 )
         RETVAL =  PmmNodeToGdomeSv( retnode ); 
     OUTPUT:
         RETVAL    
+
+
+int
+load_default_catalog( self, filename )
+        SV * self
+        SV * filename
+    PREINIT:
+        const char * fn = Sv2C(filename, NULL);
+    INIT:
+        if ( fn == NULL || xmlStrlen( fn ) == 0 ) {
+            croak( "cannot load catalog" );
+        }
+    CODE:
+        warn("load defualt catalog %s", fn );
+        xmlCatalogSetDebug(10);
+        warn("set properties");
+        /* xmlInitializeCatalog(); */
+        warn("effective load");
+        RETVAL = xmlLoadCatalog( fn );
+		/* xmlCatalogAdd(BAD_CAST "catalog", BAD_CAST fn, NULL); */
+        xmlCatalogDump(stderr);
+        warn("done %d", RETVAL);
+        /* xmlCatalogSetDefaults(XML_CATA_ALLOW_ALL); */
+        warn("done");
+    OUTPUT:
+        RETVAL
+
+
+
+int
+_default_catalog( self, catalog )
+        SV * self
+        SV * catalog
+    PREINIT:
+        xmlCatalogPtr catal = (xmlCatalogPtr)SvIV(SvRV(catalog));
+    INIT:
+        if ( catal == NULL ) {
+            croak( "empty catalog" );
+        }
+    CODE:
+        warn( "this feature is not implemented" );
+        RETVAL = 0;
+    OUTPUT:
+        RETVAL
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::ParserContext
 
@@ -2324,6 +2369,7 @@ toFH( self, filehandler, format=0 )
         int oldTagFlag = xmlSaveNoEmptyTags;
         xmlDtdPtr intSubset = NULL;
         xmlDocPtr doc = (xmlDocPtr)PmmSvNode( self );
+        int t_indent_var = xmlIndentTreeOutput;
     CODE:
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
@@ -2343,33 +2389,29 @@ toFH( self, filehandler, format=0 )
             if ( xmlParseCharEncoding(encoding) != XML_CHAR_ENCODING_UTF8) {
                 handler = xmlFindCharEncodingHandler(encoding);
             }
+
         }
         else {
-            warn("no encoding?");
+            xs_warn("no encoding?");
         }
+
         buffer = xmlOutputBufferCreateIO( (xmlOutputWriteCallback) &LibXML_output_write_handler,
                                           (xmlOutputCloseCallback)&LibXML_output_close_handler,
                                           filehandler,
                                           handler ); 
 
-
-
         if ( format <= 0 ) {
-            xs_warn( "use no formated toFH!" );
-            RETVAL =xmlSaveFormatFileTo( buffer, 
-                                         doc,
-                                         encoding,
-                                         format);
+            format = 0;
+            xmlIndentTreeOutput = 0;
         }
         else {
-            int t_indent_var = xmlIndentTreeOutput;
             xmlIndentTreeOutput = 1;
-            RETVAL =xmlSaveFormatFileTo( buffer, 
-                                         doc,
-                                         encoding,
-                                         format);
-            xmlIndentTreeOutput = t_indent_var;
         }
+
+        RETVAL = xmlSaveFormatFileTo( buffer, 
+                                      doc,
+                                      encoding,
+                                      format);
 
         if ( intSubset != NULL ) {
             if (doc->children == NULL)
@@ -2377,9 +2419,9 @@ toFH( self, filehandler, format=0 )
             else
                 xmlAddPrevSibling(doc->children, (xmlNodePtr) intSubset);
         }
-
+    
+        xmlIndentTreeOutput = t_indent_var;
         xmlSaveNoEmptyTags = oldTagFlag;
-        xmlOutputBufferClose( buffer );
     OUTPUT:
         RETVAL    
 
@@ -2668,18 +2710,15 @@ createElementNS( pdoc, nsURI, name )
         eURI  = Sv2C( nsURI , NULL );
 
         if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
-            pchar = xmlStrchr( ename, ':' );
-            if ( pchar != NULL ) {
-                localname = xmlSplitQName2(ename, &prefix);
-            }
-            else {
+            localname = xmlSplitQName2(ename, &prefix);
+            if ( localname == NULL ) {
                 localname = xmlStrdup( ename );
             }
 
             newNode = xmlNewNode( NULL , localname );
             newNode->doc = doc;
             
-            ns = xmlSearchNsByHref( doc, xmlDocGetRootElement(doc), eURI );
+            ns = xmlSearchNsByHref( doc, newNode, eURI );
             if ( ns == NULL ) {
                 /* create a new NS if the NS does not already exists */
                 ns = xmlNewNs(newNode, eURI , prefix );
@@ -2696,7 +2735,6 @@ createElementNS( pdoc, nsURI, name )
                 XSRETURN_UNDEF;
             }
 
-            xmlSetNs(newNode, ns );
             xmlFree(localname);
         }
         else {
@@ -2707,6 +2745,8 @@ createElementNS( pdoc, nsURI, name )
             newNode = xmlNewNode( NULL , localname );
             newNode->doc = doc;
         }
+
+        xmlSetNs(newNode, ns);
 
         docfrag = PmmNewFragment( doc );
         domAppendChild( PmmNODE(docfrag), newNode );
@@ -4145,12 +4185,12 @@ cloneNode( self, deep=0 )
         SV* self
         int deep
     PREINIT:
-        xmlNodePtr ret;
+        xmlNodePtr ret, node;
         xmlDocPtr doc;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        ret = PmmCloneNode( PmmSvNode( self ), deep );
-        
+        node = PmmSvNode( self );
+        ret = PmmCloneNode( node, deep );
         if ( ret == NULL ) {
             XSRETURN_UNDEF;
         }
@@ -4159,11 +4199,16 @@ cloneNode( self, deep=0 )
             RETVAL = PmmNodeToSv(ret, NULL);
         }
         else {
-            doc = PmmSvNode(self)->doc;
+            doc = node->doc;
             
             if ( doc != NULL ) {
                 xmlSetTreeDoc(ret, doc);
             }
+
+            # make namespaces available
+            ret->ns = node->ns;
+
+            xmlReconciliateNs(ret->doc, ret);     
 
             docfrag = PmmNewFragment( ret->doc );
             domAppendChild( PmmNODE(docfrag), ret );            

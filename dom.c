@@ -353,7 +353,9 @@ domAppendChild( xmlNodePtr self,
         self->last     = newChild;
         newChild->parent= self;
     }
-    
+ 
+    xmlReconciliateNs(self->doc, newChild);     
+
     return newChild;
 }
 
@@ -449,6 +451,8 @@ domInsertBefore( xmlNodePtr self,
     }
     
     domAddNodeToList(newChild, refChild->prev, refChild);
+    xmlReconciliateNs(self->doc, newChild);     
+
     return newChild;
 }
 
@@ -489,6 +493,8 @@ domInsertAfter( xmlNodePtr self,
     }
 
     domAddNodeToList(newChild, refChild, refChild->next);
+    xmlReconciliateNs(self->doc, newChild);     
+
     return newChild;
 }
 
@@ -531,6 +537,8 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
     else {
         domAddNodeToList( newNode, prev,  next );
     }
+
+    xmlReconciliateNs(newNode->doc, newNode); 
 
     return oldNode;
 }
