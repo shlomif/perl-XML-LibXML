@@ -9,7 +9,15 @@ $|=0;
 
 my %config;
 
+
+# maybe i am doing something wrong here, but on my system parse_fh()
+# refuses to work correctly with libxml2 versions below 2.4.25 :|
+# (without even a code change at that level)
+# someone else should run tests with this package, since i can't 
+# trigger this problem. 
 my ( $lib_major, $lib_minor, $lib_patch ) = (2, 4, 20);
+# uncomment for release?
+# my ( $lib_major, $lib_minor, $lib_patch ) = (2, 4, 25);
 
 while($_ = shift) {
     my ($key, $val) = split(/=/, $_, 2);
@@ -92,11 +100,21 @@ OPT
 
 
 if ($config{LIBS} !~ /\-lxml2\b/) {
-    $config{LIBS} .= $is_Win32 ? ' -llibxml2' : ' -lxml2';
+    # in this case we are not able to run xml2-config. therefore we need to
+    # expand the libz as well.
+    $config{LIBS} .= $is_Win32 ? ' -llibxml2 -lzlib' : ' -lxml2 -lz';
 }
 
 if ($config{LIBS} !~ /\-lz\b/) {
-    $config{LIBS} .= $is_Win32 ? ' -lzlib' :' -lz';
+    # note if libxml2 has not -lz within its cflags, we should not use
+    # it! We should trust libxml2 and assume libz is not available on the
+    # current system (this is ofcourse not true with win32 systems.
+    # $config{LIBS} .= $is_Win32 ? ' -lzlib' :' -lz';
+    if ( $config{DEBUG} ) {
+        warn "zlib was not configured\n";
+        warn "set zlib\n" if $is_Win32;
+    }
+    $config{LIBS} .= $is_Win32 ? ' -lzlib' :'';
 }
 
 if ($config{LIBS} !~ /\-lm\b/) {

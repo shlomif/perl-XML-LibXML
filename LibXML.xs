@@ -85,7 +85,9 @@ static SV * LibXML_close_cb = NULL;
 static SV * LibXML_error    = NULL;
 
 #define LibXML_init_error() LibXML_error = NEWSV(0, 512); \
-                            sv_setpvn(LibXML_error, "", 0);
+                            sv_setpvn(LibXML_error, "", 0); \
+                            xmlSetGenericErrorFunc( NULL ,  \
+                                (xmlGenericErrorFunc)LibXML_error_handler);
 
 #define LibXML_croak_error() if ( SvCUR( LibXML_error ) > 0 ) { \
                                  croak("%s",SvPV(LibXML_error, len)); \
@@ -604,8 +606,6 @@ LibXML_init_parser( SV * self ) {
         SV * RETVAL  = NULL; /* dummy for the stupid macro */
 
         LibXML_init_error();
-        xmlSetGenericErrorFunc( NULL , 
-                                (xmlGenericErrorFunc)LibXML_error_handler);
 
         item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
         if ( item != NULL && SvTRUE(*item) ) {  
@@ -4112,7 +4112,7 @@ _findnodes( pnode, perl_xpath )
                 xmlFree(xpath);
             croak( "empty XPath found" );
             XSRETURN_UNDEF;
-        }
+        }   
     PPCODE:
         if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement(node->doc ) );

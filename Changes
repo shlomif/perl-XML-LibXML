@@ -7,11 +7,14 @@ versions of the package.
 1.54
    - Catalog interface is aware about libxml2 configuration
    - XML::LibXML should work now on system without having zlib installed (?)
+   - cleaned the error handling code, which 
+     - fixes bad reporting of the validating parser
+     - fixes bad reporting in xpath functions
    - fixed memory management problem introduced in 1.53
+     (that fixes a lot strange things)
    - fixed default iterator of XML::LibXML::Iterator
    - interface for raw libxml2 DOM building functions 
      (currently just addChild(), others will follow)
-   - fixed bad behaviour of the validating parser
    - fixed memory leak in push parser code
    - fixed namespace handling if nodes are imported to a new DOM.
    - fixed segmentation fault during validation under libxml2 2.4.25
