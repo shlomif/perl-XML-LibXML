@@ -1059,6 +1059,63 @@ _parse_html_file(self, filename)
         RETVAL
 
 SV*
+_parse_xml_chunk( self, chunk, encoding="UTF-8" )
+        SV * self
+        char * chunk
+        char * encoding
+    PREINIT:
+        char * CLASS = "XML::LibXML::DocumentFragment";
+        xmlNodePtr rv = NULL;
+        xmlNodePtr fragment= NULL;
+        ProxyObject *ret=NULL;
+        xmlNodePtr rv_end = NULL;
+    CODE:
+        if ( encoding == NULL ) encoding = "UTF-8";
+
+        chunk = domEncodeString( encoding, chunk );
+
+        if ( chunk != NULL ) {
+            LibXML_error = sv_2mortal(newSVpv("", 0));
+            rv = domReadWellBalancedString( NULL, chunk );
+            LibXML_cleanup_callbacks();
+            LibXML_cleanup_parser();    
+
+            if ( rv != NULL ) {
+                /* now we append the nodelist to a document
+                   fragment which is unbound to a Document!!!! */
+                # warn( "good chunk, create fragment" );
+
+                /* step 1: create the fragment */
+                fragment = xmlNewDocFragment( NULL );
+                # if ( !fragment ) warn( "no fragment!\n" );
+                ret = make_proxy_node( fragment );
+                RETVAL = NEWSV(0,0);
+                sv_setref_pv( RETVAL, (char *)CLASS, (void*)ret );
+                ret->extra = RETVAL;
+                # warn( "NEW FRAGMENT DOCUMENT" );
+                # SvREFCNT_inc(RETVAL);
+
+                /* step 2: set the node list to the fragment */
+                fragment->children = rv;
+                rv->parent = fragment;
+                rv_end = rv;
+                while ( rv_end->next != NULL ) {
+                    rv_end = rv_end->next;
+                    rv_end->parent = fragment;
+                }
+                fragment->last = rv_end;
+            }
+            else {
+                # warn( "bad chunk" );
+                RETVAL = &PL_sv_undef;
+            }
+            /* free the chunk we created */
+            xmlFree( chunk );
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
 encodeToUTF8( encoding, string )
         const char * encoding
         const char * string
@@ -1932,42 +1989,68 @@ appendChild( parent, child )
         ProxyObject* cproxy = NULL;
         xmlNodePtr test = NULL;
     CODE:
+        if ( parent == NULL ) {
+               croak("parent problem!\n");
+        }
+        if ( child == NULL ) {
+               croak("child problem!\n");
+        }
 
-        # test = domAppendChild( parent->object, child->object );
-        # update the proxies if nessecary
-        if ( !(((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE
-             && ((xmlNodePtr)child->object)->type == XML_ELEMENT_NODE ) 
-             && domAppendChild( parent->object, child->object ) != NULL ) {
-            if ( parent == NULL ) {
-                croak("parent problem!\n");
-            }
+        # warn( "append Child \n" );
+        if (((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE
+             && ((xmlNodePtr)child->object)->type == XML_ELEMENT_NODE ) {
+            # warn( "use setDocumentElement!!!!\n" );
+            
+        }
+        else {
+            # test = domAppendChild( parent->object, child->object );
+            # update the proxies if nessecary
+            # warn( "real append\n" );
+            if ( domAppendChild( parent->object, child->object ) != NULL ) {
 
-            if ( ((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE ) {
-                pproxy = parent;
-            }
-            else if ( parent->extra != NULL ){
-                pproxy = (ProxyObject*)SvIV((SV*)SvRV(parent->extra));
-            }
-            if ( child->extra != NULL ) {
-                cproxy = (ProxyObject*)SvIV((SV*)SvRV(child->extra));
-            }
-            if ( child->extra == NULL || parent->extra == NULL || pproxy->object != cproxy->object ) {
+                # warn( "node appended\n" );    
+                /* if we appended a fragment we do not need to change refcounts */
+                if ( !((xmlNodePtr)parent->object)->type == XML_DOCUMENT_FRAG_NODE ) {
+                    if ( ((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE ) {
+                        pproxy = parent;
+                    }
+                    else if ( parent->extra != NULL ){
+                        pproxy = (ProxyObject*)SvIV((SV*)SvRV(parent->extra));
+                    }
+
+                    if ( child->extra != NULL ) {
+                        warn( "c1\n" );
+                        cproxy = (ProxyObject*)SvIV((SV*)SvRV(child->extra));
+                        warn( "c2\n" );    
+                    }
+
+                    if ( child->extra == NULL
+                         || parent->extra == NULL
+                         || pproxy->object != cproxy->object ) {
       
-                # warn("different documents");
-                if ( child->extra != NULL ){
-                    # warn("decrease child documents");   
-                    SvREFCNT_dec(child->extra);
+                        # warn("different documents");
+                        if ( child->extra != NULL ){
+                            # warn("decrease child documents");   
+                            SvREFCNT_dec(child->extra);
+                        }
+
+                        child->extra = parent->extra;
+
+                        if ( child->extra != NULL ){
+                            # warn("increase child documents");   
+                            SvREFCNT_inc(child->extra);
+                        }
+                    }
+                    else {
+                        # warn( "object failure\n" );
+                    }
                 }
-
-                child->extra = parent->extra;
-
-                if ( child->extra != NULL ){
-                    # warn("increase child documents");   
-                    SvREFCNT_inc(child->extra);
+                else {
+                    # warn( "fragment append!\n" );
                 }
             }
             else {
-                # warn( "object failure\n" );
+                # warn("append problem ...\n");
             }
         }
 
@@ -3364,6 +3447,15 @@ getParentElement( attrnode )
         RETVAL
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::DocumentFragment
+
+void
+_fix_extra(node_sv)
+        SV * node_sv
+    PREINIT:
+        ProxyObject* node;
+    CODE:
+        node = (ProxyObject *)SvIV((SV*)SvRV(node_sv));
+        node->extra = node_sv;
 
 SV*
 new( CLASS )

@@ -169,6 +169,34 @@ sub parse_string {
     return $result;
 }
 
+sub parse_xml_chunk {
+    my $self = shift;
+    # max 2 parameter:
+    # 1: the chunk
+    # 2: the encoding of the string
+    croak("parse already in progress") if $self->{_State_};
+    $self->{_State_} = 1;
+    my $result;
+    eval {
+        $self->init_parser();
+        $result = $self->_parse_xml_chunk( @_ );
+        if ( $result ) {
+            $result->_fix_extra;
+        }
+
+        # we should include this to document fragments as well ...
+        # if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
+        #     $result->process_xinclude();
+        # }
+    };
+    my $err = $@;
+    $self->{_State_} = 0;
+    if ($err) {
+        croak $err;
+    }
+    return $result;
+}
+
 sub parse_fh {
     my $self = shift;
     croak("parse already in progress") if $self->{_State_};

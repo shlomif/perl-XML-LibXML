@@ -48,7 +48,7 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
   xmlNodePtr helper = NULL;
   xmlNodePtr nodes  = NULL;
   
-  if ( doc && block ) {
+  if ( block ) {
     /* read and encode the chunk */
     retCode = xmlParseBalancedChunkMemory( doc, 
                                            NULL,
@@ -56,7 +56,7 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
                                            0,
                                            block,
                                            &nodes );
-    
+
     /* error handling */
     if ( retCode != 0 ) {
       /* if the code was not well balanced, we will not return 
@@ -342,6 +342,7 @@ xmlNodePtr
 domAppendChild( xmlNodePtr self,
                 xmlNodePtr newChild ){
     /* unbinds the new node if nessecary ... does not handle attributes :P */
+    /* fprintf( stderr,"check if child is not parent of the current node\n"); */
     newChild = domIsNotParentOf( newChild, self );
 
     if ( self == NULL ) {
@@ -355,40 +356,52 @@ domAppendChild( xmlNodePtr self,
               && newChild->children == NULL ) 
          ){
         /* HIERARCHIY_REQUEST_ERR */
+        /* fprintf(stderr,"HIERARCHIY_REQUEST_ERR\n"); */
         return NULL;
     }
 
     if ( newChild->doc == self->doc ){
+        /* fprintf(stderr,"child part of the current dom\n"); */
         newChild= domUnbindNode( newChild );
     }
     else {
         /* WRONG_DOCUMENT_ERR - non conform implementation*/
+        /* fprintf(stderr,"WRONG_DOCUMENT_ERR - non conform implementation\n"); */
         newChild= domImportNode( self->doc, newChild, 1 );
+        /* fprintf(stderr,"post import\n");  */
+
     }
-  
-  if ( self->children != NULL ) {
-    newChild = insert_node_to_nodelist( self->last, newChild , NULL );
-  }
-  else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
-    xmlNodePtr cld = newChild->children;
-    self->children = newChild->children;
-    self->last     = newChild->last;
-    while( cld != NULL ){
-      cld->parent = self;
-      cld = cld->next;
+ 
+    /* fprintf(stderr,"real append\n");  */
+    if ( self->children != NULL ) {
+        /* fprintf(stderr,"append to the end of the child list\n");  */
+        newChild = insert_node_to_nodelist( self->last, newChild , NULL );
     }
-    cld->parent = self;
+    else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
+        xmlNodePtr cld = newChild->children;
+        /* fprintf(stderr," insert a fragment into an empty node\n");  */
+        self->children = newChild->children;
+        self->last     = newChild->last;
+        while( cld != NULL ){
+            cld->parent = self;
+            cld = cld->next;
+        }
+        /* cld->parent = self; */
+        
+        newChild->children = NULL;
+        newChild->last = NULL;
+        /* cld = self->children; */
+    }
+    else {
+        /* fprintf(stderr,"single node, no children\n");  */
+
+        self->children = newChild;
+        self->last     = newChild;
+        newChild->parent= self;
+    }
     
-    newChild->children = NULL;
-    newChild->last = NULL;
-    cld = self->children;
-  }
-  else {
-    self->children = newChild;
-    self->last     = newChild;
-    newChild->parent= self;
-  }
-  return newChild;
+    /* fprintf(stderr,"append done...\n");  */
+    return newChild;
 }
 
 
@@ -668,29 +681,32 @@ domUnbindNode( xmlNodePtr self ) {
  **/
 xmlNodePtr
 domIsNotParentOf( xmlNodePtr node1, xmlNodePtr node2 ) {
-  xmlNodePtr helper = NULL;
+    xmlNodePtr helper = NULL;
 
-  if ( node1 == NULL ) {
-    return NULL;
-  }
-
-  if( node2 == NULL || node1->doc != node2->doc) {
-    return node1;
-  }
-  
-  helper= node2;
-  while ( helper!=NULL ) {
-    if( helper == node1 ) {
-      return NULL;
+    if ( node1 == NULL ) {
+        return NULL;
     }
     
-    helper = helper->parent;
-    if ( (xmlDocPtr) helper == node2->doc ) {
-      helper = NULL;
+    if( node2 == NULL || node1->doc != node2->doc) {
+        return node1;
     }
-  }
-
-  return node1;
+    if( node2->type == XML_DOCUMENT_NODE ){  
+      return node1;
+    }
+    
+    helper= node2;
+    while ( helper!=NULL ) {
+        if( helper == node1 ) {
+            return NULL;
+        }
+        
+        helper = helper->parent;
+        if ( (xmlDocPtr) helper == node2->doc ) {
+            helper = NULL;
+        }
+    }
+    
+    return node1;
 }
 
 /**

@@ -1,6 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
 1.32
+   - new parsefunction: $parser->parse_xml_chunk($string);
+   - appendChild( $doc_fragment ) bug fixed
    - removed obsolete files (parser.?)
    - fixed getElementsByTagName and getElementsByTagNameNS to fit the spec
    - new functions in XML::LibXML::Element:
