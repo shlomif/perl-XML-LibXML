@@ -1630,11 +1630,11 @@ _start_push( self, with_sax=0 )
                                             NULL,
                                             0,
                                             NULL );
+            PmmSAXInitContext( ctxt, self );
         }
         else {
             ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
         }
-        PmmSAXInitContext( ctxt, self );
         sv_2mortal(LibXML_error);
 
         RETVAL = PmmContextSv( ctxt );
@@ -1749,9 +1749,10 @@ _end_sax_push( self, pctxt )
 
         sv_2mortal(LibXML_error);
 
+        PmmSAXCloseContext(ctxt);
+
         xmlFree(ctxt->sax);
         ctxt->sax = NULL;
-        PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
         XSRETURN_UNDEF;
 
