@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 12 }
+BEGIN { plan tests => 25 }
 END { ok(0) unless $loaded }
 use XML::LibXML;
 $loaded = 1;
@@ -24,16 +24,24 @@ my $root = $dom->getDocumentElement();
 my @nodes = $root->findnodes( 'xml/xsl' );
 ok( scalar @nodes );
 
+chdir("example/complex") || die "chdir: $!";
+open(F, "complex.xml") || die "Cannot open complex.xml: $!";
+local $/;
+my $str = <F>;
+close F;
+$dom = $parser->parse_string($str);
+ok($dom);
+
 # warn $dom->toString() , "\n";
 
 sub match {
-#    warn "match!\n";
+# warn "match: $_[0]\n";
     ok(1);
     return 1;
 }
 
 sub close {
-#    warn "close!\n";
+# warn "close $_[0]\n";
     ok(1);
     if ( $_[0] ) {
         $_[0]->close();
@@ -42,6 +50,7 @@ sub close {
 }
 
 sub open {
+# warn("open: $_[0]\n");
     $file = new IO::File;
     if ( $file->open( "<$_[0]" ) ){
 #        warn "open!\n";
@@ -51,6 +60,7 @@ sub open {
 #        warn "cannot open $_[0] $!\n";
         $file = 0;
     }   
+# warn("opened $file\n");
    
     return $file;
 }
