@@ -73,6 +73,12 @@
     of <i>xmlDocDumpFormatMemory</i> in <i>libxml2/tree.h</i>.
 </method>
 
+<method name="toStringHTML"
+    synopsis="$document->toStringHTML();">
+    <b>toStringHTML</b> deparses the tree to a string as HTML. With 
+    this method indenting is automatic and managed by libxml2 internally.
+</method>
+
 <method name="is_valid" 
 	synopsis="$bool = $dom->is_valid();">
 	Returns either TRUE or FALSE depending on the DOM Tree is a
