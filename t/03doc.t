@@ -65,7 +65,8 @@ use XML::LibXML::Common qw(:libxml);
     
     {
         print "# document with encoding\n";
-        my $encdoc = XML::LibXML::Document->new( "1.0", "iso-8859-1" );
+        my $encdoc = XML::LibXML::Document->new( "1.0" );
+        $encdoc->setEncoding( "iso-8859-1" );
         {
             my $node = $encdoc->createElement( "foo" );
             ok($node);

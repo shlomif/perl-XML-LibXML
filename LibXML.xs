@@ -2989,8 +2989,21 @@ void
 setEncoding( self, encoding )
         xmlDocPtr self
         char *encoding
+    PREINIT:
+        int charset = XML_CHAR_ENCODING_ERROR;
     CODE:
+        if ( self->encoding != NULL ) {
+            xmlFree( (xmlChar*) self->encoding );
+        }   
         self->encoding = xmlStrdup( (const xmlChar *)encoding );
+        charset = (int)xmlParseCharEncoding( (const char*)self->encoding );
+        if ( charset > 0 ) {
+            ((ProxyNodePtr)self->_private)->encoding = charset;
+        }
+        else {
+            ((ProxyNodePtr)self->_private)->encoding = XML_CHAR_ENCODING_ERROR;
+        }
+        
 
 int
 standalone( self ) 
@@ -3030,6 +3043,9 @@ setVersion( self, version )
         xmlDocPtr self
         char *version
     CODE:
+        if ( self->version != NULL ) {
+            xmlFree( (xmlChar*) self->version );
+        }
         self->version = xmlStrdup( (const xmlChar*)version );
 
 int
