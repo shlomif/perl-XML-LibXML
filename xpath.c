@@ -7,8 +7,8 @@
 
 void
 perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
-    xmlXPathObjectPtr obj, obj2 = NULL;
-    xmlChar *base = NULL, *URI;
+    xmlXPathObjectPtr obj = NULL, obj2 = NULL;
+    xmlChar *base = NULL, *URI = NULL;
 
 
     if ((nargs < 1) || (nargs > 2)) {
@@ -172,8 +172,8 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
 
 xmlNodeSetPtr
 domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
-    xmlNodeSetPtr rv ;
-    xmlXPathObjectPtr res;
+    xmlNodeSetPtr rv = NULL;
+    xmlXPathObjectPtr res = NULL;
   
     res = domXPathFind( refNode, path );
     

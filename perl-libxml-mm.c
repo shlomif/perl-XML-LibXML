@@ -665,11 +665,11 @@ Sv2C( SV* scalar, const xmlChar *encoding )
     if ( scalar != NULL && scalar != &PL_sv_undef ) {
         STRLEN len;
         char * t_pv =SvPV(scalar, len);
+        xmlChar* ts;
         xmlChar* string = xmlStrdup((xmlChar*)t_pv);
         /* Safefree( t_pv ); */
         
         if ( xmlStrlen(string) > 0 ) {
-            xmlChar* ts;
             xs_warn( "no undefs" );
 #ifdef HAVE_UTF8
             xs_warn( "use UTF8" );
@@ -680,11 +680,13 @@ Sv2C( SV* scalar, const xmlChar *encoding )
                 xs_warn( "domEncodeString!" );
                 ts= PmmEncodeString( encoding, string );
                 xs_warn( "done!" );
-                if ( string != NULL ) 
+                if ( string != NULL ) {
                     xmlFree(string);
+                }
                 string=ts;
             }
         }
+
         retval = xmlStrdup(string);
         if (string != NULL ) {
             xmlFree(string);

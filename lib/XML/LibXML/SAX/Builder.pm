@@ -161,7 +161,14 @@ sub characters {
         $self->{NamespaceStack}->push_context;
     }
     return unless $self->{Parent};
-    my $node = $self->{DOM}->createTextNode($chars->{Data});
+    my $node;
+    if ( defined $self->{DOM} ) {
+        $node = $self->{DOM}->createTextNode($chars->{Data});
+    }
+    else {
+        $node = XML::LibXML::Text->new($chars->{Data});
+    }
+
     $self->{Parent}->appendChild($node);
 }
 
