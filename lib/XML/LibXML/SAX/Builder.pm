@@ -9,8 +9,6 @@ sub new {
     return bless {@_}, $class;
 }
 
-sub get_document { $_[0]->{DOM}; }
-
 sub start_document {
     my ($self, $doc) = @_;
 
@@ -39,6 +37,7 @@ sub end_document {
     my ($self, $doc) = @_;
     my $dom = $self->{DOM};
     delete $self->{Parent};
+    delete $self->{DOM};
     return $dom;
 }
 
@@ -66,8 +65,14 @@ sub start_element {
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
-            # SAX2 attributes
-            $node->setAttributeNS($attr->{NamespaceURI} || "", $attr->{Name}, $attr->{Value});
+            if ( $attr->{Prefix} ne "xmlns" ) {
+                # SAX2 attributes
+                $node->setAttributeNS($attr->{NamespaceURI} || "",
+                                      $attr->{Name}, $attr->{Value});
+            }
+            else {
+                $node->setNamespace( $attr->{Value}, $attr->{LocalName},0 );
+            }
         }
         else {
             $node->setAttribute($key => $attr);
