@@ -1226,7 +1226,7 @@ parser is told to finish the parsing process.
 This function pushs the data stored inside the array to libxml2's
 parse. Each entry in @data must be a normal scalar!
 
-=item $parser->finish( $restore );
+=item $parser->finish_push( $restore );
 
 This function returns the result of the parsing process. If this
 function is called without a parameter it will complain about non
@@ -1235,7 +1235,7 @@ restore broken or non well formed (XML) documents as the following
 example shows:
 
   $parser->push( "<foo>", "bar" );
-  eval { $doc = $parser->finish; };      # will complain
+  eval { $doc = $parser->finish_push(); };      # will complain
   if ( $@ ) {
      # ...
   }
@@ -1244,11 +1244,11 @@ This can be anoing if the closing tag misses by accident. The
 following code will restore the document:
 
   $parser->push( "<foo>", "bar" );
-  eval { $doc = $parser->finish(1); };      # will not complain
+  eval { $doc = $parser->finish_push(1); };      # will not complain
 
   warn $doc->toString(); # returns "<foo>bar</foo>"
 
-of course finish() will return nothing if there was no data pushed to
+of course finish_push() will return nothing if there was no data pushed to
 the parser before.
 
 =back

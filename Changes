@@ -1,7 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
 *NOTE:* 
-Version 1.53 fixes potentional buffer overflows. 
+Version 1.53 fixes potentional buffer overflows were possible with earlier
+versions of the package. It is recommended to upgrade any XML::LibXML since
+1.49 to 1.53 to avoid such problems.
 
 1.53
    - catalog interface
@@ -21,7 +23,7 @@ Version 1.53 fixes potentional buffer overflows.
    - XML::LibXML::SAX speedups
    - more security checks
    - removed some redundand code
-   - more documentation
+   - more documentation (fixes)
 
 1.52
    - fixed some typos (thanks to randy kobes and hildo biersma)
