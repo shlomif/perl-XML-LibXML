@@ -83,6 +83,23 @@
 	synopsis="$bool = $dom->is_valid();">
 	Returns either TRUE or FALSE depending on the DOM Tree is a
 	valid Document or not.
+  
+  You may also pass in a XML::LibXML::Dtd object, to validate
+  against an external DTD:
+  <example>
+  if (!$dom->is_valid($dtd)) {
+    warn("document is not valid!");
+  }
+  </example>
+</method>
+
+<method name="validate"
+    synopsis="$dom->validate();">
+  This is an exception throwing equivalent of is_valid. If the document
+  is not valid it will throw an exception containing the error. This
+  allows you much better error reporting than simply is_valid or not.
+  
+  Again, you may pass in a DTD object.
 </method>
 
 <method name="getDocumentElement" 
@@ -780,4 +797,40 @@ expect if you treated the namespace node as an attribute.
 </description>
 
 </class>
+
+<class name="XML::LibXML::Dtd">
+<short>A Class implementing Dtd Nodes</short>
+<description>
+
+  This class holds a DTD. You may parse a DTD from either a string,
+  or from an external SYSTEM identifier.
+
+  No support is available as yet for parsing from a filehandle.
+  
+  XML::LibXML::Dtd is a sub-class of Node, so all the methods available
+  to nodes (particularly toString()) are available to Dtd objects.
+
+<method name="new" 
+  synopsis="$dtd = XML::LibXML::Dtd->new($public_id, $system_id)">
+  Parse a DTD from the system identifier, and return a DTD object that
+  you can pass to $doc->is_valid() or $doc->validate().
+  
+  <example>
+  my $dtd = XML::LibXML::Dtd->new(
+              "SOME // Public / ID / 1.0",
+              "test.dtd"
+              );
+  my $doc = XML::LibXML->new->parse_file("test.xml");
+  $doc->validate($dtd);
+  </example>
+</method>
+
+<method name="parse_string"
+  synopsis="$dtd = XML::LibXML::Dtd->parse_string($dtd_str)">
+  The same as new() above, except you can parse a DTD from a string.
+</method>
+
+</description>
+</class>
+
 </module>
