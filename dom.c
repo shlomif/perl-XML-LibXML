@@ -207,24 +207,24 @@ domTestDocument(xmlNodePtr cur, xmlNodePtr ref)
 xmlNodePtr
 domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
     xmlNodePtr return_node = node;
-    
-    if ( node && doc && node->doc != doc ) {
-        if ( move ) {
-            return_node = node;
-            if ( node->type != XML_DTD_NODE ) {
-                xmlUnlinkNode( node );
-            }
+
+    if ( move ) {
+        return_node = node;
+        if ( node->type != XML_DTD_NODE ) {
+            xmlUnlinkNode( node );
+        }
+    }
+    else {
+        if ( node->type == XML_DTD_NODE ) {
+            return_node = (xmlNodePtr) xmlCopyDtd((xmlDtdPtr) node);
         }
         else {
-            if ( node->type == XML_DTD_NODE ) {
-                return_node = (xmlNodePtr) xmlCopyDtd((xmlDtdPtr) node);
-            }
-            else {
-                return_node = xmlCopyNode( node, 1 );
-            }
+            return_node = xmlCopyNode( node, 1 );
         }
-        /* tell all children about the new boss */ 
+    }
 
+    /* tell all children about the new boss */ 
+    if ( node && doc && node->doc != doc ) {
         xmlSetTreeDoc(return_node, doc);
     }
  

@@ -2588,8 +2588,7 @@ importNode( dom, node )
         real_node=  PmmSvNode(node);
         ret = domImportNode( real_dom, real_node, 0 );
         if ( ret ) {
-            RETVAL = newSVsv(node);
-            PmmFixOwner(SvPROXYNODE(node),SvPROXYNODE(dom));
+            RETVAL = PmmNodeToSv( ret, SvPROXYNODE(dom));
         }
         else {
             XSRETURN_UNDEF;
@@ -2603,6 +2602,7 @@ adoptNode( dom, node )
         SV * node
     PREINIT:
         xmlNodePtr ret = NULL;
+        ProxyNodePtr frag = NULL;
         xmlNodePtr real_node = NULL;
         xmlDocPtr real_dom;
     CODE:
@@ -2610,8 +2610,10 @@ adoptNode( dom, node )
         real_node=  PmmSvNode(node);
         ret = domImportNode( real_dom, real_node, 1 );
         if ( ret ) {
+            frag = PmmNewFragment( real_dom );
+            domAppendChild( PmmNODE(frag), ret );
             RETVAL = newSVsv(node);
-            PmmFixOwner(SvPROXYNODE(node),SvPROXYNODE(dom));
+            PmmFixOwner(SvPROXYNODE(node),frag);
         }
         else {
             XSRETURN_UNDEF;
@@ -2915,7 +2917,7 @@ setName( pnode , value )
             xmlFree(prefix);
         }
         else {
-            warn("node name normal\n");
+            xs_warn("node name normal\n");
             xmlNodeSetName(node, string );
         }
         xmlFree(string);
@@ -2982,6 +2984,8 @@ parentNode( self )
 SV*
 nextSibling( self ) 
         SV *self
+    ALIAS:
+        getNextSibling = 1
     CODE:
         RETVAL = PmmNodeToSv( PmmSvNode(self)->next,
                               PmmOWNERPO( SvPROXYNODE(self) ) ); 
@@ -2991,6 +2995,8 @@ nextSibling( self )
 SV*
 previousSibling( self )
         SV *self
+    ALIAS:
+        getPreviousSibling = 1
     CODE:
         RETVAL = PmmNodeToSv( PmmSvNode(self)->prev,
                               PmmOWNERPO( SvPROXYNODE(self) ) ); 
@@ -3456,11 +3462,12 @@ addSibling( self, newNode )
         RETVAL
 
 SV*
-cloneNode( self, deep ) 
+cloneNode( self, deep=0 ) 
         SV* self
         int deep
     PREINIT:
         xmlNodePtr ret;
+        xmlDocPtr doc;
         ProxyNodePtr docfrag = NULL;
     CODE:
         if ( PmmSvNode( self )->type == XML_DTD_NODE ) {
@@ -3474,7 +3481,12 @@ cloneNode( self, deep )
         }
         else {
             ret = xmlCopyNode( PmmSvNode(self), deep );
-    
+            doc = PmmSvNode(self)->doc;
+            
+            if ( doc != NULL ) {
+                xmlSetTreeDoc(ret, doc);
+            }
+
             if (ret != NULL) {
                 docfrag = PmmNewFragment( ret->doc );
                 domAppendChild( PmmNODE(docfrag), ret );            

@@ -282,20 +282,13 @@
             </method>
 
             <method name="importNode"
-                    synopsis="$document->importNode( $node [, $move] );">
+                    synopsis="$document->importNode( $node );">
                 <p>
                     If a node is not part of a document, it can be
                     imported to another document. As specified in DOM
                     Level 2 Specification the Node will not be altered
-                    or removed from its original document by
-                    default. (<em>$node->cloneNode(1)</em> will get
-                    called implicitly).
-                </p>
-                <p>
-                    Sometimes it is nessecary to <em>move</em> a node
-                    between documents. In such a case the node will
-                    not be copied, but removed from the original
-                    document.
+                    or removed from its original document
+                    (<em>$node->cloneNode(1)</em> will get called implicitly).
                 </p>
                 <p>
 		<st>NOTE:</st> Don't try to use importNode() to import 
@@ -305,6 +298,29 @@
 		a limitation of libxml2 and not of XML::LibXML itself.
 		</p>
             </method>
+            <method name="adoptNode"
+                    synopsis="$document->adoptNode( $node );">
+                <p>
+                    If a node is not part of a document, it can be
+                    imported to another document. As specified in DOM
+                    Level 3 Specification the Node will not be altered
+                    but it will removed from its original document.
+                </p>
+                <p>
+                    After a document adopted a node, the node, its
+                    attributes and all its descendants belong to the
+                    new document. Because the node does not belong to
+                    the old document, it will be unlinked from its old
+                    location first.
+                </p>
+                <p>
+		<st>NOTE:</st> Don't try to adoptNode() to import subtrees
+		that contain entity references - even if the entity reference
+		is the root node of the subtree. This will cause serious
+		problems to your program. This is a limitation of libxml2 and
+		not of XML::LibXML itself.
+		</p>
+             </method>
 
         </description>
         <also>
@@ -589,16 +605,17 @@
             </method>
 
             <method name="setOwnerDocument" 
-                    synopsis="$node->setOwnerDocument( $dom );">
+                    synopsis="$node->setOwnerDocument( $doc );">
                 <p>
                     This function binds a node to another DOM. This
                     method unbinds the node first, if it is allready
                     bound to another document.
                 </p>
                 <p>
-                    Note that this is only safe with single nodes but not 
-                    with subtrees. In case of subtrees one should use 
-                    XML::LibXML::Document's importNode method.
+                    This function is the oposite calling of
+                    XML::LibXML::Document's adoptNode()
+                    function. Because of this it has the same
+                    limitations with Entity References as adoptNode().
                 </p>
             </method>
 

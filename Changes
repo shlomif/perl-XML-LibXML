@@ -4,8 +4,14 @@ Revision history for Perl extension XML::LibXML
    - push parser interface
    - basic native libxml2 SAX interface
    - XML::LibXML::Document::process_xincludes reintroduced
+   - Class wide callbacks added 
    - code cleanings
+   - fixed library tests and output in Makefile.PL
    - more documentation
+   - more tests
+   - importNode() bug fix
+   - compatibility fixes
+   - cloneNode clones now within documents
 
 1.49
    - memory management has been completely rewritten.

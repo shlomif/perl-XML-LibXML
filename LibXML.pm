@@ -507,6 +507,11 @@ sub find {
     return undef;
 }
 
+sub setOwnerDocument {
+    my ( $self, $doc ) = @_;
+    $doc->adoptNode( $self );
+}
+
 1;
 
 package XML::LibXML::Document;
