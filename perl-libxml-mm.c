@@ -635,9 +635,15 @@ SV*
 C2Sv( const xmlChar *string, const xmlChar *encoding )
 {
     SV *retval = &PL_sv_undef;
-
+    xmlCharEncoding enc;
     if ( string != NULL ) {
-        if ( encoding == NULL || xmlStrcmp( encoding, "UTF8" ) == 0 ) {
+        enc = xmlParseCharEncoding( encoding );
+        if ( enc == 0 ) {
+            /* this happens if the encoding is "" or NULL */
+            enc = XML_CHAR_ENCODING_UTF8;
+        }
+
+        if ( enc == XML_CHAR_ENCODING_UTF8 ) {
             /* create an UTF8 string. */       
             STRLEN len = 0;
             xs_warn("set UTF8 string");
