@@ -19,12 +19,18 @@ my $DEBUG = delete $config{DEBUG};
 # get libs and inc from gnome-config
 eval {
     print "running xml2-config... ";
+    my $ver = backtick('xml2-config --version');
+    my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
+    die "VERSION" unless $major > 2 || $minor > 4 || $point >= 8;
     $config{LIBS} ||= backtick('xml2-config --libs');
     $config{INC} ||= backtick('xml2-config --cflags');
     print "ok\n";
 };
 if ($@) {
     print "failed\n";
+    if ($@ =~ /^VERSION/) {
+        die "XML::LibXML needs libxml2 version 2.4.8 or higher\n";
+    }
     warn "*** ", $@ if $DEBUG;
     warn "using fallback values for LIBS and INC\n";
     # backtick fails if gnome-config didn't exist...

@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXSLT.
 
+1.30
+    - Full PI access
+    - New parser implementation (safer)
+    - Callbacks API changed to be on the object, not the class
+    - SAX uses XML::SAX now (required)
+    - Memory leak fixes
+
 1.00
     - Added SAX serialisation
     - Added a SAX builder module

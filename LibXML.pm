@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT);
 use Carp;
 use XML::LibXML::NodeList;
 
-$VERSION = "1.01";
+$VERSION = "1.30";
 require Exporter;
 require DynaLoader;
 
