@@ -150,7 +150,7 @@ PmmNewNode(xmlNodePtr node)
 
     if ( node->_private == NULL ) {
         /* proxy = (ProxyNodePtr)malloc(sizeof(struct _ProxyNode));  */
-        Newc(0, (void *) proxy, 1, struct _ProxyNode, ProxyNodePtr);
+        Newc(0, proxy, 1, ProxyNode, ProxyNode);
         if (proxy != NULL) {
             proxy->node  = node;
             proxy->owner   = NULL;
