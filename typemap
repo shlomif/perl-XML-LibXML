@@ -4,6 +4,7 @@ xmlParserCtxtPtr            O_PARSER_OBJECT
 xmlRelaxNGPtr               O_OBJECT
 xmlSchemaPtr                O_OBJECT
 xmlNodeSetPtr               O_OBJECT
+xmlErrorPtr                 O_OBJECT
 perlxmlParserObjectPtr      O_OBJECT
 xmlDocPtr                   O_DOC_OBJECT
 xmlNodePtr                  O_NODE_OBJECT
