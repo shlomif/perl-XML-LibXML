@@ -30,17 +30,19 @@ BEGIN {
         
     }
 
-    $tests = 1 if $] > 5.007;
-
+    if ( $] > 5.007 ) {
+	    print "1..0 # Skipping tests on this platform\n";
+        exit(0)
+    }
     plan tests => $tests;
 }
 
-END { ok(0) unless $loaded }
+END { ok(0) unless $loaded and $] < 5.007 }
+
 use XML::LibXML;
 $loaded = 1;
 ok(1);
 
-warn "skip tests on this platform\n" if $] > 5.007;
 
 my $p = XML::LibXML->new();
 
