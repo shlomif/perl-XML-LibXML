@@ -658,6 +658,7 @@ domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href ) {
   /* prefix is not in use */
   if (ns == NULL) {
     ns = xmlNewNs( elem , href , prefix );
+    ns->next = NULL;
   } else {
     /* prefix is in use; if it has same URI, let it go, otherwise it's
        an error */

@@ -767,9 +767,9 @@ toString(self, format=0)
 	        croak("Failed to convert doc to string");
     	} else {
             RETVAL = newSVpvn((char *)result, (STRLEN)len);
-	        xmlFree(result);
-	    }
-        xmlReconciliateNs(real_dom,xmlDocGetRootElement(real_dom));
+	    xmlFree(result);
+	}
+        xmlReconciliateNs( real_dom, xmlDocGetRootElement( real_dom ) );
     OUTPUT:
         RETVAL
 
@@ -853,13 +853,15 @@ createElementNS( dom, nsURI, qname)
          char * CLASS = "XML::LibXML::Element";
          xmlNodePtr newNode;
          xmlChar *prefix;
-         xmlChar *lname;
-         xmlNsPtr ns;
+         xmlChar *lname = NULL;
+         xmlNsPtr ns = NULL;
      CODE:
-         lname = xmlSplitQName2(qname, &prefix);
-         ns = domNewNs (0 , prefix , nsURI);
+         if (nsURI != NULL && strlen(nsURI) != 0) {
+             lname = xmlSplitQName2(qname, &prefix);
+             ns = domNewNs (0 , prefix , nsURI);
+         }
          newNode = xmlNewNode( ns , lname );
-         newNode->doc =(xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
+         newNode->doc = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
          RETVAL = make_proxy_node(newNode);
          RETVAL->extra = dom;
          SvREFCNT_inc(dom);
@@ -941,14 +943,17 @@ createAttributeNS( dom, nsURI, qname, value="" )
         const char* CLASS = "XML::LibXML::Attr";
         xmlNodePtr newNode;
         xmlChar *prefix;
-        xmlChar *lname;
-        xmlNsPtr ns;
+        xmlChar *lname = NULL;
+        xmlNsPtr ns = NULL;
     CODE:
-        lname = xmlSplitQName2(qname, &prefix);
-        if (lname == NULL) {
-            lname = qname;
+        lname = qname;
+        if (nsURI != NULL && strlen(nsURI) != 0) {
+            lname = xmlSplitQName2(qname, &prefix);
+            if (lname == NULL) {
+                lname = qname;
+            }
+            ns = domNewNs (0 , prefix , nsURI);
         }
-        ns = domNewNs (0 , prefix , nsURI);
         newNode = (xmlNodePtr)xmlNewNsProp(NULL, ns, lname , value );
         newNode->doc = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
         if ( newNode->children!=NULL ) {
@@ -1238,6 +1243,9 @@ getParentNode( self )
             if( self->extra != NULL ) {
                 RETVAL->extra = self->extra ;
                 SvREFCNT_inc(self->extra);                
+            }
+            if ( ret == (xmlNodePtr)((xmlNodePtr)self->object)->doc) {
+                CLASS = "XML::LibXML::Document";
             }
         }
     OUTPUT:
@@ -1665,13 +1673,18 @@ setAttributeNS( elem, nsURI, qname, value )
         char * qname
         char * value
     PREINIT:
-        xmlNsPtr ns;
         xmlChar *prefix;
-        xmlChar *lname;
+        xmlChar *lname = NULL;
+        xmlNsPtr ns = NULL;
     CODE:
-        lname = xmlSplitQName2(qname, &prefix);
-        ns = domNewNs (elem , prefix , nsURI);
-        xmlSetNsProp( elem, ns, lname, value );
+        if ( nsURI != NULL && strlen(nsURI) != 0 ) {
+            lname = xmlSplitQName2(qname, &prefix);
+            ns = domNewNs (elem , prefix , nsURI);
+            xmlSetNsProp( elem, ns, lname, value );
+        }
+        else {
+            xmlSetProp( elem, qname, value );
+        }
 
 # this is a dummy!
 ProxyObject *
@@ -1819,8 +1832,8 @@ removeAttributeNS( elem, nsURI, name )
         char * name
     PREINIT:
         xmlChar *prefix;
-        xmlChar *lname;
-        xmlNsPtr ns;
+        xmlChar *lname = NULL;
+        xmlNsPtr ns = NULL;
     CODE:
         lname = xmlSplitQName2(name, &prefix);
         if (lname == NULL) /* as it is supposed to be */

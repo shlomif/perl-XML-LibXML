@@ -1,5 +1,15 @@
 Revision history for Perl extension XML::LibXSLT.
 
+0.94
+    - Some DOM Level 2 cleanups
+    - getParentNode returns XML::LibXML::Document if we get the 
+      document node
+
+0.93
+    - Addition of DOM Level 2 APIs
+    - some more segfault fixes
+    - Document is now a Node (which makes lots of things easier)
+
 0.92
     - Many segfault and other bug fixes
     - More DOM API methods added
