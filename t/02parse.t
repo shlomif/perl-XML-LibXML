@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 32 };
+BEGIN { plan tests => 33 };
 use XML::LibXML;
 
 ##
@@ -104,9 +104,14 @@ ok($@);
 
 {
     $parser->expand_entities(1);
-    $doc = $parser->parse_file( "example/dtd.xml" );
+    my $doc = $parser->parse_file( "example/dtd.xml" );
     my @cn = $doc->documentElement->childNodes;
     ok( scalar @cn, 1 );
+
+    $doc = $parser->parse_file( "example/complex/complex2.xml" );
+    @cn = $doc->documentElement->childNodes;
+    ok( scalar @cn, 1 );
+
     $parser->expand_entities(0);
 }
 

@@ -10,6 +10,7 @@ Revision history for Perl extension XML::LibXML
    - more documentation
    - more tests
    - importNode() bug fix
+   - fixed external entity loading for entity expansion
    - compatibility fixes
    - cloneNode clones now within documents
 

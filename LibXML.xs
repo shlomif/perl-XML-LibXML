@@ -532,7 +532,13 @@ LibXML_init_parser( SV * self ) {
         xmlDoValidityCheckingDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
 
         item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_ENTITIES", 26, 0 );
-        xmlSubstituteEntitiesDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
+        if ( item != NULL && SvTRUE(*item) ) {
+            xmlSubstituteEntitiesDefaultValue = 1;
+            xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
+        }
+        else {
+            xmlSubstituteEntitiesDefaultValue = 0;
+        }
 
         item = hv_fetch( real_obj, "XML_LIBXML_KEEP_BLANKS", 22, 0 );
         xmlKeepBlanksDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
