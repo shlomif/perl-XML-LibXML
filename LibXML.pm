@@ -346,6 +346,12 @@ sub XML::LibXML::Text::replaceDataRE {
     $node->setData( $datastr );
 }
 
+sub XML::LibXML::DocumentFragment::toString {
+    my $self = shift;
+    my $enc  = shift;
+    return join( "", map( {$_->toString($enc)}  $self->childNodes() ) );
+}
+
 1;
 __END__
 
