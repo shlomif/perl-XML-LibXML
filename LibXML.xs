@@ -1777,7 +1777,6 @@ _parse_xml_chunk(self, svchunk, enc = &PL_sv_undef)
 
                 /* step 2: set the node list to the fragment */
                 fragment->children = rv;
-                rv->parent = fragment;
                 rv_end = rv;
                 while ( rv_end->next != NULL ) {
                     rv_end->parent = fragment;
