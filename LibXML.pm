@@ -14,7 +14,7 @@ use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
 
-$VERSION = "1.54";
+$VERSION = "1.55";
 require Exporter;
 require DynaLoader;
 

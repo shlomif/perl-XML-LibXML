@@ -350,11 +350,11 @@ sub dump_pod {
         elsif ( $node->nodeName() eq "itemizedlist" ) {
             my @items = $node->findnodes( "listitem" );
             my $sp= "  ";
-            $self->{OFILE}->print( "\n=back\n\n" );
+            $self->{OFILE}->print( "\n=over 4\n\n" );
             foreach my $item ( @items ) {
                 my $str = $item->string_value();
                 $str =~ s/^\s*|\s*$//g;
-                $self->{OFILE}->print( "item * ".$str );
+                $self->{OFILE}->print( "=item * ".$str );
                 $self->{OFILE}->print( "\n\n" );
             }
             $self->{OFILE}->print( "=back\n\n" );
