@@ -1,6 +1,6 @@
 TYPEMAP
 const char *                T_PV
-xmlParserCtxtPtr            O_OBJECT
+xmlParserCtxtPtr            O_PARSER_OBJECT
 xmlRelaxNGPtr               O_OBJECT
 xmlSchemaPtr                O_OBJECT
 xmlNodeSetPtr               O_OBJECT
@@ -38,7 +38,20 @@ O_NODE_OBJECT
                XSRETURN_UNDEF;
             }
     }
-    else{
+    else {
+            croak( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
+            XSRETURN_UNDEF;
+    }
+
+O_PARSER_OBJECT
+    if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) ) {
+            $var = PmmSvContext($arg);
+            if ( $var == NULL ) {
+               croak( \"${Package}::$func_name() -- $var contains no parse context\" );
+               XSRETURN_UNDEF;
+            }
+    }
+    else {
             croak( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
             XSRETURN_UNDEF;
     }
@@ -52,3 +65,5 @@ O_OBJECT
         sv_setref_pv( $arg, (char *)CLASS, (void*)$var );
 
 
+O_PARSER_OBJECT
+        $arg = PmmContextSv( $var );
