@@ -10,10 +10,7 @@
 # since all tests are run on a preparsed 
 
 use Test;
-use Devel::Peek;
-
 use strict;
-use warnings;
 
 BEGIN { plan tests => 62 };
 use XML::LibXML;
@@ -23,11 +20,11 @@ use XML::LibXML;
 
     my $doc = XML::LibXML::Document->createDocument();
     ok($doc);
-    ok( $doc->encoding,undef); 
+    ok( not defined $doc->encoding); 
     ok( $doc->version,  "1.0" );
-    ok( $doc->standalone, -1 ); # is the value we get for undefined,
-                                   # actually the same as 0 but just not set.
-    ok( $doc->URI, undef);       # should be set by default.
+    ok( $doc->standalone, -1 );  # is the value we get for undefined,
+                                 # actually the same as 0 but just not set.
+    ok( not defined $doc->URI);  # should be set by default.
     ok( $doc->compression, -1 ); # -1 indicates NO compression at all!
                                  # while 0 indicates just no zip compression 
                                  # (big difference huh?)

@@ -10,10 +10,6 @@
 # since all tests are run on a preparsed 
 
 use Test;
-use Devel::Peek;
-
-use strict;
-use warnings;
 
 BEGIN { plan tests => 101 };
 use XML::LibXML;
@@ -33,7 +29,7 @@ print "# 1.1 Node Attributes\n";
     ok($node);
     ok($node->nodeType, XML_ELEMENT_NODE);
     ok($node->nodeName, "foo");
-    ok($node->nodeValue, undef);
+    ok(not defined $node->nodeValue);
     ok($node->hasChildNodes);
     ok($node->textContent, "bar&foo bar");
 

@@ -4,11 +4,6 @@
 # this test checks the DOM element and attribute interface of XML::LibXML
 
 use Test;
-use Devel::Peek;
-
-use strict;
-use warnings;
-
 
 BEGIN { plan tests => 51 };
 use XML::LibXML;
@@ -126,7 +121,7 @@ print "# 3. Namespace switching\n";
     $elem->setAttributeNodeNS($nsAttr);
     ok( $elem->hasAttributeNS($nsURI, $foo) );    
 
-    ok( $nsAttr->ownerDocument, undef);
+    ok( not defined $nsAttr->ownerDocument);
     # warn $elem->toString() , "\n";
 } 
 
@@ -153,8 +148,8 @@ print "# 4. Text Append and Normalization\n";
     @cn = $e->childNodes;
     ok( scalar( @cn ), 1 );
 
-    ok( $t2->parentNode, undef);
-    ok( $t3->parentNode, undef);
+    ok(not defined $t2->parentNode);
+    ok(not defined $t3->parentNode);
 }
 
 

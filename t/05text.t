@@ -4,10 +4,6 @@
 # this test checks the DOM Characterdata interface of XML::LibXML
 
 use Test;
-use Devel::Peek;
-
-use strict;
-use warnings;
 
 BEGIN { plan tests => 24 };
 use XML::LibXML;

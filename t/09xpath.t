@@ -1,8 +1,5 @@
 use Test;
-use Devel::Peek;
-
 use strict;
-use warnings;
 
 BEGIN { plan tests => 20 };
 use XML::LibXML;
@@ -63,7 +60,7 @@ ok($doc);
     ok( $result->string_value, "true" );
 
     $result = $doc->find( "contains(/foo/bar[3], 'test 1')" );
-    ok( !$result );
+    ok( $result == 0 );
 }
 
 

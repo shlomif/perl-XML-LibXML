@@ -1,10 +1,6 @@
 # $Id$
 
 use Test;
-use Devel::Peek;
-
-use strict;
-use warnings;
 
 BEGIN { plan tests => 5 };
 use XML::LibXML;

@@ -74,8 +74,8 @@ print "# 3.   nested names \n";
     ok( $x2[1]->namespaceURI , "http://foobar" );    
 
     # namespace scopeing
-    ok( $elem->lookupNamespacePrefix( "http://kungfoo" ), undef );
-    ok( $elem->lookupNamespacePrefix( "http://foobar" ), undef );
+    ok( not defined $elem->lookupNamespacePrefix( "http://kungfoo" ) );
+    ok( not defined $elem->lookupNamespacePrefix( "http://foobar" ) );
 }
 
 print "# 4. post creation namespace setting\n";

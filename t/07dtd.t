@@ -1,10 +1,6 @@
 # $Id$
 
 use Test;
-use Devel::Peek;
-
-use strict;
-use warnings;
 
 BEGIN { plan tests => 20 };
 use XML::LibXML;
@@ -29,11 +25,11 @@ use XML::LibXML;
     ok( $dtd->isSameNode( $doc->internalSubset ) );
 
     $doc->setExternalSubset( $dtd );
-    ok( $doc->internalSubset, undef );
+    ok(not defined $doc->internalSubset );
     ok( $dtd->isSameNode( $doc->externalSubset ) );
 
     $doc->setInternalSubset( $dtd );
-    ok( $doc->externalSubset, undef );
+    ok(not defined  $doc->externalSubset );
     ok( $dtd->isSameNode( $doc->internalSubset ) );
 
     my $dtd2 = $doc->createDTD( "huhu",
@@ -42,19 +38,19 @@ use XML::LibXML;
                               );
 
     $doc->setInternalSubset( $dtd2 );
-    ok( $dtd->parentNode, undef );
+    ok(not defined $dtd->parentNode );
     ok( $dtd2->isSameNode( $doc->internalSubset ) );    
 
  
     my $dtd3 = $doc->removeInternalSubset;
     ok( $dtd3->isSameNode($dtd2) );
-    ok( $doc->internalSubset, undef );
+    ok(not defined $doc->internalSubset );
 
     $doc->setExternalSubset( $dtd2 );
 
     $dtd3 = $doc->removeExternalSubset;
     ok( $dtd3->isSameNode($dtd2) );
-    ok( $doc->externalSubset, undef );
+    ok(not defined $doc->externalSubset );
 }
 
 {
