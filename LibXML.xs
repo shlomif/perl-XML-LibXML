@@ -1059,7 +1059,7 @@ URI (doc, new_URI=NULL)
         xmlDocPtr doc
         char * new_URI
     CODE:
-        RETVAL = doc->URL;
+        RETVAL = xmlStrdup( doc->URL );
         if (new_URI) {
             xmlFree( (char*) doc->URL);
             doc->URL = xmlStrdup(new_URI);
