@@ -844,6 +844,7 @@ _parse_string(self, string, directory = NULL)
             proxy->extra = RETVAL;
             SvREFCNT_inc(RETVAL);
         }
+ 
     OUTPUT:
         RETVAL
 
@@ -2019,9 +2020,9 @@ appendChild( parent, child )
                     }
 
                     if ( child->extra != NULL ) {
-                        warn( "c1\n" );
+                        # warn( "c1\n" );
                         cproxy = (ProxyObject*)SvIV((SV*)SvRV(child->extra));
-                        warn( "c2\n" );    
+                        # warn( "c2\n" );    
                     }
 
                     if ( child->extra == NULL

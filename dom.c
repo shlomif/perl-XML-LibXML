@@ -161,7 +161,8 @@ domDecodeString( const char *encoding, const xmlChar *string){
         }
       }
       else {
-        /* printf( "decoding error:no encoding\n" ); */
+        /* warn( "decoding error:no encoding\n" ); */
+        ret = xmlStrdup( string );
       }
     }
     else {
