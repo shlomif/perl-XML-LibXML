@@ -19,6 +19,94 @@
 #endif
 
 /**
+ * NAME domParseChar
+ * TYPE function
+ * SYNOPSIS
+ *   int utf8char = domParseChar( curchar, &len );
+ *
+ * The current char value, if using UTF-8 this may actually span
+ * multiple bytes in the given string. This function parses an utf8
+ * character from a string into a UTF8 character (an integer). It uses
+ * a slightly modified version of libxml2's character parser. libxml2
+ * itself does not provide any function to parse characters dircetly
+ * from a string and test if they are valid utf8 characters.
+ *
+ * XML::LibXML uses this function rather than perls native UTF8
+ * support for two reasons:
+ * 1) perls UTF8 handling functions often lead to encoding errors,
+ *    which partly comes, that they are badly documented.
+ * 2) not all perl versions XML::LibXML intends to run with have native
+ *    UTF8 support.
+ *
+ * domParseChar() allows to use the very same code with all versions
+ * of perl :)
+ *
+ * Returns the current char value and its length
+ *
+ * NOTE: If the character passed to this function is not a UTF
+ * character, the return value will be 0 and the length of the
+ * character is -1!
+ */
+int
+domParseChar( xmlChar *cur, int *len ) 
+{
+    unsigned char c;
+	unsigned int val;
+
+	/*
+	 * We are supposed to handle UTF8, check it's valid
+	 * From rfc2044: encoding of the Unicode values on UTF-8:
+	 *
+	 * UCS-4 range (hex.)           UTF-8 octet sequence (binary)
+	 * 0000 0000-0000 007F   0xxxxxxx
+	 * 0000 0080-0000 07FF   110xxxxx 10xxxxxx
+	 * 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx 
+	 *
+	 * Check for the 0x110000 limit too
+	 */
+    
+    if ( cur == NULL || *cur == 0 ) {
+        *len = 0;
+        return(0);
+    }
+    
+    c = *cur;
+    if ( c & 0x80 ) { 
+        if ((c & 0xe0) == 0xe0) {
+            if ((c & 0xf0) == 0xf0) {
+                /* 4-byte code */
+                *len = 4;
+                val = (cur[0] & 0x7) << 18;
+                val |= (cur[1] & 0x3f) << 12;
+                val |= (cur[2] & 0x3f) << 6;
+                val |= cur[3] & 0x3f;
+            } else {
+                /* 3-byte code */
+                *len = 3;
+                val = (cur[0] & 0xf) << 12;
+                val |= (cur[1] & 0x3f) << 6;
+                val |= cur[2] & 0x3f;
+            }
+	    } else {
+            /* 2-byte code */
+            *len = 2;
+            val = (cur[0] & 0x1f) << 6;
+            val |= cur[1] & 0x3f;
+	    }
+        if ( !IS_CHAR(val) ) {
+            *len = -1;
+            return(0);
+        }
+	    return(val);
+    }
+    else {
+        /* 1-byte code */
+	    *len = 1;
+        return((int)c); 
+    }
+}
+
+/**
  * Name: domReadWellBalancedString
  * Synopsis: xmlNodePtr domReadWellBalancedString( xmlDocPtr doc, xmlChar *string )
  * @doc: the document, the string should belong to
@@ -894,3 +982,4 @@ domNodeNormalizeList( xmlNodePtr nodelist )
     }
     return(1);
 }
+

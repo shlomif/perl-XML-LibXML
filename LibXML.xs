@@ -763,33 +763,32 @@ int
 LibXML_test_node_name( xmlChar * name ) 
 {
     xmlChar * cur = name;
-    xmlChar * tc;
-    int t = 0;
+    int tc  = 0;
+    int len = 0; 
+
     if ( cur == NULL || *cur == 0 ) {
         return(0);
     }
 
-    tc = cur+UTF8SKIP(cur);
-    while (cur != tc) {
-        t = (t << 8) + *cur++;
-    }
+    tc = domParseChar( cur, &len );
 
-    if ( !( IS_LETTER( t ) || (t == '_') || (t == ':')) ) {
+    if ( !( IS_LETTER( tc ) || (tc == '_') || (tc == ':')) ) {
         return(0);
     }
-    t = 0;
 
-    while (*cur!=0 ) {
-        tc = cur+UTF8SKIP(cur);
-        while (cur != tc) {
-            t = (t << 8) + *cur++;
-        }
+    tc  =  0;
+    cur += len;
 
-        if (!(IS_LETTER(t) || IS_DIGIT(t) || (t == '_') || (t == '-') ||
-             (t == ':') || (t == '.') || IS_COMBINING(t) || IS_EXTENDER(t)) ) {
+    while (*cur != 0 ) {
+        tc = domParseChar( cur, &len );
+
+        if (!(IS_LETTER(tc) || IS_DIGIT(tc) || (tc == '_') ||
+             (tc == '-') || (tc == ':') || (tc == '.') ||
+             IS_COMBINING(tc) || IS_EXTENDER(tc)) ) {
             return(0);
         }
-        t = 0;
+        tc = 0;
+        cur += len;
     }
     
     return(1);
@@ -4982,7 +4981,7 @@ appendText( self, string )
         XML::LibXML::DocumentFragment::appendText = 2
         XML::LibXML::DocumentFragment::appendTextNode = 3
     PREINIT:
-        xmlChar * content;
+        xmlChar * content = NULL;
     INIT:
         content = nodeSv2C( string, self );
         if ( content == NULL ) {
@@ -4995,6 +4994,7 @@ appendText( self, string )
     CODE:
         xmlNodeAddContent( self, content );
         xmlFree(content);
+
 
 void
 appendTextChild( self, strname, strcontent=&PL_sv_undef, nsURI=&PL_sv_undef )

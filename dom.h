@@ -29,6 +29,39 @@
  * unsortet. 
  **/
 
+
+/**
+ * NAME domParseChar
+ * TYPE function
+ * SYNOPSIS
+ *   int utf8char = domParseChar( curchar, &len );
+ *
+ * The current char value, if using UTF-8 this may actually span
+ * multiple bytes in the given string. This function parses an utf8
+ * character from a string into a UTF8 character (an integer). It uses
+ * a slightly modified version of libxml2's character parser. libxml2
+ * itself does not provide any function to parse characters dircetly
+ * from a string and test if they are valid utf8 characters.
+ *
+ * XML::LibXML uses this function rather than perls native UTF8
+ * support for two reasons:
+ * 1) perls UTF8 handling functions often lead to encoding errors,
+ *    which partly comes, that they are badly documented.
+ * 2) not all perl versions XML::LibXML intends to run with have native
+ *    UTF8 support.
+ *
+ * domParseChar() allows to use the very same code with all versions
+ * of perl :)
+ *
+ * Returns the current char value and its length
+ *
+ * NOTE: If the character passed to this function is not a UTF
+ * character, the return value will be 0 and the length of the
+ * character is -1!
+ */
+int
+domParseChar( xmlChar *char, int *len );
+
 xmlNodePtr 
 domReadWellBalancedString( xmlDocPtr doc, xmlChar* string, int repair );
 
