@@ -423,6 +423,9 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     FREETMPS;
     LEAVE;
     
+    SvREFCNT_dec(tbuff);
+    SvREFCNT_dec(tsize);
+    
     return read_length;
 }
 
@@ -634,6 +637,8 @@ _parse_string(self, string)
         }
         ctxt->_private = (void*)self;
         
+        SvCUR_set(LibXML_error, 0);
+        
         ret = xmlParseDocument(ctxt);
         
         well_formed = ctxt->wellFormed;
@@ -671,6 +676,8 @@ _parse_fh(self, fh)
         xmlDocPtr real_dom;
         ProxyObject* proxy;
     CODE:
+        SvCUR_set(LibXML_error, 0);
+        
         real_dom = LibXML_parse_stream(self, fh);
         if (real_dom == NULL) {
             RETVAL = &PL_sv_undef;    
@@ -704,6 +711,8 @@ _parse_file(self, filename)
             croak("Could not create file parser context for file '%s' : %s", filename, strerror(errno));
         }
         ctxt->_private = (void*)self;
+        
+        SvCUR_set(LibXML_error, 0);
         
         xmlParseDocument(ctxt);
         well_formed = ctxt->wellFormed;
@@ -764,7 +773,7 @@ DESTROY(self)
     CODE:
         if ( self->object != NULL ) {
             xmlFreeDoc((xmlDocPtr)self->object);
-            #warn( "REAL DOCUMENT DROP SUCCEEDS" );
+            # warn( "REAL DOCUMENT DROP SUCCEEDS" );
         }        
         self->object = NULL;
         Safefree( self );
