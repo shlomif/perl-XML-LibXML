@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXSLT.
 
+0.91
+    - Removed from XML::LibXSLT distribution
+    - Added DOM API (phish)
+
 0.01  Sat Mar  3 17:08:00 2001
 	- original version; created by h2xs 1.19
 

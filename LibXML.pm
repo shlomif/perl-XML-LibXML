@@ -148,9 +148,10 @@ XML::LibXML - Interface to the gnome libxml2 library
 
 =head1 DESCRIPTION
 
-Currently this module doesn't actually do much but parse files and give
-you back a document (DOM) handle. You can't actually call DOM methods on
-that document though (because I haven't written the code to do it yet!).
+This module is an interface to the gnome libxml2 DOM parser (no SAX
+parser support yet), and the DOM tree. It also provides an
+XML::XPath-like findnodes() interface, providing access to the XPath
+API in libxml2.
 
 =head1 OPTIONS
 
@@ -369,6 +370,9 @@ Copyright 2001, AxKit.com Ltd. All rights reserved.
 
 =head1 SEE ALSO
 
-XML::LibXSLT
+L<XML::LibXSLT>, L<XML::LibXML::Document>,
+L<XML::LibXML::Element>, L<XML::LibXML::Node>,
+L<XML::LibXML::Text>, L<XML::LibXML::Comment>,
+L<XML::LibXML::CDATASection>
 
 =cut
