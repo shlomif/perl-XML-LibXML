@@ -696,8 +696,10 @@ DESTROY(self)
         if (self == NULL) {
            XSRETURN_UNDEF;
         }
+             
         # warn("xmlFreeDoc(%d)\n", self);
         xmlFreeDoc(self);
+
 
 SV *
 toString(self)
@@ -897,11 +899,10 @@ DESTROY( node )
         if (node->extra != NULL) {
             SvREFCNT_dec(node->extra);
         }
-        Safefree(node);
-        /* warn( "Free node\n" ); */
-        /*domUnbindNode( node );  * before freeing we unbind the node from
-		                          * possible siblings */
-        /* xmlFreeNode( node ); */
+
+        # warn( "Free node\n" );
+        Safefree(node); 
+    
     
 	
 int 
@@ -1342,7 +1343,7 @@ appendTextNode( self, xmlString )
         xmlNodePtr tn;
     CODE:
         if ( self->doc != NULL && xmlString != NULL ) {
-            tn == xmlNewDocText( self->doc, xmlString ); 
+            tn = xmlNewDocText( self->doc, xmlString ); 
             domAppendChild( self, tn );
         }
 

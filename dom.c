@@ -77,7 +77,7 @@ domAppendChild( xmlNodePtr self,
     newChild->doc = self->doc;
   }
   
-  if ( self->children != 0 ) {
+  if ( self->children != NULL ) {
     if ( newChild->type   == XML_TEXT_NODE && 
 	 self->last->type == XML_TEXT_NODE ) {
       int len = xmlStrlen(newChild->content);
@@ -278,12 +278,11 @@ domUnbindNode( xmlNodePtr self ) {
       self->parent->last = self->prev;
     if ( self == self->parent->children ) 
       self->parent->children = self->next;
-    
+
     self->parent = 0;
     self->next   = 0;
     self->prev   = 0;
   }
-
   return self;
 }
 
