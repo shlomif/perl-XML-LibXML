@@ -1814,6 +1814,7 @@ insertProcessingInstruction( dom, name, content )
         insertPI = 1
     PREINIT:
         xmlNodePtr pinode = NULL;
+        xmlNodePtr delem  = NULL;
         xmlDocPtr real_dom;
         xmlChar * enctarg;
         xmlChar * encdata;
@@ -1822,11 +1823,15 @@ insertProcessingInstruction( dom, name, content )
         enctarg = nodeSv2C( name , (xmlNodePtr) real_dom );
         encdata = nodeSv2C( content , (xmlNodePtr) real_dom );
         pinode = xmlNewPI( enctarg, encdata );
+        if ( pinode != NULL ) {
+            warn("got node\n");
+        }
         xmlFree(enctarg);
         xmlFree(encdata);
+        delem = domDocumentElement( real_dom );
         domInsertBefore( (xmlNodePtr)real_dom, 
                          pinode, 
-                         domDocumentElement( real_dom ) );
+                         delem );
 
 SV *
 createProcessingInstruction( dom, name, content=&PL_sv_undef )
@@ -2274,13 +2279,11 @@ insertBefore( self, new, ref )
         xmlNodePtr pNode, nNode, oNode;
     CODE:
         if ( new != NULL
-             && new != &PL_sv_undef
-             && ref != NULL
-             && ref != &PL_sv_undef ) {
+             && new != &PL_sv_undef ) {
         pNode = getSvNode(self);
         nNode = getSvNode(new);
         oNode = getSvNode(ref);
-
+        
         if ( !(pNode->type == XML_DOCUMENT_NODE
              && nNode->type == XML_ELEMENT_NODE ) 
              && domInsertBefore( pNode, nNode, oNode ) != NULL ) {
@@ -2297,9 +2300,7 @@ insertAfter( self, new, ref )
         xmlNodePtr pNode, nNode, oNode;
     CODE:
         if ( new != NULL
-             && new != &PL_sv_undef
-             && ref != NULL
-             && ref != &PL_sv_undef ) {
+             && new != &PL_sv_undef ) {
             
         pNode = getSvNode(self);
         nNode = getSvNode(new);

@@ -559,8 +559,14 @@ domInsertAfter( xmlNodePtr self,
     if ( self == NULL ) {
         return NULL;
     }
+
+    if ( newChild == NULL ) {
+        return newChild;
+    }
   
-    newChild = domIsNotParentOf( newChild, self );
+    if ( domIsNotParentOf( newChild, self ) == NULL ) {
+        return NULL;
+    }
 
     if ( refChild == newChild ) {
         return newChild;
@@ -579,17 +585,22 @@ domInsertAfter( xmlNodePtr self,
         return NULL;
     }
 
-    if ( newChild != NULL && 
-         self == refChild->parent &&
-         refChild != newChild ) {
-        
-        if( newChild->doc == self->doc ) {
-            domUnbindNode( newChild );
+    if ( self->doc == newChild->doc ){
+        newChild = domUnbindNode( newChild );
+    }
+    else {
+        newChild = domImportNode( self->doc, newChild, 1 );
+    }
+
+    if ( refChild == NULL ) {
+        if ( self->children == NULL ) {
+            newChild = domAppendChild( self, newChild );
         }
         else {
-            domImportNode( self->doc, newChild, 1 );
+            newChild = insert_node_to_nodelist( self->last, newChild, NULL );
         }
-
+    }
+    else if ( self == refChild->parent ) {        
         newChild = insert_node_to_nodelist( refChild, newChild, refChild->next );
     }
     else {
