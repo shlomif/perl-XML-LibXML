@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 19;
+        plan tests => 21;
     }
     else {
         plan tests => 0;
@@ -64,7 +64,6 @@ use XML::LibXML;
         ok(1);
 
         check_mem();
-if( $ENV{DUMMY_VAR} ) {
         # multiple parses
         print("# MULTIPLE PARSES\n");
         for (1..$times_through) {
@@ -164,7 +163,7 @@ if( $ENV{DUMMY_VAR} ) {
             check_mem();
                 
         }
-}
+
         print "# FIND NODES \n";
         my $xml=<<'dromeds.xml';
 <?xml version="1.0" encoding="UTF-8"?>
@@ -206,6 +205,23 @@ dromeds.xml
             ok(1);
             check_mem();
 
+        }
+
+        {
+            print "# ENCODING TESTS \n";
+            my $string = "test ä ø is a test string to test iso encoding";
+            my $encstr = encodeToUTF8( "iso-8859-1" , $string );
+            for ( 1..$times_through ) {
+                my $str = encodeToUTF8( "iso-8859-1" , $string );
+            }
+            ok(1);
+            check_mem();
+    
+            for ( 1..$times_through ) {
+                my $str = decodeFromUTF8( "iso-8859-1" , $encstr );
+            }
+            ok(1);
+            check_mem();
         }
     }
 }

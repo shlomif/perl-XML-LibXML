@@ -540,6 +540,7 @@ PmmEncodeString( const char *encoding, const xmlChar *string ){
                     
                 xmlBufferFree( in );
                 xmlBufferFree( out );
+                xmlCharEncCloseFunc( coder );
             }
             else {
                 xs_warn("no coder found\n");
@@ -644,7 +645,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
         char * t_pv =SvPV(scalar, len);
         xmlChar* string = xmlStrdup((xmlChar*)t_pv);
         /* Safefree( t_pv ); */
-
+        
         if ( xmlStrlen(string) > 0 ) {
             xmlChar* ts;
             xs_warn( "no undefs" );
@@ -652,7 +653,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
             xs_warn( "use UTF8" );
             if( !DO_UTF8(scalar) && encoding != NULL ) {
 #else
-            if ( encoding != NULL ) {
+            if ( encoding != NULL ) {        
 #endif
                 xs_warn( "domEncodeString!" );
                 ts= PmmEncodeString( encoding, string );
@@ -662,6 +663,8 @@ Sv2C( SV* scalar, const xmlChar *encoding )
                 string=ts;
             }
             retval = xmlStrdup(string);
+        }
+        if (string != NULL ) {
             xmlFree(string);
         }
     }
