@@ -242,8 +242,10 @@ LibXML_report_error(SV * saved_error, int recover)
 #ifdef HAVE_SERRORS
     if (LibXML_error_OK) {
       if ( recover ) {
-	warn("%s",SvPV_nolen(LibXML_error));
-	SvREFCNT_dec(LibXML_error);	
+	if ( recover == 1 ) {
+	    warn("%s",SvPV_nolen(LibXML_error));
+	}
+	SvREFCNT_dec(LibXML_error);
 	LibXML_error = saved_error;
       } else {
 	SV* perl_err_var;
@@ -251,16 +253,18 @@ LibXML_report_error(SV * saved_error, int recover)
 	sv_setsv(perl_err_var, LibXML_error);
 	LibXML_error = saved_error;
 	croak(Nullch);
-      }
-    } else {
-      LibXML_error = saved_error;
-    }
+       }
+   } else {
+     LibXML_error = saved_error;
+   }
 #else
     SV *my_error = sv_2mortal(LibXML_error);
     LibXML_error = saved_error;
     if ( SvCUR( my_error ) > 0 ) {
         if ( recover ) {
-            warn("%s", SvPV_nolen(my_error));
+            if ( recover == 1 ) {
+                warn("%s", SvPV_nolen(my_error));
+            }
         } else {
             croak("%s", SvPV_nolen(my_error));
         }
@@ -272,7 +276,7 @@ static int
 LibXML_get_recover(HV * real_obj)
 {
     SV** item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
-    return ( item != NULL && SvTRUE(*item) ) ? 1 : 0;
+    return ( item != NULL && SvTRUE(*item) ) ? SvIV(*item) : 0;
 }
 
 static SV *
@@ -410,7 +414,7 @@ LibXML_input_match(char const * filename)
 void *
 LibXML_input_open(char const * filename)
 {
-    SV * results;
+    SV * results = NULL;
     SV * global_cb;
     SV * callback = NULL;
 
@@ -1023,11 +1027,12 @@ _parse_string(self, string, dir = &PL_sv_undef)
         RETVAL = &PL_sv_undef;
         LibXML_init_error(&saved_error);
         real_obj = LibXML_init_parser(self);
+        recover = LibXML_get_recover(real_obj);
 
         {
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Couldn't create memory parser context: %s", strerror(errno));
             }
             xs_warn( "context created\n");
@@ -1112,7 +1117,7 @@ _parse_sax_string(self, string)
         {
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Couldn't create memory parser context: %s", strerror(errno));
             }
             xs_warn( "context created\n");
@@ -1159,6 +1164,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
         RETVAL = &PL_sv_undef;
         LibXML_init_error(&saved_error);
         real_obj = LibXML_init_parser(self);
+        recover = LibXML_get_recover(real_obj);
 
         {
             int read_length;
@@ -1172,7 +1178,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
 
             ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Could not create xml push parser context: %s",
                       strerror(errno));
             }
@@ -1211,7 +1217,6 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
         }
 
         if ( real_doc != NULL ) {
-            recover = LibXML_get_recover(real_obj);
 
             if ( directory == NULL ) {
                 SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
@@ -1273,7 +1278,7 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
             sax = PSaxGetHandler();
             ctxt = xmlCreatePushParserCtxt(sax, NULL, buffer, read_length, NULL);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Could not create xml push parser context: %s",
                       strerror(errno));
             }
@@ -1332,11 +1337,12 @@ _parse_file(self, filename_sv)
         RETVAL = &PL_sv_undef;
         LibXML_init_error(&saved_error);
         real_obj = LibXML_init_parser(self);
+        recover = LibXML_get_recover(real_obj);
 
         {
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Couldn't create file parser context for file \"%s\": %s",
                       filename, strerror(errno));
             }
@@ -1364,7 +1370,6 @@ _parse_file(self, filename_sv)
         }
 
         if ( real_doc != NULL ) {
-            recover = LibXML_get_recover(real_obj);
 
             if ( recover || ( well_formed &&
                               ( !xmlDoValidityCheckingDefaultValue
@@ -1406,7 +1411,7 @@ _parse_sax_file(self, filename_sv)
         {
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Couldn't create file parser context for file \"%s\": %s",
                       filename, strerror(errno));
             }
@@ -1485,6 +1490,7 @@ parse_html_fh(self, fh)
         RETVAL = &PL_sv_undef;
         LibXML_init_error(&saved_error);
         real_obj = LibXML_init_parser(self);
+        recover = LibXML_get_recover(real_obj);
 
         {
             int read_length;
@@ -1499,7 +1505,7 @@ parse_html_fh(self, fh)
             ctxt = htmlCreatePushParserCtxt(NULL, NULL, buffer, read_length,
                                             NULL, XML_CHAR_ENCODING_NONE);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Could not create html push parser context: %s",
                       strerror(errno));
             }
@@ -1527,7 +1533,6 @@ parse_html_fh(self, fh)
         }
 
         if ( real_doc != NULL ) {
-            recover = LibXML_get_recover(real_obj);
 
             {
                 SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
@@ -1660,6 +1665,7 @@ parse_sgml_fh(self, fh, enc = &PL_sv_undef)
         RETVAL = &PL_sv_undef;
         LibXML_init_error(&saved_error);
         real_obj = LibXML_init_parser(self);
+        recover = LibXML_get_recover(real_obj);
 
         {
             int read_length;
@@ -1674,7 +1680,7 @@ parse_sgml_fh(self, fh, enc = &PL_sv_undef)
             ctxt = docbCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL,
                                             xmlParseCharEncoding((const char*)encoding));
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Could not create docbook SGML push parser context: %s",
                       strerror(errno));
             }
@@ -1702,7 +1708,6 @@ parse_sgml_fh(self, fh, enc = &PL_sv_undef)
         }
 
         if ( real_doc != NULL ) {
-            recover = LibXML_get_recover(real_obj);
 
             {
                 SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
@@ -1800,7 +1805,7 @@ _parse_sax_sgml_file(self, filename_sv, enc = &PL_sv_undef)
         {
             docbParserCtxtPtr ctxt = docbCreateFileParserCtxt(filename, encoding);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Couldn't create file parser context for file \"%s\": %s",
                       filename, strerror(errno));
             }
@@ -1931,7 +1936,7 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
         if ( chunk != NULL ) {
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
-                LibXML_report_error(saved_error, 1);
+                LibXML_report_error(saved_error, recover ? recover : 1);
                 croak("Couldn't create memory parser context: %s", strerror(errno));
             }
             xs_warn( "context created\n");
@@ -3444,7 +3449,7 @@ is_valid(self, ...)
     PREINIT:
         SV * saved_error;
         xmlValidCtxt cvp;
-        xmlDtdPtr dtd;
+        xmlDtdPtr dtd = NULL;
         SV * dtd_sv;
     CODE:
         LibXML_init_error(&saved_error);
