@@ -74,17 +74,20 @@ if ( $] >= 5.006 ) {
 # of working and not working versions where Ma.Mi.Pt <= X.Y.Z is of the same
 # state.
 #
+# NOTE: All versions, the tests pass will be marked as working.
+#
 unless ( $is_Win32 ) { # cannot get config in W32
     my @blacklist = (
-                     [2,4,20,0],
-                     [2,4,24,1],
-                     [2,4,25,0], # broken version
-                     [2,4,26,1],
-                     [2,5,5,0],
+                     [2,4,24,0],
+                     [2,4,30,1],
+                     [2,5,4,1],
+                     [2,5,5,0], # known as broken
                      [2,5,7,1],
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
+
+    delete $config{XMLPREFIX}; # delete if exists, otherwise MakeMaker gets confused
 
     if ( defined $libprefix ) {
         $xml2cfg = $libprefix . '/bin/' . $xml2cfg;
@@ -105,7 +108,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
         if ( $@ =~ /^UNTESTED/ ) {
             warn <<UNTESTED;
 WARNING!
-The installed Version of libxml2 was not tested with this version of XML::LibXML.
+The installed version of libxml2 was not tested with this version of XML::LibXML.
 
     XML::LibXML may fail building or some tests may not pass.
     Expect strange errors and unstable scripts.
