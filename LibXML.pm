@@ -627,6 +627,11 @@ sub toStringC14N {
     return $self->_toStringC14N( $comments, $xpath );
 }
 
+sub serialize_c14n {
+    my $self = shift;
+    return $self->toStringC14N( @_ );
+}
+
 1;
 
 #-------------------------------------------------------------------------#
@@ -668,6 +673,11 @@ sub toString {
     }
 
     return $retval;
+}
+
+sub serialize {
+    my $self = shift;
+    return $self->toString( @_ );
 }
 
 #-------------------------------------------------------------------------#
@@ -746,6 +756,12 @@ sub toString {
         }
     }
     return $retval;
+}
+
+
+sub serialize {
+    my $self = shift;
+    return $self->toString(@_);
 }
 
 1;

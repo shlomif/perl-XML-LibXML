@@ -2278,6 +2278,8 @@ toFile( self, filename, format=0 )
 SV *
 toStringHTML(self)
         xmlDocPtr self
+    ALIAS:
+       XML::LibXML::Document::serialize_html = 1 
     PREINIT:
         xmlChar *result=NULL;
         STRLEN len = 0;
@@ -4161,6 +4163,8 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         xmlNodePtr self
         SV * useDomEncoding
         int format
+    ALIAS:
+        XML::LibXML::Node::serialize = 1
     PREINIT:
         xmlBufferPtr buffer;
         const xmlChar *ret = NULL;
