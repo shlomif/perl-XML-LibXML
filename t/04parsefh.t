@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 4 };
+BEGIN { plan tests => 6 };
 use XML::LibXML;
 use IO::File;
 ok(1);
@@ -15,4 +15,12 @@ my $doc = $parser->parse_fh($fh);
 
 ok($doc);
 
-# warn "doc is: ", $doc->toString, "\n";
+$fh = IO::File->new("example/bad.xml");
+
+ok($fh);
+
+eval {
+    my $doc = $parser->parse_fh($fh);
+};
+ok($@);
+
