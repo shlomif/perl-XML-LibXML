@@ -460,6 +460,7 @@ LibXML_parse_stream(SV * self, SV * ioref)
     xmlDocPtr doc;
     xmlParserCtxtPtr ctxt;
     int well_formed;
+    int valid;
     char buffer[1024];
     int read_length;
     int ret = -1;
@@ -479,11 +480,12 @@ LibXML_parse_stream(SV * self, SV * ioref)
         
         doc = ctxt->myDoc;
         well_formed = ctxt->wellFormed;
+        valid = ctxt->valid;
 
         xmlFreeParserCtxt(ctxt);
     }
     
-    if (!well_formed) {
+    if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid)) {
         xmlFreeDoc(doc);
         return NULL;
     }
@@ -687,6 +689,7 @@ _parse_string(self, string)
         STRLEN len;
         char * ptr;
         int well_formed;
+        int valid;
         int ret;
         xmlDocPtr real_dom;
         ProxyObject * proxy;
@@ -706,13 +709,14 @@ _parse_string(self, string)
         ret = xmlParseDocument(ctxt);
         
         well_formed = ctxt->wellFormed;
+        valid = ctxt->valid;
 
         real_dom = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
         
         sv_2mortal(LibXML_error);
         
-        if (!well_formed) {
+        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid)) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
@@ -774,6 +778,7 @@ _parse_file(self, filename)
         xmlParserCtxtPtr ctxt;
         char * CLASS = "XML::LibXML::Document";
         int well_formed;
+        int valid;
         STRLEN len;
         xmlDocPtr real_dom;
         ProxyObject * proxy;
@@ -788,13 +793,14 @@ _parse_file(self, filename)
         
         xmlParseDocument(ctxt);
         well_formed = ctxt->wellFormed;
+        valid = ctxt->valid;
 
         real_dom = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
         
         sv_2mortal(LibXML_error);
         
-        if (!well_formed) {
+        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid)) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef ;  
             croak(SvPV(LibXML_error, len));
@@ -953,6 +959,7 @@ void
 DESTROY(self)
         ProxyObject* self
     CODE:
+        /* warn("destroy DOC\n"); */
         if ( self->object != NULL ) {
             xmlFreeDoc((xmlDocPtr)self->object);
             #warn( "REAL DOCUMENT DROP SUCCEEDS" );
@@ -1554,6 +1561,7 @@ DESTROY( node )
     PREINIT:
         xmlNodePtr real_node;
     CODE:
+        /* warn("destroy NODE\n"); */
         if (node == NULL) {
            XSRETURN_UNDEF;
         }
@@ -1563,8 +1571,9 @@ DESTROY( node )
             if( real_node->type == XML_DOCUMENT_FRAG_NODE ) {
                 warn( "NODE DESTROY: NODE ISA DOCUMENT_FRAGMENT!" );
             }
-
+            
             if ( SvREFCNT( node->extra ) > 0 ){
+                /* warn("dec REFCNT extra : %d\n", SvREFCNT(node->extra)); */
                 SvREFCNT_dec(node->extra);
             }
             if ( real_node->type != XML_DOCUMENT_NODE ) {
@@ -2065,7 +2074,7 @@ _findnodes( node, xpath )
                 cls = domNodeTypeName( tnode );
 
                 proxy = make_proxy_node(tnode);
-                if ( node->extra != NULL ) {
+                if ( node->extra != NULL && ((xmlNodePtr)node->object)->type != XML_DOCUMENT_NODE ) {
                     proxy->extra = node->extra;
                     SvREFCNT_inc(node->extra);
                 }
@@ -2114,7 +2123,7 @@ _find ( node, xpath )
                         cls = domNodeTypeName( tnode );
         
                         proxy = make_proxy_node(tnode);
-                        if ( node->extra != NULL ) {
+                        if ( node->extra != NULL && ((xmlNodePtr)node->object)->type != XML_DOCUMENT_NODE ) {
                             proxy->extra = node->extra;
                             SvREFCNT_inc(node->extra);
                         }
@@ -3055,6 +3064,7 @@ void
 DESTROY(self)
         ProxyObject* self
     CODE:
+        /* warn("destroy FRAGMENT\n"); */
         if ( (xmlNodePtr)self->object != NULL ) {
             # domSetOwnerDocument( (xmlNodePtr)self->object, NULL ); 
             # if( ((xmlNodePtr)self->object)->children !=NULL){

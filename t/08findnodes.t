@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>8; }
+BEGIN { plan tests=>9; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -54,3 +54,15 @@ if ( defined $dom ) {
     ok( $itervar, 'testbtext' );
 
 }
+
+# test to make sure that multiple array findnodes() returns
+# don't segfault perl; it'll happen after the second one if it does
+for (0..3) {
+    my $doc = XML::LibXML->new->parse_string(
+'<?xml version="1.0" encoding="UTF-8"?>
+<?xsl-stylesheet type="text/xsl" href="a.xsl"?>
+<a />');
+    my @nds = $doc->findnodes("processing-instruction('xsl-stylesheet')");
+}
+
+ok(1);

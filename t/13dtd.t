@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 11 }
+BEGIN { plan tests => 13 }
 use XML::LibXML;
 ok(1);
 
@@ -50,6 +50,23 @@ ok(!$xml->is_valid($dtd));
 eval {
     $xml->validate($dtd);
     ok(0); # shouldn't get here
+};
+ok($@);
+}
+
+{
+# validate a document with a <!DOCTYPE> declaration
+XML::LibXML->validation(1);
+my $xml = XML::LibXML->new->parse_file('example/article_internal.xml');
+ok($xml);
+}
+
+{
+# validate an invalid document with <!DOCTYPE declaration
+XML::LibXML->validation(1);
+eval {
+my $xml = XML::LibXML->new->parse_file('example/article_internal_bad.xml');
+ok(0);
 };
 ok($@);
 }

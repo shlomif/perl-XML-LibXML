@@ -19,6 +19,8 @@ example/test.xhtml
 example/test.dtd
 example/article.xml
 example/article_bad.xml
+example/article_internal.xml
+example/article_internal_bad.xml
 t/01basic.t
 t/02parsestring.t
 t/03parsefile.t
