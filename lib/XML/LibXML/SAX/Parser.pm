@@ -20,20 +20,31 @@ sub _parse_characterstream {
 sub _parse_bytestream {
     my ($self, $fh, $options) = @_;
     my $parser = XML::LibXML->new();
-    my $doc = exists($options->{Source}{SystemId}) ? $parser->parse_fh($fh, $options->{Source}{SystemId}) : $parser->parse_fh($fh);
-    $self->generate($doc);
+    if (exists($options->{Source}{SystemId})) {
+        $self->{SystemId} = $options->{Source}{SystemId};
+        $self->generate($parser->parse_fh($fh, $self->{SystemId}));
+    }
+    else {
+        $self->generate($parser->parse_fh($fh));
+    }
 }
 
 sub _parse_string {
     my ($self, $str, $options) = @_;
     my $parser = XML::LibXML->new();
-    my $doc = exists($options->{Source}{SystemId}) ? $parser->parse_string($str, $options->{Source}{SystemId}) : $parser->parse_string($str);
-    $self->generate($doc);
+    if (exists($options->{Source}{SystemId})) {
+        $self->{SystemId} = $options->{Source}{SystemId};
+        $self->generate($parser->parse_string($str, $self->{SystemId}));
+    }
+    else {
+        $self->generate($parser->parse_string($str));
+    }
 }
 
 sub _parse_systemid {
     my ($self, $sysid, $options) = @_;
     my $parser = XML::LibXML->new();
+    $self->{SystemId} = $sysid;
     my $doc = $parser->parse_file($sysid);
     $self->generate($doc);
 }
@@ -42,7 +53,17 @@ sub generate {
     my $self = shift;
     my ($node) = @_;
 
-    if ( $node->getType() == XML_DOCUMENT_NODE ) {
+    if ( $node->getType() == XML_DOCUMENT_NODE ||
+    	$node->getType() == XML_HTML_DOCUMENT_NODE ||
+        $node->getType() == XML_DOCUMENT_FRAG_NODE ) {
+        $self->set_document_locator(
+            {
+                SystemId => $self->{SystemId},
+                PublicId => '',
+                LineNumber => 0,
+                ColumnNumber => 0,
+            }
+        );
         $self->start_document({});
         $self->xml_decl({Version => $node->getVersion, Encoding => $node->getEncoding});
         $self->process_node($node);
@@ -74,6 +95,7 @@ sub process_node {
     }
 #    elsif ($node_type == XML_DOCUMENT_NODE) {
     elsif ($node_type == XML_DOCUMENT_NODE
+           || $node_type == XML_HTML_DOCUMENT_NODE
            || $node_type == XML_DOCUMENT_FRAG_NODE) {
         # some times it is just usefull to generate SAX events from
         # a document fragment (very good with filters).
