@@ -12,9 +12,10 @@ sub new {
 sub start_document {
     my ($self, $doc) = @_;
 
-    $self->{DOM} = XML::LibXML::Document->createDocument({});
+    $self->{DOM} = XML::LibXML::Document->createDocument();
 
     if ( defined $self->{Encoding} ) {
+        warn "use encoding!";
         $self->xml_decl({Version => ($self->{Version} || '1.0') , Encoding => $self->{Encoding}});
     }
 

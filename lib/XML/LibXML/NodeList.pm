@@ -81,7 +81,7 @@ sub string_value {
 sub to_literal {
 	my $self = CORE::shift;
 	return XML::LibXML::Literal->new(
-			join('', map { $_->string_value } @$self)
+			join('', grep {defined $_} map { $_->string_value } @$self)
 			);
 }
 
