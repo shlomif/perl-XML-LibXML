@@ -1,5 +1,13 @@
 Revision history for Perl extension XML::LibXSLT.
 
+0.97
+    - Addition of Dtd string parser
+    - Added support for namespace nodes (e.g. $element->getNamespaces())
+    - Some memory leak and segfault fixes
+    - Added $doc->validate([$dtd]) which throws exceptions (augments 
+      $doc->is_valid([$dtd]))
+    - Added doc files and test files to CPAN distro
+
 0.96
     - Addition of HTML parser
     - getOwner method added
