@@ -1,0 +1,11 @@
+I plan the following issues to implemented soon
+
+* interface to the canolization implementation
+* better DTD Support
+* Interface to the schemainterface
+* corrected catalog support
+* more flexible parser interface (in the binding)
+* better module support (for shared code with other XS modules using libxml2)
+
+* xmlReader Interface.
+* RelaxNG, libxml2 Regex interface.
