@@ -29,6 +29,7 @@ example/test2.xml
 example/test3.xml
 example/article.xml
 example/article_bad.xml
+example/article_internal_bad.xml
 example/complex/complex.xml
 example/complex/complex2.xml
 example/complex/complex.dtd
