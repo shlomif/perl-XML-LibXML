@@ -87,52 +87,53 @@ sub start_element {
         $self->{NamespaceStack}->push_context;
     }
 
-    if ($el->{NamespaceURI}) {
-        if ( defined $self->{DOM} ) {
-            $node = $self->{DOM}->createElementNS($el->{NamespaceURI},
-                                                  $el->{Name});
-        }
-        else {
-            $node = XML::LibXML::Element->new( $el->{Name} );
-            $node->setNamespace( $el->{NamespaceURI},
-                                 $el->{Prefix} , 1 );
-        }
+    if ( defined $self->{Parent} ) {
+        $el->{NamespaceURI} ||= "";
+        $node = $self->{Parent}->addNewChild( $el->{NamespaceURI},
+                                              $el->{Name} );
     }
     else {
-        if ( defined $self->{DOM} ) {
-            $node = $self->{DOM}->createElement($el->{Name});
+        if ($el->{NamespaceURI}) {
+            if ( defined $self->{DOM} ) {
+                $node = $self->{DOM}->createRawElementNS($el->{NamespaceURI},
+                                                         $el->{Name});
+            }
+            else {
+                $node = XML::LibXML::Element->new( $el->{Name} );
+                $node->setNamespace( $el->{NamespaceURI},
+                                     $el->{Prefix} , 1 );
+            }
         }
         else {
-            $node = XML::LibXML::Element->new( $el->{Name} );
+            if ( defined $self->{DOM} ) {
+                $node = $self->{DOM}->createRawElement($el->{Name});
+            }
+            else {
+                $node = XML::LibXML::Element->new( $el->{Name} );
+            }
         }
+
+        $self->{DOM}->setDocumentElement($node);
     }
 
     # build namespaces
     my $skip_ns= 0;
     foreach my $p ( $self->{NamespaceStack}->get_declared_prefixes() ) {
-         $skip_ns= 1;
+        $skip_ns= 1;
         my $uri = $self->{NamespaceStack}->get_uri($p);
         my $nodeflag = 0;
         if ( defined $uri
              and defined $el->{NamespaceURI}
              and $uri eq $el->{NamespaceURI} ) {
-#            $nodeflag = 1;
+            #            $nodeflag = 1;
             next;
         }
         $node->setNamespace($uri, $p, 0 );
     }
 
-    # append
-    if ($self->{Parent}) {
-        $self->{Parent}->addChild($node);
-        $self->{Parent} = $node;
-    }
-    else {
-        $self->{DOM}->setDocumentElement($node);
-        $self->{Parent} = $node;
-    }
+    $self->{Parent} = $node;
 
-     $self->{NamespaceStack}->push_context;
+    $self->{NamespaceStack}->push_context;
 
     # do attributes
     foreach my $key (keys %{$el->{Attributes}}) {
@@ -202,7 +203,8 @@ sub characters {
             $node = $self->{DOM}->createCDATASection($chars->{Data});
         }
         else {
-            $node = $self->{DOM}->createTextNode($chars->{Data});
+            $node = $self->{Parent}->appendText($chars->{Data});
+            return;
         }
     }
     elsif ( defined $self->{IN_CDATA} and $self->{IN_CDATA} == 1 ) {
