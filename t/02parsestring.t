@@ -9,7 +9,7 @@ my $parser = XML::LibXML->new();
 ok($parser);
 {
 my $doc = $parser->parse_string(<<'EOT');
-<xml/>
+<test/>
 EOT
 
 ok($doc);
@@ -32,7 +32,7 @@ my $fragment = $parser->parse_xml_chunk( $chunk );
 ok( $fragment );
 
 my $doc = $parser->parse_string(<<'EOT');
-<xml/>
+<test/>
 EOT
 
 ok($doc);
@@ -45,7 +45,7 @@ ok($r);
 $r->appendChild( $fragment );
 # warn "appended!\n";
 # warn $r->toString();
-ok( $r->toString(), "<xml>$chunk</xml>" );
+ok( $r->toString(), "<test>$chunk</test>" );
 
 # bad fragment:
 

@@ -71,7 +71,7 @@ if ( defined $dom ) {
 
 # attribute lists
 
-my $teststring = '<xml xmlns:b="http://whatever" attr1="1" attr2="2" b:attr3="3"/>';
+my $teststring = '<test xmlns:b="http://whatever" attr1="1" attr2="2" b:attr3="3"/>';
 my $dom2 = $parser->parse_string( $teststring );
 if( defined $dom2 ) {
     my $elem = $dom2->getDocumentElement();
