@@ -1159,49 +1159,54 @@ is therefore a shortcut for
             </method>
 
             <method name="lookupNamespaceURI"
-                    synopsis="$nsnode = $node->lookupNamespaceURI( $URI );">
+                    synopsis="$URI = $node->lookupNamespaceURI( $prefix );">
                 <p>
-                    Find a namespace by its URI starting at the
+                    Find a namespace URI by its prefix starting at the
                     current node.
                 </p>
             </method>
 
             <method name="lookupNamespacePrefix"
-                    synopsis="$nsnode = $node->lookupNamespacePrefix( $prefix );">
+                    synopsis="$prefix = $node->lookupNamespacePrefix( $URI );">
                 <p>
-                    Find a namespace by its prefix starting at the
+                    Find a namespace prefix by its URI starting at the
                     current node.
                 </p>
                 <p>
-                    <st>NOTE</st> Only the namespace URIs are
-                    unique. The prefix is only document related.
+                    <st>NOTE</st> Only the namespace URIs are ment to be
+                    unique. The prefix is only document related. also 
+                    document might has more than a single prefix defined 
+                    for a namespace.
                 </p>
             </method>
 
             <method name="iterator"
-                    synopsis="$node->iterator( \&amp;nodehandler );">
+                    synopsis="$iter = $node->iterator;">
                 <p>
-                    This is little helper function, that lets one
-                    define a function, that will be processed on the
-                    current node and all its children. The function
-                    will recieve as its only parameter the node to
-                    proceed. The function uses inorder proceeding to
-                    traverse the subtree. Therefore you can't reach
-                    the childnodes anymore, if the nodehandler removes
-                    childnodes.
+                   This function returns a new iterator object based
+                   with the current element as first element. This
+                   iterator can be used for linear tree walking.
                 </p>
 
                 <example><![CDATA[
- $node->iterator( sub { print $_[0]->nodeName(),"\n"; } );
+ $node->iterator->iterate( sub { shift;print $_[0]->nodeName(),"\n"; } );
                 ]]></example>
 
                 <p>
-                    The example will print all node names in the current subtree.
+                    The example will print all node names in the
+                    current subtree.
                 </p>
+
                 <p>
-                    The <st>iterator</st> function will return the
-                    return value of the nodehandler while processing
-                    the last child of the current node.
+                   Check the <em>XML::LibXML::Iterator</em> man page
+                   for more details.
+                </p>
+
+                <p>
+                    <st>NOTE:</st> The function has changed with
+                    version 1.53. Earlier versions did not return an
+                    iterator object, but ran the iterate() function
+                    directly.
                 </p>
             </method>
 
@@ -1419,6 +1424,18 @@ is therefore a shortcut for
                     trick for you.  But this is only done if the
                     String is <em>well-balanced</em>.
                 </p>
+   		<p>
+ 		    <st>Note that appendWellBalancedChunk() is only left for
+		    compatibility reasons</st>. Implicitly it uses 
+		</p>
+<example><![CDATA[
+  my $fragment = $parser->parse_xml_chunk( $chunk );
+  $node->appendChild( $fragment );
+]]></example>
+ 		<p>
+		    This form is more explicit and makes it easier to 
+		    control the flow of a script. 
+		</p>
             </method>
 
             <method name="appendText" 

@@ -428,15 +428,10 @@ sub attributes {
 
 sub iterator {
     my $self = shift;
-    my $funcref = shift;
-    my $child = undef;
-
-    my $rv = $funcref->( $self );
-    foreach $child ( $self->childNodes() ){
-        $rv = $child->iterator( $funcref );
-    }
-    return $rv;
+    require XML::LibXML::Iterator;
+    return XML::LibXML::Iterator->new( $self );
 }
+
 
 sub findnodes {
     my ($node, $xpath) = @_;

@@ -112,7 +112,7 @@ unless (have_library("xml2") or have_library("libxml2")) {
 libxml2 not found
 Try setting LIBS and INC values on the command line
 Or get libxml2 from 
-  http://www.libxml.org/
+  http://xmlsoft.org/
 If you install via RPMs, make sure you also install the -devel
 RPMs, as this is where the headers (.h files) are.
 DEATH
@@ -131,9 +131,9 @@ EOT
 WriteMakefile(
     'NAME'	=> 'XML::LibXML',
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
-    'AUTHOR'    => 'Matt Sergeant',
+    'AUTHOR'    => 'Christian Glahn',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
-    'PREREQ_PM' => { 'XML::SAX' => 0,
+    'PREREQ_PM' => { 'XML::SAX' => '0.11',
                      'XML::NamespaceSupport' => '1.07',
                      'XML::LibXML::Common' => 0,
                    },
@@ -341,6 +341,11 @@ EOT
     close($cfile);
     my $quote = $is_Win32 ? '"' : "'";
     xsystem("$^X Makefile.PL " . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config));
+
+    # I am not shure if OTHERLDFLAGS is really required - at least the
+    # libraries to include do not belong here!
+    # I would assume a user to set OTHERLDFLAGS in the %config if they are
+    # really required. if done so, we don't have to pass them here ...
     xsystem("$Config{make} test ${quote}OTHERLDFLAGS=${opt}${quote}");
 } # end try_link0
 
@@ -365,14 +370,14 @@ sub have_library {
         my $libs = $is_Win32 ? " $lib.lib  " : "-l$lib";
 #        my $libs = "-l$lib";
         if ($is_Win32) {
-            $result = try_link(<<"SRC", $libs);
+            $result = try_link(<<"SRC", undef);
 #include <windows.h>
 #include <winsock.h>
 blank() { return 0; }
 int t() { ${func}(); return 0; }
 SRC
             unless ($result) {
-                $result = try_link(<<"SRC", $libs);
+                $result = try_link(<<"SRC", undef);
 #include <windows.h>
 #include <winsock.h>
 blank() { return 0; }
@@ -381,7 +386,7 @@ SRC
             }
         }
         else {
-            $result = try_link(<<"SRC", $libs);
+            $result = try_link(<<"SRC", undef);
 blank() { return 0; }
 int t() { ${func}(); return 0; }
 SRC
