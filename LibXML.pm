@@ -122,6 +122,8 @@ sub new {
         $self->set_handler( $options{Handler} );
     }
 
+    $self->{XML_LIBXML_EXT_DTD} = 1;
+
     return $self;
 }
 

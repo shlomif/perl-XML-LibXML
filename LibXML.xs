@@ -600,30 +600,6 @@ LibXML_init_parser( SV * self ) {
         /* first fetch the values from the hash */
         real_obj = (HV *)SvRV(self);
 
-        item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
-        if ( item != NULL && SvTRUE(*item) ) {
-            xmlDoValidityCheckingDefaultValue = 1;
-            xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
-        }
-        else {
-            xmlDoValidityCheckingDefaultValue = 0;
-        }
-
-        item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_ENTITIES", 26, 0 );
-        if ( item != NULL ) {
-            if ( SvTRUE(*item) ) {
-                xmlSubstituteEntitiesDefaultValue = 1;
-                xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
-            }
-            else {
-                xmlSubstituteEntitiesDefaultValue = 0;
-            }
-        }
-        else {
-            xmlSubstituteEntitiesDefaultValue = 1;
-            xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
-        }
-
         item = hv_fetch( real_obj, "XML_LIBXML_KEEP_BLANKS", 22, 0 );
         if ( item != NULL ) {
             if ( SvTRUE(*item) )
@@ -664,19 +640,45 @@ LibXML_init_parser( SV * self ) {
         }
 
         item = hv_fetch( real_obj, "XML_LIBXML_EXT_DTD", 18, 0 );
-        if ( item != NULL && SvTRUE(*item) )
+        if ( item != NULL && SvTRUE(*item) ) {
             xmlLoadExtDtdDefaultValue |= 1;
-        else
-            xmlLoadExtDtdDefaultValue ^= 1;
 
-        item = hv_fetch( real_obj, "XML_LIBXML_COMPLETE_ATTR", 24, 0 );
-        if (item != NULL && SvTRUE(*item)) {
-            xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
+            item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
+            if ( item != NULL && SvTRUE(*item) ) {
+                xmlDoValidityCheckingDefaultValue = 1;
+                xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
+            }
+            else {
+                xmlDoValidityCheckingDefaultValue = 0;
+            }
+            item = hv_fetch( real_obj, "XML_LIBXML_COMPLETE_ATTR", 24, 0 );
+            if (item != NULL && SvTRUE(*item)) {
+                xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
+            }
+            else {
+                xmlLoadExtDtdDefaultValue ^= XML_COMPLETE_ATTRS;
+            }
+
+            item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_ENTITIES", 26, 0 );
+            if ( item != NULL ) {
+                if ( SvTRUE(*item) ) {
+                    xmlSubstituteEntitiesDefaultValue = 1;
+                    xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
+                }
+                else {
+                    xmlSubstituteEntitiesDefaultValue = 0;
+                }
+            }
+            else {
+                xmlSubstituteEntitiesDefaultValue = 1;
+                xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
+            }
         }
         else {
-            xmlLoadExtDtdDefaultValue ^= XML_COMPLETE_ATTRS;
+            /* xmlLoadExtDtdDefaultValue ^= 1;*/
+            xmlLoadExtDtdDefaultValue = 0;
         }
-
+        
         item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
         if ( item != NULL  && SvTRUE(*item)) {
             LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
@@ -686,11 +688,6 @@ LibXML_init_parser( SV * self ) {
             /* LibXML_old_ext_ent_loader =  NULL; */
         }
     }
-
-     /* LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();  */
-     /* xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity ); */
-
-
 
     return real_obj;
 }

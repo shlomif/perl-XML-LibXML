@@ -1161,6 +1161,8 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         </funcsynopsis>
 
                         <para>Load external DTD subsets while parsing.</para>
+                        <para>This flag is also required for DTD Validation, to provide complete attribute, and to expand entities, regardless if the document has an internal subset. Thus switching off external dtd loading, will disable entity expansion, validation, and complete attributes on internal subsets as well.</para>
+                        <para>If you leave this parser flag untouched, everythig will work, because the default is 1 (activated)</para>
                     </listitem>
                 </varlistentry>
 
