@@ -5,6 +5,7 @@ Version 1.54 fixes potentional buffer overflows were possible with earlier
 versions of the package. 
 
 1.54
+   - fixed major bugs, works now with libxml2 2.5.7 or later versions
    - fixed problem with empty document fragments
    - bad tag and attribute names cannot be created anymore
    - Catalog interface is aware about libxml2 configuration
@@ -12,11 +13,11 @@ versions of the package.
    - cleaned the error handling code, which 
      - fixes bad reporting of the validating parser
      - fixes bad reporting in xpath functions
+   - added getElementsBy*Name() functions for the Document Class
    - fixed memory management problem introduced in 1.53
      (that fixes a lot strange things)
    - interface for raw libxml2 DOM building functions 
      (currently just addChild() and addNewChild(), others will follow)
-   - fixed memory leak in push parser code
    - fixed namespace handling if nodes are imported to a new DOM.
    - fixed segmentation fault during validation under libxml2 2.4.25
    - fixed bad CDATA handing in XML::LibXML::SAX::Builder
@@ -32,6 +33,7 @@ versions of the package.
      (after realizing some CPAN testers refuse to read their warnings
      from Makefile.PL)
    - improved parser testsuite
+   - improved Makefile.PL
    - more documentation 
 
 1.53
