@@ -80,7 +80,7 @@ if( defined $dom2 ) {
     ok( scalar(@attr) , 4 );
     ok( $attr[1]->getValue(), 2 );
     
-    ok( $attr[3]->getName(), "b" );
+    ok( $attr[3]->getName(), "xmlns:b" );
     ok( $attr[3]->getValue(), "http://whatever" );
 
     my @nsattr = $elem->getAttributesNS("http://whatever");
