@@ -33,7 +33,7 @@ BEGIN {
     plan tests => $tests;
 }
 
-END { ok(0) unless $loaded and $] < 5.007 }
+END { ok(0) unless $loaded }
 
 use XML::LibXML;
 $loaded = 1;
