@@ -613,6 +613,14 @@
             <method name="getChildnodes"
                     synopsis="@children = $node->getChildnodes();">
                 <p>
+                    Alias for <st>childNodes()</st>
+                </p>
+            
+            </method>
+
+            <method name="childNodes"
+                    synopsis="@childnodes = $node->childNodes;">
+                <p>
                     <st>getChildnodes</st> implements a more intuitive
                     interface to the childnodes of the current
                     node. It enables you to pass all children directly
@@ -620,14 +628,7 @@
                     function is called in scalar context, the number
                     of childnodes will be returned.
                 </p>
-            </method>
-
-            <method name="childNodes"
-                    synopsis="@childnodes = $node->childNodes;">
-                <p>
-                    Alias for <st>getChildnodes()</st>
-                </p>
-            </method>
+                </method>
 
             <method name="toString"
                     synopsis="$xmlstring = $node->toString();">
@@ -744,6 +745,15 @@
                     return value of the nodehandler while processing
                     the last child of the current node.
                 </p>
+            </method>
+
+            <method name="normalize" synopsis="$node->normalize">
+                 <p>
+                   This function normalizes adjacent textnodes. This
+                   function is not as strict as libxml2's
+                   xmlTextMerge() function, since it will not free a
+                   node that is still refered by the perl layer.
+                 </p>
             </method>
 
         </description>

@@ -930,6 +930,12 @@ domNodeNormalize( xmlNodePtr node )
             next = node->next;
             xmlNodeAddContent(node, next->content);
             xmlUnlinkNode( next );
+
+            /**
+             * keep only nodes that are refered by perl (or GDOME)
+             */
+            if ( !next->_private )
+                xmlFreeNode( next );
         }
         break;
     case XML_ELEMENT_NODE:
