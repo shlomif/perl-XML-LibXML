@@ -974,7 +974,7 @@ sub getNamespaces { return (); }
 sub nodeName {
     my $self = shift;
     my $nsP  = $self->name;
-    return length($nsP) ? "xmlns:$nsP" : "xmlns";
+    return ( defined($nsP) && length($nsP) ) ? "xmlns:$nsP" : "xmlns";
 }
 
 sub getNodeName { my $self = shift; return $self->nodeName; }
