@@ -16,8 +16,13 @@ use File::Basename;
   # init the file parser
   my $parser = XML::LibXML->new();
 
+  my $target_dir = "XML-LibXML-${XML::LibXML::VERSION}/lib";
   if ( scalar @ARGV == 1 ){
     $xml_file = $ARGV[0];
+  }
+  elsif ( @ARGV == 2 ) {
+      $xml_file = $ARGV[0];
+      $target_dir = $ARGV[1];
   }
 
   # read the DOM
@@ -34,7 +39,7 @@ use File::Basename;
 
       # find class definitions without XPath :-P
       foreach my $child ( $elem->getElementsByTagName("class") ) { 
-        handle_class( $child ); # handle the class
+        handle_class( $child, $target_dir ); # handle the class
       }
     }
     else {
@@ -50,6 +55,7 @@ sub endl() { "\n"; } # helper for c++ programmer ;)
 
 sub handle_class {
   my $node = shift; # node to handle (<class ..>)
+  my $target_dir = shift;
   
   my $name ="";         # for POD - NAME Section
   my $description = ""; # for POD - DESCRIPTION and SYNOPSIS Section
@@ -101,9 +107,9 @@ sub handle_class {
   # print the data to a separated POD File
   my $filename = $node->getAttribute("name");
   $filename =~ s/::/\//g;
-  print("writing file: XML-LibXML-${XML::LibXML::VERSION}/lib/${filename}.pod\n");
-  mkpath([dirname("XML-LibXML-${XML::LibXML::VERSION}/lib/${filename}.pod")]);
-  open FILE , "> XML-LibXML-${XML::LibXML::VERSION}/lib/${filename}.pod" ||
+  print("writing file: ${target_dir}/${filename}.pod\n");
+  mkpath([dirname("${target_dir}/${filename}.pod")]);
+  open FILE , "> ${target_dir}/${filename}.pod" ||
     do{
       warn "cannot open file...\n"; 
       return ; # don't proceed if there is no open descriptor
