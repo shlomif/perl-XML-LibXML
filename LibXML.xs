@@ -1123,7 +1123,12 @@ getData( node )
         const char * content;
     CODE:
         if( node != NULL ) {
-            content = node->content;
+            if ( node->type != XML_ATTRIBUTE_NODE ){
+                content = node->content;
+            }
+            else if ( node->children != NULL ) {
+                content = node->children->content;
+            }
         }
         if ( content != 0 ){
             RETVAL = newSVpvn( (char *)content, xmlStrlen( content ) );
@@ -1202,15 +1207,24 @@ toString( self )
     PREINIT:
         xmlBufferPtr buffer;
     CODE:
-        buffer = xmlBufferCreate();
-        xmlNodeDump( buffer, self->doc, self, 0, 0 );
-        if ( buffer->content != 0 ) {
-            RETVAL = newSVpvn( buffer->content, buffer->use );
+        if ( self->type != XML_ATTRIBUTE_NODE ) {
+            buffer = xmlBufferCreate();
+            xmlNodeDump( buffer, self->doc, self, 0, 0 );
+            if ( buffer->content != 0 ) {
+                RETVAL = newSVpvn( buffer->content, buffer->use );
+            }
+            else {
+                RETVAL = &PL_sv_undef;
+            }
+            xmlBufferFree( buffer );
+        }
+        else if ( self->children != NULL ) {
+            RETVAL =  newSVpvn( self->children->content, 
+                                xmlStrlen( self->children->content) );
         }
         else {
             RETVAL = &PL_sv_undef;
         }
-        xmlBufferFree( buffer );
     OUTPUT:
         RETVAL
 
