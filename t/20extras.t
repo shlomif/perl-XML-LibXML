@@ -20,6 +20,7 @@ my $parser = XML::LibXML->new();
 
 {
     local $XML::LibXML::skipDTD = 1;
+    $parser->expand_entities(0);
     my $doc = $parser->parse_file( "example/dtd.xml" );
     ok($doc);
     my $test = "<?xml version=\"1.0\"?>\n<doc>This is a valid document &foo; !</doc>\n";
