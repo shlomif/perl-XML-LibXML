@@ -9,8 +9,10 @@ manpage!
 1.53
    - fixed very stupid encoding bug. all UTF8 strings will now be marked as 
      UTF8
+   - fixed namespace functions to work with empty namespaces
    - made XML::LibXML::SAX parser running without errors in most cases 
      (DTD handling is still not implemented)
+   - more documentation
 
 1.52
    - fixed some typos (thanks to randy kobes and hildo biersma)

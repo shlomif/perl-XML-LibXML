@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <module name="XML::LibXML">
     <!-- $Id$ -->
-    <version>1.50</version>
+    <version>1.53</version>
     <authors>
         <author>Matt Sergeant</author>
         <author>Christian Glahn</author>
@@ -102,7 +102,60 @@
                 whatever your OS throws. An example for such a test
                 can be found in test 19encoding.t of the distribution.
             </p>
+            <p>
+                <st>Namespaces and XML::LibXML's DOM implementation</st>
+            </p>
+            <p>
+                XML::LibXML's DOM implementation follows the DOM
+                implementation of libxml2. This is important to know
+                if namespaces are used. Namespaces cannot be declared
+                on an document node. This is basicly because XPath
+                doesn't know about document nodes. Therefore
+                namespaces have to be declared on element nodes. This
+                can happen explicitly by using XML::LibXML:Element's
+                setNamespace() function or more or less implicitly by
+                using XML::LibXML::Document's createElementNS() or
+                createAttributeNS() function. If the a namespace is
+                not declared on the documentElement, the namespace
+                will be localy declared for the newly created node.
+                In case of Attributes this may look a bit confusing,
+                since these nodes cannot have namespace declarations
+                itself. In this case the namespace in internally
+                applied to the attribute and later declared on the
+                node the attribute is appended to.
+            </p>
+            <p>
+                The following example may explain this a bit:
+            </p>
+            <example><![CDATA[
+ my $doc = XML::LibXML->createDocument;
+ my $root = $doc->createElementNS( "", "foo" );
+ $doc->setDocumentElement( $root );
+
+ my $attr = $doc->createAttributeNS( "bar", "bar:foo", "test" );
+ $root->setAttributeNodeNS( $attr );
+                ]]></example>
+            <p>
+                This piece of code will result the following document:
+            </p>
+            <example><![CDATA[
+ <?xml version="1.0"?>
+ <foo xmlns:bar="bar" bar:foo="test"/>
+                ]]></example>
+            <p>
+                Note that the namespace is declared on the document
+                element while the setAttributeNodeNS() call.
+            </p>
+
+            <p>
+                Here it is important to repeat the specification:
+                While working with namespaces you should use the
+                namespace aware functions instead of the simplified
+                versions. For example you should <st>never</st> use
+                setAttributeNode() but setAttributeNodeNS().
+            </p>
         </description>
+
         <also>
             <item name="XML::LibXML::Document"/>
             <item name="XML::LibXML::Element"/>
@@ -110,7 +163,7 @@
             <item name="XML::LibXML::Text"/>
             <item name="XML::LibXML::Comment"/>
             <item name="XML::LibXML::CDATASection"/>
-            <item name="XML::LibXML::Attribute"/>
+            <item name="XML::LibXML::Attr"/>
             <item name="XML::LibXML::DocumentFragment"/>
         </also>
     </package>
@@ -580,7 +633,7 @@ is therefore a shortcut for
                     <st>NOTE:</st> A text content containing something
                     that looks like an entity reference, will not be
                     expanded to a real entity reference unless it is a
-                    predefined entity (such as &amp;gt;)
+                    predefined entity
                 </p>
                 
                 <example><![CDATA[
@@ -1410,34 +1463,34 @@ is therefore a shortcut for
                     The following example may clarify this:
                 </p>
 
-                <example>
+                <example><![CDATA[
  my $e1 = $doc->createElement("bar");
  $e1->setNamespace("http://foobar.org", "foo")
-                </example>
+                ]]></example>
 
                 <p>
                    results
                 </p>
 
- <example>
+ <example><![CDATA[
  <foo:bar xmlns:foo="http://foobar.org"/>
-</example>
+]]></example>
 
                 <p>
                     while 
                 </p>
 
-                <example>
+                <example><![CDATA[
  my $e2 = $doc->createElement("bar");
  $e2->setNamespace("http://foobar.org", "foo",0)
-                </example>
+                ]]></example>
                 <p>
                    results only
                 </p>
 
- <example>
+ <example><![CDATA[
  <bar xmlns:foo="http://foobar.org"/>
-</example>
+]]></example>
 
                 <p>
                     By using $activate == 0 it is possible to apply
@@ -1451,17 +1504,17 @@ is therefore a shortcut for
                     activating it:
                 </p>
 
-                <example>
+                <example><![CDATA[
   $e2->setAttribute( "xmlns:foo", "http://bar.org" );                 
-                </example>
+                ]]></example>
 
                 <p>
                     has the same result as
                 </p>
 
-                <example>
+                <example><![CDATA[
  $e2->setNamespace("http://foobar.org", "foo", 0)
-                </example>
+                ]]></example>
             </method>
 
         </description>
@@ -1832,6 +1885,26 @@ is therefore a shortcut for
                 return what you would expect if you treated the
                 namespace node as an attribute.
             </p>
+            
+            <method name="new" synopsis="my $ns = XML::LibXML::Namespace->new($nsURI);">
+                <p>
+                    Creates a new Namespace node. Note that this is
+                    not a 'node' as an attribute or an element
+                    node. Therefore you can't do call all
+                    XML::LibXML::Node Functions. All functions
+                    available for this node are listed below.
+                </p>
+                <p>
+                    optionally you can pass the prefix to the
+                    namespace constructor. If this second parameter is
+                    ommited you will create a so called default
+                    namespace. Note, the newly created namespace is
+                    not bound to any docuement or node, therefore you
+                    should not expect it to be available in an
+                    existing document.
+                </p>
+            </method>
+
             
             <method name="getName" synopsis="print $ns->getName()">
                 <p>

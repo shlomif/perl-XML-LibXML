@@ -2300,8 +2300,10 @@ createElementNS( pdoc, nsURI, name )
             }
 
             xmlSetNs(newNode, ns );
+            xmlFree(localname);
         }
         else {
+            xs_warn( " ordinary element " );    
             /* ordinary element */
             localname = ename;
         
@@ -2313,9 +2315,12 @@ createElementNS( pdoc, nsURI, name )
         domAppendChild( PmmNODE(docfrag), newNode );
         RETVAL = PmmNodeToSv(newNode, docfrag);
     
-        xmlFree(localname);
-        xmlFree(prefix);
-        xmlFree(eURI);
+        if ( prefix != NULL ) {
+            xmlFree(prefix);
+        }
+        if ( eURI != NULL ) {
+            xmlFree(eURI);
+        }
         xmlFree(ename);
     OUTPUT:
         RETVAL
@@ -2496,9 +2501,9 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
         }
 
         nsURI = Sv2C( URI , NULL );
-        value = nodeSv2C( pvalue, NULL );
+        value = nodeSv2C( pvalue, (xmlNodePtr) doc  );
 
-        if ( nsURI ) {
+        if ( nsURI != NULL && xmlStrlen(nsURI) > 0 ) {
             xmlNodePtr root = xmlDocGetRootElement( doc );
             if ( root ) {
                 pchar = xmlStrchr(name, ':');
