@@ -16,8 +16,8 @@
     </authorgroup>
     <edition>1.55</edition>
     <copyright>
-      <year>2001-2003</year>
-      <holder>AxKit.com Ltd</holder>
+      <year>2001-2002</year>
+      <holder>AxKit.com Ltd; 2002-2003 Christian Glahn</holder>
     </copyright>
   </bookinfo>
   <chapter>
@@ -498,7 +498,7 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
         data, but also (strict) HTML and SGML files. There are three ways to
         parse documents - as a string, as a Perl filehandle, or as a filename.
         The return value from each is a XML::LibXML::Document object, which is
-        a DOM object. </para>
+        a DOM object.</para>
         <para>All of the functions listed below will throw an exception if the
         document is invalid. To prevent this causing your program exiting,
         wrap the call in an eval{} block</para>
@@ -523,8 +523,7 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
               <funcsynopsis>
                 <funcsynopsisinfo>$doc = $parser-&#62;parse_fh( $io_fh );</funcsynopsisinfo>
               </funcsynopsis>
-              <para>parse_fh() parses a IOREF or a subclass of IO::Handle.
-              </para>
+              <para>parse_fh() parses a IOREF or a subclass of IO::Handle.</para>
               <para>Because the data comes from an open handle, libxml2&#39;s
               parser does not know about the base URI of the document. To set
               the base URI one should use parse_fh() as follows:</para>
@@ -675,7 +674,7 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
         <para>This allows one to parse large documents without waiting for the
         parser to finish. The interface is especially usefull if a program
         needs to preprocess the incoming pieces of XML (e.g. to detect
-        document boundaries). </para>
+        document boundaries).</para>
         <para>While XML::LibXML parse_*() functions force the data to be a
         wellformed XML, the push parser will take any arbitrary string that
         contains some XML data. The only requirement is that all the pushed
@@ -808,7 +807,7 @@ $parser-&#62;generate( $doc );</programlisting>
         </listitem>
       </itemizedlist>
       <para>of that three functions only setTagCompression is available for
-      all serialization functions. </para>
+      all serialization functions.</para>
       <para>Because XML::LibXML does these flags not itself, one has to define
       them locally as the following example shows:</para>
       <programlisting>local $XML::LibXML::skipXMLDeclaration = 1;
@@ -857,8 +856,10 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             wellformed very efficiently. That is for example a document that
             forgets to close the document tag (or any other tag inside the
             document). The recover mode of XML::LibXML has problems though to
-            restore documents that are more like well ballanced chunks. In
-            that case XML::LibXML will only parse the first tag of the chunk.</para>
+            restore documents that are more like well ballanced chunks.
+            </para>
+            <para>XML::LibXML will only parse until the first fatal error
+            occours.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -964,7 +965,8 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             allows you to make use of XML::LibXML&#39;s full parser options
             and XML::GDOME&#39;s DOM implementation at the same time.</para>
             <para>To make use of this function, one has to install libgdome
-            and configure XML::LibXML to use this library.</para>
+            and configure XML::LibXML to use this library. For this you need
+            to rebuild XML::LibXML!</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -1081,12 +1083,21 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
     <sect1>
       <title>Error Reporting</title>
       <para>XML::LibXML throws exceptions during parseing, validation or XPath
-      processing. These errors can be catched by useing eval blocks. The error
-      then will be stored in <emphasis>$@</emphasis>. Alternatively one can
-      use the get_last_error() function of XML::LibXML. It will return the
-      same string that is stored in <emphasis>$@</emphasis>. Using
-      get_last_error() makes it still nessecary to eval the statement, since
-      these function groups will die() on errors.</para>
+      processing (and some other occations). These errors can be catched by
+      using <emphasis>eval</emphasis> blocks. The error then will be stored in
+      <emphasis>$@</emphasis>. Alternatively one can use the get_last_error()
+      function of XML::LibXML. It will return the same string that is stored
+      in <emphasis>$@</emphasis>. Using get_last_error() makes it still
+      nessecary to eval the statement, since these function groups will die()
+      on errors.</para>
+      <para>Note, that the use of get_last_error() still requires eval blocks.
+      XML::LibXML throws errors as they occour and does not wait if a user
+      test for them. This is a very common misunderstanding in the use of
+      XML::LibXML. If the eval is ommited, XML::LibXML will allways halt your
+      script by &#34;croaking&#34; (see Carp man page for details). </para>
+      <para>Also note that an increasing number throws errors if bad data is
+      passed. If you cannot asure valid data passed to XML::LibXML you should
+      eval these functions. </para>
       <para>get_last_error() can be called either by the class itself or by a
       parser instance:</para>
       <programlisting>$errstring = XML::LibXML-&#62;get_last_error();
@@ -1119,7 +1130,8 @@ $errstring = $parser-&#62;get_last_error();</programlisting>
       <para><emphasis>NOTE:</emphasis> At the moment XML::LibXML provides only
       an incomplete interface to libxml2&#39;s native SAX implementaion. The
       current implementation is not tested in production environment. It may
-      causes significant memory problems or shows wrong behaviour.</para>
+      causes significant memory problems or shows wrong behaviour. If you run
+      into specific problems using this part of XML::LibXML, let me know.</para>
     </sect1>
   </chapter>
   <chapter>
@@ -1136,17 +1148,17 @@ my $doc = $builder-&#62;result();</programlisting>
     </sect1>
     <sect1>
       <title>Description</title>
-      <para>Building DOM trees from SAX events is quite easy with
-      XML::LibXML::SAX::Builder. The class is designed as a SAX2 final
-      handler. </para>
-      <para>Since SAX is strictly stream oriented, you should not expect
-      anything to return from a generator. Instead you have to ask the builder
-      instance directly to get the document built.
-      XML::LibXML::SAX::Builder&#39;s result function holds the document
-      generated from the last SAX stream.</para>
       <para>This is a SAX handler that generates a DOM tree from SAX events.
       Usage is as above. Input is accepted from any SAX1 or SAX2 event
       generator.</para>
+      <para>Building DOM trees from SAX events is quite easy with
+      XML::LibXML::SAX::Builder. The class is designed as a SAX2 final handler
+      not as a filter!</para>
+      <para>Since SAX is strictly stream oriented, you should not expect
+      anything to return from a generator. Instead you have to ask the builder
+      instance directly to get the document built.
+      XML::LibXML::SAX::Builder&#39;s result() function holds the document
+      generated from the last SAX stream.</para>
     </sect1>
   </chapter>
   <chapter>
@@ -1428,6 +1440,25 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term>serialize</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$str = $doc-&#62;serialze($format); </funcsynopsisinfo>
+          </funcsynopsis>
+          <para>Alternative form of toString(). This function name added to be
+          more conform with libxml2&#39;s examples.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>serialize_c14n</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$c14nstr = $doc-&#62;serialize_c14n($comment_flag,$xpath); </funcsynopsisinfo>
+          </funcsynopsis>
+          <para>Alternative form of toStringC14N(). </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>toFile</term>
         <listitem>
           <funcsynopsis>
@@ -1454,11 +1485,20 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
         <term>toStringHTML</term>
         <listitem>
           <funcsynopsis>
-            <funcsynopsisinfo>$document-&#62;toStringHTML();</funcsynopsisinfo>
+            <funcsynopsisinfo>$str = $document-&#62;toStringHTML();</funcsynopsisinfo>
           </funcsynopsis>
           <para><emphasis>toStringHTML</emphasis> deparses the tree to a
           string as HTML. With this method indenting is automatic and managed
           by libxml2 internally.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>serialize_html</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$str = $document-&#62;serialize_html();</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>Alternative form of toStringHTML().</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -2312,6 +2352,25 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <para>If $xpath_expression is ommitted or empty, toStringC14N() will
           include all nodes in the given sub-tree.</para>
           <para>No serializing flags will be recognized by this function!</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>serialize</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$str = $doc-&#62;serialze($format); </funcsynopsisinfo>
+          </funcsynopsis>
+          <para>Alternative form of toString(). This function name added to be
+          more conform with libxml2&#39;s examples.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>serialize_c14n</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$c14nstr = $doc-&#62;serialize_c14n($comment_flag,$xpath); </funcsynopsisinfo>
+          </funcsynopsis>
+          <para>Alternative form of toStringC14N().</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -3249,9 +3308,9 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
     specified in XML 1.0 [17]) as a string. This string can be accessed with
     getData as implemented in XML::LibXML::Node.</para>
     <para>The write access is aware about the fact, that many processing
-    instructions have attribute like data. Therefor L&#60;setData&#62;
-    provides besides the DOM spec conform Interface to pass a set of named
-    parameter. So the code segment</para>
+    instructions have attribute like data. Therefore setData() provides
+    besides the DOM spec conform Interface to pass a set of named parameter.
+    So the code segment</para>
     <programlisting>my $pi = $dom-&#62;createProcessingInstruction(&#34;abc&#34;);
 $pi-&#62;setData(foo=&#62;&#39;bar&#39;, foobar=&#62;&#39;foobar&#39;);
 $dom-&#62;appendChild( $pi );</programlisting>
@@ -3259,8 +3318,8 @@ $dom-&#62;appendChild( $pi );</programlisting>
     <programlisting>&#60;?abc foo=&#34;bar&#34; foobar=&#34;foobar&#34;?&#62;</programlisting>
     <para>Which is how it is specified in the DOM specification. This three
     step interface creates temporary a node in perl space. This can be avoided
-    while using the B&#60;insertProcessingInstruction&#62; method. Instead of
-    the three calls described above, the call</para>
+    while using the insertProcessingInstruction() method. Instead of the three
+    calls described above, the call</para>
     <programlisting>$dom-&#62;insertProcessingInstruction(&#34;abc&#34;,&#39;foo=&#34;bar&#34; foobar=&#34;foobar&#34;&#39;);</programlisting>
     <para>will have the same result as above.</para>
     <para>XML::LibXML::PI&#39;s implementation of setData() differs a bit from
