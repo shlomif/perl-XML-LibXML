@@ -686,6 +686,9 @@ Sv2C( SV* scalar, const xmlChar *encoding )
             }
             retval = xmlStrdup(string);
         }
+	else {
+            retval = "";
+	}
         if (string != NULL ) {
             xmlFree(string);
         }
