@@ -9,6 +9,8 @@ $|=0;
 
 my %config;
 
+my ( $lib_major, $lib_minor, $lib_patch ) = (2, 4, 20);
+
 while($_ = shift) {
     my ($key, $val) = split(/=/, $_, 2);
     $config{$key} = $val;
@@ -34,9 +36,9 @@ eval {
     print "running xml2-config... ";
     my $ver = backtick("$xml2cfg --version");
     my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-    die "VERSION" unless $major > 2
-      || ($major == 2 && $minor > 4)
-      || ($major == 2 && $minor == 4 && $point >= 20);
+    die "VERSION" unless $major > $lib_major
+      || ($major == $libmajor && $minor > $lib_minor)
+      || ($major == $libmajor && $minor == $lib_minor && $point >= $lib_patch);
     $config{LIBS} ||= backtick("$xml2cfg --libs");
     $config{INC}  ||= backtick("$xml2cfg --cflags");
     print "ok\n";
@@ -44,7 +46,7 @@ eval {
 if ($@) {
     print "failed\n";
     if ($@ =~ /^VERSION/) {
-        die "XML::LibXML needs libxml2 version 2.4.20 or higher\n";
+        die "XML::LibXML needs libxml2 version $lib_major.$lib_minor.$lib_patch or higher\n";
     }
     warn "*** ", $@ if $DEBUG;
     warn "using fallback values for LIBS and INC\n";
