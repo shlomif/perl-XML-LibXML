@@ -50,7 +50,7 @@ if ( defined $dom ) {
     my $telem = $dom->createElement('test');
     $telem->appendWellBalancedChunk('<b>c</b>');
 
-    $telem->iterator( sub { $itervar.=$_[0]->getName(); } );
+    $telem->iterator->iterate( sub { shift; $itervar.=$_[0]->getName(); } );
     ok( $itervar, 'testbtext' );
   
     finddoc($dom);

@@ -41,7 +41,6 @@ exit(0) unless $] < 5.008;
 
 use XML::LibXML::Common;
 use XML::LibXML;
-$loaded = 1;
 ok(1);
 
 
