@@ -107,7 +107,10 @@ EOF
 #  - these should really be in MakeMaker... But &shrug;
 ###################################################################
 
+use Config;
 use Cwd;
+use Symbol;
+use File::Spec;
 
 use vars qw/$DEVNULL $is_Win32/;
 
@@ -206,28 +209,65 @@ sub backtick {
 sub try_link0 {
     my ($src, $opt) = @_;
     my $cfile = gensym();
-    mkdir(".testlink", 0777) || die "Cannot create .testlink dir: $!";
+    # local $config{LIBS};
+    # $config{LIBS} .= $opt;
+    unless (mkdir(".testlink", 0777)) {
+        rm_fr(".testlink");
+        mkdir(".testlink", 0777) || die "Cannot create .testlink dir: $!";
+    }
     chdir(".testlink");
     open($cfile, ">Conftest.xs") || die "Cannot write to file Conftest.xs: $!";
+print $cfile <<EOT;
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <EXTERN.h>
+#include <perl.h>
+#include <XSUB.h>
+#ifdef __cplusplus
+}
+#endif
+
+EOT
     print $cfile $src;
+    print $cfile <<EOT;
+
+MODULE = Conftest          PACKAGE = Conftest
+
+PROTOTYPES: DISABLE
+
+EOT
     close($cfile);
     open($cfile, ">Conftest.pm") || die "Cannot write to file Conftest.pm: $!";
-    print $cfile <<EOT;
+    print $cfile <<'EOT';
 package Conftest;
 $VERSION = 1.0;
 require DynaLoader;
+@ISA = ('DynaLoader');
 bootstrap Conftest $VERSION;
 1;
 EOT
     close($cfile);
     open($cfile, ">Makefile.PL") || die "Cannot write to file Makefile.PL: $!";
-    print $cfile <<EOT;
+    print $cfile <<'EOT';
 use ExtUtils::MakeMaker;
-WriteMakefile(NAME => "Conftest", VERSION_FROM => "Conftest.pm");
+my %config;
+while($_ = shift @ARGV) {
+    my ($k, $v) = split /=/, $_, 2;
+    warn("$k = $v\n");
+    $config{$k} = $v;
+}
+WriteMakefile(NAME => "Conftest", VERSION_FROM => "Conftest.pm", %config);
 EOT
     close($cfile);
-    xsystem("$^X Makefile.PL " . join(' ', map { "$_=$config{$_}" } keys %config));
-    xsystem($Config{make});
+    open($cfile, ">test.pl") || die "Cannot write to file test.pl: $!";
+    print $cfile <<EOT;
+use Test; BEGIN { plan tests => 1; } END { ok(\$loaded) }
+use Conftest; \$loaded++;
+EOT
+    close($cfile);
+    xsystem("$^X Makefile.PL " . join(' ', map { "'$_=$config{$_}'" } keys %config));
+    xsystem("$Config{make} test 'OTHERLDFLAGS=$opt'");
 }
 
 sub try_link {
@@ -242,8 +282,9 @@ sub try_link {
 }
 
 sub have_library {
-    my ($lib, $func) = (@_, "main");
-    printf("checking for %s() in -l%s... ", $func, $lib);
+    my ($lib, $func) = (@_, "blank");
+    printf("checking for %s() in -l%s... ", $func, $lib) if $func ne "blank";
+    printf("looking for -l%s... ", $lib) if $func eq "blank";
 
     my $result;
     if ($func) {
@@ -252,14 +293,14 @@ sub have_library {
             $result = try_link(<<"SRC", $libs);
 #include <windows.h>
 #include <winsock.h>
-int main() { return 0; }
+blank() { return 0; }
 int t() { ${func}(); return 0; }
 SRC
             unless ($result) {
                 $result = try_link(<<"SRC", $libs);
 #include <windows.h>
 #include <winsock.h>
-int main() { return 0; }
+blank() { return 0; }
 int t() { void ((*p)()); p = (void ((*)()))${func}; return 0; }
 SRC
             }
@@ -267,7 +308,7 @@ SRC
         else {
 
             $result = try_link(<<"SRC", $libs);
-int main() { return 0; }
+blank() { return 0; }
 int t() { ${func}(); return 0; }
 SRC
         }
