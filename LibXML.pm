@@ -971,6 +971,22 @@ sub processing_instruction {
                                                  Data   => $data} );
 }
 
+# these functions will use SAX exceptions as soon i know how things really work
+sub warning {
+    my ( $parser, $message ) = @_;
+    warn( $message );
+}
+
+sub error {
+    my ( $parser, $message ) = @_;
+    warn( $message );
+}
+
+sub fatal_error {
+    my ( $parser, $message ) = @_;
+    warn( $message );
+}
+
 1;
 __END__
 
@@ -1133,7 +1149,7 @@ parsing.
 
   my $doc = $parser->parse_file($filename);
 
-=head1 PARSING HTML
+=head2 Parsing Html
 
 As of version 0.96, XML::LibXML is capable of parsing HTML into a
 regular XML DOM. This gives you the full power of XML::LibXML on HTML
@@ -1156,21 +1172,7 @@ to do that.
 
   my $doc = $parser->parse_html_file($filename);
 
-=head2 Extra parsing methods
-
-B<processXIncludes>
-
-  $parser->processXIncludes( $doc );
-
-While the document class implements a separate XInclude processing,
-this method, is stricly related to the parser. The use of this method
-is only required, if the parser implements special callbacks that
-should to be used for the XInclude as well.
-
-If expand_xincludes is set to 1, the method is only required to process
-XIncludes appended to the DOM after its original parsing.
-
-=head1 PUSH PARSER
+=head2 Push Parser
 
 XML::LibXML supports also a push parser interface. This allows one to
 parse large documents without actually loading the entire document
@@ -1224,7 +1226,42 @@ the parser before.
 
 =back
 
-=head1 SERIALIZATION
+=head2 Extra parsing methods
+
+B<processXIncludes>
+
+  $parser->processXIncludes( $doc );
+
+While the document class implements a separate XInclude processing,
+this method, is stricly related to the parser. The use of this method
+is only required, if the parser implements special callbacks that
+should to be used for the XInclude as well.
+
+If expand_xincludes is set to 1, the method is only required to process
+XIncludes appended to the DOM after its original parsing.
+
+=head2 Error Handling
+
+XML::LibXML throws exceptions during parseing, validation or XPath
+processing. These errors can be catched by useing eval blocks. The
+error then will be stored in B<$@>. Alternatively one can use the
+get_last_error() function of XML::LibXML. It will return the same
+string that is stored in $@. Using get_last_error() makes it still
+nessecary to eval the statement, since these function groups will
+die() on errors.
+
+get_last_error() can be called either by the class itself or by a
+parser instance:
+
+   $errstring = XML::LibXML->get_last_error();
+   $errstring = $parser->get_last_error();
+
+Note that XML::LibXML exceptions are global. That means if
+get_last_error is called on an parser instance, the last B<global>
+error will be returned. This is not nessecarily the error caused by
+the parser instance itself.
+
+=head2 Serialization
 
 The oposite of parsing is serialization. In XML::LibXML this can be
 done by using the functions toString(), toFile() and toFH(). All
@@ -1265,30 +1302,7 @@ All basic serialization function recognize an additional formating
 flag. This flag is an easy way to format complex xml documents without
 adding ignoreable whitespaces.
 
-=head1 XML::LibXML::Document
-
-The objects returned above have a few methods available to them:
-
-=head2 C<$doc-E<gt>toString>
-
-Convert the document to a string.
-
-=head2 C<$doc-E<gt>is_valid>
-
-Post parse validation. Returns true if the document is valid against the
-DTD specified in the DOCTYPE declaration
-
-=head2 C<$doc-E<gt>is_valid($dtd)>
-
-Same as the above, but allows you to pass in a DTD created from
-L<"XML::LibXML::Dtd">.
-
-=head2 C<$doc-E<gt>process_xinclude>
-
-Process any xinclude tags in the file. (currently using B<only> libxml2's
-default callbacks)
-
-=head1 Input Callbacks
+=head2 Input Callbacks
 
 The input callbacks are used whenever LibXML has to get something B<other
 than external parsed entities> from somewhere. The input callbacks in LibXML
@@ -1385,7 +1399,7 @@ functions directly on the class.
 The previous code snippet will set the callbacks from the first
 example as global callbacks.
 
-=head1 Encoding
+=head2 Encoding
 
 All data will be stored UTF-8 encoded. Nevertheless the input and
 output functions are aware about the encoding of the owner

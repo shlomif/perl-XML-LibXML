@@ -5,6 +5,7 @@ Makefile.PL
 MANIFEST
 PHISHS.CHANGES
 README
+ppport.h
 dom.c
 dom.h
 xpath.c

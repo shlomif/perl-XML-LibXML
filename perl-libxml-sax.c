@@ -6,9 +6,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define PERL_NO_GET_CONTEXT     /* we want efficiency */
+
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "XSUB.h"
+#include "ppport.h"
 
 
 #include <stdlib.h>
@@ -58,6 +62,8 @@ void
 PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser ) {
     xmlNodePtr ns_stack = NULL;
     PmmSAXVectorPtr vec = NULL;
+    dTHX;
+
     vec = (PmmSAXVector*) xmlMalloc( sizeof(PmmSAXVector) );
     vec->ns_stack = xmlNewNode( NULL, "stack" );
     SvREFCNT_inc( parser );
@@ -68,6 +74,8 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser ) {
 void 
 PmmSAXCloseContext( xmlParserCtxtPtr ctxt ) {
     PmmSAXVector * vec = (PmmSAXVectorPtr) ctxt->_private;
+    dTHX;
+
     vec = (PmmSAXVector*) ctxt->_private;
     SvREFCNT_dec( vec->parser );
     xmlFreeNode( vec->ns_stack );
@@ -160,9 +168,10 @@ PmmAddNamespace( xmlNodePtr ns_stack, const xmlChar * name, const xmlChar * href
 }
 
 HV *
-PmmGenElementSV( PmmSAXVectorPtr sax, const xmlChar * name ) {
+PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name ) {
     HV * retval = newHV();
     SV *empty_sv = sv_2mortal(C2Sv("", NULL));
+
     xmlNsPtr ns = NULL;
     if ( name != NULL && xmlStrlen( name )  ) {
         const xmlChar * pos = PmmDetectNamespace( name );
@@ -211,11 +220,12 @@ PmmGenElementSV( PmmSAXVectorPtr sax, const xmlChar * name ) {
 }
 
 HV *
-PmmGenAttributeSV( PmmSAXVectorPtr sax,
+PmmGenAttributeSV( pTHX_ PmmSAXVectorPtr sax,
                    const xmlChar * name,
                    const xmlChar * value ) {
     HV * retval = newHV();
     SV *empty_sv = sv_2mortal(C2Sv("", NULL));
+
 
     if ( name != NULL && xmlStrlen( name )  ) {
         const xmlChar * pos = PmmDetectNamespaceDecl( name );
@@ -268,7 +278,7 @@ PmmGenAttributeSV( PmmSAXVectorPtr sax,
 }
 
 HV *
-PmmGenAttributeHashSV( PmmSAXVectorPtr sax, const xmlChar **attr ) {
+PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
     HV * retval = newHV();
     SV * atV = NULL;
     U32 atnameHash;
@@ -276,6 +286,7 @@ PmmGenAttributeHashSV( PmmSAXVectorPtr sax, const xmlChar **attr ) {
     const xmlChar **ta = attr;
     const xmlChar * name = NULL;
     const xmlChar * value = NULL;
+
     if ( attr != NULL ) {
         while ( *ta != NULL ) {
             if ( PmmDetectNamespaceDecl( *ta ) ) {
@@ -292,7 +303,7 @@ PmmGenAttributeHashSV( PmmSAXVectorPtr sax, const xmlChar **attr ) {
         while ( *ta != NULL ) {
             name = *ta; ta++;
             value = *ta; ta++;
-            atV = (SV*) PmmGenAttributeSV( sax, name, value );
+            atV = (SV*) PmmGenAttributeSV( aTHX_ sax, name, value );
             len = xmlStrlen( name );
             PERL_HASH( atnameHash, name, len );
             hv_store(retval, name, len, newRV_noinc(atV), atnameHash );
@@ -307,13 +318,15 @@ PSaxStartDocument(void * ctx)
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     int count = 0;
+
+    dTHX;
     dSP;
     
     ENTER;
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    PUSHs(sax->parser);
+    XPUSHs(sax->parser);
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::start_document", 0 );
@@ -321,14 +334,14 @@ PSaxStartDocument(void * ctx)
     SPAGAIN;
 
     PUSHMARK(SP) ;
-    PUSHs(sax->parser);
+    XPUSHs(sax->parser);
 
     if ( ctxt->version != NULL ) {
-        PUSHs(C2Sv(ctxt->version, NULL));
+        XPUSHs(C2Sv(ctxt->version, NULL));
     }
 
     if ( ctxt->encoding != NULL ) {
-        PUSHs(C2Sv(ctxt->encoding, NULL));
+        XPUSHs(C2Sv(ctxt->encoding, NULL));
     }
 
     PUTBACK;
@@ -348,13 +361,14 @@ PSaxEndDocument(void * ctx)
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     int count = 0;
 
+    dTHX;
     dSP;
     
     ENTER;
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    PUSHs(sax->parser);
+    XPUSHs(sax->parser);
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::end_document", 0 );
@@ -372,17 +386,18 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr) {
     int count = 0;
     SV * attrhash = NULL;
  
+    dTHX;
     dSP;
     
     ENTER;
     SAVETMPS;
 
     PmmExtendNsStack(sax);
-    attrhash = (SV*) PmmGenAttributeHashSV( sax, attr );
+    attrhash = (SV*) PmmGenAttributeHashSV(aTHX_  sax, attr );
     
     PUSHMARK(SP) ;
-    PUSHs(sax->parser);
-    XPUSHs(newRV_noinc((SV*)PmmGenElementSV(sax,name)));
+    XPUSHs(sax->parser);
+    XPUSHs(newRV_noinc((SV*)PmmGenElementSV(aTHX_ sax,name)));
     XPUSHs(newRV_noinc(attrhash));
     PUTBACK;
 
@@ -400,14 +415,15 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     int count = 0;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
 
+    dTHX;
     dSP;
     
     ENTER;
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    PUSHs(sax->parser);
-    PUSHs(C2Sv(name, NULL));
+    XPUSHs(sax->parser);
+    XPUSHs(C2Sv(name, NULL));
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::end_element", 0 );
@@ -429,14 +445,15 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
     if ( ch != NULL ) {
         xmlChar * data = xmlStrndup( ch, len );
 
+        dTHX;
         dSP;
     
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
-        PUSHs(sax->parser);
-        PUSHs(C2Sv(data, NULL));
+        XPUSHs(sax->parser);
+        XPUSHs(C2Sv(data, NULL));
         PUTBACK;
 
         count = perl_call_pv( "XML::LibXML::_SAXParser::characters", 0 );
@@ -458,14 +475,15 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     if ( ch != NULL ) {
         xmlChar * data = xmlStrdup( ch );
 
+        dTHX;
         dSP;
     
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
-        PUSHs(sax->parser);
-        PUSHs(C2Sv(data, NULL));
+        XPUSHs(sax->parser);
+        XPUSHs(C2Sv(data, NULL));
         PUTBACK;
 
         count = perl_call_pv( "XML::LibXML::_SAXParser::comment", 0 );
@@ -487,14 +505,15 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     if ( ch != NULL ) {
         xmlChar * data = xmlStrndup( ch, len );
 
+        dTHX;
         dSP;
     
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
-        PUSHs(sax->parser);
-        PUSHs(C2Sv(data, NULL));
+        XPUSHs(sax->parser);
+        XPUSHs(C2Sv(data, NULL));
         PUTBACK;
 
         count = perl_call_pv( "XML::LibXML::_SAXParser::cdata_block", 0 );
@@ -515,15 +534,16 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     int count = 0;
 
+    dTHX;
     dSP;
     
     ENTER;
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    PUSHs(sax->parser);
-    PUSHs(C2Sv(target, NULL));
-    PUSHs(C2Sv(data, NULL));
+    XPUSHs(sax->parser);
+    XPUSHs(C2Sv(target, NULL));
+    XPUSHs(C2Sv(data, NULL));
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::processing_instruction", 0 );
@@ -531,6 +551,112 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     FREETMPS ;
     LEAVE ;
     
+    return 1;
+}
+
+int
+PmmSaxWarning(void * ctx, const char * msg, ...)
+{
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
+
+    va_list args;
+    SV * svMessage;
+
+    dTHX;
+    dSP;
+    svMessage = NEWSV(0,512);
+
+    va_start(args, msg);
+    sv_vsetpvfn(svMessage, msg, xmlStrlen(msg), &args, NULL, 0, NULL);
+    va_end(args);
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP) ;
+    XPUSHs(sax->parser);
+
+    XPUSHs(svMessage);
+    PUTBACK;
+
+    perl_call_pv( "XML::LibXML::_SAXParser::warning", 0 );
+    
+    FREETMPS ;
+    LEAVE ;
+    SvREFCNT_dec(svMessage);
+    return 1;
+}
+
+
+int
+PmmSaxError(void * ctx, const char * msg, ...)
+{
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
+
+    va_list args;
+    SV * svMessage;
+ 
+    dTHX;
+    dSP;
+
+
+    svMessage = NEWSV(0,512);
+
+    va_start(args, msg);
+    sv_vsetpvfn(svMessage, msg, xmlStrlen(msg), &args, NULL, 0, NULL);
+    va_end(args);
+
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP) ;
+    XPUSHs(sax->parser);
+
+    XPUSHs(svMessage);
+    PUTBACK;
+    perl_call_pv( "XML::LibXML::_SAXParser::error", 0 );
+    
+    FREETMPS ;
+    LEAVE ;
+    SvREFCNT_dec(svMessage);
+    return 1;
+}
+
+
+int
+PmmSaxFatalError(void * ctx, const char * msg, ...)
+{
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
+
+    va_list args;
+    SV * svMessage;
+ 
+    dTHX;
+    dSP;
+
+    svMessage = NEWSV(0,512);
+
+    va_start(args, msg);
+    sv_vsetpvfn(svMessage, msg, xmlStrlen(msg), &args, NULL, 0, NULL);
+    va_end(args);
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP) ;
+    XPUSHs(sax->parser);
+
+    XPUSHs(svMessage);
+    PUTBACK;
+    perl_call_pv( "XML::LibXML::_SAXParser::fatal_error", 0 );
+    
+    FREETMPS ;
+    LEAVE ;
+    SvREFCNT_dec(svMessage);
     return 1;
 }
 
@@ -557,9 +683,9 @@ PSaxGetHandler()
     retval->processingInstruction = (processingInstructionSAXFunc)&PSaxProcessingInstruction;
 
     /* warning functions should be internal */
-    retval->warning    = &xmlParserWarning;
-    retval->error      = &xmlParserError;
-    retval->fatalError = &xmlParserError;
+    retval->warning    = &PmmSaxWarning;
+    retval->error      = &PmmSaxError;
+    retval->fatalError = &PmmSaxFatalError;
 
     return retval;
 }

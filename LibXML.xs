@@ -8,6 +8,7 @@ extern "C" {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "ppport.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -144,6 +145,7 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
 int
 LibXML_read_perl (SV * ioref, char * buffer, int len)
 {   
+    dTHX;
     dSP;
     
     int cnt;
@@ -212,6 +214,7 @@ LibXML_input_match(char const * filename)
         int count;
         SV * res;
 
+        dTHX;
         dSP;
 
         ENTER;
@@ -262,6 +265,7 @@ LibXML_input_open(char const * filename)
     if (callback) {
         int count;
 
+        dTHX;
         dSP;
 
         ENTER;
@@ -313,6 +317,7 @@ LibXML_input_read(void * context, char * buffer, int len)
     if (callback) {
         int count;
 
+        dTHX;
         dSP;
 
         ENTER;
@@ -369,6 +374,7 @@ LibXML_input_close(void * context)
     if (callback) {
         int count;
 
+        dTHX;
         dSP;
 
         ENTER;
@@ -399,6 +405,7 @@ int
 LibXML_output_write_handler(void * ioref, char * buffer, int len)
 {   
     if ( buffer != NULL && len > 0) {
+        dTHX;
         dSP;
 
         int cnt; 
@@ -470,6 +477,7 @@ LibXML_load_external_entity(
     func = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
     
     if (func) {
+        dTHX;
         dSP;
         
         ENTER;
@@ -1042,7 +1050,7 @@ XML_XINCLUDE_END()
 
 char *
 get_last_error(CLASS)
-        char * CLASS 
+        SV * CLASS 
     PREINIT: 
         STRLEN len;
     CODE:
@@ -3755,6 +3763,7 @@ _find( pnode, pxpath )
             xs_warn( "bad xpath\n" );
             if ( xpath ) 
                 xmlFree(xpath);
+            croak( "empty XPath found" );
             XSRETURN_UNDEF;
         }
     PPCODE:
@@ -3851,7 +3860,6 @@ _find( pnode, pxpath )
             if ( SvCUR( LibXML_error ) > 0 ) {
                 croak(SvPV(LibXML_error, len));
             }
-            XSRETURN_UNDEF;
         }
 
 void
@@ -3870,6 +3878,7 @@ _findnodes( pnode, perl_xpath )
             xs_warn( "bad xpath\n" );
             if ( xpath ) 
                 xmlFree(xpath);
+            croak( "empty XPath found" );
             XSRETURN_UNDEF;
         }
     PPCODE:
@@ -3927,7 +3936,6 @@ _findnodes( pnode, perl_xpath )
             if ( SvCUR( LibXML_error ) > 0 ) {
                 croak(SvPV(LibXML_error, len));
             }
-            XSRETURN_UNDEF;
         }
         
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
