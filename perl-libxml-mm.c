@@ -242,7 +242,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
             libnode = PmmNODE( node );
             if ( libnode != NULL ) {
                 if ( libnode->_private != node ) {
-                    warn( "lost node\n" );
+                    xs_warn( "lost node\n" );
                     libnode = NULL;
                 }
                 else {
@@ -421,7 +421,7 @@ PmmSvNodeExt( SV* perlnode, int copy )
             else {
                 retval = gdome_xml_n_get_xmlNode( gnode );
                 if ( retval == NULL ) {
-                    warn( "no XML::LibXML node found in GDOME object" );
+                    xs_warn( "no XML::LibXML node found in GDOME object" );
                 }
                 else if ( copy == 1 ) {
                     retval = PmmCloneNode( retval, 1 );
@@ -662,16 +662,16 @@ PmmSvContext( SV * scalar )
     else {
         if ( scalar == NULL
              && scalar == &PL_sv_undef ) {
-            warn( "no scalar!" );
+            xs_warn( "no scalar!" );
         }
         else if ( ! sv_isa( scalar, "XML::LibXML::ParserContext" ) ) {
-            warn( "bad object" );
+            xs_warn( "bad object" );
         }
         else if (SvPROXYNODE(scalar) == NULL) {
-            warn( "empty object" );
+            xs_warn( "empty object" );
         }
         else {
-            warn( "nothing was wrong!");
+            xs_warn( "nothing was wrong!");
         }
     }
     return retval;
@@ -692,7 +692,7 @@ PmmFastEncodeString( int charset,
     }
 
     if ( charset > 1 ) {
-        /* warn( "use document encoding %s", encoding ); */
+        /* warn( "use document encoding %s (%d)", encoding, charset ); */
         coder= xmlGetCharEncodingHandler( charset );
     }
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
@@ -759,7 +759,7 @@ PmmFastDecodeString( int charset,
             retval = xmlStrdup(out->content);
         }
         else {
-            warn("decoding error \n");
+            xs_warn("decoding error \n");
         }
         
         xmlBufferFree( in );
@@ -974,6 +974,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
 #ifdef HAVE_UTF8
                     xs_warn( "use UTF8" );
                     if( !DO_UTF8(scalar) && real_dom->encoding != NULL ) {
+                        xs_warn( "string is not UTF8\n" );
 #else
                     if ( real_dom->encoding != NULL ) {        
 #endif
@@ -987,12 +988,20 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                         }
                         string=ts;
                     }
+                    else {
+                        xs_warn( "no encoding set, use UTF8!\n" );
+                    }
                 }
+                if ( string == NULL ) xs_warn( "string is NULL\n" );
                 return string;
             }
             else {
+                xs_warn( "return NULL" );
                 return NULL;
             }
+        }
+        else {
+            xs_warn( "document has no encoding defined! use simple SV extraction\n" );
         }
     }
     xs_warn("no encoding !!");
