@@ -434,7 +434,12 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     PUSHs(sv_2mortal(tsize));
     PUTBACK;
     
-    cnt = perl_call_method("read", G_SCALAR);
+    if (sv_isobject(ioref)) {
+        cnt = perl_call_method("read", G_SCALAR);
+    }
+    else {
+        cnt = perl_call_pv("__read", G_SCALAR);
+    }
     
     SPAGAIN;
     

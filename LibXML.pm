@@ -248,6 +248,10 @@ sub processXIncludes {
     $dom->process_xinclude();
 }
 
+sub __read {
+    read($_[0], $_[1], $_[2]);
+}
+
 sub XML_ELEMENT_NODE(){1;}
 sub XML_ATTRIBUTE_NODE(){2;}
 sub XML_TEXT_NODE(){3;}
