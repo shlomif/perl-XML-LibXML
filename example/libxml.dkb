@@ -221,8 +221,10 @@ perl Makefile.PL LIBS=&#39;-L/path/to/lib&#39; INC=&#39;-I/path/to/include&#39;<
     </sect1>
     <sect1>
       <title>Contact</title>
-      <para>For suggestions, bugreports etc. you may contact the maintainer
-      directly <email>christian.glahn@uibk.ac.at</email></para>
+      <para>For suggestions etc. you may contact the maintainer directly
+      <email>christian.glahn@uibk.ac.at</email></para>
+      <para>For bug reports, please use the CPAN request tracker on
+      http://rt.cpan.org/NoAuth/Bugs.html?Dist=XML-LibXML</para>
       <para>Also XML::LibXML issues are discussed among other things on the
       perl XML mailing list (<email>perl-xml@listserv.ActiveState.com</email>).
       In case of problems you should check the archives of that list first.
@@ -234,7 +236,8 @@ perl Makefile.PL LIBS=&#39;-L/path/to/lib&#39; INC=&#39;-I/path/to/include&#39;<
       <para>Version &#60; 0.98 were maintained by Matt Sergeant</para>
       <para>0.98 &#62; Version &#62; 1.49 were maintained by Matt Sergeant and
       Christian Glahn</para>
-      <para>Version &#62;= 1.49 are maintained by Christian Glahn</para>
+      <para>Versions &#62;= 1.49 are maintained by Christian Glahn</para>
+      <para>Versions &#62; 1.56 are co-maintained by Petr Pajas</para>
     </sect1>
     <sect1>
       <title>Patches and Developer Version</title>
