@@ -40,7 +40,7 @@ if ( defined $dom ) {
 
 
     @list   = $elem->findnodes( 'species/@name' );
-    ok( scalar @list && $list[0]->toString() eq $list[0]->getData() );
+    ok( scalar @list && $list[0]->toString() eq ' name="Camel"' );
 
     my $x = XML::LibXML::Text->new( 1234 );
     if( defined $x ) {

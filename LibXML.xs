@@ -2441,18 +2441,13 @@ toString( self )
         xmlBufferPtr buffer;
         char *ret = NULL;
     CODE:
-        if ( self->type != XML_ATTRIBUTE_NODE ) {
-            buffer = xmlBufferCreate();
-            xmlNodeDump( buffer, self->doc, self, 0, 0 );
-            if ( buffer->content != 0 ) {
-                ret= xmlStrdup( buffer->content );
-                # warn( "x -> %s\n", ret );
-            }
-            xmlBufferFree( buffer );
+        buffer = xmlBufferCreate();
+        xmlNodeDump( buffer, self->doc, self, 0, 0 );
+        if ( buffer->content != 0 ) {
+            ret= xmlStrdup( buffer->content );
+            # warn( "x -> %s\n", ret );
         }
-        else if ( self->children != NULL ) {
-            ret= xmlStrdup( self->children->content ); 
-        }
+        xmlBufferFree( buffer );
         
         if ( self->doc != NULL ) {
             xmlChar *retDecoded = domDecodeString( self->doc->encoding, ret );

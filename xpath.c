@@ -41,7 +41,7 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
             res = xmlXPathCompiledEval(comp, ctxt);
             xmlXPathFreeCompExpr(comp);
         }
-        
+
         xmlXPathFreeContext(ctxt);
     }
     return res;
