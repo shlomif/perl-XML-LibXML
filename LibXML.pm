@@ -458,7 +458,15 @@ sub parse_balanced_chunk {
     return $self->parse_xml_chunk( @_ );
 }
 
+# java style
 sub processXIncludes {
+    my $self = shift;
+    my $doc = shift;
+    return $self->_processXIncludes($doc || " ");
+}
+
+# perl style
+sub process_xincludes {
     my $self = shift;
     my $doc = shift;
     return $self->_processXIncludes($doc || " ");
