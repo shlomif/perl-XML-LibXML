@@ -10,6 +10,18 @@ sub new {
     return bless {@_}, $class;
 }
 
+sub done {
+    my ($self) = @_;
+    my $dom = $self->{DOM};
+    $dom = $self->{Parent} unless defined $dom; # this is for parsing document chunks
+    delete $self->{NamespaceStack};
+    delete $self->{Parent};
+    delete $self->{DOM};
+
+    return $dom;
+}
+
+
 sub start_document {
     my ($self, $doc) = @_;
 
@@ -38,12 +50,8 @@ sub xml_decl {
 
 sub end_document {
     my ($self, $doc) = @_;
-    my $dom = $self->{DOM};
-    $dom = $self->{Parent} unless defined $dom; # this is for parsing document chunks
-    delete $self->{NamespaceStack};
-    delete $self->{Parent};
-    delete $self->{DOM};
-    return $dom;
+    my $d = $self->done();
+    return $d;
 }
 
 sub start_prefix_mapping {
@@ -65,7 +73,6 @@ sub start_prefix_mapping {
 sub end_prefix_mapping {
     my $self = shift;
     my $ns = shift;
-
     $self->{NamespaceStack}->undeclare_prefix( $ns->{Prefix} );
 }
 
