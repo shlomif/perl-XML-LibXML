@@ -1,5 +1,4 @@
-
-                $result = $self->{HANDLER}->end_document();XML::LibXML
+XML::LibXML
 ===========
 
 This module implements much of the DOM Level 2 API as an 
@@ -24,12 +23,35 @@ library. You can get the latest libxml2 version from
 
       http://xmlsoft.org
 
+Since there are some versions around that can be used with XML::LibXML,
+there are some things to mention here:
+
 Then run:
 
  $ perl Makefile.PL
  $ make test
  $ su
  $ make install
+
+Note On libxml2 Versions
+
+  libxml2 claims binary compatibility between its patch levels. This is not 
+  all true: 
+
+  First of all XML::LibXML requires at least libxml2 2.4.20. For most OS this 
+  means that an update of the prebuild packages is required, since most 
+  distributors ship ancient libxml2 versions most users will need to upgrade 
+  their installation. 
+
+  If you already run an older version of XML::LibXML and you wish to upgrade
+  to a bug fixed version of libxml2, you can upgrade the libraries from 
+  libxml2 2.4.20 to 2.4.24 without recompiling XML::LibXML. libxml2 2.4.25 
+  and later versions are not 100% binary compatible to older versions. So 
+  if you intend to upgrade to such a version you will need to recompile 
+  XML::LibXML as well. 
+
+  Users of perl 5.005_03 and perl 5.6.1 with thread support will also like 
+  to avoid libxml2 version 2.4.25 and use later versions instead. 
 
 Parser documentation is in perldoc XML::LibXML. DOM documentation
 starts in perldoc XML::LibXML::Document and perldoc
