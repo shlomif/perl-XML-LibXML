@@ -687,6 +687,188 @@ END()
     CODE:
         xmlCleanupParser();
 
+
+int
+XML_ELEMENT_NODE()
+    ALIAS: 
+        XML::LibXML::ELEMENT_NODE = 1
+    CODE:
+        RETVAL = 1;
+    OUTPUT:
+        RETVAL
+        
+int
+XML_ATTRIBUTE_NODE()
+    ALIAS: 
+        XML::LibXML::ATTRIBUTE_NODE = 1
+    CODE:
+        RETVAL = 2;
+    OUTPUT:
+        RETVAL
+
+
+int
+XML_TEXT_NODE()
+    ALIAS: 
+        XML::LibXML::TEXT_NODE = 1
+    CODE:
+        RETVAL = 3;
+    OUTPUT:
+        RETVAL
+
+int
+XML_CDATA_SECTION_NODE()
+    ALIAS: 
+        XML::LibXML::CDATA_SECTION_NODE = 1
+    CODE:
+        RETVAL = 4;
+    OUTPUT:
+        RETVAL
+
+int
+XML_ENTITY_REF_NODE()
+    ALIAS: 
+        XML::LibXML::ENTITY_REFERENCE_NODE = 1
+    CODE:
+        RETVAL = 5;
+    OUTPUT:
+        RETVAL
+
+int
+XML_ENTITY_NODE()
+    ALIAS: 
+        XML::LibXML::ENTITY_NODE = 1
+    CODE:
+        RETVAL = 6;
+    OUTPUT:
+        RETVAL
+
+int
+XML_PI_NODE()
+    ALIAS: 
+        XML::LibXML::PROCESSING_INSTRUCTION_NODE = 1
+    CODE:
+        RETVAL = 7;
+    OUTPUT:
+        RETVAL
+
+int
+XML_COMMENT_NODE()
+    ALIAS: 
+        XML::LibXML::COMMENT_NODE = 1
+    CODE:
+        RETVAL = 8;
+    OUTPUT:
+        RETVAL
+
+int
+XML_DOCUMENT_NODE()
+    ALIAS: 
+        XML::LibXML::DOCUMENT_NODE = 1
+    CODE:
+        RETVAL = 9;
+    OUTPUT:
+        RETVAL
+
+int
+XML_DOCUMENT_TYPE_NODE()
+    ALIAS: 
+        XML::LibXML::DOCUMENT_TYPE_NODE = 1
+    CODE:
+        RETVAL = 10;
+    OUTPUT:
+        RETVAL
+
+int
+XML_DOCUMENT_FRAG_NODE()
+    ALIAS: 
+        XML::LibXML::DOCUMENT_FRAGMENT_NODE = 1
+    CODE:
+        RETVAL = 11;
+    OUTPUT:
+        RETVAL
+
+int
+XML_NOTATION_NODE()
+    ALIAS: 
+        XML::LibXML::NOTATION_NODE = 1
+    CODE:
+        RETVAL = 12;
+    OUTPUT:
+        RETVAL
+
+int
+XML_HTML_DOCUMENT_NODE()
+    ALIAS: 
+        XML::LibXML::HTML_DOCUMENT_NODE = 1
+    CODE:
+        RETVAL = 13;
+    OUTPUT:
+        RETVAL
+
+int
+XML_DTD_NODE()
+    ALIAS:
+        XML::LibXML::DTD_NODE = 1
+    CODE:
+        RETVAL = 14;
+    OUTPUT:
+        RETVAL
+
+int
+XML_ELEMENT_DECL()
+    ALIAS: 
+        XML::LibXML::ELEMENT_DECLARATION = 1
+    CODE:
+        RETVAL = 15;
+    OUTPUT:
+        RETVAL
+
+int
+XML_ATTRIBUTE_DECL()
+    ALIAS: 
+        XML::LibXML::ATTRIBUTE_DECLARATION = 1
+    CODE:
+        RETVAL = 16;
+    OUTPUT:
+        RETVAL
+
+int
+XML_ENTITY_DECL()
+    ALIAS: 
+        XML::LibXML::ENTITY_DECLARATION = 1
+    CODE:
+        RETVAL = 17;
+    OUTPUT:
+        RETVAL
+
+int
+XML_NAMESPACE_DECL()
+    ALIAS: 
+        XML::LibXML::NAMESPACE_DECLARATION = 1
+    CODE:
+        RETVAL = 18;
+    OUTPUT:
+        RETVAL
+
+int
+XML_XINCLUDE_START()
+    ALIAS: 
+        XML::LibXML::XINCLUDE_START = 1
+    CODE:
+        RETVAL = 19;
+    OUTPUT:
+        RETVAL
+
+int
+XML_XINCLUDE_END()
+    ALIAS: 
+        XML::LibXML::XINCLUDE_END = 1
+    CODE:
+        RETVAL = 20;
+    OUTPUT:
+        RETVAL
+
 char *
 get_last_error(CLASS)
         char * CLASS 
@@ -1010,7 +1192,8 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         if (len == 0) {
             croak("Empty string");
         }
-    
+
+        /* encode the chunk to UTF8 */
         chunk = Sv2C(svchunk, encoding);
 
         if ( chunk != NULL ) {
@@ -1071,12 +1254,19 @@ encodeToUTF8( encoding, string )
         xmlChar * realstring;
         xmlChar * tstr;
     CODE:
+        xs_warn( "encoding start" );
         realstring = Sv2C(string,(xmlChar*) encoding);
-        RETVAL = C2Sv(realstring, NULL);
-        xmlFree( realstring );
+        if ( realstring != NULL ) {
+            RETVAL = C2Sv(realstring, NULL);
+            xmlFree( realstring );
 #ifdef HAVE_UTF8
-        SvUTF8_on(RETVAL);
+            SvUTF8_on(RETVAL);
 #endif
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+        xs_warn( "encoding done" );
     OUTPUT:
         RETVAL
 
@@ -1088,17 +1278,32 @@ decodeFromUTF8( encoding, string )
         xmlChar * tstr;
         xmlChar * realstring;
     CODE: 
+        xs_warn( "decoding start" );
 #ifdef HAVE_UTF8
         if ( SvUTF8(string) ) {
 #endif
             realstring = Sv2C(string,"UTF8" );
-            tstr =  domDecodeString( encoding, realstring );
-            RETVAL = C2Sv(tstr,(xmlChar*)encoding);
-            xmlFree( realstring ); 
-            xmlFree( tstr );
+            if ( realstring != NULL ) {
+                tstr =  domDecodeString( encoding, realstring );
+                if ( tstr != NULL ) {
+                    RETVAL = C2Sv(tstr,(xmlChar*)encoding);
+                    xmlFree( tstr );
+                }
+                else {
+                    XSRETURN_UNDEF;
+                }
+                xmlFree( realstring ); 
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
 #ifdef HAVE_UTF8
         }
+        else {
+            XSRETURN_UNDEF;
+        }
 #endif
+        xs_warn( "decoding done" );
     OUTPUT:
         RETVAL
 
@@ -1686,6 +1891,16 @@ getVersion( self )
     OUTPUT:
         RETVAL
 
+void
+setVersion( self, version )
+        SV* self
+        char *version
+    CODE:
+        if( self != NULL && self!=&PL_sv_undef) {
+            ((xmlDocPtr)getSvNode(self))->version = xmlStrdup( version );
+        }
+
+
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Dtd
 
 SV *
@@ -1773,12 +1988,6 @@ DESTROY( node )
                 }
                 free_proxy_node(node);
             }
-            else {
-                XSRETURN_UNDEF;
-            }
-        }
-        else {
-            XSRETURN_UNDEF;
         }
 
 
@@ -3325,14 +3534,12 @@ DESTROY(self)
     CODE:
         if (self != NULL || self != &PL_sv_undef ) {
             xs_warn("destroy fragment");
+            /* check if the refcnt is 0 or 1 */
             object = getSvNode(self);
             if ( object != NULL ) {
                 xmlFreeNode(object);
             }
             free_proxy_node(self);
-        }
-        else {
-            XSRETURN_UNDEF;
         }
 
 MODULE = XML::LibXML        PACKAGE = XML::LibXML::Namespace

@@ -16,26 +16,26 @@ require DynaLoader;
 
 bootstrap XML::LibXML $VERSION;
 
-@EXPORT = qw( XML_ELEMENT_NODE 
-              XML_ATTRIBUTE_NODE
-              XML_TEXT_NODE
-              XML_CDATA_SECTION_NODE
-              XML_ENTITY_REF_NODE
-              XML_ENTITY_NODE
-              XML_PI_NODE
-              XML_COMMENT_NODE
-              XML_DOCUMENT_NODE
-              XML_DOCUMENT_TYPE_NODE
-              XML_DOCUMENT_FRAG_NODE
-              XML_NOTATION_NODE
-              XML_HTML_DOCUMENT_NODE
-              XML_DTD_NODE
-              XML_ELEMENT_DECL
-              XML_ATTRIBUTE_DECL
-              XML_ENTITY_DECL
-              XML_NAMESPACE_DECL
-              XML_XINCLUDE_START
-              XML_XINCLUDE_END
+@EXPORT = qw( XML_ELEMENT_NODE ELEMENT_NODE
+              XML_ATTRIBUTE_NODE ATTRIBUTE_NODE
+              XML_TEXT_NODE TEXT_NODE
+              XML_CDATA_SECTION_NODE CDATA_SECTION_NODE
+              XML_ENTITY_REF_NODE ENTITY_REFERENCE_NODE
+              XML_ENTITY_NODE ENTITY_NODE
+              XML_PI_NODE PROCESSING_INSTRUCTION_NODE
+              XML_COMMENT_NODE COMMENT_NODE
+              XML_DOCUMENT_NODE DOCUMENT_NODE
+              XML_DOCUMENT_TYPE_NODE DOCUMENT_TYPE_NODE
+              XML_DOCUMENT_FRAG_NODE DOCUMENT_FRAGMENT_NODE
+              XML_NOTATION_NODE NOTATION_NODE
+              XML_HTML_DOCUMENT_NODE HTML_DOCUMENT_NODE
+              XML_DTD_NODE DTD_NODE
+              XML_ELEMENT_DECL ELEMENT_DECLARATION
+              XML_ATTRIBUTE_DECL ATTRIBUTE_DECLARATION
+              XML_ENTITY_DECL ENTITY_DECLARATION
+              XML_NAMESPACE_DECL NAMESPACE_DECLARATION
+              XML_XINCLUDE_START XINCLUDE_START
+              XML_XINCLUDE_END XINCLUDE_END
               encodeToUTF8
               decodeFromUTF8
             );
@@ -199,27 +199,6 @@ sub __read {
     read($_[0], $_[1], $_[2]);
 }
 
-sub XML_ELEMENT_NODE(){1;}
-sub XML_ATTRIBUTE_NODE(){2;}
-sub XML_TEXT_NODE(){3;}
-sub XML_CDATA_SECTION_NODE(){4;}
-sub XML_ENTITY_REF_NODE(){5;}
-sub XML_ENTITY_NODE(){6;}
-sub XML_PI_NODE(){7;}
-sub XML_COMMENT_NODE(){8;}
-sub XML_DOCUMENT_NODE(){9;}
-sub XML_DOCUMENT_TYPE_NODE(){10;}
-sub XML_DOCUMENT_FRAG_NODE(){11;}
-sub XML_NOTATION_NODE(){12;}
-sub XML_HTML_DOCUMENT_NODE(){13;}
-sub XML_DTD_NODE(){14;}
-sub XML_ELEMENT_DECL_NODE(){15;}
-sub XML_ATTRIBUTE_DECL_NODE(){16;}
-sub XML_ENTITY_DECL_NODE(){17;}
-sub XML_NAMESPACE_DECL_NODE(){18;}
-sub XML_XINCLUDE_START(){19;}
-sub XML_XINCLUDE_END(){20;}
-
 @XML::LibXML::Document::ISA         = 'XML::LibXML::Node';
 @XML::LibXML::DocumentFragment::ISA = 'XML::LibXML::Node';
 @XML::LibXML::Element::ISA          = 'XML::LibXML::Node';
@@ -349,7 +328,10 @@ sub XML::LibXML::Text::replaceDataRE {
 sub XML::LibXML::DocumentFragment::toString {
     my $self = shift;
     my $enc  = shift;
-    return join( "", map( {$_->toString($enc)}  $self->childNodes() ) );
+    if ( $self->hasChildNodes() ) {
+        return join( "", grep {defined $_} map( {$_->toString($enc)}  $self->childNodes() ) );
+    }
+    return "";
 }
 
 1;
