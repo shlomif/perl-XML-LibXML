@@ -104,7 +104,6 @@ sub new {
     return $self;
 }
 
-
 sub match_callback {
     my $self = shift;
     $self->{XML_LIBXML_MATCH_CB} = shift if scalar @_;
@@ -367,16 +366,17 @@ sub XML::LibXML::Text::replaceDataString {
     $node->setData( $datastr );
 }
 
-sub XML::LibXML::Text::replaceDataRE {
-    my ( $node, $leftre, $rightre, $flag_all ) = @_;
+sub XML::LibXML::Text::replaceDataRegEx {
+    my ( $node, $leftre, $rightre, $flags ) = @_;
     return unless defined $leftre;
     $rightre ||= "";
 
     my $datastr = $node->getData();
     my $restr   = "s/" . $leftre . "/" . $rightre . "/";
-    $restr .= "g" if defined $flag_all and $flag_all == 1;
+    $restr .= $flags if defined $flags;
 
-    eval "\$datastring =~ $restr";
+    eval '$datastr =~ '. $restr;
+
     $node->setData( $datastr );
 }
 

@@ -2378,46 +2378,8 @@ getData( proxy_node, useDomEncoding = &PL_sv_undef )
          * be returned here.
          */
         xs_warn( "getDATA" );
-        node = getSvNode(proxy_node); 
-
-        if( node != NULL ) {
-            if ( node->type != XML_ATTRIBUTE_NODE ){
-                    if ( node->content != NULL ) {
-                        content = xmlStrdup(node->content);
-                    }
-                    else {
-                        if ( node->children != NULL ) {
-                            xmlNodePtr cnode = node->children;
-                            xs_warn ( "oh the node has children ..." );
-                            /* ok then toString in this case ... */
-                            while (cnode) {
-                                xmlBufferPtr buffer = xmlBufferCreate();
-                               /* buffer = xmlBufferCreate(); */
-                                xmlNodeDump( buffer, node->doc, cnode, 0, 0 );
-                                if ( buffer->content != NULL ) {
-                                    xs_warn( "add item" );
-                                    if ( content != NULL ) {
-                                        content = xmlStrcat( content, buffer->content );
-                                    }
-                                    else {
-                                        content = xmlStrdup( buffer->content );
-                                    }
-                                }
-                                xmlBufferFree( buffer );
-                                cnode = cnode->next;
-                            }
-                        }
-                    }                    
-             }
-            else if ( node->children != NULL ) {
-                xs_warn("copy kiddies content!");
-                content = xmlStrdup(node->children->content);
-            }
-            else {
-                xs_warn( "no bloddy data!" );
-            }
-        }
-
+        content = domGetNodeValue( getSvNode(proxy_node) ); 
+        
         if ( content != NULL ){
             xs_warn ( "content follows"); xs_warn( content );
             if ( SvTRUE(useDomEncoding) ) {
@@ -3342,6 +3304,39 @@ _setData( node, value )
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 
+SV *
+substringData( node, offset, length ) 
+        xmlNodePtr node
+        int offset
+        int length
+    PREINIT:
+        xmlChar * data = NULL;
+        xmlChar * substr = NULL;
+        int len = 0;
+        int dl = 0;
+    CODE:
+        if ( node != NULL && offset >= 0 && length > 0 ) {
+            dl = offset + length - 1 ;
+            data = domGetNodeValue( node );
+            len = xmlStrlen( data );
+            if ( data != NULL && len > 0 && len > offset ) {
+                if ( dl > len ) 
+                    dl = offset + len;
+
+                substr = xmlStrsub( data, offset, dl );
+                RETVAL = C2Sv( (const xmlChar*)substr, NULL );
+                xmlFree( substr );
+            }   
+            else {
+                XSRETURN_UNDEF;
+            }
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
 void
 setData( node, value )
         xmlNodePtr node
@@ -3356,6 +3351,191 @@ setData( node, value )
             encstr = nodeSv2C(value,node);
             domSetNodeValue( node, encstr );
             xmlFree(encstr);
+        }
+
+void 
+appendData( node, value )
+        xmlNodePtr node
+        SV * value
+    PREINIT:
+        xmlChar * data = NULL;
+        xmlChar * encstring = NULL;
+    CODE:
+        if ( node != NULL ) {
+            encstring = Sv2C( value,
+                              node->doc!=NULL ? node->doc->encoding : NULL );
+            if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
+                data = domGetNodeValue( node );
+                if ( data != NULL && xmlStrlen( data ) > 0) {
+                    data = xmlStrcat( data, encstring );
+                    domSetNodeValue( node, data );
+                    xmlFree( encstring );
+                    xmlFree( data );
+                }
+                else {
+                    domSetNodeValue( node, encstring );
+                    xmlFree( encstring );
+                }
+            }
+        }
+
+void
+insertData( node, offset, value ) 
+        xmlNodePtr node
+        int offset
+        SV * value
+    PREINIT:
+        xmlChar * after= NULL;
+        xmlChar * data = NULL;
+        xmlChar * new  = NULL;
+        xmlChar * encstring = NULL;
+        int dl = 0;
+    CODE:
+        if ( node != NULL && offset >= 0 ) {
+            encstring = Sv2C( value,
+                              node->doc!=NULL ? node->doc->encoding : NULL );
+            if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
+                data = domGetNodeValue(node);
+                if ( data != NULL && xmlStrlen( data ) > 0 ) {
+                    if ( xmlStrlen( data ) < offset ) {
+                        data = xmlStrcat( data, encstring );
+                        domSetNodeValue( node, data );
+                    }
+                    else {
+                        dl = xmlStrlen( data ) - offset;
+
+                        if ( offset > 0 )
+                            new   = xmlStrsub(data, 0, offset );
+
+                        after = xmlStrsub(data, offset, dl );
+
+                        if ( new != NULL ) {
+                            new = xmlStrcat(new, encstring );
+                        }
+                        else {
+                            new = xmlStrdup( encstring );
+                        }
+
+                        if ( after != NULL ) 
+                            new = xmlStrcat(new, after );
+    
+                        domSetNodeValue( node, new );
+
+                        xmlFree( new );
+                        xmlFree( after );
+                    }
+                    xmlFree( data );
+                }
+                else {
+                    domSetNodeValue( node, encstring );
+                }
+                xmlFree(encstring);
+            }
+        }
+
+void
+deleteData( node, offset, length )
+        xmlNodePtr node
+        int offset
+        int length
+    PREINIT:
+        xmlChar * data  = NULL;
+        xmlChar * after = NULL;
+        xmlChar * new   = NULL;
+        int len = 0;
+        int dl1 = 0;
+        int dl2 = 0;
+    CODE:
+        if ( node != NULL && length > 0 && offset >= 0 ) {
+            data = domGetNodeValue(node);
+            len = xmlStrlen( data );
+            if ( data != NULL
+                 && len > 0
+                 && len > offset ) {
+                dl1 = offset + length;
+                if ( offset > 0 )
+                    new = xmlStrsub( data, 0, offset );
+
+                if ( len > dl1 ) {
+                    dl2 = len - dl1;
+                    after = xmlStrsub( data, dl1, dl2 );
+                    if ( new != NULL ) {
+                        new = xmlStrcat( new, after );
+                        xmlFree(after);
+                    }
+                    else {
+                        new = after;
+                    }
+                }
+
+                domSetNodeValue( node, new );
+                xmlFree(new);
+            }
+        }
+
+void
+replaceData( node, offset,length, value ) 
+        xmlNodePtr node
+        int offset
+        int length
+        SV * value
+    PREINIT:
+        xmlChar * after= NULL;
+        xmlChar * data = NULL;
+        xmlChar * new  = NULL;
+        xmlChar * encstring = NULL;
+        int len = 0;
+        int dl1 = 0;
+        int dl2 = 0;
+    CODE:
+        if ( node != NULL && offset >= 0 ) {
+            encstring = Sv2C( value,
+                              node->doc!=NULL ? node->doc->encoding : NULL );
+
+            if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
+                data = domGetNodeValue(node);
+                len = xmlStrlen( data );
+
+                if ( data != NULL
+                     && len > 0
+                     && len > offset  ) {
+
+                    dl1 = offset + length;
+                    if ( dl1 < len ) {
+                        dl2 = xmlStrlen( data ) - dl1;
+                        if ( offset > 0 ) {
+                            new = xmlStrsub(data, 0, offset );
+                            new = xmlStrcat(new, encstring );
+                        }
+                        else {
+                            new   = xmlStrdup( encstring );
+                        }
+
+                        after = xmlStrsub(data, dl1, dl2 );
+                        new = xmlStrcat(new, after );
+    
+                        domSetNodeValue( node, new );
+
+                        xmlFree( new );
+                        xmlFree( after );
+                    }
+                    else {
+                        /* replace until end! */ 
+                        if ( offset > 0 ) {
+                            new = xmlStrsub(data, 0, offset );
+                            new = xmlStrcat(new, encstring );
+                        }
+                        else {
+                            new   = xmlStrdup( encstring );
+                        }
+                        domSetNodeValue( node, new );
+                        xmlFree( new );
+                    }
+                    xmlFree( data );
+                }
+
+                xmlFree(encstring);
+            }
         }
 
 SV *
