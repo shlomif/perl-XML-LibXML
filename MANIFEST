@@ -35,6 +35,8 @@ example/complex/complex.dtd
 example/complex/dtd/f.dtd
 example/complex/dtd/g.dtd
 example/ns.xml
+example/xmlns/goodguy.xml
+example/xmlns/badguy.xml
 example/xpath.pl
 t/01basic.t
 t/02parse.t
