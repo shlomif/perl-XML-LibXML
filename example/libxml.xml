@@ -3,19 +3,20 @@
 <short>DOM Document Class</short>
 <description>
 	The Document Class is the result of a parsing process. But
-	sometimes it is needed, to create a Document from scratch. The
-	provides functions that are conform to the DOM Core naming
-	style.
+	sometimes it is necessary to create a Document from
+	scratch. The DOM Document Class provides functions that are
+	conform to the DOM Core naming style.
 
-    It is suggested, allways to create a node unbound of a document.
-    There is no need of really including the node to the document, but
-    since the node is once bound to a document, it is quite save that
-    all strings have the correct encoding. If an unbound textnode with
-    an iso encoded string is created (e.g. with $CLASS->new()), the
-    <i>toString</i> function may not return the expected result.
-
-    This seems like a limitation as long UTF8 encoding is ashured. If
-    iso encoded strings come into play it is much saver to use the
+    It is suggested that one should always create a node not bound to
+    any document.  There is no need of really including the node to
+    the document, but once the node is bound to a document, it is
+    quite safe that all strings have the correct encoding.  If an
+    unbound textnode with an iso encoded string is created (e.g. with
+    $CLASS->new()), the <i>toString</i> function may not return the
+    expected result.
+  
+    This seems like a limitation as long UTF8 encoding is assured. If
+    iso encoded strings come into play it is much safer to use the
     node creation functions of <b>XML::LibXML::Document</b>. 
 
 <method name="new" 
@@ -97,8 +98,9 @@
 </method>
 
 <method name="createElementNS" 
-	synopsis="$element = $dom->createElement( $nsURI, $nodename );">
-    Namespace version of <i>createElement</i>
+	synopsis="$element = $dom->createElementNS( $namespaceURI, $qname );">
+    This function creates a new Element Node bound to the DOM with
+    the name <i>$nodename</i> and placed in the given namespace.
 </method>
 
 <method name="createTextNode" 
@@ -347,7 +349,7 @@
 
 <method name="hasAttribute" synopsis="$boolean = $node->hasAttribute( $aname );">
     This funcion tests if the named attribute is set for the node. If
-    the attrbute is specified, TRUE (1) will be returned, otherwise
+    the attribute is specified, TRUE (1) will be returned, otherwise
     the returnvalue is FALSE (0).
 </method>
 

@@ -17,6 +17,9 @@ domCreateDocument( xmlChar *version, xmlChar *enc ){
        */
         doc->encoding = xmlStrdup(enc);
     }
+    else {
+        doc->encoding = xmlStrdup("UTF-8");
+    }
 
     return doc;
 }
@@ -72,6 +75,36 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move );
 
 xmlNodePtr
 domRemoveChild( xmlNodePtr self, xmlNodePtr old );
+
+/**
+ * Name: domName
+ * Synopsis: string = domName( node );
+ *
+ * domName returns the full name for the current node.
+ * If the node belongs to a namespace it returns the prefix and 
+ * the local name. otherwise only the local name is returned.
+ **/
+const xmlChar*
+domName(xmlNodePtr node) {
+  xmlChar *qname = NULL; 
+  if ( node ) {
+    if (node->ns != NULL) {
+      if (node->ns->prefix != NULL) {
+        qname = xmlStrdup( node->ns->prefix );
+        qname = xmlStrcat( qname , ":" );
+        qname = xmlStrcat( qname , node->name );
+      } 
+      else {
+        qname = xmlStrdup( node->name );
+      }
+    } 
+    else {
+      qname = xmlStrdup( node->name );
+    }
+  }
+  return qname;
+}
+
 
 xmlNodePtr
 domAppendChild( xmlNodePtr self,
@@ -313,15 +346,19 @@ domInsertAfter( xmlNodePtr self,
 
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
-  xmlDocPtr doc = n->doc;
+  xmlDocPtr doc = NULL;
   
   if ( n == NULL ) 
     return;
+
   if( n->content != NULL ) {
+    /* free old content */
     xmlFree( n->content );
   }
 
-  if ( doc != NULL ){
+  doc = n->doc;
+
+  if ( doc != NULL ) {
     xmlCharEncodingHandlerPtr handler = xmlGetCharEncodingHandler( xmlParseCharEncoding(doc->encoding) );
 
     if ( handler != NULL ){
@@ -341,10 +378,12 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
        }
     }
     else {
+      /* handler error => no output */ 
       n->content = xmlStrdup( "" );
     }
   }
   else {    
+    /* take data as UTF-8 */
     n->content = xmlStrdup( val );
   }
 }
@@ -508,13 +547,12 @@ domSetOwnerDocument( xmlNodePtr self, xmlDocPtr newDoc );
 
 xmlNodePtr
 domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
-  xmlNodePtr return_node;
+  xmlNodePtr return_node = node;
 
   if ( !doc ) {
-    return node;
+    return_node = node;
   }
-
-  if ( node && node->doc != doc ) {
+  else if ( node && node->doc != doc ) {
     if ( move ) {
       return_node = domUnbindNode( node );
     }
@@ -524,7 +562,7 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
     /* tell all children about the new boss */ 
     return_node = domSetOwnerDocument( return_node, doc ); 
   }
-
+ 
   return return_node;
 }
 

@@ -460,6 +460,11 @@ LibXML_parse_stream(SV * self, SV * ioref)
         return NULL;
     }
     
+    /* this should be done by libxml2 !? */
+    if (doc->encoding == NULL) {
+        doc->encoding = xmlStrdup("utf-8");
+    }
+    
     return doc;
 }
 
@@ -630,6 +635,11 @@ _parse_string(self, string)
         ret = xmlParseDocument(ctxt);
         
         well_formed = ctxt->wellFormed;
+
+        if (ctxt->myDoc->encoding == NULL) {
+            ctxt->myDoc->encoding = xmlStrdup("utf-8");
+        }
+
         RETVAL = ctxt->myDoc;
         
         xmlFreeParserCtxt(ctxt);
@@ -674,6 +684,9 @@ _parse_file(self, filename)
         
         xmlParseDocument(ctxt);
         RETVAL = ctxt->myDoc;
+        if (RETVAL->encoding == NULL) {
+            RETVAL->encoding = xmlStrdup("utf-8");
+        }
         ret = ctxt->wellFormed;
         
         xmlFreeParserCtxt(ctxt);
@@ -873,6 +886,35 @@ createAttribute( dom, name , value="" )
         xmlNodePtr newNode;
     CODE:
         newNode = (xmlNodePtr)xmlNewProp(NULL, name , value );
+        newNode->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
+        if ( newNode->children!=NULL ) {
+            newNode->children->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
+        }
+        RETVAL = make_proxy_node(newNode);
+        RETVAL->extra = dom;
+        SvREFCNT_inc(dom);    
+    OUTPUT:
+        RETVAL
+
+ProxyObject *
+createAttributeNS( dom, nsURI, qname, value="" )
+        SV * dom
+        char * nsURI
+        char * qname
+        char * value
+    PREINIT:
+        const char* CLASS = "XML::LibXML::Attr";
+        xmlNodePtr newNode;
+        xmlChar *prefix;
+        xmlChar *lname;
+        xmlNsPtr ns;
+    CODE:
+        lname = xmlSplitQName2(qname, &prefix);
+        if (lname == NULL) {
+            lname = qname;
+        }
+        ns = domNewNs (0 , prefix , nsURI);
+        newNode = (xmlNodePtr)xmlNewNsProp(NULL, ns, lname , value );
         newNode->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
         if ( newNode->children!=NULL ) {
             newNode->children->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
@@ -1213,9 +1255,13 @@ getName( node )
         const char * name;
     CODE:
         if( node != NULL ) {
-            name =  node->name;
+            name =  domName( node );
+            RETVAL = newSVpvn( (char *)name, xmlStrlen( name ) );
         }
-        RETVAL = newSVpvn( (char *)name, xmlStrlen( name ) );
+        else {
+            RETVAL = &PL_sv_undef;
+        }
+
     OUTPUT:
         RETVAL
 
@@ -1351,8 +1397,11 @@ getLocalName( node )
     CODE:
         if( node != NULL ) {
             lname =  node->name;
+            RETVAL = newSVpvn( (char *)lname, xmlStrlen( lname ) );
         }
-        RETVAL = newSVpvn( (char *)lname, xmlStrlen( lname ) );
+        else {
+            RETVAL = &PL_sv_undef;
+        }
     OUTPUT:
         RETVAL
 
@@ -1367,8 +1416,9 @@ getPrefix( node )
             && node->ns->prefix != NULL ) {
             prefix =  node->ns->prefix;
             RETVAL = newSVpvn( (char *)prefix, xmlStrlen( prefix ) );
-        } else {
-            RETVAL = NULL;
+        }
+        else {
+            RETVAL = &PL_sv_undef;
         }
     OUTPUT:
         RETVAL
@@ -1384,8 +1434,9 @@ getNamespaceURI( node )
             && node->ns->href != NULL ) {
             nsURI =  node->ns->href;
             RETVAL = newSVpvn( (char *)nsURI, xmlStrlen( nsURI ) );
-        } else {
-            RETVAL = NULL;
+        }
+        else {
+            RETVAL = &PL_sv_undef;
         }
     OUTPUT:
         RETVAL
@@ -1533,6 +1584,31 @@ getAttributeNode( elemobj, name )
             RETVAL = make_proxy_node((xmlNodePtr)attrnode);
             RETVAL->extra = elemobj->extra;
             SvREFCNT_inc(elemobj->extra);
+        }
+        else {
+            RETVAL = NULL;
+        }
+    OUTPUT:
+        RETVAL
+
+ProxyObject *
+getAttributeNodeNS( elemobj, nsURI, name )
+        ProxyObject* elemobj 
+        char * nsURI
+        char * name
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Attr";
+        xmlNodePtr elem = (xmlNodePtr) elemobj->object;
+        xmlAttrPtr attrnode;
+    CODE:
+        attrnode = domHasNsProp( elem, name, nsURI );
+        if ( attrnode != NULL ) {
+            RETVAL = make_proxy_node((xmlNodePtr)attrnode);
+            RETVAL->extra = elemobj->extra;
+            SvREFCNT_inc(elemobj->extra);
+        }
+        else {
+            RETVAL = NULL;
         }
     OUTPUT:
         RETVAL
@@ -1783,6 +1859,9 @@ getValue( attr )
                     croak("handler error" );
                 }
             }
+        }
+        else {
+            RETVAL = &PL_sv_undef;
         }
     OUTPUT:
         RETVAL
