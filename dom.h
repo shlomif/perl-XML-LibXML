@@ -83,9 +83,10 @@ domSetParentNode( xmlNodePtr self,
 		  xmlNodePtr newParent );
 xmlNodePtr
 domUnbindNode(  xmlNodePtr self );
-
 const char*
 domNodeTypeName( xmlNodePtr self );
+xmlNodePtr
+domReplaceNode( xmlNodePtr old, xmlNodePtr new );
 
 xmlNodePtr
 domIsNotParentOf( xmlNodePtr testNode, xmlNodePtr refNode );

@@ -94,7 +94,7 @@ sub MY::manifypods {
 
 docs : pure_all
 \t\@$^X -Iblib/arch -Iblib/lib example/xml2pod.pl example/libxml.xml lib
-\t\@\$(TOUCH) Makefile.PL
+\t\@$^X -pi.old -e 's/a/a/' Makefile.PL
 \t\@echo "==> YOU MUST NOW RE-RUN $^X Makefile.PL <=="
 \t\@false
 

@@ -2,8 +2,8 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-
-BEGIN { plan tests=>47; }
+use Devel::Peek;
+BEGIN { plan tests=>60; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -51,6 +51,7 @@ if ( defined $elem1 ) {
   # in the first version it cause a method not found ... 
   ok( $estr eq $te->toString() );
 
+  #####################################################
   # attribute tests
 
   $elem1->setAttribute( $aname, $bvalue );
@@ -64,6 +65,7 @@ if ( defined $elem1 ) {
         $attr->getValue() eq 'value' );
 
     $attr->setValue( 'other' );
+    # warn $attr->value . "\n";
     ok( $attr->getValue() eq 'other' );
 
     my $attr2 = $dom->createAttribute( "deutsch", "überflieger" );
@@ -74,6 +76,7 @@ if ( defined $elem1 ) {
     $attr2->setValue( "drückeberger" );
     ok( $attr2->getValue() eq "drückeberger" );
      
+  ###################################################
   # child node functions:
   my $text = $dom->createTextNode( $testtxt );
   ok( defined $text && $text->getType == XML_TEXT_NODE );
@@ -127,8 +130,8 @@ if ( defined $elem1 ) {
     }
     $c = $c->getNextSibling();
   }
-  ok( $str eq 'tcd' );
- 
+  ok( $str eq 'tcd' ); 
+
   # reverse traversing
   $str = "";
   my $rem = undef;
@@ -152,15 +155,15 @@ if ( defined $elem1 ) {
     }
     $c = $c->getPreviousSibling();
   }
-  ok( $str eq 'dct' ); 
+  ok( $str , 'dct' ); 
 
   # replace test
-
   my $elem3 = $dom->createElement( "C" );
   $elem1->replaceChild( $elem3, $rem );
 	
   $str = "";
   $c = $elem1->getLastChild();
+
   while ( $c ) {
     if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
     elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
@@ -169,7 +172,7 @@ if ( defined $elem1 ) {
     else{$str .= '?';}
     $c = $c->getPreviousSibling();
   }
-  ok( $str eq 'det' );    
+  ok( $str, 'det' );    
   ok( not defined $rem->getParentNode() && 
       not defined $rem->getNextSibling() &&
       not defined $rem->getPreviousSibling() );
@@ -187,7 +190,7 @@ if ( defined $elem1 ) {
     else{$str .= '?';}
     $c = $c->getPreviousSibling();
   }
-  ok( $str eq 'dt' );    
+  ok( $str, 'dt' );    
   ok( not defined $elem3->getParentNode() && 
       not defined $elem3->getNextSibling() &&
       not defined $elem3->getPreviousSibling() ); 
@@ -198,6 +201,7 @@ if ( defined $elem1 ) {
   $elem3->appendChild( $text );
   $str = "";
   $c = $elem1->getLastChild();
+
   while ( $c ) {
     if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
     elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
@@ -206,8 +210,8 @@ if ( defined $elem1 ) {
     else{$str .= '?';}
     $c = $c->getPreviousSibling();
   }
-  ok( $str eq 'et' && 
-      $elem3->hasChildNodes() && 
+  ok( $str, 'et' );
+  ok( $elem3->hasChildNodes() && 
       $elem3->getFirstChild()->getType() == XML_CDATA_SECTION_NODE && 
       $elem3->getFirstChild()->getData() eq $cdata );
 
@@ -218,13 +222,58 @@ if ( defined $elem1 ) {
   $elem->appendTextChild($testtxt, $testtxt);
   $elem->setAttribute( 'test', $testtxt );
 
+  @ta = $elem->getChildnodes();
+    # warn Devel::Peek::DumpArray(2 ,@ta );
+    # warn "\@TA HAS " , scalar( @ta), " ITEMS\n"; 
   my ( $n1, $n2 ) = $elem->getChildnodes();
   ok( $n1 && $n1->getData() eq $testtxt );
   ok( $n2 && $n2->getName() eq $testtxt );
   ok( $n2 && $n2->getLocalName() eq $testtxt );
 
   ok( $elem->getAttribute( 'test' ) eq $testtxt );
+
+  #################################################
+  # explicit document fragment test
+    print "# fragment tests \n";
+  $frag = $dom->createDocumentFragment();
+#   $frag = XML::LibXML::DocumentFragment->new();
+  ok( $frag );
+#  Devel::Peek::Dump( $frag );
+  $frag->appendChild( $n1 );
+  ok( $frag->hasChildNodes() );
+  ok( ($frag->childNodes)[0]->nodeValue, $testtxt );
+  ok( ($elem->childNodes)[0]->nodeName, $testtxt );
+  $frag->appendChild( $elem );
+    @ta = $frag->childNodes;
+  ok( scalar(@ta) , 2 );
+
+  $domroot = $dom->documentElement;
+
+  # @ta = $domroot->childNodes;
+  # warn "root has ",scalar( @ta ) ," elements\n"; 
+  $domroot->appendChild( $frag );
+  @ta =$frag->childNodes;
+  ok( scalar(@ta), 0 );
+  @ta =$domroot->childNodes;
+  ok( scalar(@ta), 4 );
+  ok( ($domroot->childNodes)[2]->nodeValue, $testtxt );
+  #  warn $domroot->toString();
+  $frag->appendChild( ($domroot->childNodes)[2] );
+  $frag->appendChild( ($domroot->childNodes)[2] );
+  
+   # warn scalar( $frag->childNodes ), "\n";
+
+  $cnode = ($domroot->childNodes)[1];
+  ok( $cnode );
+  ok( $cnode->nodeName, 'C');
+  $domroot->replaceChild( $frag, $cnode );
+  ok( scalar($frag->childNodes), 0 );
+  ok( scalar($domroot->childNodes), 2 ); # its 2 because the first node in the fragment is text
+                        # and so is the preceeding node in domroot
+  # warn $domroot->toString();
+
 }
+print "# end fragment tests\n";
 
 
 # node creation 2 (unbound element)
@@ -239,6 +288,7 @@ if ( defined $elem1 ) {
 # these tests are ment to test logical correctness!
 
  my $elem2 = XML::LibXML::Element->new( "B" );
+
  if ( defined $elem2 ) {
   ok( defined $elem2 && $elem2->getType() == XML_ELEMENT_NODE );
   ok( defined $elem2 && $elem2->getName() eq "B" );
@@ -260,5 +310,4 @@ if ( defined $elem1 ) {
 	ok( not defined $elem3->getOwnerDocument() );
   }
  }
-
 }

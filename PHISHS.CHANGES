@@ -55,3 +55,52 @@ _VERSION_C_
 the current version includes some securety fixes in dom.c and LibXML.xs
 
 also a better testsuite
+
+-- LibXML.xs_1.22
+
+completed function setAttributeNode
+added function getAttributes 
+added function getAttributesNS
+
+more node security fixes 
+
+these functions will return an array of attribute nodes.
+both will probably renamed before i make them public
+
+
+idea: global encoding constant, so all user input will be encoded from
+that encoding to utf8 INTERNALLY
+
+todo: add xmlEncodeEntitiesReentrant for all text content
+
+dom.h/dom.c
+
+introduced domSetAttributeNode
+cleaned the test suite
+
+LibXML.xs_1.23
+    + getOwner returns the Owner Node (root of the subtree)
+      of the current element 
+    + getOwnerDocument returns the Owner document of the node if any 
+    + proxy fixes
+    + introduced documentfragment
+      i will allways create a document fragment for EACH unbound node.
+      made the documentFragment a node 
+    + more securety checks and less memory leaks...
+    + better array handling
+    + DOM L2 conform naming (optional)
+    + entity encoding fixed
+
+dom.c_1.21
+   + domsetnodevalue is aware of attributes as well
+   + domreplacenode introduced
+   + added internal function insert_node_to_nodelist
+
+t/06nodetypes.t
+   + document_fragment tests 
+
+todo:
+    make shure appendChild or similar functions do not allow
+    wrong node type to be appended
+    make the node iterator function XS to avoid GC overhead 
+    for temporary iterator nodes.

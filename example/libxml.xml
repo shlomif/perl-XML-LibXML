@@ -85,6 +85,11 @@
 	just one root element to contain the documents data.
 </method>
 
+<method name="doumentElement" 
+    synopsis="$root = $dom->documentElement;">
+    Alias for <b>getDocumentElement</b>.
+</method>
+
 <method name="setDocumentElement" 
 	synopsis="$dom->setDocumentElement( $root );"> 
 	This function enables you to set the root element for a
@@ -118,9 +123,12 @@
 
 <method name="createAttribute"
      synopsis="$attrnode = $doc->createAttribute($name [,$value]);">
-     Creates a new Attribute node. This function is rather useless at
-     the moment, since there is no setAttributeNode function defined
-     in <i>XML::LibXML::Element</i>, yet. 
+     Creates a new Attribute node. 
+</method>
+
+<method name="createDocumentFragment"
+    synopsis="$fragment = $doc->createDocumentFragment()">
+    This function creates a DocumentFragment. 
 </method>
 
 <method name="createAttributeNS"
@@ -153,8 +161,9 @@
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Attr"/>
   <item name="XML::LibXML::Comment"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.90_a</version>
+<version>0.95</version>
 </class>
 
 <class name="XML::LibXML::Node">
@@ -171,6 +180,11 @@
 	Returns the node's name. This Function is aware about namesaces
 	and returns the full name of the current node
 	(<i>prefix:localname</i>)
+</method>
+
+<method name="nodeName"
+    synopsis="$name = $node->nodeName;">
+    Alias for <b>getName()</b>.
 </method>
 
 <method name="setName"
@@ -190,12 +204,21 @@
 	node</i>) it can get requested through this function.
 </method>
 
+<method name="nodeValue" synopsis="$content = $node->nodeValue;">
+    Alias for <b>getData</b>
+</method>
+
 <method name="getType" 
 	synopsis="$type = $node->getType();">
 	Retrun the node's type. The possible types are described in
 	the libxml2 <b>tree.h</b> documentation. The return value of this 
     function is a numeric value. Therefore it differst with the result
     of perl ref function.
+</method>
+
+<method name="nodeType"
+    synopsis="$type = $node->nodeType;">
+    Alias for <b>getType</b>.
 </method>
 
 <method name="unbindNode" 
@@ -216,14 +239,20 @@
 <method name="replaceChild" 
 	synopsis="$oldnode = $node->replaceChild( $newNode, $oldNode )">
 	Replaces the <i>$oldNode</i> with the <i>$newNode</i>. The
-	<i>$oldNode</i>	will be unbound from the Node
+	<i>$oldNode</i>	will be unbound from the Node. This function 
+    differs from the DOM L2 specification, in the case, if the new
+    node is not part of the document, the node will be imported 
+    first.
 </method>
 
 <method name="appendChild"
 	synopsis="$childnode = $node->appendChild( $childnode )">
 	The function will add the <i>$childnode</i> to the end of
 	<i>$node</i>'s children. The function should fail, if the new
-	childnode is allready a child of <i>$node</i>
+	childnode is allready a child of <i>$node</i>. This function 
+    differs from the DOM L2 specification, in the case, if the new
+    node is not part of the document, the node will be imported 
+    first.
 </method>
 
 <method name="cloneNode" 
@@ -233,11 +262,12 @@
 	well. If $deep is 0 only the current node will be copied.
 </method>
 
-<method name="getParentNode" synopsis="$parentnode = $node->getParentNode()">
+<method name="getParentNode" synopsis="$parentnode = $node->getParentNode();">
 	Returns simply the Parent Node of the current node. 
- 
- 	If this function is called on the root element, the document
- 	will be returned as a LibXML::Node element. So be carefull :-)
+</method>
+
+<method name="parentNode" synopsis="$parentnode = $node->parentNode;">
+   Alias for <b>getParentNode()</b>
 </method>
 
 <method name="getNextSibling" 
@@ -245,10 +275,18 @@
 	Returns the next sibling if any .
 </method>
 
+<method name="nextSibling" 	synopsis="$nextnode = $node->nextSibling()">
+   Alias for <b>getNextSibling()</b>
+</method>
+
 <method name="getPreviousSibling" 
 	synopsis="$nextnode = $node->getPreviousSibling()">
 	Analogous to <b>getNextSibling</b> the function returns the previous
 	sibling if any.
+</method>
+
+<method name="previousSibling" 	synopsis="$prevnode = $node->previousSibling()">
+   Alias for <b>getPreviousSibling()</b>
 </method>
 
 <method name="hasChildNodes"
@@ -262,14 +300,34 @@
 	node in the childlist. 
 </method>
 
+<method name="firstChild" 	synopsis="$childnode = $node->firstChild;">
+   Alias for <b>getFirstChild()</b>
+</method>
+
+
 <method name="getLastChild" synopsis="$childnode = $node->getLastChild()">
 	If the <i>$node</i> has childnodes this function returns the
 	last child node. 
 </method>
 
+<method name="lastChild" synopsis="$childnode = $node->lastChild;">
+   Alias for <b>getLastChild()</b>
+</method>
+
 <method name="getOwnerDocument" synopsis="$dom = $node->getOwnerDocument()">
 	Through this function it is allway possible to access the
 	document the current node is bound to.
+</method>
+
+
+<method name="ownerDocument" synopsis="$documentnode = $node->ownerDocument;">
+   Alias for <b>getOwnerDocument()</b>
+</method>
+
+<method name="getOwner" synopsis="$node = $node->getOwner;">
+   This function returns the node the current node is associated
+   with. In the very most cases this will be a document node or a
+   document fragment node.
 </method>
 
 <method name="setOwnerDocument" 
@@ -279,10 +337,12 @@
 </method>
 
 <method name="insertBefore" 
-    synopsis="$node->insertBefore( $newNode, $refNode )">
+    synopsis="$node->insertBefore( $newNode, $refNode )"> 
     The method inserts <i>$newNode</i> before <i>$refNode</i>. If
     <i>$refNode</i> is undefined, the newNode will be set as the new
-    first child of the parent node.
+    first child of the parent node.  This function differs from the
+    DOM L2 specification, in the case, if the new node is not part of
+    the document, the node will be imported first.
 </method>
 
 <method name="insertAfter" synopsis="$node->insertAfter( $newNode, $refNode )">
@@ -300,7 +360,12 @@
 <method name="getChildnodes" synopsis="@children = $node->getChildnodes();">
 	<b>getChildnodes</b> implements a more intuitive interface to the
 	childnodes of the current node. It enables you to pass all
-	children directly to a <i>map</i> or <i>grep</i>.
+	children directly to a <i>map</i> or <i>grep</i>. If this function is 
+    called in scalar context, the number of childnodes will be returned.
+</method>
+
+<method name="childNodes" synopsis="@childnodes = $node->childNodes;">
+   Alias for <b>getChildnodes()</b>
 </method>
 
 <method name="toString" synopsis="$xmlstring = $node->toString();">
@@ -317,14 +382,62 @@
     Returns the local name of a tag. This is the part behind the colon.
 </method>
 
+<method name="localname" synopsis="$localname = $node->localname;">
+   Alias for <b>getLocalName()</b>
+</method>
+
 <method name="getPrefix" 
     synopsis="$name = $node->getPrefix();">
     Returns the prefix of a tag. This is the part before the colon.
 </method>
 
+<method name="prefix" synopsis="$nameprefix = $node->prefix;">
+   Alias for <b>getPrefix()</b>
+</method>
+
 <method name="getNamespaceURI" synopsis="$uri = $node->getNamespaceURI()">
     returns the URI of the current namespace.
 </method>
+
+
+<method name="hasAttributes" synopsis="$boolean = $node->hasAttributes();">
+   returns 1 (TRUE) if the current node has any attributes set, otherwise
+   0 (FALSE) is returned.
+</method>
+
+
+<method name="getAttributes" synopsis="@attributelist = $node->getAttributes;">
+   returns all attribute nodes of the current node. 
+</method>
+
+<method name="attributes" synopsis="@attributelist = $node->attributes;">
+   Alias for <b>getAttributes()</b>
+</method>
+
+
+<method name="getAttributesNS" 
+    synopsis="@attributelist = $node->attributesNS( $URI );">
+   returns all attributes for the given namespace.
+</method>
+
+
+<method name="iterator" synopsis="$node->iterator( \&amp;nodehandler );">
+   This is little helper function, that lets one define a function, that
+   will be processed on the current node and all its children. The function
+   will recieve as its only parameter the node to proceed. The function uses
+   inorder proceeding to traverse the subtree. Therefore you can't reach the 
+   childnodes anymore, if the nodehandler removes childnodes. 
+
+<example>
+   $node->iterator( sub { print $_[0]->nodeName(), "\n"; } );    
+</example>
+
+   The example will print all node names in the current subtree.
+
+   The <b>iterator</b> function will return the return value of the
+   nodehandler while processing the last child of the current node.
+</method>
+
 </description>
 <also>
   <item name="XML::LibXML"/>
@@ -332,8 +445,9 @@
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Comment"/>
   <item name="XML::LibXML::Attr"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.93</version>
+<version>0.95</version>
 </class>
 
 <class name="XML::LibXML::Element">
@@ -399,11 +513,17 @@
 	The function gives direct access to all childnodes of the current
 	node with the same tagname. It makes things a lot easier if you
 	need to handle big datasets.
+
+    If this function is called in SCALAR context, it returns the number of 
+    Elements found.
 </method>
 
 <method name="getElementsByTagNameNS" 
     synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$tagname);">
     Namespace version of <i>getElementsByTagName</i>.
+
+    If this function is called in SCALAR context, it returns the number of 
+    Elements found.
 </method>
 
 <method name="appendWellBalancedChunk" 
@@ -438,8 +558,9 @@
   <item name="XML::LibXML::Attr"/>
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Comment"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.90_a</version>
+<version>0.95</version>
 </class>
 
 <class name="XML::LibXML::Text">
@@ -465,8 +586,9 @@
   <item name="XML::LibXML::Element"/>
   <item name="XML::LibXML::Document"/>
   <item name="XML::LibXML::Comment"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.90_a</version>
+<version>0.95</version>
 </class>
 
 <class name="XML::LibXML::Comment">
@@ -489,8 +611,9 @@
   <item name="XML::LibXML::Element"/>
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.90_a</version>
+<version>0.95</version>
 </class>
 
 
@@ -513,8 +636,9 @@
   <item name="XML::LibXML::Element"/>
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.90_a</version>
+<version>0.95</version>
 </class>
 
 <class name="XML::LibXML::Attr">
@@ -536,6 +660,12 @@
     specified</i>.
 </method>
 
+
+<method name="value" synopsis="$value = $attr->value;">
+   Alias for <b>getValue()</b>
+</method>
+
+
 <method name="setValue" synopsis="$attr->setValue( $string );">
     This is needed to set a new attributevalue. If iso encoded strings
     are passed as parameter, the node has to be bound to a document,
@@ -544,7 +674,9 @@
 
 <method name="getOwnerElement" synopsis="$node = $attr->getOwnerDocument();">
     returns the node the attribute belongs to. If the attribute is not
-    bound to a node, undef will be returned.
+    bound to a node, undef will be returned. Overwriting the underlaying
+    implementation, the <b>parentNode</b> function will return undef, instead
+    of the owner element.
 </method>
 
 </description>
@@ -553,8 +685,30 @@
   <item name="XML::LibXML::Node"/>
   <item name="XML::LibXML::Element"/>
   <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::DocumentFragment"/>
 </also>
-<version>0.92</version>
+<version>0.95</version>
 </class>
 
+<class name="XML::LibXML::DocumentFragment">
+<short>DOM L2 Implementation of a Document Fragment</short>
+<description>
+This class is a helper class as described in the DOM Level 2 Specification.
+It is implamented as a node without name. All adding, inserting or replacing
+functions are aware about document fragments now. 
+
+As well <b>all</b> unbound nodes (all nodes that does not belong to any 
+document subtree) are implicit member of document fragments.
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Node"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Comment"/>
+  <item name="XML::LibXML::CDATASection"/>
+</also>
+<version>0.95</version>
+</class>
 </module>

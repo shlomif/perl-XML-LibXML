@@ -48,10 +48,10 @@ if ( defined $dom ) {
     my $doc = XML::LibXML::Document->new( '1.0' );
     my $elem2 = $doc->createElement( $camel );
     $doc->setDocumentElement( $elem2 ); 
-
+    
     $elem2->appendWellBalancedChunk( $string );
     ok(  $elem2->toString() eq $tstr );
- 
+
     my @bs = $elem2->getElementsByTagName('B');
     ok( ( scalar( @bs ) == 2 ) &&
         ( $bs[0]->getAttribute( 'lang' ) eq "eng" ) && 
@@ -67,6 +67,7 @@ if ( defined $dom ) {
     $elem4 = $doc->createTextNode( $string2 );
     ok( $string2 eq $elem4->toString() );
 }
+# warn "Doc fragments shall be destroyed here!\n";
 
 # attribute lists
 

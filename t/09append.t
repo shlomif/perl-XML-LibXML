@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>6; }
+BEGIN { plan tests=>11; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -20,23 +20,32 @@ $dom->setDocumentElement( $root );
 $root->appendChild( $node1 );
 
 my @children = $root->getChildnodes();
-ok( ( scalar @children == 1 ) && ( $children[0]->getName() eq "a" ) );
+ok( scalar( @children ), 1 );
+ok( ( $children[0]->getName() eq "a" ) );
 
 $root->insertBefore( $node2 , $node1 );
- @children = $root->getChildnodes();
-ok( ( scalar @children == 2 ) && ( $children[0]->getName() eq "b" ) );
+@children = $root->getChildnodes();
+ok( scalar( @children ),2 ) ;
+ok( ( $children[0]->getName() eq "b" ) &&
+    ( $children[1]->getName() eq "a" ) );
 
 $root->insertAfter( $node3 , $node1 );
  @children = $root->getChildnodes();
-ok( ( scalar @children == 3 ) && ( $children[2]->getName() eq "c" ) );
+ok( scalar( @children ), 3 );
+ok( ( $children[0]->getName() eq "b" ) &&
+    ( $children[2]->getName() eq "c" ) &&
+    ( $children[1]->getName() eq "a" ) );
  
 $root->removeChild( $node3 );
 @children = $root->getChildnodes();
-ok( ( scalar @children == 2  ) );
+ok( scalar( @children ),  2  );
+ok( ( $children[0]->getName() eq "b" ) &&
+    ( $children[1]->getName() eq "a" ) );
 
 # lets switch two nodes :)
 $root->insertAfter( $node2, $node1 ); 
 @children = $root->getChildnodes();
-ok( ( scalar @children == 2 ) && 
-    ( $children[1]->getName() eq "b" ) &&
+ok( scalar( @children ) , 2 );
+ok( ( $children[1]->getName() eq "b" ) &&
     ( $children[0]->getName() eq "a" ) );
+
