@@ -2,7 +2,11 @@
 
 package XML::LibXML::SAX::Generator;
 
+use strict;
+
 use XML::LibXML;
+
+warn("This class (", __PACKAGE__, ") is deprecated!");
 
 sub new {
     my $class = shift;
