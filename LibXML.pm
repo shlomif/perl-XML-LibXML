@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT);
 use Carp;
 
-$VERSION = "0.92";
+$VERSION = "0.94";
 require Exporter;
 require DynaLoader;
 
@@ -123,7 +123,7 @@ sub XML_XINCLUDE_END(){20;}
 @XML::LibXML::NoGCDocument::ISA = 'XML::LibXML::Document';
 @XML::LibXML::Attr::ISA         = 'XML::LibXML::Node';
 
-sub XML::LibXML::NoGCDocument::DESTROY () { }
+# sub XML::LibXML::NoGCDocument::DESTROY () { }
 
 sub XML::LibXML::Node::iterator {
     my $self = shift;

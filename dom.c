@@ -1,3 +1,4 @@
+/* $Id$ */
 #include <libxml/tree.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlmemory.h>
@@ -516,14 +517,18 @@ domSetParentNode( xmlNodePtr self, xmlNodePtr p ) {
 xmlNodePtr
 domUnbindNode( xmlNodePtr self ) {
   if ( (self != NULL) && (self->parent != NULL) ) { 
+    if( self->parent!=NULL ) {
+      if( self->parent->properties == (xmlAttrPtr) self ) 
+        self->parent->properties = (xmlAttrPtr)self->next;
+      if ( self == self->parent->last ) 
+        self->parent->last = self->prev;
+      if ( self == self->parent->children ) 
+        self->parent->children = self->next;
+    }
     if ( self->next != NULL )
       self->next->prev = self->prev;
     if ( self->prev != NULL )
       self->prev->next = self->next;
-    if ( self == self->parent->last ) 
-      self->parent->last = self->prev;
-    if ( self == self->parent->children ) 
-      self->parent->children = self->next;
 
     self->parent = NULL;
     self->next   = NULL;
@@ -594,6 +599,9 @@ domNodeTypeName( xmlNodePtr elem ){
     case XML_ATTRIBUTE_NODE:
       name = "XML::LibXML::Attr"; 
       break;
+    case XML_DOCUMENT_NODE:
+      name = "XML::LibXML::Document";
+      break;
     default:
       name = "XML::LibXML::Node";
       break;
@@ -659,10 +667,7 @@ xmlNodePtr
 domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
   xmlNodePtr return_node = node;
 
-  if ( !doc ) {
-    return_node = node;
-  }
-  else if ( node && node->doc != doc ) {
+  if ( node && node->doc != doc ) {
     if ( move ) {
       return_node = domUnbindNode( node );
     }
@@ -730,17 +735,19 @@ domGetElementsByTagNameNS( xmlNodePtr n, xmlChar* nsURI, xmlChar* name ){
 
 xmlNodePtr
 domSetOwnerDocument( xmlNodePtr self, xmlDocPtr newDoc ) {
-    if ( newDoc == NULL ) {
-        return NULL;
-    }
-
     if ( self != NULL ) {
-        xmlNodePtr pNode = self->children;
-
+        xmlNodePtr cNode = self->children;
+        xmlNodePtr pNode = (xmlNodePtr)self->properties;
+        
         self->doc = newDoc;
+        while ( cNode != NULL ) {
+            domSetOwnerDocument( cNode, newDoc );
+            cNode = cNode->next;
+        }
+
         while ( pNode != NULL ) {
-            domSetOwnerDocument( pNode, newDoc );
-            pNode = pNode->next;
+          domSetOwnerDocument( cNode, newDoc );
+          pNode = pNode->next;
         }
     }
 
@@ -849,4 +856,37 @@ domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace) {
     }
   }
   return(NULL);
+}
+
+xmlAttrPtr 
+domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
+  if ( attr != NULL && attr->type != XML_ATTRIBUTE_NODE )
+    return NULL;
+  if ( node == NULL || attr == NULL ) {
+    return attr;
+  }
+  if ( node == attr->parent ) {
+    return attr; /* attribute is allready part of the node */
+  }  
+  if ( attr->doc != node->doc ){
+    attr = (xmlAttrPtr) domImportNode( node->doc, (xmlNodePtr) attr, 1 ); 
+  } 
+  else {
+    attr = (xmlAttrPtr)domUnbindNode( (xmlNodePtr) attr );
+  }
+
+  /* stolen from libxml2 */
+  if ( attr != NULL ) {
+    if (node->properties == NULL) {
+      node->properties = attr;
+    } else {
+      xmlAttrPtr prev = node->properties;
+      
+      while (prev->next != NULL) prev = prev->next;
+      prev->next = attr;
+      attr->prev = prev;
+    }
+  }
+
+  return attr;
 }

@@ -647,9 +647,9 @@ _parse_string(self, string)
             croak(SvPV(LibXML_error, len));
         }
         else {
-            if (real_dom->encoding == NULL) {
-                real_dom->encoding = "UTF-8";
-            }
+            #xmlFreeDoc(real_dom);
+            #RETVAL = &PL_sv_undef;    
+            #croak(SvPV(LibXML_error, len));
 
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
@@ -677,10 +677,6 @@ _parse_fh(self, fh)
             croak(SvPV(LibXML_error, len));
         }
         else {
-            if (real_dom->encoding == NULL) {
-                real_dom->encoding = xmlStrdup("UTF-8");
-            }
-       
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
@@ -721,10 +717,6 @@ _parse_file(self, filename)
             croak(SvPV(LibXML_error, len));
         }
         else {
-            if (real_dom->encoding == NULL) {
-                real_dom->encoding = xmlStrdup("UTF-8");
-            }
-
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
@@ -768,8 +760,12 @@ DESTROY(self)
     PREINIT:
         xmlDocPtr real_node;
     CODE:
-       
-   
+        if ( self->object != NULL ) {
+            xmlFreeDoc((xmlDocPtr)self->object);
+            # warn( "REAL DOCUMENT DROP SUCCEEDS" );
+        }        
+        self->object = NULL;
+        Safefree( self );
 
 SV *
 toString(self, format=0)
@@ -777,15 +773,17 @@ toString(self, format=0)
         int format
     PREINIT:
         xmlDocPtr real_dom;
-        xmlChar *result;
-        int len;
+        xmlChar *result=NULL;
+        int len=0;
     CODE:
         real_dom = (xmlDocPtr)self->object;
         if ( format <= 0 ) {
+            # warn( "use no formated toString!" );
             xmlDocDumpMemory(real_dom, &result, &len);
         }
         else {
             int t_indent_var = xmlIndentTreeOutput;
+            # warn( "use formated toString!" );
             xmlIndentTreeOutput = 1;
             xmlDocDumpFormatMemory( real_dom, &result, &len, format ); 
             xmlIndentTreeOutput = t_indent_var;
@@ -795,11 +793,10 @@ toString(self, format=0)
 	        # warn("Failed to convert doc to string");           
             RETVAL = &PL_sv_undef;
     	} else {
-            # warn(result);
+            # warn("%s, %d\n",result, len);
             RETVAL = newSVpvn((char *)result, (STRLEN)len);
             xmlFree(result);
         }
-        xmlReconciliateNs(real_dom,xmlDocGetRootElement(real_dom));
     OUTPUT:
         RETVAL
 
@@ -1046,9 +1043,13 @@ setDocumentElement( dom , proxy )
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
         SvREFCNT_dec(proxy->extra);
         elem = (xmlNodePtr)proxy->object;
-        domSetDocumentElement( real_dom, elem );
-        proxy->extra = dom;
-        SvREFCNT_inc(dom);
+        # please correct me if i am wrong: the document element HAS to be
+        # an ELEMENT NODE
+        if ( elem->type == XML_ELEMENT_NODE ) {
+            domSetDocumentElement( real_dom, elem );
+            proxy->extra = dom;
+            SvREFCNT_inc(dom);
+        }
 
 ProxyObject *
 getDocumentElement( dom )
@@ -1142,22 +1143,19 @@ DESTROY( node )
         if (node == NULL) {
            XSRETURN_UNDEF;
         }
-        real_node = node->object;
-        if (node->extra != NULL) {
-            SvREFCNT_dec(node->extra);
-        }
-     
-        if ( real_node != NULL ) {
-            if ( real_node->type == XML_DOCUMENT_NODE ){
-                if ( node->extra == NULL ) {
-                    xmlFreeDoc((xmlDocPtr)node->object);
-                }
-                else {
-                    node->extra  = NULL;
-                }
+        real_node = (xmlNodePtr)node->object;
+        if ( node->extra != NULL
+             && real_node != NULL ){
+            if ( SvREFCNT( node->extra ) > 0 ){
+                SvREFCNT_dec(node->extra);
             }
+            if ( real_node->type != XML_DOCUMENT_NODE ) {
+                Safefree(node);
+            }
+        }
+        else if ( real_node == NULL ) {
             Safefree(node);
-        } 
+        }     
  
 int 
 getType( node ) 
@@ -1477,6 +1475,7 @@ getOwnerDocument( elem )
         ProxyObject* elem
     CODE:
         RETVAL = elem->extra;
+        SvREFCNT_inc( RETVAL );
     OUTPUT:
         RETVAL
 
@@ -1778,7 +1777,7 @@ setAttributeNS( elem, nsURI, qname, value )
             qname  = domEncodeString( elem->doc->encoding, qname );
             value = domEncodeString( elem->doc->encoding, value );
         }
-
+    
         if ( nsURI != NULL && strlen(nsURI) != 0 ) {
             lname = xmlSplitQName2(qname, &prefix);
         
@@ -1789,7 +1788,6 @@ setAttributeNS( elem, nsURI, qname, value )
             xmlSetProp( elem, qname, value );
         }
 
-# this is a dummy!
 ProxyObject *
 setAttributeNode( elem, attrnode ) 
         ProxyObject* elem
@@ -1797,7 +1795,11 @@ setAttributeNode( elem, attrnode )
     PREINIT:
         const char * CLASS = "XML::LibXML::Attr";
     CODE:
-        RETVAL = NULL;        
+        RETVAL = make_proxy_node( (xmlNodePtr)domSetAttributeNode( (xmlNodePtr) elem->object, (xmlAttrPtr) attrnode->object ) );
+        if ( elem->extra != NULL ) {
+            RETVAL->extra = elem->extra;
+            SvREFCNT_inc(elem->extra);
+        }
     OUTPUT:
         RETVAL
 
@@ -1806,7 +1808,7 @@ hasAttribute( elem, name )
         xmlNodePtr elem
         char * name
     PREINIT:
-        xmlAttrPtr att;
+        xmlAttrPtr att = NULL;
     CODE:
         /**
          * xmlHasProp() returns the attribute node, which is not exactly what 
@@ -1823,7 +1825,7 @@ hasAttributeNS( elem, nsURI, name )
         char * nsURI
         char * name
     PREINIT:
-        xmlAttrPtr att;
+        xmlAttrPtr att = NULL;
     CODE:
         /**
          * domHasNsProp() returns the attribute node, which is not exactly what 
@@ -1839,12 +1841,13 @@ getAttribute( elem, name )
         ProxyObject* elem
         char * name 
     PREINIT:
-	    char * content;
+	    char * content = NULL;
     CODE:
         content = xmlGetProp( elem->object, name );
-        if( ((xmlNodePtr)elem->object)->doc != NULL ){
+        if ( ((xmlNodePtr)elem->object)->doc != NULL ){
             content = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
         }
+
         if ( content != NULL ) {
             RETVAL  = newSVpvn( content, xmlStrlen( content ) );
         }
@@ -1861,14 +1864,14 @@ getAttributeNS( elem, nsURI ,name )
         char * name 
     PREINIT:
         xmlAttrPtr att;
-	    char * content;
+	    char * content = NULL;
     CODE:
         att = domHasNsProp( elem->object, name, nsURI );
         if ( att != NULL && att->children != NULL ) {
             content = att->children->content;
         }
 
-        if( ((xmlNodePtr)elem->object)->doc != NULL ){
+        if ( ((xmlNodePtr)elem->object)->doc != NULL ){
             content = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
         }
 
@@ -1889,8 +1892,9 @@ getAttributeNode( elemobj, name )
     PREINIT:
         const char * CLASS = "XML::LibXML::Attr";
         xmlNodePtr elem = (xmlNodePtr) elemobj->object;
-        xmlAttrPtr attrnode;
+        xmlAttrPtr attrnode = NULL;
     CODE:
+        RETVAL = NULL;
         attrnode = xmlHasProp( elem, name );
         if ( attrnode != NULL ) {
             RETVAL = make_proxy_node((xmlNodePtr)attrnode);
@@ -1898,9 +1902,6 @@ getAttributeNode( elemobj, name )
                 RETVAL->extra = elemobj->extra;
                 SvREFCNT_inc(elemobj->extra);
             }
-        }
-        else {
-            RETVAL = NULL;
         }
     OUTPUT:
         RETVAL
@@ -1913,8 +1914,9 @@ getAttributeNodeNS( elemobj, nsURI, name )
     PREINIT:
         const char * CLASS = "XML::LibXML::Attr";
         xmlNodePtr elem = (xmlNodePtr) elemobj->object;
-        xmlAttrPtr attrnode;
+        xmlAttrPtr attrnode = NULL;
     CODE:
+        RETVAL = NULL;
         attrnode = domHasNsProp( elem, name, nsURI );
         if ( attrnode != NULL ) {
             RETVAL = make_proxy_node((xmlNodePtr)attrnode);
@@ -1923,11 +1925,66 @@ getAttributeNodeNS( elemobj, nsURI, name )
                 SvREFCNT_inc(elemobj->extra);
             }
         }
-        else {
-            RETVAL = NULL;
-        }
     OUTPUT:
         RETVAL
+
+SV*
+getAttributes( node )
+        ProxyObject* node
+    PREINIT:
+        xmlAttrPtr attr = NULL;
+        xmlNodePtr real_node = NULL;
+        SV * element;
+        int len=0;
+        const char * CLASS = "XML::LibXML::Attr";
+    PPCODE:
+        real_node = (xmlNodePtr) node->object;
+
+        attr      = real_node->properties;
+        while ( attr != NULL ) {
+            ProxyObject * proxy=NULL;
+            element = sv_newmortal();   
+            proxy = make_proxy_node((xmlNodePtr)attr);
+            if ( node->extra != NULL ) {
+                proxy->extra = node->extra;
+                SvREFCNT_inc(node->extra);
+            }
+            XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
+            attr = attr->next;
+            len++;
+         }
+        XSRETURN(len);
+
+SV*
+getAttributesNS( node,nsURI )
+        ProxyObject* node
+        char * nsURI
+    PREINIT:
+        xmlAttrPtr attr = NULL;
+        xmlNodePtr real_node = NULL;
+        SV * element;
+        int len = 0;
+        const char * CLASS = "XML::LibXML::Attr";
+    PPCODE:
+        real_node = (xmlNodePtr) node->object;
+
+        attr      = real_node->properties;
+        while ( attr != NULL ) {
+            if( attr->ns != NULL && xmlStrcmp( nsURI, attr->ns->href ) == 0 ){ 
+                ProxyObject * proxy;
+                element = sv_newmortal();
+                
+                proxy = make_proxy_node((xmlNodePtr)attr);
+                if ( node->extra != NULL ) {
+                    proxy->extra = node->extra;
+                    SvREFCNT_inc(node->extra);
+                }
+                XPUSHs( sv_setref_pv( element, (char *)CLASS, (void*)proxy ) );
+                len++;
+            }
+            attr = attr->next;
+        }
+        XSRETURN(len);
 
 void
 removeAttribute( elem, name ) 	

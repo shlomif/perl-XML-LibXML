@@ -1,4 +1,5 @@
 /* dom.h
+ * $Id$
  * Author: Christian Glahn (2001)
  * 
  * This header file provides some definitions for wrapper functions.
@@ -126,4 +127,8 @@ domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href );
 
 xmlAttrPtr
 domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace);
+
+xmlAttrPtr
+domSetAttributeNode( xmlNodePtr node , xmlAttrPtr attr );
+
 #endif
