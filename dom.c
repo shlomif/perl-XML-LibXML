@@ -184,12 +184,15 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
    xmlNodePtr c1 = NULL, c2 = NULL, p = NULL;
    if ( cur ) { 
        c1 = c2 = cur;
-       if( leader )
+       if( leader ) {
           p = leader->parent;
-       else if( followup ) 
+       }
+       else if( followup ) {
           p = followup->parent;
-       else
-          return(0); /* can't insert */
+       }
+       else {
+          return 0; /* can't insert */
+       }
 
        if ( cur->type == XML_DOCUMENT_FRAG_NODE ) {
            c1 = cur->children;
@@ -205,7 +208,7 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
            cur->parent = p;
        }
        
-       if (c1 && c2 && c1!=leader) {
+       if (c1 && 2 && c1!=leader) {
            if ( leader ) {
                leader->next = c1;
 	       c1->prev = leader;
@@ -585,23 +588,22 @@ xmlNodePtr
 domInsertBefore( xmlNodePtr self, 
                  xmlNodePtr newChild,
                  xmlNodePtr refChild ){
-
-    if ( refChild == newChild ) 
+    if ( refChild == newChild ) {
         return newChild;
-    
-    if ( self == NULL || newChild == NULL ) 
-        return NULL;
-   
-    if ( refChild == NULL ) {
-        refChild = self->children;
     }
-
-    if ( refChild->parent != self
-       || (  newChild->type     == XML_DOCUMENT_FRAG_NODE 
-          && newChild->children == NULL ) ) {
-        /* NOT_FOUND_ERR */
-        xmlGenericError(xmlGenericErrorContext,"NOT_FOUND_ERR\n");
+    
+    if ( self == NULL || newChild == NULL ) {
         return NULL;
+    }
+   
+    if ( refChild != NULL ) {
+        if ( refChild->parent != self
+             || (  newChild->type     == XML_DOCUMENT_FRAG_NODE 
+                   && newChild->children == NULL ) ) {
+            /* NOT_FOUND_ERR */
+            xmlGenericError(xmlGenericErrorContext,"NOT_FOUND_ERR\n");
+            return NULL;
+        }
     }
 
     if ( !(domTestHierarchy( self, newChild )
@@ -617,7 +619,13 @@ domInsertBefore( xmlNodePtr self,
         newChild = domImportNode( self->doc, newChild, 1 );
     }
     
-    domAddNodeToList(newChild, refChild->prev, refChild);
+    if ( refChild == NULL ) {
+        domAddNodeToList(newChild, self->last, NULL);
+    }
+    else { 
+        domAddNodeToList(newChild, refChild->prev, refChild);
+    }
+
     if ( newChild->type != XML_ENTITY_REF_NODE ) {
         xmlReconciliateNs(self->doc, newChild);     
     }
@@ -632,42 +640,10 @@ xmlNodePtr
 domInsertAfter( xmlNodePtr self, 
                 xmlNodePtr newChild,
                 xmlNodePtr refChild ){
-    if ( self == NULL || newChild == NULL ) 
-        return NULL;
-
-    if ( refChild == newChild ) 
-        return newChild;
-    
     if ( refChild == NULL ) {
-        return domAppendChild( self, newChild );
+        return domInsertBefore( self, newChild, NULL );
     }
-
-    if ( refChild->parent != self
-       || (  newChild->type     == XML_DOCUMENT_FRAG_NODE 
-          && newChild->children == NULL ) ) {
-        xmlGenericError(xmlGenericErrorContext,"NOT_FOUND_ERR\n");
-        return NULL;
-    }
-
-    if ( !(domTestHierarchy( self, newChild )
-           && domTestDocument( self, newChild ))) {
-        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
-        return NULL;
-    }
-
-    if ( self->doc == newChild->doc ){
-        domUnlinkNode( newChild );
-    }
-    else {
-        newChild = domImportNode( self->doc, newChild, 1 );
-    }
-
-    domAddNodeToList(newChild, refChild, refChild->next);
-    if ( newChild->type != XML_ENTITY_REF_NODE ) {
-        xmlReconciliateNs(self->doc, newChild);     
-    }
-
-    return newChild;
+    return domInsertBefore( self, newChild, refChild->next );
 }
 
 xmlNodePtr

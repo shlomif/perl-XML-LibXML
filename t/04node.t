@@ -153,7 +153,8 @@ print "# 1.1 Node Attributes\n";
         ok( $xn->isSameNode($inode) );
 
         $node->insertBefore( $jnode, undef );
-        ( $xn ) = $node->childNodes;
+        my @ta  = $node->childNodes();
+        $xn = pop @ta;
         ok( $xn->isSameNode( $jnode ) );
         $jnode->unbindNode;
 
@@ -227,7 +228,6 @@ print "# 1.1 Node Attributes\n";
         ok($node1->isSameNode($node->firstChild));
         @cn2 = $node->childNodes;
         ok(scalar(@cn2), 6);
-
     }
 
     print "# 2.2 Invalid Operations\n";
