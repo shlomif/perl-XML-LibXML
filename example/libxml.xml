@@ -1377,6 +1377,89 @@ is therefore a shortcut for
                 </p>
             </method>
 
+            <method name="setNamespace" 
+                    synopsis="$node->setNamespace( $nsURI , $nsPrefix, $activate )">
+                <p>
+                    setNamespace() allows one to apply a namespace to
+                    an element. The function takes three parameters:
+                    1. the namespace URI, which is required and the
+                    two optional values prefix, which is the namespace
+                    prefix, as it should be used in child elements or
+                    attributes as well as the additionally activate
+                    parameter.
+                </p>
+                <p>
+                    The activate parameter is most usefull: If this
+                    parameter is set to FALSE (0), the namespace is
+                    simply added to the namespacelist of the node,
+                    while the element's namespace itself is not
+                    altered. Nevertheless activate is set to TRUE (1)
+                    on default. In this case the namespace automaticly
+                    is used as the nodes effective namespace. This
+                    means the namespace prefix is added to the node
+                    name and if there was a namespace already active
+                    for the node, this will be replaced (but not
+                    removed from the global namespace list)
+                </p>
+
+                <p>
+                    The following example may clarify this:
+                </p>
+
+                <example>
+ my $e1 = $doc->createElement("bar");
+ $e1->setNamespace("http://foobar.org", "foo")
+                </example>
+
+                <p>
+                   results
+                </p>
+
+ <example>
+ <foo:bar xmlns:foo="http://foobar.org"/>
+</example>
+
+                <p>
+                    while 
+                </p>
+
+                <example>
+ my $e2 = $doc->createElement("bar");
+ $e2->setNamespace("http://foobar.org", "foo",0)
+                </example>
+                <p>
+                   results only
+                </p>
+
+ <example>
+ <bar xmlns:foo="http://foobar.org"/>
+</example>
+
+                <p>
+                    By using $activate == 0 it is possible to apply
+                    multiple namepace declarations to a single
+                    element.
+                </p>
+
+                <p>
+                    Alternativly you can call setAttribute() simply to
+                    declare a new namespace for a node, without
+                    activating it:
+                </p>
+
+                <example>
+  $e2->setAttribute( "xmlns:foo", "http://bar.org" );                 
+                </example>
+
+                <p>
+                    has the same result as
+                </p>
+
+                <example>
+ $e2->setNamespace("http://foobar.org", "foo", 0)
+                </example>
+            </method>
+
         </description>
         <also>
             <item name="XML::LibXML"/>
@@ -1681,6 +1764,17 @@ is therefore a shortcut for
                 </p>
             </method>
 
+            <method name="setNamespace"
+                    synopsis="$attr->setNamespace($nsURI, $prefix);">
+                <p>
+                    This function activates a namespace for the given
+                    attribute. If the attribute was not previously
+                    declared in the context of the attribute this
+                    function will be silently ignored. In this case
+                    you may wish to call setNamespace() on the
+                    ownerElement.
+                </p>
+            </method>
         </description>
         <also>
             <item name="XML::LibXML"/>

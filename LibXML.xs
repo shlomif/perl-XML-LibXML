@@ -4262,7 +4262,7 @@ setAttributeNode( self, attr_node )
         RETVAL
 
 SV *
-getAttribtueNS( self, namespaceURI, attr_name )
+getAttributeNS( self, namespaceURI, attr_name )
         SV * self
         SV * namespaceURI
         SV * attr_name
