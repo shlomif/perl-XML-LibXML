@@ -673,31 +673,41 @@ _parse_file(self, filename)
         char chars[BUFSIZE];
     CODE:
         if ((filename[0] == '-') && (filename[1] == 0)) {
-	    f = PerlIO_stdin();
-	} else {
-	    f = PerlIO_open(filename, "r");
-	}
-	if (f != NULL) {
+            f = PerlIO_stdin();
+        } else {
+            /* f = PerlIO_open(filename, "r");*/ /* should not use this */
+
+            /* somewhere hides an bad code section, which confuses the parser
+             * while reading a file NOT using xmlParseFile(). 
+             * basicly it seems to be an encoding problem, that makes
+             * me guess, the whole filehandle parsing has to be rewritten
+             */
+
+            f = NULL;
+            RETVAL = xmlParseFile( filename );
+        }
+        if (f != NULL) {
             ctxt = LibXML_get_context(self);
-	    res = PerlIO_read(f, chars, 4);
-	    if (res > 0) {
+            res = PerlIO_read(f, chars, 4);
+            if (res > 0) {
                 xmlParseChunk(ctxt, chars, res, 0);
-		while ((res = PerlIO_read(f, chars, BUFSIZE)) > 0) {
-		    xmlParseChunk(ctxt, chars, res, 0);
-		}
+                while ((res = PerlIO_read(f, chars, BUFSIZE)) > 0) {
+                    xmlParseChunk(ctxt, chars, res, 0);
+                }
                 xmlParseChunk(ctxt, chars, 0, 1);
-		RETVAL = ctxt->myDoc;
-		ret = ctxt->wellFormed;
-		if (!ret) {
+                RETVAL = ctxt->myDoc;
+                ret = ctxt->wellFormed;
+                if (!ret) {
                     PerlIO_close(f);
-		    xmlFreeDoc(RETVAL);
-		    croak(SvPV(LibXML_error, len));
-		}
-	    }
+                    xmlFreeDoc(RETVAL);
+                    croak(SvPV(LibXML_error, len));
+		        }
+            }
             PerlIO_close(f);
-	}
+        }
         else {
-            croak("cannot open file %s", filename);
+            if ( RETVAL == NULL ) 
+                croak("cannot open input file %s", filename);
         }
     OUTPUT:
         RETVAL
