@@ -1,7 +1,7 @@
 use Test;
 BEGIN { 
     if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
-        plan tests => 21;
+        plan tests => 22;
     }
     else {
         plan tests => 0;
@@ -213,6 +213,12 @@ dromeds.xml
             my $encstr = encodeToUTF8( "iso-8859-1" , $string );
             for ( 1..$times_through ) {
                 my $str = encodeToUTF8( "iso-8859-1" , $string );
+            }
+            ok(1);
+            check_mem();
+
+            for ( 1..$times_through ) {
+                my $str = encodeToUTF8( "iso-8859-2" , "abc" );
             }
             ok(1);
             check_mem();
