@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>23 }
+BEGIN { plan tests=>25 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -37,8 +37,11 @@ ok( $str eq $xs );
 my $elem = $dom->createElement( "element" );
 ok( defined $elem && $elem->getName() eq "element" );
 
+warn "1\n";
 $dom->setDocumentElement( $elem );
+warn "2\n";
 ok( $elem->isEqual( $dom->getDocumentElement() ) );
+warn "3\n";
 
 # lets test if we can overwrite the document element with an 
 # invalid element type
@@ -81,33 +84,43 @@ else {
     ok(0);
 }
 
-my $text = $dom->createTextNode( $testtxt );
-ok( defined $text && $text->isa( "XML::LibXML::Text" ) );
+{
+    my $text = $dom->createTextNode( $testtxt );
+    ok( defined $text && $text->isa( "XML::LibXML::Text" ) );
 
-$text = $dom->createComment( $testtxt );
-ok( defined $text && $text->isa( "XML::LibXML::Comment" ) );
+    $text = $dom->createComment( $testtxt );
+    ok( defined $text && $text->isa( "XML::LibXML::Comment" ) );
 
-$text = $dom->createCDATASection( $testtxt );
-ok( defined $text && $text->isa( "XML::LibXML::CDATASection" ) );
+    $text = $dom->createCDATASection( $testtxt );
+    ok( defined $text && $text->isa( "XML::LibXML::CDATASection" ) );
+}
+warn "node should be dropped here !\n";
 
-# PI tests
-my $pi = $dom->createPI( "test", "test" );
-ok( $pi );
+{
+    print "# PI tests\n";
+    my $pi = $dom->createPI( "foo", "bar" );
+    ok( $pi );
+    $pi->setData( foo=>"bar" );
+    ok( $pi->toString(), '<?foo foo="bar"?>');
 
+    $dom->appendChild( $pi );
+    my @clds = $dom->childNodes();
+    my $cnt_dn = scalar( @clds );
+    ok( $cnt_dn > 1 );
 
-$dom->appendChild( $pi );
-my @clds = $dom->childNodes();
-my $cnt_dn = scalar( @clds );
-ok( $cnt_dn > 1 );
+    $node = $dom2->createElement( $testtxt );
+    $dom->appendChild( $node );
+    @clds = $dom->childNodes();
+    ok( scalar( @clds ), $cnt_dn );
 
-$node = $dom2->createElement( $testtxt );
-$dom->appendChild( $node );
-@clds = $dom->childNodes();
-ok( scalar( @clds ), $cnt_dn );
-
+    my $dom3 = XML::LibXML::Document->new();
+    $dom3->insertPI( "foo", 'foo="bar"' );
+    my $pi2 = $dom3->firstChild;
+    ok( $pi2->toString(), '<?foo foo="bar"?>');
+}
 # parse tests
 
-# init the file parser
+print "# init the file parser\n";
 {
     my $parser = XML::LibXML->new();
     my $dom3    = $parser->parse_file( $file );

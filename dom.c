@@ -512,7 +512,7 @@ domInsertBefore( xmlNodePtr self,
     }
     if( ( refChild != NULL 
           && ( refChild->type == XML_ATTRIBUTE_NODE 
-               || refChild->type == XML_DOCUMENT_FRAG_NODE ) )
+               || refChild->type == XML_DOCUMENT_FRAG_NODE ) ) 
         || ( newChild != NULL && ( newChild->type == XML_ATTRIBUTE_NODE
                                    || ( newChild->type==XML_DOCUMENT_FRAG_NODE 
                                         && newChild->children == NULL ) ) ) ) {
@@ -542,8 +542,7 @@ domInsertBefore( xmlNodePtr self,
             newChild = insert_node_to_nodelist( NULL, newChild, self->children );
         }
     }
-
-    if ( self == refChild->parent ) {
+    else if ( self == refChild->parent ) {
         newChild = insert_node_to_nodelist( refChild->prev, newChild, refChild );
     }
     else {
