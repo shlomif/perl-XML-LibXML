@@ -323,7 +323,7 @@ use XML::LibXML::Common qw(:libxml);
             my $doc2 = $parser2->parse_string($string2);
             my @as   = $doc2->getElementsByTagName( "C:A" );
             ok( scalar( @as ), 3);
-            my @as   = $doc2->getElementsByTagNameNS( "D", "A" );
+            @as   = $doc2->getElementsByTagNameNS( "D", "A" );
             ok( scalar( @as ), 3);
             @as   = $doc2->getElementsByLocalName( "A" );
             ok( scalar( @as ), 3);
@@ -339,9 +339,7 @@ use XML::LibXML::Common qw(:libxml);
         }
         {
             my $doc2 = $parser2->parse_string($string4);
-#
-# fails due a bug in libxml2's xpath engine (?)
-#
+
 #            my @as   = $doc2->getElementsByTagName( "C:A" );
 #            ok( scalar( @as ), 3);
             my @as   = $doc2->getElementsByLocalName( "A" );

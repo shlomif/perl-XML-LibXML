@@ -160,7 +160,7 @@ sub process_element {
         }
         else {
             my $ns = $attr->namespaceURI;
-            my $ns = $attr->namespaceURI;
+
             $ns = '' unless defined $ns;
             $key = "{$ns}".$attr->localname;
             ## Not sure why, but $attr->name is coming through stripped
