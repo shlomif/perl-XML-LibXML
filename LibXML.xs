@@ -3364,13 +3364,12 @@ _findnodes( pnode, perl_xpath )
             XSRETURN_UNDEF;
         }
     PPCODE:
-        /*if ( node->doc ) {
+        if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement(node->doc ) );
         }
         else {
             domNodeNormalize( PmmOWNER(SvPROXYNODE(pnode)) );
         }
-        */
 
         nodelist = domXPathSelect( node, xpath );
         xmlFree(xpath);
