@@ -35,6 +35,11 @@ domCreateDocument( xmlChar* version,
 xmlNodePtr 
 domReadWellBalancedString( xmlDocPtr doc, xmlChar* string );
 
+xmlChar*
+domEncodeString( const char *encoding, const char *string );
+char*
+domDecodeString( const char *encoding, const xmlChar *string);
+
 /**
  * part A:
  *

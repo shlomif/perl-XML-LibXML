@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT);
 use Carp;
 
-$VERSION = "0.94";
+$VERSION = "0.92";
 require Exporter;
 require DynaLoader;
 
@@ -33,7 +33,10 @@ bootstrap XML::LibXML $VERSION;
               XML_ENTITY_DECL
               XML_NAMESPACE_DECL
               XML_XINCLUDE_START
-              XML_XINCLUDE_END );
+              XML_XINCLUDE_END
+              encodeToUTF8
+              decodeFromUTF8
+            );
 
 
 sub new {
@@ -90,7 +93,6 @@ sub parse_file {
     }
     return $result;
 }
-
 
 sub XML_ELEMENT_NODE(){1;}
 sub XML_ATTRIBUTE_NODE(){2;}

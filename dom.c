@@ -64,6 +64,106 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
   return nodes;
 }
 
+/** 
+ * encodeString returns an UTF-8 encoded String
+ * while the encodig has the name of the encoding of string
+ **/ 
+xmlChar*
+domEncodeString( const char *encoding, const char *string ){
+  xmlCharEncoding enc;
+  xmlChar *ret = NULL;
+
+  if ( string != NULL ) {
+    if( encoding != NULL ) {
+      enc = xmlParseCharEncoding( encoding );
+      if ( enc > 0 ) {
+        if( enc > 1 ) {
+          xmlBufferPtr in, out;
+          xmlCharEncodingHandlerPtr coder ;
+          in  = xmlBufferCreate();
+          out = xmlBufferCreate();
+          
+          coder = xmlGetCharEncodingHandler( enc );
+          
+          xmlBufferCCat( in, string );
+          
+          if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
+            ret = xmlStrdup( out->content );
+          }
+          else {
+            /* printf("encoding error\n"); */
+          }
+          
+          xmlBufferFree( in );
+          xmlBufferFree( out );
+        }
+        else {
+          /* if utf-8 is requested we do nothing */
+          ret = xmlStrdup( string );
+        }
+      }
+      else {
+        /* printf( "encoding error: no enciding\n" ); */
+      }
+    }
+    else {
+      /* if utf-8 is requested we do nothing */
+      ret = xmlStrdup( string );
+    }
+  }
+  return ret;
+}
+
+/**
+ * decodeString returns an $encoding encoded string.
+ * while string is an UTF-8 encoded string and 
+ * encoding is the coding name
+ **/
+char*
+domDecodeString( const char *encoding, const xmlChar *string){
+  char *ret=NULL;
+  xmlBufferPtr in, out;
+ 
+  if ( string != NULL ) {
+    if( encoding != NULL ) {
+      xmlCharEncoding enc = xmlParseCharEncoding( encoding );
+      /*      printf("encoding: %d\n", enc ); */
+      if ( enc > 0 ) {
+        if( enc > 1 ) {
+          xmlBufferPtr in, out;
+          xmlCharEncodingHandlerPtr coder;
+          in  = xmlBufferCreate();
+          out = xmlBufferCreate();
+
+          coder = xmlGetCharEncodingHandler( enc );
+          xmlBufferCat( in, string );        
+          
+          if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
+            ret=xmlStrdup(out->content);
+          }
+          else {
+            /* printf("decoding error \n"); */
+          }
+
+          xmlBufferFree( in );
+          xmlBufferFree( out );
+        }
+        else {
+          ret = xmlStrdup(string);
+        }
+      }
+      else {
+        /* printf( "decoding error:no encoding\n" ); */
+      }
+    }
+    else {
+      /* if utf-8 is requested we do nothing */
+      ret = xmlStrdup( string );
+    }
+  }
+  return ret;
+}
+
 xmlNodePtr
 domUnbindNode( xmlNodePtr );
 
@@ -84,29 +184,50 @@ domRemoveChild( xmlNodePtr self, xmlNodePtr old );
  * If the node belongs to a namespace it returns the prefix and 
  * the local name. otherwise only the local name is returned.
  **/
+
+/* esther 0179-3929246; schlesische str 14; 10997 bln; estherman@gmx.de */
+
 const xmlChar*
 domName(xmlNodePtr node) {
   xmlChar *qname = NULL; 
   if ( node ) {
     if (node->ns != NULL) {
       if (node->ns->prefix != NULL) {
-        qname = xmlStrdup( node->ns->prefix );
-        qname = xmlStrcat( qname , ":" );
-        qname = xmlStrcat( qname , node->name );
+        xmlChar *tname = xmlStrdup( node->ns->prefix );
+        tname = xmlStrcat( tname , ":" );
+        tname = xmlStrcat( tname , node->name );
+        if ( node->doc != NULL ) {
+          qname = domDecodeString( node->doc->encoding , tname );
+          xmlFree( tname );
+        }
+        else {
+          qname = tname;
+        }
       } 
       else {
-        qname = xmlStrdup( node->name );
+        if ( node->doc != NULL ) {
+          qname = domDecodeString( node->doc->encoding , node->name );
+        }
+        else {
+          qname = xmlStrdup( node->name );
+        }
       }
     } 
     else {
-      qname = xmlStrdup( node->name );
+      if ( node->doc != NULL ) {
+        qname = domDecodeString( node->doc->encoding , node->name );
+      }
+      else {
+        qname = xmlStrdup( node->name );
+      }
     }
   }
   return qname;
 }
 
 void
-domSetName( xmlNodePtr node, xmlChar* name ) {
+domSetName( xmlNodePtr node, char* name ) {
+  xmlChar* str = NULL;  
   /* TODO: add ns support */
   if ( node == NULL || name == NULL ) 
     return ;
@@ -114,12 +235,20 @@ domSetName( xmlNodePtr node, xmlChar* name ) {
     /* required since node->name is const! */
     xmlFree( (void*) node->name );
   }
-  node->name = xmlStrdup( name );
+
+  if ( node->doc != NULL ) {
+    str = domEncodeString( node->doc->encoding , name );
+  }
+  else {
+    str = xmlStrdup( name );
+  }
+  warn( str );
+  node->name = str;
 }
 
 xmlNodePtr
 domAppendChild( xmlNodePtr self,
-		xmlNodePtr newChild ){
+                xmlNodePtr newChild ){
   /* unbind the new node if nessecary ...  */
 
   newChild = domIsNotParentOf( newChild, self );
@@ -357,8 +486,6 @@ domInsertAfter( xmlNodePtr self,
 
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
-  xmlDocPtr doc = NULL;
-  
   if ( n == NULL ) 
     return;
 
@@ -367,36 +494,7 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
     xmlFree( n->content );
   }
 
-  doc = n->doc;
-
-  if ( doc != NULL ) {
-    xmlCharEncodingHandlerPtr handler = xmlGetCharEncodingHandler( xmlParseCharEncoding(doc->encoding) );
-
-    if ( handler != NULL ){
-       xmlBufferPtr in  = xmlBufferCreate();
-       xmlBufferPtr out = xmlBufferCreate();   
-       int len=-1;
-
-       xmlBufferCat( in, val );
-       len = xmlCharEncInFunc( handler, out, in );
-
-       if ( len >= 0 ) {
-         n->content = xmlStrdup( out->content );
-       }
-       else {
-         printf( "\nencoding error %d \n", len );
-         n->content = xmlStrdup( "" );
-       }
-    }
-    else {
-      /* handler error => no output */ 
-      n->content = xmlStrdup( "" );
-    }
-  }
-  else {    
-    /* take data as UTF-8 */
-    n->content = xmlStrdup( val );
-  }
+  n->content = xmlStrdup( val );
 }
 
 
@@ -511,6 +609,7 @@ domCreateCDATASection( xmlDocPtr self , xmlChar * strNodeContent ){
   xmlNodePtr elem = NULL;
 
   if ( ( self != NULL ) && ( strNodeContent != NULL ) ) {
+    strNodeContent = domEncodeString( self->encoding, strNodeContent );
     elem = xmlNewCDataBlock( self, strNodeContent, xmlStrlen(strNodeContent) );
     elem->next = NULL;
     elem->prev = NULL;
@@ -658,7 +757,6 @@ domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href ) {
   /* prefix is not in use */
   if (ns == NULL) {
     ns = xmlNewNs( elem , href , prefix );
-    ns->next = NULL;
   } else {
     /* prefix is in use; if it has same URI, let it go, otherwise it's
        an error */
