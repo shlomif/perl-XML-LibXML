@@ -50,7 +50,7 @@ sub generate {
 
 sub process_node {
     my ($self, $node) = @_;
-    
+
     my $node_type = $node->getType();
     if ($node_type == XML_COMMENT_NODE) {
         $self->comment( { Data => $node->getData } );
@@ -88,19 +88,39 @@ sub process_element {
     my ($self, $element) = @_;
     
     my $attribs = {};
-    
+
     foreach my $attr ($element->getAttributes) {
         my $key;
+        # warn("Attr: $attr -> ", $attr->getName, " = ", $attr->getData, "\n");
         if ($attr->isa('XML::LibXML::Namespace')) {
-            $key = "{http://www.w3.org/2000/xmlns/}" . $attr->getName;
-        }
-        elsif (my $ns = $attr->getNamespaceURI) {
-            $key = "{$ns}".$attr->getLocalName;
+            my ($localname, $p);
+            if (my $prefix = $attr->getLocalName) {
+                $key = "{" . $attr->getNamespaceURI . "}" . $prefix;
+                $localname = $prefix;
+                $p = "xmlns";
+            }
+            else {
+                $key = $attr->getName;
+                $localname = $key;
+                $p = '';
+            }
+            $attribs->{$key} =
+                {
+                    Name => $attr->getName,
+                    Value => $attr->getData,
+                    NamespaceURI => $attr->getNamespaceURI,
+                    Prefix => $p,
+                    LocalName => $localname,
+                };
         }
         else {
-            $key = $attr->getLocalName;
-        }
-        $attribs->{$key} =
+            if (my $ns = $attr->getNamespaceURI) {
+                $key = "{$ns}".$attr->getLocalName;
+            }
+            else {
+                $key = $attr->getLocalName;
+            }
+            $attribs->{$key} =
                 {
                     Name => $attr->getName,
                     Value => $attr->getData,
@@ -108,6 +128,9 @@ sub process_element {
                     Prefix => $attr->getPrefix,
                     LocalName => $attr->getLocalName,
                 };
+        }
+        # use Data::Dumper;
+        # warn("Attr made: ", Dumper($attribs->{$key}), "\n");
     }
     
     my $node = {
