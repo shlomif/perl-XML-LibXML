@@ -165,8 +165,18 @@ int
 LibXML_input_match(char const * filename)
 {
     int results = 0;
-    
-    if (LibXML_match_cb && SvTRUE(LibXML_match_cb)) {
+    SV * global_cb;
+    SV * callback = NULL;
+
+    if ((global_cb = perl_get_sv("XML::LibXML::match_cb", FALSE))
+            && SvTRUE(global_cb)) {
+        callback = global_cb;
+    }
+    else if (LibXML_match_cb && SvTRUE(LibXML_match_cb)) {
+        callback = LibXML_match_cb;
+    }
+
+    if (callback) {
         int count;
         SV * res;
 
@@ -180,7 +190,7 @@ LibXML_input_match(char const * filename)
         PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
         PUTBACK;
 
-        count = perl_call_sv(LibXML_match_cb, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR);
 
         SPAGAIN;
         
@@ -206,8 +216,18 @@ void *
 LibXML_input_open(char const * filename)
 {
     SV * results;
+    SV * global_cb;
+    SV * callback = NULL;
 
-    if (LibXML_open_cb && SvTRUE(LibXML_open_cb)) {
+    if ((global_cb = perl_get_sv("XML::LibXML::open_cb", FALSE))
+            && SvTRUE(global_cb)) {
+        callback = global_cb;
+    }
+    else if (LibXML_open_cb && SvTRUE(LibXML_open_cb)) {
+        callback = LibXML_open_cb;
+    }
+
+    if (callback) {
         int count;
 
         dSP;
@@ -220,7 +240,7 @@ LibXML_input_open(char const * filename)
         PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
         PUTBACK;
 
-        count = perl_call_sv(LibXML_open_cb, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR);
 
         SPAGAIN;
         
@@ -246,10 +266,19 @@ LibXML_input_read(void * context, char * buffer, int len)
     SV * results = NULL;
     STRLEN res_len = 0;
     const char * output;
-    
+    SV * global_cb;
+    SV * callback = NULL;
     SV * ctxt = (SV *)context;
+
+    if ((global_cb = perl_get_sv("XML::LibXML::read_cb", FALSE))
+            && SvTRUE(global_cb)) {
+        callback = global_cb;
+    }
+    else if (LibXML_read_cb && SvTRUE(LibXML_read_cb)) {
+        callback = LibXML_read_cb;
+    }
     
-    if (LibXML_read_cb && SvTRUE(LibXML_read_cb)) {
+    if (callback) {
         int count;
 
         dSP;
@@ -263,7 +292,7 @@ LibXML_input_read(void * context, char * buffer, int len)
         PUSHs(sv_2mortal(newSViv(len)));
         PUTBACK;
 
-        count = perl_call_sv(LibXML_read_cb, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR);
 
         SPAGAIN;
         
@@ -293,9 +322,19 @@ LibXML_input_read(void * context, char * buffer, int len)
 void 
 LibXML_input_close(void * context)
 {
+    SV * global_cb;
+    SV * callback = NULL;
     SV * ctxt = (SV *)context;
-    
-    if (LibXML_close_cb && SvTRUE(LibXML_close_cb)) {
+
+    if ((global_cb = perl_get_sv("XML::LibXML::close_cb", FALSE))
+            && SvTRUE(global_cb)) {
+        callback = global_cb;
+    }
+    else if (LibXML_close_cb && SvTRUE(LibXML_close_cb)) {
+        callback = LibXML_close_cb;
+    }
+
+    if (callback) {
         int count;
 
         dSP;
@@ -308,7 +347,7 @@ LibXML_input_close(void * context)
         PUSHs(ctxt);
         PUTBACK;
 
-        count = perl_call_sv(LibXML_close_cb, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR);
 
         SPAGAIN;
 
@@ -529,6 +568,9 @@ LibXML_cleanup_parser() {
 
 void
 LibXML_init_callbacks() {
+    xmlSetGenericErrorFunc(PerlIO_stderr(), 
+                           (xmlGenericErrorFunc)LibXML_error_handler);
+    return;
 /*    LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader(); */
 /*    warn("      init parser callbacks!\n"); */
 
@@ -539,14 +581,13 @@ LibXML_init_callbacks() {
 
     xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
 
-    xmlSetGenericErrorFunc(PerlIO_stderr(), 
-                           (xmlGenericErrorFunc)LibXML_error_handler);
 
 }
 
 void
 LibXML_cleanup_callbacks() {
-
+    xmlSetGenericErrorFunc(NULL, NULL);
+    return;
 /*   warn("      cleanup parser callbacks!\n"); */
 
     xmlCleanupInputCallbacks();
@@ -558,7 +599,6 @@ LibXML_cleanup_callbacks() {
 /*    } */
 
 /*    xsltSetGenericDebugFunc(NULL, NULL); */
-    xmlSetGenericErrorFunc(NULL, NULL);
 
 }
 
@@ -569,6 +609,18 @@ PROTOTYPES: DISABLE
 BOOT:
     LIBXML_TEST_VERSION
     xmlInitParser();
+    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
+                              (xmlInputOpenCallback) LibXML_input_open,
+                              (xmlInputReadCallback) LibXML_input_read,
+                              (xmlInputCloseCallback) LibXML_input_close);
+    xmlSetGenericErrorFunc(PerlIO_stderr(), 
+                           (xmlGenericErrorFunc)LibXML_error_handler);
+    xmlDoValidityCheckingDefaultValue = 0;
+    xmlSubstituteEntitiesDefaultValue = 1;
+    xmlGetWarningsDefaultValue = 0;
+    xmlKeepBlanksDefaultValue = 1;
+    xmlLoadExtDtdDefaultValue = 5;
+    xmlPedanticParserDefaultValue = 0;
 
 void
 END()

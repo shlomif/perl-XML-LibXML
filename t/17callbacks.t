@@ -1,10 +1,12 @@
 use Test;
-BEGIN { plan tests => 25 }
+BEGIN { plan tests => 38}
 END { ok(0) unless $loaded }
 use XML::LibXML;
 use IO::File;
 $loaded = 1;
 ok(1);
+
+my $using_globals = '';
 
 my $parser = XML::LibXML->new();
 ok($parser);
@@ -33,17 +35,25 @@ close F;
 $dom = $parser->parse_string($str);
 ok($dom);
 
+$using_globals = 1;
+$XML::LibXML::match_cb = \&match;
+$XML::LibXML::open_cb = \&open;
+$XML::LibXML::read_cb = \&read;
+$XML::LibXML::close_cb = \&close;
+
+ok($parser->parse_string($str));
+
 # warn $dom->toString() , "\n";
 
 sub match {
 # warn "match: $_[0]\n";
-    ok(1);
+    ok($using_globals, defined($XML::LibXML::match_cb));
     return 1;
 }
 
 sub close {
 # warn "close $_[0]\n";
-    ok(1);
+    ok($using_globals, defined($XML::LibXML::close_cb));
     if ( $_[0] ) {
         $_[0]->close();
     }
@@ -55,7 +65,7 @@ sub open {
     $file = new IO::File;
     if ( $file->open( "<$_[0]" ) ){
 #        warn "open!\n";
-        ok(1);
+        ok($using_globals, defined($XML::LibXML::open_cb));
     }
     else {
 #        warn "cannot open $_[0] $!\n";
@@ -73,7 +83,7 @@ sub read {
     if ( $_[0] ) {
 #        warn "read $_[1] bytes!\n";
         $n = $_[0]->read( $rv , $_[1] );
-        ok(1) if $n > 0
+        ok($using_globals, defined($XML::LibXML::read_cb)) if $n > 0
     }
     return $rv;
 }
