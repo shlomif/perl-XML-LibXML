@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+1.49
+   - memory management has been completely rewritten.
+        now the module should not cause that many memory leaks 
+   - ownerDocument fixed
+
 1.40
    - new parsefunction: $parser->parse_xml_chunk($string);
    - appendChild( $doc_fragment ) bug fixed

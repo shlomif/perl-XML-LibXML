@@ -1016,6 +1016,11 @@ _parse_string(self, string, directory = NULL)
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
         }
+        else if (xmlDoValidityCheckingDefaultValue
+                 && SvLEN(LibXML_error) > 0
+                 && (real_dom->intSubset || real_dom->extSubset) ) {
+            croak(SvPV(LibXML_error, len));
+        }
         else {
             RETVAL = PmmNodeToSv((xmlNodePtr)real_dom, NULL);
         }        
@@ -1044,6 +1049,11 @@ _parse_fh(self, fh, directory = NULL)
         
         if (real_dom == NULL) {
             RETVAL = &PL_sv_undef;    
+            croak(SvPV(LibXML_error, len));
+        }
+        else if (xmlDoValidityCheckingDefaultValue
+                 && SvLEN(LibXML_error) > 0
+                 && (real_dom->intSubset || real_dom->extSubset)  ) {
             croak(SvPV(LibXML_error, len));
         }
         else {
@@ -1087,7 +1097,7 @@ _parse_file(self, filename)
         
         sv_2mortal(LibXML_error);
         
-        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (real_dom->intSubset || real_dom->extSubset) )) {
+        if (!well_formed || (xmlDoValidityCheckingDefaultValue && (!valid|| SvLEN(LibXML_error) > 0 ) && (real_dom->intSubset || real_dom->extSubset) )) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef ;  
             croak(SvPV(LibXML_error, len));
@@ -2318,6 +2328,7 @@ is_valid(self, ...)
         xmlValidCtxt cvp;
         xmlDtdPtr dtd;
         SV * dtd_sv;
+        STRLEN n_a;
     CODE:
         LibXML_error = sv_2mortal(newSVpv("", 0));
         cvp.userData = (void*)PerlIO_stderr();
@@ -2359,6 +2370,7 @@ validate(self, ...)
                 croak("is_valid: argument must be a DTD object");
             }
             RETVAL = xmlValidateDtd(&cvp, doc , dtd);
+
         }
         else {
             RETVAL = xmlValidateDocument(&cvp, doc);
