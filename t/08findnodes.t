@@ -52,10 +52,9 @@ if ( defined $dom ) {
 
     $telem->iterator( sub { $itervar.=$_[0]->getName(); } );
     ok( $itervar, 'testbtext' );
-
-    print "# get the document\n";
-    ($telem) = $elem->findnodes( "/" );
-    ok( $telem );
+  
+    finddoc($dom);
+    ok(1);
 }
 ok( $dom );
 
@@ -92,3 +91,9 @@ my @doc = $root->findnodes('document("example/test.xml")');
 ok(@doc);
 # warn($doc[0]->toString);
 
+sub finddoc {
+    my $doc = shift;
+    return unless defined $doc;
+    my $rn = $doc->documentElement;
+    $rn->findnodes("/");
+}

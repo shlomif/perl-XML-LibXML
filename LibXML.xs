@@ -2411,6 +2411,7 @@ _findnodes( node, xpath )
         SV* node
         char * xpath 
     PREINIT:
+        xmlNodePtr owner = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
         int len = 0 ;
@@ -2420,6 +2421,7 @@ _findnodes( node, xpath )
             int i = 0 ;
             const char * cls = "XML::LibXML::Node";
             xmlNodePtr tnode;
+            owner = getSvNode(getSvNodeExtra(node));
             len = nodelist->nodeNr;
             for( i ; i < len; i++){
                /* we have to create a new instance of an objectptr. and then 
@@ -2428,13 +2430,18 @@ _findnodes( node, xpath )
                  */
                 element = NULL;
                 tnode = nodelist->nodeTab[i];
-
                 if (tnode->type == XML_NAMESPACE_DECL) {
                     element = sv_newmortal();
                     cls = domNodeTypeName( tnode );
                     element = sv_setref_pv( element, (char *)cls, (void*)tnode );
-                } else {
-                    element = nodeToSv(tnode);
+                }
+                else {
+                    if ( tnode == owner ) {
+                        element = getSvNodeExtra(node);
+                    }
+                    else {
+                        element = nodeToSv(tnode);
+                    }
                     setSvNodeExtra(element, getSvNodeExtra(node));
                 }
                 XPUSHs( element );
@@ -2447,6 +2454,7 @@ _find ( node, xpath )
         SV* node
         char * xpath
     PREINIT:
+        xmlNodePtr owner = NULL;
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV* element = NULL ;
@@ -2466,6 +2474,7 @@ _find ( node, xpath )
                         xmlNodePtr tnode;
                         SV * element;
                         
+                        owner = getSvNode(getSvNodeExtra(node));
                         len = nodelist->nodeNr;
                         for( i ; i < len; i++){
                             /* we have to create a new instance of an
@@ -2474,11 +2483,14 @@ _find ( node, xpath )
                              * object. afterwards we can
                              * push the object to the array!
                              */
-
                             tnode = nodelist->nodeTab[i];
-                            element = nodeToSv(tnode);
+                            if ( tnode == owner ) {
+                                element = getSvNodeExtra(node);
+                            }
+                            else {
+                                element = nodeToSv(tnode);
+                            }
                             setSvNodeExtra(element,getSvNodeExtra(node));
-
                             XPUSHs( element );
                         }
                     }
