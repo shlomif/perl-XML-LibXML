@@ -14,7 +14,7 @@
         <surname>Glahn</surname>
       </author>
     </authorgroup>
-    <edition>1.55</edition>
+    <edition>1.56</edition>
     <copyright>
       <year>2001-2002</year>
       <holder>AxKit.com Ltd; 2001-2003 Christian Glahn</holder>
@@ -1868,8 +1868,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           <funcsynopsis>
             <funcsynopsisinfo>my $node = $doc-&#62;getElementsById($id);</funcsynopsisinfo>
           </funcsynopsis>
-          <para>This allows to fetch the node at a given position in the DOM.
-          </para>
+          <para>This allows to fetch the node at a given position in the DOM.</para>
           <para>Note: The Id of a node might change while manipulating the
           document.</para>
         </listitem>
