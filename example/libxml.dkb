@@ -2718,6 +2718,19 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
         </listitem>
       </varlistentry>
     </variablelist>
+    <variablelist>
+      <varlistentry>
+        <term>nodePath</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$node-&#62;nodePath();</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This function is not specified for any DOM level: 
+	  It returns a cannonical structure based XPath for
+	  a given node.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </chapter>
   <chapter>
     <title>XML::LibXML Class for Element Nodes</title>
