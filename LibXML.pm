@@ -974,17 +974,17 @@ sub processing_instruction {
 # these functions will use SAX exceptions as soon i know how things really work
 sub warning {
     my ( $parser, $message ) = @_;
-    warn( $message );
+    eval { die( $message ); };
 }
 
 sub error {
     my ( $parser, $message ) = @_;
-    warn( $message );
+    eval { die( $message ); };
 }
 
 sub fatal_error {
     my ( $parser, $message ) = @_;
-    warn( $message );
+    die( $message );
 }
 
 1;

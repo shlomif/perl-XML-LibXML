@@ -5,6 +5,8 @@ use Config;
 use Symbol;
 use File::Spec;
 
+my $is_win32 = ($^O =~ /Win32/i);
+
 $|=0;
 
 my %config;
@@ -28,33 +30,35 @@ if ( $] >= 5.006 ) {
 }
 
 # get libs and inc from gnome-config
-eval {
-    my $xml2cfg = "xml2-config";
-    if ( defined $ENV{XMLPREFIX} ) {
-        $xml2cfg = $ENV{XMLPREFIX} . '/bin/' . $xml2cfg;
-    }
-    print "running xml2-config... ";
-    my $ver = backtick("$xml2cfg --version");
-    my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-    die "VERSION $major.$minor.$point" unless $major > $lib_major
-      || ($major == $lib_major && $minor > $lib_minor)
-      || ($major == $lib_major && $minor == $lib_minor && $point >= $lib_patch);
-    $config{LIBS} ||= backtick("$xml2cfg --libs");
-    $config{INC}  ||= backtick("$xml2cfg --cflags");
-    print "ok\n";
-};
-if ($@) {
-    print "failed\n";
-    if ($@ =~ /^VERSION/) {
-        die "XML::LibXML needs libxml2 version $lib_major.$lib_minor.$lib_patch or higher (found $@)\n";
-    }
-    warn "*** ", $@ if $DEBUG;
-    warn "using fallback values for LIBS and INC\n";
-    # backtick fails if gnome-config didn't exist...
-    $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lz -lm';
-    $config{INC} = '-I/usr/local/include -I/usr/include';
-    
-    print <<OPT;
+
+unless ( $win32 ) {
+    eval {
+        my $xml2cfg = "xml2-config";
+        if ( defined $ENV{XMLPREFIX} ) {
+            $xml2cfg = $ENV{XMLPREFIX} . '/bin/' . $xml2cfg;
+        }
+        print "running xml2-config... ";
+        my $ver = backtick("$xml2cfg --version");
+        my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
+        die "VERSION $major.$minor.$point" unless $major > $lib_major
+          || ($major == $lib_major && $minor > $lib_minor)
+            || ($major == $lib_major && $minor == $lib_minor && $point >= $lib_patch);
+        $config{LIBS} ||= backtick("$xml2cfg --libs");
+        $config{INC}  ||= backtick("$xml2cfg --cflags");
+        print "ok\n";
+    };
+    if ($@) {
+        print "failed\n";
+        if ($@ =~ /^VERSION/) {
+            die "XML::LibXML needs libxml2 version $lib_major.$lib_minor.$lib_patch or higher (found $@)\n";
+        }
+        warn "*** ", $@ if $DEBUG;
+        warn "using fallback values for LIBS and INC\n";
+        # backtick fails if gnome-config didn't exist...
+        $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lz -lm';
+        $config{INC} = '-I/usr/local/include -I/usr/include';
+        
+        print <<OPT;
 options:
   LIBS='$config{LIBS}'
   INC='$config{INC}'
@@ -62,22 +66,23 @@ If this is wrong, Re-run as:
   \$ $^X Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'
 
 OPT
-
+    }
 }
 
+
 if ($config{LIBS} !~ /\-lxml2\b/) {
-    $config{LIBS} .= ' -lxml2';
+    $config{LIBS} .= $is_win32 ? '-llibxml2' : ' -lxml2';
 }
 
 if ($config{LIBS} !~ /\-lz\b/) {
-    $config{LIBS} .= ' -lz';
+    $config{LIBS} .= $is_win32 ? '-lzlib' :' -lz';
 }
 
 if ($config{LIBS} !~ /\-lm\b/) {
-    $config{LIBS} .= ' -lm';
+    $config{LIBS} .= $is_win32 ? '' :' -lm';
 }
 
-if (!have_library("xml2")) {
+unless (have_library("xml2") or have_library("libxml2")) {
     die <<DEATH;
 libxml2 not found
 Try setting LIBS and INC values on the command line

@@ -11,7 +11,10 @@ extern "C" {
 #include "ppport.h"
 
 #include <fcntl.h>
-#include <unistd.h>
+
+#ifndef WIN32
+#  include <unistd.h>
+#endif
 
 /* libxml2 stuff */
 #include <libxml/xmlmemory.h>
@@ -44,13 +47,13 @@ extern int xmlDoValidityCheckingDefaultVal;
 extern int xmlSubstituteEntitiesDefaultVal;
 #define xmlSubstituteEntitiesDefaultValue xmlSubstituteEntitiesDefaultVal
 #else
-extern int xmlDoValidityCheckingDefaultValue;
-extern int xmlSubstituteEntitiesDefaultValue;
+LIBXML_DLL_IMPORT extern int xmlDoValidityCheckingDefaultValue;
+LIBXML_DLL_IMPORT extern int xmlSubstituteEntitiesDefaultValue;
 #endif
-extern int xmlGetWarningsDefaultValue;
-extern int xmlKeepBlanksDefaultValue;
-extern int xmlLoadExtDtdDefaultValue;
-extern int xmlPedanticParserDefaultValue;
+LIBXML_DLL_IMPORT extern int xmlGetWarningsDefaultValue;
+LIBXML_DLL_IMPORT extern int xmlKeepBlanksDefaultValue;
+LIBXML_DLL_IMPORT extern int xmlLoadExtDtdDefaultValue;
+LIBXML_DLL_IMPORT extern int xmlPedanticParserDefaultValue;
 
 #define TEST_PERL_FLAG(flag) \
     SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
@@ -1175,6 +1178,7 @@ _parse_sax_string(self, string)
 
         LibXML_init_parser(self);
         RETVAL = xmlParseDocument(ctxt);
+
         xmlFree( ctxt->sax );
         ctxt->sax = NULL;
         PmmSAXCloseContext(ctxt);
@@ -1556,7 +1560,7 @@ _processXIncludes( self, dom )
         SV * dom
     PREINIT:
         xmlDocPtr real_dom = (xmlDocPtr)PmmSvNode(dom);
-        char * ERROR;
+        char * LibXML_ERROR_MSG;
         STRLEN len;
     CODE:
         if ( real_dom == NULL ) {
@@ -1569,10 +1573,10 @@ _processXIncludes( self, dom )
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
 
-        ERROR = SvPV(LibXML_error, len );
+        LibXML_ERROR_MSG = SvPV(LibXML_error, len );
     
         if ( len > 0 ){
-                croak(ERROR);
+                croak(LibXML_ERROR_MSG);
                 XSRETURN_UNDEF;            
         }
         else {
