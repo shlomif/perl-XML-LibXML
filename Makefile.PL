@@ -36,9 +36,9 @@ eval {
     print "running xml2-config... ";
     my $ver = backtick("$xml2cfg --version");
     my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-    die "VERSION" unless $major > $lib_major
-      || ($major == $libmajor && $minor > $lib_minor)
-      || ($major == $libmajor && $minor == $lib_minor && $point >= $lib_patch);
+    die "VERSION $major.$minor.$point" unless $major > $lib_major
+      || ($major == $lib_major && $minor > $lib_minor)
+      || ($major == $lib_major && $minor == $lib_minor && $point >= $lib_patch);
     $config{LIBS} ||= backtick("$xml2cfg --libs");
     $config{INC}  ||= backtick("$xml2cfg --cflags");
     print "ok\n";
@@ -46,7 +46,7 @@ eval {
 if ($@) {
     print "failed\n";
     if ($@ =~ /^VERSION/) {
-        die "XML::LibXML needs libxml2 version $lib_major.$lib_minor.$lib_patch or higher\n";
+        die "XML::LibXML needs libxml2 version $lib_major.$lib_minor.$lib_patch or higher (found $@)\n";
     }
     warn "*** ", $@ if $DEBUG;
     warn "using fallback values for LIBS and INC\n";

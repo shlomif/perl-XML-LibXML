@@ -15,6 +15,7 @@ use XML::LibXML;
 my $goodWFString = "<foobar/>";
 my $badWFString1 = "<foo>&</foo>";
 my $badWFString2 = "<foo>";
+my $badWFString3 = '<?xml version="1.0">';
 
 my $goodWBString = "foo<bar/>foo";
 my $badWBString1 = "<foo>bar";
@@ -42,6 +43,10 @@ ok($@);
 
 eval { my $fail = $parser->parse_string($badWFString2); };
 ok($@);
+
+eval { my $fail = $parser->parse_string($badWFString3); };
+ok($@);
+
 
 eval { my $fail = $parser->parse_string(""); };
 ok($@);
