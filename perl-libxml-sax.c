@@ -207,7 +207,7 @@ PmmDetectNamespaceDecl( const xmlChar * name ) {
     decl = xmlStrndup( name, len );
     
     if ( xmlStrcmp( "xmlns", decl ) != 0 ) {
-        pos= NULL;
+        pos = NULL;
     }
 
     xmlFree( decl );
@@ -259,11 +259,11 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name ) {
             ns = PmmGetNsMapping( sax->ns_stack, prefix );
 
             hv_store(retval, "Prefix", 6,
-                     C2Sv(prefix, NULL), PrefixHash);
+                     sv_2mortal(C2Sv(prefix, NULL)), PrefixHash);
 
             if ( ns != NULL ) {
                 hv_store(retval, "NamespaceURI", 12,
-                         C2Sv(ns->href, NULL), NsURIHash);
+                         sv_2mortal(C2Sv(ns->href, NULL)), NsURIHash);
             } 
             else {
                 hv_store(retval, "NamespaceURI", 12,
@@ -271,7 +271,7 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name ) {
             }
 
             hv_store(retval, "LocalName", 9,
-                     C2Sv(localname, NULL), LocalNameHash);
+                     sv_2mortal(C2Sv(localname, NULL)), LocalNameHash);
             
             xmlFree(localname);
             xmlFree(prefix);
@@ -282,7 +282,7 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name ) {
             hv_store(retval, "NamespaceURI", 12,
                      SvREFCNT_inc(empty_sv), NsURIHash);
             hv_store(retval, "LocalName", 9,
-                     C2Sv(name, NULL), LocalNameHash);
+                     sv_2mortal(C2Sv(name, NULL)), LocalNameHash);
         }
                 
     }
@@ -321,7 +321,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
     const xmlChar **ta = attr;
     const xmlChar * name = NULL;
     const xmlChar * value = NULL;
-    xmlChar * keyname;
+    xmlChar * keyname = NULL;
 
     if ( attr != NULL ) {
         while ( *ta != NULL ) {
@@ -346,9 +346,9 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
                 const xmlChar * pos = PmmDetectNamespace( name );
 
                 hv_store(atV, "Name", 4,
-                         C2Sv(name, NULL), NameHash);
+                         sv_2mortal(C2Sv(name, NULL)), NameHash);
                 hv_store(atV, "Value", 5,
-                         C2Sv(value, NULL), ValueHash);
+                         sv_2mortal(C2Sv(value, NULL)), ValueHash);
                 
                 if ( pos != NULL ) {
                     xmlNsPtr ns = NULL;
@@ -361,12 +361,12 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
                     ns = PmmGetNsMapping( sax->ns_stack, prefix );
             
                     hv_store(atV, "Prefix", 6,
-                             C2Sv(prefix, NULL), PrefixHash);
+                             sv_2mortal(C2Sv(prefix, NULL)), PrefixHash);
 
                     if ( ns != NULL ) {
                         nsURI = xmlStrdup( ns->href );
                         hv_store(atV, "NamespaceURI", 12,
-                                 C2Sv(ns->href, NULL), NsURIHash);
+                                 sv_2mortal(C2Sv(ns->href, NULL)), NsURIHash);
                     }
                     else {
                         hv_store(atV, "NamespaceURI", 12,
@@ -374,7 +374,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
                     }
                     
                     hv_store(atV, "LocalName", 9,
-                             C2Sv(localname, NULL), LocalNameHash);
+                             sv_2mortal(C2Sv(localname, NULL)), LocalNameHash);
                     
                     xmlFree(prefix);
                 }
@@ -384,7 +384,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
                     hv_store(atV, "NamespaceURI", 12,
                              SvREFCNT_inc(empty_sv), NsURIHash);
                     hv_store(atV, "LocalName", 9,
-                             C2Sv(name, NULL), LocalNameHash);            
+                             sv_2mortal(C2Sv(name, NULL)), LocalNameHash);            
                 }
             }
             
@@ -418,7 +418,7 @@ PmmGenCharDataSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * data ) {
 
     if ( data != NULL && xmlStrlen( data ) ) {
         hv_store(retval, "Data", 4,
-                 C2Sv(data, NULL), DataHash);
+                 sv_2mortal(C2Sv(data, NULL)), DataHash);
     }
 
     return retval;
@@ -430,15 +430,15 @@ PmmGenPISV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * target, const xmlChar * d
 
     if ( target != NULL && xmlStrlen( target ) ) {
         hv_store(retval, "Target", 6,
-                 C2Sv(data, NULL), TargetHash);
+                 sv_2mortal(C2Sv(data, NULL)), TargetHash);
 
         if ( data != NULL && xmlStrlen( data ) ) {
             hv_store(retval, "Data", 4,
-                     C2Sv(data, NULL), DataHash);
+                     sv_2mortal(C2Sv(data, NULL)), DataHash);
         }
         else {
             hv_store(retval, "Data", 4,
-                     C2Sv("", NULL), DataHash);
+                     sv_2mortal(C2Sv("", NULL)), DataHash);
         }
     }
 
@@ -712,7 +712,7 @@ PmmSaxWarning(void * ctx, const char * msg, ...)
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
 
-    XPUSHs(svMessage);
+    XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
 
@@ -752,7 +752,7 @@ PmmSaxError(void * ctx, const char * msg, ...)
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
 
-    XPUSHs(svMessage);
+    XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;
@@ -789,7 +789,7 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
 
-    XPUSHs(svMessage);
+    XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;

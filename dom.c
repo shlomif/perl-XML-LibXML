@@ -80,7 +80,7 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
 int
 domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup) 
 {
-   xmlNodePtr c1, c2, p = NULL;
+   xmlNodePtr c1 = NULL, c2 = NULL, p = NULL;
    if ( cur ) { 
        c1 = c2 = cur;
        if( leader )
@@ -326,7 +326,7 @@ domAppendChild( xmlNodePtr self,
         domAddNodeToList( newChild, self->last, NULL );
     }
     else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
-        xmlNodePtr c1;
+        xmlNodePtr c1 = NULL;
         newChild->children->parent = self;
         self->children = newChild->children;
         c1 = newChild->children;
@@ -483,7 +483,7 @@ domInsertAfter( xmlNodePtr self,
 
 xmlNodePtr
 domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
-    xmlNodePtr prev, next, par;
+    xmlNodePtr prev = NULL, next = NULL, par = NULL;
     
     if ( oldNode == NULL
          || newNode == NULL ) {
@@ -709,9 +709,9 @@ domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href ) {
  */
 xmlAttrPtr
 domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace) {
-    xmlAttrPtr prop;
-    xmlDocPtr doc;
-    xmlNsPtr ns;
+    xmlAttrPtr prop = NULL;
+    xmlDocPtr doc = NULL;
+    xmlNsPtr ns = NULL;
     
     if (node == NULL)
         return(NULL);
@@ -809,7 +809,7 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
 int
 domNodeNormalize( xmlNodePtr node )
 {
-    xmlNodePtr next;
+    xmlNodePtr next = NULL;
 
     if ( node == NULL ) 
         return(0);

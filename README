@@ -85,6 +85,15 @@ Additionally I got these Note from Rozi Kovesdi:
 > 
 > perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'
 
+NOTES FOR M$ Windows
+====================
+
+Thanks to Randy Kobes there is a precompiled PPM package available on
+
+http://theoryx5.uwinnipeg.ca/ppmpackages/
+
+Usually it takes a little time to build the package for the latest
+release. 
 
 Contact
 =======
