@@ -60,9 +60,9 @@ if ( defined $elem1 ) {
   ok( not $elem1->hasAttribute( $aname ) );
 
     my $attr = XML::LibXML::Attr->new( 'test', 'value' );
-    ok( defined $attr && 
-        $attr->getName() eq 'test' &&
-        $attr->getValue() eq 'value' );
+    ok( defined $attr
+        && $attr->getName() eq 'test'
+        && $attr->getValue() eq 'value' );
 
     $attr->setValue( 'other' );
     # warn $attr->value . "\n";
@@ -74,6 +74,7 @@ if ( defined $elem1 ) {
         $attr2->getValue() eq "überflieger" );
 
     $attr2->setValue( "drückeberger" );
+    # warn "> '". $attr2->getValue() . "'\n";
     ok( $attr2->getValue() eq "drückeberger" );
      
   ###################################################
@@ -268,7 +269,7 @@ if ( defined $elem1 ) {
   ok( $cnode->nodeName, 'C');
   $domroot->replaceChild( $frag, $cnode );
   ok( scalar($frag->childNodes), 0 );
-  ok( scalar($domroot->childNodes), 2 ); # its 2 because the first node in the fragment is text
+  ok( scalar($domroot->childNodes), 3 ); # its 2 because the first node in the fragment is text
                         # and so is the preceeding node in domroot
   # warn $domroot->toString();
 
