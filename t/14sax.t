@@ -56,7 +56,7 @@ $parser->parse_uri("example/ns.xml");
 
 {
     my $h = "SAXNS2Tester";
-    my $xml = "<a xmlns='A'><b/></a>";
+    my $xml = "<a xmlns='xml://A'><b/></a>";
     my @tests = (
 sub {
     XML::LibXML::SAX        ->new( Handler => $h )->parse_string( $xml );
@@ -154,7 +154,7 @@ use Test;
 sub start_element {
     my $self = shift;
     my ( $elt ) = @_;
-    ok $elt->{NamespaceURI} eq "A"
+    ok $elt->{NamespaceURI} eq "xml://A"
         if $elt->{Name} eq "b"
 }
 
