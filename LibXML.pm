@@ -193,7 +193,9 @@ sub base_uri {
 
 sub set_sax_handler {
     my $self = shift;
-    $self->{SAX} = {HANDLER => $_[0]};
+    $self->{SAX} = {HANDLER    => $_[0],
+                    NAMESPACES => {},
+                    ELSTACK    => []};
 }
 
 sub _auto_expand {
@@ -838,51 +840,105 @@ sub removeNamedItemNS {
 package XML::LibXML::_SAXParser;
 
 # this is pseudo class!!!
+use Carp;
 
 sub start_document {
     my $parser = shift;
-    warn "start DOCUMENT!";
+    $parser->{SAX}->{HANDLER}->start_document({});
 }
 
 sub xml_decl {
     my ( $parser, $version, $encoding ) = @_;
-    warn "xml declaration $version, $encoding\n";
+
+    my $decl = {version => $version};
+    $decl->{encoding} = $encoding if defined $encoding;
+    $parser->{SAX}->{HANDLER}->xml_decl($decl);
 }
 
 sub end_document {
     my $parser = shift;
-    warn "end DOCUMENT!";
+    $parser->{SAX}->{HANDLER}->end_document({});
 }
 
 sub start_element {
     my ( $parser, $name, %attrs ) = @_;
-    warn "start ELEMENT $name!";
-    warn "   " . join " ", map { $_ . "=\"".$attrs{$_}."\"" } keys %attrs ;
+
+    my $saxattr = {};
+    foreach my $att ( keys %attrs ) {
+        next unless $att =~ /^xmlns/;
+        $parser->{SAX}->{Namespaces}->{$att} = $attrs{$att};
+    }
+    foreach my $att ( keys %attrs ) {
+        next if $att =~ /^xmlns/;
+        $saxattr->{$att} = {Name         => $att,
+                            Value        => $attrs{$att},
+                            NamespaceURI => "",
+                            Prefix       => "",
+                            LocalName    => $att};
+
+        if ( $att =~ /([^\:]+):(.+)/ ) {
+            if ( exists  $parser->{SAX}->{Namespaces}->{"xmlns:$1"} ) {
+                $saxattr->{$att}->{NamespaceURI} = $parser->{SAX}->{Namespaces}->{"xmlns:$1"};
+                $saxattr->{$att}->{LocalName} = $2;
+                $saxattr->{$att}->{Prefix} = $1;
+            }
+        }
+    }
+
+    my $elem = { Name => $name };
+    if ( $name =~ /([^\:]+)\:(.+)/ ) {
+        my $xmlns = "xmlns:$1";
+        if ( exists $parser->{SAX}->{Namespaces}->{$xmlns} ){
+            $elem->{LocalName} = $2;
+            $elem->{Prefix} = $1;
+            $elem->{NamespaceURI} = $parser->{SAX}->{Namespaces}->{$xmlns};
+        }
+        else {
+             $elem->{LocalName} = $name;
+             $elem->{Prefix} = "";
+             $elem->{NamespaceURI} = "";
+        }
+    }
+    else {
+        $elem->{LocalName} = $name;
+        $elem->{Prefix} = "";
+        $elem->{NamespaceURI} = "";
+    }
+    push @{$parser->{SAX}->{ELSTACK}}, $elem;
+    $parser->{SAX}->{HANDLER}->start_element( { %$elem, Attributes=>$saxattr} )
+
 }
 
 sub end_element {
     my ( $parser, $name ) = @_;
-    warn "end ELEMENT $name!";
+    my $elem = pop @{$parser->{SAX}->{ELSTACK}};
+    if ( $elem->{Name} ne $name ) {
+        croak( "Not Well Formed! got </$name> expected </$elem->{Name}>" );
+    }
+    $parser->{SAX}->{HANDLER}->end_element( $elem );
 }
 
 sub characters {
     my ( $parser, $data ) = @_;
-    warn "characters '$data'\n";
+    $parser->{SAX}->{HANDLER}->characters( {Data => $data} );
 }
 
 sub comment {
     my ( $parser, $data ) = @_;
-    warn "comment '$data'\n";
+    $parser->{SAX}->{HANDLER}->comment( {Data => $data} );
 }
 
 sub cdata_block {
     my ( $parser, $data ) = @_;
-    warn "cdata '$data'\n";
+    $parser->{SAX}->{HANDLER}->start_cdata();
+    $parser->{SAX}->{HANDLER}->characters( {Data => $data} );
+    $parser->{SAX}->{HANDLER}->end_cdata();
 }
 
 sub processing_instruction {
     my ( $parser, $target, $data ) = @_;
-    warn "processing instruction '$target' -> '$data'\n";
+    $parser->{SAX}->{HANDLER}->processing_instruction( {Target => $target,
+                                                        Data   => $data} );
 }
 
 1;

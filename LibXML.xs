@@ -1421,6 +1421,7 @@ _parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
         char * encoding
     PREINIT:
         xmlChar *chunk;
+        xmlParserCtxtPtr ctxt;
         char * ptr;
         STRLEN len;
         int retCode              = -1;
@@ -1437,6 +1438,13 @@ _parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
         chunk = Sv2C(svchunk, (const xmlChar*)encoding);
 
         if ( chunk != NULL ) {
+            ctxt = xmlCreateMemoryParserCtxt(ptr, len);
+            if (ctxt == NULL) {
+                croak("Couldn't create memory parser context: %s", strerror(errno));
+            }   
+            ctxt->_private = (void*)self;
+            ctxt->sax = PSaxGetHandler();
+
             LibXML_error = sv_2mortal(newSVpv("", 0));
 
             LibXML_init_parser(self);
@@ -1444,7 +1452,7 @@ _parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
 
             retCode = xmlParseBalancedChunkMemory( NULL, 
                                                    handler,
-                                                   NULL,
+                                                   ctxt,
                                                    0,
                                                    chunk,
                                                    &nodes );       
@@ -1642,6 +1650,7 @@ _end_push( self, pctxt, restore )
         sv_setpvn(LibXML_error, "", 0);
 
         LibXML_init_parser(self);
+        ctxt->_private = (void*)self;
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
@@ -1683,6 +1692,7 @@ _end_sax_push( self, pctxt )
         sv_setpvn(LibXML_error, "", 0);
 
         LibXML_init_parser(self);
+        ctxt->_private = (void*)self;
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    

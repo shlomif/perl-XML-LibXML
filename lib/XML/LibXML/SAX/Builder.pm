@@ -9,6 +9,8 @@ sub new {
     return bless {@_}, $class;
 }
 
+sub get_document { $_[0]->{DOM}; }
+
 sub start_document {
     my ($self, $doc) = @_;
 
@@ -35,7 +37,7 @@ sub xml_decl {
 
 sub end_document {
     my ($self, $doc) = @_;
-    my $dom = delete $self->{DOM};
+    my $dom = $self->{DOM};
     delete $self->{Parent};
     return $dom;
 }
@@ -50,18 +52,6 @@ sub start_element {
         $node = $self->{DOM}->createElement($el->{Name});
     }
 
-    # do attributes
-    foreach my $key (keys %{$el->{Attributes}}) {
-        my $attr = $el->{Attributes}->{$key};
-        if (ref($attr)) {
-            # SAX2 attributes
-            $node->setAttributeNS($attr->{NamespaceURI} || "", $attr->{Name} => $attr->{Value});
-        }
-        else {
-            $node->setAttribute($key => $attr);
-        }
-    }
-
     # append
     if ($self->{Parent}) {
         $self->{Parent}->appendChild($node);
@@ -70,6 +60,20 @@ sub start_element {
     else {
         $self->{DOM}->setDocumentElement($node);
         $self->{Parent} = $node;
+    }
+
+    # do attributes
+    foreach my $key (keys %{$el->{Attributes}}) {
+        my $attr = $el->{Attributes}->{$key};
+        if (ref($attr)) {
+            # SAX2 attributes
+            warn $attr->{NamespaceURI};
+            warn $attr->{Name};
+            $node->setAttributeNS($attr->{NamespaceURI} || "", $attr->{Name}, $attr->{Value});
+        }
+        else {
+            $node->setAttribute($key => $attr);
+        }
     }
 }
 
@@ -83,6 +87,28 @@ sub characters {
     my ($self, $chars) = @_;
     return unless $self->{Parent};
     $self->{Parent}->appendText($chars->{Data});
+}
+
+sub comment {
+    my ($self, $chars) = @_;
+    my $comment = $self->{DOM}->createComment( $chars->{Data} );
+    if ( defined $self->{Parent} ) {
+        $self->{Parent}->appendChild($comment);
+    }
+    else {
+        $self->{DOM}->appendChild($comment);
+    }
+}
+
+sub processing_instruction {
+    my ( $self,  $pi ) = @_;
+    my $PI = $self->{DOM}->createPI( $pi->{Target}, $pi->{Data} );
+    if ( defined $self->{Parent} ) {
+        $self->{Parent}->appendChild( $PI );
+    }
+    else {
+        $self->{DOM}->appendChild( $PI );
+    }
 }
 
 1;

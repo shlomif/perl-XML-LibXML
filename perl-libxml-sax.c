@@ -40,7 +40,7 @@ PSaxStartDocument(void * ctx)
     SPAGAIN;
 
     PUSHMARK(SP) ;
-    XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+    XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
 
     if ( ctxt->version != NULL ) 
         XPUSHs(sv_2mortal(newSVpv((char*)ctxt->version, 0)));
@@ -70,7 +70,7 @@ PSaxEndDocument(void * ctx)
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+    XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
     PUTBACK;
 
     count = perl_call_pv( "XML::LibXML::_SAXParser::end_document", 0 );
@@ -90,9 +90,9 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr) {
     
     ENTER;
     SAVETMPS;
-
+    
     PUSHMARK(SP) ;
-    XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+    XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
     XPUSHs(sv_2mortal(newSVpv((char*)name, 0)));
 
     if ( attr != NULL ) {
@@ -124,7 +124,7 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+    XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
     XPUSHs(sv_2mortal(newSVpv((char*)name, 0)));
     PUTBACK;
 
@@ -149,7 +149,7 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
         SAVETMPS;
 
         PUSHMARK(SP) ;
-        XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+        XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
         XPUSHs(sv_2mortal(newSVpv((char*)data, 0)));
         PUTBACK;
 
@@ -177,7 +177,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
         SAVETMPS;
 
         PUSHMARK(SP) ;
-        XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+        XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
         XPUSHs(sv_2mortal(newSVpv((char*)data, 0)));
         PUTBACK;
 
@@ -205,7 +205,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         SAVETMPS;
 
         PUSHMARK(SP) ;
-        XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+        XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
         XPUSHs(sv_2mortal(newSVpv((char*)data, 0)));
         PUTBACK;
 
@@ -232,7 +232,7 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     SAVETMPS;
 
     PUSHMARK(SP) ;
-    XPUSHs(sv_mortalcopy((SV*)ctxt->_private));
+    XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
     XPUSHs(sv_2mortal(newSVpv((char*)target, 0)));
     XPUSHs(sv_2mortal(newSVpv((char*)data, 0)));
     PUTBACK;
