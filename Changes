@@ -18,7 +18,7 @@ manpage!
    - fixed external entity loading for entity expansion
    - compatibility fixes
    - basic native libxml2 SAX interface
-     THIS INTERFACE IS STILL EXPERIMENTAL, check XML::LibXML::SAX man page
+     THIS INTERFACE IS STILL EXPERIMENTAL
    - cloneNode clones now within documents
 
 1.49

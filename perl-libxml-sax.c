@@ -93,11 +93,14 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr) {
     
     PUSHMARK(SP) ;
     XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
+
     XPUSHs(sv_2mortal(newSVpv((char*)name, 0)));
 
     if ( attr != NULL ) {
         const xmlChar ** ta = attr;
         while ( *ta ) {
+            XPUSHs(sv_2mortal(newSVpv((char*)*ta, 0)));
+            ta++;
             XPUSHs(sv_2mortal(newSVpv((char*)*ta, 0)));
             ta++;
         }
@@ -124,7 +127,9 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     SAVETMPS;
 
     PUSHMARK(SP) ;
+
     XPUSHs(sv_mortalcopy((SV*)((xmlParserCtxtPtr)ctxt->userData)->_private));
+
     XPUSHs(sv_2mortal(newSVpv((char*)name, 0)));
     PUTBACK;
 
@@ -270,3 +275,4 @@ PSaxGetHandler()
 
     return retval;
 }
+
