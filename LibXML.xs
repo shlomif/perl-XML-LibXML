@@ -3849,7 +3849,7 @@ _find( pnode, pxpath )
                     /* access ->stringval */
                     /* return as a Literal */
                     XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-                    XPUSHs(sv_2mortal(newSVpv(found->stringval, 0)));
+                    XPUSHs(sv_2mortal(C2Sv(found->stringval, NULL)));
                     break;
                 default:
                     croak("Unknown XPath return type");
