@@ -77,7 +77,7 @@ _C2Sv( const xmlChar *string, const xmlChar *dummy )
 }
 
 void
-PmmSAXInitialize()
+PmmSAXInitialize(pTHX)
 {
     PERL_HASH(PrefixHash,     "Prefix",        6);
     PERL_HASH(NsURIHash,      "NamespaceURI", 12);

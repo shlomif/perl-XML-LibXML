@@ -57,6 +57,7 @@ t/18docfree.t
 t/19encoding.t
 t/20extras.t
 t/23rawfunctions.t
+t/24c14n.t
 lib/XML/LibXML/NodeList.pm
 lib/XML/LibXML/Literal.pm
 lib/XML/LibXML/Boolean.pm

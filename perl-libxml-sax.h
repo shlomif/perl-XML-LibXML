@@ -18,7 +18,7 @@ extern "C" {
 
 /* has to be called in BOOT sequence */
 void
-PmmSAXInitialize();
+PmmSAXInitialize(pTHX);
 
 void
 PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser );

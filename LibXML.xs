@@ -1061,7 +1061,7 @@ PROTOTYPES: DISABLE
 BOOT:
     LIBXML_TEST_VERSION
     xmlInitParser();
-    PmmSAXInitialize();
+    PmmSAXInitialize(aTHX);
 
     /* make the callback mechnism available to perl coders */
     xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
