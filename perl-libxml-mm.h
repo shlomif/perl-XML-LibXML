@@ -84,6 +84,21 @@ PmmREFCNT_dec( ProxyNodePtr node );
 SV*
 PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner );
 
+/* PmmFixProxyEncoding
+ * TYPE
+ *    Method
+ * PARAMETER
+ *    @dfProxy: The proxystructure to fix.
+ *
+ * DESCRIPTION
+ *
+ * This little helper allows to fix the proxied encoding information
+ * after a not standard operation was done. This is required for
+ * XML::LibXSLT
+ */
+void
+PmmFixProxyEncoding( ProxyNodePtr dfProxy );
+
 /* PmmSvNodeExt
  * TYPE 
  *    Function

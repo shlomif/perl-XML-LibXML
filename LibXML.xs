@@ -30,7 +30,9 @@ extern "C" {
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
+#if LIBXML_VERSION < 20600
 #include <libxml/DOCBparser.h>
+#endif
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xmlIO.h>

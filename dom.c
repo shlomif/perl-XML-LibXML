@@ -473,8 +473,8 @@ domAppendChild( xmlNodePtr self,
 
     if ( !(domTestHierarchy(self, newChild)
            && domTestDocument(self, newChild))){
-        xs_warn("HIERARCHIY_REQUEST_ERR\n"); 
-        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
+        xs_warn("HIERARCHY_REQUEST_ERR\n"); 
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHY_REQUEST_ERR\n");
         return NULL;
     }
 
@@ -554,7 +554,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     if ( !(domTestHierarchy(self, new)
            && domTestDocument(self, new))){
         xs_warn("HIERARCHIY_REQUEST_ERR\n"); 
-        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHY_REQUEST_ERR\n");
         return NULL;
     }
     
@@ -612,7 +612,7 @@ domInsertBefore( xmlNodePtr self,
    
     if ( !(domTestHierarchy( self, newChild )
            && domTestDocument( self, newChild ))) {
-        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHY_REQUEST_ERR\n");
         return NULL;
     }
 
@@ -668,7 +668,7 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
          * wrong node type
          * new node is parent of itself
          */
-        xmlGenericError(xmlGenericErrorContext,"HIERARCHIY_REQUEST_ERR\n");
+        xmlGenericError(xmlGenericErrorContext,"HIERARCHY_REQUEST_ERR\n");
         return NULL;
     }
         

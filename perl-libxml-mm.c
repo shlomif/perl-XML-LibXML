@@ -134,6 +134,7 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmENCODING(node)    node->encoding
 #define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
 #define PmmDocEncoding(node) (node->charset)
+
 /* creates a new proxy node from a given node. this function is aware
  * about the fact that a node may already has a proxy structure.
  */
@@ -349,6 +350,31 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
     }
 
     return retval;
+}
+
+/* This is a little helper, that allows us to set the encoding attr. 
+ * after broken transformations 
+ */
+void
+PmmFixProxyEncoding( ProxyNodePtr dfProxy ) 
+{
+    xmlNodePtr node = PmmNODE( dfProxy );
+    
+    if ( node != NULL ) {
+        switch ( node->type ) {
+        case XML_DOCUMENT_NODE:
+        case XML_HTML_DOCUMENT_NODE:
+        case XML_DOCB_DOCUMENT_NODE:
+            if ( ((xmlDocPtr)node)->encoding != NULL ) {
+                dfProxy->encoding = (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding );
+            }
+            break;
+        default:
+            dfProxy->encoding = 1;
+            break;
+        }
+    }
+
 }
 
 xmlNodePtr
@@ -824,6 +850,8 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
 {
     SV *retval = &PL_sv_undef;
     xmlCharEncoding enc;
+    STRLEN len = 0;
+
     if ( string != NULL ) {
         if ( encoding != NULL ) {
             enc = xmlParseCharEncoding( (const char*)encoding );
@@ -836,11 +864,10 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
             enc = XML_CHAR_ENCODING_UTF8;
         }
 
+        len = xmlStrlen( string );
         if ( enc == XML_CHAR_ENCODING_UTF8 ) {
             /* create an UTF8 string. */       
-            STRLEN len = 0;
             xs_warn("set UTF8 string");
-            len = xmlStrlen( string );
             /* create the SV */
             /* string[len] = 0; */
 
@@ -854,7 +881,7 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
         else {
             /* just create an ordinary string. */
             xs_warn("set ordinary string");
-            retval = newSVpvn( (const char *)string, xmlStrlen( string ) );
+            retval = newSVpvn( (const char *)string, xmlStrlen(string) );
         }
     }
 
@@ -911,11 +938,13 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
         xmlDocPtr real_doc = refnode->doc;
         if ( real_doc != NULL && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = PmmDecodeString( (const xmlChar*)real_doc->encoding,
-						 (const xmlChar *)string );
+            xmlChar * decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc) ,
+                                                     (const xmlChar *)string,
+                                                     (const xmlChar*)real_doc->encoding);
             len = xmlStrlen( decoded );
 
-            if ( PmmDocEncoding(real_doc) == XML_CHAR_ENCODING_UTF8 
+            if ( PmmNodeEncoding( real_doc ) == XML_CHAR_ENCODING_UTF8 ) {
+            /*if ( PmmDocEncoding(real_doc) == XML_CHAR_ENCODING_UTF8 */
 		 /* most probably true, since libxml2 always 
                   * sets doc->charset to UTF8, see tree.c:
                   *
@@ -924,8 +953,8 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
 		  * be obsolete if not for binary compatibility.
 		  */
 
-		 && (real_doc->encoding == NULL ||
-		     xmlParseCharEncoding(real_doc->encoding)==XML_CHAR_ENCODING_UTF8 )) {
+	    /*	 && (real_doc->encoding == NULL || */
+	    /*	     xmlParseCharEncoding(real_doc->encoding)==XML_CHAR_ENCODING_UTF8 )) { */
                 /* create an UTF8 string. */       
                 xs_warn("set UTF8 string");
                 /* create the SV */
@@ -989,8 +1018,9 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                         xs_warn( "domEncodeString!" );
                       /*  if ( string == NULL || *string == 0 ) warn("string is empty" ); */
                        
-                        ts= PmmEncodeString( (const xmlChar*)real_dom->encoding,
-					     string );
+                        ts= PmmFastEncodeString( PmmNodeEncoding(real_dom),
+                                                 string,
+                                                 (const xmlChar*)real_dom->encoding );
 
                         xs_warn( "done!" );
                         if ( string != NULL ) {
