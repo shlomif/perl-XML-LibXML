@@ -322,7 +322,7 @@ domAppendChild( xmlNodePtr self,
     }
  
     if ( self->children != NULL ) {
-        warn("unlink node!\n");
+        xs_warn("unlink node!\n");
         domAddNodeToList( newChild, self->last, NULL );
     }
     else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
