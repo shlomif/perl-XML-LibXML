@@ -980,15 +980,6 @@ is therefore a shortcut for
                 </p>
             </method>
 
-            <method name="attributes" synopsis="@attrs =$node->attributes;">
-                <p>
-                    This function returns all attributes assigned to
-                    the given node. if this function is called in
-                    scalar context, it will return a
-                    XML::LibXML::NodeList.
-                </p>
-            </method>
-
             <method name="parentNode"
                     synopsis="$parentnode = $node->parentNode;">
                 <p>
@@ -1123,15 +1114,15 @@ is therefore a shortcut for
                 <p>
                     <st>findvalue</st> is exactly equivalent to:
                 </p>
-                <example>
- $node->find( $xpath )-&gt;to_literal;
-                </example>
+                <example><![CDATA[
+ $node->find( $xpath )->to_literal;
+                ]]></example>
                 <p>
                     That is, it returns the literal value of the
                     results. This enables you to ensure that you get a
                     string back from your search, allowing certain
                     shortcuts. This could be used as the equivalent of
-                    XSLT's &lt;xsl:value-of select="some_xpath"/&gt;.
+                    XSLT's <![CDATA[<xsl:value-of select="some_xpath"/>]]>.
                 </p>
             </method>
 
@@ -1201,7 +1192,15 @@ is therefore a shortcut for
             <method name="attributes" 
                     synopsis="@attributelist = $node->attributes();">
                 <p>
-                    Returns all attributes of a given node.
+
+                    This function returns all attributes and namespace
+                    declarations assigned to the given node.
+                </p>
+                <p>
+                    Because XML::LibXML does not implement namespace
+                    declarations and attributes the same way, it is
+                    required to test what kind of node is handled
+                    while accessing the functions result.
                 </p>
                 <p>
                     If this function is called in array context the
@@ -1426,7 +1425,7 @@ is therefore a shortcut for
             </method>
 
             <method name="getElementsByTagName"
-                    synopsis="@nodes = $node-&gt;getElementsByTagName($tagname);">
+                    synopsis="@nodes = $node->;getElementsByTagName($tagname);">
                 <p>
                     This function is part of the spec it fetches all
                     descendants of a node with a given tagname. If one

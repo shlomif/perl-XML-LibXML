@@ -623,6 +623,13 @@ sub getChildrenByTagName {
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
+sub getChildrenByTagNameNS {
+    my ( $node, $nsURI, $name ) = @_;
+    my $xpath = "*[local-name()='$name' and namespace-uri()='$nsURI']";
+    my @nodes = $node->_findnodes($xpath);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
+
 sub appendWellBalancedChunk {
     my ( $self, $chunk ) = @_;
 
