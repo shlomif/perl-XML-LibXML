@@ -955,6 +955,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
        code in LibXML.xs */
     SV* retval = &PL_sv_undef;
     STRLEN len = 0;
+    xmlChar * decoded = NULL;
 
     if ( refnode != NULL ) {
         xmlDocPtr real_doc = refnode->doc;
@@ -962,12 +963,15 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
             xs_warn( " encode node !!" );
             /* The following statement is to handle bad
                values set by XML::LibXSLT */
+
             if ( PmmNodeEncoding(real_doc) == XML_CHAR_ENCODING_NONE ) {
                 PmmNodeEncoding(real_doc) = XML_CHAR_ENCODING_UTF8;
             }
-            xmlChar * decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc) ,
-                                                     (const xmlChar *)string,
-                                                     (const xmlChar*)real_doc->encoding);
+
+            decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc) ,
+                                           (const xmlChar *)string,
+                                           (const xmlChar*)real_doc->encoding);
+
             xs_warn( "push decoded string into SV" );
             len = xmlStrlen( decoded );
             retval = newSVpvn( (const char *)decoded, len );

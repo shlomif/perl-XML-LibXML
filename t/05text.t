@@ -15,7 +15,7 @@ my $doc = XML::LibXML::Document->new();
     my $foo = "foobar";
     my $textnode = $doc->createTextNode($foo);
     ok( $textnode );
-    ok( $textnode->nodeName(), text );
+    ok( $textnode->nodeName(), 'text' );
     ok( $textnode->nodeValue(), $foo );
 
     print "# 2. substring\n";
