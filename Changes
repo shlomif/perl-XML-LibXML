@@ -1,5 +1,16 @@
 Revision history for Perl extension XML::LibXSLT.
 
+1.00
+    - Added SAX serialisation
+    - Added a SAX builder module
+    - Fixed findnodes in scalar context to return a NodeList object
+    - Added findvalue($xpath)
+    - Added find(), which returns different things depending on the XPath
+    - Added Boolean, Number and Literal data types
+
+0.99
+    - Added support for $doc->URI getter/setter
+
 0.98
     - New have_library implementation
 

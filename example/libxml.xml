@@ -377,7 +377,33 @@
 <method name="findnodes" 
     synopsis="@nodes = $node->findnodes( $xpath_statement );">
 	<b>findnodes</b> performs the xpath statement on the current node and 
-	returns the result as an array. 
+	returns the result as an array. In scalar context returns a
+	<i>XML::LibXML::NodeList</i> object.
+</method>
+
+<method name="find"
+    synopsis="$result = $node->find( $xpath );">
+        <b>find</b> performs the xpath expression using the current
+        node as the context of the expression, and returns the result
+        depending on what type of result the XPath expression had. For
+        example, the XPath "1 * 3 + 52" results in a
+        <i>XML::LibXML::Number</i> object being returned. Other
+        expressions might return a <i>XML::LibXML::Boolean</i> object,
+        or a <i>XML::LibXML::Literal</i> object (a string). Each of
+        those objects uses Perl's overload feature to "do the right thing"
+        in different contexts.
+</method>
+
+<method name="findvalue"
+    synopsis="print $node->findvalue( $xpath );">
+        <b>findvalue</b> is exactly equivalent to:
+<example>
+$node->find( $xpath )->to_literal;
+</example>
+        That is, it returns the literal value of the results. This enables
+        you to ensure that you get a string back from your search, allowing
+        certain shortcuts. This could be used as the equivalent of
+        &lt;xsl:value-of select="some_xpath"/>.
 </method>
 
 <method name="getChildnodes" synopsis="@children = $node->getChildnodes();">

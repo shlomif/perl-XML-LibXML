@@ -151,7 +151,7 @@ sub XML::LibXML::Node::findnodes {
 
 sub XML::LibXML::Node::findvalue {
     my ($node, $xpath) = @_;
-    return $node->findnodes($xpath)->to_literal->value;
+    return $node->find($xpath)->to_literal->value;
 }
 
 sub XML::LibXML::Node::find {
