@@ -22,6 +22,10 @@ example/test.xhtml
 example/test.dtd
 example/article.xml
 example/article_bad.xml
+example/complex/complex.xml
+example/complex/complex.dtd
+example/complex/dtd/f.dtd
+example/complex/dtd/g.dtd
 t/01basic.t
 t/02parsestring.t
 t/03parsefile.t

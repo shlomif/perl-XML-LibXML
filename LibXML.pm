@@ -146,7 +146,7 @@ sub parse_string {
         $result = $self->_parse_string( @_ );
         $result->_fix_extra;
         if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
-            warn "use xinclude!" ;
+# warn "use xinclude!" ;
             $result->process_xinclude();
         }
         $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
