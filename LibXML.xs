@@ -207,10 +207,12 @@ LibXML_serror2SV(SV** dest, xmlErrorPtr err, SV* prev_error) {
     *dest = hr;
 }
 
+#ifdef HAVE_SERRORS
 void
 LibXML_serror_handler(void *userData, xmlErrorPtr err) {
   xmlError2Sv(&LibXML_error,err,LibXML_error); 
 }
+#endif /* HAVE_SERRORS */
 
 void
 LibXML_dummy_handler(void * ctxt, const char * msg, ...)
