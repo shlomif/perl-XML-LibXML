@@ -144,7 +144,7 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
     
         /* get the namespace information */
         if (refNode->type == XML_DOCUMENT_NODE) {
-            ctxt->namespaces = xmlGetNsList(refnode->doc, refNode->children);
+            ctxt->namespaces = xmlGetNsList(refNode->doc, refNode->children);
         }
         else {
             ctxt->namespaces = xmlGetNsList(refNode->doc, refNode);
