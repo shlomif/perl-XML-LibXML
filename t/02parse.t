@@ -701,10 +701,10 @@ EOXML
     $parser->line_numbers(0);
     eval { $doc = $parser->parse_string( $goodxml ); };
 
-    my $root = $doc->documentElement();
+    $root = $doc->documentElement();
     ok( $root->line_number(), 0);
 
-    my @kids = $root->childNodes();
+    @kids = $root->childNodes();
     ok( $kids[1]->line_number(), 0 );
 
 
