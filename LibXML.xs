@@ -3864,8 +3864,7 @@ cloneNode( self, deep=0 )
             
             docfrag = PmmNewFragment( doc );
             xmlAddChild( PmmNODE(docfrag), ret );
-            RETVAL = PmmNodeToSv(ret, docfrag);
-        
+            RETVAL = PmmNodeToSv(ret, docfrag); 
         }   
     OUTPUT:
         RETVAL
@@ -4225,7 +4224,6 @@ getNamespace( node )
     CODE:
         ns = node->ns;
         if ( ns != NULL ) {
-            warn( "node has namespace! %s", ns->prefix );
             newns = xmlCopyNamespace(ns);
             if ( newns != NULL ) {
                 RETVAL = NEWSV(0,0);
@@ -4236,7 +4234,6 @@ getNamespace( node )
             }
         }
         else {
-            warn( "node has no namespace!" );
             XSRETURN_UNDEF;
         }
     OUTPUT:
