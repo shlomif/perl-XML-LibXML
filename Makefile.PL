@@ -154,6 +154,7 @@ WriteMakefile(
     'PREREQ_PM' => { 'XML::SAX' => '0.11',
                      'XML::NamespaceSupport' => '1.07',
                      'XML::LibXML::Common' => 0,
+                     'XML::NodeFilter' => 0,
                    },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
     'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },

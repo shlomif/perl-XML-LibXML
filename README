@@ -15,7 +15,7 @@ with version 1.50 a lot of compatibility fixes were applied, so
 programs written for XML::LibXML 1.40 or less should run with 
 version 1.50 again.
 
-Installation
+Dependencies
 ============
 
 Prior to installation you MUST have installed the libxml2
@@ -23,8 +23,19 @@ library. You can get the latest libxml2 version from
 
       http://xmlsoft.org
 
-Since there are some versions around that can be used with XML::LibXML,
-there are some things to mention here:
+Also XML::LibXML requires the following packages:
+
+XML::LibXML::Common   - node type symbols and encoding functions
+XML::SAX              - DOM building support from SAX
+XML::NamespaceSupport - DOM building support from SAX
+XML::NodeFilter       - Filter Class for XML::LibXML::Iterator
+                        and XML::LibXML::NodeList::Iterator
+
+These packages are required. If one is missing some tests most likely
+will fail.
+
+Installation
+============
 
 Then run:
 
@@ -108,6 +119,15 @@ Additionally I got these Note from Rozi Kovesdi:
 > 
 > perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'
 
+NOTES FOR Mac OS X
+==================
+
+XML::LibXML 1.54 is known not to work with Max OS X because of the known
+'flat namespace' linking problem. This leads to conflicts with 
+XML::LibXML::Common. I am aware that there are sollutions to this 
+problem, but because of a lack of hardware I was not able to solve this
+problem for this release. 
+
 NOTES FOR M$ Windows
 ====================
 
@@ -130,7 +150,7 @@ perl XML mailing list (perl-xml@listserv.ActiveState.com)
 Package History
 ===============
 
-Version < 0.98 were implemented by Matt Sergeant 
+Version < 0.98 were maintained by Matt Sergeant 
 0.98 > Version > 1.49 were maintained by Matt Sergeant and Christian Glahn
 Version >= 1.49 are maintained by Christian Glahn
  
@@ -141,7 +161,6 @@ This is free software, you may use it and distribute it under the same
 terms as Perl itself. 
 
 Copyright 2001-2002 AxKit.com Ltd, All rights reserved.
-
 
 DISCLAIMER
 ==========
