@@ -1826,8 +1826,15 @@ into a string before it is appended to the PI.
 =head1 AUTHOR
 
 Matt Sergeant, matt@sergeant.org
+Christian Glahn, christian.glahn@uibk.ac.at
 
-Copyright 2001, AxKit.com Ltd. All rights reserved.
+=head1 COPYRIGHT
+
+Copyright 2001-2002, AxKit.com Ltd. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
 
 =head1 SEE ALSO
 

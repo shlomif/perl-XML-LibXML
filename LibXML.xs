@@ -324,7 +324,7 @@ LibXML_input_open(char const * filename)
             croak("open callback must return a single value");
         }
 
-	if (SvTRUE(ERRSV)) {
+        if (SvTRUE(ERRSV)) {
             STRLEN n_a;
        	    croak("input callback died: %s", SvPV(ERRSV, n_a));
        	    POPs ;
@@ -3055,9 +3055,9 @@ is_valid(self, ...)
         xmlValidCtxt cvp;
         xmlDtdPtr dtd;
         SV * dtd_sv;
-        STRLEN n_a;
+        STRLEN n_a, len;
     CODE:
-        LibXML_error = sv_2mortal(newSVpv("", 0));
+        LibXML_init_error();
         cvp.userData = (void*)PerlIO_stderr();
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
@@ -3080,6 +3080,7 @@ is_valid(self, ...)
         else {
             RETVAL = xmlValidateDocument(&cvp, self);
         }
+        sv_2mortal(LibXML_error);
     OUTPUT:
         RETVAL
 
@@ -3090,13 +3091,12 @@ validate(self, ...)
         xmlValidCtxt cvp;
         xmlDtdPtr dtd;
         SV * dtd_sv;
-        STRLEN n_a;
+        STRLEN n_a, len;
     CODE:
-        LibXML_error = sv_2mortal(newSVpv("", 0));
+        LibXML_init_error();
         cvp.userData = (void*)PerlIO_stderr();
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
-
         /* we need to initialize the node stack, because perl might 
          * already messed it up.
          */
@@ -3118,8 +3118,10 @@ validate(self, ...)
         else {
             RETVAL = xmlValidateDocument(&cvp, self);
         }
+        sv_2mortal(LibXML_error);
+
         if (RETVAL == 0) {
-            croak("%s",SvPV(LibXML_error, n_a));
+            LibXML_croak_error();
         }
     OUTPUT:
         RETVAL
