@@ -1,6 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
 1.58
+   - fixed a pointer initialization in parse_xml_chunk(), fixes 
+     random several segmentation faults on document fragments.
    - added NSCLEAN feature to the parser interface (bug 4560)
    - minor code cleanups
    - updated libxml2 blacklist.

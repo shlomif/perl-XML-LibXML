@@ -227,7 +227,7 @@ if ($config{LIBS} !~ /\-lz\b/) {
 }
 
 if ($config{LIBS} !~ /\-lm\b/) {
-    # math support is important, but is not available separate in W32
+    # math support is important, but is not available separately in W32
     $config{LIBS} .= $is_Win32 ? '' :' -lm';
 }
 # -------------------------------------------------------------------------- #

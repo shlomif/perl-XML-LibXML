@@ -1779,11 +1779,15 @@ _parse_xml_chunk(self, svchunk, enc = &PL_sv_undef)
                 fragment->children = rv;
                 rv->parent = fragment;
                 rv_end = rv;
-                while ( rv_end != NULL ) {
-                    fragment->last = rv_end;
+                while ( rv_end->next != NULL ) {
                     rv_end->parent = fragment;
                     rv_end = rv_end->next;
                 }
+                /* the following line is important, otherwise we'll have 
+                   occasional segmentation faults
+                 */
+                rv_end->parent = fragment;
+                fragment->last = rv_end;
             }
 
             /* free the chunk we created */

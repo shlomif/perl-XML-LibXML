@@ -9,10 +9,10 @@ use IO::File;
 
 BEGIN { use XML::LibXML;
     if ( XML::LibXML::LIBXML_VERSION >= 20600 ) {
-        plan tests => 468; 
+        plan tests => 472; 
     }
     else {
-        plan tests => 460;
+        plan tests => 464;
         print "# skip NS cleaning tests\n";
     }
 };
@@ -614,6 +614,59 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
         eval { my $fail = $pparser->parse_xml_chunk($str); };  
         ok($@);
     }
+
+    {
+        print "# 5.1.1 Segmenation fault tests\n";
+
+        my $sDoc   = '<C/><D/>';
+        my $sChunk = '<A/><B/>';
+
+        my $parser = XML::LibXML->new();
+        my $doc = $parser->parse_xml_chunk( $sDoc,  undef );
+        my $chk = $parser->parse_xml_chunk( $sChunk,undef );
+
+        my $fc = $doc->firstChild;
+
+        $doc->appendChild( $chk );
+
+        ok( $doc->toString(), '<C/><D/><A/><B/>' );
+    }
+
+    {
+        print "# 5.1.2 Segmenation fault tests\n";
+
+        my $sDoc   = '<C/><D/>';
+        my $sChunk = '<A/><B/>';
+
+        my $parser = XML::LibXML->new();
+        my $doc = $parser->parse_xml_chunk( $sDoc,  undef );
+        my $chk = $parser->parse_xml_chunk( $sChunk,undef );
+
+        my $fc = $doc->firstChild;
+
+        $doc->insertAfter( $chk, $fc );
+
+        ok( $doc->toString(), '<C/><A/><B/><D/>' );
+    }
+
+    {
+        print "# 5.1.3 Segmenation fault tests\n";
+
+        my $sDoc   = '<C/><D/>';
+        my $sChunk = '<A/><B/>';
+
+        my $parser = XML::LibXML->new();
+        my $doc = $parser->parse_xml_chunk( $sDoc,  undef );
+        my $chk = $parser->parse_xml_chunk( $sChunk,undef );
+
+        my $fc = $doc->firstChild;
+
+        $doc->insertBefore( $chk, $fc );
+
+        ok( $doc->toString(), '<A/><B/><C/><D/>' );
+    }
+
+    ok(1);
 
     print "# 5.2 SAX CHUNK PARSER\n";
 
