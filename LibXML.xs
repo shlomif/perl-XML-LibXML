@@ -2290,9 +2290,6 @@ createTextNode( doc, content )
         ProxyNodePtr docfrag = NULL;
     CODE:
         STRLEN len;
-        if (!content || (SvCUR(content) <= 0)) {
-            XSRETURN_UNDEF;
-        }
         real_doc = (xmlDocPtr)PmmSvNode(doc);
         docfrag = PmmNewFragment( real_doc );
        
