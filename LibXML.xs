@@ -81,7 +81,7 @@ static SV * LibXML_error    = NULL;
                             sv_setpvn(LibXML_error, "", 0);
 
 #define LibXML_croak_error() if ( SvCUR( LibXML_error ) > 0 ) { \
-                                 croak(SvPV(LibXML_error, len)); \
+                                 croak("%s",SvPV(LibXML_error, len)); \
                              } 
 
 /* this should keep the default */
@@ -1118,15 +1118,16 @@ _parse_sax_string(self, string)
         }
     CODE:
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
-
+        LibXML_init_parser(self);
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
         }
+
         PmmSAXInitContext( ctxt, self );
 
         ctxt->sax = PSaxGetHandler();
 
-        LibXML_init_parser(self);
+        /* LibXML_init_parser(self); */
         RETVAL = xmlParseDocument(ctxt);
 
         xmlFree( ctxt->sax );
@@ -1720,13 +1721,19 @@ _processXIncludes( self, dom )
         if ( real_dom == NULL ) {
             croak("No document to process!");
         }
+
         LibXML_init_parser(self);
+
         RETVAL = xmlXIncludeProcess(real_dom);        
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
-    
-        if ( len > 0 ){
-            LibXML_croak_error();
+
+        sv_2mortal( LibXML_error );
+
+        LibXML_croak_error();
+
+        if ( RETVAL > 0 ){
+            croak( "unknown error due XInclude" );
             XSRETURN_UNDEF;            
         }
         else {
@@ -1743,6 +1750,7 @@ _start_push( self, with_sax=0 )
         xmlParserCtxtPtr ctxt = NULL;
     CODE:
         /* create empty context */
+        LibXML_init_parser(self);
         if ( with_sax == 1 ) {
             ctxt = xmlCreatePushParserCtxt( PSaxGetHandler(),
                                             NULL,
@@ -1785,13 +1793,14 @@ _push( self, pctxt, data )
             XSRETURN_UNDEF;
         }
 
-        LibXML_init_parser(self);
+        LibXML_init_error();
+        
         xmlParseChunk(ctxt, chunk, len, 0);
 
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
 
-        sv_2mortal(LibXML_error);
+        sv_2mortal(LibXML_error); 
 
         RETVAL = 1;
     OUTPUT:
@@ -1817,15 +1826,18 @@ _end_push( self, pctxt, restore )
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
 
-        LibXML_init_parser(self);
+        LibXML_init_error();
+        /* LibXML_init_parser(self); */
+
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
 
         sv_2mortal(LibXML_error);
 
+
         if ( ctxt->node != NULL && restore == 0 ) {
-            xmlFreeParserCtxt(ctxt);
+            xmlFreeParserCtxt(ctxt);            
             LibXML_croak_error();
         }
 
@@ -1861,7 +1873,8 @@ _end_sax_push( self, pctxt )
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
 
-        LibXML_init_parser(self);
+        LibXML_init_error();
+        /* LibXML_init_parser(self); */
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    

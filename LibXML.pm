@@ -9,6 +9,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
 use Carp;
 
 use XML::LibXML::Common qw(:encoding :libxml :w3c);
+
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
@@ -337,7 +338,7 @@ sub init_push {
     my $self = shift;
 
     if ( defined $self->{CONTEXT} ) {
-        delete $self->{COMTEXT};
+        delete $self->{CONTEXT};
     }
 
     if ( defined $self->{SAX} ) {
@@ -349,17 +350,11 @@ sub init_push {
     }
 }
 
-
 sub push {
     my $self = shift;
 
     if ( not defined $self->{CONTEXT} ) {
-        if ( defined $self->{SAX} ) {
-            $self->{CONTEXT} = $self->_start_push(1);
-        }
-        else {
-            $self->{CONTEXT} = $self->_start_push(0);
-        }
+        $self->init_push();
     }
 
     foreach ( @_ ) {

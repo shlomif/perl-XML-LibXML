@@ -3,13 +3,14 @@
 #include <libxml/xpathInternals.h>
 #include <libxml/uri.h>
 
+#include "EXTERN.h"
+
 #include "dom.h"
 
 void
 perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
     xmlXPathObjectPtr obj = NULL, obj2 = NULL;
     xmlChar *base = NULL, *URI = NULL;
-
 
     if ((nargs < 1) || (nargs > 2)) {
         ctxt->error = XPATH_INVALID_ARITY;
@@ -130,11 +131,38 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
     if ( refNode != NULL && path != NULL ) {
         xmlXPathContextPtr ctxt;
         xmlXPathCompExprPtr comp;
-    
+
+        xmlDocPtr tdoc = NULL;
+        xmlNodePtr froot = refNode;
+
+        comp = xmlXPathCompile( path );
+        if ( comp == NULL ) {
+            return NULL;
+        }
+        
+        if ( refNode->doc == NULL ) {
+            /* if one XPaths a node from a fragment, libxml2 will
+               refuse the lookup. this is not very usefull for XML
+               scripters. thus we need to create a temporary document
+               to make libxml2 do it's job correctly.
+             */
+            tdoc = xmlNewDoc( NULL );
+
+            /* find refnode's root node */
+            while ( froot != NULL ) {
+                if ( froot->parent == NULL ) {
+                    break;
+                }
+                froot = froot->parent;
+            }
+            xmlAddChild((xmlNodePtr)tdoc, froot);
+
+            refNode->doc = tdoc;
+        }
+
         /* prepare the xpath context */
         ctxt = xmlXPathNewContext( refNode->doc );
         ctxt->node = refNode;
-    
         /* get the namespace information */
         if (refNode->type == XML_DOCUMENT_NODE) {
             ctxt->namespaces = xmlGetNsList( refNode->doc,
@@ -153,18 +181,27 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
                              (const xmlChar *) "document",
                              perlDocumentFunction);
        
+        res = xmlXPathCompiledEval(comp, ctxt);
 
-        comp = xmlXPathCompile( path );
-        if (comp != NULL) {
-            res = xmlXPathCompiledEval(comp, ctxt);
-            xmlXPathFreeCompExpr(comp);
-        }
+        xmlXPathFreeCompExpr(comp);
 
         if (ctxt->namespaces != NULL) {
             xmlFree( ctxt->namespaces );
         }
 
         xmlXPathFreeContext(ctxt);
+
+        if ( tdoc != NULL ) {
+            /* after looking through a fragment, we need to drop the
+               fake document again */
+            froot->doc = NULL;
+            tdoc->children = NULL;
+            tdoc->last     = NULL;
+            froot->parent  = NULL;
+            refNode->doc = NULL;
+
+            xmlFreeDoc( tdoc );
+        }
     }
     return res;
 }
