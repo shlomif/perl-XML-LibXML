@@ -5,6 +5,7 @@ Version 1.54 fixes potentional buffer overflows were possible with earlier
 versions of the package. 
 
 1.55
+   - Added C14N interface "toStringC14N()" (thanks to Chip Turner)
    - fixed a NOOP in the XPath code.
    - fixed insertBefore() behaviour to be DOM conform
    - fixed a minor problem in Makefile.PL
