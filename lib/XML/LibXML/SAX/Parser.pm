@@ -95,6 +95,8 @@ sub process_element {
         my $key;
         # warn("Attr: $attr -> ", $attr->getName, " = ", $attr->getData, "\n");
         if ($attr->isa('XML::LibXML::Namespace')) {
+            # TODO This needs fixing modulo agreeing on what
+            # is the right thing to do here.
             my ($localname, $p);
             if (my $prefix = $attr->getLocalName) {
                 $key = "{" . $attr->getNamespaceURI . "}" . $prefix;
@@ -116,12 +118,8 @@ sub process_element {
                 };
         }
         else {
-            if (my $ns = $attr->getNamespaceURI) {
-                $key = "{$ns}".$attr->getLocalName;
-            }
-            else {
-                $key = $attr->getLocalName;
-            }
+            my $ns = $attr->getNamespaceURI || '';
+            $key = "{$ns}".$attr->getLocalName;
             $attribs->{$key} =
                 {
                     Name => $attr->getName,
