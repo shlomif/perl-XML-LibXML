@@ -192,17 +192,19 @@
 <class name="XML::LibXML::Node">
 <short>"virtual" Base Class DOM-Nodes</short>
 <description>
-	LibXML::Node defines functions that are common to all Node
-	Types.  A LibXML::Node should never be created standalone, but
-	as an instance of a high level class such as LibXML::Element
-	or LibXML::Text.  The class itself should provide only common
-	functionality.
+	LibXML::Node defines functions that are common to all Node Types.
+	A LibXML::Node should never be created standalone, but as an
+	instance of a high level class such as LibXML::Element or
+	LibXML::Text.  The class itself should provide only common
+	functionality. In XML::LibXML each node is part either of a
+	document or a document-fragment.  Because of this there is no node
+	without a parent. This may causes confusion with "unbound" nodes.
+
 
 <method name="getName" 
-	synopsis="$name = $node->getName();">
-	Returns the node's name. This Function is aware about namesaces
-	and returns the full name of the current node
-	(<i>prefix:localname</i>)
+	synopsis="$name = $node->getName();"> Returns the node's
+	name. This Function is aware about namesaces and returns the full
+	name of the current node (<i>prefix:localname</i>)
 </method>
 
 <method name="nodeName"
@@ -244,11 +246,12 @@
     Alias for <b>getType</b>.
 </method>
 
-<method name="unbindNode" 
-	synopsis="$node->unbindNode()">
-	Unbinds the Node from its siblings and Parent, but not from the
-	Document it belongs to. If the node is not inserted into the 
-	DOM afterwards it will be lost after the programm terminated.
+<method name="unbindNode" synopsis="$node->unbindNode()"> 
+Unbinds the Node from its siblings and Parent, but not from the
+Document it belongs to. If the node is not inserted into the DOM
+afterwards it will be lost after the programm terminated. From a low
+level view, the unbound node is stripped from the context it is and
+inserted into a (hidden) document-fragment.
 </method>
 
 <method name="removeChild" 
