@@ -6,10 +6,20 @@
 
 use Test;
 use strict;
+BEGIN { 
+    use XML::LibXML;
 
-BEGIN { plan tests => 6 };
+    if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
+        plan tests => 6; 
+    }
+    else {
+        plan tests => 0;
+        print( "# Skip : No Schema Support compiled\n" );
+    }
+};
 
-use XML::LibXML;
+if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
+
 
 my $xmlparser = XML::LibXML->new();
 
@@ -59,3 +69,4 @@ print "# 3 validate a document\n";
     ok ( $@ );
 }
 
+}

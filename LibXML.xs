@@ -885,6 +885,22 @@ BOOT:
     xmlInitializeCatalog(); /* use catalog data */
 #endif
 
+char *
+LIBXML_DOTTED_VERSION()
+    CODE:
+        RETVAL = LIBXML_DOTTED_VERSION;
+    OUTPUT:
+        RETVAL
+
+
+int
+LIBXML_VERSION()
+    CODE:
+        RETVAL = LIBXML_VERSION;
+    OUTPUT:
+        RETVAL
+
+
 void
 END()
     CODE:

@@ -43,6 +43,10 @@ while($_ = shift) {
     my ($key, $val) = split(/=/, $_, 2);
     $config{$key} = $val;
 }
+
+$extralibdir = $config{EXTRALIBDIR};
+delete $config{EXTRALIBDIR};
+
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
@@ -82,13 +86,18 @@ delete $config{SKIP_SAX_INSTALL};
 
 unless ( $is_Win32 ) { # cannot get config in W32
     my @blacklist = (
-                     [2,4,20,0],
-                     [2,4,24,1],
                      [2,4,25,0],
                      [2,4,30,1],
                      [2,5,4,1],
-                     [2,5,5,0], # known as broken
-                     [2,5,10,1],
+                     [2,5,5,0], # tests pass, but known as broken
+                     [2,5,11,1],
+                     [2,6,0,0],
+                     [2,6,2,1],
+                     [2,6,3,0],
+                     [2,6,4,0], # schema error
+                     [2,6,5,0], # broken xincludes
+                     [2,6,7,1],
+
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
@@ -304,6 +313,16 @@ INSTALL
    }
    return $script;
 }
+
+sub MY::test {
+   package MY;
+   my $script = shift->SUPER::test(@_);
+   if ( $::extralibdir ) {
+      $script =~ s/(\$\(TEST_VERBOSE\),)/$1 \'$::extralibdir\',/m;
+   }
+   return $script;
+}
+
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #

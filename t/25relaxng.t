@@ -7,9 +7,19 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 8 };
+BEGIN { 
+    use XML::LibXML;
 
-use XML::LibXML;
+    if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
+        plan tests => 8;
+    }
+    else {
+        plan tests => 0;
+        print( "# Skip No RNG Support compiled\n" );
+    }
+};
+
+if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
 
 my $xmlparser = XML::LibXML->new();
 
@@ -70,3 +80,4 @@ print "# 4 validate a document\n";
     ok ( $@ );
 }
 
+} # Version >= 20510 test 
