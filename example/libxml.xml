@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
+<!-- $Id$ -->
+<!-- Copyright (c) 2001-2002 AxKit.com. All rights reserved -->
 <module name="XML::LibXML">
-    <!-- $Id$ -->
     <version>1.53</version>
     <authors>
-        <author>Matt Sergeant</author>
+        <author>Matt Sergeant, chri</author>
         <author>Christian Glahn</author>
     </authors>
 
@@ -918,7 +919,7 @@ is therefore a shortcut for
                     faster, because it avoids all DOM confomity
                     checks. Therefore this function is quite usefull
                     if one builds XML documents in memory where the
-                    order and ownership (<em>ownerDocument<em>) is
+                    order and ownership (<em>ownerDocument</em>) is
                     ashured.
                 </p>
                 <p>
