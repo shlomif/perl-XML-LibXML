@@ -790,9 +790,16 @@ toString(self, format=0)
             xmlDocDumpFormatMemory( real_dom, &result, &len, format ); 
             xmlIndentTreeOutput = t_indent_var;
         }
+
+        if ( real_dom->encoding != NULL ) {
+            result = domDecodeString( real_dom->encoding, result );
+        }
+
     	if (result == NULL) {
-	        croak("Failed to convert doc to string");
+	        # warn("Failed to convert doc to string");           
+            RETVAL = &PL_sv_undef;
     	} else {
+            # warn(result);
             RETVAL = newSVpvn((char *)result, (STRLEN)len);
             xmlFree(result);
         }
@@ -1621,23 +1628,30 @@ toString( self )
         xmlNodePtr self
     PREINIT:
         xmlBufferPtr buffer;
+        char *ret = NULL;
     CODE:
         if ( self->type != XML_ATTRIBUTE_NODE ) {
             buffer = xmlBufferCreate();
             xmlNodeDump( buffer, self->doc, self, 0, 0 );
             if ( buffer->content != 0 ) {
-                RETVAL = newSVpvn( buffer->content, buffer->use );
-            }
-            else {
-                RETVAL = &PL_sv_undef;
+                ret= xmlStrdup( buffer->content );
+                # warn( "x -> %s\n", ret );
             }
             xmlBufferFree( buffer );
         }
         else if ( self->children != NULL ) {
-            RETVAL =  newSVpvn( self->children->content, 
-                                xmlStrlen( self->children->content) );
+            ret= xmlStrdup( self->children->content ); 
+        }
+        
+        if ( self->doc != NULL ) {
+            ret= domDecodeString( self->doc->encoding, ret );
+        }
+
+        if ( ret != NULL ) {
+            RETVAL = newSVpvn( ret , strlen( ret ) ) ;  
         }
         else {
+	        # warn("Failed to convert doc to string");           
             RETVAL = &PL_sv_undef;
         }
     OUTPUT:
@@ -2036,6 +2050,9 @@ appendWellBalancedChunk( self, chunk )
     PREINIT:
         xmlNodePtr rv;
     CODE:
+        if( self->doc != NULL ) {
+            chunk = domEncodeString( self->doc->encoding, chunk );
+        }
         rv = domReadWellBalancedString( self->doc, chunk );
         if ( rv != NULL ) {
             xmlAddChildList( self , rv );
