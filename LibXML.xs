@@ -105,7 +105,6 @@ LibXML_error_handler(void * ctxt, const char * msg, ...)
     va_list args;
     SV * sv;
     /* xmlParserCtxtPtr context = (xmlParserCtxtPtr) ctxt; */
-
     sv = NEWSV(0,512);
 
     va_start(args, msg);
@@ -605,6 +604,8 @@ LibXML_init_parser( SV * self ) {
         SV * RETVAL  = NULL; /* dummy for the stupid macro */
 
         LibXML_init_error();
+        xmlSetGenericErrorFunc( NULL , 
+                                (xmlGenericErrorFunc)LibXML_error_handler);
 
         item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
         if ( item != NULL && SvTRUE(*item) ) {  
@@ -683,7 +684,7 @@ LibXML_init_parser( SV * self ) {
             xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
         }
         else {
-            LibXML_old_ext_ent_loader =  NULL; 
+            /* LibXML_old_ext_ent_loader =  NULL; */
         }
     }
 
@@ -1037,14 +1038,14 @@ get_last_error(CLASS)
         RETVAL
 
 SV*
-_parse_string(self, string, directory = NULL)
+_parse_string(self, string, dir = &PL_sv_undef)
         SV * self
         SV * string
-        char * directory
+        SV * dir
     PREINIT:
         xmlParserCtxtPtr ctxt = NULL;
-        STRLEN len;
-        char * ptr;
+        STRLEN len = 0;
+        xmlChar * ptr = NULL;
         int well_formed;
         int valid;
         int ret;
@@ -1052,28 +1053,33 @@ _parse_string(self, string, directory = NULL)
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
         int recover ;
+        xmlChar * directory = NULL;
     CODE:
-        ptr = SvPV(string, len);
+        ptr = SvPV(string, len);        
         if (len == 0) {
             croak("Empty string");
         }
-
+  
         LibXML_init_parser(self);
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
         }
-        ctxt->directory = directory;
+
+        directory = Sv2C( dir, NULL );
 
         xs_warn( "context created\n");
+
+        if ( directory != NULL ) {
+            ctxt->directory = directory;
+        }
 
         ctxt->_private = (void*)self;
         
         xs_warn( "context initialized \n");        
+
         ret = xmlParseDocument(ctxt);
-
         xs_warn( "document parsed \n");
-
         ctxt->directory = NULL;
 
         well_formed = ctxt->wellFormed;
@@ -1089,9 +1095,12 @@ _parse_string(self, string, directory = NULL)
             XSRETURN_UNDEF;
         }
 
+  
         if ( directory == NULL ) {
             STRLEN len;
-            SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
+            SV * newURI;
+
+            newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
             real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, len));
         } else {
             real_doc->URL = xmlStrdup((const xmlChar*)directory);
@@ -1101,8 +1110,7 @@ _parse_string(self, string, directory = NULL)
         recover = ( item != NULL && SvTRUE(*item) ) ? 1 : 0;
         if ( ( !well_formed && !recover )
                || (xmlDoValidityCheckingDefaultValue
-                    && !valid && !recover 
-                    && (real_doc->intSubset || real_doc->extSubset) ) ) {
+                    && valid == 0 && recover == 0 ) ) {
             xmlFreeDoc(real_doc);
             RETVAL = &PL_sv_undef;    
             croak("%s",SvPV(LibXML_error, len));
@@ -1188,7 +1196,6 @@ _parse_fh(self, fh, directory = NULL)
             XSRETURN_UNDEF;
         }
         else if (xmlDoValidityCheckingDefaultValue
-                 && (real_doc->intSubset || real_doc->extSubset) 
                  && recover == 0 ) {
             LibXML_croak_error();
         }
@@ -1265,10 +1272,7 @@ _parse_file(self, filename)
         if (  ( !well_formed && !recover )
                || (xmlDoValidityCheckingDefaultValue
                    && !recover 
-                   && (!valid
-                       || SvCUR(LibXML_error) > 0 )
-                   && (real_doc->intSubset
-                       || real_doc->extSubset) )  ) {
+                   && !valid ) ) {
             xmlFreeDoc(real_doc);
             croak("'%s'",SvPV(LibXML_error, len));
             XSRETURN_UNDEF;
@@ -2038,7 +2042,7 @@ _toString(self, format=0)
                 xmlUnlinkNode( (xmlNodePtr)intSubset );
         }
 
-        LibXML_init_error();
+        /* LibXML_init_error(); */
 
         if ( format <= 0 ) {
             xs_warn( "use no formated toString!" );
@@ -2062,10 +2066,9 @@ _toString(self, format=0)
         }
 
         xmlSaveNoEmptyTags = oldTagFlag;
-
-        sv_2mortal( LibXML_error );
+/*        sv_2mortal( LibXML_error );
         LibXML_croak_error();
-
+*/
     	if (result == NULL) {
 	        xs_warn("Failed to convert doc to string");           
             XSRETURN_UNDEF;
@@ -4085,9 +4088,6 @@ _find( pnode, pxpath )
             }
             xmlXPathFreeObject(found);
         }
-        else {
-            LibXML_croak_error();
-        }
 
 void
 _findnodes( pnode, perl_xpath )
@@ -4163,9 +4163,6 @@ _findnodes( pnode, perl_xpath )
                 }
             }
             xmlXPathFreeNodeSet( nodelist );
-        }
-        else {
-            LibXML_croak_error();
         }
 
 void

@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 457 };
+BEGIN { plan tests => 460 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
@@ -621,6 +621,20 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
     }
 }
 
+{
+    print "# 6 VALIDATING PARSER\n";
+
+    my %badstrings = (
+                    SIMPLE => '<?xml version="1.0"?>'."\n<A/>\n",
+                  );
+    my $parser = XML::LibXML->new;
+    $parser->validation(1);
+    my $doc;
+    eval { $doc = $parser->parse_string($badstrings{SIMPLE}); };
+    ok( $@ );
+    my $ql;
+}
+
 sub tsub {
     my $doc = shift;
 
@@ -636,4 +650,10 @@ sub tsub {
     $e2->appendChild( $th->{d}->importNode( $doc->documentElement() ) );
 
     return $th->{d};
+}
+
+sub tsub2 {
+    my ($doc,$query)=($_[0],@{$_[1]});
+#    return [ $doc->findnodes($query) ];
+    return [ $doc->findnodes(encodeToUTF8('iso-8859-1',$query)) ];
 }

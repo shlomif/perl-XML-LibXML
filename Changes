@@ -11,6 +11,7 @@ versions of the package.
    - fixed default iterator of XML::LibXML::Iterator
    - interface for raw libxml2 DOM building functions 
      (currently just addChild(), others will follow)
+   - fixed bad behaviour of the validating parser
    - fixed memory leak in push parser code
    - fixed namespace handling if nodes are imported to a new DOM.
    - fixed segmentation fault during validation under libxml2 2.4.25
