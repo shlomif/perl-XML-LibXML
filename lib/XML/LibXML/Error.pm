@@ -67,7 +67,8 @@ sub as_string {
   my ($self)=@_;
   my $msg = "";
   my $level;
-  if ($self->{_prev}) {
+
+  if (defined($self->{_prev})) {
     $msg = $self->{_prev}->as_string;
   }
 
