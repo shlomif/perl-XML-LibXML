@@ -36,6 +36,7 @@ struct _perlxmlParserObject
 
     xmlGenericErrorFunc error_cb;
     xmlExternalEntityLoader entity_loader_cb;
+    xmlExternalEntityLoader old_entity_loader_cb;
 
     /* then the pseudo sax handler */
     xmlSAXHandlerPtr SAX_handler; /* this is for the time when daniel 
@@ -162,6 +163,7 @@ perlxmlInitLibParser ( perlxmlParserObjectPtr parser )
             printf( "%d \n",regtest );
         }
 
+        parser->old_entity_loader_cb = xmlGetExternalEntityLoader();
         xmlSetExternalEntityLoader( parser->entity_loader_cb );
         xmlSetGenericErrorFunc(parser->error_fh, parser->error_cb );
 
@@ -180,7 +182,7 @@ perlxmlCleanupLibParser ( perlxmlParserObjectPtr parser )
     if ( parser != NULL ) {
         xmlSubstituteEntitiesDefaultValue = 1;
         xmlKeepBlanksDefaultValue = 1;
-        xmlSetExternalEntityLoader( NULL );
+        xmlSetExternalEntityLoader( parser->old_entity_loader_cb );
         xmlSetGenericErrorFunc( NULL, NULL );
         xmlGetWarningsDefaultValue = 0;
         xmlLoadExtDtdDefaultValue = 5;
@@ -194,6 +196,8 @@ perlxmlCleanupLibParser ( perlxmlParserObjectPtr parser )
          * another opinion would be a callback pop, that pops the last
          * callback function off the callback stack
          */
+
+        xmlRegisterInputCallbacks(NULL, NULL, NULL, NULL);
 
 /*         xmlCleanupParser(); */
     }

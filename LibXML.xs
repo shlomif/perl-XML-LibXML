@@ -342,7 +342,7 @@ LibXML_error_handler(void * ctxt, const char * msg, ...)
     va_list args;
     SV * sv;
     
-    sv = NEWSV(0,0);
+    sv = NEWSV(0,512);
     
     va_start(args, msg);
     sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
@@ -358,7 +358,7 @@ LibXML_validity_error(void * ctxt, const char * msg, ...)
     va_list args;
     SV * sv;
     
-    sv = NEWSV(0,0);
+    sv = NEWSV(0,512);
     
     va_start(args, msg);
     sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
@@ -375,7 +375,7 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
     STRLEN len;
     SV * sv;
     
-    sv = NEWSV(0,0);
+    sv = NEWSV(0,512);
     
     va_start(args, msg);
     sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
@@ -394,7 +394,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     SV * read_results;
     STRLEN read_length;
     char * chars;
-    SV * tbuff = NEWSV(0,0);
+    SV * tbuff = NEWSV(0,len);
     SV * tsize = newSViv(len);
     
     ENTER;
@@ -804,9 +804,10 @@ _parse_string(self, string)
         # warn( "context created\n");
 
         ctxt->_private = (void*)self;
-
-        LibXML_error = newSVpv("", 0);
-
+        
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
         # warn( "context initialized \n");        
         ret = xmlParseDocument(ctxt);
 
@@ -847,7 +848,9 @@ _parse_fh(self, fh)
         xmlDocPtr real_dom;
         ProxyObject* proxy;
     CODE:
-        LibXML_error = newSVpv("", 0);
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
         real_dom = LibXML_parse_stream(self, fh);
 
         sv_2mortal(LibXML_error);
@@ -890,8 +893,10 @@ _parse_file(self, filename)
             croak("Could not create file parser context for file '%s' : %s", filename, strerror(errno));
         }
         ctxt->_private = (void*)self;
-        LibXML_error = newSVpv("", 0);
-
+        
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
         xmlParseDocument(ctxt);
         well_formed = ctxt->wellFormed;
         valid = ctxt->valid;
@@ -936,7 +941,8 @@ _parse_html_string(self, string)
             croak("Empty string");
         }
         
-        LibXML_error = newSVpv("", 0);
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
         
         real_dom = htmlParseDoc(ptr, NULL);
         
@@ -970,7 +976,9 @@ _parse_html_fh(self, fh)
         xmlDocPtr real_dom;
         ProxyObject* proxy;
     CODE:
-        LibXML_error = newSVpv("", 0);
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
         real_dom = LibXML_parse_html_stream(self, fh);
         
         sv_2mortal(LibXML_error);
@@ -1003,7 +1011,9 @@ _parse_html_file(self, filename)
         xmlDocPtr real_dom;
         ProxyObject * proxy;
     CODE:
-        LibXML_error = newSVpv("", 0);
+        LibXML_error = NEWSV(0, 512);
+        sv_setpvn(LibXML_error, "", 0);
+        
         real_dom = htmlParseFile(filename, NULL);
 
         sv_2mortal(LibXML_error);
