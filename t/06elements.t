@@ -9,7 +9,7 @@ use Devel::Peek;
 use strict;
 use warnings;
 
-BEGIN { plan tests => 41 };
+BEGIN { plan tests => 45 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -128,3 +128,30 @@ print "# 3. Namespace switching\n";
     ok( $nsAttr->ownerDocument, undef);
     # warn $elem->toString() , "\n";
 } 
+
+print "# 4. Text Append and Normalization\n";
+
+{
+    my $doc = XML::LibXML::Document->new();
+    my $t1 = $doc->createTextNode( "bar1" );
+    my $t2 = $doc->createTextNode( "bar2" );
+    my $t3 = $doc->createTextNode( "bar3" );
+    my $e  = $doc->createElement("foo");
+    $e->appendChild( $t1 );
+    $e->appendChild( $t2 );
+    $e->appendChild( $t3 );
+
+    my @cn = $e->childNodes;
+
+    # this is the correct behaviour for DOM. the nodes are still
+    # refered
+    ok( scalar( @cn ), 3 );
+    
+    $e->normalize;
+    
+    @cn = $e->childNodes;
+    ok( scalar( @cn ), 1 );
+
+    ok( $t2->parentNode, undef);
+    ok( $t3->parentNode, undef);
+}
