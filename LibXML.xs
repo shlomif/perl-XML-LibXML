@@ -2511,65 +2511,67 @@ _find ( node, xpath )
         int len = 0 ;
     PPCODE:
         found = domXPathFind( node->object, xpath );
-        switch (found->type) {
-            case XPATH_NODESET:
-                /* return as a NodeList */
-                /* access ->nodesetval */
-                XPUSHs(newSVpv("XML::LibXML::NodeList", 0));
-                nodelist = found->nodesetval;
-                if ( nodelist && nodelist->nodeNr > 0 ) {
-                    int i = 0 ;
-                    const char * cls = "XML::LibXML::Node";
-                    xmlNodePtr tnode;
-                    ProxyObject * proxy;
-                    SV * element;
+        if (found) {
+            switch (found->type) {
+                case XPATH_NODESET:
+                    /* return as a NodeList */
+                    /* access ->nodesetval */
+                    XPUSHs(newSVpv("XML::LibXML::NodeList", 0));
+                    nodelist = found->nodesetval;
+                    if ( nodelist && nodelist->nodeNr > 0 ) {
+                        int i = 0 ;
+                        const char * cls = "XML::LibXML::Node";
+                        xmlNodePtr tnode;
+                        ProxyObject * proxy;
+                        SV * element;
+                        
+                        len = nodelist->nodeNr;
+                        for( i ; i < len; i++){
+                           /* we have to create a new instance of an objectptr. and then 
+                             * place the current node into the new object. afterwards we can 
+                             * push the object to the array!
+                             */
+                            element = NULL;
+                            tnode = nodelist->nodeTab[i];
+                            element = sv_newmortal();
+                            cls = domNodeTypeName( tnode );
+            
+                            proxy = make_proxy_node(tnode);
+                            if ( node->extra != NULL
+                                 && ((xmlNodePtr)node->object)->type != XML_DOCUMENT_NODE ) {
+                                proxy->extra = node->extra;
+                                SvREFCNT_inc(node->extra);
+                            }
                     
-                    len = nodelist->nodeNr;
-                    for( i ; i < len; i++){
-                       /* we have to create a new instance of an objectptr. and then 
-                         * place the current node into the new object. afterwards we can 
-                         * push the object to the array!
-                         */
-                        element = NULL;
-                        tnode = nodelist->nodeTab[i];
-                        element = sv_newmortal();
-                        cls = domNodeTypeName( tnode );
-        
-                        proxy = make_proxy_node(tnode);
-                        if ( node->extra != NULL
-                             && ((xmlNodePtr)node->object)->type != XML_DOCUMENT_NODE ) {
-                            proxy->extra = node->extra;
-                            SvREFCNT_inc(node->extra);
+                            element = sv_setref_pv( element, (char *)cls, (void*)proxy );
+                            cls = domNodeTypeName( tnode );
+                            XPUSHs( element );
                         }
-                
-                        element = sv_setref_pv( element, (char *)cls, (void*)proxy );
-                        cls = domNodeTypeName( tnode );
-                        XPUSHs( element );
                     }
-                }
-                break;
-            case XPATH_BOOLEAN:
-                /* return as a Boolean */
-                /* access ->boolval */
-                XPUSHs(newSVpv("XML::LibXML::Boolean", 0));
-                XPUSHs(newSViv(found->boolval));
-                break;
-            case XPATH_NUMBER:
-                /* return as a Number */
-                /* access ->floatval */
-                XPUSHs(newSVpv("XML::LibXML::Number", 0));
-                XPUSHs(newSVnv(found->floatval));
-                break;
-            case XPATH_STRING:
-                /* access ->stringval */
-                /* return as a Literal */
-                XPUSHs(newSVpv("XML::LibXML::Literal", 0));
-                XPUSHs(newSVpv(found->stringval, 0));
-                break;
-            default:
-                croak("Uknown XPath return type");
+                    break;
+                case XPATH_BOOLEAN:
+                    /* return as a Boolean */
+                    /* access ->boolval */
+                    XPUSHs(newSVpv("XML::LibXML::Boolean", 0));
+                    XPUSHs(newSViv(found->boolval));
+                    break;
+                case XPATH_NUMBER:
+                    /* return as a Number */
+                    /* access ->floatval */
+                    XPUSHs(newSVpv("XML::LibXML::Number", 0));
+                    XPUSHs(newSVnv(found->floatval));
+                    break;
+                case XPATH_STRING:
+                    /* access ->stringval */
+                    /* return as a Literal */
+                    XPUSHs(newSVpv("XML::LibXML::Literal", 0));
+                    XPUSHs(newSVpv(found->stringval, 0));
+                    break;
+                default:
+                    croak("Uknown XPath return type");
+            }
+            xmlXPathFreeObject(found);
         }
-        xmlXPathFreeObject(found);
 
 void
 getChildnodes( node )
