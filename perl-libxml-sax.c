@@ -277,10 +277,18 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name ) {
             xmlFree(prefix);
         }
         else {
+            /* need to test if there is a default NS declared */
+            ns = PmmGetNsMapping( sax->ns_stack, NULL );
+            if ( ns != NULL ){
+                hv_store(retval, "NamespaceURI", 12,
+                         sv_2mortal(C2Sv(ns->href, NULL)), NsURIHash);
+            }
+            else {
+                hv_store(retval, "NamespaceURI", 12,
+                         SvREFCNT_inc(empty_sv), NsURIHash);
+            }
             hv_store(retval, "Prefix", 6,
                      SvREFCNT_inc(empty_sv), PrefixHash);
-            hv_store(retval, "NamespaceURI", 12,
-                     SvREFCNT_inc(empty_sv), NsURIHash);
             hv_store(retval, "LocalName", 9,
                      sv_2mortal(C2Sv(name, NULL)), LocalNameHash);
         }
@@ -340,7 +348,8 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
             name = *ta; ta++;
             value = *ta; ta++;
 /* Grant, Robin and the SAX spec say the ns node should appear in the
- *  attr list */
+ *  attr list
+ */
 /*             if (PmmDetectNamespaceDecl(name)) { */
 /*                 continue; */
 /*             } */
@@ -381,6 +390,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar **attr ) {
                     xmlFree(prefix);
                 }
                 else {
+                    /* different to elements attributes have no default ns */
                     hv_store(atV, "Prefix", 6,
                              SvREFCNT_inc(empty_sv), PrefixHash);
                     hv_store(atV, "NamespaceURI", 12,

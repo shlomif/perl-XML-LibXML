@@ -108,7 +108,7 @@ sub start_element {
              and defined $el->{NamespaceURI} 
              and $uri eq $el->{NamespaceURI} ) {
             $nodeflag = 1;
-        }      
+        }
         $node->setNamespace($uri, $p, $nodeflag );
     }
 
@@ -128,9 +128,11 @@ sub start_element {
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
-            next if defined $attr->{Prefix}
-                    and $attr->{Prefix} eq "xmlns"
-                    and $self->{USENAMESPACESTACK} == 1;
+            next if $self->{USENAMESPACESTACK} == 1
+                    and ( $attr->{Name} eq "xmlns"
+                          or ( defined $attr->{Prefix}
+                               and $attr->{Prefix} eq "xmlns" ) );
+
 
             if ( defined $attr->{Prefix}
                  and $attr->{Prefix} eq "xmlns" ) {
@@ -140,7 +142,7 @@ sub start_element {
                                     $attr->{Localname},
                                     $uri eq $el->{NamespaceURI} ? 1 : 0 );
             }
-            else {
+            els {
                 $node->setAttributeNS($attr->{NamespaceURI} || "",
                                       $attr->{Name}, $attr->{Value});
             }
