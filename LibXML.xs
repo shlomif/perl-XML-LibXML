@@ -762,11 +762,6 @@ LibXML_init_parser( SV * self ) {
      /* LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();  */
      /* xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity ); */
 
-    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
-                              (xmlInputOpenCallback) LibXML_input_open,
-                              (xmlInputReadCallback) LibXML_input_read,
-                              (xmlInputCloseCallback) LibXML_input_close);
-
     return real_obj;
 }
 
@@ -790,8 +785,10 @@ LibXML_cleanup_callbacks() {
 
 /*    xs_warn("      cleanup parser callbacks!\n"); */
 
+  /*
     xmlCleanupInputCallbacks();
     xmlRegisterDefaultInputCallbacks();
+    */
 
 /*    if ( LibXML_old_ext_ent_loader != NULL ) { */
 /*        xmlSetExternalEntityLoader( NULL ); */
@@ -850,12 +847,6 @@ BOOT:
     xmlInitParser();
     PmmSAXInitialize(aTHX);
 
-    /* make the callback mechnism available to perl coders */
-    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
-                              (xmlInputOpenCallback) LibXML_input_open,
-                              (xmlInputReadCallback) LibXML_input_read,
-                              (xmlInputCloseCallback) LibXML_input_close);
-
     xmlSetGenericErrorFunc( NULL ,
                            (xmlGenericErrorFunc)LibXML_error_handler);
     xmlDoValidityCheckingDefaultValue = 0;
@@ -866,6 +857,10 @@ BOOT:
     xmlPedanticParserDefaultValue = 0;
     xmlLineNumbersDefault(0);
     xmlSetGenericErrorFunc(NULL, NULL);
+    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
+                              (xmlInputOpenCallback) LibXML_input_open,
+                              (xmlInputReadCallback) LibXML_input_read,
+                              (xmlInputCloseCallback) LibXML_input_close);
 #ifdef LIBXML_CATALOG_ENABLED
     /* xmlCatalogSetDebug(10); */
     xmlInitializeCatalog(); /* use catalog data */
