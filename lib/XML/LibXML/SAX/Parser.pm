@@ -121,18 +121,22 @@ sub process_element {
         if ($attr->isa('XML::LibXML::Namespace')) {
             # TODO This needs fixing modulo agreeing on what
             # is the right thing to do here.
-
             my $prefix = "xmlns";
-            my $localname = $attr->prefix;
-            my $key = "{http://www.w3.org/xmlns/2000/}".$localname;
-            my $name = "xmlns:". $localname;
+            my $localname = $attr->localname;
+            my $key = "{http://www.w3.org/xmlns/2000/}";
+            my $name = "xmlns";
+
+            if ( defined $localname ) {
+                $key .= $localname;
+                $name.= ":".$localname;
+            }
 
             $attribs->{$key} =
                 {
                     Name => $name,
                     Value => $attr->href,
                     NamespaceURI => "http://www.w3.org/xmlns/2000/",
-                    Prefix => "xmlns",
+                    Prefix => $prefix,
                     LocalName => $localname,
                 };
             # push @ns_maps, $attribs->{$key};
@@ -144,8 +148,8 @@ sub process_element {
                 {
                     Name => $attr->name,
                     Value => $attr->value,
-                    NamespaceURI => $attr->namespaceURI,
-                    Prefix => $attr->prefix,
+                    NamespaceURI => $ns,
+                    Prefix => $attr->prefix || "",
                     LocalName => $attr->localname,
                 };
         }
@@ -157,7 +161,7 @@ sub process_element {
         Name => $element->nodeName,
         Attributes => $attribs,
         NamespaceURI => $element->namespaceURI,
-        Prefix => $element->prefix,
+        Prefix => $element->prefix || "",
         LocalName => $element->localname,
     };
 
