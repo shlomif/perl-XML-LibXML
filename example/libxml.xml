@@ -7,6 +7,12 @@
 	scratch. The DOM Document Class provides functions that are
 	conform to the DOM Core naming style.
 
+    It inherits all functions from <i>XML::LibXML::Node</i> as
+    specified in DOM Level2. This enables to access the nodes beside
+    the root element on document level - a <i>DTD</i> for example. The
+    support for these nodes is limited at the moment, so I would
+    recommend, not to use <i>node</i> functions on <i>documents<i>.
+
     It is suggested that one should always create a node not bound to
     any document.  There is no need of really including the node to
     the document, but once the node is bound to a document, it is
@@ -36,9 +42,9 @@
 
      Both parameter are optional. The default value for <b>$version</b> is
      <i>1.0</i>, of course. If the <b>$encoding</b> parameter is not set,
-     the encoding will be left unset, which means UTF8 is implied.
+     the encoding will be left unset, which means UTF8 is implied (and set).
 
-     The parameter less call of <b>createDocument</b> wil result the 
+     The call of <b>createDocument</b> without any parameter will result the
      following code:
 
 <example><![CDATA[
@@ -52,11 +58,6 @@
 
 <method name="getVersion" synopsis="$strVersion = $doc->getVersion();">
     returns the version string of the document
-</method>
-
-<method name="isEqual" synopsis="$bool = $doc->isEqual( $other_doc );">
-    returns TRUE (1) if documents refer to the same documentstructure,
-    otherwise FALSE (0) is returned.
 </method>
 
 <method name="toString" 
@@ -116,8 +117,14 @@
 </method>
 
 <method name="createAttribute"
-     synopsis="$doc->createAttribute($name [,$value]);">
-     Creates a new Attribute node.  
+     synopsis="$attrnode = $doc->createAttribute($name [,$value]);">
+     Creates a new Attribute node. This function is rather useless at
+     the moment, since there is no setAttributeNode function defined
+     in <i>XML::LibXML::Element</i>, yet. 
+</method>
+<method name="createAttributeNS"
+     synopsis="$attrnode = $doc->createAttributeNS( namespaceURI, $name [,$value] );">
+     Creates an Attribute bound to a namespace.
 </method>
 
 <method name="createCDATASection" synopsis="$cdata = $dom->create( $cdata_content );">
@@ -160,7 +167,16 @@
 
 <method name="getName" 
 	synopsis="$name = $node->getName();">
-	Returns the node's name
+	Returns the node's name. This Function is aware about namesaces
+	and returns the full name of the current node
+	(<i>prefix:localname</i>)
+</method>
+
+<method name="setName"
+    synopsis="$node->setName( $newName );"> 
+    In very limited situation it is usefull to change a nodes name. In
+    the DOM specification this should throw an error. This Function is 
+    not aware about namespaces yet. 
 </method>
 
 <method name="isEqual" synopsis="$bool = $node->isEqual( $other_node );">
@@ -176,7 +192,9 @@
 <method name="getType" 
 	synopsis="$type = $node->getType();">
 	Retrun the node's type. The possible types are described in
-	the libxml2 <b>tree.h</b> documentation.
+	the libxml2 <b>tree.h</b> documentation. The return value of this 
+    function is a numeric value. Therefore it differst with the result
+    of perl ref function.
 </method>
 
 <method name="unbindNode" 
@@ -230,6 +248,12 @@
 	synopsis="$nextnode = $node->getPreviousSibling()">
 	Analogous to <b>getNextSibling</b> the function returns the previous
 	sibling if any.
+</method>
+
+<method name="hasChildNodes"
+    synopsis="$boolean = $node->hasChildNodes();"> 
+    If the current node has Childnodes this function returns TRUE (1),
+    otherwise it returns FALSE (0, not undef).
 </method>
 
 <method name="getFirstChild" synopsis="$childnode = $node->getFirstChild()">
@@ -308,7 +332,7 @@
   <item name="XML::LibXML::Comment"/>
   <item name="XML::LibXML::Attr"/>
 </also>
-<version>0.90_a</version>
+<version>0.93</version>
 </class>
 
 <class name="XML::LibXML::Element">
@@ -336,6 +360,18 @@
 
 <method name="getAttributeNS" synopsis="$avalue = $node->setAttributeNS( $nsURI, $aname );">
 	Namespaceversion of <i>getAttribute</i>.
+</method>
+
+<method name="getAttributeNode"
+    synopsis="$attrnode = $node->getAttributeNode( $aname );">
+
+    Returns the attribute as a node if the attribute exists. If the
+    Attribute does not exists <i>undef</i> will be returned. 
+</method>
+
+<method name="getAttributeNodeNS"
+    synopsis="$attrnode = $node->getAttributeNodeNS( $namespaceURI, $aname );">
+    Namespaceversion of <i>getAttributeNode</i>. 
 </method>
 
 <method name="removeAttribute" synopsis="$node->removeAttribute( $aname );">

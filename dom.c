@@ -105,6 +105,17 @@ domName(xmlNodePtr node) {
   return qname;
 }
 
+void
+domSetName( xmlNodePtr node, xmlChar* name ) {
+  /* TODO: add ns support */
+  if ( node == NULL || name == NULL ) 
+    return ;
+  if ( node->name != NULL ) {
+    /* required since node->name is const! */
+    xmlFree( (void*) node->name );
+  }
+  node->name = xmlStrdup( name );
+}
 
 xmlNodePtr
 domAppendChild( xmlNodePtr self,

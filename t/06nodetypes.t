@@ -246,7 +246,6 @@ if ( defined $elem1 ) {
 	$elem2->appendChild( $elem3 );
 	ok( not defined $elem3->getOwnerDocument() );
   }
-
  }
 
 }

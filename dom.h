@@ -44,7 +44,10 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* string );
 /* A.1 DOM specified section */
 
 const xmlChar *
-domName( xmlNodePtr );
+domName( xmlNodePtr node );
+
+void
+domSetName( xmlNodePtr node, xmlChar* name );
 
 xmlNodePtr
 domAppendChild( xmlNodePtr self,
