@@ -549,20 +549,33 @@ LibXML_init_parser( SV * self ) {
         }
 
         item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_ENTITIES", 26, 0 );
-        if ( item != NULL && SvTRUE(*item) ) {
+        if ( item != NULL ) {
+            if ( SvTRUE(*item) ) {
+                xmlSubstituteEntitiesDefaultValue = 1;
+                xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
+            }
+            else {
+                xmlSubstituteEntitiesDefaultValue = 0;
+            }
+        }
+        else {
             xmlSubstituteEntitiesDefaultValue = 1;
             xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
         }
-        else {
-            xmlSubstituteEntitiesDefaultValue = 0;
-        }
 
         item = hv_fetch( real_obj, "XML_LIBXML_KEEP_BLANKS", 22, 0 );
-        if ( item != NULL && SvTRUE(*item) )
-             xmlKeepBlanksDefault(1);
-        else {
-             xmlKeepBlanksDefault(0);
+        if ( item != NULL ) {
+            if ( SvTRUE(*item) )
+                xmlKeepBlanksDefault(1);
+            else {
+                xmlKeepBlanksDefault(0);
+            }
         }
+        else {
+            /* keep blanks on default */
+            xmlKeepBlanksDefault(1);
+        }
+
         item = hv_fetch( real_obj, "XML_LIBXML_PEDANTIC", 19, 0 );
         xmlPedanticParserDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
 
@@ -573,10 +586,12 @@ LibXML_init_parser( SV * self ) {
             xmlLoadExtDtdDefaultValue ^= 1;
 
         item = hv_fetch( real_obj, "XML_LIBXML_COMPLETE_ATTR", 24, 0 );
-        if (item != NULL && SvTRUE(*item))
+        if (item != NULL && SvTRUE(*item)) {
             xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
-        else
+        }
+        else {
             xmlLoadExtDtdDefaultValue ^= XML_COMPLETE_ATTRS;
+        }
         /* now fetch the callbacks */
 
         item = hv_fetch( real_obj, "XML_LIBXML_READ_CB", 18, 0 );
@@ -3847,7 +3862,7 @@ _find( pnode, pxpath )
                                         cls = PmmNodeTypeName( tnode );
                                         element = sv_setref_pv( element,
                                                                 (const char *)cls,
-                                                                (void *)newns
+                                                                (void*)newns
                                                           );
                                     }
                                     else {
@@ -3994,7 +4009,7 @@ getNamespaces( pnode )
         node = PmmSvNode(pnode);
         ns = node->nsDef;
         while ( ns != NULL ) {
-            newns = xmlCopyNamespace((xmlNsPtr)ns);
+            newns = xmlCopyNamespace(ns);
             if ( newns != NULL ) {
                 element = NEWSV(0,0);
                 element = sv_setref_pv( element,

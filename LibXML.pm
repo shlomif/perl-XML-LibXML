@@ -1135,6 +1135,31 @@ Note that you do not need to enable this - if not supplied libxml will
 get the resource either directly from the filesystem, or using an internal
 http client library.
 
+=head1 DEFAULT VALUES
+
+The following table gives an overview about the default values of the
+parser attributes.
+
+=over 4
+
+=item validation == off (0)
+
+=item expand_entities == on (1)
+
+=item keep_blanks == on (1)
+
+=item pedantic_parser == off (0)
+
+=item load_ext_dtd == on (1)
+
+=item complete_attributes == on (1)
+
+=item expand_xinclude == off (0)
+
+=back
+
+By default no callback handler is set.
+
 =head1 PARSING
 
 There are three ways to parse documents - as a string, as a Perl
