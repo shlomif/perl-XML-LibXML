@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 40 };
+BEGIN { plan tests => 41 };
 use XML::LibXML;
 
 ##

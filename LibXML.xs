@@ -701,32 +701,34 @@ LibXML_parse_stream(SV * self, SV * ioref, char * directory)
     else {
         croak( "Empty Stream" );
     }
-    
-    if (
-        !well_formed
-        || ( xmlDoValidityCheckingDefaultValue
-             && !valid
-             && (doc->intSubset
-                 || doc->extSubset) ) 
-        ) {
-        xmlFreeDoc(doc);
-        return NULL;
+
+    if ( doc != NULL ) {
+        if (
+            !well_formed
+            || ( xmlDoValidityCheckingDefaultValue
+                 && !valid
+                 && (doc->intSubset
+                     || doc->extSubset) ) 
+            ) {
+            xmlFreeDoc(doc);
+            return NULL;
+        }
+
+        /* this should be done by libxml2 !? */
+        if (doc->encoding == NULL) {
+            /*  *LEAK NOTE* i am not shure if this is correct */
+            doc->encoding = xmlStrdup((const xmlChar*)"UTF-8");
+        }
+
+        if ( directory == NULL ) {
+            STRLEN len;
+            SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)doc));
+            doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, len));
+        } else {
+            doc->URL = xmlStrdup((const xmlChar*)directory);
+        }
     }
 
-    /* this should be done by libxml2 !? */
-    if (doc->encoding == NULL) {
-        /*  *LEAK NOTE* i am not shure if this is correct */
-        doc->encoding = xmlStrdup((const xmlChar*)"UTF-8");
-    }
-
-    if ( directory == NULL ) {
-        STRLEN len;
-        SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)doc));
-        doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, len));
-    } else {
-        doc->URL = xmlStrdup((const xmlChar*)directory);
-    }
-    
     return doc;
 }
 
@@ -1101,6 +1103,13 @@ _parse_string(self, string, directory = NULL)
 
         sv_2mortal(LibXML_error);
         
+        if ( real_dom == NULL ) {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
+        }
+
         if ( directory == NULL ) {
             STRLEN len;
             SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_dom));
@@ -1187,8 +1196,10 @@ _parse_fh(self, fh, directory = NULL)
         sv_2mortal(LibXML_error);
         
         if (real_dom == NULL) {
-            RETVAL = &PL_sv_undef;    
-            croak(SvPV(LibXML_error, len));
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
         }
         else if (xmlDoValidityCheckingDefaultValue
                  && SvCUR(LibXML_error) > 0
@@ -1252,6 +1263,13 @@ _parse_file(self, filename)
         xmlFreeParserCtxt(ctxt);
         
         sv_2mortal(LibXML_error);
+        
+        if ( real_dom == NULL ) {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
+        }
         
         if (!well_formed
             || (xmlDoValidityCheckingDefaultValue
@@ -1331,9 +1349,11 @@ parse_html_string(self, string)
 
         sv_2mortal(LibXML_error);
         
-        if (!real_dom || ((*SvPV(LibXML_error, len)) != '\0')) {
-            RETVAL = &PL_sv_undef;    
-            croak(SvPV(LibXML_error, len));
+        if (!real_dom) {
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
         }
         else {
             STRLEN n_a;
@@ -1396,8 +1416,10 @@ parse_html_file(self, filename)
         sv_2mortal(LibXML_error);
         
         if (!real_dom) {
-            RETVAL = &PL_sv_undef ;  
-            croak(SvPV(LibXML_error, len));
+            if ( SvCUR( LibXML_error ) > 0 ) {
+                croak(SvPV(LibXML_error, len));
+            }
+            XSRETURN_UNDEF;
         }
         else {
             RETVAL = PmmNodeToSv( (xmlNodePtr)real_dom, NULL ); 
@@ -1825,7 +1847,7 @@ _toString(self, format=0)
         RETVAL
 
 int 
-toFH( self, filehandler, format=1 )
+toFH( self, filehandler, format=0 )
         SV * self
         SV * filehandler
         int format
@@ -1864,10 +1886,26 @@ toFH( self, filehandler, format=1 )
                                           (xmlOutputCloseCallback)&LibXML_output_close_handler,
                                           filehandler,
                                           handler ); 
-        RETVAL =xmlSaveFormatFileTo( buffer, 
-                                     doc,
-                                     encoding,
-                                     format);
+
+
+
+        if ( format <= 0 ) {
+            # warn( "use no formated toString!" );
+            RETVAL =xmlSaveFormatFileTo( buffer, 
+                                         doc,
+                                         encoding,
+                                         format);
+        }
+        else {
+            int t_indent_var = xmlIndentTreeOutput;
+            xmlIndentTreeOutput = 1;
+            RETVAL =xmlSaveFormatFileTo( buffer, 
+                                         doc,
+                                         encoding,
+                                         format);
+            xmlIndentTreeOutput = t_indent_var;
+        }
+
         if ( intSubset != NULL ) {
             if (doc->children == NULL)
                 xmlAddChild((xmlNodePtr) doc, (xmlNodePtr) intSubset);
@@ -1881,9 +1919,10 @@ toFH( self, filehandler, format=1 )
         RETVAL    
 
 int 
-toFile( self, filename )
+toFile( self, filename, format=0 )
         SV * self
         char * filename
+        int format
     PREINIT:
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
@@ -1893,7 +1932,18 @@ toFile( self, filename )
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
 
-        RETVAL = xmlSaveFile( filename, (xmlDocPtr)PmmSvNode(self) );
+        if ( format <= 0 ) {
+            # warn( "use no formated toString!" );
+            RETVAL = xmlSaveFile( filename, (xmlDocPtr)PmmSvNode(self) );
+        }
+        else {
+            int t_indent_var = xmlIndentTreeOutput;
+            xmlIndentTreeOutput = 1;
+            RETVAL =xmlSaveFormatFile( filename,
+                                       (xmlDocPtr)PmmSvNode(self),
+                                       format);
+            xmlIndentTreeOutput = t_indent_var;
+        }
 
         xmlSaveNoEmptyTags = oldTagFlag;   
         if ( RETVAL > 0 ) 
