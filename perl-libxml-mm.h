@@ -45,12 +45,55 @@ extern "C" {
 #define xs_warn(string)
 #endif
 
-struct _ProxyObject {
-    void * object;
-    SV * extra;
+struct _ProxyNode {
+    xmlNodePtr node;
+    xmlNodePtr owner;
+    int count;
 };
 
-typedef struct _ProxyObject ProxyObject;
+/* helper type for the proxy structure */
+typedef struct _ProxyNode ProxyNode;
+
+/* pointer to the proxy structure */
+typedef ProxyNode* ProxyNodePtr;
+
+/* this my go only into the header used by the xs */
+#define SvPROXYNODE(x) ((ProxyNodePtr)SvIV(SvRV(x)))
+
+#define PmmREFCNT(node)      node->count
+#define PmmREFCNT_inc(node)  node->count++
+#define PmmNODE(xnode)       xnode->node
+#define PmmOWNER(node)       node->owner
+#define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
+
+ProxyNodePtr
+PmmNewNode(xmlNodePtr node);
+
+ProxyNodePtr
+PmmNewFragment(xmlDocPtr document);
+
+SV*
+PmmCreateDocNode( unsigned int type, ProxyNodePtr pdoc, ...);
+
+int
+PmmREFCNT_dec( ProxyNodePtr node );
+
+SV*
+PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner );
+
+xmlNodePtr
+PmmSvNode( SV * perlnode );
+
+xmlNodePtr
+PmmSvOwner( SV * perlnode );
+
+SV*
+PmmSetSvOwner(SV * perlnode, SV * owner );
+
+void
+PmmFixOwner(ProxyNodePtr node, ProxyNodePtr newOwner );
+
+/* string manipulation will go elsewhere! */
 
 /*
  * NAME c_string_to_sv
@@ -89,60 +132,5 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode );
 
 xmlChar *
 nodeSv2C( SV * scalar, xmlNodePtr refnode );
-
-ProxyObject *
-make_proxy_node (xmlNodePtr node);
-void 
-free_proxy_node ( SV * nodesv );
-
-/*
- * NAME node_to_sv
- * TYPE function
- * SYNOPSIS
- * SV *my_sv = node_to_sv(node)
- *
- * node_to_sv creates an proxy object and wraps it into a SV.
- * the node will not be copied.
- */
-SV*
-nodeToSv( xmlNodePtr node );
-
-/*
- * NAME sv_get_node
- * TYPE function
- * SYNOPSIS
- * xmlNodePtr = sv_get_node(my_sv)
- *
- * simply reads the node value from the SV. it is not implemened as a 
- * MACRO to be analogue to node_to_sv.
- */
-xmlNodePtr
-getSvNode( SV* perlnode );
-
-SV*
-getSvNodeExtra( SV* perlnode );
-
-SV*
-setSvNodeExtra( SV* perlnode, SV* extra );
-
-/*
- * NAME fix_dom
- * TYPE method
- * SYNOPSIS
- * fix_dom( node_to_fix, parent );
- *
- * fix_dom is ment to be used after each operation a node may change
- * the document it belongs to. this function will update the related
- * SV values.
- *
- * this function is required, so we can update the refcounts, so perl
- * won't delete a node/document/document_fragment if any childnode is
- * still refered by the perl layer.
- *
- * parent is a SV* pointing to the actual main node. this may is a
- * document or a document_frag at the moment.
- */
-void
-fix_proxy_extra( SV* nodetofix, SV* parent ); 
 
 #endif
