@@ -322,6 +322,30 @@ sub XML::LibXML::PI::setData {
     $pi->_setData( $string ) unless  $string =~ /\?>/;
 }
 
+sub XML::LibXML::Text::replaceDataString {
+    my ( $node, $left, $right ) = @_;
+
+    #ashure we exchange the strings and not expressions!
+    $left  =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
+    $right =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\$1/g;
+    my $datastr = $node->getData();
+    $datastr =~ s/$left/$right/;
+    $node->setData( $datastr );
+}
+
+sub XML::LibXML::Text::replaceDataRE {
+    my ( $node, $leftre, $rightre, $flag_all ) = @_;
+    return unless defined $leftre;
+    $rightre ||= "";
+
+    my $datastr = $node->getData();
+    my $restr   = "s/" . $leftre . "/" . $rightre . "/";
+    $restr .= "g" if defined $flag_all and $flag_all == 1;
+
+    eval "\$datastring =~ $restr";
+    $node->setData( $datastr );
+}
+
 1;
 __END__
 
@@ -447,11 +471,11 @@ http client library.
 
 =head1 PARSING
 
-There are three ways to parse documents - as a string, as a Perl filehandle,
-or as a filename. The return value from each is a XML::LibXML::Document
-object, which is a DOM object (although no DOM methods are implemented
-yet). See L<"XML::LibXML::Document"> below for more details on the methods
-available on documents.
+There are three ways to parse documents - as a string, as a Perl
+filehandle, or as a filename. The return value from each is a
+XML::LibXML::Document object, which is a DOM object (although not all
+DOM methods are implemented yet). See L<"XML::LibXML::Document"> below
+for more details on the methods available on documents.
 
 Each of the below methods will throw an exception if the document is invalid.
 To prevent this causing your program exiting, wrap the call in an eval{}
