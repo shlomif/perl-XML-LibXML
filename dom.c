@@ -4,6 +4,7 @@
 #include <libxml/xmlerror.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
+#include <libxml/parserInternals.h>
 #include <libxml/xmlIO.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
