@@ -3,7 +3,7 @@
 
 use Test;
 use Devel::Peek;
-BEGIN { plan tests=>60; }
+BEGIN { plan tests=>65; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -19,8 +19,10 @@ ok($loaded);
 
 local $XML::LibXML::ORIGINAL_STRING = 1;
 
-my $vers   = "1.0";
-my $enc    = "iso-8859-1";
+my $version = "1.0";
+my $enc1    = "iso-8859-1";
+my $enc2    = "iso-8859-2";
+
 my $aname  = "test";
 my $avalue = "the value";
 my $bvalue = "other value";
@@ -28,298 +30,282 @@ my $testtxt= "text";
 my $comment= "comment";
 my $cdata  = "unparsed";
 
-my $dom = XML::LibXML::Document->createDocument( $vers, $enc );
-if( defined $dom ) {
+print "# document tests\n";
+my $dom = XML::LibXML::Document->createDocument( $version, $enc1 );
+ok($dom);
 
-# node creation 1 (bound element)
+ok( $dom->getVersion, $version );
+ok( $dom->getEncoding, $enc1 );
+
+$dom->setEncoding($enc2);
+ok( $dom->getEncoding, $enc2 );
+$dom->setVersion( "2.0" );
+ok( $dom->getVersion, "2.0" );
+
+print "# node creation 1 (bound element)\n";
+
 my $elem1 = $dom->createElement( "A" );
-if ( defined $elem1 ) {
-    ok( $elem1->getType() == XML_ELEMENT_NODE );
-    ok( $elem1->getName() eq "A" );
+ok( $elem1 );
+ok( $elem1->getType(), XML_ELEMENT_NODE );
+ok( $elem1->getName(), "A" );
 
-    # warn "# Attribute tests";
-
-    # set, reset and remove attribute
-    $elem1->setAttribute( $aname, $avalue );
-    ok( $elem1->getAttribute( $aname ) eq $avalue );
-    ok( $elem1->hasAttribute( $aname ) );
+$elem1->setAttribute( $aname, $avalue );
+ok( $elem1->getAttribute( $aname ) eq $avalue );
+ok( $elem1->hasAttribute( $aname ) );
  
-  # toString test
-  my $estr = $elem1->toString();
-  my $tstr = "<A $aname=\"$avalue\"/>";
-  ok( $estr eq $tstr );  
+# toString test
+my $estr = $elem1->toString();
+my $tstr = "<A $aname=\"$avalue\"/>";
+ok( $estr, $tstr );  
 
-  $dom->setDocumentElement( $elem1 );
-  my $te = $dom->getDocumentElement();
+$dom->setDocumentElement( $elem1 );
+my $te = $dom->getDocumentElement();
   
-  # in the first version it cause a method not found ... 
-  ok( $estr eq $te->toString() );
+# in the first version it cause a method not found ... 
+ok( $estr, $te->toString() );
+ok( $elem1->isSameNode( $te ) );
 
-  #####################################################
-  # attribute tests
+#####################################################
+print "# attribute tests\n";
 
-  $elem1->setAttribute( $aname, $bvalue );
-  ok( $elem1->getAttribute( $aname ) eq $bvalue );
-  $elem1->removeAttribute( $aname );
-  ok( not $elem1->hasAttribute( $aname ) );
+$elem1->setAttribute( $aname, $bvalue );
+ok( $elem1->hasAttribute( $aname ) );
+ok( $elem1->getAttribute( $aname ), $bvalue );
+$elem1->removeAttribute( $aname );
+ok( not $elem1->hasAttribute( $aname ) );
+
+my $attr = XML::LibXML::Attr->new( 'test', 'value' );
+ok( defined $attr && $attr->name() eq 'test' && $attr->getValue() eq 'value' );
+
+$attr->setValue( 'other' );
+ok( $attr->getValue(), 'other' );
+
     
-    # warn "# attribute w/out document";
-    # warn "# new";
-    my $attr = XML::LibXML::Attr->new( 'test', 'value' );
-    ok( defined $attr && $attr->name() eq 'test' && $attr->getValue() eq 'value' );
+###################################################
+print "# child node functions:\n";
 
-    # warn "# reset";
-    $attr->setValue( 'other' );
-    # warn "# reset done";
-    # warn $attr->value . "\n";
-    ok( $attr->getValue(), 'other' );
+my $text = $dom->createTextNode( $testtxt );
+ok( $text );
+ok( $text->getType, XML_TEXT_NODE );
+ok( $text->getData(), $testtxt );
 
-    my $attr2 = $dom->createAttribute( "deutsch", "uberflieger" );
-    ok( defined $attr2 &&
-        $attr2->getName() eq "deutsch" &&
-        $attr2->getValue() eq "uberflieger" );
+$elem1->appendChild( $text );
+ok( $elem1->hasChildNodes() );
 
-    $attr2->setValue( "druckeberger" );
-    # warn "> '". $attr2->getValue() . "'\n";
-    ok( $attr2->getValue() eq "druckeberger" );
-     
-  ###################################################
-  # child node functions:
-  my $text = $dom->createTextNode( $testtxt );
-    # warn "# child functions";
-  ok( defined $text && $text->getType == XML_TEXT_NODE );
-  ok( defined $text && $text->getData() eq $testtxt );
+my $tt = $elem1->getFirstChild();
+ok( $tt );
+ok( $text->isSameNode($tt) );
 
-  $elem1->appendChild( $text );
-  ok( $elem1->hasChildNodes() );
+$tt = $elem1->getLastChild();
+ok( $tt );
+ok( $tt->isSameNode($text) ) ;
 
-  # test if first child works
-  my $tt = $elem1->getFirstChild();
-  ok( defined $tt && ( $tt->getData() eq $text->getData() ) ) ;
+my @children = $elem1->getChildnodes();
+ok( scalar( @children ) == 1 ); 
 
-  # test if last child works 
-  $tt = $elem1->getLastChild();
-  ok( defined $tt && ( $tt->getData() eq $text->getData() ) ) ;
-
-  my @children = $elem1->getChildnodes();
-  ok( scalar( @children ) == 1 ); 
-
-  # test bugs in classification
-  ok( $tt->isa("XML::LibXML::Text") );
+# test bugs in classification
+ok( $tt->isa("XML::LibXML::Text") );
   
-  $text = $dom->createComment( $comment ); 
-  ok( $text->isa("XML::LibXML::Comment") );
-  $elem1->appendChild( $text );
+$text = $dom->createComment( $comment ); 
+ok( $text->isa("XML::LibXML::Comment") );
+$elem1->appendChild( $text );
 
 
-  $text = $dom->createCDATASection( $cdata ); 
-  ok( $text->isa("XML::LibXML::CDATASection") );
-  $elem1->appendChild( $text );
+$text = $dom->createCDATASection( $cdata ); 
+ok( $text->isa("XML::LibXML::CDATASection") );
+$elem1->appendChild( $text );
  
-  my $str = "";
+my $str = "";
 
-  # forward traversing
-  my $c = $elem1->getFirstChild();
-  while ( $c ) {
+print "# traversing tests\n";
+
+my $c = $elem1->getFirstChild();
+while ( $c ) {
     if( $c->getType() == XML_TEXT_NODE ){
-	ok( $c->isa( "XML::LibXML::Text" ) );
-	$str .='t';
+    	ok( $c->isa( "XML::LibXML::Text" ) );
+	    $str .='t';
     }
     elsif( $c->getType() == XML_COMMENT_NODE ){
-	ok( $c->isa( "XML::LibXML::Comment" ) );
-	$str .='c';
+    	ok( $c->isa( "XML::LibXML::Comment" ) );
+	    $str .='c';
     }
     elsif( $c->getType() == XML_CDATA_SECTION_NODE ){
-	ok( $c->isa( "XML::LibXML::CDATASection" ) );
-	$str .='d';
+    	ok( $c->isa( "XML::LibXML::CDATASection" ) );
+	    $str .='d';
     }
     else{
-	$str .= '?';
+    	$str .= '?';
     }
     $c = $c->getNextSibling();
-  }
-  ok( $str eq 'tcd' ); 
-
-    # reverse traversing
-    $str = "";
-    my $rem = undef;
-    $c = $elem1->getLastChild();
-    while ( $c ) {
-        if( $c->getType() == XML_TEXT_NODE ){
-	        ok( $c->isa( "XML::LibXML::Text" ) );
-        	$str .='t';
-        }
-        elsif( $c->getType() == XML_COMMENT_NODE ){
-	        ok( $c->isa( "XML::LibXML::Comment" ) );
-	        $rem = $c;
-	        $str .='c';
-        }
-        elsif( $c->getType() == XML_CDATA_SECTION_NODE ){
-        	ok( $c->isa( "XML::LibXML::CDATASection" ) );
-        	$str .='d';
-        }
-        else{
-	        $str .= '?';
-        }
-        $c = $c->getPreviousSibling();
-    }
-    ok( $str , 'dct' ); 
-
-
-      # replace test
-    # warn "# replace test";
-
-    my $elem3 = $dom->createElement( "C" );
-    my $tn = $elem1->replaceChild( $elem3, $rem );
-
-  $str = "";
-  $c = $elem1->getLastChild();
-
-  while ( $c ) {
-    if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
-    elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
-    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){$str .='d';}
-    elsif( $c->getType() == XML_ELEMENT_NODE )      {$str .='e';}
-    else{$str .= '?';}
-    $c = $c->getPreviousSibling();
-  }
-  ok( $str, 'det' );    
-  ok( not defined $rem->getParentNode() && 
-      not defined $rem->getNextSibling() &&
-      not defined $rem->getPreviousSibling() );
-
-  # remove test
-  # warn "# remove test\n";
-
-  $elem1->removeChild( $elem3 );
-  $str = "";
-  $c = $elem1->getLastChild();
-  while ( $c ) {
-    if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
-    elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
-    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){$str .='d';}
-    elsif( $c->getType() == XML_ELEMENT_NODE )      {$str .='e';}
-    else{$str .= '?';}
-    $c = $c->getPreviousSibling();
-  }
-  ok( $str, 'dt' );    
-  ok( not defined $elem3->getParentNode() && 
-      not defined $elem3->getNextSibling() &&
-      not defined $elem3->getPreviousSibling() ); 
-
-  # node moving in the tree ...
-
-  $elem1->appendChild( $elem3 );
-  $elem3->appendChild( $text );
-  $str = "";
-  $c = $elem1->getLastChild();
-
-  while ( $c ) {
-    if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
-    elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
-    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){$str .='d';}
-    elsif( $c->getType() == XML_ELEMENT_NODE )      {$str .='e';}
-    else{$str .= '?';}
-    $c = $c->getPreviousSibling();
-  }
-  ok( $str, 'et' );
-  ok( $elem3->hasChildNodes() && 
-      $elem3->getFirstChild()->getType() == XML_CDATA_SECTION_NODE && 
-      $elem3->getFirstChild()->getData() eq $cdata );
-
-  my $testtxt = "täst";
-  my $elem = $dom->createElement( $testtxt );
-  ok( $elem->getName(), $testtxt );
-  $elem->appendTextNode( $testtxt );
-  $elem->appendTextChild($testtxt, $testtxt);
-  $elem->setAttribute( 'test', $testtxt );
-
-  @ta = $elem->getChildnodes();
-    # warn Devel::Peek::DumpArray(2 ,@ta );
-    # warn "\@TA HAS " , scalar( @ta), " ITEMS\n"; 
-  my ( $n1, $n2 ) = $elem->getChildnodes();
-  ok( $n1 && $n1->getData() eq $testtxt );
-  ok( $n2 && $n2->getName() eq $testtxt );
-  ok( $n2 && $n2->getLocalName() eq $testtxt );
-
-  ok( $elem->getAttribute( 'test' ) eq $testtxt );
-
-  #################################################
-  # explicit document fragment test
-    print "# fragment tests \n";
-  $frag = $dom->createDocumentFragment();
-#   $frag = XML::LibXML::DocumentFragment->new();
-  ok( $frag );
-#  Devel::Peek::Dump( $frag );
-  $frag->appendChild( $n1 );
-  ok( $frag->hasChildNodes() );
-  ok( ($frag->childNodes)[0]->nodeValue, $testtxt );
-  ok( ($elem->childNodes)[0]->nodeName, $testtxt );
-  $frag->appendChild( $elem );
-    @ta = $frag->childNodes;
-  ok( scalar(@ta) , 2 );
-
-  $domroot = $dom->documentElement;
-
-  # @ta = $domroot->childNodes;
-  # warn "root has ",scalar( @ta ) ," elements\n"; 
-  $domroot->appendChild( $frag );
-  @ta =$frag->childNodes;
-  ok( scalar(@ta), 0 );
-  @ta =$domroot->childNodes;
-  ok( scalar(@ta), 4 );
-  ok( ($domroot->childNodes)[2]->nodeValue, $testtxt );
-  #  warn $domroot->toString();
-  $frag->appendChild( ($domroot->childNodes)[2] );
-  $frag->appendChild( ($domroot->childNodes)[2] );
-  
-   # warn scalar( $frag->childNodes ), "\n";
-
-  $cnode = ($domroot->childNodes)[1];
-  ok( $cnode );
-  ok( $cnode->nodeName, 'C');
-  $domroot->replaceChild( $frag, $cnode );
-  ok( scalar($frag->childNodes), 0 );
-  ok( scalar($domroot->childNodes), 3 ); # its 2 because the first node in the fragment is text
-                        # and so is the preceeding node in domroot
-  # warn $domroot->toString();
-
 }
-print "# end fragment tests\n";
+
+ok( $str, 'tcd' ); 
+
+# reverse traversing
+$str = "";
+my $rem = undef;
+$c = $elem1->getLastChild();
+while ( $c ) {
+    if( $c->getType() == XML_TEXT_NODE ){
+	    ok( $c->isa( "XML::LibXML::Text" ) );
+      	$str .='t';
+    }
+    elsif( $c->getType() == XML_COMMENT_NODE ){
+	    ok( $c->isa( "XML::LibXML::Comment" ) );
+	    $rem = $c;
+	    $str .='c';
+    }
+    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){
+      	ok( $c->isa( "XML::LibXML::CDATASection" ) );
+      	$str .='d';
+    }
+    else{
+	    $str .= '?';
+    }
+    $c = $c->getPreviousSibling();
+}
+
+ok( $str , 'dct' ); 
 
 
-# node creation 2 (unbound element)
-#
+print "# replace test\n";
+
+my $elem3 = $dom->createElement( "C" );
+my $tn = $elem1->replaceChild( $elem3, $rem );
+ok( $tn->isSameNode( $rem ) );
+
+$str = "";
+$c = $elem1->getLastChild();
+
+while ( $c ) {
+    if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
+    elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
+    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){$str .='d';}
+    elsif( $c->getType() == XML_ELEMENT_NODE )      {$str .='e';}
+    else{$str .= '?';}
+    $c = $c->getPreviousSibling();
+}
+ok( $str, 'det' );    
+ok( not defined $rem->getParentNode() && 
+    not defined $rem->getNextSibling() &&
+    not defined $rem->getPreviousSibling() );
+
+
+# remove test
+print "# remove test\n";
+
+$tt = $elem1->removeChild( $elem3 );
+ok( $tt->isSameNode( $elem3 ) );
+
+$str = "";
+$c = $elem1->getLastChild();
+while ( $c ) {
+    if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
+    elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
+    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){$str .='d';}
+    elsif( $c->getType() == XML_ELEMENT_NODE )      {$str .='e';}
+    else{$str .= '?';}
+    $c = $c->getPreviousSibling();
+}
+ok( $str, 'dt' );    
+
+ok( not defined $elem3->getParentNode() && 
+    not defined $elem3->getNextSibling() &&
+    not defined $elem3->getPreviousSibling() ); 
+
+# node moving in the tree ...
+
+$elem1->appendChild( $elem3 );
+$elem3->appendChild( $text );
+$str = "";
+$c = $elem1->getLastChild();
+
+while ( $c ) {
+    if( $c->getType() == XML_TEXT_NODE )            {$str .='t';}
+    elsif( $c->getType() == XML_COMMENT_NODE )      {$str .='c';}
+    elsif( $c->getType() == XML_CDATA_SECTION_NODE ){$str .='d';}
+    elsif( $c->getType() == XML_ELEMENT_NODE )      {$str .='e';}
+    else{$str .= '?';}
+    $c = $c->getPreviousSibling();
+}
+ok( $str, 'et' );
+
+ok( $elem3->hasChildNodes() && 
+    $elem3->getFirstChild()->getType() == XML_CDATA_SECTION_NODE && 
+    $elem3->getFirstChild()->getData() eq $cdata );
+
+#################################################
+# explicit document fragment test
+print "# fragment tests \n";
+
+$elem4 = $dom->createElement("D");
+
+$frag = $dom->createDocumentFragment();
+#   $frag = XML::LibXML::DocumentFragment->new();
+ok( $frag );
+$frag->appendChild( $elem4 );
+
+ok( $frag->hasChildNodes() );
+ok( ($frag->childNodes)[0]->nodeName, "D" );
+
+$domroot = $dom->documentElement;
+
+# @ta = $domroot->childNodes;
+# warn "root has ",scalar( @ta ) ," elements\n"; 
+$domroot->appendChild( $frag );
+@ta =$frag->childNodes;
+ok( scalar(@ta), 0 );
+
+@ta =$domroot->childNodes;
+ok( scalar(@ta), 3 );
+# ok( ($domroot->childNodes)[2]->nodeName, $elem4->nodeName );
+
+$frag->appendChild( ($domroot->childNodes)[1] );
+$frag->appendChild( ($domroot->childNodes)[1] );
+  
+$cnode = ($domroot->childNodes)[0];
+
+ok( $cnode );
+ok( $cnode->nodeValue, $testtxt);
+
+ok( scalar($domroot->childNodes), 1 );
+$domroot->replaceChild( $frag, $cnode );
+ok( scalar($frag->childNodes), 0 );
+ok( scalar($domroot->childNodes), 2 ); 
+
+# warn $domroot->toString();
+
+print "# node creation 2 (unbound element)\n";
+
 # NOTE!
 #
 # this should only be a virtual thing! you should never everdo such a
 # thing. create nodes allways through a document, otherwise the node
 # might not be in UTF-8 which confuses XSLT, toString etc.
 #
-#
 # these tests are ment to test logical correctness!
 
- my $elem2 = XML::LibXML::Element->new( "B" );
+my $elem2 = XML::LibXML::Element->new( "B" );
 
- if ( defined $elem2 ) {
-  ok( defined $elem2 && $elem2->getType() == XML_ELEMENT_NODE );
-  ok( defined $elem2 && $elem2->getName() eq "B" );
-  # much easier to test if no owner document is set ...
-  ok( defined $elem2 && not defined $elem2->getOwnerDocument() );
+ok( $elem2 );
+ok( defined $elem2 && $elem2->getType() == XML_ELEMENT_NODE );
+ok( defined $elem2 && $elem2->getName() eq "B" );
 
-  $elem2->setAttribute( $aname, $avalue );
-  ok( $elem2->getAttribute( $aname ) eq $avalue );
-  $elem2->setAttribute( $aname, $bvalue );
-  ok( $elem2->getAttribute( $aname ) eq $bvalue );
-  $elem2->removeAttribute( $aname );
-  ok( not $elem2->hasAttribute( $aname ) );
+# much easier to test if no owner document is set ...
+ok( not defined $elem2->getOwnerDocument() );
+
+$elem2->setAttribute( $aname, $avalue );
+ok( $elem2->getAttribute( $aname ), $avalue );
+$elem2->setAttribute( $aname, $bvalue );
+ok( $elem2->getAttribute( $aname ), $bvalue );
+$elem2->removeAttribute( $aname );
+ok( not $elem2->hasAttribute( $aname ) );
 
 
-  # nessecary document switch test!
-  my $elem3 = $dom->createElement( "C" );
-  if ( defined $elem3 ) {
-	$elem2->appendChild( $elem3 );
-	ok( not defined $elem3->getOwnerDocument() );
-  }
- }
-}
+print "# document switching!\n";
+
+$elem3 = $dom->createElement( "C" );
+$elem2->appendChild( $elem3 );
+ok( not defined $elem3->getOwnerDocument() );
+
+print "# end tests \n";

@@ -15,17 +15,15 @@ ok($loaded);
 # of the test code):
 
 # this performs general dom tests
-# local $XML::LibXML::ORIGINAL_STRING = 1;
 my $file    = "example/dromeds.xml";
 my $string = q{
 <B lang="eng">hump</B>
-<!-- thingi in german -->
-<B lang="ger">Hocker</B>
+<B lang="ger">Hoecker</B>
 };
 my $camel = 'A';
 my $tstr  = qq{<$camel>$string</$camel>};
 
-my $string2 = "Hocker";
+my $string2 = "Hoecker";
 
 
 # init the file parser
@@ -61,16 +59,6 @@ if ( defined $dom ) {
 
     my $data = $bs[1]->getData();
     ok( $bs[1]->getData() eq $string2 );
-
-#    my $elem3 = $doc->createElement('C');
-#    $elem3->setAttribute( "value", $string2 );
-
-
-#    ok( $elem3->toString() eq "<C value=\"$string2\"/>" );
-  
-#    # test if the output of simple text nodes will be correct as well
-#    $elem4 = $doc->createTextNode( $string2 );
-#    ok( $string2 eq $elem4->toString() );
 }
 # warn "Doc fragments shall be destroyed here!\n";
 
