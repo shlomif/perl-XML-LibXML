@@ -2587,7 +2587,8 @@ importNode( dom, node )
         real_dom = (xmlDocPtr)PmmSvNode(dom);
         real_node=  PmmSvNode(node);
    
-        if ( real_dom == real_node ) {
+        if ( real_node->type == XML_DOCUMENT_NODE 
+             || real_node->type == XML_HTML_DOCUMENT_NODE ) {
             croak( "Can't import Documents!" );
             XSRETURN_UNDEF;
         }
@@ -2615,7 +2616,8 @@ adoptNode( dom, node )
         real_dom = (xmlDocPtr)PmmSvNode(dom);
         real_node=  PmmSvNode(node);
 
-        if ( real_dom == real_node ) {
+        if ( real_node->type == XML_DOCUMENT_NODE 
+             || real_node->type == XML_HTML_DOCUMENT_NODE ) {
             croak( "Can't adopt Documents!" );
             XSRETURN_UNDEF;
         }
