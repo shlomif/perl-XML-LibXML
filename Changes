@@ -8,6 +8,8 @@ Revision history for Perl extension XML::LibXML
    - made parse_xml_chunk() reporting errors
    - DOM API is more Level 3 conform
    - fixed the PI interface
+   - xpath.pl example 
+   - namespace fixes
 
 1.40
    - new parsefunction: $parser->parse_xml_chunk($string);
