@@ -1,5 +1,14 @@
 Revision history for Perl extension XML::LibXSLT.
 
+0.96
+    - Addition of HTML parser
+    - getOwner method added
+    - Element->getAttributes() added
+    - Element->getAttributesNS(URI) added
+    - Documentation updates
+    - Memory leak fixes
+    - Bug Fixes
+
 0.94
     - Some DOM Level 2 cleanups
     - getParentNode returns XML::LibXML::Document if we get the 
