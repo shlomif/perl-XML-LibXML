@@ -553,6 +553,11 @@
                     case, if the new node is not part of the document,
                     the node will be imported first.
                 </p>
+                <p>
+                    If $refNode is defined but is not a childnode of
+                    the current node, this function will fail. An
+                    undefined $newNode has no effect.
+                </p>
             </method>
 
             <method name="insertAfter"
@@ -562,6 +567,11 @@
                     <em>$refNode</em>. If <em>$refNode</em> is
                     undefined, the newNode will be set as the new last
                     child of the parent node.
+                </p>
+                <p>
+                    If $refNode is defined but is not a childnode of
+                    the current node, this function will fail. An
+                    undefined $newNode has no effect.
                 </p>
             </method>
 
