@@ -1412,14 +1412,12 @@ sub _callback_open {
 
 sub _callback_read {
     my $fh = shift;
-    my $buffer = shift;
+    my $buflen = shift;
 
     my $retval = undef;
 
-    # libxml2 expects -1 if a callback has read everything.
-
     if ( defined $_CUR_CB ) {
-        $retval = $_CUR_CB->[2]->( $fh, $buffer );
+        $retval = $_CUR_CB->[2]->( $fh, $buflen );
     }
 
     return $retval;

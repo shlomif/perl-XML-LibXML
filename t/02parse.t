@@ -9,7 +9,7 @@ use IO::File;
 
 BEGIN { use XML::LibXML;
     if ( XML::LibXML::LIBXML_VERSION >= 20600 ) {
-        plan tests => 472; 
+        plan tests => 474; 
     }
     else {
         plan tests => 464;
@@ -826,6 +826,28 @@ if ( XML::LibXML::LIBXML_VERSION >= 20600 )
     $doc = $parser->parse_chunk( "", 1 );
     ok( $doc->documentElement->toString() , 
         $xsDoc2 );
+}
+
+
+##
+# test if external subsets are loaded correctly
+
+{
+        my $xmldoc = <<EOXML;
+<!DOCTYPE X SYSTEM "example/ext_ent.dtd">
+<X>&foo;</X>
+EOXML
+        my $parser = XML::LibXML->new();
+        
+        $parser->load_ext_dtd(1);
+
+        # first time it should work
+        my $doc    = $parser->parse_string( $xmldoc );
+        ok( $doc->documentElement()->string_value(), " test " );
+
+        # second time it must not fail.        
+        my $doc2   = $parser->parse_string( $xmldoc );
+        ok( $doc2->documentElement()->string_value(), " test " );
 }
 
 sub tsub {
