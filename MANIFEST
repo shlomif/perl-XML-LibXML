@@ -56,6 +56,7 @@ t/18docfree.t
 t/19encoding.t
 t/20extras.t
 t/22iterator.t
+t/23rawfunctions.t
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/Comment.pod
 lib/XML/LibXML/DOM.pod

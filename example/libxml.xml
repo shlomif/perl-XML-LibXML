@@ -404,7 +404,8 @@ is therefore a shortcut for
 
                 <p>
                     Note that this feature will <st>only</st> work if
-                    libxml2 is compiled with zlib support.
+                    libxml2 is compiled with zlib support and toFile()
+                    is used for output.
                 </p>
             </method>
 
@@ -807,7 +808,7 @@ is therefore a shortcut for
                     synopsis="$bool = $node->isSameNode( $other_node );">
                 <p>
                     returns TRUE (1) if the given nodes refer to the same
-                    nodestructure, otherwise FALSE (0) is returned.
+                    node structure, otherwise FALSE (0) is returned.
                 </p>
             </method>
 
@@ -898,7 +899,7 @@ is therefore a shortcut for
             </method>
 
             <method name="appendChild"
-                    synopsis="$childnode = $node->appendChild( $childnode )">
+                    synopsis="$childnode = $node->appendChild( $childnode );">
                 <p>
                     The function will add the <em>$childnode</em> to
                     the end of <em>$node</em>'s children. The function
@@ -907,6 +908,58 @@ is therefore a shortcut for
                     from the DOM L2 specification, in the case, if the
                     new node is not part of the document, the node
                     will be imported first.
+                </p>
+            </method>
+            <method name="addChild"
+                    synopsis="$childnode = $node->addChild( $chilnode );">
+                <p>
+                    As an alternative to appendChild() one can use the
+                    addChild() function. This function is a bit
+                    faster, because it avoids all DOM confomity
+                    checks. Therefore this function is quite usefull
+                    if one builds XML documents in memory where the
+                    order and ownership (<em>ownerDocument<em>) is
+                    ashured.
+                </p>
+                <p>
+                    addChild() uses libxml2's own xmlAddChild()
+                    function. Thus it has to be used with extra care:
+                    If a text node is added to a node and the node
+                    itself or its last childnode is aswell a text
+                    node, the node to add will be merged with the one
+                    already available. The current node will be
+                    removed from memory after this action. Because
+                    perl is not aware about this action, the perl
+                    instance is still available. XML::LibXML will
+                    catch the loss of a node an avoid to run any
+                    function called on that node.
+                </p>
+                <example><![CDATA[
+ my $t1 = $doc->createTextNode( "foo" );
+ my $t2 = $doc->createTextNode( "bar" );
+ $t1->addChild( $t2 );       # is ok
+ my $val = $t2->nodeValue(); # will fail, script dies
+                    ]]></example>
+
+                <p>
+                    Also addChild() will not check it the added node
+                    belongs to the same document as the node it will
+                    be added to. This could lead to inconsistent
+                    documents and in more worse cases even to memory
+                    violations, if one does not keep track of this
+                    issue.
+                </p>
+                <p>
+                    Although this sounds like a lot of trouble,
+                    addChild() is usefull if a document is build from
+                    a stream, such as happens sometimes in SAX
+                    handlers or filters.
+                </p>
+                <p>
+                    If you are not shure about the source of your
+                    nodes, you better stay with appendChild(), because
+                    this function is more user friendly in the sense
+                    of more error tolerance.
                 </p>
             </method>
 

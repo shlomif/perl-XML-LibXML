@@ -781,6 +781,8 @@ sub isSameNode {
 
 package XML::LibXML::NamedNodeMap;
 
+use XML::LibXML::Common qw(:libxml);
+
 sub new {
     my $class = shift;
     my $self = bless { Nodes => [@_] }, $class;
@@ -807,21 +809,26 @@ sub setNamedItem {
     if ( defined $node ) {
         if ( scalar @{$self->{Nodes}} ) {
             my $name = $node->nodeName();
-            if ( $name =~ /^xmlns/ ) {
-                warn "not done yet\n";
+            if ( $node->nodeType() == XML_NAMESPACE_DECL ) {
+                return;
             }
-            elsif ( exists $self->{NodeMap}->{$name} ) {
+            if ( defined $self->{NodeMap}->{$name} ) {
+                if ( $node->isSameNode( $self->{NodeMap}->{$name} ) ) {
+                    return;
+                }
                 $retval = $self->{NodeMap}->{$name}->replaceNode( $node );
             }
             else {
                 $self->{Nodes}->[0]->addSibling($node);
             }
+
             $self->{NodeMap}->{$name} = $node;
             push @{$self->{Nodes}}, $node;
         }
         else {
             # not done yet
             # can this be properly be done???
+            warn "not done yet\n";
         }
     }
     return $retval;

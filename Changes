@@ -5,6 +5,15 @@ Version 1.53 fixes potentional buffer overflows were possible with earlier
 versions of the package. It is recommended to upgrade any XML::LibXML since
 1.49 to 1.53 to avoid such problems.
 
+1.54
+   - Catalog interface is aware about libxml2 configuration
+   - XML::LibXML should work now on system without having zlib installed
+   - fixed memory management problem introduced in 1.53
+   - fixed default iterator of XML::LibXML::Iterator
+   - interface for raw libxml2 DOM building functions 
+     (currently just addChild())
+   - more documentation 
+
 1.53
    Parser
    - catalog interface

@@ -114,7 +114,7 @@ sub start_element {
 
     # append
     if ($self->{Parent}) {
-        $self->{Parent}->appendChild($node);
+        $self->{Parent}->addChild($node);
         $self->{Parent} = $node;
     }
     else {
@@ -179,7 +179,7 @@ sub characters {
         $node = XML::LibXML::Text->new($chars->{Data});
     }
 
-    $self->{Parent}->appendChild($node);
+    $self->{Parent}->addChild($node);
 }
 
 sub comment {
@@ -199,10 +199,10 @@ sub comment {
     }
 
     if ( defined $self->{Parent} ) {
-        $self->{Parent}->appendChild($comment);
+        $self->{Parent}->addChild($comment);
     }
     else {
-        $self->{DOM}->appendChild($comment);
+        $self->{DOM}->addChild($comment);
     }
 }
 
@@ -213,10 +213,10 @@ sub processing_instruction {
     $PI = $self->{DOM}->createPI( $pi->{Target}, $pi->{Data} );
 
     if ( defined $self->{Parent} ) {
-        $self->{Parent}->appendChild( $PI );
+        $self->{Parent}->addChild( $PI );
     }
     else {
-        $self->{DOM}->appendChild( $PI );
+        $self->{DOM}->addChild( $PI );
     }
 }
 
