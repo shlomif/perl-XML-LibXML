@@ -181,17 +181,17 @@ PmmNewFragment(xmlDocPtr doc)
  */
 void
 PmmFreeNode( xmlNodePtr node )
-{
+{  
     switch( node->type ) {
     case XML_DOCUMENT_NODE:
     case XML_HTML_DOCUMENT_NODE:
-        xs_warn("XML_DOCUMENT_NODE\n");
+        xs_warn("PFN: XML_DOCUMENT_NODE\n");
         xmlFreeDoc( (xmlDocPtr) node );
         break;
     case XML_ATTRIBUTE_NODE:
-        xs_warn("XML_ATTRIBUTE_NODE\n");
+        xs_warn("PFN: XML_ATTRIBUTE_NODE\n");
         if ( node->parent == NULL ) {
-            xs_warn( "free node\n");
+            xs_warn( "free node!\n");
             node->ns = NULL;
             xmlFreeProp( (xmlAttrPtr) node );
         }
@@ -200,15 +200,16 @@ PmmFreeNode( xmlNodePtr node )
         if ( node->doc ) {
             if ( node->doc->extSubset != (xmlDtdPtr)node 
                  && node->doc->intSubset != (xmlDtdPtr)node ) {
-                xs_warn( "XML_DTD_NODE\n");
+                xs_warn( "PFN: XML_DTD_NODE\n");
                 node->doc = NULL;
                 xmlFreeDtd( (xmlDtdPtr)node );
             }
         }
         break;
     case XML_DOCUMENT_FRAG_NODE:
-        xs_warn("XML_DOCUMENT_FRAG_NODE\n");
+        xs_warn("PFN: XML_DOCUMENT_FRAG_NODE\n");
     default:
+        xs_warn( "PFN: normal node" );
         xmlFreeNode( node);
         break;
     }
@@ -230,28 +231,42 @@ PmmREFCNT_dec( ProxyNodePtr node )
         retval = PmmREFCNT(node)--;
         if ( PmmREFCNT(node) <= 0 ) {
             xs_warn( "NODE DELETATION\n" );
+
             libnode = PmmNODE( node );
-            libnode->_private = NULL;
+            if ( libnode != NULL ) {
+                if ( libnode->_private != node ) {
+                    libnode = NULL;
+                }
+                else {
+                    libnode->_private = NULL;
+                }
+            }
+
             PmmNODE( node ) = NULL;
             if ( PmmOWNER(node) && PmmOWNERPO(node) ) {
                 xs_warn( "DOC NODE!\n" );
                 owner = PmmOWNERPO(node);
                 PmmOWNER( node ) = NULL;
-                if ( libnode->parent == NULL ) {
+                if( libnode != NULL && libnode->parent == NULL ) {
                     /* this is required if the node does not directly
                      * belong to the document tree
                      */
                     xs_warn( "REAL DELETE" );
                     PmmFreeNode( libnode );
-                }            
+                }
+                xs_warn( "decrease owner" );
                 PmmREFCNT_dec( owner );
             }
-            else {
+            else if ( libnode != NULL ) {
                 xs_warn( "STANDALONE REAL DELETE" );
+                
                 PmmFreeNode( libnode );
             }
             free( node );
         }
+    }
+    else {
+        xs_warn("lost node" );
     }
     return retval;
 }
@@ -368,28 +383,42 @@ xmlNodePtr
 PmmSvNodeExt( SV* perlnode, int copy ) 
 {
     xmlNodePtr retval = NULL;
+    ProxyNodePtr proxy = NULL;
 
     if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
-         if ( sv_derived_from(perlnode, "XML::LibXML::Node")
-              && SvPROXYNODE(perlnode) != NULL  ) {
-             retval = PmmNODE( SvPROXYNODE(perlnode) ) ;
-         }
+/*         if ( sv_derived_from(perlnode, "XML::LibXML::Node") */
+/*              && SvPROXYNODE(perlnode) != NULL  ) { */
+/*             retval = PmmNODE( SvPROXYNODE(perlnode) ) ; */
+/*         } */
+        xs_warn("   perlnode found\n" );
+        if ( sv_derived_from(perlnode, "XML::LibXML::Node")  ) {
+            proxy = SvPROXYNODE(perlnode);
+            xs_warn( "is a xmlNodePtr structure\n" );
+            retval = PmmNODE( proxy ) ;
+
+            if ( retval != NULL
+                 && ((ProxyNodePtr)retval->_private) != proxy ) {
+                xs_warn( "no node in proxy node" );
+                PmmNODE( proxy ) = NULL;
+                retval = NULL;
+            }
+        }
 #ifdef  XML_LIBXML_GDOME_SUPPORT
-         else if ( sv_derived_from( perlnode, "XML::GDOME::Node" ) ) {
-             GdomeNode* gnode = (GdomeNode*)SvIV((SV*)SvRV( perlnode ));
-             if ( gnode == NULL ) {
-                 warn( "no XML::GDOME data found (datastructure empty)" );    
-             }
-             else {
-                 retval = gdome_xml_n_get_xmlNode( gnode );
-                 if ( retval == NULL ) {
-                     warn( "no XML::LibXML node found in GDOME object" );
-                 }
-                 else if ( copy == 1 ) {
-                     retval = PmmCloneNode( retval, 1 );
-                 }
-             }
-         }
+        else if ( sv_derived_from( perlnode, "XML::GDOME::Node" ) ) {
+            GdomeNode* gnode = (GdomeNode*)SvIV((SV*)SvRV( perlnode ));
+            if ( gnode == NULL ) {
+                warn( "no XML::GDOME data found (datastructure empty)" );    
+            }
+            else {
+                retval = gdome_xml_n_get_xmlNode( gnode );
+                if ( retval == NULL ) {
+                    warn( "no XML::LibXML node found in GDOME object" );
+                }
+                else if ( copy == 1 ) {
+                    retval = PmmCloneNode( retval, 1 );
+                }
+            }
+        }
 #endif
     }
 
@@ -513,6 +542,12 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
                 PmmFixOwnerList( (xmlNodePtr)PmmNODE(nodetofix)->properties,
                                  parent );
             }
+
+            if ( parent == NULL || PmmNODE(nodetofix)->parent == NULL ) {
+                /* fix to self */
+                parent = nodetofix;
+            }
+
             PmmFixOwnerList(PmmNODE(nodetofix)->children, parent);
         }
         else {
@@ -776,7 +811,12 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
     SV *retval = &PL_sv_undef;
     xmlCharEncoding enc;
     if ( string != NULL ) {
-        enc = xmlParseCharEncoding( encoding );
+        if ( encoding != NULL ) {
+            enc = xmlParseCharEncoding( encoding );
+        }
+        else {
+            enc = 0;
+        }
         if ( enc == 0 ) {
             /* this happens if the encoding is "" or NULL */
             enc = XML_CHAR_ENCODING_UTF8;
@@ -788,7 +828,10 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
             xs_warn("set UTF8 string");
             len = xmlStrlen( string );
             /* create the SV */
-            retval = newSVpvn( (const char *)string, len );
+            /* string[len] = 0; */
+
+            retval = NEWSV(0, len+1); 
+            sv_setpvn(retval, string, len );
 #ifdef HAVE_UTF8
             xs_warn("set UTF8-SV-flag");
             SvUTF8_on(retval);
@@ -863,6 +906,8 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
                 /* create an UTF8 string. */       
                 xs_warn("set UTF8 string");
                 /* create the SV */
+                /* warn( "string is %s\n", string ); */
+
                 retval = newSVpvn( (const char *)decoded, len );
 #ifdef HAVE_UTF8
                 xs_warn("set UTF8-SV-flag");
