@@ -142,7 +142,7 @@ sub start_element {
                                     $attr->{Localname},
                                     $uri eq $el->{NamespaceURI} ? 1 : 0 );
             }
-            els {
+            else {
                 $node->setAttributeNS($attr->{NamespaceURI} || "",
                                       $attr->{Name}, $attr->{Value});
             }

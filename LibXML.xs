@@ -169,10 +169,10 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     PUTBACK;
 
     if (sv_isobject(ioref)) {
-        cnt = perl_call_method("read", G_SCALAR);
+        cnt = perl_call_method("read", G_SCALAR | G_EVAL);
     }
     else {
-        cnt = perl_call_pv("__read", G_SCALAR);
+        cnt = perl_call_pv("__read", G_SCALAR | G_EVAL);
     }
 
     SPAGAIN;
@@ -180,6 +180,12 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     if (cnt != 1) {
         croak("read method call failed");
     }
+    
+    if (SvTRUE(ERRSV)) {
+       STRLEN n_a;
+       croak("read on filehandle failed: %s", SvPV(ERRSV, n_a));
+       POPs ;
+    }				  
 
     read_results = POPs;
 
@@ -228,7 +234,7 @@ LibXML_input_match(char const * filename)
         PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
 
         SPAGAIN;
         
@@ -236,6 +242,12 @@ LibXML_input_match(char const * filename)
             croak("match callback must return a single value");
         }
         
+        if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+       	    croak("input match callback died: %s", SvPV(ERRSV, n_a));
+       	    POPs ;
+    	}				  
+
         res = POPs;
 
         if (SvTRUE(res)) {
@@ -279,13 +291,19 @@ LibXML_input_open(char const * filename)
         PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
 
         SPAGAIN;
         
         if (count != 1) {
             croak("open callback must return a single value");
         }
+
+	if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+       	    croak("input callback died: %s", SvPV(ERRSV, n_a));
+       	    POPs ;
+        } 
 
         results = POPs;
 
@@ -332,12 +350,18 @@ LibXML_input_read(void * context, char * buffer, int len)
         PUSHs(sv_2mortal(newSViv(len)));
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
 
         SPAGAIN;
         
         if (count != 1) {
             croak("read callback must return a single value");
+        }
+
+        if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+       	    croak("read callback died: %s", SvPV(ERRSV, n_a));
+       	    POPs ;
         }
 
         output = POPp;
@@ -388,7 +412,7 @@ LibXML_input_close(void * context)
         PUSHs(ctxt);
         PUTBACK;
 
-        count = perl_call_sv(callback, G_SCALAR);
+        count = perl_call_sv(callback, G_SCALAR | G_EVAL);
 
         SPAGAIN;
 
@@ -396,6 +420,12 @@ LibXML_input_close(void * context)
         
         if (!count) {
             croak("close callback failed");
+        }
+
+        if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+       	    croak("close callback died: %s", SvPV(ERRSV, n_a));
+       	    POPs ;
         }
 
         PUTBACK;
@@ -429,12 +459,18 @@ LibXML_output_write_handler(void * ioref, char * buffer, int len)
         PUSHs(sv_2mortal(tsize));
         PUTBACK;
 
-        cnt = perl_call_pv("XML::LibXML::__write", G_SCALAR);
+        cnt = perl_call_pv("XML::LibXML::__write", G_SCALAR | G_EVAL);
 
         SPAGAIN;
 
         if (cnt != 1) {
             croak("write method call failed");
+        }
+
+        if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+       	    croak("write method call died: %s", SvPV(ERRSV, n_a));
+       	    POPs ;
         }
 
         FREETMPS;
@@ -491,7 +527,7 @@ LibXML_load_external_entity(
         XPUSHs(sv_2mortal(newSVpv((char*)ID, 0)));
         PUTBACK;
         
-        count = perl_call_sv(*func, G_SCALAR);
+        count = perl_call_sv(*func, G_SCALAR | G_EVAL);
         
         SPAGAIN;
         
@@ -499,6 +535,12 @@ LibXML_load_external_entity(
             croak("external entity handler did not return a value");
         }
         
+        if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+       	    croak("external entity callback died: %s", SvPV(ERRSV, n_a));
+       	    POPs ;
+        }
+
         results = POPs;
         
         results_pv = SvPV(results, results_len);
@@ -884,6 +926,11 @@ END()
     CODE:
         xmlCleanupParser();
 
+=head1 Some POD here
+
+Foo
+
+=cut
 
 int
 XML_ELEMENT_NODE()
