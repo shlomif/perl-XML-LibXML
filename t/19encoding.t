@@ -11,7 +11,7 @@ use Test;
 
 BEGIN { 
     my $tests = 25;  
-    $tests = 5 if $] < 5.006;
+    $tests = 6 if $] < 5.006;
     plan tests => $tests;
 }
 
@@ -29,7 +29,7 @@ ok($p);
 my $do_kio8r = 1;
 
 my $tstr_utf8       = 'test';
-my $tstr_iso_latin1 = 'täst';
+my $tstr_iso_latin1 = "t\xE4st";
 my $tstr_euc_jp     = 'À¸ÇşÀ¸ÊÆÀ¸Íñ';
 my $tstr_kio8r       = 'ĞÒÏÂÁ';
 
