@@ -60,7 +60,7 @@
  * character is -1!
  */
 int
-domParseChar( xmlChar *char, int *len );
+domParseChar( xmlChar *characters, int *len );
 
 xmlNodePtr 
 domReadWellBalancedString( xmlDocPtr doc, xmlChar* string, int repair );
