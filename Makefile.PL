@@ -1,4 +1,9 @@
+# -------------------------------------------------------------------------- #
 # $Id$
+# -------------------------------------------------------------------------- #
+# Makefile.PL for XML::LibXML.
+# This file is required to generate a localized Makefile
+# -------------------------------------------------------------------------- #
 
 use ExtUtils::MakeMaker;
 use Config;
@@ -6,64 +11,115 @@ use Symbol;
 use File::Spec;
 
 $|=0;
-
 my %config;
 
+# -------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
+# common informations go to the top, so they are easier to find
+# -------------------------------------------------------------------------- #
+my %INFOS = (
+    'NAME'	=> 'XML::LibXML',
+    'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
+    'AUTHOR'    => 'Christian Glahn',
+    'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
+    'PREREQ_PM' => { 'XML::SAX' => '0.11',
+                     'XML::NamespaceSupport' => '1.07',
+                     'XML::LibXML::Common' => 0,
+                   },
+    'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
+    'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
+            );
+# -------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------- #
 
-# maybe i am doing something wrong here, but on my system parse_fh()
-# refuses to work correctly with libxml2 versions below 2.4.25 :|
-# (without even a code change at that level)
-# someone else should run tests with this package, since i can't 
-# trigger this problem. 
-my ( $lib_major, $lib_minor, $lib_patch ) = (2, 4, 20);
-# uncomment for release?
-# my ( $lib_major, $lib_minor, $lib_patch ) = (2, 4, 25);
+# -------------------------------------------------------------------------- #
+# libxml2 valid versions
 
+# -------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------- #
+# read extra configurations from the commandline
 while($_ = shift) {
     my ($key, $val) = split(/=/, $_, 2);
     $config{$key} = $val;
 }
+# -------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------- #
+# switch Debugging messages on
 my $DEBUG = delete $config{DEBUG};
 
-# $config{DEFINE} .= " -DXS_WARNINGS";
+if ( $config{DEBUG} and $is_Win32 ) {
+    warn "win32 compile\n";
+}
+# -------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------- #
+# enable perls UTF8 support if available
 if ( $] >= 5.006 ) {
     warn "enable native perl UTF8\n";
     $config{DEFINE} .= " -DHAVE_UTF8";
 }
+# -------------------------------------------------------------------------- #
 
-# get libs and inc from gnome-config
+# -------------------------------------------------------------------------- #
+# get the libxml2 configuration
+#
+# For each release we already know which libxml2 versions work with the given
+# module. All we need is to keep track of bad versions.
+# If a user wants to build XML::LibXML with a newer version, there will be
+# a warning, that errors are possible.
+#
+# We keep track of the valid versions by keeping a blacklist of intervals
+# of working and not working versions where Ma.Mi.Pt <= X.Y.Z is of the same
+# state.
+#
+unless ( $is_Win32 ) { # cannot get config in W32
+    my @blacklist = (
+                     [2,4,20,0],
+                     [2,4,24,1],
+                     [2,4,25,0], # broken version
+                     [2,4,26,1],
+                     [2,5,5,0],
+                     [2,5,7,1],
+                    );
+    my $xml2cfg = "xml2-config";
+    my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
 
-unless ( $is_Win32 ) {
+    if ( defined $libprefix ) {
+        $xml2cfg = $libprefix . '/bin/' . $xml2cfg;
+    }
+
+    print "running xml2-config...";
     eval {
-        my $xml2cfg = "xml2-config";
-        if ( defined $ENV{XMLPREFIX} ) {
-            $xml2cfg = $ENV{XMLPREFIX} . '/bin/' . $xml2cfg;
-        }
-
-        print "running xml2-config... ";
-        my $ver = backtick("$xml2cfg --version");
-        my ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-        die "VERSION $major.$minor.$point" unless $major > $lib_major
-          || ($major == $lib_major && $minor > $lib_minor)
-            || ($major == $lib_major && $minor == $lib_minor && $point >= $lib_patch);
-        $config{LIBS} ||= backtick("$xml2cfg --libs");
-        $config{INC}  ||= backtick("$xml2cfg --cflags");
-        print "ok\n";
+        try_libconfig( $xml2cfg, \%config, @blacklist );
     };
-    if ($@) {
-        print "failed\n";
-        if ($@ =~ /^VERSION/) {
-            die "XML::LibXML needs libxml2 version $lib_major.$lib_minor.$lib_patch or higher (found $@)\n";
-        }
-        warn "*** ", $@ if $DEBUG;
-        warn "using fallback values for LIBS and INC\n";
-        # backtick fails if gnome-config didn't exist...
-        $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lz -lm';
-        $config{INC} = '-I/usr/local/include -I/usr/include';
 
-        print <<OPT;
+    if ( $@ ) {
+        if ( $@ =~ /^VERSION/ ) {
+            die "The installed version of libxml2 is known not to work.\n".
+                 "  Don't expect XML::LibXML to build or work correctly.\n".
+                 "  Don't report errors!!!\n".
+                 "  Check the README file for more informations\n";
+        }
+        if ( $@ =~ /^UNTESTED/ ) {
+            warn <<UNTESTED;
+WARNING!
+The installed Version of libxml2 was not tested with this version of XML::LibXML.
+
+    XML::LibXML may fail building or some tests may not pass.
+    Expect strange errors and unstable scripts.
+
+    Check the README file for more informations
+END OF WARNING
+UNTESTED
+        }
+
+        if ( not defined $config{LIBS} and not defined $config{INC} ) {
+            warn "\nusing fallback values for LIBS and INC\n";
+            $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lz -lm';
+            $config{INC} = '-I/usr/local/include -I/usr/include';
+            print <<OPT;
 options:
   LIBS='$config{LIBS}'
   INC='$config{INC}'
@@ -71,34 +127,59 @@ If this is wrong, Re-run as:
   \$ $^X Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'
 
 OPT
+        }
     }
-
-    # test for libgdome
-    my ( $g_major, $g_minor, $g_patch ) = (0, 7, 3);
-
-    eval {
-        print "running gdome-config...";
-        my $ver = backtick("gdome-config --version");
-        ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-        die "VERSION " unless $major > $g_major
-             || ($major == $g_major && $minor > $g_minor)
-             || ($major == $g_major && $minor == $g_minor && $point >= $g_patch) ;
-            print "ok\n";
-            print "make use of GDOME support\n";
-            print "NOTE: You will still have to install XML::GDOME to make\n";
-            print "      use of this feature\n";
-            $config{LIBS} = backtick("gdome-config --libs");
-            $config{INC}  = backtick("gdome-config --cflags");
-            $config{DEFINE} .= " -DXML_LIBXML_GDOME_SUPPORT";
-    };
-    if ($@) {
-       print "failed\n";
-       print "GDOME support is optional and is not required for running\n";
-       print "this package\n";
-   }
 }
+# -------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------- #
+# GDOME Support
+#
+# GDOME Support has to get explicitly activated by setting GDOME=1 as a config param.
+#
+unless ( $is_Win32 ) { # cannot get config in W32
+    if ( $config{GDOME} ) {
+        my $ver;
+        my $state = undef; # there are three possible states:
+                           # 1     : works
+                           # 0     : works not
+                           # undef : not yet tested
+        my @blacklist = (
+                         [0,7,2,0],
+                         [0,7,3,1],
+                        );
+        print <<GDOME;
+
+GDOME Support (experimental):
+   XML::LibXML can parse into XML::GDOME DOMs if libgdome is installed.
+   This feature is optional and is not required for using XML::LibXML.
+
+GDOME
+
+        print "running gdome-config...";
+
+        eval {
+            test_libconfig( "gdome-config", \%config, @blacklist );
+            print "NOTE: You will need to install XML::GDOME to use this feature\n";
+        };
+
+        if ( $@ ) {
+            if ( $@ =~ /^VERSION/ ) {
+                warn "The installed libgdome version is not supported\n";
+            }
+            elsif ( $@ =~ /^UNTESTED/ ) {
+                warn "The installed libgdome version is not tested, expect problems.\n";
+                print "NOTE: You will need to install XML::GDOME to use this feature\n";
+            }
+        }
+    }
+}
+# -------------------------------------------------------------------------- #
 
 
+# -------------------------------------------------------------------------- #
+# fix the ld flags
+# -------------------------------------------------------------------------- #
 if ($config{LIBS} !~ /\-lxml2\b/) {
     # in this case we are not able to run xml2-config. therefore we need to
     # expand the libz as well.
@@ -118,13 +199,22 @@ if ($config{LIBS} !~ /\-lz\b/) {
 }
 
 if ($config{LIBS} !~ /\-lm\b/) {
+    # math support is important, but is not available separate in W32
     $config{LIBS} .= $is_Win32 ? '' :' -lm';
 }
+# -------------------------------------------------------------------------- #
 
-if ( $config{DEBUG} ) {
-    warn "win32 compile\n" if $is_Win32;
-}
+# -------------------------------------------------------------------------- #
+# MacOS X Compiler switches have to go here
+#
+# if we run on MacOSX, we should check if 10.2 is running and if so,
+# if the Build Target is set correctly. Otherwise we have to set it by
+# hand
 
+# -------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------- #
+# test if the libraries are really installed!
 unless (have_library("xml2") or have_library("libxml2")) {
     die <<DEATH;
 libxml2 not found
@@ -135,8 +225,13 @@ If you install via RPMs, make sure you also install the -devel
 RPMs, as this is where the headers (.h files) are.
 DEATH
 }
+# -------------------------------------------------------------------------- #
 
-print <<EOT;
+# -------------------------------------------------------------------------- #
+# NOTE This should be removed for a release, we should test here, if we are
+# building from a CVS version
+if ( -d './CVS' ) {
+    print <<EOT;
 If you are building XML::LibXML from CVS, you may wish to run
 
   \$ make docs
@@ -145,21 +240,20 @@ before doing anything else. This will re-build the documentation
 from the XML file in examples/libxml.xml. This is *not* necessary
 if you are building from a CPAN distribution.
 EOT
+}
+# -------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------- #
+# _NOW_ write the Makefile
 WriteMakefile(
-    'NAME'	=> 'XML::LibXML',
-    'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
-    'AUTHOR'    => 'Christian Glahn',
-    'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
-    'PREREQ_PM' => { 'XML::SAX' => '0.11',
-                     'XML::NamespaceSupport' => '1.07',
-                     'XML::LibXML::Common' => 0,
-                   },
-    'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
-    'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
-    %config,
+              %INFOS,
+              %config,
 );
+# -------------------------------------------------------------------------- #
 
+
+# -------------------------------------------------------------------------- #
+# helper functions to build the Makefile
 sub MY::manifypods {
     package MY;
     my $str = shift->SUPER::manifypods(@_);
@@ -191,12 +285,12 @@ INSTALL
  
     return $script;
 }
+# -------------------------------------------------------------------------- #
 
-
-###################################################################
+# -------------------------------------------------------------------------- #
 # Functions
 #  - these should really be in MakeMaker... But &shrug;
-###################################################################
+# -------------------------------------------------------------------------- #
 
 use Config;
 use Cwd;
@@ -423,3 +517,50 @@ SRC
     print "yes\n";
     return 1;
 }
+
+# -------------------------------------------------------------------------- #
+# try_libconfig class a generic config file and requests --version, --libs and
+# --cflags
+sub try_libconfig {
+    my $cfgscript = shift;
+    my $config = shift;
+    my @bl = @_;
+
+    my $state = undef; # there are three possible states:
+                       # 1     : works
+                       # 0     : works not
+                       # undef : not yet tested
+
+    my $ver = backtick("$cfgscript --version");
+    if ( defined $ver ) {
+        my ( $major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
+        foreach ( @bl ) {
+            $state = $_->[3];
+            last if $major <  $_->[0];
+            next if $major >  $_->[0];
+            last if $minor <  $_->[1];
+            next if $minor >  $_->[1];
+            last if $point <= $_->[2];
+            $state = undef;
+        }
+        if ( defined $state and $state == 0 ) {
+            print "failed\n";
+            die "VERSION $ver";
+        }
+
+        $config->{LIBS} = backtick("$cfgscript --libs");
+        $config->{INC}  = backtick("$cfgscript --cflags");
+
+        unless ( defined $state ) {
+            print "untested\n";
+            die "UNTESTED $ver";
+        }
+
+        print "ok\n";
+    }
+    else {
+        print "failed\n";
+        die "FAILED\n"; # strange error
+    }
+}
+# -------------------------------------------------------------------------- #
