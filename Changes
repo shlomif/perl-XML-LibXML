@@ -8,6 +8,7 @@ manpage!
 
 1.51
    - fixed parser bug with broken XML declarations
+   - fixed memory management within documents that have subsets
    - pretty formating to all serializing functions
      *NOTE* the XML::LibXML::Node::toString interface changed
      check the XML::LibXML::Node man page 
