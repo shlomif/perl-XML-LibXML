@@ -4249,9 +4249,9 @@ toStringC14N(self, comments=0, xpath = &PL_sv_undef)
              && self->type != XML_DOCB_DOCUMENT_NODE
            ) {
             if (comments)
-                nodepath = xmlStrdup( "(.//node() | .//@* | .//namespace::*)" );
+                nodepath = xmlStrdup( "(. | .//node() | .//@* | .//namespace::*)" );
             else
-                nodepath = xmlStrdup( "(.//node() | .//@* | .//namespace::*)[not(self::comment())]" );
+                nodepath = xmlStrdup( "(. | .//node() | .//@* | .//namespace::*)[not(self::comment())]" );
         }
 
         if ( nodepath != NULL ) {

@@ -7,7 +7,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 13 };
+BEGIN { plan tests => 14 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -107,14 +107,16 @@ EOX
 {
     my $doc = $parser->parse_string( <<EOX );
 <?xml version="1.0" encoding="iso-8859-1"?>
-<a><b><c/><d><e/></d></b></a>
+<a xmlns="http://foo/test#"><b><c/><d><e/></d></b></a>
 EOX
-
-    my $rootnode = $doc->documentElement;
+    my $rootnode=$doc->documentElement;
     my $c14n_res;
-    $c14n_res = $rootnode->toStringC14N(0, "//d" );
+    $c14n_res = $rootnode->toStringC14N(0, "//*[local-name()='d']");
     ok( $c14n_res, '<d></d>' );
+    ($rootnode) = $doc->findnodes("//*[local-name()='d']");
+    $c14n_res = $rootnode->toStringC14N();
+    ok( $c14n_res, '<d xmlns="http://foo/test#"><e></e></d>' );
     $rootnode = $doc->documentElement->firstChild;
     $c14n_res = $rootnode->toStringC14N(0);
-    ok( $c14n_res, '<c></c><d><e></e></d>' );
+    ok( $c14n_res, '<b xmlns="http://foo/test#"><c></c><d><e></e></d></b>' );
 }
