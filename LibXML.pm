@@ -1328,7 +1328,7 @@ opened streams.
 
 The following callbacks are defined:
 
-=over4
+=over 4
 
 =item match(uri)
 
