@@ -266,8 +266,9 @@ use Test; BEGIN { plan tests => 1; } END { ok(\$loaded) }
 use Conftest; \$loaded++;
 EOT
     close($cfile);
-    xsystem("$^X Makefile.PL " . join(' ', map { "'$_=$config{$_}'" } keys %config));
-    xsystem("$Config{make} test 'OTHERLDFLAGS=$opt'");
+    my $quote = $is_Win32 ? '"' : "'";
+    xsystem("$^X Makefile.PL " . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config));
+    xsystem("$Config{make} test ${quote}OTHERLDFLAGS=${opt}${quote}");
 }
 
 sub try_link {
@@ -289,6 +290,7 @@ sub have_library {
     my $result;
     if ($func) {
         my $libs = $is_Win32 ? " $lib.lib  " : "-l$lib";
+#        my $libs = "-l$lib";
         if ($is_Win32) {
             $result = try_link(<<"SRC", $libs);
 #include <windows.h>

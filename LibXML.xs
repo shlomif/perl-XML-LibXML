@@ -41,13 +41,21 @@ extern int xmlPedanticParserDefaultValue;
 
 #define SET_CB(cb, fld) \
     RETVAL = cb ? newSVsv(cb) : &PL_sv_undef;\
-    if (cb) {\
-        if (cb != fld) {\
-            sv_setsv(cb, fld);\
+    if (SvOK(fld)) {\
+        if (cb) {\
+            if (cb != fld) {\
+                sv_setsv(cb, fld);\
+            }\
+        }\
+        else {\
+            cb = newSVsv(fld);\
         }\
     }\
     else {\
-        cb = newSVsv(fld);\
+        if (cb) {\
+            SvREFCNT_dec(cb);\
+            cb = NULL;\
+        }\
     }
 
 typedef struct _ProxyObject ProxyObject;
@@ -333,6 +341,24 @@ LibXML_input_close(void * context)
 }
 
 void
+LibXML_update_callbacks()
+{
+    xmlInputMatchCallback mc;
+    xmlInputOpenCallback oc;
+    xmlInputReadCallback rc;
+    xmlInputCloseCallback cc;
+
+    mc = LibXML_match_cb ? (xmlInputMatchCallback)LibXML_input_match : NULL;
+    oc = LibXML_open_cb ? (xmlInputOpenCallback)LibXML_input_open : NULL;
+    rc = LibXML_read_cb ? (xmlInputReadCallback)LibXML_input_read : NULL;
+    cc = LibXML_close_cb ? (xmlInputCloseCallback)LibXML_input_close : NULL;
+
+ /* warn("update_callbacks: mc: %d, oc: %d, rc: %d, cc: %d\n", mc, oc, rc, cc); */
+
+    xmlRegisterInputCallbacks(mc, oc, rc, cc);
+}
+
+void
 LibXML_error_handler(void * ctxt, const char * msg, ...)
 {
     va_list args;
@@ -514,12 +540,6 @@ PROTOTYPES: DISABLE
 BOOT:
     LIBXML_TEST_VERSION
     xmlInitParser();
-    xmlRegisterInputCallbacks(
-            (xmlInputMatchCallback)LibXML_input_match,
-            (xmlInputOpenCallback)LibXML_input_open,
-            (xmlInputReadCallback)LibXML_input_read,
-            (xmlInputCloseCallback)LibXML_input_close
-        );
     xmlSubstituteEntitiesDefaultValue = 1;
     xmlKeepBlanksDefaultValue = 1;
     xmlSetExternalEntityLoader((xmlExternalEntityLoader)LibXML_load_external_entity);
@@ -539,6 +559,7 @@ match_callback(self, ...)
     CODE:
         if (items > 1) {
             SET_CB(LibXML_match_cb, ST(1));
+            LibXML_update_callbacks();
         }
         else {
             RETVAL = LibXML_match_cb ? sv_2mortal(LibXML_match_cb) : &PL_sv_undef;
@@ -552,6 +573,7 @@ open_callback(self, ...)
     CODE:
         if (items > 1) {
             SET_CB(LibXML_open_cb, ST(1));
+            LibXML_update_callbacks();
         }
         else {
             RETVAL = LibXML_open_cb ? sv_2mortal(LibXML_open_cb) : &PL_sv_undef;
@@ -565,6 +587,7 @@ read_callback(self, ...)
     CODE:
         if (items > 1) {
             SET_CB(LibXML_read_cb, ST(1));
+            LibXML_update_callbacks();
         }
         else {
             RETVAL = LibXML_read_cb ? sv_2mortal(LibXML_read_cb) : &PL_sv_undef;
@@ -578,6 +601,7 @@ close_callback(self, ...)
     CODE:
         if (items > 1) {
             SET_CB(LibXML_close_cb, ST(1));
+            LibXML_update_callbacks();
         }
         else {
             RETVAL = LibXML_close_cb ? sv_2mortal(LibXML_close_cb) : &PL_sv_undef;
