@@ -18,7 +18,7 @@ my $DEBUG = delete $config{DEBUG};
 
 # $config{DEFINE} .= " -DXS_WARNINGS";
 
-if ( $] > 5.006 ) {
+if ( $] >= 5.006 ) {
 # if ( ( backtick('perl -V:version') =~ /version=\'([^\']*)\'/ )[0] !~ /5\.0/ ) {
     warn "enable native perl UTF8\n";
 
