@@ -5,7 +5,6 @@ Version 1.54 fixes potentional buffer overflows were possible with earlier
 versions of the package. 
 
 1.54
-   - XML::NodeFilter support for iterator classes
    - bad tag and attribute names cannot be created anymore
    - Catalog interface is aware about libxml2 configuration
    - XML::LibXML should work now on systems without having zlib installed
@@ -14,7 +13,6 @@ versions of the package.
      - fixes bad reporting in xpath functions
    - fixed memory management problem introduced in 1.53
      (that fixes a lot strange things)
-   - fixed default iterator of XML::LibXML::Iterator
    - interface for raw libxml2 DOM building functions 
      (currently just addChild() and addNewChild(), others will follow)
    - fixed memory leak in push parser code
@@ -28,6 +26,9 @@ versions of the package.
    - fixed segfault while appending entity ref nodes to documents
    - fixed some backward compatibility issues
    - fixed cloning with namespaces misbehaviour
+   - moved iterator classes into a separate package
+     (after realizing some CPAN testers refuse to read their warnings
+     from Makefile.PL)
    - improved parser testsuite
    - more documentation 
 
