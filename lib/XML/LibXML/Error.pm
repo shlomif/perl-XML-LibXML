@@ -75,7 +75,7 @@ sub as_string {
   chomp($str);
   $msg.=" ".$str."\n";
   if (($self->{domain} == XML_ERR_FROM_XPATH) and
-      $self->{str1} ne "") {
+      defined($self->{str1})) {
     $msg.=$self->{str1}."\n";
     $msg.=(" " x $self->{int1})."^\n";
   }
