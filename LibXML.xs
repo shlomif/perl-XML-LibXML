@@ -547,7 +547,11 @@ LibXML_init_parser( SV * self ) {
         }
 
         item = hv_fetch( real_obj, "XML_LIBXML_KEEP_BLANKS", 22, 0 );
-        xmlKeepBlanksDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
+        if ( item != NULL && SvTRUE(*item) )
+             xmlKeepBlanksDefault(1);
+        else {
+             xmlKeepBlanksDefault(0);
+        }
         item = hv_fetch( real_obj, "XML_LIBXML_PEDANTIC", 19, 0 );
         xmlPedanticParserDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
 
@@ -2856,6 +2860,8 @@ prefix( node )
 SV*
 namespaceURI( self )
         SV * self
+    ALIAS:
+        getNamespaceURI = 1
     PREINIT:
         xmlNodePtr rnode = PmmSvNode(self);
         xmlChar * nsURI;
@@ -2877,8 +2883,6 @@ SV*
 lookupNamespaceURI( node, svprefix=&PL_sv_undef )
         SV * node
         SV * svprefix
-    ALIAS:
-        getNamespaceURI = 1
     PREINIT:
         xmlNodePtr rnode = PmmSvNode(node);
         xmlChar * nsURI;
