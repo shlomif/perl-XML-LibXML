@@ -5,7 +5,7 @@
 #include "dom.h"
 
 /**
- * Most of the code is stolen from textXPath. 
+ * Most of the code is stolen from testXPath. 
  * The almost only thing I added, is the storeing of the data, so
  * we can access the data easily - or say more easiely than through
  * libxml2.
@@ -28,6 +28,14 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
         ctxt = xmlXPathNewContext( refNode->doc );
         ctxt->node = refNode;
     
+        /* get the namespace information */
+        ctxt->namespaces = xmlGetNsList(refNode->doc, refNode);
+        ctxt->nsNr = 0;
+        if (ctxt->namespaces != NULL) {
+            while (ctxt->namespaces[ctxt->nsNr] != NULL)
+            ctxt->nsNr++;
+        }
+
         comp = xmlXPathCompile( path );
         if (comp != NULL) {
             res = xmlXPathCompiledEval(comp, ctxt);
