@@ -453,7 +453,7 @@ print "# 3 SAX PARSER\n";
     # declarations, if a node with a new namespace is added.
 
     # my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
-    my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi xmlns:bar="http://foo.bar"/></foo>};
+    my $vstring = qr(<foo xmlns:bar="http://foo.bar">bar<bar:bi( xmlns:bar="http://foo.bar")?/></foo>);
     ok($root->toString, $vstring );
 
     print "# 3.3 INTERNAL SUBSETS\n";
