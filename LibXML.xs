@@ -1809,7 +1809,9 @@ _push( self, pctxt, data )
         xmlParseChunk(ctxt, chunk, len, 0);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
+    
         sv_2mortal(LibXML_error); 
+        LibXML_croak_error();
 
         RETVAL = 1;
     OUTPUT:
@@ -1835,16 +1837,21 @@ _end_push( self, pctxt, restore )
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
         LibXML_init_parser(self); 
+
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
+
         sv_2mortal(LibXML_error);
-        if ( ctxt->node != NULL && restore == 0 ) {
-            xmlFreeParserCtxt(ctxt);            
-            LibXML_croak_error();
+    
+        if ( SvCUR( LibXML_error ) > 0 && restore == 0 ) { 
+            xmlFreeDoc( ctxt->myDoc );
+            xmlFreeParserCtxt(ctxt); 
+            croak("%s",SvPV(LibXML_error, len));
         }
 
         doc = ctxt->myDoc;
+        ctxt->myDoc = NULL;
         xmlFreeParserCtxt(ctxt);
         if ( doc == NULL ){
             croak( "no document found!" );
@@ -1875,16 +1882,15 @@ _end_sax_push( self, pctxt )
         }
     CODE:
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
-        LibXML_init_parser(self); 
-        xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
+        LibXML_init_parser(self);
 
+        xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
-        sv_2mortal(LibXML_error); 
+        sv_2mortal(LibXML_error);
 
         PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
-        XSRETURN_UNDEF;
 
 SV*
 import_GDOME( dummy, sv_gdome, deep=1 )

@@ -29,6 +29,8 @@ extern "C" {
 
 #endif
 
+#include "perl-libxml-sax.h"
+
 #ifdef __cplusplus
 }
 #endif
@@ -606,8 +608,15 @@ PmmContextREFCNT_dec( ProxyNodePtr node )
             xs_warn( "NODE DELETATION\n" );
             libnode = (xmlParserCtxtPtr)PmmNODE( node );
             if ( libnode != NULL ) {
-                free( libnode->_private );
-                libnode->_private = NULL;
+                if (libnode->_private != NULL ) {
+                    if ( libnode->_private != (void*)node ) {
+                        PmmSAXCloseContext( libnode );
+                    }
+                    else {
+                        xmlFree( libnode->_private );
+                    }
+                    libnode->_private = NULL;
+                }
                 PmmNODE( node )   = NULL;
                 xmlFreeParserCtxt(libnode);
             }

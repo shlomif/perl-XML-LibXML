@@ -136,19 +136,22 @@ PmmSAXCloseContext( xmlParserCtxtPtr ctxt )
 {
     PmmSAXVector * vec = (PmmSAXVectorPtr) ctxt->_private;
     dTHX;
-    
+
     if ( vec->handler != NULL ) {
         SvREFCNT_dec( vec->handler );
+        vec->handler = NULL;
     }
 
     xmlFree( ctxt->sax );
     ctxt->sax = NULL;
 
     SvREFCNT_dec( vec->parser );
+    vec->parser = NULL;
 
     xmlFreeDoc( vec->ns_stack_root );
-    
+    vec->ns_stack_root;
     xmlFree( vec );
+    ctxt->_private = NULL;
 }
 
 
@@ -198,7 +201,7 @@ PSaxStartPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
     XPUSHs(rv);
     PUTBACK;
 
-    perl_call_method( "start_prefix_mapping", 0 );
+    perl_call_method( "start_prefix_mapping", G_SCALAR | G_EVAL );
     sv_2mortal(rv);
     FREETMPS ;
     LEAVE ;
@@ -238,7 +241,7 @@ PSaxEndPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
     XPUSHs(rv);
     PUTBACK;
 
-    perl_call_method( "end_prefix_mapping", 0 );
+    perl_call_method( "end_prefix_mapping", G_SCALAR | G_EVAL );
 
     sv_2mortal(rv);
 
@@ -435,6 +438,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
             value = *ta; ta++;
 
             if ( name != NULL && xmlStrlen( name ) ) {
+                localname = xmlSplitQName(NULL, name, &prefix);
 
                 hv_store(atV, "Name", 4,
                          _C2Sv(name, NULL), NameHash);
@@ -458,7 +462,6 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                     
                 }
                 else if (xmlStrncmp("xmlns:", name, 6 ) == 0 ) {
-                    localname = xmlSplitQName(NULL, name, &prefix);                        
                     PmmAddNamespace( sax,
                                      localname,
                                      value,
@@ -472,9 +475,8 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                              _C2Sv(NSDEFAULTURI,NULL),
                              NsURIHash);
                 }
-                else if ( ns = PmmGetNsMapping( sax->ns_stack, prefix ) ) {
-                    localname = xmlSplitQName(NULL, name, &prefix);        
-                        
+                else if ( prefix != NULL
+                          && (ns = PmmGetNsMapping( sax->ns_stack, prefix ) ) ) {
                     hv_store(atV, "NamespaceURI", 12,
                              _C2Sv(ns->href, NULL), NsURIHash);
                     hv_store(atV, "Prefix", 6,
@@ -582,7 +584,7 @@ PSaxStartDocument(void * ctx)
         XPUSHs(sv_2mortal(newRV_noinc((SV*)empty)));
         PUTBACK;
         
-        count = perl_call_method( "start_document", 0 );
+        count = perl_call_method( "start_document", G_SCALAR | G_EVAL );
         
         SPAGAIN;
 
@@ -611,7 +613,7 @@ PSaxStartDocument(void * ctx)
 
         PUTBACK;
         
-        count = perl_call_method( "xml_decl", 0 );
+        count = perl_call_method( "xml_decl", G_SCALAR | G_EVAL );
         sv_2mortal(rv);
 
         FREETMPS ;
@@ -638,7 +640,7 @@ PSaxEndDocument(void * ctx)
     XPUSHs(sax->parser);
     PUTBACK;
 
-    count = perl_call_pv( "XML::LibXML::_SAXParser::end_document", 0 );
+    count = perl_call_pv( "XML::LibXML::_SAXParser::end_document", G_SCALAR | G_EVAL );
 
     FREETMPS ;
     LEAVE ;
@@ -683,7 +685,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     XPUSHs(rv);
     PUTBACK;
 
-    count = perl_call_method( "start_element", 0 );
+    count = perl_call_method( "start_element", G_SCALAR | G_EVAL );
     
     sv_2mortal(rv) ;
     FREETMPS ;
@@ -717,7 +719,7 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     XPUSHs(rv);
     PUTBACK;
 
-    count = perl_call_method( "end_element", 0 );
+    count = perl_call_method( "end_element", G_SCALAR | G_EVAL );
 
     sv_2mortal(rv);
 
@@ -762,7 +764,7 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
         XPUSHs(rv);
         PUTBACK;
 
-        count = perl_call_method( "characters", 0 );
+        count = perl_call_method( "characters", G_SCALAR | G_EVAL );
 
         sv_2mortal(rv);
 
@@ -801,7 +803,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
         XPUSHs(rv);
         PUTBACK;
 
-        count = perl_call_method( "comment", 0 );
+        count = perl_call_method( "comment", G_SCALAR | G_EVAL );
 
         sv_2mortal(rv);
 
@@ -837,7 +839,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         PUSHMARK(SP) ;
         XPUSHs(handler);
         PUTBACK;
-        count = perl_call_method( "start_cdata", 0 );
+        count = perl_call_method( "start_cdata", G_SCALAR | G_EVAL );
 
         SPAGAIN;        
         PUSHMARK(SP) ;
@@ -848,7 +850,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         XPUSHs(rv);
         PUTBACK;
 
-        count = perl_call_method( "characters", 0 );
+        count = perl_call_method( "characters", G_SCALAR | G_EVAL );
 
         SPAGAIN;        
         PUSHMARK(SP) ;
@@ -856,7 +858,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         XPUSHs(handler);
         PUTBACK;
 
-        count = perl_call_method( "end_cdata", 0 );
+        count = perl_call_method( "end_cdata", G_SCALAR | G_EVAL );
 
         sv_2mortal(rv);
 
@@ -897,7 +899,7 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
 
         PUTBACK;
 
-        count = perl_call_method( "processing_instruction", 0 );
+        count = perl_call_method( "processing_instruction", G_SCALAR | G_EVAL );
 
         sv_2mortal(rv);
 
@@ -936,11 +938,11 @@ PmmSaxWarning(void * ctx, const char * msg, ...)
 
     PUTBACK;
 
-    perl_call_pv( "XML::LibXML::_SAXParser::warning", 0 );
+    perl_call_pv( "XML::LibXML::_SAXParser::warning", G_SCALAR | G_EVAL );
     
     FREETMPS ;
     LEAVE ;
-    SvREFCNT_dec(svMessage);
+
     return 1;
 }
 
@@ -974,11 +976,10 @@ PmmSaxError(void * ctx, const char * msg, ...)
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;
-    perl_call_pv( "XML::LibXML::_SAXParser::error", 0 );
+    perl_call_pv( "XML::LibXML::_SAXParser::error", G_SCALAR | G_EVAL );
     
     FREETMPS ;
     LEAVE ;
-    SvREFCNT_dec(svMessage);
     return 1;
 }
 
@@ -1011,11 +1012,10 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;
-    perl_call_pv( "XML::LibXML::_SAXParser::fatal_error", 0 );
+    perl_call_pv( "XML::LibXML::_SAXParser::fatal_error", G_SCALAR | G_EVAL );
     
     FREETMPS ;
     LEAVE ;
-    SvREFCNT_dec(svMessage);
     return 1;
 }
 

@@ -8,17 +8,85 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $MatchCB $ReadCB $OpenCB $CloseCB );
 use Carp;
 
-use XML::LibXML::Common qw(:encoding :libxml :w3c);
+use XML::LibXML::Common qw(:encoding :libxml);
 
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
-$VERSION = "1.53";
+
+$VERSION = "1.54";
 require Exporter;
 require DynaLoader;
 
 @ISA = qw(DynaLoader Exporter);
 
+#-------------------------------------------------------------------------#
+# export information                                                      #
+#-------------------------------------------------------------------------#
+%EXPORT_TAGS = (
+                all => [qw(
+                           XML_ELEMENT_NODE
+                           XML_ATTRIBUTE_NODE
+                           XML_TEXT_NODE
+                           XML_CDATA_SECTION_NODE
+                           XML_ENTITY_REF_NODE
+                           XML_ENTITY_NODE
+                           XML_PI_NODE
+                           XML_COMMENT_NODE
+                           XML_DOCUMENT_NODE
+                           XML_DOCUMENT_TYPE_NODE
+                           XML_DOCUMENT_FRAG_NODE
+                           XML_NOTATION_NODE
+                           XML_HTML_DOCUMENT_NODE
+                           XML_DTD_NODE
+                           XML_ELEMENT_DECL
+                           XML_ATTRIBUTE_DECL
+                           XML_ENTITY_DECL
+                           XML_NAMESPACE_DECL
+                           XML_XINCLUDE_END
+                           XML_XINCLUDE_START
+                           encodeToUTF8
+                           decodeFromUTF8
+                          )],
+                libxml => [qw(
+                           XML_ELEMENT_NODE
+                           XML_ATTRIBUTE_NODE
+                           XML_TEXT_NODE
+                           XML_CDATA_SECTION_NODE
+                           XML_ENTITY_REF_NODE
+                           XML_ENTITY_NODE
+                           XML_PI_NODE
+                           XML_COMMENT_NODE
+                           XML_DOCUMENT_NODE
+                           XML_DOCUMENT_TYPE_NODE
+                           XML_DOCUMENT_FRAG_NODE
+                           XML_NOTATION_NODE
+                           XML_HTML_DOCUMENT_NODE
+                           XML_DTD_NODE
+                           XML_ELEMENT_DECL
+                           XML_ATTRIBUTE_DECL
+                           XML_ENTITY_DECL
+                           XML_NAMESPACE_DECL
+                           XML_XINCLUDE_END
+                           XML_XINCLUDE_START
+                          )],
+                encoding => [qw(
+                                encodeToUTF8
+                                decodeFromUTF8
+                               )],
+               );
+
+@EXPORT_OK = (
+              @{$EXPORT_TAGS{all}},
+             );
+
+@EXPORT = (
+           @{$EXPORT_TAGS{all}},
+          );
+
+#-------------------------------------------------------------------------#
+# initialization of the global variables                                  #
+#-------------------------------------------------------------------------#
 $skipDTD            = 0;
 $skipXMLDeclaration = 0;
 $setTagCompression  = 0;
@@ -28,8 +96,14 @@ $ReadCB  = undef;
 $OpenCB  = undef;
 $CloseCB = undef;
 
+#-------------------------------------------------------------------------#
+# bootstrapping                                                           #
+#-------------------------------------------------------------------------#
 bootstrap XML::LibXML $VERSION;
 
+#-------------------------------------------------------------------------#
+# parser constructor                                                      #
+#-------------------------------------------------------------------------#
 sub new {
     my $class = shift;
     my %options = @_;
@@ -50,6 +124,9 @@ sub new {
     return $self;
 }
 
+#-------------------------------------------------------------------------#
+# callback functions                                                      #
+#-------------------------------------------------------------------------#
 sub match_callback {
     my $self = shift;
     if ( ref $self ) {
@@ -119,6 +196,9 @@ sub callbacks {
     }
 }
 
+#-------------------------------------------------------------------------#
+# member variable manipulation                                            #
+#-------------------------------------------------------------------------#
 sub validation {
     my $self = shift;
     $self->{XML_LIBXML_VALIDATION} = shift if scalar @_;
@@ -179,6 +259,10 @@ sub gdome_dom {
     return $self->{XML_LIBXML_GDOME};
 }
 
+
+#-------------------------------------------------------------------------#
+# set the optional SAX(2) handler                                         #
+#-------------------------------------------------------------------------#
 sub set_handler {
     my $self = shift;
     if ( defined $_[0] ) {
@@ -195,6 +279,9 @@ sub set_handler {
     }
 }
 
+#-------------------------------------------------------------------------#
+# helper functions                                                        #
+#-------------------------------------------------------------------------#
 sub _auto_expand {
     my ( $self, $result, $uri ) = @_;
 
@@ -214,6 +301,26 @@ sub _auto_expand {
     return $result;
 }
 
+sub __read {
+    read($_[0], $_[1], $_[2]);
+}
+
+sub __write {
+    if ( ref( $_[0] ) ) {
+        $_[0]->write( $_[1], $_[2] );
+    }
+    else {
+        $_[0]->write( $_[1] );
+    }
+}
+
+#-------------------------------------------------------------------------#
+# parsing functions                                                       #
+#-------------------------------------------------------------------------#
+# all parsing functions handle normal as SAX parsing at the same time.
+# note that SAX parsing is handled incomplete! use XML::LibXML::SAX for
+# complete parsing sequences
+#-------------------------------------------------------------------------#
 sub parse_string {
     my $self = shift;
     croak("parse already in progress") if $self->{_State_};
@@ -228,7 +335,9 @@ sub parse_string {
     if ( defined $self->{SAX} ) {
         my $string = shift;
         $self->{SAX_ELSTACK} = [];
-        eval { $self->_parse_sax_string($string); };
+        eval {
+            $self->_parse_sax_string($string);
+        };
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
@@ -319,7 +428,17 @@ sub parse_xml_chunk {
 
     $self->{_State_} = 1;
     if ( defined $self->{SAX} ) {
-        eval { $result = $self->_parse_sax_xml_chunk( @_ ); };
+        eval {
+            $self->_parse_sax_xml_chunk( @_ );
+
+            # this is required for XML::GenericChunk.
+            # in normal case is_filter is not defined, an thus the parsing
+            # will be terminated. in case of a SAX filter the parsing is not
+            # finished at that state. therefore we must not reset the parsing
+            unless ( $self->{IS_FILTER} ) {
+                $result = $self->{HANDLER}->end_document();
+            }
+        };
     }
     else {
         eval { $result = $self->_parse_xml_chunk( @_ ); };
@@ -334,12 +453,21 @@ sub parse_xml_chunk {
     return $result;
 }
 
+sub parse_balanced_chunk {
+    my $self = shift;
+    return $self->parse_xml_chunk( @_ );
+}
+
 sub processXIncludes {
     my $self = shift;
     my $doc = shift;
     return $self->_processXIncludes($doc || " ");
 }
 
+
+#-------------------------------------------------------------------------#
+# push parser interface                                                   #
+#-------------------------------------------------------------------------#
 sub init_push {
     my $self = shift;
 
@@ -348,7 +476,6 @@ sub init_push {
     }
 
     if ( defined $self->{SAX} ) {
-        $self->{SAX_ELSTACK} = [];
         $self->{CONTEXT} = $self->_start_push(1);
     }
     else {
@@ -368,6 +495,27 @@ sub push {
     }
 }
 
+# this function should be promoted!
+# the reason is because libxml2 uses xmlParseChunk() for this purpose!
+sub parse_chunk {
+    my $self = shift;
+    my $chunk = shift;
+    my $terminate = shift;
+
+    if ( not defined $self->{CONTEXT} ) {
+        $self->init_push();
+    }
+
+    if ( defined $chunk and length $chunk ) {
+        $self->_push( $self->{CONTEXT}, $chunk );
+    }
+
+    if ( $terminate ) {
+        return $self->finish_push();
+    }
+}
+
+
 sub finish_push {
     my $self = shift;
     my $restore = shift || 0;
@@ -376,34 +524,28 @@ sub finish_push {
     my $retval;
 
     if ( defined $self->{SAX} ) {
-        eval { $retval = $self->_end_sax_push( $self->{CONTEXT} ); };
+        eval {
+            $self->_end_sax_push( $self->{CONTEXT} );
+            $retval = $self->{HANDLER}->end_document( {} );
+        };
     }
     else {
         eval { $retval = $self->_end_push( $self->{CONTEXT}, $restore ); };
     }
+
     delete $self->{CONTEXT};
+
     if ( $@ ) {
         croak( $@ );
     }
     return $retval;
 }
 
-sub __read {
-    read($_[0], $_[1], $_[2]);
-}
-
-sub __write {
-    if ( ref( $_[0] ) ) {
-        $_[0]->write( $_[1], $_[2] );
-    }
-    else {
-        $_[0]->write( $_[1] );
-    }
-}
-
-
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Node Interface                                             #
+#-------------------------------------------------------------------------#
 package XML::LibXML::Node;
 
 sub isSupported {
@@ -472,6 +614,9 @@ sub setOwnerDocument {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Document Interface                                         #
+#-------------------------------------------------------------------------#
 package XML::LibXML::Document;
 
 use vars qw(@ISA);
@@ -510,6 +655,9 @@ sub toString {
     return $retval;
 }
 
+#-------------------------------------------------------------------------#
+# bad style xinclude processing                                           #
+#-------------------------------------------------------------------------#
 sub process_xinclude {
     my $self = shift;
     XML::LibXML->new->processXIncludes( $self );
@@ -541,6 +689,9 @@ sub insertPI {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::DocumentFragment Interface                                 #
+#-------------------------------------------------------------------------#
 package XML::LibXML::DocumentFragment;
 
 use vars qw(@ISA);
@@ -559,6 +710,9 @@ sub toString {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Element Interface                                          #
+#-------------------------------------------------------------------------#
 package XML::LibXML::Element;
 
 use vars qw(@ISA);
@@ -641,6 +795,9 @@ sub appendWellBalancedChunk {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Text Interface                                             #
+#-------------------------------------------------------------------------#
 package XML::LibXML::Text;
 
 use vars qw(@ISA);
@@ -708,6 +865,9 @@ use vars qw(@ISA);
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Attribute Interface                                        #
+#-------------------------------------------------------------------------#
 package XML::LibXML::Attr;
 use vars qw( @ISA ) ;
 @ISA = ('XML::LibXML::Node') ;
@@ -725,12 +885,20 @@ sub setNamespace {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Dtd Interface                                              #
+#-------------------------------------------------------------------------#
+# this is still under construction
+#
 package XML::LibXML::Dtd;
 use vars qw( @ISA );
 @ISA = ('XML::LibXML::Node');
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::PI Interface                                               #
+#-------------------------------------------------------------------------#
 package XML::LibXML::PI;
 use vars qw( @ISA );
 @ISA = ('XML::LibXML::Node');
@@ -753,6 +921,9 @@ sub setData {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::Namespace Interface                                        #
+#-------------------------------------------------------------------------#
 package XML::LibXML::Namespace;
 
 # this is infact not a node!
@@ -786,6 +957,9 @@ sub isSameNode {
 
 1;
 
+#-------------------------------------------------------------------------#
+# XML::LibXML::NamedNodeMap Interface                                     #
+#-------------------------------------------------------------------------#
 package XML::LibXML::NamedNodeMap;
 
 use XML::LibXML::Common qw(:libxml);
@@ -883,17 +1057,10 @@ sub removeNamedItemNS {
 
 package XML::LibXML::_SAXParser;
 
-# this is pseudo class!!!
+# this is pseudo class!!! and it will be removed as soon all functions
+# moved to XS level
 
 use XML::SAX::Exception;
-
-# the cdata section will go to the c-layer soon
-sub cdata_block {
-    my ( $parser, $data ) = @_;
-    $parser->{HANDLER}->start_cdata();
-    $parser->{HANDLER}->characters( $data );
-    $parser->{HANDLER}->end_cdata();
-}
 
 # these functions will use SAX exceptions as soon i know how things really work
 sub warning {
@@ -922,6 +1089,10 @@ sub fatal_error {
 }
 
 1;
+
+#-------------------------------------------------------------------------#
+# XML::LibXML Parser documentation                                        #
+#-------------------------------------------------------------------------#
 __END__
 
 =head1 NAME
@@ -1208,25 +1379,64 @@ to do that.
 
   my $doc = $parser->parse_html_file($filename);
 
-=head2 Push Parser
+=head2 The Push Parser
 
-XML::LibXML supports also a push parser interface. This allows one to
-parse large documents without actually loading the entire document
-into memory.
+XML::LibXML provides a push parser interface. This allows one to parse
+large documents without actually loading the entire document into
+memory. While parse_file() and parse_fh() won't load the document
+before parsing either. While parse_file() forces the data to be a
+wellformed XML file, parse_fh() may be used to parse data comming from
+any kind of source that delivers wellformed XML
+documents. parse_fh()'s parsing ability is limited to single
+documents. For a programmer there is no chance to interrupt the
+parsing process if for example multiple XML documents are recieved
+through the same channel. XML::LibXML's push parser works around this
+limitation and provides an interface to libxml2's pushparser. This
+parser will parse the data the application provides to it at the time
+they are pushed into the parser, rather than pulling the data itself.
 
-The interface is devided into two parts:
+Through this it is possible to preprocess incoming data if required -
+i.e. in the given example to find the document boundaries. Different
+to the pull parser implemented in parse_fh() or parse_file(), the push
+parser is not able to find out about the documents end itself. Thus
+the calling program needs to indicate explicitly when the parsing is
+done.
+
+In XML::LibXML this is done by a single function:
+
+  parse_chunk()
+
+parse_chunk() tries to parse a given chunk of data, which isn't
+nessecarily well balanced data. The function takes two parameters:
 
 =over 4
 
-=item * pushing the data into the parser
+=item 1. the chunk of data as a single string
 
-=item * finish the parse
+=item 2. (optional) a termination flag
 
 =back
 
-The user has no chance to access the document while still pushing the
-data to the parser. The resulting document will be returned when the
-parser is told to finish the parsing process.
+If the termination flag is set to a true value (e.g. 1), the parsing
+will be stopped and the resulting document will be returned.
+
+the following example may clearify this a bit:
+
+  my $parser = XML::LibXML->new;
+
+  for my $string ( "<", "foo", ' bar="hello worls"', "/>") {
+       $parser->parse_chunk( $string );
+  }
+  my $doc = $parser->parse_chunk("", 1); # terminate the parsing
+
+Internally the push parser uses two functions, push() and finish_push().
+they are not very usefull expect one likes to write a repairing parser.
+How to do this is described in the following part.
+
+Of course XML::LibXML's push parser is available as a SAX parser as
+well. To make use of the SAX capabilities one must any the SAX as the
+parsers SAX handler; otherwise parse_chunk() will work in the default
+mode.
 
 =over 4
 
@@ -1243,8 +1453,10 @@ wellformed documents. If $restore is 1, the push parser can be used to
 restore broken or non well formed (XML) documents as the following
 example shows:
 
-  $parser->push( "<foo>", "bar" );
-  eval { $doc = $parser->finish_push(); };      # will complain
+  eval {
+      $parser->push( "<foo>", "bar" );
+      $doc = $parser->finish_push();    # will report broken XML
+  };
   if ( $@ ) {
      # ...
   }
@@ -1252,9 +1464,11 @@ example shows:
 This can be anoing if the closing tag misses by accident. The
 following code will restore the document:
 
-  $parser->push( "<foo>", "bar" );
-  eval { $doc = $parser->finish_push(1); };      # will not complain
-
+  eval {
+      $parser->push( "<foo>", "bar" );
+      $doc = $parser->finish_push(1);   # will return the data parsed
+                                        # until an error happend
+  };
   warn $doc->toString(); # returns "<foo>bar</foo>"
 
 of course finish_push() will return nothing if there was no data pushed to

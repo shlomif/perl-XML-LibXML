@@ -1,9 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
 *NOTE:* 
-Version 1.53 fixes potentional buffer overflows were possible with earlier
-versions of the package. It is recommended to upgrade any XML::LibXML since
-1.49 to 1.53 to avoid such problems.
+Version 1.54 fixes potentional buffer overflows were possible with earlier
+versions of the package. 
 
 1.54
    - Catalog interface is aware about libxml2 configuration
@@ -12,13 +11,14 @@ versions of the package. It is recommended to upgrade any XML::LibXML since
    - fixed default iterator of XML::LibXML::Iterator
    - interface for raw libxml2 DOM building functions 
      (currently just addChild(), others will follow)
-   - fixed memory leak in XML::LibXML::SAX
    - fixed memory leak in push parser code
    - fixed namespace handling if nodes are imported to a new DOM.
-   - fixed segmentation fault during validation
+   - fixed segmentation fault during validation under libxml2 2.4.25
    - fixed bad CDATA handing in XML::LibXML::SAX::Builder
    - fixed namespace handing in XML::LibXML::SAX
    - fixed attribute handing in XML::LibXML::SAX
+   - fixed memory leak       in XML::LibXML::SAX
+   - improved parser testsuite
    - more documentation 
 
 1.53
