@@ -65,7 +65,7 @@ sub start_element {
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
-            if ( not defined $self->{Prefix} or $attr->{Prefix} ne "xmlns" ) {
+            if ( not defined $attr->{Prefix} or $attr->{Prefix} ne "xmlns" ) {
                 # SAX2 attributes
                 $node->setAttributeNS($attr->{NamespaceURI} || "",
                                       $attr->{Name}, $attr->{Value});

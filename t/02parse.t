@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 35 };
+BEGIN { plan tests => 40 };
 use XML::LibXML;
 
 ##
@@ -184,6 +184,7 @@ print "# 6. push parser\n";
 
     my $parser = XML::LibXML->new;
     {
+        
         $parser->push( @good_strings );
         my $doc = $parser->finish_push;
         ok($doc);
@@ -209,4 +210,32 @@ print "# 6. push parser\n";
         eval { $doc = $parser->finish_push(1); };
         ok( $doc );
     }
+}
+
+print "# 7. SAX parser\n";
+
+{
+    use XML::LibXML::SAX;
+    use XML::LibXML::SAX::Builder;
+    my $handler = XML::LibXML::SAX::Builder->new();
+    my $generator = XML::LibXML::SAX->new( Handler=>$handler );
+
+    my $string  = q{<bar foo="bar">foo</bar>};
+
+    $doc = $generator->parse_string( $string );
+    ok( $doc );
+
+    my $string2 = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
+
+    $doc = $generator->parse_string( $string2 );
+    ok($doc);
+
+    my $root = $doc->documentElement;
+    my @attrs = $root->attributes;
+    ok( scalar @attrs );
+    ok( $attrs[0]->nodeType, XML_NAMESPACE_DECL );
+
+    $doc = $generator->parse_uri( "example/test.xml" );
+
+    ok($doc);
 }
