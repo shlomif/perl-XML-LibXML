@@ -45,12 +45,7 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
         if ( encoding == NULL || xmlStrcmp( encoding, "UTF8" ) == 0 ) {
             /* create an UTF8 string. */       
             STRLEN len = 0;
-            /* xmlChar *tstr = string; */
-
             xs_warn("set UTF8 string");
-            /* find out about the lenght */
-            /* while ( *tstr++ != 0 ); */
-            /* len = tstr - string; */ /* we need BYTE length */
             len = xmlStrlen( string );
             /* create the SV */
             retval = newSVpvn( (char *)xmlStrdup(string), len );
@@ -73,22 +68,29 @@ xmlChar *
 Sv2C( SV* scalar, const xmlChar *encoding )
 {
     xmlChar *retval = NULL;
-
+    xs_warn("sv2c start!");
     if ( scalar != NULL && scalar != &PL_sv_undef ) {
         STRLEN len;
         xmlChar* string = xmlStrdup((xmlChar*)SvPV(scalar, len));
+        if ( xmlStrlen(string) > 0 ) {
+            xs_warn( "no undefs" );
 #ifdef HAVE_UTF8
-        if( !SvUTF8(scalar) && encoding != NULL ) {
-            xmlChar* ts;
-            ts= domEncodeString( encoding, string );
-            xmlFree(string);
-            string=ts;
-        }
+            xs_warn( "use UTF8" );
+            if( !SvUTF8(scalar) && encoding != NULL ) {
+                xmlChar* ts;
+                xs_warn( "domEncodeString!" );
+                ts= domEncodeString( encoding, string );
+                xs_warn( "done!" );
+                if ( string != NULL ) 
+                    xmlFree(string);
+                string=ts;
+            }
 #endif
-        retval = xmlStrdup(string);
-        xmlFree(string);
+            retval = xmlStrdup(string);
+            xmlFree(string);
+        }
     }
-
+    xs_warn("sv2c end!");
     return retval;
 }
 
@@ -198,6 +200,7 @@ xmlNodePtr
 getSvNode( SV* perlnode ) 
 {
     xmlNodePtr retval = NULL;
+
     if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
         retval = (xmlNodePtr)((ProxyObject*)SvIV((SV*)SvRV(perlnode)))->object;
     }
@@ -221,7 +224,7 @@ setSvNodeExtra( SV* perlnode, SV* extra )
     if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
         (SV*)((ProxyObject*)SvIV((SV*)SvRV(perlnode)))->extra = extra;
         if ( perlnode != extra ) { /* different objects */
-            SvREFCNT_inc(extra);
+           SvREFCNT_inc(extra);
         }
     }
     return perlnode;
