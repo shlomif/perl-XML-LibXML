@@ -64,6 +64,28 @@ If this is wrong, Re-run as:
 
 OPT
     }
+
+    # test for libgdome
+    eval {
+        print "running gdome-config...";
+        my $ver = backtick("gdome-config --version");
+        ($major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
+        die "VERSION " unless $major > $g_major
+             || ($major == $g_major && $minor > $g_minor)
+             || ($major == $g_major && $minor == $g_minor && $point >= $g_patch) ;
+            print "ok\n";
+            print "make use of GDOME support\n";
+            print "NOTE: You will still have to install XML::GDOME to make\n";
+            print "      use of this feature\n";
+            $config{LIBS} ||= backtick("gdome-config --libs");
+            $config{INC}  ||= backtick("gdome-config --cflags");
+            $config{DEFINE} .= " -DXML_LIBXML_GDOME_SUPPORT";
+    };
+    if ($@) {
+       print "failed\n";
+       print "GDOME support is optional and is not required for running\n";
+       print "this package\n";
+   }
 }
 
 

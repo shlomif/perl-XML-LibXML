@@ -22,6 +22,13 @@ extern "C" {
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+#ifdef XML_LIBXML_GDOME_SUPPORT
+
+#include <libgdome/gdome.h>
+#include <libgdome/gdome-libxml-util.h>
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif
@@ -292,7 +299,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
         retval = NEWSV(0,0);
         sv_setref_pv( retval, CLASS, (void*)dfProxy );
         PmmREFCNT_inc(dfProxy);            
-    }         
+    }
     else {
         xs_warn( "no node found!" );
     }
@@ -300,23 +307,79 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
     return retval;
 }
 
-/* extracts the libxml2 node from a perl reference
- */
 xmlNodePtr
-PmmSvNode( SV* perlnode ) 
+PmmCloneNode( xmlNodePtr node, int recursive )
 {
     xmlNodePtr retval = NULL;
-
-    if ( perlnode != NULL
-         && perlnode != &PL_sv_undef
-         && sv_derived_from(perlnode, "XML::LibXML::Node")
-         && SvPROXYNODE(perlnode) != NULL  ) {
-        retval = PmmNODE( SvPROXYNODE(perlnode) ) ;
+    
+    if ( node != NULL ) {
+        switch ( node->type ) {
+        case XML_ELEMENT_NODE:
+		case XML_TEXT_NODE:
+		case XML_CDATA_SECTION_NODE:
+		case XML_ENTITY_REF_NODE:
+		case XML_PI_NODE:
+		case XML_COMMENT_NODE:
+		case XML_DOCUMENT_FRAG_NODE:
+		case XML_ENTITY_DECL: 
+            retval = xmlCopyNode( node, recursive );
+            break;
+		case XML_ATTRIBUTE_NODE:
+            retval = (xmlNodePtr) xmlCopyProp( NULL, (xmlAttrPtr) node );
+            break;
+        case XML_DOCUMENT_NODE:
+		case XML_HTML_DOCUMENT_NODE:
+            retval = (xmlNodePtr) xmlCopyDoc( (xmlDocPtr)node, recursive );
+            break;
+        case XML_DOCUMENT_TYPE_NODE:
+        case XML_DTD_NODE:
+            retval = (xmlNodePtr) xmlCopyDtd( (xmlDtdPtr)node );
+            break;
+        case XML_NAMESPACE_DECL:
+            retval = ( xmlNodePtr ) xmlCopyNamespace( (xmlNsPtr) node );
+            break;
+        default:
+            break;
+        }
     }
 
     return retval;
 }
 
+/* extracts the libxml2 node from a perl reference
+ */
+
+xmlNodePtr
+PmmSvNodeExt( SV* perlnode, int copy ) 
+{
+    xmlNodePtr retval = NULL;
+
+    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
+         if ( sv_derived_from(perlnode, "XML::LibXML::Node")
+              && SvPROXYNODE(perlnode) != NULL  ) {
+             retval = PmmNODE( SvPROXYNODE(perlnode) ) ;
+         }
+#ifdef  XML_LIBXML_GDOME_SUPPORT
+         else if ( sv_derived_from( perlnode, "XML::GDOME::Node" ) ) {
+             GdomeNode* gnode = (GdomeNode*)SvIV((SV*)SvRV( perlnode ));
+             if ( gnode == NULL ) {
+                 warn( "no XML::GDOME data found (datastructure empty)" );    
+             }
+             else {
+                 retval = gdome_xml_n_get_xmlNode( gnode );
+                 if ( retval == NULL ) {
+                     warn( "no XML::LibXML node found in GDOME object" );
+                 }
+                 else if ( copy == 1 ) {
+                     retval = PmmCloneNode( retval, 1 );
+                 }
+             }
+         }
+#endif
+    }
+
+    return retval;
+}
 
 /* extracts the libxml2 owner node from a perl reference
  */
@@ -669,14 +732,13 @@ xmlChar *
 Sv2C( SV* scalar, const xmlChar *encoding )
 {
     xmlChar *retval = NULL;
+
     xs_warn("sv2c start!");
     if ( scalar != NULL && scalar != &PL_sv_undef ) {
         STRLEN len = 0;
         char * t_pv =SvPV(scalar, len);
         xmlChar* ts = NULL;
         xmlChar* string = xmlStrdup((xmlChar*)t_pv);
-        /* Safefree( t_pv ); */
-        
         if ( xmlStrlen(string) > 0 ) {
             xs_warn( "no undefs" );
 #ifdef HAVE_UTF8
@@ -694,7 +756,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
                 string=ts;
             }
         }
-
+             
         retval = xmlStrdup(string);
         if (string != NULL ) {
             xmlFree(string);
@@ -754,4 +816,67 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
 #endif
 
     return  Sv2C( scalar, NULL ); 
+}
+
+SV * 
+PmmNodeToGdomeSv( xmlNodePtr node ) 
+{
+    SV * retval = &PL_sv_undef;
+
+#ifdef XML_LIBXML_GDOME_SUPPORT
+    GdomeNode * gnode = NULL;
+    GdomeException exc;
+    const char * CLASS = "";
+
+    if ( node != NULL ) {
+        gnode = gdome_xml_n_mkref( node );
+        if ( gnode != NULL ) {
+            switch (gdome_n_nodeType(gnode, &exc)) {
+            case GDOME_ELEMENT_NODE:
+                CLASS = "XML::GDOME::Element";
+                break;
+            case GDOME_ATTRIBUTE_NODE:
+                CLASS = "XML::GDOME::Attr";
+                break;
+            case GDOME_TEXT_NODE:
+                CLASS = "XML::GDOME::Text"; 
+                break;
+            case GDOME_CDATA_SECTION_NODE:
+                CLASS = "XML::GDOME::CDATASection"; 
+                break;
+            case GDOME_ENTITY_REFERENCE_NODE:
+                CLASS = "XML::GDOME::EntityReference"; 
+                break;
+            case GDOME_ENTITY_NODE:
+                CLASS = "XML::GDOME::Entity"; 
+                break;
+            case GDOME_PROCESSING_INSTRUCTION_NODE:
+                CLASS = "XML::GDOME::ProcessingInstruction"; 
+                break;
+            case GDOME_COMMENT_NODE:
+                CLASS = "XML::GDOME::Comment"; 
+                break;
+            case GDOME_DOCUMENT_TYPE_NODE:
+                CLASS = "XML::GDOME::DocumentType"; 
+                break;
+            case GDOME_DOCUMENT_FRAGMENT_NODE:
+                CLASS = "XML::GDOME::DocumentFragment"; 
+                break;
+            case GDOME_NOTATION_NODE:
+                CLASS = "XML::GDOME::Notation"; 
+                break;
+            case GDOME_DOCUMENT_NODE:
+                CLASS = "XML::GDOME::Document"; 
+                break;
+            default:
+                break;
+            }
+
+            retval = NEWSV(0,0);
+            sv_setref_pv( retval, CLASS, gnode);
+        }
+    }
+#endif
+
+    return retval;
 }

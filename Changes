@@ -7,11 +7,15 @@ versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
 1.53
+   - introduced transparent XML::GDOME import. (EXPERIMENTAL)
+   - calling external entity handlers work again
+   - fixed a bug while replacing the document element.
    - fixed very stupid encoding bug. all UTF8 strings will now be marked as 
      UTF8
    - fixed namespace functions to work with empty namespaces
    - made XML::LibXML::SAX parser running without errors in most cases 
      (DTD handling is still not implemented)
+   - more security checks
    - more documentation
 
 1.52

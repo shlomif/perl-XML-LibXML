@@ -66,6 +66,7 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmOWNER(node)       node->owner
 #define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
 
+
 ProxyNodePtr
 PmmNewNode(xmlNodePtr node);
 
@@ -81,8 +82,39 @@ PmmREFCNT_dec( ProxyNodePtr node );
 SV*
 PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner );
 
+/* PmmSvNodeExt
+ * TYPE 
+ *    Function
+ * PARAMETER
+ *    @perlnode: the perl reference that holds the scalar.
+ *    @copy : copy flag
+ *
+ * DESCRIPTION
+ *
+ * The function recognizes XML::LibXML and XML::GDOME 
+ * nodes as valid input data. The second parameter 'copy'
+ * indicates if in case of GDOME nodes the libxml2 node
+ * should be copied. In some cases, where the node is 
+ * cloned anyways, this flag has to be set to '0', while
+ * the default value should be allways '1'. 
+ */
 xmlNodePtr
-PmmSvNode( SV * perlnode );
+PmmSvNodeExt( SV * perlnode, int copy );
+
+/* PmmSvNode
+ * TYPE
+ *    Macro
+ * PARAMETER
+ *    @perlnode: a perl reference that holds a libxml node
+ *
+ * DESCRIPTION
+ *
+ * PmmSvNode fetches the libxml node such as PmmSvNodeExt does. It is
+ * a wrapper, that sets the copy always to 1, which is good for all
+ * cases XML::LibXML uses.
+ */
+#define PmmSvNode(n) PmmSvNodeExt(n,1)
+
 
 xmlNodePtr
 PmmSvOwner( SV * perlnode );
@@ -103,13 +135,45 @@ xmlParserCtxtPtr
 PmmSvContext( SV * perlctxt );
 
 /**
- * NAME domNodeTypeName
+ * NAME PmmCopyNode
+ * TYPE function
+ *
+ * returns libxml2 node
+ *
+ * DESCRIPTION
+ * This function implements a nodetype independant node cloning.
+ * 
+ * Note that this function has to stay in this module, since
+ * XML::LibXSLT reuses it.
+ */
+xmlNodePtr
+PmmCloneNode( xmlNodePtr node , int deep );
+
+/**
+ * NAME PmmNodeToGdomeSv
+ * TYPE function
+ *
+ * returns XML::GDOME node
+ *
+ * DESCRIPTION
+ * creates an Gdome node from our XML::LibXML node.
+ * this function is very usefull for the parser.
+ *
+ * the function will only work, if XML::LibXML is compiled with
+ * XML::GDOME support.
+ *    
+ */
+SV *
+PmmNodeToGdomeSv( xmlNodePtr node );
+
+/**
+ * NAME PmmNodeTypeName
  * TYPE function
  * 
  * returns the perl class name for the given node
  *
  * SYNOPSIS
- * CLASS = domNodeTypeName( node );
+ * CLASS = PmmNodeTypeName( node );
  */
 const char*
 PmmNodeTypeName( xmlNodePtr elem );

@@ -3,7 +3,6 @@ LibXML.pm
 LibXML.xs
 Makefile.PL
 MANIFEST
-PHISHS.CHANGES
 README
 ppport.h
 dom.c
