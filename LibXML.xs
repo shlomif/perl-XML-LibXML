@@ -3450,13 +3450,13 @@ is_valid(self, ...)
         LibXML_init_error(&saved_error);
 
         cvp.userData = (void*)PerlIO_stderr();
-#ifdef HAVE_SERROR
+#ifdef HAVE_SERRORS
         cvp.error = NULL;
         cvp.warning = NULL;
 #else
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
 
         /* we need to initialize the node stack, because perl might
          * already have messed it up.
@@ -3493,13 +3493,13 @@ validate(self, ...)
         LibXML_init_error(&saved_error);
 
         cvp.userData = (void*)PerlIO_stderr();
-#ifdef HAVE_SERROR
+#ifdef HAVE_SERRORS
         cvp.error = NULL;
         cvp.warning = NULL;
 #else
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         /* we need to initialize the node stack, because perl might
          * already have messed it up.
          */
@@ -6118,12 +6118,12 @@ parse_location( self, url )
         }
 
         /* Register Error callbacks */
-#ifndef HAVE_SERROR
+#ifndef HAVE_SERRORS
         xmlRelaxNGSetParserErrors( rngctxt,
                                   (xmlRelaxNGValidityErrorFunc)LibXML_error_handler,
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
                                   rngctxt );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlRelaxNGParse( rngctxt );
         xmlRelaxNGFreeParserCtxt( rngctxt );
 
@@ -6156,12 +6156,12 @@ parse_buffer( self, perlstring )
         }
 
         /* Register Error callbacks */
-#ifndef HAVE_SERROR
+#ifndef HAVE_SERRORS
         xmlRelaxNGSetParserErrors( rngctxt,
                                   (xmlRelaxNGValidityErrorFunc)LibXML_error_handler,
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
                                   rngctxt );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlRelaxNGParse( rngctxt );
         xmlRelaxNGFreeParserCtxt( rngctxt );
 
@@ -6187,12 +6187,12 @@ parse_document( self, doc )
         }
 
         /* Register Error callbacks */
-#ifndef HAVE_SERROR
+#ifndef HAVE_SERRORS
         xmlRelaxNGSetParserErrors( rngctxt,
                                   (xmlRelaxNGValidityErrorFunc)  LibXML_error_handler,
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
                                   rngctxt );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlRelaxNGParse( rngctxt );
         xmlRelaxNGFreeParserCtxt( rngctxt );
 
@@ -6214,28 +6214,22 @@ validate( self, doc )
         if ( vctxt == NULL ) {
             croak( "cannot initialize the validation context" );
         }
-#ifndef HAVE_SERROR
+#ifndef HAVE_SERRORS
         /* Register Error callbacks */
         xmlRelaxNGSetValidErrors( vctxt,
                                   (xmlRelaxNGValidityErrorFunc)LibXML_error_handler,
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler,
                                   vctxt );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlRelaxNGValidateDoc( vctxt, doc );
         xmlRelaxNGFreeValidCtxt( vctxt );
 
         LibXML_report_error(saved_error, 0);
-#ifdef HAVE_SERROR
-            LibXML_croak_error();
-            croak( "validation failed\n" );
-#else
-	    if ( LibXML_error_OK && SvCUR( LibXML_error ) > 0 ) {
-               croak("validate error: %s",SvPV_nolen(LibXML_error));
-            } else {
-	       /* not valid, although libxml2 gave no reason */
- 	       croak( "validation failed\n" );
-	    }
-#endif /* HAVE_SERROR */
+        if (RETVAL>1) {
+	  /* not valid, although libxml2 gave no reason */
+          croak( "validation failed for unknown reason\n" );
+          XSRETURN_UNDEF;
+        }
         if ( RETVAL == -1 ) {
             croak( "API Error" );
             XSRETURN_UNDEF;
@@ -6268,13 +6262,13 @@ parse_location( self, url )
         if ( rngctxt == NULL ) {
             croak( "failed to initialize Schema parser" );
         }
-#ifdef HAVE_SERROR
+#ifdef HAVE_SERRORS
         /* Register Error callbacks */
         xmlSchemaSetParserErrors( rngctxt,
                                   (xmlSchemaValidityErrorFunc)LibXML_error_handler,
                                   (xmlSchemaValidityWarningFunc)LibXML_error_handler,
                                   rngctxt );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlSchemaParse( rngctxt );
         xmlSchemaFreeParserCtxt( rngctxt );
 
@@ -6305,13 +6299,13 @@ parse_buffer( self, perlstring )
         if ( rngctxt == NULL ) {
             croak( "failed to initialize Schema parser" );
         }
-#ifdef HAVE_SERROR
+#ifdef HAVE_SERRORS
         /* Register Error callbacks */
         xmlSchemaSetParserErrors( rngctxt,
                                   (xmlSchemaValidityErrorFunc)LibXML_error_handler,
                                   (xmlSchemaValidityWarningFunc)LibXML_error_handler,
                                   NULL );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlSchemaParse( rngctxt );
         xmlSchemaFreeParserCtxt( rngctxt );
 
@@ -6334,29 +6328,19 @@ validate( self, doc )
         if ( vctxt == NULL ) {
             croak( "cannot initialize the validation context" );
         }
-#ifdef HAVE_SERROR
+#ifdef HAVE_SERRORS
         /* Register Error callbacks */
         xmlSchemaSetValidErrors( vctxt,
                                   (xmlSchemaValidityErrorFunc)LibXML_error_handler,
                                   (xmlSchemaValidityWarningFunc)LibXML_error_handler,
                                   NULL );
-#endif /* HAVE_SERROR */
+#endif /* HAVE_SERRORS */
         RETVAL = xmlSchemaValidateDoc( vctxt, doc );
         xmlSchemaFreeValidCtxt( vctxt );
 
         LibXML_report_error(saved_error, 0);
         if ( RETVAL > 0 ) {
-#ifdef HAVE_SERROR
-            LibXML_croak_error();
-            croak( "validation failed\n" );
-#else
-	    if ( LibXML_error_OK && SvCUR( LibXML_error ) > 0 ) {
-               croak("validate error: %s",SvPV_nolen(LibXML_error));
-            } else {
-	       /* not valid, although libxml2 gave no reason */
- 	       croak( "validation failed\n" );
-	    }
-#endif /* HAVE_SERROR */
+            croak( "validation failed for unknown reason\n" );
             XSRETURN_UNDEF;
         }
         if ( RETVAL == -1 ) {
