@@ -161,7 +161,8 @@ sub characters {
         $self->{NamespaceStack}->push_context;
     }
     return unless $self->{Parent};
-    $self->{Parent}->appendText($chars->{Data});
+    my $node = $self->{DOM}->createTextNode($chars->{Data});
+    $self->{Parent}->appendChild($node);
 }
 
 sub comment {
