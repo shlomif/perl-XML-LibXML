@@ -6225,10 +6225,10 @@ validate( self, doc )
         xmlRelaxNGFreeValidCtxt( vctxt );
 
         LibXML_report_error(saved_error, 0);
-        if (RETVAL>1) {
-	  /* not valid, although libxml2 gave no reason */
-          croak( "validation failed for unknown reason\n" );
-          XSRETURN_UNDEF;
+        if ( RETVAL > 0 ) {
+	    /* not valid, although libxml2 gave no reason */
+            croak( "validation failed for unknown reason\n" );
+            XSRETURN_UNDEF;
         }
         if ( RETVAL == -1 ) {
             croak( "API Error" );
@@ -6340,6 +6340,7 @@ validate( self, doc )
 
         LibXML_report_error(saved_error, 0);
         if ( RETVAL > 0 ) {
+	    /* not valid, although libxml2 gave no reason */
             croak( "validation failed for unknown reason\n" );
             XSRETURN_UNDEF;
         }
