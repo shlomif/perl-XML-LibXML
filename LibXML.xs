@@ -979,14 +979,19 @@ is_valid(self, ...)
     PREINIT:
         xmlDocPtr real_dom;
         xmlValidCtxt cvp;
+        ProxyObject * dtd_proxy;
         xmlDtdPtr dtd;
         SV * dtd_sv;
     CODE:
         real_dom = (xmlDocPtr)self->object;
+        LibXML_error = sv_2mortal(newSVpv("", 0));
         if (items > 1) {
             dtd_sv = ST(1);
             if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
-                dtd = (xmlDtdPtr)SvIV((SV*)SvRV( dtd_sv ));
+                dtd_proxy = (ProxyObject*)SvIV((SV*)SvRV( dtd_sv ));
+                if (dtd_proxy != NULL) {
+                    dtd = (xmlDtdPtr)dtd_proxy->object;
+                }
             }
             else {
                 croak("is_valid: argument must be a DTD object");
@@ -1388,13 +1393,57 @@ getVersion( self )
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Dtd
 
-xmlDtdPtr
+ProxyObject *
 new(CLASS, external, system)
         char * CLASS
         char * external
         char * system
     CODE:
-        RETVAL = xmlParseDTD((const xmlChar*)external, (const xmlChar*)system);
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        RETVAL = make_proxy_node((xmlNodePtr)xmlParseDTD((const xmlChar*)external, (const xmlChar*)system));
+    OUTPUT:
+        RETVAL
+
+ProxyObject *
+parse_string(CLASS, str, ...)
+        char * CLASS
+        char * str
+    PREINIT:
+        STRLEN n_a;
+        xmlDtdPtr res;
+        SV * encoding_sv;
+        xmlParserInputBufferPtr buffer;
+        xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
+    CODE:
+        LibXML_error = sv_2mortal(newSVpv("", 0));
+        if (items > 2) {
+            encoding_sv = ST(2);
+            if (items > 3) {
+                croak("parse_string: too many parameters");
+            }
+            /* warn("getting encoding...\n"); */
+            enc = xmlParseCharEncoding(SvPV(encoding_sv, n_a));
+            if (enc == XML_CHAR_ENCODING_ERROR) {
+                croak("Parse of encoding %s failed: %s", SvPV(encoding_sv, n_a), SvPV(LibXML_error, n_a));
+            }
+        }
+        /* warn("make buffer\n"); */
+        buffer = xmlAllocParserInputBuffer(enc);
+        /* xmlParserInputBufferCreateMem(str, strlen(str), enc); */
+        xmlParserInputBufferPush(buffer, strlen(str), str);
+        /* warn("parse\n"); */
+        res = xmlIOParseDTD(NULL, buffer, enc);
+        /* warn("free : 0x%x\n", buffer); */
+        /* NOTE: For some reason freeing this InputBuffer causes a segfault! */
+        /* xmlFreeParserInputBuffer(buffer); */
+        /* warn("make proxy\n"); */
+        if (res != NULL) {
+            RETVAL = make_proxy_node((xmlNodePtr)res);
+        }
+        else {
+            croak("couldn't parse DTD: %s", SvPV(LibXML_error, n_a));
+        }
+        /* warn("return\n"); */
     OUTPUT:
         RETVAL
 
@@ -2002,7 +2051,7 @@ toString( self )
 
         if ( ret != NULL ) {
             RETVAL = newSVpvn( ret , strlen( ret ) ) ;
-            xmlFree( ret );  
+            xmlFree( ret );
         }
         else {
 	        # warn("Failed to convert doc to string");           

@@ -15,6 +15,8 @@ example/bad.xml
 example/libxml.xml
 example/xml2pod.pl
 example/test.html
+example/test.xhtml
+example/test.dtd
 t/01basic.t
 t/02parsestring.t
 t/03parsefile.t
@@ -27,3 +29,4 @@ t/09append.t
 t/10ns.t
 t/11memory.t
 t/12html.t
+t/13dtd.t

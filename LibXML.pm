@@ -122,6 +122,7 @@ sub XML_XINCLUDE_END(){20;}
 @XML::LibXML::CDATASection::ISA     = 'XML::LibXML::Text';
 @XML::LibXML::Attr::ISA             = 'XML::LibXML::Node';
 @XML::LibXML::DocumentFragment::ISA = 'XML::LibXML::Node';
+@XML::LibXML::Dtd::ISA              = 'XML::LibXML::Node';
 
 
 sub XML::LibXML::Node::iterator {
