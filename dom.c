@@ -341,29 +341,30 @@ domSetName( xmlNodePtr node, char* name ) {
 xmlNodePtr
 domAppendChild( xmlNodePtr self,
                 xmlNodePtr newChild ){
-  /* unbinds the new node if nessecary ... does not handle attributes :P */
-  newChild = domIsNotParentOf( newChild, self );
+    /* unbinds the new node if nessecary ... does not handle attributes :P */
+    newChild = domIsNotParentOf( newChild, self );
 
-  if ( self == NULL ) {
-    return newChild;
-  }
+    if ( self == NULL ) {
+        return newChild;
+    }
 
-  if ( newChild == NULL
-       || newChild->type == XML_ATTRIBUTE_NODE
-       || self->type == XML_ATTRIBUTE_NODE
-       || ( newChild->type == XML_DOCUMENT_FRAG_NODE 
-            && newChild->children == NULL ) 
-       ){
-    /* HIERARCHIY_REQUEST_ERR */
-    return NULL;
-  }
-  if ( newChild->doc == self->doc ){
-    newChild= domUnbindNode( newChild );
-  }
-  else {
-    /* WRONG_DOCUMENT_ERR - non conform implementation*/
-    newChild= domImportNode( self->doc, newChild, 1 );
-  }
+    if ( newChild == NULL
+         || newChild->type == XML_ATTRIBUTE_NODE
+         || self->type == XML_ATTRIBUTE_NODE
+         || ( newChild->type == XML_DOCUMENT_FRAG_NODE 
+              && newChild->children == NULL ) 
+         ){
+        /* HIERARCHIY_REQUEST_ERR */
+        return NULL;
+    }
+
+    if ( newChild->doc == self->doc ){
+        newChild= domUnbindNode( newChild );
+    }
+    else {
+        /* WRONG_DOCUMENT_ERR - non conform implementation*/
+        newChild= domImportNode( self->doc, newChild, 1 );
+    }
   
   if ( self->children != NULL ) {
     newChild = insert_node_to_nodelist( self->last, newChild , NULL );
@@ -471,107 +472,105 @@ domInsertBefore( xmlNodePtr self,
                  xmlNodePtr newChild,
                  xmlNodePtr refChild ){
 
-  if ( self == NULL || newChild == NULL ) {
-    return NULL;
-  }
-
-  if ( newChild != NULL && domIsNotParentOf( newChild, self ) == NULL ){
-    /* HIERARCHIY_REQUEST_ERR */
-    return NULL;
-  }
-
-  if ( refChild == newChild ) {
-    return newChild;
-  }
-  if( ( refChild != NULL 
-        && ( refChild->type == XML_ATTRIBUTE_NODE 
-             || refChild->type == XML_DOCUMENT_FRAG_NODE ) )
-      || ( newChild != NULL && ( newChild->type == XML_ATTRIBUTE_NODE
-                                 || ( newChild->type==XML_DOCUMENT_FRAG_NODE 
-                                      && newChild->children == NULL ) ) ) ) {
-    /* HIERARCHY_REQUEST_ERR */
-    /* this condition is true, because:
-     * case 1: if the reference is an attribute, it's not a child
-     * case 2: if the reference is a document_fragment, it's not part of the tree
-     * case 3: if the newchild is an attribute, it can't get inserted as a child
-     * case 4: if newchild is a document fragment and has no children, we can't
-     *         insert it
-     */
-    return NULL;
-  }
-
-
-  if ( self->doc == newChild->doc ){
-    newChild = domUnbindNode( newChild );
-  }
-  else {
-    newChild = domImportNode( self->doc, newChild, 1 );
-  }
-
-  if ( refChild == NULL ) {
-    if( self->children == NULL ){
-      newChild = domAppendChild( self, newChild );
-    } 
-    else {
-      newChild = insert_node_to_nodelist( NULL, newChild, self->children );
+    if ( self == NULL || newChild == NULL ) {
+        return NULL;
     }
-  }
 
-  if ( self == refChild->parent ) {
-    newChild = insert_node_to_nodelist( refChild->prev, newChild, refChild );
-  }
-  else {
-    newChild = NULL;
-  }
+    if ( newChild != NULL && domIsNotParentOf( newChild, self ) == NULL ){
+        /* HIERARCHIY_REQUEST_ERR */
+        return NULL;
+    }
 
-  return newChild;
+    if ( refChild == newChild ) {
+        return newChild;
+    }
+    if( ( refChild != NULL 
+          && ( refChild->type == XML_ATTRIBUTE_NODE 
+               || refChild->type == XML_DOCUMENT_FRAG_NODE ) )
+        || ( newChild != NULL && ( newChild->type == XML_ATTRIBUTE_NODE
+                                   || ( newChild->type==XML_DOCUMENT_FRAG_NODE 
+                                        && newChild->children == NULL ) ) ) ) {
+        /* HIERARCHY_REQUEST_ERR */
+        /* this condition is true, because:
+         * case 1: if the reference is an attribute, it's not a child
+         * case 2: if the reference is a document_fragment, it's not part of the tree
+         * case 3: if the newchild is an attribute, it can't get inserted as a child
+         * case 4: if newchild is a document fragment and has no children, we can't
+         *         insert it
+         */
+        return NULL;
+    }
+
+    if ( self->doc == newChild->doc ){
+        newChild = domUnbindNode( newChild );
+    }
+    else {
+        newChild = domImportNode( self->doc, newChild, 1 );
+    }
+
+    if ( refChild == NULL ) {
+        if( self->children == NULL ){
+            newChild = domAppendChild( self, newChild );
+        } 
+        else {
+            newChild = insert_node_to_nodelist( NULL, newChild, self->children );
+        }
+    }
+
+    if ( self == refChild->parent ) {
+        newChild = insert_node_to_nodelist( refChild->prev, newChild, refChild );
+    }
+    else {
+        newChild = NULL;
+    }
+
+    return newChild;
 }
 
 xmlNodePtr
 domInsertAfter( xmlNodePtr self, 
                 xmlNodePtr newChild,
                 xmlNodePtr refChild ){
-  if ( self == NULL ) {
-    return NULL;
-  }
+    if ( self == NULL ) {
+        return NULL;
+    }
   
-  newChild = domIsNotParentOf( newChild, self );
+    newChild = domIsNotParentOf( newChild, self );
 
-  if ( refChild == newChild ) {
-    return newChild;
-  }
+    if ( refChild == newChild ) {
+        return newChild;
+    }
 
-  if ( refChild == NULL ) {
-    return domAppendChild( self, newChild );
-  }
+    if ( refChild == NULL ) {
+        return domAppendChild( self, newChild );
+    }
 
-  if( refChild->type == XML_ATTRIBUTE_NODE 
-      || refChild->type == XML_DOCUMENT_FRAG_NODE
-      || ( newChild != NULL && ( newChild->type == XML_ATTRIBUTE_NODE
-                                 || ( newChild->type==XML_DOCUMENT_FRAG_NODE 
-                                      && newChild->children == NULL ) ) ) ) {
-    /* HIERARCHY_REQUEST_ERR */
-    return NULL;
-  }
+    if( refChild->type == XML_ATTRIBUTE_NODE 
+        || refChild->type == XML_DOCUMENT_FRAG_NODE
+        || ( newChild != NULL && ( newChild->type == XML_ATTRIBUTE_NODE
+                                   || ( newChild->type==XML_DOCUMENT_FRAG_NODE 
+                                        && newChild->children == NULL ) ) ) ) {
+        /* HIERARCHY_REQUEST_ERR */
+        return NULL;
+    }
 
+    if ( newChild != NULL && 
+         self == refChild->parent &&
+         refChild != newChild ) {
+        
+        if( newChild->doc == self->doc ) {
+            domUnbindNode( newChild );
+        }
+        else {
+            domImportNode( self->doc, newChild, 1 );
+        }
 
-  if ( newChild != NULL && 
-       self == refChild->parent &&
-       refChild != newChild ) {
-
-    if( newChild->doc == self->doc ) {
-      domUnbindNode( newChild );
+        newChild = insert_node_to_nodelist( refChild, newChild, refChild->next );
     }
     else {
-      domImportNode( self->doc, newChild, 1 );
+        newChild = NULL;
     }
-
-    newChild = insert_node_to_nodelist( refChild, newChild, refChild->next );
-  }
-  else {
-    newChild = NULL;
-  }
-  return newChild;
+    return newChild;
 }
 
 xmlNodePtr

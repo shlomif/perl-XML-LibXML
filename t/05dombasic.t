@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>20 }
+BEGIN { plan tests=>23 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -90,6 +90,19 @@ ok( defined $text && $text->isa( "XML::LibXML::Comment" ) );
 
 $text = $dom->createCDATASection( $testtxt );
 ok( defined $text && $text->isa( "XML::LibXML::CDATASection" ) );
+
+# PI tests
+my $pi = $dom->createPI( "test", "test" );
+ok( $pi );
+$dom->appendChild( $pi );
+my @clds = $dom->childNodes();
+my $cnt_dn = scalar( @clds );
+ok( $cnt_dn > 1 );
+
+$node = $dom2->createElement( $testtxt );
+$dom->appendChild( $node );
+@clds = $dom->childNodes();
+ok( scalar( @clds ), $cnt_dn );
 
 # parse tests
 

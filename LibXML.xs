@@ -1562,29 +1562,33 @@ getDocumentElement( dom )
         RETVAL
 
 void
-addProcessingInstruction( dom, name, content )
+insertProcessingInstruction( dom, name, content )
         SV * dom
         char * name 
         char * content
+    ALIAS:
+        insertPI = 1
     PREINIT:
         xmlNodePtr pinode = NULL;
         xmlDocPtr real_dom;
     CODE:
         real_dom = (xmlDocPtr)((ProxyObject*)SvIV((SV*)SvRV(dom)))->object;
-        /* pinode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
-                            domEncodeString( real_dom->encoding, content ) );*/
-        pinode = xmlNewPI( name, content );
+        pinode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
+                           domEncodeString( real_dom->encoding, content ) );
+        /* pinode = xmlNewPI( name, content ); */
         domInsertBefore( (xmlNodePtr)real_dom, 
                          pinode, 
                          domDocumentElement( real_dom ) );
 
 ProxyObject *
-createProcessingInstruction( dom, name, content )
+createProcessingInstruction( dom, name, content="" )
         SV * dom
         char * name 
         char * content
+    ALIAS:
+        createPI = 1
     PREINIT:
-        char * CLASS = "XML::LibXML::Element";
+        char * CLASS = "XML::LibXML::PI";
         xmlNodePtr newNode;
         xmlDocPtr real_dom;
         xmlNodePtr docfrag = NULL;
@@ -1601,9 +1605,9 @@ createProcessingInstruction( dom, name, content )
         # warn( "NEW FRAGMENT ELEMNT (%s)", name);
         # SvREFCNT_inc(docfrag_sv);    
 
-        /* newNode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
-                            domEncodeString( real_dom->encoding, content ) );*/
-        newNode = xmlNewPI( name, content );
+        newNode = xmlNewPI( domEncodeString( real_dom->encoding, name ),
+                            domEncodeString( real_dom->encoding, content ) );
+        /* newNode = xmlNewPI( name, content ); */
         newNode->doc = real_dom;
         domAppendChild( docfrag, newNode );
         # warn( newNode->name );
@@ -1881,43 +1885,43 @@ appendChild( parent, child )
         ProxyObject* cproxy = NULL;
         xmlNodePtr test = NULL;
     CODE:
-        test = domAppendChild( parent->object, child->object );
+
+        # test = domAppendChild( parent->object, child->object );
         # update the proxies if nessecary
-       # if ( test == NULL ) {
-       #     croak( "child was not appended\n" );
-       # }
+        if ( !(((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE
+             && ((xmlNodePtr)child->object)->type == XML_ELEMENT_NODE ) 
+             && domAppendChild( parent->object, child->object ) != NULL ) {
+            if ( parent == NULL ) {
+                croak("parent problem!\n");
+            }
 
-
-        if ( parent == NULL ) {
-            croak("parent problem!\n");
-        }
-
-        if ( ((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE ) {
-            pproxy = parent;
-        }
-        else if ( parent->extra != NULL ){
-            pproxy = (ProxyObject*)SvIV((SV*)SvRV(parent->extra));
-        }
-        if ( child->extra != NULL ) {
-            cproxy = (ProxyObject*)SvIV((SV*)SvRV(child->extra));
-        }
-        if ( child->extra == NULL || parent->extra == NULL || pproxy->object != cproxy->object ) {
+            if ( ((xmlNodePtr)parent->object)->type == XML_DOCUMENT_NODE ) {
+                pproxy = parent;
+            }
+            else if ( parent->extra != NULL ){
+                pproxy = (ProxyObject*)SvIV((SV*)SvRV(parent->extra));
+            }
+            if ( child->extra != NULL ) {
+                cproxy = (ProxyObject*)SvIV((SV*)SvRV(child->extra));
+            }
+            if ( child->extra == NULL || parent->extra == NULL || pproxy->object != cproxy->object ) {
       
-            # warn("different documents");
-            if ( child->extra != NULL ){
-                # warn("decrease child documents");   
-                SvREFCNT_dec(child->extra);
-            }
+                # warn("different documents");
+                if ( child->extra != NULL ){
+                    # warn("decrease child documents");   
+                    SvREFCNT_dec(child->extra);
+                }
 
-            child->extra = parent->extra;
+                child->extra = parent->extra;
 
-            if ( child->extra != NULL ){
-                # warn("increase child documents");   
-                SvREFCNT_inc(child->extra);
+                if ( child->extra != NULL ){
+                    # warn("increase child documents");   
+                    SvREFCNT_inc(child->extra);
+                }
             }
-        }
-        else {
-            # warn( "object failure\n" );
+            else {
+                # warn( "object failure\n" );
+            }
         }
 
 ProxyObject *
@@ -2080,29 +2084,32 @@ insertBefore( self, new, ref )
         ProxyObject* pproxy= NULL;
         ProxyObject* cproxy= NULL; 
     CODE:
-        domInsertBefore( self->object, new->object, ref );
-        if ( ((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE ) {
-            pproxy = self;
-        }
-        else if ( self->extra != NULL ){
-            pproxy = (ProxyObject*)SvIV((SV*)SvRV(self->extra));
-        }
-        if ( new->extra != NULL ) {
-            cproxy = (ProxyObject*)SvIV((SV*)SvRV(new->extra));
-        }
-        if ( pproxy->object != cproxy->object ) {
-      
-            # warn("different documents");
-            if ( new->extra != NULL ){
-                # warn("decrease old child document");   
-                SvREFCNT_dec(new->extra);
+        if ( !(((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE
+             && ((xmlNodePtr)new->object)->type == XML_ELEMENT_NODE ) 
+             && domInsertBefore( self->object, new->object, ref ) != NULL ) {
+            if ( ((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE ) {
+                pproxy = self;
             }
+            else if ( self->extra != NULL ){
+                pproxy = (ProxyObject*)SvIV((SV*)SvRV(self->extra));
+            }
+            if ( new->extra != NULL ) {
+                cproxy = (ProxyObject*)SvIV((SV*)SvRV(new->extra));
+            }
+            if ( pproxy->object != cproxy->object ) {
+      
+                # warn("different documents");
+                if ( new->extra != NULL ){
+                    # warn("decrease old child document");   
+                    SvREFCNT_dec(new->extra);
+                }
 
-            new->extra = self->extra;
+                new->extra = self->extra;
 
-            if ( new->extra != NULL ){
-                #warn("increase child document");   
-                SvREFCNT_inc(new->extra);
+                if ( new->extra != NULL ){
+                    #warn("increase child document");   
+                    SvREFCNT_inc(new->extra);
+                }
             }
         }
 
@@ -2116,31 +2123,34 @@ insertAfter( self, new, ref )
         ProxyObject* pproxy= NULL;
         ProxyObject* cproxy= NULL; 
     CODE:
-        domInsertAfter( self->object, new->object, ref );
-        if ( ((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE ) {
-            pproxy = self;
-        }
-        else if ( self->extra != NULL ){
-            pproxy = (ProxyObject*)SvIV((SV*)SvRV(self->extra));
-        }
-        if ( new->extra != NULL ) {
-            cproxy = (ProxyObject*)SvIV((SV*)SvRV(new->extra));
-        }
-        if ( pproxy == NULL || 
-             cproxy == NULL || 
-             pproxy->object != cproxy->object ) {
-      
-            # warn("different documents");
-            if ( new->extra != NULL ){
-                # warn("decrease child documents");   
-                SvREFCNT_dec(new->extra);
+        if ( !(((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE
+             && ((xmlNodePtr)new->object)->type == XML_ELEMENT_NODE ) 
+             && domInsertAfter( self->object, new->object, ref ) != NULL ) {
+            if ( ((xmlNodePtr)self->object)->type == XML_DOCUMENT_NODE ) {
+                pproxy = self;
             }
+            else if ( self->extra != NULL ){
+                pproxy = (ProxyObject*)SvIV((SV*)SvRV(self->extra));
+            }
+            if ( new->extra != NULL ) {
+                cproxy = (ProxyObject*)SvIV((SV*)SvRV(new->extra));
+            }
+            if ( pproxy == NULL || 
+                 cproxy == NULL || 
+                 pproxy->object != cproxy->object ) {
+      
+                # warn("different documents");
+                if ( new->extra != NULL ){
+                    # warn("decrease child documents");   
+                    SvREFCNT_dec(new->extra);
+                }
+    
+                new->extra = self->extra;
 
-            new->extra = self->extra;
-
-            if ( new->extra != NULL ){
-                # warn("increase child documents");   
-                SvREFCNT_inc(new->extra);
+                if ( new->extra != NULL ){
+                    # warn("increase child documents");   
+                    SvREFCNT_inc(new->extra);
+                }
             }
         }
 
@@ -3091,50 +3101,12 @@ appendTextChild( self, childname, xmlString )
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::PI
 
-ProxyObject *
-new( CLASS, name, content )
-        const char * CLASS
-        char * name
-        char * content
-    PREINIT:
-        xmlNodePtr newNode;
-    CODE:
-        /* we should test if this is UTF8 ... because this WILL cause
-         * problems with iso encoded strings :(
-         */
-        newNode = xmlNewPI( name, content );
-        if( newNode != NULL ) {
-            # init the keeping fragment
-            xmlNodePtr docfrag = NULL;
-            ProxyObject * dfProxy = NULL; 
-            SV * docfrag_sv = NULL;
-
-            docfrag = xmlNewDocFragment(NULL);
-            dfProxy = make_proxy_node( docfrag );
-
-            docfrag_sv = sv_newmortal(); 
-            sv_setref_pv( docfrag_sv, 
-                          "XML::LibXML::DocumentFragment", 
-                          (void*)dfProxy );
-            dfProxy->extra = docfrag_sv;
-            # warn( "NEW FRAGMENT TEXT");
-            # SvREFCNT_inc(docfrag_sv);
-                     
-            domAppendChild( docfrag, newNode );            
-
-            RETVAL = make_proxy_node(newNode);
-            RETVAL->extra = docfrag_sv;
-            SvREFCNT_inc(docfrag_sv);
-        }
-    OUTPUT:
-        RETVAL
-
 void
-setData( node, value )
+_setData( node, value )
         xmlNodePtr node
         char * value
     CODE:
-        domSetNodeValue( node, value );
+        domSetNodeValue(node,domEncodeString(node->doc->encoding,value));
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 

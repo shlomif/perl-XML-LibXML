@@ -370,6 +370,22 @@ sub XML::LibXML::Node::find {
     return $type->new(@params);
 }
 
+sub XML::LibXML::PI::setData {
+    my $pi = shift;
+
+    my $string = "";
+    if ( scalar @_ == 1 ) {
+        $string = shift;
+    }
+    else {
+        my %h = @_;
+        $string = join " ", map {$_.'="'.$h{$_}.'"'} keys %h;
+    }
+
+    # the spec says any char but "?>" [17]
+    $pi->_setData( $string ) unless  $string =~ /\?>/;
+}
+
 1;
 __END__
 
@@ -703,6 +719,86 @@ This Function transforms an UTF-8 encoded string the specified
 encoding.  While transforms to ISO encodings may cause errors if the
 given stirng contains unsupported characters, this function can
 transform to UTF-16 encodings as well.
+
+=head1 Processing Instructions - XML::LibXML::PI
+
+Processing instructions are implemented with XML::LibXML with read and
+write access ;) The PI data is the PI without the PI target (as
+specified in XML 1.0 [17]) as a string. This string can be accessed with
+L<getData> as implemented in XML::LibXML::Node.
+
+The write access is aware about the fact, that many processing
+instructions have attribute like data. Therefor L<setData> provides
+besides the DOM spec conform Interface to pass a set of named
+parameter. So the code segment
+
+    my $pi = $dom->createProcessingInstruction("abc");
+    $pi->setData(foo=>'bar', foobar=>'foobar');
+    $dom->appendChild( $pi );
+
+will result the following PI in the DOM:
+
+    <?abc foo="bar" foobar="foobar"?>
+
+The same can be done with
+
+   $pi->setData( 'foo="bar" foobar="foobar"' );
+
+Which is how it is specified in the L<DOM specification>. This three
+step interface creates temporary a node in perl space. This can be
+avoided while using the B<insertProcessingInstruction> method.
+Instead of the three calls described above, the call
+C<$dom->insertProcessingInstruction("abc",'foo="bar" foobar="foobar"');>
+will have the same result as above.
+
+Currently only the B<setData()> function accepts named parameters,
+while only strings are accepted by the other methods.
+
+=head2 createProcessingInstruction
+
+B<SYNOPSIS:>
+
+   $pinode = $dom->createProcessingInstruction( $target );
+
+or
+
+   $pinode = $dom->createProcessingInstruction( $target, $data );
+
+This function creates a new PI and returns this node. The PI is bound
+to the DOM, but is not appended to the DOM itself. To add the PI to
+the DOM, one needs to use B<appendChild()> directly on the dom itself.
+
+=head2 insertProcessingInstruction
+
+B<SYNOPSIS:>
+
+  $dom->insertProcessingInstruction( $target, $data );
+
+Creates a processing instruction and inserts it directly to the
+DOM. The function does not return a node.
+
+=head2 createPI
+
+alias for createProcessingInstruction
+
+=head2 insertPI
+
+alias for insertProcessingInstruction
+
+=head2 setData
+
+B<SYNOPSIS:>
+
+   $pinode->setData( $data_string );
+
+or
+
+   $pinode->setData( name=>string_value [...] );
+
+This method allows to change the content data of a PI. Additionaly to
+the interface specified for DOM Level2, the method provides a named
+parameter interface to set the data. This parameterlist is converted
+into a string before it is appended to the PI.
 
 =head1 AUTHOR
 
