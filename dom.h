@@ -49,7 +49,7 @@ domDecodeString( const char *encoding, const xmlChar *string);
 
 /* A.1 DOM specified section */
 
-const xmlChar *
+xmlChar *
 domName( xmlNodePtr node );
 
 void

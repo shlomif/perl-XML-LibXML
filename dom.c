@@ -294,7 +294,7 @@ domRemoveChild( xmlNodePtr self, xmlNodePtr old );
  * If the node belongs to a namespace it returns the prefix and 
  * the local name. otherwise only the local name is returned.
  **/
-const xmlChar*
+xmlChar*
 domName(xmlNodePtr node) {
   xmlChar *qname = NULL; 
   if ( node ) {

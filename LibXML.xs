@@ -736,6 +736,7 @@ encodeToUTF8( encoding, string )
     CODE:
         tstr =  domEncodeString( encoding, string );
         RETVAL = newSVpvn( (char *)tstr, xmlStrlen( tstr ) );
+        xmlFree( tstr ); 
     OUTPUT:
         RETVAL
 
@@ -748,6 +749,7 @@ decodeFromUTF8( encoding, string )
     CODE: 
         tstr =  domDecodeString( encoding, string );
         RETVAL = newSVpvn( (char *)tstr, xmlStrlen( tstr ) );
+        xmlFree( tstr ); 
     OUTPUT:
         RETVAL
 
@@ -1657,11 +1659,12 @@ getName( node )
         XML::LibXML::Node::nodeName = 1
         XML::LibXML::Attr::name     = 2
     PREINIT:
-        const char * name;
+        char * name;
     CODE:
         if( node != NULL ) {
             name =  domName( node );
             RETVAL = newSVpvn( (char *)name, xmlStrlen( name ) );
+            xmlFree( name );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -1685,7 +1688,7 @@ getData( proxy_node )
         XML::LibXML::Attr::getValue  = 3
     PREINIT:
         xmlNodePtr node;
-        const char * content;
+        char * content;
     CODE:
         node = (xmlNodePtr) proxy_node->object; 
 
@@ -1696,7 +1699,7 @@ getData( proxy_node )
                                                node->content );
                 }
                 else {
-                    content = node->content;
+                    content = xmlStrdup(node->content);
                 }
             }
             else if ( node->children != NULL ) {
@@ -1705,13 +1708,14 @@ getData( proxy_node )
                                                node->children->content );
                 }
                 else {
-                    content = node->children->content;
+                    content = xmlStrdup(node->children->content);
                 }
             }
         }
 
-        if ( content != 0 ){
+        if ( content != NULL ){
             RETVAL = newSVpvn( (char *)content, xmlStrlen( content ) );
+            xmlFree( content );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -1820,11 +1824,14 @@ toString( self )
         }
         
         if ( self->doc != NULL ) {
-            ret= domDecodeString( self->doc->encoding, ret );
+            xmlChar *retDecoded = domDecodeString( self->doc->encoding, ret );
+            xmlFree( ret );
+            ret= retDecoded;
         }
 
         if ( ret != NULL ) {
-            RETVAL = newSVpvn( ret , strlen( ret ) ) ;  
+            RETVAL = newSVpvn( ret , strlen( ret ) ) ;
+            xmlFree( ret );  
         }
         else {
 	        # warn("Failed to convert doc to string");           
@@ -1851,16 +1858,17 @@ getLocalName( node )
     ALIAS:
         XML::LibXML::Node::localname = 1
     PREINIT:
-        const char * lname;
+        char * lname;
     CODE:
         if( node != NULL ) {
             if ( node->doc != NULL ) {
                 lname = domDecodeString( node->doc->encoding, node->name );
             }
             else {
-                lname =  node->name;
+                lname = xmlStrdup( node->name );
             }
             RETVAL = newSVpvn( (char *)lname, xmlStrlen( lname ) );
+            xmlFree( lname );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -1874,7 +1882,7 @@ getPrefix( node )
     ALIAS:
         XML::LibXML::Node::prefix = 1
     PREINIT:
-        const char * prefix;
+        char * prefix;
     CODE:
         if( node != NULL 
             && node->ns != NULL
@@ -1884,10 +1892,11 @@ getPrefix( node )
                                           node->ns->prefix );
             }
             else {
-                prefix =  node->ns->prefix;
+                prefix =  xmlStrdup( node->ns->prefix );
             }
 
             RETVAL = newSVpvn( (char *)prefix, xmlStrlen( prefix ) );
+            xmlFree( prefix );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -2135,12 +2144,15 @@ getAttribute( elem, name )
 	    char * content = NULL;
     CODE:
         content = xmlGetProp( elem->object, name );
-        if ( ((xmlNodePtr)elem->object)->doc != NULL ){
-            content = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
-        }
-
         if ( content != NULL ) {
+            if ( ((xmlNodePtr)elem->object)->doc != NULL ){
+                xmlChar* deccontent = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
+               xmlFree( content);
+               content = deccontent;
+            }
+
             RETVAL  = newSVpvn( content, xmlStrlen( content ) );
+            xmlFree( content );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -2159,15 +2171,17 @@ getAttributeNS( elem, nsURI ,name )
     CODE:
         att = domHasNsProp( elem->object, name, nsURI );
         if ( att != NULL && att->children != NULL ) {
-            content = att->children->content;
+            content = xmlStrdup( att->children->content ); 
         }
-
-        if ( ((xmlNodePtr)elem->object)->doc != NULL ){
-            content = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
-        }
-
         if ( content != NULL ) {
+            if ( ((xmlNodePtr)elem->object)->doc != NULL ){
+                xmlChar *deccontent = domDecodeString( ((xmlNodePtr)elem->object)->doc->encoding, content );
+                xmlFree( content );
+                content = deccontent;
+            }
+
             RETVAL  = newSVpvn( content, xmlStrlen( content ) );
+            xmlFree( content );
         }
         else {
             RETVAL = &PL_sv_undef;
@@ -2346,6 +2360,8 @@ appendWellBalancedChunk( self, chunk )
         if ( rv != NULL ) {
             xmlAddChildList( self , rv );
         }	
+        if( chunk != NULL )
+            xmlFree( chunk );
 
 void 
 appendTextNode( self, xmlString )
@@ -2373,12 +2389,16 @@ appendTextChild( self, childname, xmlString )
         xmlNodePtr self
         char * childname
         char * xmlString
+    PREINIT:
+        xmlChar * encname = NULL;
+        xmlChar * enccontent= NULL;
     CODE:
         if( self->doc != NULL ) {
             childname = domEncodeString( self->doc->encoding, childname );
             xmlString = domEncodeString( self->doc->encoding, xmlString );
         }
         xmlNewTextChild( self, NULL, childname, xmlString );
+
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 
