@@ -42,7 +42,27 @@ e.g.
 
 $ XMLPREFIX=/usr/brand-new perl Makefile.PL
 
-will ask '/usr/brand-new/bin/xml2-config' about your real libxml2 configuration.
+will ask '/usr/brand-new/bin/xml2-config' about your real 
+libxml2 configuration.
+
+Contact
+=======
+
+For suggestions, bugreports etc. you may contact the maintainer directly
+christian.glahn@uibk.ac.at 
+
+Also XML::LibXML issues are discussed among other things on the
+perl XML mailing list (perl-xml@listserv.ActiveState.com)
+
+Package History
+===============
+
+Version < 0.98 were implemented by Matt Sergeant 
+0.98 > Version > 1.49 were maintained by Matt Sergeant and Christian Glahn
+Version >= 1.49 are maintained by Christian Glahn
+ 
+License
+=======
 
 This is free software, you may use it and distribute it under the same
 terms as Perl itself. 

@@ -89,6 +89,11 @@ sub process_node {
     elsif ($node_type == XML_COMMENT_NODE) {
         $self->comment( { Data => $node->getData } );
     }
+    elsif ( $node_type == XML_XINCLUDE_START
+            || $node_type == XML_XINCLUDE_END ) {
+        # ignore!
+        # i may want to handle this one day, dunno yet
+    }
     else {
         warn("unsupported node type: $node_type");
     }
