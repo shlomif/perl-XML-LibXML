@@ -1395,7 +1395,7 @@ importNode( dom, node, move=0 )
         RETVAL = NULL;
         ret = domImportNode( real_dom, real_node, move );
         if ( ret ) {
-            if ( node->extra != NULL ){
+            if ( node->extra != NULL && move == 0 ){
                 SvREFCNT_dec( node->extra );
             }
             CLASS = domNodeTypeName( ret );
