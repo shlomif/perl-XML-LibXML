@@ -68,11 +68,11 @@ OPT
 
 
 if ($config{LIBS} !~ /\-lxml2\b/) {
-    $config{LIBS} .= $is_Win32 ? '-llibxml2' : ' -lxml2';
+    $config{LIBS} .= $is_Win32 ? ' -llibxml2' : ' -lxml2';
 }
 
 if ($config{LIBS} !~ /\-lz\b/) {
-    $config{LIBS} .= $is_Win32 ? '-lzlib' :' -lz';
+    $config{LIBS} .= $is_Win32 ? ' -lzlib' :' -lz';
 }
 
 if ($config{LIBS} !~ /\-lm\b/) {
