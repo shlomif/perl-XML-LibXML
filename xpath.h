@@ -8,5 +8,7 @@
 xmlNodeSetPtr
 domXPathSelect( xmlNodePtr refNode, xmlChar * xpathstring );
 
+xmlXPathObjectPtr
+domXPathFind( xmlNodePtr refNode, xmlChar * xpathstring );
 
 #endif

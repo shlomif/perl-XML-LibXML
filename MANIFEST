@@ -42,3 +42,7 @@ lib/XML/LibXML/Element.pod
 lib/XML/LibXML/Text.pod
 lib/XML/LibXML/DocumentFragment.pod
 lib/XML/LibXML/Namespace.pod
+lib/XML/LibXML/NodeList.pm
+lib/XML/LibXML/Literal.pm
+lib/XML/LibXML/Boolean.pm
+lib/XML/LibXML/Number.pm

@@ -5,8 +5,9 @@ package XML::LibXML;
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
 use Carp;
+use XML::LibXML::NodeList;
 
-$VERSION = "0.99";
+$VERSION = "1.00";
 require Exporter;
 require DynaLoader;
 
@@ -135,6 +136,28 @@ sub XML::LibXML::Node::iterator {
         $rv = $child->iterator( $funcref );
     }
     return $rv;
+}
+
+sub XML::LibXML::Node::findnodes {
+    my ($node, $xpath) = @_;
+    my @nodes = $node->_findnodes($xpath);
+    if (wantarray) {
+        return @nodes;
+    }
+    else {
+        return XML::LibXML::NodeList->new(@nodes);
+    }
+}
+
+sub XML::LibXML::Node::findvalue {
+    my ($node, $xpath) = @_;
+    return $node->findnodes($xpath)->to_literal->value;
+}
+
+sub XML::LibXML::Node::find {
+    my ($node, $xpath) = @_;
+    my ($type, @params) = $node->_find($xpath);
+    return $type->new(@params);
 }
 
 1;

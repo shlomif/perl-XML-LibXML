@@ -23,20 +23,20 @@ if ( defined $dom ) {
   
     # first very simple path starting at root
     my @list   = $elem->findnodes( "species" );
-    ok( scalar(@list) == 3 );
+    ok( scalar(@list), 3 );
 
     # a simple query starting somewhere ...
     my $node = $list[0];
     my @slist = $node->findnodes( "humps" );
-    ok( scalar(@slist) == 1 );
+    ok( scalar(@slist), 1 );
 
     # find a single node
     @list   = $elem->findnodes( "species[\@name='Llama']" );
-    ok( scalar( @list ) == 1 );
+    ok( scalar( @list ), 1 );
   
     # find with not conditions
     @list   = $elem->findnodes( "species[\@name!='Llama']/disposition" );
-    ok( scalar(@list) == 2 );
+    ok( scalar(@list), 2 );
 
 
     @list   = $elem->findnodes( 'species/@name' );
@@ -44,13 +44,13 @@ if ( defined $dom ) {
 
     my $x = XML::LibXML::Text->new( 1234 );
     if( defined $x ) {
-        ok( $x->getData() eq "1234" );
+        ok( $x->getData(), "1234" );
     }
     
     my $telem = $dom->createElement('test');
     $telem->appendWellBalancedChunk('<b>c</b>');
 
     $telem->iterator( sub { $itervar.=$_[0]->getName(); } );
-    ok( $itervar eq 'testbtext' );
+    ok( $itervar, 'testbtext' );
 
 }

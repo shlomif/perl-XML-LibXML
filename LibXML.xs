@@ -2014,14 +2014,13 @@ getData( proxy_node )
 
 
 void
-findnodes( node, xpath )
+_findnodes( node, xpath )
         ProxyObject* node
         char * xpath 
     PREINIT:
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
         int len = 0 ;
-        int wantarray = GIMME_V;
     PPCODE:
         nodelist = domXPathSelect( node->object, xpath );
         if ( nodelist && nodelist->nodeNr > 0 ) {
@@ -2029,35 +2028,101 @@ findnodes( node, xpath )
             const char * cls = "XML::LibXML::Node";
             xmlNodePtr tnode;
             ProxyObject * proxy;
-
+            
             len = nodelist->nodeNr;
-            if( wantarray != G_SCALAR ) {         
-                for( i ; i < len; i++){
-                /* we have to create a new instance of an objectptr. and then 
+            for( i ; i < len; i++){
+               /* we have to create a new instance of an objectptr. and then 
                  * place the current node into the new object. afterwards we can 
                  * push the object to the array!
                  */
-                    element = 0;
-                    tnode = nodelist->nodeTab[i];
-                    element = sv_newmortal();
-                    cls = domNodeTypeName( tnode );
+                element = NULL;
+                tnode = nodelist->nodeTab[i];
+                element = sv_newmortal();
+                cls = domNodeTypeName( tnode );
 
-                    proxy = make_proxy_node(tnode);
-                    if ( node->extra != NULL ) {
-                        proxy->extra = node->extra;
-                        SvREFCNT_inc(node->extra);
-                    }
-        
-                    element = sv_setref_pv( element, (char *)cls, (void*)proxy );
-                    cls = domNodeTypeName( tnode );
-                    XPUSHs( element );
+                proxy = make_proxy_node(tnode);
+                if ( node->extra != NULL ) {
+                    proxy->extra = node->extra;
+                    SvREFCNT_inc(node->extra);
                 }
+        
+                element = sv_setref_pv( element, (char *)cls, (void*)proxy );
+                cls = domNodeTypeName( tnode );
+                XPUSHs( element );
             }
-            else {
-                XPUSHs( newSViv(len) );
-            }
+            
             xmlXPathFreeNodeSet( nodelist );
         }
+
+void
+_find ( node, xpath )
+        ProxyObject* node
+        char * xpath
+    PREINIT:
+        xmlXPathObjectPtr found = NULL;
+        xmlNodeSetPtr nodelist = NULL;
+        SV * element = NULL ;
+        int len = 0 ;
+    PPCODE:
+        found = domXPathFind( node->object, xpath );
+        switch (found->type) {
+            case XPATH_NODESET:
+                /* return as a NodeList */
+                /* access ->nodesetval */
+                XPUSHs(newSVpv("XML::LibXML::NodeList", 0));
+                nodelist = found->nodesetval;
+                if ( nodelist && nodelist->nodeNr > 0 ) {
+                    int i = 0 ;
+                    const char * cls = "XML::LibXML::Node";
+                    xmlNodePtr tnode;
+                    ProxyObject * proxy;
+                    SV * element;
+                    
+                    len = nodelist->nodeNr;
+                    for( i ; i < len; i++){
+                       /* we have to create a new instance of an objectptr. and then 
+                         * place the current node into the new object. afterwards we can 
+                         * push the object to the array!
+                         */
+                        element = NULL;
+                        tnode = nodelist->nodeTab[i];
+                        element = sv_newmortal();
+                        cls = domNodeTypeName( tnode );
+        
+                        proxy = make_proxy_node(tnode);
+                        if ( node->extra != NULL ) {
+                            proxy->extra = node->extra;
+                            SvREFCNT_inc(node->extra);
+                        }
+                
+                        element = sv_setref_pv( element, (char *)cls, (void*)proxy );
+                        cls = domNodeTypeName( tnode );
+                        XPUSHs( element );
+                    }
+                }
+                break;
+            case XPATH_BOOLEAN:
+                /* return as a Boolean */
+                /* access ->boolval */
+                XPUSHs(newSVpv("XML::LibXML::Boolean", 0));
+                XPUSHs(newSViv(found->boolval));
+                break;
+            case XPATH_NUMBER:
+                /* return as a Number */
+                /* access ->floatval */
+                XPUSHs(newSVpv("XML::LibXML::Number", 0));
+                XPUSHs(newSVnv(found->floatval));
+                break;
+            case XPATH_STRING:
+                /* access ->stringval */
+                /* return as a Literal */
+                XPUSHs(newSVpv("XML::LibXML::Literal", 0));
+                XPUSHs(newSVpv(found->stringval, 0));
+                break;
+            default:
+                croak("Uknown XPath return type");
+        }
+        xmlXPathFreeObject(found);
 
 void
 getChildnodes( node )
@@ -2331,6 +2396,25 @@ getNamespaces ( node )
         if( wantarray == G_SCALAR ) {
             XPUSHs( newSViv( len ) );
         }
+
+char *
+string_value ( node )
+        xmlNodePtr node
+    ALIAS:
+        to_literal = 1
+    CODE:
+        RETVAL = xmlXPathCastNodeToString(node);
+    OUTPUT:
+        RETVAL
+
+double
+to_number ( node )
+        xmlNodePtr node
+    CODE:
+        RETVAL = xmlXPathCastNodeToNumber(node);
+    OUTPUT:
+        RETVAL
+
         
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
