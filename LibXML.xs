@@ -796,7 +796,6 @@ LibXML_cleanup_parser() {
     if (LibXML_old_ext_ent_loader != NULL ) {
         xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_old_ext_ent_loader );
     }
-    xmlCleanupParser();
 }
 
 void
@@ -805,8 +804,8 @@ LibXML_cleanup_callbacks() {
     return;
 /*    xs_warn("      cleanup parser callbacks!\n"); */
 
-/*    xmlCleanupInputCallbacks(); */
-/*    xmlRegisterDefaultInputCallbacks(); */
+/*    xmlCleanupInputCallbacks();*/
+/*    xmlRegisterDefaultInputCallbacks();*/
 /*    if ( LibXML_old_ext_ent_loader != NULL ) { */
 /*        xmlSetExternalEntityLoader( NULL ); */
 /*        xmlSetExternalEntityLoader( LibXML_old_ext_ent_loader ); */
