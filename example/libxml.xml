@@ -562,8 +562,8 @@ $node->find( $xpath )->to_literal;
     namespace version of <i>hasAttribute</i>
 </method>
 
-<method name="getElementsByTagName" 
-    synopsis="@nodes = $node->getElementsByTagName($tagname);">
+<method name="getChildrenByTagName" 
+    synopsis="@nodes = $node->getChildrenByTagName($tagname);">
 	The function gives direct access to all childnodes of the current
 	node with the same tagname. It makes things a lot easier if you
 	need to handle big datasets.
@@ -572,9 +572,40 @@ $node->find( $xpath )->to_literal;
     Elements found.
 </method>
 
+<method name="getChildrenByTagNameNS" 
+    synopsis="@nodes = $node->getChildrenByTagNameNS($nsURI,$tagname);">
+    Namespace version of <i>getChildrenByTagName</i>.
+
+    If this function is called in SCALAR context, it returns the number of 
+    Elements found.
+</method>
+
+<method name="getElementsByTagName" synopsis="@nodes =
+$node->getElementsByTagName($tagname);"> This function is part of the
+spec it fetches all descendants of a node with a given tagname. If one
+is as confused with <i>tagname</i> as I was, tagname is a qualified
+tagname which is in case of namespace useage prefix and local name
+
+    If this function is called in SCALAR context, it returns the number of 
+    Elements found.
+
+</method>
+
 <method name="getElementsByTagNameNS" 
-    synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$tagname);">
-    Namespace version of <i>getElementsByTagName</i>.
+    synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$localname);">
+    Namespace version of <i>getElementsByTagName</i> as found in the DOM spec.
+
+    If this function is called in SCALAR context, it returns the number of 
+    Elements found.
+
+</method>
+
+<method name="getElementsByLocalName" 
+    synopsis="@nodes = $node->getElementsByLocalName($localname);">
+    This function is not found in the DOM specification. It is a mix of
+    getElementsByTagName and getElementsByTagNameNS. It will fetch all 
+    tags matching the given local-name. This alows one to select tags with 
+    the same local name across namespace borders. 
 
     If this function is called in SCALAR context, it returns the number of 
     Elements found.
