@@ -7,7 +7,7 @@
 use Test;
 use IO::File;
 
-BEGIN { plan tests => 28 };
+BEGIN { plan tests => 31 };
 use XML::LibXML;
 
 ##
@@ -148,4 +148,39 @@ my $badXInclude = q{
     ok($@);
     eval{ $parser->processXIncludes("blahblah"); };
     ok($@);
+}
+
+print "# 6. push parser\n";
+
+{
+    my @good_strings = ("<foo>", "bar", "</foo>" );
+    my @bad_strings  = ("<foo>", "bar");
+
+    my $parser = XML::LibXML->new;
+    {
+        $parser->push( @good_strings );
+        my $doc = $parser->finish_push;
+        ok($doc);
+    }
+
+    {
+        foreach ( @bad_strings ) {
+            $parser->push( $_);
+        }
+
+        eval { my $doc = $parser->finish_push; };
+        ok( $@ );
+    }
+
+    {
+        $parser->init_push;
+
+        foreach ( @bad_strings ) {
+            $parser->push( $_);
+        }
+
+        my $doc;
+        eval { $doc = $parser->finish_push(1); };
+        ok( $doc );
+    }
 }
