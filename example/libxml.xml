@@ -645,6 +645,59 @@ is therefore a shortcut for
                     ]]></example>
             </method>
 
+            <method name="createInternalSubset"
+                    synopsis="$dtd = $document->createInternalSubset( $rootnode, $public, $system);">
+                <p>
+                    This function creates and adds an internal subset
+                    to the given document. Because the function
+                    automaticly adds the DTD to the document there is
+                    no need to add the created node explicitly to the
+                    document.
+                </p>
+
+                <example><![CDATA[
+ my $document = XML::LibXML::Document->new();
+ my $dtd      = $document->createInternalSubset( "foo", undef, "foo.dtd" );
+                    ]]></example>
+                <p>
+                    will result in the following XML document:
+                </p>
+                <example><![CDATA[
+ <?xml version="1.0"?>
+ <!DOCTYPE foo SYSTEM "foo.dtd">
+                    ]]></example>
+
+                <p>
+                    By setting the public parameter it is possible to
+                    set PUBLIC dtds to a given document. So
+                </p>
+                <example><![CDATA[
+ my $document = XML::LibXML::Document->new();
+ my $dtd      = $document->createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//EN", undef );
+
+                    ]]></example>
+                <p>
+                    will cause the following declaration to be created
+                    on the document:
+                </p>
+
+                <example><![CDATA[
+ <?xml version="1.0"?>
+ <!DOCTYPE foo PUBLIC "-//FOO//DTD FOO 0.1//EN">
+                ]]></example>
+           </method>
+
+            <method name="createExternalSubset"
+                    synopsis="$dtd = $document->createExternalSubset( $rootnode, $public, $system);">
+                <p>
+                    This function is similar to
+                    <em>createInternalSubset()</em> but this DTD is
+                    concidered to be external and is therefore not
+                    added to the document itself. Nevertheless it can
+                    be used for validation purposes.
+                </p>
+            </method>
+
             <method name="importNode"
                     synopsis="$document->importNode( $node );">
                 <p>
