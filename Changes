@@ -9,7 +9,7 @@ manpage!
 1.52
    - fixed some typos (thanks to randy kobes and hildo biersma)
    - fixed namespace node handling
-   - fixed empty attribute bug
+   - fixed empty Text Node bug
    - corrected the parser default values.
    - added some documentation
 

@@ -10,7 +10,7 @@ use Carp;
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
-$VERSION = "1.51";
+$VERSION = "1.52";
 require Exporter;
 require DynaLoader;
 
