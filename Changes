@@ -11,6 +11,9 @@ Revision history for Perl extension XML::LibXML
        getElementsByLocalName
    - minor fixes and extensions of the tests
    - more docu ;)
+   - SAX added comment and PI support
+   - Fixed find() bug with no results
+   - Added use IO::Handle so FH reads work
 
 1.31
     - Removed C-layer parser implementation.
