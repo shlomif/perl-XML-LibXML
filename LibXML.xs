@@ -198,7 +198,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
         cnt = perl_call_method("read", G_SCALAR | G_EVAL);
     }
     else {
-        cnt = perl_call_pv("__read", G_SCALAR | G_EVAL);
+        cnt = perl_call_pv("XML::LibXML::__read", G_SCALAR | G_EVAL);
     }
 
     SPAGAIN;
