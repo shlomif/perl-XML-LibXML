@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>13; }
+BEGIN { plan tests=>15; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -77,8 +77,11 @@ if( defined $dom2 ) {
     my $elem = $dom2->getDocumentElement();
     ok($elem);
     my @attr = $elem->getAttributes();
-    ok( scalar(@attr) , 3 );
+    ok( scalar(@attr) , 4 );
     ok( $attr[1]->getValue(), 2 );
+    
+    ok( $attr[3]->getName(), "b" );
+    ok( $attr[3]->getValue(), "http://whatever" );
 
     my @nsattr = $elem->getAttributesNS("http://whatever");
     ok( scalar(@nsattr) , 1 );
