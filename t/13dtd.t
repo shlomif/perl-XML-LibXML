@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 9 }
+BEGIN { plan tests => 11 }
 use XML::LibXML;
 ok(1);
 
@@ -38,6 +38,7 @@ ok($dtd);
 my $xml = XML::LibXML->new->parse_file('example/article.xml');
 ok($xml);
 ok($xml->is_valid($dtd));
+ok($xml->validate($dtd));
 }
 
 {
@@ -46,4 +47,9 @@ my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
 ok($dtd);
 my $xml = XML::LibXML->new->parse_file('example/article_bad.xml');
 ok(!$xml->is_valid($dtd));
+eval {
+    $xml->validate($dtd);
+    ok(0); # shouldn't get here
+};
+ok($@);
 }
