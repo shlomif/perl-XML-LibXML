@@ -1373,6 +1373,7 @@ parse_html_string(self, string)
         xmlDocPtr real_doc;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover;
     CODE:
         ptr = SvPV(string, len);
         if (len == 0) {
@@ -1385,14 +1386,20 @@ parse_html_string(self, string)
         LibXML_cleanup_parser();        
 
         sv_2mortal(LibXML_error);
-        
-        if (!real_doc) {
+
+        if (real_doc == NULL) {
             LibXML_croak_error();
             XSRETURN_UNDEF;
         }
         else {
             STRLEN n_a;
-            SV * newURI = newSVpvf("unknown-%12.12d", real_doc);
+            SV * newURI;
+
+            item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+            recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
+            if (!recover) LibXML_croak_error();
+
+            newURI = newSVpvf("unknown-%12.12d", real_doc);
             real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
 
@@ -1416,6 +1423,7 @@ parse_html_fh(self, fh)
         xmlDocPtr real_doc;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover;
     CODE:        
         LibXML_init_parser(self);
         real_doc = LibXML_parse_html_stream(self, fh);
@@ -1424,14 +1432,20 @@ parse_html_fh(self, fh)
         
         sv_2mortal(LibXML_error);
         
-        LibXML_croak_error();
 
-        if (real_doc == NULL ) {
-            croak("something went wrong");
-        }
+        if (real_doc == NULL) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        } 
         else {
             STRLEN n_a;
-            SV * newURI = newSVpvf("unknown-%12.12d", real_doc);
+            SV * newURI;
+
+            item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+            recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;            
+            if (!recover) LibXML_croak_error();
+
+            newURI = newSVpvf("unknown-%12.12d", real_doc);
             real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
             item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
@@ -1452,9 +1466,10 @@ parse_html_file(self, filename)
         const char * filename
     PREINIT:
         STRLEN len;
-        xmlDocPtr real_doc;
+        xmlDocPtr real_doc = NULL;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover;
     CODE:
         LibXML_init_parser(self);
         real_doc = htmlParseFile((char*)filename, NULL);
@@ -1463,11 +1478,14 @@ parse_html_file(self, filename)
 
         sv_2mortal(LibXML_error);
 
-        LibXML_croak_error();        
-
-        if (!real_doc) {
-            croak( "no document parsed!" );
+        if (real_doc == NULL) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
         }
+
+        item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+        recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
+        if (!recover) LibXML_croak_error();
 
         item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
 
@@ -1492,6 +1510,7 @@ parse_sgml_fh(self, fh, encoding)
         SV** item    = NULL;
         STRLEN n_a;
         SV * newURI;
+        int recover;
     CODE:
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
@@ -1502,12 +1521,15 @@ parse_sgml_fh(self, fh, encoding)
         LibXML_cleanup_parser();
         
         sv_2mortal(LibXML_error);
-
-        LibXML_croak_error();
         
         if (real_doc == NULL) {
-            croak("no document parsed!");
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
         }
+
+        item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+        recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
+        if (!recover) LibXML_croak_error();
 
         newURI = newSVpvf("unknown-%12.12d", real_doc);
         real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
@@ -1539,6 +1561,7 @@ parse_sgml_string(self, string, encoding)
         SV** item    = NULL;
         STRLEN n_a;
         SV * newURI;
+        int recover;
     CODE:
         ptr = SvPV(string, len);
         if (len == 0) {
@@ -1554,12 +1577,14 @@ parse_sgml_string(self, string, encoding)
 
         sv_2mortal(LibXML_error);
 
-        LibXML_croak_error();
-        
-        if (!real_doc) {
-            croak("no document parsed!");
+        if (real_doc == NULL) {
+            LibXML_croak_error();
             XSRETURN_UNDEF;
         }
+
+        item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+        recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
+        if (!recover) LibXML_croak_error();
 
         newURI = newSVpvf("unknown-%12.12d", real_doc);
         real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
@@ -1586,6 +1611,7 @@ parse_sgml_file(self, fn, encoding)
         xmlDocPtr real_doc;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover;
     CODE:
         LibXML_init_parser(self);
         real_doc = (xmlDocPtr) docbParseFile(filename,
@@ -1595,13 +1621,15 @@ parse_sgml_file(self, fn, encoding)
 
         sv_2mortal(LibXML_error);
         
-        LibXML_croak_error();
-
-        if (!real_doc) {
-            croak( "no document parsed!" );
+        if (real_doc == NULL) {
+            LibXML_croak_error();
             XSRETURN_UNDEF;
         }
         else {
+            item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+            recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
+            if (!recover) LibXML_croak_error();
+            
             item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
 
             if ( item != NULL && SvTRUE(*item) ) {  
