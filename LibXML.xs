@@ -24,8 +24,6 @@ extern "C" {
 }
 #endif
 
-#define BUFSIZE 32768
-
 #ifdef VMS
 extern int xmlDoValidityCheckingDefaultVal;
 #define xmlDoValidityCheckingDefaultValue xmlDoValidityCheckingDefaultVal
@@ -444,26 +442,25 @@ LibXML_parse_stream(SV * self, SV * ioref)
     xmlDocPtr doc;
     xmlParserCtxtPtr ctxt;
     int well_formed;
-    char buffer[BUFSIZE];
+    char buffer[1024];
     int read_length;
     int ret = -1;
     
-    ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, 0, NULL);
-    ctxt->_private = (void*)self;
-    
     read_length = LibXML_read_perl(ioref, buffer, 4);
     if (read_length > 0) {
-        xmlParseChunk(ctxt, buffer, read_length, 0);
-        while(read_length = LibXML_read_perl(ioref, buffer, BUFSIZE)) {
+        ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL);
+        ctxt->_private = (void*)self;
+
+        while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
             xmlParseChunk(ctxt, buffer, read_length, 0);
         }
         ret = xmlParseChunk(ctxt, buffer, 0, 1);
+        
+        doc = ctxt->myDoc;
+        well_formed = ctxt->wellFormed;
+
+        xmlFreeParserCtxt(ctxt);
     }
-    
-    doc = ctxt->myDoc;
-    well_formed = ctxt->wellFormed;
-    
-    xmlFreeParserCtxt(ctxt);
     
     if (!well_formed) {
         xmlFreeDoc(doc);
@@ -670,11 +667,8 @@ _parse_file(self, filename)
     PREINIT:
         xmlParserCtxtPtr ctxt;
         char * CLASS = "XML::LibXML::Document";
-        PerlIO *f;
         int ret;
-        int res;
         STRLEN len;
-        char chars[BUFSIZE];
     CODE:
         ctxt = xmlCreateFileParserCtxt(filename);
         ctxt->_private = (void*)self;
