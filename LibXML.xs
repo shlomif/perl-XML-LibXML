@@ -449,6 +449,9 @@ LibXML_parse_stream(SV * self, SV * ioref)
     read_length = LibXML_read_perl(ioref, buffer, 4);
     if (read_length > 0) {
         ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL);
+        if (ctxt == NULL) {
+            croak("Could not create push parser context: %s", strerror(errno));
+        }
         ctxt->_private = (void*)self;
 
         while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
@@ -629,6 +632,9 @@ _parse_string(self, string)
     CODE:
         ptr = SvPV(string, len);
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
+        if (ctxt == NULL) {
+            croak("Couldn't create memory parser context: %s", strerror(errno));
+        }
         ctxt->_private = (void*)self;
         
         ret = xmlParseDocument(ctxt);
@@ -671,6 +677,9 @@ _parse_file(self, filename)
         STRLEN len;
     CODE:
         ctxt = xmlCreateFileParserCtxt(filename);
+        if (ctxt == NULL) {
+            croak("Could not create file parser context for file '%s' : %s", filename, strerror(errno));
+        }
         ctxt->_private = (void*)self;
         
         xmlParseDocument(ctxt);
