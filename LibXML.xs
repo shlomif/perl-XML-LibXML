@@ -882,6 +882,60 @@ getDocumentElement( dom )
     OUTPUT:
         RETVAL
 
+ProxyObject *
+importNode( dom, node, move=0 ) 
+        SV * dom
+        xmlNodePtr node
+        int move
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Node";
+        xmlNodePtr ret;
+        xmlDocPtr real_dom;
+    CODE:
+        real_dom = (xmlDocPtr)SvIV((SV*)SvRV(dom));
+        RETVAL = NULL;
+        ret = domImportNode( real_dom, node, move );
+        if ( ret ) {
+            CLASS = domNodeTypeName( ret );
+            RETVAL = make_proxy_node(ret);
+            RETVAL->extra = dom;
+            SvREFCNT_inc(dom);
+        }
+    OUTPUT:
+        RETVAL
+
+char*
+getEncoding( self )
+         xmlDocPtr self
+    CODE:
+        if( self != NULL ) {
+            RETVAL = xmlStrdup( self->encoding );
+        }
+    OUTPUT:
+        RETVAL
+
+char*
+getVersion( self ) 
+         xmlDocPtr self
+    CODE:
+        if( self != NULL ) {
+            RETVAL = xmlStrdup( self->version );
+        }
+    OUTPUT:
+        RETVAL
+
+int 
+isEqual( self, other )
+        xmlDocPtr self
+        xmlDocPtr other
+    CODE:
+        RETVAL = 0;
+        if( self == other ) {
+            RETVAL = 1;
+        }
+    OUTPUT:
+        RETVAL
+
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Dtd
 
 xmlDtdPtr
@@ -942,9 +996,10 @@ removeChild( paren, child )
         const char * CLASS = "XML::LibXML::Node";
         xmlNodePtr ret;
     CODE:
-        ret = domRemoveNode( paren, child );
+        ret = domRemoveChild( paren, child );
         RETVAL = NULL;
-        if (ret != 0) {
+        if (ret != NULL) {
+            CLASS = domNodeTypeName( ret );
             RETVAL = make_proxy_node(ret);
         }
     OUTPUT:
@@ -961,7 +1016,8 @@ replaceChild( paren, newChild, oldChild )
     CODE:
         ret = domReplaceChild( paren, newChild, oldChild );
         RETVAL = NULL;
-        if (ret != 0) {
+        if (ret != NULL) {
+            CLASS = domNodeTypeName( ret );
             RETVAL = make_proxy_node(ret);
         }
     OUTPUT:
@@ -984,7 +1040,8 @@ cloneNode( self, deep )
     CODE:
         ret = xmlCopyNode( self, deep );
         RETVAL = NULL;
-        if (ret != 0) {
+        if (ret != NULL) {
+            CLASS = domNodeTypeName( ret );
             RETVAL = make_proxy_node(ret);
         }
     OUTPUT:
@@ -1000,7 +1057,7 @@ getParentNode( self )
     CODE:
         ret = self->parent;
         RETVAL = NULL;
-        if (ret != 0) {
+        if (ret != NULL) {
             RETVAL = make_proxy_node(ret);
         }
     OUTPUT:
@@ -1111,12 +1168,7 @@ setOwnerDocument( elem, doc )
         xmlNodePtr elem
         xmlDocPtr doc
     CODE:
-        if ( doc ) {
-            if ( elem->doc != doc ) {
-                domUnbindNode( elem );
-            }
-            elem->doc = doc;
-        }
+        domSetOwnerDocument( elem, doc );
 
 SV*
 getName( node )
@@ -1242,6 +1294,19 @@ toString( self )
         }
     OUTPUT:
         RETVAL
+
+int 
+isEqual( self, other )
+        xmlNodePtr self
+        xmlNodePtr other
+    CODE:
+        RETVAL = 0;
+        if( self == other ) {
+            RETVAL = 1;
+        }
+    OUTPUT:
+        RETVAL
+
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 

@@ -51,7 +51,7 @@ domReplaceChild( xmlNodePtr self,
                  xmlNodePtr oldChlid,
                  xmlNodePtr newChild );
 xmlNodePtr
-domRemoveNode( xmlNodePtr self,
+domRemoveChild( xmlNodePtr self,
                xmlNodePtr Child );
 xmlNodePtr
 domInsertBefore( xmlNodePtr self, 
@@ -75,6 +75,9 @@ domUnbindNode(  xmlNodePtr self );
 const char*
 domNodeTypeName( xmlNodePtr self );
 
+xmlNodePtr
+domIsNotParentOf( xmlNodePtr testNode, xmlNodePtr refNode );
+
 /** 
  * part B:
  *
@@ -89,6 +92,8 @@ domDocumentElement( xmlDocPtr document );
 xmlNodePtr
 domSetDocumentElement( xmlDocPtr document, 
 		       xmlNodePtr newRoot);
+xmlNodePtr
+domImportNode( xmlDocPtr document, xmlNodePtr node, int move );
 
 /**
  * part C:
@@ -98,5 +103,7 @@ domSetDocumentElement( xmlDocPtr document,
 
 xmlNodeSetPtr
 domGetElementsByTagName( xmlNodePtr self, xmlChar* name );
+xmlNodePtr
+domSetOwnerDocument( xmlNodePtr self, xmlDocPtr doc );
 
 #endif

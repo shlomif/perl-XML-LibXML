@@ -8,7 +8,7 @@
 
 xmlDocPtr
 domCreateDocument( xmlChar *version, xmlChar *enc ){
-    xmlDocPtr doc = 0;
+    xmlDocPtr doc = NULL;
     doc = xmlNewDoc( version );  
     doc->charset  = XML_CHAR_ENCODING_UTF8;
     if ( enc != NULL && *enc!= 0 ) {
@@ -65,17 +65,35 @@ xmlNodePtr
 domUnbindNode( xmlNodePtr );
 
 xmlNodePtr
+domIsNotParentOf( xmlNodePtr node1, xmlNodePtr node2 );
+
+xmlNodePtr
+domImportNode( xmlDocPtr doc, xmlNodePtr node, int move );
+
+xmlNodePtr
+domRemoveChild( xmlNodePtr self, xmlNodePtr old );
+
+xmlNodePtr
 domAppendChild( xmlNodePtr self,
 		xmlNodePtr newChild ){
   /* unbind the new node if nessecary ...  */
-  if ( newChild == 0 ){
-    return 0;
+
+  newChild = domIsNotParentOf( newChild, self );
+  if ( newChild == NULL ){
+    return NULL;
   }
-  if ( self == 0 ) {
+  if ( self == NULL ) {
     return newChild;
   }
 
-  newChild= domUnbindNode( newChild );
+
+  if ( newChild->doc == self->doc ){
+    newChild= domUnbindNode( newChild );
+  }
+  else {
+    newChild= domImportNode( self->doc, newChild, 1 );
+  }
+
   /* fix the document if they are from different documents 
    * actually this has to be done for ALL nodes in the subtree... 
    **/
@@ -108,13 +126,22 @@ domAppendChild( xmlNodePtr self,
 
 xmlNodePtr
 domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
-  if ( new == 0 ) {
-    return old;
+  new = domIsNotParentOf( new, self );
+  if ( new == NULL ) {
+    /* level2 sais nothing about this case :( */
+    return domRemoveChild( self, old );
   }
-  if ( self== 0 ){
-    return 0;
+
+  if ( self== NULL ){
+    return NULL;
   }
-  if ( old == 0 ) {
+
+  if ( new == old ) {
+    /* dom level 2 throw no exception if new and old are equal */ 
+    return new;
+  }
+
+  if ( old == NULL ) {
     domAppendChild( self, new );
     return old;
   }
@@ -122,7 +149,13 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     /* should not do this!!! */
     return new;
   }
-  new = domUnbindNode( new ) ;
+
+  if ( new->doc == self->doc ) {
+    new = domUnbindNode( new ) ;
+  }
+  else {
+    new = domImportNode( self->doc, new, 1 );
+  }
   new->parent = self;
   
   /* this piece is quite important */
@@ -130,9 +163,9 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     new->doc = self->doc;
   }
 
-  if ( old->next != 0 ) 
+  if ( old->next != NULL ) 
     old->next->prev = new;
-  if ( old->prev != 0 ) 
+  if ( old->prev != NULL ) 
     old->prev->next = new;
   
   new->next = old->next;
@@ -143,16 +176,16 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
   if ( old == self->last )
     self->last = new;
   
-  old->parent = 0;
-  old->next   = 0;
-  old->prev   = 0;
+  old->parent = NULL;
+  old->next   = NULL;
+  old->prev   = NULL;
  
   return old;
 }
 
 xmlNodePtr
-domRemoveNode( xmlNodePtr self, xmlNodePtr old ) {
-  if ( (self != 0)  && (old!=0) && (self == old->parent ) ) {
+domRemoveChild( xmlNodePtr self, xmlNodePtr old ) {
+  if ( (self != NULL)  && (old!=NULL) && (self == old->parent ) ) {
     domUnbindNode( old );
   }
   return old ;
@@ -162,8 +195,15 @@ xmlNodePtr
 domInsertBefore( xmlNodePtr self, 
                  xmlNodePtr newChild,
                  xmlNodePtr refChild ){
+
   if ( self == NULL ) {
     return NULL;
+  }
+
+  newChild = domIsNotParentOf( newChild, self );
+
+  if ( refChild == newChild ) {
+    return newChild;
   }
 
   if ( refChild == NULL && newChild != NULL ) {
@@ -172,7 +212,12 @@ domInsertBefore( xmlNodePtr self,
       return domAppendChild( self, newChild );
     }
     
-    domUnbindNode( newChild );
+    if ( self->doc == newChild->doc ){
+      newChild = domUnbindNode( newChild );
+    }
+    else {
+      newChild = domImportNode( self->doc, newChild, 1 );
+    }
 
     newChild->next = self->children;
     self->children->prev = newChild;
@@ -183,14 +228,19 @@ domInsertBefore( xmlNodePtr self,
   }
 
   if ( newChild != NULL && 
-       self == refChild->parent &&
-       refChild != newChild ) {
+       self == refChild->parent ) {
     /* find the refchild, to avoid spoofed parents */
     xmlNodePtr hn = self->children;
     while ( hn ) {
       if ( hn == refChild ) {
         /* found refChild */
-        newChild = domUnbindNode( newChild );
+        if ( self->doc == newChild->doc ){
+          newChild = domUnbindNode( newChild );
+        }
+        else {
+          newChild = domImportNode( self->doc, newChild, 1 );
+        }
+
         newChild->parent = self;
         newChild->next = refChild;
         newChild->prev = refChild->prev;
@@ -217,6 +267,12 @@ domInsertAfter( xmlNodePtr self,
     return NULL;
   }
 
+  newChild = domIsNotParentOf( newChild, self );
+
+  if ( refChild == newChild ) {
+    return newChild;
+  }
+
   if ( refChild == NULL ) {
     return domAppendChild( self, newChild );
   }
@@ -229,7 +285,13 @@ domInsertAfter( xmlNodePtr self,
     while ( hn ) {
       if ( hn == refChild ) {
         /* found refChild */
-        newChild = domUnbindNode( newChild );
+        if ( self->doc == newChild->doc ) {
+          newChild = domUnbindNode( newChild );
+        }
+        else {
+          newChild = domImportNode( self->doc , newChild, 1 );
+        }
+
         newChild->parent = self;
         newChild->prev = refChild;
         newChild->next = refChild->next;
@@ -251,9 +313,9 @@ domInsertAfter( xmlNodePtr self,
 
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
-  if ( n == 0 ) 
+  if ( n == NULL ) 
     return;
-  if( n->content != 0 ) {
+  if( n->content != NULL ) {
     xmlFree( n->content );
   }
   n->content = xmlStrdup( val );
@@ -262,7 +324,9 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
 
 void
 domSetParentNode( xmlNodePtr self, xmlNodePtr p ) {
-  if( self != 0 ){
+  /* never set the parent to a node in the own subtree */ 
+  self = domIsNotParentOf( self, p );
+  if( self != NULL ){
     if( self->parent != p ){
       domUnbindNode( self );
       self->parent = p;
@@ -275,21 +339,53 @@ domSetParentNode( xmlNodePtr self, xmlNodePtr p ) {
 
 xmlNodePtr
 domUnbindNode( xmlNodePtr self ) {
-  if ( (self != 0) && (self->parent != 0) ) { 
-    if ( self->next != 0 )
+  if ( (self != NULL) && (self->parent != NULL) ) { 
+    if ( self->next != NULL )
       self->next->prev = self->prev;
-    if ( self->prev != 0 )
+    if ( self->prev != NULL )
       self->prev->next = self->next;
     if ( self == self->parent->last ) 
       self->parent->last = self->prev;
     if ( self == self->parent->children ) 
       self->parent->children = self->next;
 
-    self->parent = 0;
-    self->next   = 0;
-    self->prev   = 0;
+    self->parent = NULL;
+    self->next   = NULL;
+    self->prev   = NULL;
   }
   return self;
+}
+
+/**
+ * donIsNotParentOf tests, if node1 is parent of node2. this test is very
+ * important to avoid circular constructs in trees. if node1 is NOT parent
+ * of node2 the function returns node1, otherwise NULL.
+ **/
+xmlNodePtr
+domIsNotParentOf( xmlNodePtr node1, xmlNodePtr node2 ) {
+  xmlNodePtr helper = NULL;
+
+  if ( node1 == NULL ) {
+    return NULL;
+  }
+
+  if( node2 == NULL || node1->doc != node2->doc) {
+    return node1;
+  }
+  
+  helper= node2;
+  while ( helper!=NULL ) {
+    if( helper == node1 ) {
+      return NULL;
+    }
+    
+    helper = helper->parent;
+    if ( (xmlDocPtr) helper == node2->doc ) {
+      helper = NULL;
+    }
+  }
+
+  return node1;
 }
 
 /**
@@ -304,7 +400,7 @@ const char*
 domNodeTypeName( xmlNodePtr elem ){
   const char *name = "XML::LibXML::Node";
 
-  if ( elem != 0 ) {
+  if ( elem != NULL ) {
     char * ptrHlp;
     switch ( elem->type ) {
     case XML_ELEMENT_NODE:
@@ -331,14 +427,14 @@ domNodeTypeName( xmlNodePtr elem ){
 
 xmlNodePtr
 domCreateCDATASection( xmlDocPtr self , xmlChar * strNodeContent ){
-  xmlNodePtr elem = 0;
+  xmlNodePtr elem = NULL;
 
-  if ( ( self != 0 ) && ( strNodeContent != 0 ) ) {
+  if ( ( self != NULL ) && ( strNodeContent != NULL ) ) {
     elem = xmlNewCDataBlock( self, strNodeContent, xmlStrlen(strNodeContent) );
-    elem->next = 0;
-    elem->prev = 0;
-    elem->children = 0 ;
-    elem->last = 0;
+    elem->next = NULL;
+    elem->prev = NULL;
+    elem->children = NULL ;
+    elem->last = NULL;
     elem->doc = self->doc;   
   }
 
@@ -348,10 +444,10 @@ domCreateCDATASection( xmlDocPtr self , xmlChar * strNodeContent ){
 
 xmlNodePtr 
 domDocumentElement( xmlDocPtr doc ) {
-  xmlNodePtr cld=0;
-  if ( doc != 0 && doc->doc != 0 && doc->doc->children != 0 ) {
+  xmlNodePtr cld=NULL;
+  if ( doc != NULL && doc->doc != NULL && doc->doc->children != NULL ) {
     cld= doc->doc->children;
-    while ( cld != 0 && cld->type != XML_ELEMENT_NODE ) 
+    while ( cld != NULL && cld->type != XML_ELEMENT_NODE ) 
       cld= cld->next;
   
   }
@@ -376,26 +472,69 @@ domSetDocumentElement( xmlDocPtr doc, xmlNodePtr newRoot ) {
 }
 
 
+xmlNodePtr
+domSetOwnerDocument( xmlNodePtr self, xmlDocPtr newDoc );
+
+xmlNodePtr
+domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
+  xmlNodePtr return_node;
+
+  if ( !doc ) {
+    return node;
+  }
+
+  if ( node && node->doc != doc ) {
+    if ( move ) {
+      return_node = domUnbindNode( node );
+    }
+    else {
+      return_node = xmlCopyNode( node, 1 );
+    }
+    /* tell all children about the new boss */ 
+    return_node = domSetOwnerDocument( return_node, doc ); 
+  }
+
+  return return_node;
+}
 
 xmlNodeSetPtr
 domGetElementsByTagName( xmlNodePtr n, xmlChar* name ){
-  xmlNodeSetPtr rv = 0;
-  xmlNodePtr cld = 0;
+  xmlNodeSetPtr rv = NULL;
+  xmlNodePtr cld = NULL;
 
-  if ( n != 0 && name != 0 ) {
+  if ( n != NULL && name != NULL ) {
     cld = n->children;
     while ( cld ) {
       if ( xmlStrcmp( name, cld->name ) == 0 ){
-	if ( rv == 0 ) {
-	  rv = xmlXPathNodeSetCreate( cld ) ;
-	}
-	else {
-	  xmlXPathNodeSetAdd( rv, cld );
-	}
+        if ( rv == NULL ) {
+          rv = xmlXPathNodeSetCreate( cld ) ;
+        }
+        else {
+          xmlXPathNodeSetAdd( rv, cld );
+        }
       }
       cld = cld->next;
     }
   }
   
   return rv;
+}
+
+xmlNodePtr
+domSetOwnerDocument( xmlNodePtr self, xmlDocPtr newDoc ) {
+  if ( newDoc == NULL ) {
+    return NULL;
+  }
+
+  if ( self!= NULL ) {
+    xmlNodePtr pNode = self->children;
+
+    self->doc = newDoc;
+    while ( pNode != NULL ) {
+      domSetOwnerDocument( pNode, newDoc );
+      pNode = pNode->next;
+    }
+   }
+
+  return self;
 }
