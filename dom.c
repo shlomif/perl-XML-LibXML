@@ -215,6 +215,7 @@ domDecodeString( const char *encoding, const xmlChar *string){
             
                 xmlBufferFree( in );
                 xmlBufferFree( out );
+                xmlCharEncCloseFunc( coder );
             }
         }
         else {
@@ -912,4 +913,46 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
     }
 
     return attr;
+}
+
+int
+domNodeNormalize( xmlNodePtr node )
+{
+    xmlNodePtr next;
+
+    if ( node == NULL ) 
+        return(0);
+
+    switch ( node->type ) {
+    case XML_TEXT_NODE:
+        while ( node->next
+                && node->next->type == XML_TEXT_NODE ) {
+            next = node->next;
+            xmlNodeAddContent(node, next->content);
+            xmlUnlinkNode( next );
+        }
+        break;
+    case XML_ELEMENT_NODE:
+        domNodeNormalizeList( node->properties );
+    case XML_ATTRIBUTE_NODE:
+        return( domNodeNormalizeList( node->children ) );
+        break;
+    default:
+        break;
+    }    
+    return(1);
+}
+
+int
+domNodeNormalizeList( xmlNodePtr nodelist )
+{
+    if ( nodelist == NULL ) 
+        return(0);
+
+    while ( nodelist ){
+        if ( domNodeNormalize( nodelist ) == 0 )
+            return(0);
+        nodelist = nodelist->next;
+    }
+    return(1);
 }

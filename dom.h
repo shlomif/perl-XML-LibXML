@@ -225,4 +225,10 @@ domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace);
 xmlAttrPtr
 domSetAttributeNode( xmlNodePtr node , xmlAttrPtr attr );
 
+int
+domNodeNormalize( xmlNodePtr node );
+
+int
+domNodeNormalizeList( xmlNodePtr nodelist );
+
 #endif

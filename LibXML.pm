@@ -448,7 +448,7 @@ sub toString {
         $retval .= "\n";
     }
     else {
-        $retval =  $self->_toString($flag);
+        $retval =  $self->_toString($flag||0);
     }
     return $retval;
 }
