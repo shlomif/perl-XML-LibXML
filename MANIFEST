@@ -65,6 +65,8 @@ lib/XML/LibXML/NodeList.pm
 lib/XML/LibXML/Literal.pm
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/Number.pm
+lib/XML/LibXML/Error.pm
+lib/XML/LibXML/ErrNo.pm
 lib/XML/LibXML/SAX.pm
 lib/XML/LibXML/SAX/Generator.pm
 lib/XML/LibXML/SAX/Builder.pm

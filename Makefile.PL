@@ -67,6 +67,15 @@ if ( $] >= 5.006 ) {
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
+# enable libxml2 structured errors on demand
+if ( $config{WITH_SERRORS} ) {
+    warn "enable structured errors support\n";
+    $config{DEFINE} .= " -DLIBXML_SERRORS";
+    delete $config{WITH_SERRORS};
+}
+# -------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------- #
 # get the libxml2 configuration
 #
 # For each release we already know which libxml2 versions work with the given

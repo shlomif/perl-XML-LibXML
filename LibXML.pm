@@ -9,6 +9,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
 use Carp;
 
 use XML::LibXML::Common qw(:encoding :libxml);
+use XML::LibXML::Error;
 
 use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
