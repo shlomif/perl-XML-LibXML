@@ -58,6 +58,7 @@ t/20extras.t
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/Comment.pod
 lib/XML/LibXML/DOM.pod
+lib/XML/LibXML/SAX.pod
 lib/XML/LibXML/Dtd.pod
 lib/XML/LibXML/Node.pod
 lib/XML/LibXML/CDATASection.pod
@@ -70,6 +71,7 @@ lib/XML/LibXML/NodeList.pm
 lib/XML/LibXML/Literal.pm
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/Number.pm
+lib/XML/LibXML/SAX.pm
 lib/XML/LibXML/SAX/Generator.pm
 lib/XML/LibXML/SAX/Builder.pm
 lib/XML/LibXML/SAX/Parser.pm

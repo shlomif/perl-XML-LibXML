@@ -16,6 +16,16 @@ extern "C" {
 }
 #endif
 
+/* has to be called in BOOT sequence */
+void
+PmmSAXInitialize();
+
+void
+PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser );
+
+void 
+PmmSAXCloseContext( xmlParserCtxtPtr ctxt );
+
 xmlSAXHandlerPtr
 PSaxGetHandler();
 

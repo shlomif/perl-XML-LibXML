@@ -759,7 +759,8 @@ LibXML_parse_sax_stream(SV * self, SV * ioref, char * directory)
             croak("Could not create push parser context: %s", strerror(errno));
         }
         ctxt->directory = directory;
-        ctxt->_private = (void*)self;
+        PmmSAXInitContext( ctxt, self );
+
         while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
             xmlParseChunk(ctxt, buffer, read_length, 0);
         }
@@ -769,6 +770,7 @@ LibXML_parse_sax_stream(SV * self, SV * ioref, char * directory)
 
         xmlFree(ctxt->sax);
         ctxt->sax = NULL;
+        PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
 
     }
@@ -832,6 +834,7 @@ PROTOTYPES: DISABLE
 BOOT:
     LIBXML_TEST_VERSION
     xmlInitParser();
+    PmmSAXInitialize();
 
     /* make the callback mechnism available to perl coders */
     xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
@@ -1145,11 +1148,11 @@ _parse_sax_string(self, string)
         }
     CODE:
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
+
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
         }
-
-        ctxt->_private = (void*)self;
+        PmmSAXInitContext( ctxt, self );
 
         ctxt->sax = PSaxGetHandler();
 
@@ -1157,6 +1160,7 @@ _parse_sax_string(self, string)
         RETVAL = xmlParseDocument(ctxt);
         xmlFree( ctxt->sax );
         ctxt->sax = NULL;
+        PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
 
         LibXML_cleanup_callbacks();
@@ -1283,7 +1287,7 @@ _parse_sax_file(self, filename)
         }
 
         ctxt->sax = PSaxGetHandler();
-        ctxt->_private = (void*)self;
+        PmmSAXInitContext( ctxt, self );
         
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
@@ -1292,6 +1296,7 @@ _parse_sax_file(self, filename)
 
         xmlFree(ctxt->sax);
         ctxt->sax = NULL;
+        PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
                 
         sv_2mortal(LibXML_error);
@@ -1488,7 +1493,7 @@ _parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
             if (ctxt == NULL) {
                 croak("Couldn't create memory parser context: %s", strerror(errno));
             }   
-            ctxt->_private = (void*)self;
+            PmmSAXInitContext( ctxt, self );         
             ctxt->sax = PSaxGetHandler();
 
             LibXML_error = sv_2mortal(newSVpv("", 0));
@@ -1503,6 +1508,9 @@ _parse_sax_xml_chunk( self, svchunk, encoding="UTF-8" )
                                                    chunk,
                                                    &nodes );       
             xmlFree( handler );            
+            PmmSAXCloseContext(ctxt);
+            xmlFreeParserCtxt(ctxt);
+
             LibXML_cleanup_callbacks();
             LibXML_cleanup_parser();    
             xmlFree( chunk );
@@ -1626,7 +1634,7 @@ _start_push( self, with_sax=0 )
         else {
             ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
         }
-
+        PmmSAXInitContext( ctxt, self );
         sv_2mortal(LibXML_error);
 
         RETVAL = PmmContextSv( ctxt );
@@ -1662,8 +1670,6 @@ _push( self, pctxt, data )
         sv_setpvn(LibXML_error, "", 0);
 
         LibXML_init_parser(self);
-
-        ctxt->_private = (void*)self;
         xmlParseChunk(ctxt, chunk, len, 0);
 
         LibXML_cleanup_callbacks();
@@ -1696,7 +1702,6 @@ _end_push( self, pctxt, restore )
         sv_setpvn(LibXML_error, "", 0);
 
         LibXML_init_parser(self);
-        ctxt->_private = (void*)self;
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
@@ -1738,7 +1743,6 @@ _end_sax_push( self, pctxt )
         sv_setpvn(LibXML_error, "", 0);
 
         LibXML_init_parser(self);
-        ctxt->_private = (void*)self;
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();    
@@ -1747,6 +1751,7 @@ _end_sax_push( self, pctxt )
 
         xmlFree(ctxt->sax);
         ctxt->sax = NULL;
+        PmmSAXCloseContext(ctxt);
         xmlFreeParserCtxt(ctxt);
         XSRETURN_UNDEF;
 
@@ -4799,6 +4804,18 @@ DESTROY(self)
         if (ns) {
             xmlFreeNs(ns);
         }
+
+int
+nodeType(self)
+        SV * self
+    ALIAS:
+        getType = 1
+    PREINIT:
+        xmlNsPtr ns = (xmlNsPtr)SvIV(SvRV(self));
+    CODE:
+        RETVAL = ns->type;
+    OUTPUT:
+        RETVAL
 
 SV*
 href(self)

@@ -12,6 +12,8 @@ manpage!
    - fixed attribute setting of the string parser
    - fixed external entity loading for entity expansion
    - fixed nodeValue() to handle entities and entity refs correctly
+   - SAX::Parser ignores now hidden XINCLUDE nodes.
+   - fixed SAX::Builder to recognize namespace declarations correctly
    - compatibility fixes
    - importNode() bug fix 
    - fixed library tests and output in Makefile.PL

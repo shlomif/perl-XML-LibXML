@@ -240,10 +240,17 @@ sub base_uri {
 
 sub set_handler {
     my $self = shift;
-    $self->{HANDLER} = $_[0];
+    if ( defined $_[0] ) {
+        $self->{HANDLER} = $_[0];
 
-    $self->{SAX} = {NAMESPACES => {},
-                    ELSTACK    => []};
+        $self->{SAX} = {State => 0,
+                        ELSTACK    => []};
+    }
+    else {
+        # undef SAX handling
+        delete $self->{HANDLER};
+        delete $self->{SAX};
+    }
 }
 
 sub _auto_expand {
@@ -279,7 +286,6 @@ sub parse_string {
     if ( defined $self->{SAX} ) {
         my $string = shift;
         eval { $self->_parse_sax_string($string); };
-
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
@@ -382,8 +388,6 @@ sub parse_xml_chunk {
 
     return $result;
 }
-
-sub parse_chunk { my $self = shift; return $self->parse_xml_chunk(@_); }
 
 sub processXIncludes {
     my $self = shift;
@@ -901,7 +905,13 @@ use Carp;
 
 sub start_document {
     my $parser = shift;
+    $parser->{SAX}->{State} = 1;
     $parser->{HANDLER}->start_document({});
+}
+
+sub end_document {
+    my $parser = shift;
+    $parser->{SAX}->{State} = 0;
 }
 
 sub xml_decl {
@@ -912,57 +922,14 @@ sub xml_decl {
     $parser->{HANDLER}->xml_decl($decl);
 }
 
-sub end_document {
-    my $parser = shift;
-    $parser->{HANDLER}->end_document({});
-}
-
 sub start_element {
-    my (  $parser, $name, %attrs ) = @_;
+    my (  $parser, $elem, $attrs ) = @_;
     my $saxattr = {};
-    foreach my $att ( keys %attrs ) {
-        next unless $att =~ /^xmlns/;
-        $parser->{Namespaces}->{$att} = $attrs{$att};
-    }
 
-    foreach my $att ( keys %attrs ) {
-        next if $att =~ /^xmlns/;
-        $saxattr->{$att} = {Name         => $att,
-                            Value        => $attrs{$att},
-                            NamespaceURI => "",
-                            Prefix       => "",
-                            LocalName    => $att};
-
-        if ( $att =~ /([^\:]+):(.+)/ ) {
-            if ( exists  $parser->{SAX}->{Namespaces}->{"xmlns:$1"} ) {
-                $saxattr->{$att}->{NamespaceURI} = $parser->{SAX}->{Namespaces}->{"xmlns:$1"};
-                $saxattr->{$att}->{LocalName} = $2;
-                $saxattr->{$att}->{Prefix} = $1;
-            }
-        }
-    }
-
-    my $elem = { Name => $name };
-    if ( $name =~ /([^\:]+)\:(.+)/ ) {
-        my $xmlns = "xmlns:$1";
-        if ( exists $parser->{SAX}->{Namespaces}->{$xmlns} ){
-            $elem->{LocalName} = $2;
-            $elem->{Prefix} = $1;
-            $elem->{NamespaceURI} = $parser->{SAX}->{Namespaces}->{$xmlns};
-        }
-        else {
-             $elem->{LocalName} = $name;
-             $elem->{Prefix} = "";
-             $elem->{NamespaceURI} = "";
-        }
-    }
-    else {
-        $elem->{LocalName} = $name;
-        $elem->{Prefix} = "";
-        $elem->{NamespaceURI} = "";
-    }
     push @{$parser->{SAX}->{ELSTACK}}, $elem;
-    $parser->{HANDLER}->start_element( { %$elem, Attributes=>$saxattr} )
+    if ( defined $attrs ) {
+        $parser->{HANDLER}->start_element( { %$elem, Attributes=>$attrs} )
+    }
 
 }
 
@@ -970,7 +937,7 @@ sub end_element {
     my (  $parser, $name ) = @_;
     my $elem = pop @{$parser->{SAX}->{ELSTACK}};
     if ( $elem->{Name} ne $name ) {
-        croak( "cought error where parser should work" );
+        croak( "cought error where parser should work ($elem->{Name} != $name" );
     }
     $parser->{HANDLER}->end_element( $elem );
 }
@@ -1549,10 +1516,6 @@ Copyright 2001, AxKit.com Ltd. All rights reserved.
 
 =head1 SEE ALSO
 
-L<XML::LibXSLT>, L<XML::LibXML::DOM>, L<XML::LibXML::Document>,
-L<XML::LibXML::Element>, L<XML::LibXML::Node>,
-L<XML::LibXML::Text>, L<XML::LibXML::Comment>,
-L<XML::LibXML::CDATASection>, L<XML::LibXML::Attribute>
-L<XML::LibXML::DocumentFragment>
+L<XML::LibXSLT>, L<XML::LibXML::DOM>, L<XML::LibXML::SAX>
 
 =cut
