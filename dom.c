@@ -494,13 +494,42 @@ domGetNodeValue( xmlNodePtr n ) {
         case XML_COMMENT_NODE:
         case XML_CDATA_SECTION_NODE:
         case XML_PI_NODE:
+        case XML_ENTITY_REF_NODE:
             break;
         default:
             return retval;
             break;
         }
-
-        retval = xmlXPathCastNodeToString(n);
+        if ( n->type != XML_ENTITY_DECL ) {
+            retval = xmlXPathCastNodeToString(n);
+        }
+        else {
+            if ( n->content != NULL ) {
+                xs_warn(" dublicate content\n" );
+                retval = xmlStrdup(n->content);
+            }
+            else if ( n->children != NULL ) {
+                xmlNodePtr cnode = n->children;
+                xs_warn(" use child content\n" );
+                /* ok then toString in this case ... */
+                while (cnode) {
+                    xmlBufferPtr buffer = xmlBufferCreate();
+                    /* buffer = xmlBufferCreate(); */
+                    xmlNodeDump( buffer, n->doc, cnode, 0, 0 );
+                    if ( buffer->content != NULL ) {
+                        xs_warn( "add item" );
+                        if ( retval != NULL ) {
+                            retval = xmlStrcat( retval, buffer->content );
+                        }
+                        else {
+                            retval = xmlStrdup( buffer->content );
+                        }
+                    }
+                    xmlBufferFree( buffer );
+                    cnode = cnode->next;
+                }
+            }
+        }
     }
 
     return retval;
