@@ -95,7 +95,12 @@ static SV * LibXML_error    = NULL;
 
 #define LibXML_croak_error() if ( SvCUR( LibXML_error ) > 0 ) { \
                                  croak("%s",SvPV(LibXML_error, len)); \
-                             } 
+                             }
+
+#define LibXML_warn_error() if ( SvCUR( LibXML_error ) > 0 ) { \
+                                 warn("%s",SvPV(LibXML_error, len)); \
+                             }
+
 
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
@@ -652,7 +657,14 @@ LibXML_init_parser( SV * self ) {
         }
 
         item = hv_fetch( real_obj, "XML_LIBXML_PEDANTIC", 19, 0 );
-        xmlPedanticParserDefaultValue = item != NULL && SvTRUE(*item) ? 1 : 0;
+        if ( item != NULL && SvTRUE(*item) ) {
+            xmlThrDefPedanticParserDefaultValue( 1 );
+            xmlPedanticParserDefaultValue = 1;
+        }
+        else {
+            xmlThrDefPedanticParserDefaultValue( 0 );
+            xmlPedanticParserDefaultValue = 0;
+        }
 
         item = hv_fetch( real_obj, "XML_LIBXML_EXT_DTD", 18, 0 );
         if ( item != NULL && SvTRUE(*item) )
@@ -1243,6 +1255,9 @@ _parse_fh(self, fh, directory = NULL)
                  && recover == 0 ) {
             LibXML_croak_error();
         }
+        else {
+            /* LibXML_warn_error(); */ /* if the parser causes some noise */
+        }
 
         item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
 
@@ -1331,6 +1346,7 @@ _parse_file(self, filename)
                 RETVAL = PmmNodeToSv((xmlNodePtr)real_doc, NULL);
             }
         }
+        /* LibXML_warn_error(); */ /* if the parser causes some noise */  
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
     OUTPUT:
@@ -1385,6 +1401,7 @@ parse_html_string(self, string)
         }
                 
         LibXML_init_parser(self);
+
         real_doc = htmlParseDoc((xmlChar*)ptr, NULL);
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();        
@@ -1401,7 +1418,12 @@ parse_html_string(self, string)
 
             item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
             recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
-            if (!recover) LibXML_croak_error();
+            if (!recover) {
+                LibXML_croak_error();
+            }
+            else {
+                /* LibXML_warn_error(); */ /* if the parser causes some noise */
+            }
 
             newURI = newSVpvf("unknown-%12.12d", real_doc);
             real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
@@ -1447,8 +1469,12 @@ parse_html_fh(self, fh)
 
             item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
             recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;            
-            if (!recover) LibXML_croak_error();
-
+            if (!recover){
+                LibXML_croak_error();
+            }
+            else {
+                /* LibXML_warn_error(); */ /* if the parser causes some noise */
+            }
             newURI = newSVpvf("unknown-%12.12d", real_doc);
             real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
             SvREFCNT_dec(newURI);
@@ -1489,7 +1515,12 @@ parse_html_file(self, filename)
 
         item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
         recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
-        if (!recover) LibXML_croak_error();
+        if (!recover) {
+            LibXML_croak_error();
+        }
+        else {
+            /* LibXML_warn_error(); */ /* if the parser causes some noise */
+        }
 
         item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
 
@@ -1533,7 +1564,12 @@ parse_sgml_fh(self, fh, encoding)
 
         item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
         recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
-        if (!recover) LibXML_croak_error();
+        if (!recover) {
+            LibXML_croak_error();
+        }
+        else {
+            /* LibXML_warn_error(); */ /* if the parser causes some noise */
+        }
 
         newURI = newSVpvf("unknown-%12.12d", real_doc);
         real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
@@ -1588,7 +1624,12 @@ parse_sgml_string(self, string, encoding)
 
         item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
         recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
-        if (!recover) LibXML_croak_error();
+        if (!recover) {
+            LibXML_croak_error();
+        }
+        else {
+            /* LibXML_warn_error(); */ /* if the parser causes some noise */
+        }
 
         newURI = newSVpvf("unknown-%12.12d", real_doc);
         real_doc->URL = xmlStrdup((const xmlChar*)SvPV(newURI, n_a));
@@ -1632,7 +1673,12 @@ parse_sgml_file(self, fn, encoding)
         else {
             item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
             recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
-            if (!recover) LibXML_croak_error();
+            if (!recover) {
+                LibXML_croak_error();
+            }
+            else {
+                /* LibXML_warn_error(); */ /* if the parser causes some noise */
+            }
             
             item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
 
@@ -2913,17 +2959,17 @@ createProcessingInstruction(self, name, value=&PL_sv_undef)
     PREINIT:
         xmlChar * n = NULL;
         xmlChar * v = NULL;
-        xmlNodePtr PI = NULL;
+        xmlNodePtr pinode = NULL;
     CODE:
         n = nodeSv2C(name, (xmlNodePtr)self);
         if ( !n ) {
             XSRETURN_UNDEF;
         }
         v = nodeSv2C(value, (xmlNodePtr)self);
-        PI = xmlNewPI(n,v);      
-        PI->doc = self;
+        pinode = xmlNewPI(n,v);      
+        pinode->doc = self;
 
-        RETVAL = PmmNodeToSv(PI,NULL);
+        RETVAL = PmmNodeToSv(pinode,NULL);
 
         xmlFree(v);
         xmlFree(n);
@@ -4130,7 +4176,7 @@ isSameNode( self, oNode )
     ALIAS:
         XML::LibXML::Node::isEqual = 1
     CODE:
-        RETVAL = self == oNode ? 1 : 0;
+        RETVAL = ( self == oNode ) ? 1 : 0;
     OUTPUT:
         RETVAL
 

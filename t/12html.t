@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 5 }
+BEGIN { plan tests => 6 }
 use XML::LibXML;
 use IO::File;
 ok(1);
@@ -34,5 +34,30 @@ $doc = $parser->parse_html_fh($fh);
 
 ok($doc);
 
-#warn($doc->toStringHTML);
+$fh->close();
+
+# parsing HTML's CGI calling links
+
+my $strhref = <<EOHTML;
+
+<html>
+    <body>
+        <a href="http:/foo.bar/foobar.pl?foo=bar&bar=foo">
+            foo
+        </a>
+        <p>test
+    </body>
+</html>
+EOHTML
+
+my $htmldoc;
+
+$parser->recover(1);
+eval {
+    $htmldoc = $parser->parse_html_string( $strhref );
+};
+
+# ok( not $@ );
+ok( $htmldoc );
+
 

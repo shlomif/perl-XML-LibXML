@@ -151,6 +151,18 @@ sub handle {
         $filename =~ s/^\s*|\s*$//g;
         my $dir = $self->{directory};
 
+        $filename =~ s/XML\:\:LibXML//g;
+        $filename =~ s/^-|^\:\://g;   # remove the first colon or minus. 
+        $filename =~ s/\:\:/\//g;     # transform remaining colons to paths.
+        # the previous statement should work for existing modules. This could be
+        # dangerous for nested modules, which do not exist at the time of writing
+        # this code.
+
+	unless ( length $filename ) {
+            $dir = "";
+            $filename = "LibXML";
+        }
+
         if ( $filename ne "README" and $filename ne "LICENSE" ) {
             $filename .= ".pod";
         }
@@ -158,9 +170,6 @@ sub handle {
             $dir = "";
         }
 
-
-        $filename =~ s/XML\:\:LibXML//g;
-        $filename =~ s/^-|^\:\://g;
         $self->{OFILE} = IO::File->new();
         $self->{OFILE}->open(">".$dir.$filename);
 

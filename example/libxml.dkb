@@ -598,6 +598,14 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
             </listitem>
           </varlistentry>
         </variablelist>
+        <para>Parsing HTML may causes problems, especially if the ampersand
+        (&#39;&#38;&#39;) is used. This is a common problem if HTML code is
+        parsed that contains links to CGI-scripts. Such links cause the parser
+        to throw errors. In such cases libxml2 still parses the entire
+        document as there was no error, but the error causes XML::LibXML to
+        stop the parsing process. However, the document is not lost. Such HTML
+        documents should be parsed using the <emphasis>recover</emphasis>
+        flag. By default recovering is deactivated.</para>
         <para>The functions described above are implemented to parse well
         formed documents. In some cases a program gets well balanced XML
         instead of well formed documents (e.g. a XML fragment from a
@@ -856,8 +864,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             wellformed very efficiently. That is for example a document that
             forgets to close the document tag (or any other tag inside the
             document). The recover mode of XML::LibXML has problems though to
-            restore documents that are more like well ballanced chunks.
-            </para>
+            restore documents that are more like well ballanced chunks.</para>
             <para>XML::LibXML will only parse until the first fatal error
             occours.</para>
           </listitem>
@@ -1094,10 +1101,10 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
       XML::LibXML throws errors as they occour and does not wait if a user
       test for them. This is a very common misunderstanding in the use of
       XML::LibXML. If the eval is ommited, XML::LibXML will allways halt your
-      script by &#34;croaking&#34; (see Carp man page for details). </para>
+      script by &#34;croaking&#34; (see Carp man page for details).</para>
       <para>Also note that an increasing number throws errors if bad data is
       passed. If you cannot asure valid data passed to XML::LibXML you should
-      eval these functions. </para>
+      eval these functions.</para>
       <para>get_last_error() can be called either by the class itself or by a
       parser instance:</para>
       <programlisting>$errstring = XML::LibXML-&#62;get_last_error();
@@ -1455,7 +1462,7 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
           <funcsynopsis>
             <funcsynopsisinfo>$c14nstr = $doc-&#62;serialize_c14n($comment_flag,$xpath); </funcsynopsisinfo>
           </funcsynopsis>
-          <para>Alternative form of toStringC14N(). </para>
+          <para>Alternative form of toStringC14N().</para>
         </listitem>
       </varlistentry>
       <varlistentry>
