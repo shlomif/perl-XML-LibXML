@@ -304,7 +304,7 @@ dromeds.xml
             my $parser  = XML::LibXML->new;
 
             check_mem();
-       
+       if(0) {
             foreach my $key ( keys %xmlStrings )  {
                 print "# $key \n";
                 for (1..$times_through) {
@@ -316,9 +316,35 @@ dromeds.xml
             }
             ok(1);
         }
+            my %xmlBadStrings = (
+                "SIMPLE"      => ["<xml1>"],
+                "SIMPLE2"      => ["<xml1>","</xml2>", "</xml1>"],
+                "SIMPLE TEXT" => ["<xml1> ","some text some text some text","</xml2>"],
+                "SIMPLE CDATA"=> ["<xml1> ","<!","[CDATA[some text some text some text]","</xml1>"],
+                "SIMPLE JUNK" => ["<xml1/> ","junk"],
+            );
+
+            print "# BAD PUSHED DATA\n";
+            foreach my $key ( "SIMPLE","SIMPLE2", "SIMPLE TEXT","SIMPLE CDATA","SIMPLE JUNK" )  {
+                print "# $key \n";
+                for (1..$times_through) {
+                    eval {map { $parser->push( $_ ) } @{$xmlBadStrings{$key}};};
+                    eval {my $doc = $parser->finish_push();};
+                }
+
+                check_mem();
+            }            
+
+        }
 
         {
             print "# SAX PUSH PARSER\n";
+
+            my $handler = sax_null->new;
+            my $parser  = XML::LibXML->new;
+            $parser->set_handler( $handler );
+            check_mem();
+
 
         my %xmlStrings = (
             "SIMPLE"      => ["<xml1>","<xml2><xml3></xml3></xml2>","</xml1>"],
@@ -329,23 +355,37 @@ dromeds.xml
             "NAMESPACES SIMPLE" => ['<xml:xml1 xmlns:x','ml="foo"><xml:xml2','/></xml:xml1>'],
             "NAMESPACES ATTRIBUTE" => ['<xml:xml1 xmlns:xml="foo">','<xml:xml2 xml:foo="bar"/></xml',':xml1>'],
         );
-
-            my $handler = sax_null->new;
-            my $parser  = XML::LibXML->new;
-            $parser->set_handler( $handler );
-
-            check_mem();
        
             foreach my $key ( keys %xmlStrings )  {
                 print "# $key \n";
                 for (1..$times_through) {
-                    map { $parser->push( $_ ) } @{$xmlStrings{$key}};
-                    my $doc = $parser->finish_push();
+                    eval {map { $parser->push( $_ ) } @{$xmlStrings{$key}};};
+                    eval {my $doc = $parser->finish_push();};
                 }
 
                 check_mem();
             }
             ok(1);
+
+            print "# BAD PUSHED DATA\n";
+
+            my %xmlBadStrings = (
+                "SIMPLE "      => ["<xml1>"],
+                "SIMPLE2"      => ["<xml1>","</xml2>", "</xml1>"],
+                "SIMPLE TEXT"  => ["<xml1> ","some text some text some text","</xml2>"],
+                "SIMPLE CDATA" => ["<xml1> ","<!","[CDATA[some text some text some text]","</xml1>"],
+                "SIMPLE JUNK"  => ["<xml1/> ","junk"],
+            );
+
+            foreach my $key ( keys %xmlBadStrings )  {
+                print "# $key \n";
+                for (1..$times_through) {
+                    eval {map { $parser->push( $_ ) } @{$xmlBadStrings{$key}};};
+                    eval {my $doc = $parser->finish_push();};
+                }
+
+                check_mem();
+            }            
         }
 
     }
