@@ -60,7 +60,7 @@ extern int xmlPedanticParserDefaultValue;
     }
 
 #define TEST_PERL_FLAG(flag) \
-    SvTRUE(get_sv(flag, FALSE)) ? 1 : 0
+    SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
 
 typedef struct _ProxyObject ProxyObject;
 
@@ -511,7 +511,7 @@ LibXML_parse_stream(SV * self, SV * ioref, char * directory)
         }
     }
     
-    if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid)) {
+    if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (doc->intSubset || doc->extSubset) )) {
         xmlFreeDoc(doc);
         return NULL;
     }
@@ -751,7 +751,8 @@ _parse_string(self, string, directory = NULL)
         xmlFreeParserCtxt(ctxt);
 
         sv_2mortal(LibXML_error);
-        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid)) {
+
+        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (real_dom->intSubset || real_dom->extSubset) )) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
@@ -860,7 +861,7 @@ _parse_file(self, filename)
         
         sv_2mortal(LibXML_error);
         
-        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid)) {
+        if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (real_dom->intSubset || real_dom->extSubset) )) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef ;  
             croak(SvPV(LibXML_error, len));
@@ -1342,7 +1343,7 @@ createElement( dom, name )
         sv_setref_pv( docfrag_sv, "XML::LibXML::DocumentFragment", (void*)dfProxy );
         dfProxy->extra = docfrag_sv;
         # warn( "NEW FRAGMENT ELEMNT (%s)", name);
-        # SvREFCNT_inc(docfrag_sv);    
+        //# SvREFCNT_inc(docfrag_sv);    
 
         # warn("xmlNewNode\n");
         if ( TEST_PERL_FLAG("XML::LibXML::ORIGINAL_STRING") ) {
