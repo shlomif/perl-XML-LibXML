@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT);
 use Carp;
 
-$VERSION = "0.95";
+$VERSION = "0.96";
 require Exporter;
 require DynaLoader;
 
@@ -269,6 +269,27 @@ Here, C<$fh> can be an IOREF, or a subclass of IO::Handle.
 =head2 parse_file
 
   my $doc = $parser->parse_file($filename);
+
+=head1 PARSING HTML
+
+As of version 0.96, XML::LibXML is capable of parsing HTML into a regular
+XML DOM. This gives you the full power of XML::LibXML on HTML documents.
+
+The methods work in exactly the same way as the methods above, and return
+exactly the same type of object. If you wish to dump the resulting document
+as HTML again, you can use C<$doc->toStringHTML()> to do that.
+
+=head2 parse_html_string
+
+  my $doc = $parser->parse_html_string($string);
+
+=head2 parse_html_fh
+
+  my $doc = $parser->parse_html_fh($fh);
+
+=head2 parse_html_file
+
+  my $doc = $parser->parse_html_file($filename);
 
 =head1 XML::LibXML::Document
 

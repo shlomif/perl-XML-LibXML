@@ -471,6 +471,43 @@ LibXML_parse_stream(SV * self, SV * ioref)
     return doc;
 }
 
+xmlDocPtr
+LibXML_parse_html_stream(SV * self, SV * ioref)
+{
+    xmlDocPtr doc;
+    htmlParserCtxtPtr ctxt;
+    int well_formed;
+    char buffer[1024];
+    int read_length;
+    int ret = -1;
+    
+    read_length = LibXML_read_perl(ioref, buffer, 4);
+    if (read_length > 0) {
+        ctxt = htmlCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL, XML_CHAR_ENCODING_NONE);
+        if (ctxt == NULL) {
+            croak("Could not create html push parser context: %s", strerror(errno));
+        }
+        ctxt->_private = (void*)self;
+
+        while(read_length = LibXML_read_perl(ioref, buffer, 1024)) {
+            htmlParseChunk(ctxt, buffer, read_length, 0);
+        }
+        ret = htmlParseChunk(ctxt, buffer, 0, 1);
+        
+        doc = ctxt->myDoc;
+        well_formed = ctxt->wellFormed;
+
+        htmlFreeParserCtxt(ctxt);
+    }
+    
+    if (!well_formed) {
+        xmlFreeDoc(doc);
+        return NULL;
+    }
+    
+    return doc;
+}
+
 MODULE = XML::LibXML         PACKAGE = XML::LibXML
 
 PROTOTYPES: DISABLE
@@ -737,6 +774,98 @@ _parse_file(self, filename)
         RETVAL
 
 SV*
+parse_html_string(self, string)
+        SV * self
+        SV * string
+    PREINIT:
+        htmlParserCtxtPtr ctxt;
+        char * CLASS = "XML::LibXML::Document";
+        STRLEN len;
+        char * ptr;
+        int well_formed;
+        int ret;
+        xmlDocPtr real_dom;
+        ProxyObject * proxy;
+    CODE:
+        ptr = SvPV(string, len);
+        
+        SvCUR_set(LibXML_error, 0);
+        
+        real_dom = htmlParseDoc(ptr, NULL);
+        
+        if (!real_dom) {
+            RETVAL = &PL_sv_undef;    
+            croak(SvPV(LibXML_error, len));
+        }
+        else {
+            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
+
+            RETVAL = sv_newmortal();
+            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
+            proxy->extra = RETVAL;
+            SvREFCNT_inc(RETVAL);
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+parse_html_fh(self, fh)
+        SV * self
+        SV * fh
+    PREINIT:
+        char * CLASS = "XML::LibXML::Document";
+        STRLEN len;
+        xmlDocPtr real_dom;
+        ProxyObject* proxy;
+    CODE:
+        SvCUR_set(LibXML_error, 0);
+        
+        real_dom = LibXML_parse_html_stream(self, fh);
+        if (real_dom == NULL) {
+            RETVAL = &PL_sv_undef;    
+            croak(SvPV(LibXML_error, len));
+        }
+        else {
+            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
+
+            RETVAL = sv_newmortal();
+            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
+            proxy->extra = RETVAL;
+            SvREFCNT_inc(RETVAL);
+        }
+    OUTPUT:
+        RETVAL
+        
+SV*
+parse_html_file(self, filename)
+        SV * self
+        const char * filename
+    PREINIT:
+        char * CLASS = "XML::LibXML::Document";
+        STRLEN len;
+        xmlDocPtr real_dom;
+        ProxyObject * proxy;
+    CODE:
+        SvCUR_set(LibXML_error, 0);
+        
+        real_dom = htmlParseFile(filename, NULL);
+
+        if (!real_dom) {
+            RETVAL = &PL_sv_undef ;  
+            croak(SvPV(LibXML_error, len));
+        }
+        else {
+            proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
+
+            RETVAL = sv_newmortal();
+            sv_setref_pv( RETVAL, (char *)CLASS, (void*)proxy );
+            proxy->extra = RETVAL;
+            SvREFCNT_inc(RETVAL);
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
 encodeToUTF8( encoding, string )
         const char * encoding
         const char * string
@@ -802,6 +931,29 @@ toString(self, format=0)
 
     	if (result == NULL) {
 	        # warn("Failed to convert doc to string");           
+            RETVAL = &PL_sv_undef;
+    	} else {
+            # warn("%s, %d\n",result, len);
+            RETVAL = newSVpvn((char *)result, (STRLEN)len);
+            xmlFree(result);
+        }
+    OUTPUT:
+        RETVAL
+
+SV *
+toStringHTML(self)
+        ProxyObject* self
+    PREINIT:
+        xmlDocPtr real_dom;
+        xmlChar *result=NULL;
+        int len=0;
+    CODE:
+        real_dom = (xmlDocPtr)self->object;
+        # warn( "use no formated toString!" );
+        htmlDocDumpMemory(real_dom, &result, &len);
+
+    	if (result == NULL) {
+	    # warn("Failed to convert doc to string");           
             RETVAL = &PL_sv_undef;
     	} else {
             # warn("%s, %d\n",result, len);
