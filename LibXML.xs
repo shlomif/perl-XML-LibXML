@@ -13,12 +13,12 @@ extern "C" {
 #include <libxml/HTMLtree.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <libxml/xmlIO.h>
 /* #include <libxml/debugXML.h> */
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
 
-#include "parser.h"
 #include "dom.h"
 #include "xpath.h"
 
@@ -73,30 +73,18 @@ static SV * LibXML_open_cb = NULL;
 static SV * LibXML_close_cb = NULL;
 static SV * LibXML_error = NULL;
 
-/* static ProxyObject * LibXML_nodelist_head = NULL; */
-/* static ProxyObject * LibXML_nodelist_sentinel = NULL */
+/* this should keep the default */
+static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
 
 ProxyObject *
 make_proxy_node (xmlNodePtr node)
 {
     ProxyObject * proxy;
-    /* ProxyObject * list = LibXML_nodelist; */
  
     proxy = (ProxyObject*)New(0, proxy, 1, ProxyObject);
     if (proxy != NULL) {
         proxy->object = (void*)node;
         proxy->extra = NULL;
-        /* proxy->next = NULL; */
-        /* append the node to the end of the list */
-        /* if ( list == NULL ) { */
-        /*    LibXML_nodelist = proxy; */
-        /*}*/
-        /*else {*/
-        /*    while ( list->next != NULL ) {*/
-        /*        list = list->next;*/
-        /*    }*/
-        /*    list->next = proxy;*/
-        /*} */
     }
     return proxy;
 }
@@ -529,31 +517,49 @@ LibXML_parse_html_stream(SV * self, SV * ioref)
     return doc;
 }
 
-/* ex XML::LibXML::BOOT()! */
-
-perlxmlParserObjectPtr
-make_parser() 
-{
-    perlxmlParserObjectPtr parser;
-    perlxmlInitParserObject( &parser );
-
-    perlxmlSetErrorCallback( parser,
-                            (xmlGenericErrorFunc)LibXML_error_handler);
-    perlxmlSetExtEntityLoader( parser,
-                              (xmlExternalEntityLoader)LibXML_load_external_entity);
-
-    perlxmlSetErrorOutHandler( parser, PerlIO_stderr() );
-    return parser;
+void
+LibXML_cleanup_parser() {
+    xmlSubstituteEntitiesDefaultValue = 1;
+    xmlKeepBlanksDefaultValue = 1;
+    xmlGetWarningsDefaultValue = 0;
+    xmlLoadExtDtdDefaultValue = 5;
+    xmlPedanticParserDefaultValue = 0;
+    xmlDoValidityCheckingDefaultValue = 0;
 }
 
-/* ex LibXML_free_all_callbacks */
 void
-delete_parser( perlxmlParserObjectPtr realparser ) 
-{
-    if ( realparser != NULL ) {
-        perlxmlDestroyParserObject( &realparser );
-        realparser = NULL;
-    }
+LibXML_init_callbacks() {
+/*    LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader(); */
+/*    warn("      init parser callbacks!\n"); */
+
+    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
+                              (xmlInputOpenCallback) LibXML_input_open,
+                              (xmlInputReadCallback) LibXML_input_read,
+                              (xmlInputCloseCallback) LibXML_input_close);
+
+    xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
+
+    xmlSetGenericErrorFunc(PerlIO_stderr(), 
+                           (xmlGenericErrorFunc)LibXML_error_handler);
+
+}
+
+void
+LibXML_cleanup_callbacks() {
+
+/*   warn("      cleanup parser callbacks!\n"); */
+
+    xmlCleanupInputCallbacks();
+    xmlRegisterDefaultInputCallbacks();
+/*    if ( LibXML_old_ext_ent_loader != NULL ) { */
+        /* xmlSetExternalEntityLoader( NULL ); */
+/*        xmlSetExternalEntityLoader( LibXML_old_ext_ent_loader ); */
+/*        LibXML_old_ext_ent_loader = NULL; */
+/*    } */
+
+/*    xsltSetGenericDebugFunc(NULL, NULL); */
+    xmlSetGenericErrorFunc(NULL, NULL);
+
 }
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML
@@ -569,57 +575,13 @@ END()
     CODE:
         xmlCleanupParser();
 
-perlxmlParserObjectPtr
-_init_parser( self ) 
-        SV * self
-    PREINIT:
-        const char * CLASS = "XML::LibXML::Parser";
-    CODE:
-        RETVAL = make_parser();
-    OUTPUT:
-        RETVAL
-
-void
-_delete_parser( self, parser ) 
-        SV * self
-        perlxmlParserObjectPtr parser
-    CODE:
-        delete_parser( parser );        
-
-
-
-void
-_prepare_parser( self, parser )
-        SV * self
-        perlxmlParserObjectPtr parser
-    CODE:
-        perlxmlInitLibParser( parser );
-
-
-void
-_cleanup_parser_callbacks( self, parser )
-        SV * self
-        perlxmlParserObjectPtr parser
-    CODE:
-    if ( parser != NULL ) {
-        perlxmlCleanupLibParser( parser );
-        LibXML_match_cb = NULL;
-        LibXML_read_cb = NULL;
-        LibXML_open_cb = NULL;
-        LibXML_close_cb = NULL;
-    }
-
-
 SV *
-_match_callback(self,parser, ...)
+_match_callback(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
-        if (items > 2) {
-            SET_CB(LibXML_match_cb, ST(2));
+        if (items > 1) {
+            SET_CB(LibXML_match_cb, ST(1));
             /* LibXML_update_callbacks(); */
-            perlxmlSetMatchCallback( parser,
-                                     (xmlInputMatchCallback)LibXML_input_match);
         }
         else {
             RETVAL = LibXML_match_cb ? sv_2mortal(LibXML_match_cb) : &PL_sv_undef;
@@ -628,15 +590,12 @@ _match_callback(self,parser, ...)
         RETVAL
 
 SV *
-_open_callback(self,parser, ...)
+_open_callback(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
-        if (items > 2) {
-            SET_CB(LibXML_open_cb, ST(2));
+        if (items > 1) {
+            SET_CB(LibXML_open_cb, ST(1));
             /* LibXML_update_callbacks(); */
-            perlxmlSetOpenCallback( parser,
-                                    (xmlInputOpenCallback)LibXML_input_open);
 
         }
         else {
@@ -646,15 +605,12 @@ _open_callback(self,parser, ...)
         RETVAL
 
 SV *
-_read_callback(self, parser, ...)
+_read_callback(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
-        if (items > 2) {
-            SET_CB(LibXML_read_cb, ST(2));
+        if (items > 1) {
+            SET_CB(LibXML_read_cb, ST(1));
             /* LibXML_update_callbacks(); */
-            perlxmlSetReadCallback( parser,
-                                    (xmlInputReadCallback)LibXML_input_read);
         }
         else {
             RETVAL = LibXML_read_cb ? sv_2mortal(LibXML_read_cb) : &PL_sv_undef;
@@ -663,15 +619,12 @@ _read_callback(self, parser, ...)
         RETVAL
 
 SV *
-_close_callback(self,parser, ...)
+_close_callback(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
-        if (items > 2) {
-            SET_CB(LibXML_close_cb, ST(2));
+        if (items > 1) {
+            SET_CB(LibXML_close_cb, ST(1));
             /* LibXML_update_callbacks(); */
-            perlxmlSetCloseCallback( parser,
-                                    (xmlInputCloseCallback)LibXML_input_close);
         }
         else {
             RETVAL = LibXML_close_cb ? sv_2mortal(LibXML_close_cb) : &PL_sv_undef;
@@ -680,98 +633,75 @@ _close_callback(self,parser, ...)
         RETVAL
 
 int
-_validation(self,parser, ...)
+_validation(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
         /* init retval with the current default value */
         RETVAL = xmlDoValidityCheckingDefaultValue; 
-        if ( parser != NULL ) {
-            RETVAL = parser->do_validation;
-            if (items > 2) {
-                parser->do_validation = SvTRUE(ST(2)) ? 1 : 0;
-            }
+        if (items > 1) {
+            xmlDoValidityCheckingDefaultValue = SvTRUE(ST(1)) ? 1 : 0;
         }
     OUTPUT:
         RETVAL
 
 int
-_expand_entities(self,parser, ...)
+_expand_entities(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
         RETVAL = xmlSubstituteEntitiesDefaultValue;
-        if ( parser != NULL ) {
-            RETVAL = parser->substitute_entities;
-            if (items > 2) {
-                parser->substitute_entities = SvTRUE(ST(2)) ? 1 : 0;
-            }
+        if (items > 1) {
+            xmlSubstituteEntitiesDefaultValue = SvTRUE(ST(1)) ? 1 : 0;
         }
     OUTPUT:
         RETVAL
 
 int
-_keep_blanks(self,parser, ...)
+_keep_blanks(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
         RETVAL = xmlKeepBlanksDefaultValue;
-        if ( parser != NULL ) {
-            RETVAL = parser->keep_blanks;
-            if (items > 2) {
-                parser->keep_blanks = SvTRUE(ST(2)) ? 1 : 0;
-            }
+        if (items > 1) {
+            xmlKeepBlanksDefaultValue = SvTRUE(ST(1)) ? 1 : 0;
         }
     OUTPUT:
         RETVAL
 
 int
-_pedantic_parser(self,parser, ...)
+_pedantic_parser(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
         RETVAL = xmlPedanticParserDefaultValue;
-        if ( parser != NULL ) {
-            RETVAL = parser->be_pedantic;
-            if (items > 2)  {
-                parser->be_pedantic = SvTRUE(ST(2)) ? 1 : 0;
-            }
+        if (items > 1)  {
+            xmlPedanticParserDefaultValue = SvTRUE(ST(1)) ? 1 : 0;
         }
     OUTPUT:
         RETVAL
 
 int
-_load_ext_dtd(self,parser, ...)
+_load_ext_dtd(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
-        RETVAL = ( xmlLoadExtDtdDefaultValue == (xmlLoadExtDtdDefaultValue | 1 ));
-        if ( parser != NULL ) {
-            if (items > 2) {
-                if (SvTRUE(ST(2)))
-                    parser->load_ext_entities |= 1;
-                else
-                    parser->load_ext_entities ^= 1;
-            }
-            RETVAL = ( parser->load_ext_entities == (parser->load_ext_entities | 1 ));
+        RETVAL = ( xmlLoadExtDtdDefaultValue == (xmlLoadExtDtdDefaultValue | 1 ) );
+        if (items > 1) {
+            if (SvTRUE(ST(1)))
+                xmlLoadExtDtdDefaultValue |= 1;
+            else 
+                xmlLoadExtDtdDefaultValue ^= 1;
+            RETVAL = ( xmlLoadExtDtdDefaultValue == (xmlLoadExtDtdDefaultValue | 1 ) );
         }
     OUTPUT:
         RETVAL
 
 int
-_complete_attributes(self,parser, ...)
+_complete_attributes(self, ...)
         SV * self
-        perlxmlParserObjectPtr parser
     CODE:
         RETVAL = ( xmlLoadExtDtdDefaultValue == (xmlLoadExtDtdDefaultValue | XML_COMPLETE_ATTRS));
-        if ( parser != NULL ) {
-            if (items > 2) {
-                if (SvTRUE(ST(2)))
-                    parser->load_ext_entities |= XML_COMPLETE_ATTRS;
-                else
-                    parser->load_ext_entities ^= XML_COMPLETE_ATTRS;
-            }
-            RETVAL = ( parser->load_ext_entities == (parser->load_ext_entities | XML_COMPLETE_ATTRS ));
+        if (items > 1) {
+            if (SvTRUE(ST(1)))
+                xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
+            else
+                xmlLoadExtDtdDefaultValue ^= XML_COMPLETE_ATTRS;
         }
     OUTPUT:
         RETVAL
@@ -811,6 +741,7 @@ _parse_string(self, string, directory = NULL)
         if (len == 0) {
             croak("Empty string");
         }
+
         ctxt = xmlCreateMemoryParserCtxt(ptr, len);
         if (ctxt == NULL) {
             croak("Couldn't create memory parser context: %s", strerror(errno));
@@ -825,7 +756,10 @@ _parse_string(self, string, directory = NULL)
         sv_setpvn(LibXML_error, "", 0);
         
         # warn( "context initialized \n");        
+        LibXML_init_callbacks();
         ret = xmlParseDocument(ctxt);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
 
         # warn( "document parsed \n");
 
@@ -869,8 +803,11 @@ _parse_fh(self, fh, directory = NULL)
     CODE:
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
-        
+
+        LibXML_init_callbacks();
         real_dom = LibXML_parse_stream(self, fh, directory);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
 
         sv_2mortal(LibXML_error);
         
@@ -915,8 +852,12 @@ _parse_file(self, filename)
         
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
-        
+
+        LibXML_init_callbacks();        
         xmlParseDocument(ctxt);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+
         well_formed = ctxt->wellFormed;
         valid = ctxt->valid;
 
@@ -963,8 +904,11 @@ _parse_html_string(self, string)
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
         
+        LibXML_init_callbacks();
         real_dom = htmlParseDoc(ptr, NULL);
-        
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();        
+
         sv_2mortal(LibXML_error);
         
         if (!real_dom) {
@@ -998,7 +942,10 @@ _parse_html_fh(self, fh)
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
         
+        LibXML_init_callbacks();
         real_dom = LibXML_parse_html_stream(self, fh);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
         
         sv_2mortal(LibXML_error);
         
@@ -1033,7 +980,10 @@ _parse_html_file(self, filename)
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
         
+        LibXML_init_callbacks();
         real_dom = htmlParseFile(filename, NULL);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
 
         sv_2mortal(LibXML_error);
         
@@ -1234,7 +1184,10 @@ void
 process_xinclude(self)
         ProxyObject* self
     CODE:
+        LibXML_init_callbacks();
         xmlXIncludeProcess((xmlDocPtr)self->object);
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
 
 const char *
 URI (doc, new_URI=NULL)
@@ -3076,6 +3029,9 @@ appendWellBalancedChunk( self, chunk )
         }
         LibXML_error = sv_2mortal(newSVpv("", 0));
         rv = domReadWellBalancedString( self->doc, chunk );
+        LibXML_cleanup_callbacks();
+        LibXML_cleanup_parser();
+
         if ( rv != NULL ) {
             xmlAddChildList( self , rv );
         }	

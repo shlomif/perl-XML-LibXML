@@ -44,15 +44,10 @@ sub new {
     my $class = shift;
     my %options = @_;
     my $self = bless \%options, $class;
-    $self->{XML_LIBXML_PARSER_OBJECT} = $self->_init_parser();
+
     return $self;
 }
 
-sub XML::LibXML::DESTROY {
-    my $self = shift;
-    $self->_delete_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-    $self->{XML_LIBXML_PARSER_OBJECT} = undef;
-}
 
 sub match_callback {
     my $self = shift;
@@ -87,39 +82,70 @@ sub callbacks {
 
 sub validation {
     my $self = shift;
-    return $self->_validation( $self->{XML_LIBXML_PARSER_OBJECT}, @_ );
+    $self->{XML_LIBXML_VALIDATION} = shift if scalar @_;
+    return $self->{XML_LIBXML_VALIDATION};
 }
 
 sub expand_entities {
     my $self = shift;
-    return $self->_expand_entities( $self->{XML_LIBXML_PARSER_OBJECT}, @_ );
+    $self->{XML_LIBXML_EXPAND_ENTITIES} = shift if scalar @_;
+    return $self->{XML_LIBXML_EXPAND_ENTITIES};
 }
 
 sub keep_blanks {
     my $self = shift;
-    return $self->_keep_blanks( $self->{XML_LIBXML_PARSER_OBJECT}, @_ );
+    $self->{XML_LIBXML_KEEP_BLANKS} = shift if scalar @_;
+    return $self->{XML_LIBXML_KEEP_BLANKS};
 }
 
 
 sub pedantic_parser {
     my $self = shift;
-    return $self->_pedantic_parser( $self->{XML_LIBXML_PARSER_OBJECT}, @_ );
+    $self->{XML_LIBXML_PEDANTIC} = shift if scalar @_;
+    return $self->{XML_LIBXML_PEDANTIC};
 }
 
 sub load_ext_dtd {
     my $self = shift;
-    return $self->_load_ext_dtd( $self->{XML_LIBXML_PARSER_OBJECT}, @_ );
+    $self->{XML_LIBXML_EXT_DTD} = shift if scalar @_;
+    return $self->{XML_LIBXML_EXT_DTD};
 }
 
 sub complete_attributes {
     my $self = shift;
-    return $self->_complete_attributes( $self->{XML_LIBXML_PARSER_OBJECT}, @_ );
+    $self->{XML_LIBXML_COMPLETE_ATTR} = shift if scalar @_;
+    return $self->{XML_LIBXML_COMPLETE_ATTR};
 }
 
 sub expand_xinclude  {
     my $self = shift;
-    $self->{XML_LIBXML_EXPAND_XINCLUDE} = shift;
+    $self->{XML_LIBXML_EXPAND_XINCLUDE} = shift if scalar @_;
     return $self->{XML_LIBXML_EXPAND_XINCLUDE};
+}
+
+sub init_parser {
+    my $self = shift;
+    $self->_match_callback( $self->{XML_LIBXML_MATCH_CB} )
+      if $self->{XML_LIBXML_MATCH_CB};
+    $self->_read_callback( $self->{XML_LIBXML_READ_CB} )
+      if $self->{XML_LIBXML_READ_CB};
+    $self->_open_callback( $self->{XML_LIBXML_OPEN_CB} )
+      if $self->{XML_LIBXML_OPEN_CB};
+    $self->_close_callback( $self->{XML_LIBXML_CLOSE_CB} )
+      if $self->{XML_LIBXML_CLOSE_CB};
+
+    $self->_validation( $self->{XML_LIBXML_VALIDATION} )
+      if exists $self->{XML_LIBXML_VALIDATION};
+    $self->_expand_entities( $self->{XML_LIBXML_EXPAND_ENTITIES} )
+      if exists $self->{XML_LIBXML_EXPAND_ENTITIES};
+    $self->_keep_blanks( $self->{XML_LIBXML_KEEP_BLANKS} )
+      if exists $self->{XML_LIBXML_KEEP_BLANKS};
+    $self->_pedantic_parser( $self->{XML_LIBXML_PEDANTIC} )
+      if exists $self->{XML_LIBXML_PEDANTIC};
+    $self->_load_ext_dtd( $self->{XML_LIBXML_EXT_DTD} )
+      if exists $self->{XML_LIBXML_EXT_DTD};
+    $self->_complete_attributes( $self->{XML_LIBXML_COMPLETE_ATTR} )
+      if exists $self->{XML_LIBXML_COMPLETE_ATTR};
 }
 
 sub parse_string {
@@ -128,29 +154,12 @@ sub parse_string {
     $self->{_State_} = 1;
     my $result;
     eval {
-        $self->_match_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                                $self->{XML_LIBXML_MATCH_CB} )
-          if $self->{XML_LIBXML_MATCH_CB};
-        $self->_read_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                               $self->{XML_LIBXML_READ_CB} )
-          if $self->{XML_LIBXML_READ_CB};
-        $self->_open_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                               $self->{XML_LIBXML_OPEN_CB} )
-          if $self->{XML_LIBXML_OPEN_CB};
-        $self->_close_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                                $self->{XML_LIBXML_CLOSE_CB} )
-          if $self->{XML_LIBXML_CLOSE_CB};
-
-        $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-
+        $self->init_parser();
         $result = $self->_parse_string( @_ );
         $result->_fix_extra;
         if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
-# warn "use xinclude!" ;
             $result->process_xinclude();
         }
-        $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
-
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -166,30 +175,13 @@ sub parse_fh {
     $self->{_State_} = 1;
     my $result;
     eval {
-        $self->_match_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                                $self->{XML_LIBXML_MATCH_CB} )
-          if $self->{XML_LIBXML_MATCH_CB};
-        $self->_read_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                               $self->{XML_LIBXML_READ_CB} )
-          if $self->{XML_LIBXML_READ_CB};
-        $self->_open_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                               $self->{XML_LIBXML_OPEN_CB} )
-          if $self->{XML_LIBXML_OPEN_CB};
-        $self->_close_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                                $self->{XML_LIBXML_CLOSE_CB} )
-          if $self->{XML_LIBXML_CLOSE_CB};
-
-        $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-
+        $self->init_parser();
         $result = $self->_parse_fh( @_ );
-
         $result->_fix_extra;
         if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
             warn "use xinclude!" ;
             $result->process_xinclude();
         }
-        $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
-
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -205,29 +197,13 @@ sub parse_file {
     $self->{_State_} = 1;
     my $result;
     eval {
-        $self->_match_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                                $self->{XML_LIBXML_MATCH_CB} )
-          if $self->{XML_LIBXML_MATCH_CB};
-        $self->_read_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                               $self->{XML_LIBXML_READ_CB} )
-          if $self->{XML_LIBXML_READ_CB};
-        $self->_open_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                               $self->{XML_LIBXML_OPEN_CB} )
-          if $self->{XML_LIBXML_OPEN_CB};
-        $self->_close_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                                $self->{XML_LIBXML_CLOSE_CB} )
-          if $self->{XML_LIBXML_CLOSE_CB};
-
-        $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-
+        $self->init_parser();
         $result = $self->_parse_file(@_);
         $result->_fix_extra;
         if ( $self->{XML_LIBXML_EXPAND_XINCLUDE} ) {
             # warn "use xinclude!" ;
             $result->process_xinclude();
         }
-        $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
-
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -239,69 +215,28 @@ sub parse_file {
 
 sub parse_html_string {
     my $self = shift;
-    $self->_match_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                            $self->{XML_LIBXML_MATCH_CB} )
-      if $self->{XML_LIBXML_MATCH_CB};
-    $self->_read_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                           $self->{XML_LIBXML_READ_CB} )
-      if $self->{XML_LIBXML_READ_CB};
-    $self->_open_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                           $self->{XML_LIBXML_OPEN_CB} )
-      if $self->{XML_LIBXML_OPEN_CB};
-    $self->_close_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                            $self->{XML_LIBXML_CLOSE_CB} )
-      if $self->{XML_LIBXML_CLOSE_CB};
 
-    $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-
+    $self->init_parser();
     my $retval = $self->_parse_html_string( @_ );
-
-    $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
 
     return $retval;
 }
 
 sub parse_html_fh {
     my $self = shift;
-    $self->_match_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                            $self->{XML_LIBXML_MATCH_CB} )
-      if $self->{XML_LIBXML_MATCH_CB};
-    $self->_read_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                           $self->{XML_LIBXML_READ_CB} )
-      if $self->{XML_LIBXML_READ_CB};
-    $self->_open_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                           $self->{XML_LIBXML_OPEN_CB} )
-      if $self->{XML_LIBXML_OPEN_CB};
-    $self->_close_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                            $self->{XML_LIBXML_CLOSE_CB} )
-      if $self->{XML_LIBXML_CLOSE_CB};
-    $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
 
+    $self->init_parser();
     my $retval = $self->_parse_html_fh( @_ );
-    $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
 
     return $retval;
 }
 
 sub parse_html_file {
     my $self = shift;
-    $self->_match_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                            $self->{XML_LIBXML_MATCH_CB} )
-      if $self->{XML_LIBXML_MATCH_CB};
-    $self->_read_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                           $self->{XML_LIBXML_READ_CB} )
-      if $self->{XML_LIBXML_READ_CB};
-    $self->_open_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                           $self->{XML_LIBXML_OPEN_CB} )
-      if $self->{XML_LIBXML_OPEN_CB};
-    $self->_close_callback( $self->{XML_LIBXML_PARSER_OBJECT},
-                            $self->{XML_LIBXML_CLOSE_CB} )
-      if $self->{XML_LIBXML_CLOSE_CB};
 
-    $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
-
+    $self->init_parser();
     my $retval = $self->_parse_html_file( @_ );
-    $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
+
     return $retval;
 }
 
@@ -309,9 +244,8 @@ sub processXIncludes {
     my $self = shift;
     my $dom  = shift;
 
-    $self->_prepare_parser( $self->{XML_LIBXML_PARSER_OBJECT} );
+    $self->init_parser();
     $dom->process_xinclude();
-    $self->_cleanup_parser_callbacks( $self->{XML_LIBXML_PARSER_OBJECT} );
 }
 
 sub XML_ELEMENT_NODE(){1;}
