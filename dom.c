@@ -9,6 +9,12 @@
 
 #include <stdio.h>
 
+#ifdef XS_WARNINGS
+#define xs_warn(string) fprintf(stderr, string) 
+#else
+#define xs_warn(string)
+#endif
+
 xmlDocPtr
 domCreateDocument( xmlChar *version, xmlChar *enc ){
     xmlDocPtr doc = NULL;
@@ -44,6 +50,28 @@ domCreateDocument( xmlChar *version, xmlChar *enc ){
  * in 99% the cases i believe it is faster than to create the dom by hand,
  * and skip the parsing job which has to be done here.
  **/
+void 
+_fix_node( xmlNodePtr node, xmlDocPtr doc ) {
+    /* internal helper for domReadWellBalancedString */
+
+    /* libxml2 creates an internal document for the chunk. this is ok
+       for flat chunks. chunks with nested chunks will keep a
+       reference to that internal document. this will lead into
+       segfaults, if the child nodes are not fixed. */
+
+    if ( node != NULL
+         && node->type != XML_DTD_NODE
+         && node->type != XML_NAMESPACE_DECL 
+         && node->doc != NULL ) {
+        node->doc = doc;
+
+        if ( node->children != NULL )
+            _fix_node( node->children, doc );
+
+        _fix_node( node->next , doc );
+    }
+}
+
 xmlNodePtr 
 domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
     int retCode       = -1;
@@ -68,6 +96,9 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
                 xmlFreeNode( nodes );
                 nodes = helper;
             }
+        }
+        else {
+            _fix_node( nodes, doc );
         }
     }
 
@@ -95,13 +126,15 @@ domEncodeString( const char *encoding, const char *string ){
                 ret = xmlStrdup( string );
             }
             else if ( enc == XML_CHAR_ENCODING_ERROR ){
+                xs_warn("no standard encoding\n");
                 coder = xmlFindCharEncodingHandler( encoding );
             }
             else {
-                /* fprintf(stderr, "NO XML ENCODING!\n"); */ 
+                xs_warn("no encoding found\n");
             }
 
             if ( coder != NULL ) {
+                xs_warn("coding machine found\n");
                 in    = xmlBufferCreate();
                 out   = xmlBufferCreate();
                 xmlBufferCCat( in, string );
@@ -109,14 +142,14 @@ domEncodeString( const char *encoding, const char *string ){
                     ret = xmlStrdup( out->content );
                 }
                 else {
-                    /* fprintf(stderr, "b0rked encoiding!\n"); */
+                     xs_warn( "b0rked encoiding!\n");
                 }
                     
                 xmlBufferFree( in );
                 xmlBufferFree( out );
             }
             else {
-                /*  fprintf(stderr, "no coder found\n"); */
+                xs_warn("no coder found\n");
             }
         }
         else {
@@ -152,7 +185,7 @@ domDecodeString( const char *encoding, const xmlChar *string){
                 coder = xmlFindCharEncodingHandler( encoding );
             }
             else {
-                /*  fprintf(stderr, "NO XML ENCODING!\n"); */
+                xs_warn("no encoding found");
             }
 
             if ( coder != NULL ) {
