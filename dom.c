@@ -374,10 +374,17 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
     if ( node && doc && node->doc != doc ) {
         if ( move ) {
             return_node = node;
-            xmlUnlinkNode( node );
+            if ( node->type != XML_DTD_NODE ) {
+                xmlUnlinkNode( node );
+            }
         }
         else {
-            return_node = xmlCopyNode( node, 1 );
+            if ( node->type == XML_DTD_NODE ) {
+                return_node = (xmlNodePtr) xmlCopyDtd((xmlDtdPtr) node);
+            }
+            else {
+                return_node = xmlCopyNode( node, 1 );
+            }
         }
         /* tell all children about the new boss */ 
 
@@ -645,6 +652,7 @@ domGetNodeValue( xmlNodePtr n ) {
     if( n != NULL ) {
         switch ( n->type ) {
         case XML_ATTRIBUTE_NODE:
+        case XML_ENTITY_DECL:
         case XML_TEXT_NODE:
         case XML_COMMENT_NODE:
         case XML_CDATA_SECTION_NODE:
@@ -655,6 +663,7 @@ domGetNodeValue( xmlNodePtr n ) {
             break;
         }
         
+
         if ( n->content != NULL ) {
             xs_warn(" dublicate content\n" );
             retval = xmlStrdup(n->content);
@@ -939,7 +948,7 @@ domNodeNormalize( xmlNodePtr node )
         }
         break;
     case XML_ELEMENT_NODE:
-        domNodeNormalizeList( node->properties );
+        domNodeNormalizeList( (xmlNodePtr) node->properties );
     case XML_ATTRIBUTE_NODE:
         return( domNodeNormalizeList( node->children ) );
         break;

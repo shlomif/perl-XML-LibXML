@@ -99,7 +99,6 @@ sub new {
     my $class = shift;
     my %options = @_;
     my $self = bless \%options, $class;
-
     return $self;
 }
 
@@ -420,36 +419,26 @@ sub toString {
 
     my $retval = "";
 
+    my $intDTD;
+    if ( defined $XML::LibXML::skipDTD
+         and $XML::LibXML::skipDTD == 1 ) {
+        $intDTD = $self->removeInternalSubset;
+    }
+
     if ( defined $XML::LibXML::skipXMLDeclaration
          and $XML::LibXML::skipXMLDeclaration == 1 ) {
         foreach ( $self->childNodes ){
-            next if defined $XML::LibXML::skipDTD
-                    and $XML::LibXML::skipDTD == 1
-                    and $_->nodeType == XML::LibXML::XML_DTD_NODE();
-
             $retval .= $_->toString;
         }
-    }
-    elsif ( defined $XML::LibXML::skipDTD
-         and $XML::LibXML::skipDTD == 1 ) {
-        # no chance to get the XML Decl from libxml2
-        $retval = '<?xml version="' . $self->version .'"';
-        my $standalone = $self->standalone;
-        my $encoding = $self->encoding;
-
-        $retval .= ' encoding="' . $encoding . '"' if defined $encoding;
-        $retval .= ' standalone="' .($standalone ? "yes" : "no" ). '"'
-          if defined $standalone && $standalone >= 0;
-        $retval .= "?>\n";
-        foreach ( $self->childNodes ){
-            next if $_->nodeType == XML::LibXML::XML_DTD_NODE();
-            $retval .= $_->toString(1);
-        }
-        $retval .= "\n";
     }
     else {
         $retval =  $self->_toString($flag||0);
     }
+
+    if ( defined $intDTD ) {
+        $self->setInternalSubset( $intDTD );
+    }
+
     return $retval;
 }
 

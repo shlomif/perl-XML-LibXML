@@ -126,6 +126,16 @@ PmmFreeNode( xmlNodePtr node )
         if ( node->parent == NULL ) 
             xmlFreeProp( (xmlAttrPtr) node );
         break;
+    case XML_DTD_NODE:
+        if ( node->doc ) {
+            if ( node->doc->extSubset != (xmlDtdPtr)node 
+                 && node->doc->intSubset != (xmlDtdPtr)node ) {
+                xs_warn( "should free DTD\n");
+                node->doc = NULL;
+                // xmlFreeDtd( (xmlDtdPtr)node );
+            }
+        }
+        break;
     case XML_DOCUMENT_FRAG_NODE:
         xs_warn("XML_DOCUMENT_FRAG_NODE\n");
     default:

@@ -1508,6 +1508,7 @@ setBaseURI( doc, new_URI )
         }
 
 
+
 SV*
 createDocument( CLASS, version="1.0", encoding=NULL )
         char * CLASS
@@ -1526,6 +1527,126 @@ createDocument( CLASS, version="1.0", encoding=NULL )
     OUTPUT:
         RETVAL
 
+SV* 
+createInternalSubset( doc, Pname, extID, sysID )
+        SV * doc
+        SV * Pname
+        SV * extID
+        SV * sysID
+    PREINIT:
+        xmlDocPtr document = NULL;
+        xmlDtdPtr dtd = NULL;
+        xmlChar * name = NULL;
+        xmlChar * externalID = NULL;
+        xmlChar * systemID = NULL; 
+    CODE:
+        document = (xmlDocPtr)PmmSvNode( doc );
+        if ( document == NULL ) {
+            XSRETURN_UNDEF;   
+        }
+
+        name = Sv2C( Pname, NULL );
+        if ( name == NULL ) {
+            XSRETURN_UNDEF;
+        }  
+
+        externalID = Sv2C(extID, NULL);
+        systemID   = Sv2C(sysID, NULL);
+
+        dtd = xmlCreateIntSubset( document, name, externalID, systemID );
+
+        xmlFree(externalID);
+        xmlFree(systemID);
+        xmlFree(name);
+        if ( dtd ) {
+            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(doc) );
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+SV* 
+createExternalSubset( doc, Pname, extID, sysID )
+        SV * doc
+        SV * Pname
+        SV * extID
+        SV * sysID
+    PREINIT:
+        xmlDocPtr document = NULL;
+        xmlDtdPtr dtd = NULL;
+        xmlChar * name = NULL;
+        xmlChar * externalID = NULL;
+        xmlChar * systemID = NULL; 
+    CODE:
+        document = (xmlDocPtr)PmmSvNode( doc );
+        if ( document == NULL ) {
+            XSRETURN_UNDEF;   
+        }
+
+        name = Sv2C( Pname, NULL );
+        if ( name == NULL ) {
+            XSRETURN_UNDEF;
+        }  
+
+        externalID = Sv2C(extID, NULL);
+        systemID   = Sv2C(sysID, NULL);
+
+        dtd = xmlNewDtd( document, name, externalID, systemID );
+
+        xmlFree(externalID);
+        xmlFree(systemID);
+        xmlFree(name);
+        if ( dtd ) {
+            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(doc) );
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+SV* 
+createDTD( doc, Pname, extID, sysID )
+        SV * doc
+        SV * Pname
+        SV * extID
+        SV * sysID
+    PREINIT:
+        xmlDocPtr document = NULL;
+        xmlDtdPtr dtd = NULL;
+        xmlChar * name = NULL;
+        xmlChar * externalID = NULL;
+        xmlChar * systemID = NULL; 
+    CODE:
+        document = (xmlDocPtr)PmmSvNode( doc );
+        if ( document == NULL ) {
+            XSRETURN_UNDEF;   
+        }
+
+        name = Sv2C( Pname, NULL );
+        if ( name == NULL ) {
+            XSRETURN_UNDEF;
+        }  
+
+        externalID = Sv2C(extID, NULL);
+        systemID   = Sv2C(sysID, NULL);
+
+        dtd = xmlNewDtd( NULL, name, externalID, systemID );
+        dtd->doc = document;
+
+        xmlFree(externalID);
+        xmlFree(systemID);
+        xmlFree(name);
+        if ( dtd ) {
+            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(doc) );
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
 
 SV*
 createDocumentFragment( doc )
@@ -1740,6 +1861,30 @@ createCDATASection( doc, content )
         RETVAL
 
 SV*
+createEntityReference( pdoc , pname )
+        SV * pdoc 
+        SV * pname
+    PREINIT:
+        xmlNodePtr newNode;
+        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(pdoc);
+        xmlChar * name = Sv2C( pname, NULL );
+        ProxyNodePtr docfrag = NULL;        
+    CODE:
+        if ( name == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        newNode = xmlNewReference( doc, name );
+        xmlFree(name);
+        if ( newNode == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        docfrag = PmmNewFragment( doc );
+        domAppendChild( PmmNODE(docfrag), newNode );
+        RETVAL = PmmNodeToSv( newNode, docfrag );
+    OUTPUT:
+        RETVAL
+
+SV*
 createAttribute( pdoc, pname, pvalue=&PL_sv_undef )
         SV * pdoc
         SV * pname
@@ -1846,6 +1991,8 @@ createProcessingInstruction(self, name, value)
     OUTPUT:
         RETVAL
 
+
+
 void 
 _setDocumentElement( dom , proxy )
         SV * dom
@@ -1885,6 +2032,166 @@ documentElement( dom )
         else {
             XSRETURN_UNDEF;
         }
+    OUTPUT:
+        RETVAL
+
+SV *
+externalSubset( doc )
+        SV * doc
+    PREINIT:
+        xmlDtdPtr dtd;
+    CODE:
+        if ( ((xmlDocPtr)PmmSvNode(doc))->extSubset == NULL ) {
+            XSRETURN_UNDEF;
+        }
+
+        dtd = ((xmlDocPtr)PmmSvNode(doc))->extSubset;
+        RETVAL = PmmNodeToSv((xmlNodePtr)dtd, SvPROXYNODE(doc));
+    OUTPUT:
+        RETVAL
+        
+SV *
+internalSubset( doc )
+        SV * doc
+    PREINIT:
+        xmlDtdPtr dtd;
+    CODE:
+        if ( ((xmlDocPtr)PmmSvNode(doc))->intSubset == NULL ) {
+            XSRETURN_UNDEF;
+        }
+
+        dtd = ((xmlDocPtr)PmmSvNode(doc))->intSubset;
+        RETVAL = PmmNodeToSv((xmlNodePtr)dtd, SvPROXYNODE(doc));
+    OUTPUT:
+        RETVAL
+
+void
+setExternalSubset( document, extdtd )
+        SV * document
+        SV * extdtd
+    PREINIT:
+        xmlDocPtr doc = NULL;
+        xmlDtdPtr dtd = NULL;
+        xmlDtdPtr olddtd = NULL;
+    CODE:
+        doc = (xmlDocPtr)PmmSvNode(document);
+        dtd = (xmlDtdPtr)PmmSvNode(extdtd);
+        if ( dtd && dtd != doc->extSubset ) {
+            if ( dtd->doc != doc ) {
+                croak( "can't import DTDs" );
+                domImportNode( doc, (xmlNodePtr) dtd,1);
+            }
+    
+            if ( dtd == doc->intSubset ) {
+                xmlUnlinkNode( (xmlNodePtr)dtd );
+                doc->intSubset = NULL;
+            }
+
+            olddtd = doc->extSubset;
+            if ( olddtd && olddtd->_private == NULL ) {
+                xmlFreeDtd( olddtd );
+            }
+            doc->extSubset = dtd;
+        }
+
+void
+setInternalSubset( document, extdtd )
+        SV * document
+        SV * extdtd
+    PREINIT:
+        xmlDocPtr doc = NULL;
+        xmlDtdPtr dtd = NULL;
+        xmlDtdPtr olddtd = NULL;
+    CODE:
+        doc = (xmlDocPtr)PmmSvNode(document);
+        dtd = (xmlDtdPtr)PmmSvNode(extdtd);
+        if ( dtd && dtd != doc->intSubset ) {
+            if ( dtd->doc != doc ) {
+                croak( "can't import DTDs" );
+                domImportNode( doc, (xmlNodePtr) dtd,1);
+            }
+    
+            if ( dtd == doc->extSubset ) {
+                doc->extSubset = NULL;
+            }
+
+            olddtd = doc->intSubset;
+            if( olddtd ) {
+                xmlReplaceNode( (xmlNodePtr)olddtd, (xmlNodePtr) dtd );
+                if ( olddtd->_private == NULL ) {
+                    xmlFreeDtd( olddtd );
+                }
+            }
+            else {
+                /* there is no setinternal subset function in libxml :/ */
+                if (doc->children == NULL) {
+                    doc->children = (xmlNodePtr) dtd;
+                    doc->last = (xmlNodePtr) dtd;
+                } else {
+                    if (doc->type == XML_HTML_DOCUMENT_NODE) {
+                        xmlNodePtr prev;
+
+                        prev = doc->children;
+                        prev->prev = (xmlNodePtr) dtd;
+                        dtd->next = prev;
+                        doc->children = (xmlNodePtr) dtd;
+                    } else {
+                        xmlNodePtr next;
+
+                        next = doc->children;
+                        while ((next != NULL)
+                               && (next->type != XML_ELEMENT_NODE))
+                            next = next->next;
+                        if (next == NULL) {
+                            dtd->prev = doc->last;
+                            dtd->prev->next = (xmlNodePtr) dtd;
+                            dtd->next = NULL;
+                            doc->last = (xmlNodePtr) dtd;
+                        } else {
+                            dtd->next = next;
+                            dtd->prev = next->prev;
+                            if (dtd->prev == NULL)
+                                doc->children = (xmlNodePtr) dtd;
+                            else
+                                dtd->prev->next = (xmlNodePtr) dtd;
+                            next->prev = (xmlNodePtr) dtd;
+                        }
+                    }
+                }
+            }
+            doc->intSubset = dtd;
+        }
+
+SV *
+removeInternalSubset( document ) 
+        SV * document
+    PREINIT:
+        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(document);
+        xmlDtdPtr dtd = NULL;
+    CODE:
+        dtd = doc->intSubset;
+        if ( !dtd ) {
+            XSRETURN_UNDEF;   
+        }
+        xmlUnlinkNode( (xmlNodePtr)dtd );
+        doc->intSubset = NULL;
+        RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(document) );
+    OUTPUT:
+        RETVAL
+
+SV *
+removeExternalSubset( document ) 
+        SV * document
+    PREINIT:
+        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(document);
+        xmlDtdPtr dtd = NULL;
+    CODE:
+        dtd = doc->extSubset;
+        if ( !dtd ) {
+            XSRETURN_UNDEF;   
+        }
+        doc->extSubset = NULL;
+        RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(document) );
     OUTPUT:
         RETVAL
 
@@ -2708,16 +3015,28 @@ cloneNode( self, deep )
         xmlNodePtr ret;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        ret = xmlCopyNode( PmmSvNode(self), deep );
-        if (ret != NULL) {
-            docfrag = PmmNewFragment( ret->doc );
-            domAppendChild( PmmNODE(docfrag), ret );            
-            
-            RETVAL = PmmNodeToSv(ret, docfrag);
+        if ( PmmSvNode( self )->type == XML_DTD_NODE ) {
+            ret = (xmlNodePtr) xmlCopyDtd((xmlDtdPtr) PmmSvNode(self));
+            if (ret != NULL) {
+                RETVAL = PmmNodeToSv(ret, NULL);
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
         }
         else {
-            XSRETURN_UNDEF;
-        }
+            ret = xmlCopyNode( PmmSvNode(self), deep );
+    
+            if (ret != NULL) {
+                docfrag = PmmNewFragment( ret->doc );
+                domAppendChild( PmmNODE(docfrag), ret );            
+            
+                RETVAL = PmmNodeToSv(ret, docfrag);
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
+        }   
     OUTPUT:
         RETVAL
 
