@@ -597,6 +597,98 @@ PmmSvContext( SV * scalar )
     return retval;
 }
 
+xmlChar*
+PmmFastEncodeString( int charset,
+                     const xmlChar *string,
+                     const xmlChar *encoding ) 
+{
+    xmlCharEncodingHandlerPtr coder = NULL;
+    xmlChar *retval = NULL;
+    xmlBufferPtr in = NULL, out = NULL;
+
+    if ( charset == 1 ) {
+        xs_warn("use UTF8 for encoding ...");
+        return xmlStrdup( string );
+    }
+
+    if ( charset > 1 ) {
+        /* warn( "use document encoding %s", encoding ); */
+        coder= xmlGetCharEncodingHandler( charset );
+    }
+    else if ( charset == XML_CHAR_ENCODING_ERROR ){
+        /* warn("no standard encoding %s\n", encoding); */
+        coder =xmlFindCharEncodingHandler( encoding );
+    }
+    else {
+        xs_warn("no encoding found\n");
+    }
+
+    if ( coder != NULL ) {
+        xs_warn("coding machine found \n");
+        in    = xmlBufferCreate();
+        out   = xmlBufferCreate();
+        xmlBufferCCat( in, string );
+        if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
+            retval = xmlStrdup( out->content );
+            /* warn( "encoded string is %s" , retval); */
+        }
+        else {
+            xs_warn( "b0rked encoiding!\n");
+        }
+        
+        xmlBufferFree( in );
+        xmlBufferFree( out );
+        xmlCharEncCloseFunc( coder );
+    }
+    return retval;
+}
+
+xmlChar*
+PmmFastDecodeString( int charset,
+                     const xmlChar *string,
+                     const xmlChar *encoding) 
+{
+    xmlCharEncodingHandlerPtr coder = NULL;
+    xmlChar *retval = NULL;
+    xmlBufferPtr in = NULL, out = NULL;
+
+    if ( charset == 1 ) {
+
+        return xmlStrdup( string );
+    }
+
+    if ( charset > 1 ) {
+        /* warn( "use document encoding %s", encoding ); */
+        coder= xmlGetCharEncodingHandler( charset );
+    }
+    else if ( charset == XML_CHAR_ENCODING_ERROR ){
+        /* warn("no standard encoding\n"); */
+        coder = xmlFindCharEncodingHandler( encoding );
+    }
+    else {
+        xs_warn("no encoding found\n");
+    }
+
+    if ( coder != NULL ) {
+        /* warn( "do encoding %s", string ); */
+        in  = xmlBufferCreate();
+        out = xmlBufferCreate();
+        
+        xmlBufferCat( in, string );        
+        if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
+            retval = xmlStrdup(out->content);
+        }
+        else {
+            warn("decoding error \n");
+        }
+        
+        xmlBufferFree( in );
+        xmlBufferFree( out );
+        xmlCharEncCloseFunc( coder );
+    }
+    return retval;
+}
+
 /** 
  * encodeString returns an UTF-8 encoded String
  * while the encodig has the name of the encoding of string
@@ -605,47 +697,13 @@ xmlChar*
 PmmEncodeString( const char *encoding, const xmlChar *string ){
     xmlCharEncoding enc;
     xmlChar *ret = NULL;
-    xmlBufferPtr in = NULL, out = NULL;
     xmlCharEncodingHandlerPtr coder = NULL;
     
     if ( string != NULL ) {
         if( encoding != NULL ) {
             xs_warn( encoding );
             enc = xmlParseCharEncoding( encoding );
-            if ( enc > 1 ) {
-                coder= xmlGetCharEncodingHandler( enc );
-            }
-            else if ( enc == 1 ) {
-                ret = xmlStrdup( string );
-            }
-            else if ( enc == XML_CHAR_ENCODING_ERROR ){
-                xs_warn("no standard encoding\n");
-                coder = xmlFindCharEncodingHandler( encoding );
-            }
-            else {
-                xs_warn("no encoding found\n");
-            }
-
-            if ( coder != NULL ) {
-                xs_warn("coding machine found\n");
-                in    = xmlBufferCreate();
-                out   = xmlBufferCreate();
-                xmlBufferCCat( in, string );
-                if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
-                    ret = xmlStrdup( out->content );
-                }
-                else {
-                     xs_warn( "b0rked encoiding!\n");
-                }
-                    
-                xmlBufferFree( in );
-                xmlBufferFree( out );
-                xmlCharEncCloseFunc( coder );
-            }
-            else {
-                xs_warn("no coder found\n");
-                /* ret = xmlStrdup( string ); */
-            }
+            ret = PmmFastEncodeString( enc, string, encoding );
         }
         else {
             /* if utf-8 is requested we do nothing */
@@ -668,37 +726,11 @@ PmmDecodeString( const char *encoding, const xmlChar *string){
     xmlCharEncodingHandlerPtr coder = NULL;
 
     if ( string != NULL ) {
+        xs_warn( "PmmDecodeString called" );
         if( encoding != NULL ) {
             enc = xmlParseCharEncoding( encoding );
-            if ( enc > 1 ) {
-                coder= xmlGetCharEncodingHandler( enc );
-            }
-            else if ( enc == 1 ) {
-                ret = xmlStrdup( string );
-            }
-            else if ( enc == XML_CHAR_ENCODING_ERROR ) {
-                coder = xmlFindCharEncodingHandler( encoding );
-            }
-            else {
-                xs_warn("no encoding found");
-            }
-
-            if ( coder != NULL ) {
-                in  = xmlBufferCreate();
-                out = xmlBufferCreate();
-                    
-                xmlBufferCat( in, string );        
-                if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
-                    ret=xmlStrdup(out->content);
-                }
-                else {
-                    /* printf("decoding error \n"); */
-                }
-            
-                xmlBufferFree( in );
-                xmlBufferFree( out );
-                xmlCharEncCloseFunc( coder );
-            }
+            ret = PmmFastDecodeString( enc, string, encoding );
+            xs_warn( "PmmDecodeString done" );
         }
         else {
             ret = xmlStrdup(string);
@@ -706,6 +738,7 @@ PmmDecodeString( const char *encoding, const xmlChar *string){
     }
     return ret;
 }
+
 
 SV*
 C2Sv( const xmlChar *string, const xmlChar *encoding )
@@ -779,30 +812,48 @@ Sv2C( SV* scalar, const xmlChar *encoding )
     return retval;
 }
 
-
 SV*
 nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
 {
     /* this is a little helper function to avoid to much redundand
        code in LibXML.xs */
     SV* retval = &PL_sv_undef;
+    STRLEN len = 0;
 
     if ( refnode != NULL ) {
         xmlDocPtr real_doc = refnode->doc;
         if ( real_doc && real_doc->encoding != NULL ) {
 
-            xmlChar * decoded = PmmDecodeString( (const char *)real_doc->encoding ,
-                                                 (const xmlChar *)string );
+            xmlChar * decoded = PmmFastDecodeString( (int)real_doc->charset ,
+                                                     (const xmlChar *)string,
+                                                     (const xmlChar*)real_doc->encoding);
+            len = xmlStrlen( decoded );
 
-            retval = C2Sv( decoded, real_doc->encoding );
-            xmlFree( decoded );
+            if ( real_doc->charset == XML_CHAR_ENCODING_UTF8 ) {
+                /* create an UTF8 string. */       
+                xs_warn("set UTF8 string");
+                /* create the SV */
+                retval = newSVpvn( (const char *)decoded, len );
+#ifdef HAVE_UTF8
+                xs_warn("set UTF8-SV-flag");
+                SvUTF8_on(retval);
+#endif            
+            }
+            else {
+                /* just create an ordinary string. */
+                xs_warn("set ordinary string");
+                retval = newSVpvn( (const char *)decoded, len );
+            }
+
+            /* retval = C2Sv( decoded, real_doc->encoding ); */
+            //xmlFree( decoded );
         }
         else {
-            retval = C2Sv(string, NULL);
+            retval = newSVpvn( (const char *)string, xmlStrlen(string) );
         }
     }
     else {
-        retval = C2Sv(string, NULL);
+        retval = newSVpvn( (const char *)string, xmlStrlen(string) );
     }
 
     return retval;
@@ -822,7 +873,36 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
         xs_warn("have node!");
         if (real_dom != NULL &&real_dom->encoding != NULL ) {
             xs_warn("encode string!");
-            return Sv2C(scalar,real_dom->encoding);
+            /*  speed things a bit up.... */
+            if ( scalar != NULL && scalar != &PL_sv_undef ) {
+                STRLEN len = 0;
+                char * t_pv =SvPV(scalar, len);
+                xmlChar* ts = NULL;
+                xmlChar* string = xmlStrdup((xmlChar*)t_pv);
+                if ( xmlStrlen(string) > 0 ) {
+                    xs_warn( "no undefs" );
+#ifdef HAVE_UTF8
+                    xs_warn( "use UTF8" );
+                    if( !DO_UTF8(scalar) && real_dom->encoding != NULL ) {
+#else
+                    if ( real_dom->encoding != NULL ) {        
+#endif
+                        xs_warn( "domEncodeString!" );
+                        ts= PmmFastEncodeString( real_dom->charset,
+                                                 string,
+                                                 (const xmlChar*)real_dom->encoding );
+                        xs_warn( "done!" );
+                        if ( string != NULL ) {
+                            xmlFree(string);
+                        }
+                        string=ts;
+                    }
+                }
+                return string;
+            }
+            else {
+                return NULL;
+            }
         }
     }
     xs_warn("no encoding !!");
