@@ -4817,6 +4817,7 @@ localname(self)
         name = 1
         getLocalName = 2
         getName = 3 
+        getPrefix = 4
     PREINIT:
         xmlNsPtr ns = (xmlNsPtr)SvIV(SvRV(self));
         xmlChar * prefix;
