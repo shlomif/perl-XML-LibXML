@@ -66,6 +66,8 @@ OPT
     }
 
     # test for libgdome
+    my ( $g_major, $g_minor, $g_patch ) = (0, 7, 3);
+
     eval {
         print "running gdome-config...";
         my $ver = backtick("gdome-config --version");
@@ -77,8 +79,8 @@ OPT
             print "make use of GDOME support\n";
             print "NOTE: You will still have to install XML::GDOME to make\n";
             print "      use of this feature\n";
-            $config{LIBS} ||= backtick("gdome-config --libs");
-            $config{INC}  ||= backtick("gdome-config --cflags");
+            $config{LIBS} = backtick("gdome-config --libs");
+            $config{INC}  = backtick("gdome-config --cflags");
             $config{DEFINE} .= " -DXML_LIBXML_GDOME_SUPPORT";
     };
     if ($@) {
@@ -132,7 +134,9 @@ WriteMakefile(
     'AUTHOR'    => 'Matt Sergeant',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'PREREQ_PM' => { 'XML::SAX' => 0,
-                     'XML::NamespaceSupport' => '1.07',  },
+                     'XML::NamespaceSupport' => '1.07',
+                     'XML::LibXML::Common' => 0,
+                   },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
     'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
     %config,
@@ -163,6 +167,7 @@ sub MY::install {
 
 install_sax_driver :
 \t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
+\t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
  
 INSTALL
  
