@@ -27,6 +27,7 @@ versions of the package.
    - fixed segfault while appending entity ref nodes to documents
    - fixed some backward compatibility issues
    - fixed cloning with namespaces misbehaviour
+   - fixed parser problems with libxml2 2.5.3+
    - moved iterator classes into a separate package
      (after realizing some CPAN testers refuse to read their warnings
      from Makefile.PL)

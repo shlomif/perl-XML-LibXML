@@ -1794,11 +1794,11 @@ _processXIncludes( self, doc )
 
         LibXML_croak_error();
 
-        if ( RETVAL > 0 ){
+        if ( RETVAL < 0 ){
             croak( "unknown error due XInclude" );
             XSRETURN_UNDEF;            
         }
-        else {
+        else if ( RETVAL == 0 ) {
             RETVAL = 1;
         }
     OUTPUT:
