@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT);
 use Carp;
 
-$VERSION = "0.92";
+$VERSION = "0.93";
 require Exporter;
 require DynaLoader;
 
