@@ -243,11 +243,12 @@ sub set_handler {
     if ( defined $_[0] ) {
         $self->{HANDLER} = $_[0];
 
-        $self->{SAX} = {State => 0,
-                        ELSTACK    => []};
+        $self->{SAX_ELSTACK} = [];
+        $self->{SAX} = {State => 0};
     }
     else {
         # undef SAX handling
+        $self->{SAX_ELSTACK} = [];
         delete $self->{HANDLER};
         delete $self->{SAX};
     }
@@ -285,6 +286,7 @@ sub parse_string {
 
     if ( defined $self->{SAX} ) {
         my $string = shift;
+        $self->{SAX_ELSTACK} = [];
         eval { $self->_parse_sax_string($string); };
         my $err = $@;
         $self->{_State_} = 0;
@@ -313,6 +315,7 @@ sub parse_fh {
     $self->{_State_} = 1;
     my $result;
     if ( defined $self->{SAX} ) {
+        $self->{SAX_ELSTACK} = [];
         eval { $self->_parse_sax_fh( @_ );  };
         my $err = $@;
         $self->{_State_} = 0;
@@ -340,6 +343,7 @@ sub parse_file {
     $self->{_State_} = 1;
     my $result;
     if ( defined $self->{SAX} ) {
+        $self->{SAX_ELSTACK} = [];
         eval { $self->_parse_sax_file( @_ );  };
         my $err = $@;
         $self->{_State_} = 0;
@@ -403,6 +407,7 @@ sub init_push {
     }
 
     if ( defined $self->{SAX} ) {
+        $self->{SAX_ELSTACK} = [];
         $self->{CONTEXT} = $self->_start_push(1);
     }
     else {
@@ -938,76 +943,12 @@ package XML::LibXML::_SAXParser;
 
 use XML::SAX::Exception;
 
-# NOTE: there is not end_document ON PURPOSE!
-
-sub start_document {
-    my $parser = shift;
-    $parser->{HANDLER}->start_document({});
-}
-
-sub xml_decl {
-    my ( $parser, $version, $encoding ) = @_;
-
-    my $decl = {version => $version};
-    $decl->{encoding} = $encoding if defined $encoding;
-    $parser->{HANDLER}->xml_decl($decl);
-}
-
-sub start_prefix_mapping {
-    my ( $parser, $prefix, $uri ) = @_;
-    $parser->{HANDLER}->start_prefix_mapping( { Prefix => $prefix, NamespaceURI => $uri } );
-}
-
-sub end_prefix_mapping {
-    my ( $parser, $prefix, $uri ) = @_;
-    $parser->{HANDLER}->end_prefix_mapping( { Prefix => $prefix, NamespaceURI => $uri } );
-}
-
-sub start_element {
-    my (  $parser, $elem, $attrs ) = @_;
-    my $saxattr = {};
-
-    push @{$parser->{SAX}->{ELSTACK}}, $elem;
-
-    if ( defined $attrs  ) {
-        $parser->{HANDLER}->start_element( { %$elem, Attributes=>$attrs} )
-    }
-    else {
-        $parser->{HANDLER}->start_element( $elem )
-    }
-}
-
-sub end_element {
-    my (  $parser, $name ) = @_;
-    my $elem = pop @{$parser->{SAX}->{ELSTACK}};
-    if ( $elem->{Name} ne $name ) {
-        my $error = XML::SAX::Execption::Parse->new( Message => "cought error where parser should catch ('$elem->{Name}' ne '$name' )" );
-        $parser->{HANDLER}->error( $error );
-        return;
-    }
-    $parser->{HANDLER}->end_element( $elem );
-}
-
-sub characters {
-    my ( $parser, $data ) = @_;
-    $parser->{HANDLER}->characters( $data );
-}
-
-sub comment {
-    my ( $parser, $data ) = @_;
-    $parser->{HANDLER}->comment( $data );
-}
-
+# the cdata section will go to the c-layer soon
 sub cdata_block {
     my ( $parser, $data ) = @_;
     $parser->{HANDLER}->start_cdata();
     $parser->{HANDLER}->characters( $data );
     $parser->{HANDLER}->end_cdata();
-}
-
-sub processing_instruction {
-    my ( $parser, $target ) = @_;
-    $parser->{HANDLER}->processing_instruction( $target );
 }
 
 # these functions will use SAX exceptions as soon i know how things really work
