@@ -48,7 +48,6 @@ ok( defined $attr && $attr->getValue() eq "test" );
 $dom->setDocumentElement( $attr );
 ok( $elem->isEqual( $dom->getDocumentElement() ) );
 
-
 my $node;
 {
     my $dom3 = XML::LibXML::Document->createDocument( $version, $enc );

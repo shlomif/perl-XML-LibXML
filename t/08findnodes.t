@@ -86,5 +86,5 @@ ok(@none, 0);
 
 my @doc = $root->findnodes('document("example/test.xml")');
 ok(@doc);
-warn($doc[0]->toString);
+# warn($doc[0]->toString);
 

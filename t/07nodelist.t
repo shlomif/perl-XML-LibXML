@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>15; }
+BEGIN { plan tests=>18; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -37,7 +37,7 @@ if ( defined $dom ) {
     ok( defined $elem && $elem->getName() eq "dromedaries" );
 
     if( defined $elem ) {
-        my @nodelist = $elem->getElementsByTagName( "species" );
+        my @nodelist = $elem->getChildrenByTagName( "species" );
         ok( scalar(@nodelist) == 3 );
         return unless scalar(@nodelist) == 3;
         my $lama = $nodelist[1];
@@ -52,7 +52,7 @@ if ( defined $dom ) {
     $elem2->appendWellBalancedChunk( $string );
     ok(  $elem2->toString() eq $tstr );
 
-    my @bs = $elem2->getElementsByTagName('B');
+    my @bs = $elem2->getChildrenByTagName('B');
     ok( ( scalar( @bs ) == 2 ) &&
         ( $bs[0]->getAttribute( 'lang' ) eq "eng" ) && 
         ( $bs[1]->getAttribute( 'lang' ) eq "ger" ) );
@@ -87,3 +87,30 @@ if( defined $dom2 ) {
     ok( scalar(@nsattr) , 1 );
     ok( $nsattr[0]->getValue(), 3 );
 }
+
+# ok the following tests are for getElementsBy*Name*
+
+my $bigdom = $parser->parse_string(<<EOS);
+<?xml version="1.0"?>
+<a>
+   <ns:b xmlns:ns="foo">
+      <c>1</c>
+      <ns:c>2</ns:c>
+      <ns:d>
+          <ns:c>3</ns:c>
+      </ns:d>
+   </ns:b>
+</a>
+EOS
+
+my @list;
+my $bdroot = $bigdom->getDocumentElement();
+
+@list = $bdroot->getElementsByTagName( 'c' );
+ok( scalar( @list ) , 1 );
+
+@list = $bdroot->getElementsByTagNameNS( 'foo','c' );
+ok( scalar( @list ) , 2 );
+
+@list = $bdroot->getElementsByLocalName( 'c' );
+ok( scalar( @list ) , 3 );
