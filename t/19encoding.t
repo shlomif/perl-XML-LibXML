@@ -84,7 +84,7 @@ else {
     
     ok( decodeFromUTF8( 'iso-8859-1' ,$elemlat1->toString()),
         "<$tstr_iso_latin1/>");
-    ok( $elemlat1->toString(1), "<$tstr_iso_latin1/>");
+    ok( $elemlat1->toString(0,1), "<$tstr_iso_latin1/>");
 
     $elemlat1->appendText( $tstr_iso_latin1 );
 
@@ -119,7 +119,7 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "EUC-JP" ) {
             $tstr_euc_jp );
         ok( decodeFromUTF8( 'EUC-JP' ,$elemjp->toString()),
             "<$tstr_euc_jp/>");
-        ok( $elemjp->toString(1), "<$tstr_euc_jp/>");
+        ok( $elemjp->toString(0,1), "<$tstr_euc_jp/>");
 
         $dom_euc_jp->setDocumentElement( $elemjp );
         $elemjp->appendText( $tstr_euc_jp );
@@ -156,7 +156,7 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "KIO8-R" ) {
 
         ok( decodeFromUTF8( 'KIO8-R' ,$elemkio8->toString()), 
             "<$tstr_kio8r/>");
-        ok( $elemkio8->toString(1), "<$tstr_kio8r/>");
+        ok( $elemkio8->toString(0,1), "<$tstr_kio8r/>");
 
         $elemkio8->appendText( $tstr_kio8r );
 
