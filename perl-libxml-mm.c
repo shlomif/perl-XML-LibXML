@@ -896,23 +896,14 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
         }
 
         len = xmlStrlen( string );
+        retval = newSVpvn( (const char *)string, xmlStrlen(string) );
+   
         if ( enc == XML_CHAR_ENCODING_UTF8 ) {
             /* create an UTF8 string. */       
-            xs_warn("C2Sv: set UTF8 string\n");
-            /* create the SV */
-            /* string[len] = 0; */
-
-            retval = NEWSV(0, len+1); 
-            sv_setpvn(retval, (const char*) string, len );
 #ifdef HAVE_UTF8
             xs_warn("C2Sv: set UTF8-SV-flag\n");
             SvUTF8_on(retval);
 #endif            
-        }
-        else {
-            /* just create an ordinary string. */
-            xs_warn("C2Sv: set ordinary string\n");
-            retval = newSVpvn( (const char *)string, xmlStrlen(string) );
         }
     }
 
@@ -968,47 +959,39 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
     if ( refnode != NULL ) {
         xmlDocPtr real_doc = refnode->doc;
         if ( real_doc != NULL && real_doc->encoding != NULL ) {
+            xs_warn( " encode node !!" );
+            /* The following statement is to handle bad
+               values set by XML::LibXSLT */
+            if ( PmmNodeEncoding(real_doc) == XML_CHAR_ENCODING_NONE ) {
+                PmmNodeEncoding(real_doc) = XML_CHAR_ENCODING_UTF8;
+            }
             xmlChar * decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc) ,
                                                      (const xmlChar *)string,
                                                      (const xmlChar*)real_doc->encoding);
+            xs_warn( "push decoded string into SV" );
             len = xmlStrlen( decoded );
-            if ( PmmNodeEncoding( real_doc ) == XML_CHAR_ENCODING_UTF8 ) {
-		 /* most probably true, since libxml2 always 
-                  * sets doc->charset to UTF8, see tree.c:
-                  *
-		  * The in memory encoding is always UTF8
-		  * This field will never change and would
-		  * be obsolete if not for binary compatibility.
-		  */
-                /* create an UTF8 string. */       
-                xs_warn("nodeC2Sv: set UTF8 string\n");
-                /* create the SV */
-                /* warn( "string is %s\n", string ); */
+            retval = newSVpvn( (const char *)decoded, len );
+            xmlFree( decoded );
 
-                retval = newSVpvn( (const char *)decoded, len );
+            if ( PmmNodeEncoding( real_doc ) == XML_CHAR_ENCODING_UTF8 ) {
+                /* most probably true, since libxml2 always 
+                 * sets doc->charset to UTF8, see tree.c:
+                 *
+                 * The in memory encoding is always UTF8
+                 * This field will never change and would
+                 * be obsolete if not for binary compatibility.
+                 */
 #ifdef HAVE_UTF8
                 xs_warn("nodeC2Sv: set UTF8-SV-flag\n");
                 SvUTF8_on(retval);
 #endif            
             }
-            else {
-                /* just create an ordinary string. */
-                xs_warn("nodeC2Sv: set ordinary string\n");
-                retval = newSVpvn( (const char *)decoded, len );
-            }
-
-            /* retval = C2Sv( decoded, real_doc->encoding ); */
-            xmlFree( decoded );
-        }
-        else {
-            retval = newSVpvn( (const char *)string, xmlStrlen(string) );
+           
+            return retval;
         }
     }
-    else {
-        retval = newSVpvn( (const char *)string, xmlStrlen(string) );
-    }
 
-    return retval;
+    return C2Sv(string, NULL );
 }
 
 xmlChar *
@@ -1041,7 +1024,13 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
 #endif
 		    {
                         xs_warn( "nodeSv2C:     domEncodeString!\n" );
-                      /*  if ( string == NULL || *string == 0 ) warn("string is empty" ); */
+                        /*  if ( string == NULL || *string == 0 ) warn("string is empty" ); */
+                        /* The following statement is to handle bad
+                           values set by XML::LibXSLT */
+                        if ( PmmNodeEncoding(real_dom) == XML_CHAR_ENCODING_NONE ) {
+                            PmmNodeEncoding(real_dom) = XML_CHAR_ENCODING_UTF8;
+                        }
+
                         ts= PmmFastEncodeString( PmmNodeEncoding(real_dom),
                                                  string,
                                                  (const xmlChar*)real_dom->encoding );
