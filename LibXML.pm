@@ -370,28 +370,36 @@ sub parse_string {
 
     $self->{_State_} = 1;
     my $result;
-
+    my $err;
     if ( defined $self->{SAX} ) {
         my $string = shift;
         $self->{SAX_ELSTACK} = [];
-        eval { $result = $self->_parse_sax_string($string); };
+        eval {
+            $result = $self->_parse_sax_string($string); 
+            XML::LibXML::Error::_report_error( );
+        };
 
-        my $err = $@;
+        $err = $@;
         $self->{_State_} = 0;
         if ($err) {
             croak $err;
         }
     }
     else {
-        eval { $result = $self->_parse_string( @_ ); };
+        eval { 
+            $result = $self->_parse_string( @_ );
+            XML::LibXML::Error::_report_error();
+        };
 
-        my $err = $@;
+        $err = $@;
         $self->{_State_} = 0;
         if ($err) {
             croak $err;
         }
-
-        $result = $self->_auto_expand( $result, $self->{XML_LIBXML_BASE_URI} );
+        else {
+            $result = $self->_auto_expand( $result, 
+                                           $self->{XML_LIBXML_BASE_URI} );
+        }
     }
 
     return $result;

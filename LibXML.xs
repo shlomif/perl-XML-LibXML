@@ -16,9 +16,6 @@ extern "C" {
 #  include <unistd.h>
 #endif
 
-/* libxml2 configuration properties */
-#include <libxml/xmlversion.h>
-
 #define DEBUG_C14N
 
 /* libxml2 stuff */
@@ -160,58 +157,57 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
     SvREFCNT_dec(sv);
 }
 
-void
-LibXML_serror2SV(SV** dest, xmlErrorPtr err, SV* prev_error) {
-    HV* herror;
-    SV* hr;
-    herror = newHV();
-    if (err->level == XML_ERR_NONE)
-        return;
-    if (prev_error != NULL && SvOK(prev_error))
-      hv_store(herror, "_prev", 5, prev_error,0);
-    hv_store(herror, "domain", 6, newSViv(err->domain),0);
-    hv_store(herror, "code", 4, newSViv(err->code),0);
-    if (err->message) {
-        int len = strlen(err->message);
-        if (err->message[len-1] == '\n') 
-            hv_store(herror, "message", 7, newSVpvn(err->message,len-1),0);
-        else
-            hv_store(herror, "message", 7, newSVpvn(err->message,len),0);
-    }
-    hv_store(herror, "level", 5, newSViv(err->level),0);
-    if (err->file)
-        hv_store(herror, "file", 4, newSVpvn(err->file,strlen(err->file)),0);
-    hv_store(herror, "line", 4, newSViv(err->line),0);
-    if (err->str1)
-        hv_store(herror, "str1", 4, newSVpvn(err->str1,strlen(err->str1)),0);
-    if (err->str2)
-        hv_store(herror, "str2", 4, newSVpvn(err->str2,strlen(err->str2)),0);
-    if (err->str3)
-        hv_store(herror, "str3", 4, newSVpvn(err->str3,strlen(err->str3)),0);
-    hv_store(herror, "int1", 4, newSViv(err->int1),0);
-    hv_store(herror, "int2", 4, newSViv(err->int2),0);
-    if (err->node) {
-      /* hv_store(herror, "node", 4, 
-	 PmmNodeToSv( (xmlNodePtr) err->node, NULL ),0); */
-      /* Passing the node isn't at all safe at this point, so I'll just
-         pass its name
-      */
-      xmlChar* name =  (xmlChar*)domName( err->node );
-      if ( name != NULL ) {
-	hv_store(herror, "nodename", 8, C2Sv(name,NULL) ,0);
-	xmlFree( name );
-      }
-    }
-    hr = newRV_noinc((SV *)herror);
-    sv_bless(hr, gv_stashpv("XML::LibXML::Error", TRUE));
-    *dest = hr;
-}
-
 #ifdef HAVE_SERRORS
 void
-LibXML_serror_handler(void *userData, xmlErrorPtr err) {
-  xmlError2Sv(&LibXML_error,err,LibXML_error); 
+LibXML_struct_error_handler(void * userData, xmlErrorPtr error )
+{
+    int count, extend;
+    const char * CLASS = "XML::LibXML::LibError";
+    SV* uData;
+    SV* libErr;
+
+    dTHX;
+    dSP;
+
+    xs_warn( "init SE handler\n" );
+    if ( userData != NULL ) {
+        xs_warn( "have user data \n" );
+        uData  = (SV*) userData;
+    }
+    else {
+        xs_warn( "have no user data!\n" );
+    }
+    xs_warn( "init LibError Class\n" );
+
+    libErr = NEWSV(0,0);
+    sv_setref_pv( libErr, CLASS, (void*)error );
+    
+    extend = (userData == NULL ? 1 : 2);
+
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    EXTEND(SP, extend);
+    
+    PUSHs(sv_2mortal(libErr));
+    if ( userData != NULL ) {
+        PUSHs(uData);
+    }
+    PUTBACK;
+    
+    count = perl_call_pv( "XML::LibXML::Error::_callback_error",
+                          G_SCALAR | G_EVAL );
+    SPAGAIN;
+
+    if ( SvTRUE(ERRSV) ) {
+        croak( "DIE: %s", SvPV_nolen(ERRSV) );
+        POPs;
+    }
+
+    FREETMPS;
+    LEAVE;
 }
+
 #endif /* HAVE_SERRORS */
 
 void
@@ -227,7 +223,7 @@ LibXML_init_error(SV ** saved_errorp)
 #ifdef HAVE_SERRORS
     xmlSetGenericErrorFunc(NULL, LibXML_dummy_handler);
     xmlSetStructuredErrorFunc(NULL,
-			      (xmlStructuredErrorFunc)LibXML_serror_handler);
+			      (xmlStructuredErrorFunc)LibXML_struct_error_handler);
     LibXML_error = &PL_sv_undef;
 #else
     LibXML_error = NEWSV(0, 512);
@@ -240,23 +236,23 @@ static void
 LibXML_report_error(SV * saved_error, int recover)
 {
 #ifdef HAVE_SERRORS
-    if (LibXML_error_OK) {
-      if ( recover ) {
-	if ( recover == 1 ) {
-	    warn("%s",SvPV_nolen(LibXML_error));
-	}
-	SvREFCNT_dec(LibXML_error);
-	LibXML_error = saved_error;
-      } else {
-	SV* perl_err_var;
-	perl_err_var = get_sv("@", TRUE);
-	sv_setsv(perl_err_var, LibXML_error);
-	LibXML_error = saved_error;
-	croak(Nullch);
-       }
-   } else {
-     LibXML_error = saved_error;
-   }
+   /* if (LibXML_error_OK) {
+        if ( recover ) {
+            if ( recover == 1 ) {
+                warn("%s",SvPV_nolen(LibXML_error));
+            }
+            SvREFCNT_dec(LibXML_error);
+            LibXML_error = saved_error;
+        } else {
+            SV* perl_err_var;
+            perl_err_var = get_sv("@", TRUE);
+            sv_setsv(perl_err_var, LibXML_error);
+            LibXML_error = saved_error;
+            croak(Nullch);
+        }
+    } else {
+        LibXML_error = saved_error;
+    } */
 #else
     SV *my_error = sv_2mortal(LibXML_error);
     LibXML_error = saved_error;
@@ -6357,3 +6353,98 @@ validate( self, doc )
         RETVAL
 
 #endif /* HAVE_SCHEMAS */
+
+#ifdef HAVE_SERRORS
+
+MODULE = XML::LibXML       PACKAGE = XML::LibXML::LibError
+
+int
+domain( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = self->domain;
+    OUTPUT:
+        RETVAL
+
+int
+code( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = self->code;
+    OUTPUT:
+        RETVAL
+
+int
+line( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = self->line;
+    OUTPUT:
+        RETVAL
+
+int
+num1( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = self->int1;
+    OUTPUT:
+        RETVAL
+
+int
+num2( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = self->int2;
+    OUTPUT:
+        RETVAL
+
+int
+level( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = (int)self->level;
+    OUTPUT:
+        RETVAL
+
+char *
+message( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = self->message;
+    OUTPUT:
+        RETVAL
+
+char *
+file( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = (char*)self->file;
+    OUTPUT:
+        RETVAL
+
+char *
+str1( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = (char*)self->str1;
+    OUTPUT:
+        RETVAL
+
+char *
+str2( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = (char*)self->str2;
+    OUTPUT:
+        RETVAL
+
+char *
+str3( self )
+        xmlErrorPtr self
+    CODE:
+        RETVAL = (char*)self->str3;
+    OUTPUT:
+        RETVAL
+
+
+#endif /* HAVE_SERRORS */

@@ -1,7 +1,7 @@
 package XML::LibXML::Error;
 
 use strict;
-use vars qw($AUTOLOAD @error_domains);
+use vars qw($AUTOLOAD @error_domains $ERROR);
 use Carp;
 use overload
   '""' => \&as_string;
@@ -43,6 +43,40 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 		  "Relax-NG parser", "Relax-NG validity",
 		  "Catalog", "C14N", "XSLT", "validity");
 
+
+sub _callback_error {
+    my $xE = shift;
+
+    my $terr =bless {
+        domain  => $xE->domain(),
+        level   => $xE->level(),
+        code    => $xE->code(),
+        message => $xE->message(),
+        file    => $xE->file(),
+        line    => $xE->line(),
+        str1    => $xE->str1(),
+        str2    => $xE->str2(),
+        str3    => $xE->str3(),
+        int1    => $xE->num1(),
+        int2    => $xE->num2(),
+    }, "XML::LibXML::Error";
+
+    unless ( defined $terr->{file} and length $terr->{file} ) {
+        $terr->{file} = 'string()'; # make it easier to recognize parsed strings
+    }
+
+    if ( defined $ERROR ) {
+        $terr->{prev} = $ERROR;
+    }
+
+    $ERROR = $terr;
+}
+
+sub _report_error {
+    die $ERROR;
+}
+
+
 sub AUTOLOAD {
   my $self=shift;
   return undef unless ref($self);
@@ -58,50 +92,50 @@ sub AUTOLOAD {
 sub DESTROY {}
 
 sub domain {
-  my ($self)=@_;
-  return undef unless ref($self);
-  return $error_domains[$self->{domain}]
+    my ($self)=@_;
+    return undef unless ref($self);
+    return $error_domains[$self->{domain}];
 }
 
 sub as_string {
-  my ($self)=@_;
-  my $msg = "";
-  my $level;
-
-  if (defined($self->{_prev})) {
-    $msg = $self->{_prev}->as_string;
-  }
-
-  if ($self->{level} == XML_ERR_NONE) {
-    $level = "";
-  } elsif ($self->{level} == XML_ERR_WARNING) {
-    $level = "warning";
-  } elsif ($self->{level} == XML_ERR_ERROR ||
-	   $self->{level} == XML_ERR_FATAL) {
-    $level = "error";
-  }
-  my $where="";
-  if (defined($self->{file})) {
-    $where="$self->{file}:$self->{line}";
-  } elsif (($self->{domain} == XML_ERR_FROM_PARSER)
-	   and
-	   $self->{line})  {
-    $where="Entity: line $self->{line}";
-  }
-  if ($self->{nodename}) {
-    $where.=": element ".$self->{nodename};
-  }
-  $msg.=$where.": " if $where ne "";
-  $msg.=$error_domains[$self->{domain}]." ".$level." :";
-  my $str=$self->{message};
-  chomp($str);
-  $msg.=" ".$str."\n";
-  if (($self->{domain} == XML_ERR_FROM_XPATH) and
-      defined($self->{str1})) {
-    $msg.=$self->{str1}."\n";
-    $msg.=(" " x $self->{int1})."^\n";
-  }
-  return $msg;
+    my ($self)=@_;
+    my $msg = "";
+    my $level;
+    
+    if (defined($self->{_prev})) {
+        $msg = $self->{_prev}->as_string;
+    }
+    
+    if ($self->{level} == XML_ERR_NONE) {
+        $level = "";
+    } elsif ($self->{level} == XML_ERR_WARNING) {
+        $level = "warning";
+    } elsif ($self->{level} == XML_ERR_ERROR ||
+             $self->{level} == XML_ERR_FATAL) {
+        $level = "error";
+    }
+    my $where="";
+    if (defined($self->{file})) {
+        $where="$self->{file}:$self->{line}";
+    } elsif (($self->{domain} == XML_ERR_FROM_PARSER)
+             and
+             $self->{line})  {
+        $where="Entity: line $self->{line}";
+    }
+    if ($self->{nodename}) {
+        $where.=": element ".$self->{nodename};
+    }
+    $msg.=$where.": " if $where ne "";
+    $msg.=$error_domains[$self->{domain}]." ".$level." :";
+    my $str=$self->{message};
+    chomp($str);
+    $msg.=" ".$str."\n";
+    if (($self->{domain} == XML_ERR_FROM_XPATH) and
+        defined($self->{str1})) {
+        $msg.=$self->{str1}."\n";
+        $msg.=(" " x $self->{int1})."^\n";
+    }
+    return $msg;
 }
 
 sub dump {
