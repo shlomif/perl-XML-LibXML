@@ -22,6 +22,9 @@ versions of the package.
    - fixed namespace handing in XML::LibXML::SAX
    - fixed attribute handing in XML::LibXML::SAX
    - fixed memory leak       in XML::LibXML::SAX
+   - fixed memory leak       in XML::LibXML::Document
+   - fixed segfault while appending entity ref nodes to documents
+   - fixed some backward compatibility issues
    - improved parser testsuite
    - more documentation 
 
