@@ -74,6 +74,16 @@ sub open_callback {
     return $self->{XML_LIBXML_OPEN_CB} = shift;
 }
 
+sub callbacks {
+    my $self = shift;
+    if (@_) {
+        my ($match, $open, $read, $close) = @_;
+        @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)} = ($match, $open, $read, $close);
+    }
+    else {
+        return @{$self}{qw(XML_LIBXML_MATCH_CB XML_LIBXML_OPEN_CB XML_LIBXML_READ_CB XML_LIBXML_CLOSE_CB)};
+    }
+}
 
 sub validation {
     my $self = shift;
