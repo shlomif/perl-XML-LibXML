@@ -517,6 +517,8 @@ LibXML_load_external_entity(
 void
 LibXML_init_parser( SV * self ) {
     /* we fetch all switches and callbacks from the hash */
+    SV** item    = NULL;
+    SV*  item2   = NULL;
 
     xmlSetGenericErrorFunc(PerlIO_stderr(), 
                            (xmlGenericErrorFunc)LibXML_error_handler);
@@ -524,7 +526,6 @@ LibXML_init_parser( SV * self ) {
     if ( self != NULL ) {
         /* first fetch the values from the hash */
         HV* real_obj = (HV *)SvRV(self);
-        SV** item    = NULL;
         SV * RETVAL  = NULL; /* dummy for the stupid macro */
 
         item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
@@ -573,24 +574,24 @@ LibXML_init_parser( SV * self ) {
      * callbacks.
      */
     if ( LibXML_match_cb == NULL ) {
-        SV *item = perl_get_sv("XML::LibXML::MatchCB", 0);
-        if ( item != NULL  && SvTRUE(item)) 
-            LibXML_match_cb= item;
+        item2 = perl_get_sv("XML::LibXML::MatchCB", 0);
+        if ( item != NULL  && SvTRUE(item2)) 
+            LibXML_match_cb= item2;
     }
     if ( LibXML_read_cb == NULL ) {
-        SV *item = perl_get_sv("XML::LibXML::ReadCB", 0);
-        if ( item != NULL  && SvTRUE(item)) 
-            LibXML_read_cb= item;
+        item2 = perl_get_sv("XML::LibXML::ReadCB", 0);
+        if ( item2 != NULL  && SvTRUE(item2)) 
+            LibXML_read_cb= item2;
     }
     if ( LibXML_open_cb == NULL ) {
-        SV *item = perl_get_sv("XML::LibXML::OpenCB", 0);
-        if ( item != NULL  && SvTRUE(item)) 
-            LibXML_open_cb= item;
+        item2 = perl_get_sv("XML::LibXML::OpenCB", 0);
+        if ( item2 != NULL  && SvTRUE(item2)) 
+            LibXML_open_cb= item2;
     }
     if ( LibXML_close_cb == NULL ) {
-        SV *item = perl_get_sv("XML::LibXML::CloseCB", 0);
-        if ( item != NULL  && SvTRUE(item)) 
-            LibXML_close_cb= item;
+        item2 = perl_get_sv("XML::LibXML::CloseCB", 0);
+        if ( item2 != NULL  && SvTRUE(item2)) 
+            LibXML_close_cb= item2;
     }
 
     return; 

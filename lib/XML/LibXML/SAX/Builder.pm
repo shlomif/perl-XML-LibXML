@@ -67,8 +67,6 @@ sub start_element {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
             # SAX2 attributes
-            warn $attr->{NamespaceURI};
-            warn $attr->{Name};
             $node->setAttributeNS($attr->{NamespaceURI} || "", $attr->{Name}, $attr->{Value});
         }
         else {
