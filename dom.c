@@ -33,9 +33,11 @@
  *
  * in 99% the cases i believe it is faster than to create the dom by hand,
  * and skip the parsing job which has to be done here.
+ *
+ * the repair flag will not be recognized with the current libxml2
  **/
 xmlNodePtr 
-domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
+domReadWellBalancedString( xmlDocPtr doc, xmlChar* block, int repair ) {
     int retCode       = -1;
     xmlNodePtr nodes  = NULL;
     
@@ -48,11 +50,20 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block ) {
                                                block,
                                                &nodes );
 
+/*         retCode = xmlParseBalancedChunkMemoryRecover( doc,  */
+/*                                                       NULL, */
+/*                                                       NULL, */
+/*                                                       0, */
+/*                                                       block, */
+/*                                                       &nodes, */
+/*                                                       repair ); */
+
         /* error handling */
-        if ( retCode != 0 ) {
+        if ( retCode != 0 && repair == 0 ) {
             /* if the code was not well balanced, we will not return 
              * a bad node list, but we have to free the nodes */
             xmlFreeNodeList( nodes );
+            nodes = NULL;
         }
         else {
             xmlSetListDoc(nodes,doc);

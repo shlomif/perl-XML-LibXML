@@ -1148,6 +1148,7 @@ _parse_string(self, string, directory = NULL)
         xmlDocPtr real_dom;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover ;
     CODE:
         ptr = SvPV(string, len);
         if (len == 0) {
@@ -1198,10 +1199,12 @@ _parse_string(self, string, directory = NULL)
             real_dom->URL = xmlStrdup((const xmlChar*)directory);
         }
 
-        if (!well_formed
-            || (xmlDoValidityCheckingDefaultValue
-                && !valid 
-                && (real_dom->intSubset || real_dom->extSubset) ) ) {
+        item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+        recover = ( item != NULL && SvTRUE(*item) ) ? 1 : 0;
+        if ( ( !well_formed && !recover )
+               || (xmlDoValidityCheckingDefaultValue
+                    && !valid && !recover 
+                    && (real_dom->intSubset || real_dom->extSubset) ) ) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
@@ -1276,6 +1279,7 @@ _parse_fh(self, fh, directory = NULL)
         xmlDocPtr real_dom;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover = 0;
     CODE:
         LibXML_error = NEWSV(0, 512);
         sv_setpvn(LibXML_error, "", 0);
@@ -1284,7 +1288,10 @@ _parse_fh(self, fh, directory = NULL)
         real_dom = LibXML_parse_stream(self, fh, directory);
         
         sv_2mortal(LibXML_error);
-        
+
+        item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+        recover = ( item != NULL && SvTRUE( *item ) ) ? 1 : 0;
+
         if (real_dom == NULL) {
             if ( SvCUR( LibXML_error ) > 0 ) {
                 croak(SvPV(LibXML_error, len));
@@ -1293,7 +1300,8 @@ _parse_fh(self, fh, directory = NULL)
         }
         else if (xmlDoValidityCheckingDefaultValue
                  && SvCUR(LibXML_error) > 0
-                 && (real_dom->intSubset || real_dom->extSubset)  ) {
+                 && (real_dom->intSubset || real_dom->extSubset) 
+                 && recover == 0 ) {
             croak(SvPV(LibXML_error, len));
         }
         else {
@@ -1341,6 +1349,7 @@ _parse_file(self, filename)
         xmlDocPtr real_dom = NULL;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover;
     CODE:
         LibXML_init_parser(self);
         ctxt = xmlCreateFileParserCtxt(filename);
@@ -1369,13 +1378,17 @@ _parse_file(self, filename)
             }
             XSRETURN_UNDEF;
         }
-        
-        if (!well_formed
-            || (xmlDoValidityCheckingDefaultValue
-                && (!valid
-                    || SvCUR(LibXML_error) > 0 )
-                && (real_dom->intSubset
-                    || real_dom->extSubset) )) {
+
+        item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+        recover = ( item != NULL && SvTRUE(*item) ) ? 1 : 0;
+
+        if (  ( !well_formed && !recover )
+               || (xmlDoValidityCheckingDefaultValue
+                   && !recover 
+                   && (!valid
+                       || SvCUR(LibXML_error) > 0 )
+                   && (real_dom->intSubset
+                       || real_dom->extSubset) )  ) {
             xmlFreeDoc(real_dom);
             croak("'%s'",SvPV(LibXML_error, len));
             XSRETURN_UNDEF;
@@ -1574,6 +1587,7 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         STRLEN len;
         HV* real_obj = (HV *)SvRV(self);
         SV** item    = NULL;
+        int recover;
     CODE:
         if ( encoding == NULL ) encoding = "UTF-8";
         ptr = SvPV(svchunk, len);
@@ -1585,17 +1599,19 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
         chunk = Sv2C(svchunk, (const xmlChar*)encoding);
 
         if ( chunk != NULL ) {
+            item = hv_fetch( real_obj, "XML_LIBXML_RECOVER", 18, 0 );
+            recover = ( item != NULL && SvTRUE(*item) ) ? 1 : 0;
+           
             LibXML_error = sv_2mortal(newSVpv("", 0));
 
             LibXML_init_parser(self);
-            rv = domReadWellBalancedString( NULL, chunk );
+            rv = domReadWellBalancedString( NULL, chunk, recover );
             LibXML_cleanup_callbacks();
             LibXML_cleanup_parser();    
 
             if ( rv != NULL ) {
                 /* now we append the nodelist to a document
                    fragment which is unbound to a Document!!!! */
-                # warn( "good chunk, create fragment" );
                 item = hv_fetch( real_obj, "XML_LIBXML_GDOME", 16, 0 );
 
                 /* step 1: create the fragment */
@@ -1618,7 +1634,7 @@ _parse_xml_chunk( self, svchunk, encoding="UTF-8" )
                 }
             }
             else {
-                # warn( "bad chunk" );
+                warn( "bad chunk" );
                 croak(SvPV(LibXML_error, len));
                 XSRETURN_UNDEF;
             }

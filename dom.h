@@ -30,7 +30,7 @@
  **/
 
 xmlNodePtr 
-domReadWellBalancedString( xmlDocPtr doc, xmlChar* string );
+domReadWellBalancedString( xmlDocPtr doc, xmlChar* string, int repair );
 
 /**
  * NAME domIsParent

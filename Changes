@@ -7,6 +7,7 @@ versions. Make shure you read the informations on the XML::LibXML::DOM
 manpage!
 
 1.53
+   - implemented libxml2 dom recovering
    - introduced transparent XML::GDOME import. (EXPERIMENTAL)
    - calling external entity handlers work again
    - fixed a bug while replacing the document element.

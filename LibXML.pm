@@ -195,6 +195,12 @@ sub validation {
     return $self->{XML_LIBXML_VALIDATION};
 }
 
+sub recover {
+    my $self = shift;
+    $self->{XML_LIBXML_RECOVER} = shift if scalar @_;
+    return $self->{XML_LIBXML_RECOVER};
+}
+
 sub expand_entities {
     my $self = shift;
     $self->{XML_LIBXML_EXPAND_ENTITIES} = shift if scalar @_;
@@ -1022,6 +1028,23 @@ parameters to get the current value.
 
 Turn validation on (or off). Defaults to off.
 
+=head2 recover
+
+  $parser->recover(1);
+
+Turn the parsers recover mode on (or off). Defaults to off.
+
+This allows to parse broken XML data into memory.  This switch will
+only work with XML data rather than HTML data. Also the validation
+will be switched off automaticly.
+
+The recover mode helps to recover documents that are almost wellformed
+very efficiently. That is for example a document that forgets to close
+the document tag (or any other tag inside the document). The recover
+mode of XML::LibXML has problems though to restore documents that are
+more like well ballanced chunks. In that case XML::LibXML will only
+parse the first tag of the chunk.
+
 =head2 expand_entities
 
   $parser->expand_entities(0);
@@ -1135,6 +1158,8 @@ parser attributes.
 =over 4
 
 =item validation == off (0)
+
+=item recover == off (0)
 
 =item expand_entities == on (1)
 
