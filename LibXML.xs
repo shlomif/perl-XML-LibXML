@@ -1374,12 +1374,12 @@ _toString(self, format=0)
         xmlDtdPtr intSubset = NULL;
     CODE:
         real_dom = (xmlDocPtr)PmmNODE(SvPROXYNODE(self));
-        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
 
-        internalFlag = get_sv("XML::LibXML::skipDTD", 0);
+        internalFlag = perl_get_sv("XML::LibXML::skipDTD", 0);
         if ( internalFlag && SvTRUE(internalFlag) ) {
             intSubset = xmlGetIntSubset( real_dom );
             if ( intSubset )
@@ -1432,12 +1432,12 @@ toFH( self, filehandler, format=1 )
         xmlDtdPtr intSubset = NULL;
         xmlDocPtr doc = (xmlDocPtr)PmmSvNode( self );
     CODE:
-        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
 
-        internalFlag = get_sv("XML::LibXML::skipDTD", 0);
+        internalFlag = perl_get_sv("XML::LibXML::skipDTD", 0);
         if ( internalFlag && SvTRUE(internalFlag) ) {
             intSubset = xmlGetIntSubset( doc );
             if ( intSubset )
@@ -1482,7 +1482,7 @@ toFile( self, filename )
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
-        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
@@ -1983,6 +1983,8 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
             }   
             else {
                 croak( "can't create a new namespace on an attribute!" );
+                xmlFree(name);
+                xmlFree(value);
                 XSRETURN_UNDEF;
             }
         }
@@ -3159,7 +3161,7 @@ toString( self, useDomEncoding = &PL_sv_undef )
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
-        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
 
         if ( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);

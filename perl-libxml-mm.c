@@ -124,8 +124,11 @@ PmmFreeNode( xmlNodePtr node )
         break;
     case XML_ATTRIBUTE_NODE:
         xs_warn("XML_ATTRIBUTE_NODE\n");
-        if ( node->parent == NULL ) 
+        if ( node->parent == NULL ) {
+            xs_warn( "free node\n");
+            node->ns = NULL;
             xmlFreeProp( (xmlAttrPtr) node );
+        }
         break;
     case XML_DTD_NODE:
         if ( node->doc ) {
