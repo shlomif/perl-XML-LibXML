@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 38 }
+BEGIN { plan tests => 41 }
 use XML::LibXML;
 use XML::LibXML::SAX::Parser;
 use XML::LibXML::SAX::Builder;
@@ -38,6 +38,11 @@ ok($parser);
 $parser->parse_uri("example/dromeds.xml");
 
 $parser->parse_uri("example/ns.xml");
+
+$parser->parse_string(<<EOT);
+<?xml version='1.0' encoding="US-ASCII"?>
+<dromedaries one="1" />
+EOT
 
 ########### Helper class #############
 
