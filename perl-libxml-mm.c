@@ -78,7 +78,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
             xs_warn( "no undefs" );
 #ifdef HAVE_UTF8
             xs_warn( "use UTF8" );
-            if( !SvUTF8(scalar) && encoding != NULL ) {
+            if( !DO_UTF8(scalar) && encoding != NULL ) {
 #else
             if ( encoding != NULL ) {
 #endif
@@ -140,7 +140,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
         xs_warn("have node!");
 
         if (real_dom != NULL && real_dom->encoding != NULL
-             && !SvUTF8(scalar) ) {
+             && !DO_UTF8(scalar) ) {
             xs_warn("encode string!");
             return Sv2C(scalar,real_dom->encoding);
         }
