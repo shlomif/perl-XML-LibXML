@@ -736,6 +736,9 @@ domNodeTypeName( xmlNodePtr elem ){
     case XML_DTD_NODE:
       name = "XML::LibXML::Dtd";
       break;
+    case XML_PI_NODE:
+      name = "XML::LibXML::PI";
+      break;
     default:
       name = "XML::LibXML::Node";
       break;
