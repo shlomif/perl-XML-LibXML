@@ -210,11 +210,11 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
         if ( tdoc != NULL ) {
             /* after looking through a fragment, we need to drop the
                fake document again */
-            froot->doc = NULL;
+            xmlSetTreeDoc(froot, NULL);
             tdoc->children = NULL;
             tdoc->last     = NULL;
-            xmlSetTreeDoc(froot, NULL);
-            refNode->doc = NULL;
+            /* next line is not required anymore */
+            /* refNode->doc = NULL; */
 
             xmlFreeDoc( tdoc );
         }
