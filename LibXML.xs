@@ -3414,6 +3414,17 @@ cloneNode( self, deep=0 )
     OUTPUT:
         RETVAL
 
+int
+indexElements ( self )
+        xmlDocPtr self
+     CODE:
+#if LIBXML_VERSION >= 20508
+        RETVAL = xmlXPathOrderDocElems( self );
+#else
+        RETVAL = -2;
+#endif
+     OUTPUT:
+        RETVAL
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Node
 

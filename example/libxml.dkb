@@ -1907,6 +1907,34 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           document.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>indexElements</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$dom-&#62;indexElements();</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This function causes libxml2 to stamp
+            all elements in a document with their document position
+            index which considerably speeds up XPath queries for large
+            documents. It should only be used with
+            static documents that won't be further changed by
+            any DOM methods, because once a document is indexed,
+            XPath will always prefer the index to other methods of 
+	    determining the document order of nodes. 
+	    XPath could therefore return improperly ordered 
+	    node-lists when applied on a document
+            that has been changed after being indexed.
+            It is of course possible to use this method
+            to re-index a modified document before using it with XPath
+	    again.
+            This function is not a part of the DOM specification.
+	  </para>
+          <para>This function returns number of elements indexed,
+            -1 if error occurred, or -2 if this feature is
+            not available in the running libxml2.
+          </para>
+        </listitem>
+      </varlistentry>
     </variablelist>
   </chapter>
   <chapter>

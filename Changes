@@ -30,6 +30,8 @@ Revision history for Perl extension XML::LibXML
      * slightly updated test set to reflect the new slightly more strict
        parsing. 
    - fixed default c14n XPath to include attributes and namespaces (Petr Pajas)
+   - make libxml2's xmlXPathOrderDocElems available through a new 
+     $doc->indexElements method
 
 1.56 
    - added line number interface (thanks to Peter Haworth)
