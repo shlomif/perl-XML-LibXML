@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 84 };
+BEGIN { plan tests => 101 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -45,6 +45,7 @@ use XML::LibXML::Common qw(:libxml);
     my $doc2 = XML::LibXML::Document->createDocument("1.1", "iso-8859-2");
     ok( $doc2->encoding, "iso-8859-2" );
     ok( $doc2->version,  "1.1" );
+    ok( $doc2->standalone,  -1 );
 }
 
 {
@@ -101,6 +102,17 @@ use XML::LibXML::Common qw(:libxml);
     }
 
     {
+        print "# bad element creation\n";
+        my @badnames = ( ";", "&", "<><", "/", "1A");
+
+        foreach my $name ( @badnames ) {
+            my $node = eval {$doc->createElement( $name );};
+            ok( not defined $node );
+        }
+
+    }
+
+    {
         my $node = $doc->createTextNode( "foo" );
         ok($node);
         ok($node->nodeType, XML_TEXT_NODE );
@@ -133,7 +145,19 @@ use XML::LibXML::Common qw(:libxml);
         ok($attr->hasChildNodes, 0);
         my $content = $attr->firstChild;
         ok( $content );
+        ok( $content->nodeType, XML_TEXT_NODE );
     }
+    {
+        print "# bad attribute creation\n";
+        my @badnames = ( ";", "&", "<><", "/", "1A");
+
+        foreach my $name ( @badnames ) {
+            my $node = eval {$doc->createAttribute( $name, "bar" );};
+            ok( not defined $node );
+        }
+
+    }
+
 
     {
         eval {
@@ -154,6 +178,16 @@ use XML::LibXML::Common qw(:libxml);
         ok($attr->value, "bar" );
         
     }
+    {
+        print "# bad attribute creation\n";
+        my @badnames = ( ";", "&", "<><", "/", "1A");
+
+        foreach my $name ( @badnames ) {
+            my $node = eval {$doc->createAttributeNS( undef, $name, "bar" );};
+            ok( not defined $node );
+        }
+
+    }
 
     print "# 2.2 Create PIs\n";
     {
@@ -171,7 +205,6 @@ use XML::LibXML::Common qw(:libxml);
         ok($pi->nodeName, "foo");
         ok( $pi->textContent, undef);
     }
-
 }
 
 {

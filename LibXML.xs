@@ -758,6 +758,43 @@ LibXML_cleanup_callbacks() {
 
 }
 
+
+int 
+LibXML_test_node_name( xmlChar * name ) 
+{
+    xmlChar * cur = name;
+    xmlChar * tc;
+    int t = 0;
+    if ( cur == NULL || *cur == 0 ) {
+        return(0);
+    }
+
+    tc = cur+UTF8SKIP(cur);
+    while (cur != tc) {
+        t = (t << 8) + *cur++;
+    }
+
+    if ( !( IS_LETTER( t ) || (t == '_') || (t == ':')) ) {
+        return(0);
+    }
+    t = 0;
+
+    while (*cur!=0 ) {
+        tc = cur+UTF8SKIP(cur);
+        while (cur != tc) {
+            t = (t << 8) + *cur++;
+        }
+
+        if (!(IS_LETTER(t) || IS_DIGIT(t) || (t == '_') || (t == '-') ||
+             (t == ':') || (t == '.') || IS_COMBINING(t) || IS_EXTENDER(t)) ) {
+            return(0);
+        }
+        t = 0;
+    }
+    
+    return(1);
+}
+
 /* ****************************************************************
  * general parse functions 
  * **************************************************************** */
@@ -2381,28 +2418,57 @@ createElement( self, name )
         xmlNodePtr newNode;
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
-        STRLEN len;
     CODE:
         elname = nodeSv2C( name , (xmlNodePtr) self);
-        if ( elname != NULL || xmlStrlen(elname) > 0 ) {
-            newNode = xmlNewNode(NULL , elname);
-            xmlFree(elname);
-            if ( newNode != NULL ) {        
-                docfrag = PmmNewFragment( self );
-                newNode->doc = self;
-                xmlAddChild(PmmNODE(docfrag), newNode);
-                RETVAL = PmmNodeToSv(newNode,docfrag);
-            }
-            else {
-                xs_warn( "no node created!" );
-                XSRETURN_UNDEF;
-            }
+        if ( !LibXML_test_node_name( elname ) ) {
+            xmlFree( elname );
+            croak( "bad name" );
+        }
+
+        newNode = xmlNewNode(NULL , elname);
+        xmlFree(elname);
+        if ( newNode != NULL ) {        
+            docfrag = PmmNewFragment( self );
+            newNode->doc = self;
+            xmlAddChild(PmmNODE(docfrag), newNode);
+            RETVAL = PmmNodeToSv(newNode,docfrag);
         }
         else {
+            xs_warn( "no node created!" );
             XSRETURN_UNDEF;
         }
     OUTPUT:
         RETVAL
+
+SV*
+createRawElement( self, name )
+        xmlDocPtr self
+        SV* name
+    PREINIT:
+        xmlNodePtr newNode;
+        xmlChar * elname = NULL;
+        ProxyNodePtr docfrag = NULL;
+    CODE:
+        elname = nodeSv2C( name , (xmlNodePtr) self);
+        if ( !elname || xmlStrlen(elname) <= 0 ) {
+            xmlFree( elname );
+            croak( "bad name" );
+        }
+
+        newNode = xmlNewDocNode(self,NULL , elname, NULL);
+        xmlFree(elname);
+        if ( newNode != NULL ) {        
+            docfrag = PmmNewFragment( self );
+            xmlAddChild(PmmNODE(docfrag), newNode);
+            RETVAL = PmmNodeToSv(newNode,docfrag);
+        }
+        else {
+            xs_warn( "no node created!" );
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
 
 SV*
 createElementNS( self, nsURI, name )
@@ -2418,8 +2484,15 @@ createElementNS( self, nsURI, name )
         xmlNsPtr ns            = NULL;
         ProxyNodePtr docfrag   = NULL;
         xmlNodePtr newNode     = NULL;
+        int err                = 0;
+        xmlChar * cur          = NULL;
     CODE:
         ename = nodeSv2C( name , (xmlNodePtr) self );
+        if ( !LibXML_test_node_name( ename ) ) {
+            xmlFree( ename );
+            croak( "bad name" );
+        }
+        
         eURI  = Sv2C( nsURI , NULL );
 
         if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
@@ -2457,6 +2530,82 @@ createElementNS( self, nsURI, name )
         
             newNode = xmlNewNode( NULL , localname );
             newNode->doc = self;
+        }
+        
+        xmlSetNs(newNode, ns);
+        docfrag = PmmNewFragment( self );
+        xmlAddChild(PmmNODE(docfrag), newNode);
+        RETVAL = PmmNodeToSv(newNode, docfrag);
+    
+        if ( prefix != NULL ) {
+            xmlFree(prefix);
+        }
+        if ( eURI != NULL ) {
+            xmlFree(eURI);
+        }
+        xmlFree(ename);
+    OUTPUT:
+        RETVAL
+
+
+SV*
+createRawElementNS( self, nsURI, name )
+        xmlDocPtr self
+        SV * nsURI
+        SV * name
+    PREINIT:
+        xmlChar * ename        = NULL;
+        xmlChar * prefix       = NULL;
+        xmlChar * localname    = NULL;
+        xmlChar * eURI         = NULL;
+        const xmlChar * pchar  = NULL;
+        xmlNsPtr ns            = NULL;
+        ProxyNodePtr docfrag   = NULL;
+        xmlNodePtr newNode     = NULL;
+        int err                = 0;
+        xmlChar * cur          = NULL;
+    CODE:
+        ename = nodeSv2C( name , (xmlNodePtr) self );
+        if ( !LibXML_test_node_name( ename ) ) {
+            xmlFree( ename );
+            croak( "bad name" );
+        }
+        
+        eURI  = Sv2C( nsURI , NULL );
+
+        if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
+            localname = xmlSplitQName2(ename, &prefix);
+            if ( localname == NULL ) {
+                localname = xmlStrdup( ename );
+            }
+
+            newNode = xmlNewDocNode( self,NULL , localname, NULL );
+            
+            ns = xmlSearchNsByHref( self, newNode, eURI );
+            if ( ns == NULL ) { 
+                /* create a new NS if the NS does not already exists */
+                ns = xmlNewNs(newNode, eURI , prefix );
+            }
+
+            if ( ns == NULL ) {
+                xmlFreeNode( newNode );
+                xmlFree(eURI);
+                xmlFree(localname);
+                if ( prefix != NULL ) {
+                    xmlFree(prefix);
+                }
+                xmlFree(ename);
+                XSRETURN_UNDEF;
+            }
+
+            xmlFree(localname);
+        }
+        else {
+            xs_warn( " ordinary element " );    
+            /* ordinary element */
+            localname = ename;
+        
+            newNode = xmlNewDocNode( self, NULL , localname, NULL );
         }
         
         xmlSetNs(newNode, ns);
@@ -2600,11 +2749,15 @@ createAttribute( self, pname, pvalue=&PL_sv_undef )
         xmlChar * name = NULL;
         xmlChar * value = NULL;
         xmlAttrPtr newAttr = NULL;
+        xmlChar * cur  = NULL;
+        int err = 0;
     CODE:
         name = nodeSv2C( pname , (xmlNodePtr) self );
-        if ( name == NULL ) {
+        if ( !LibXML_test_node_name( name ) ) {
+            xmlFree(name);
             XSRETURN_UNDEF;
         }
+
         value = nodeSv2C( pvalue , (xmlNodePtr) self );
         newAttr = xmlNewDocProp( self, name, value );
         RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL); 
@@ -2631,9 +2784,12 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
         xmlChar * nsURI = NULL;
         xmlAttrPtr newAttr = NULL;
         xmlNsPtr ns = NULL;
+        xmlChar * cur  = NULL;
+        int err = 0;
     CODE:
-        name  = nodeSv2C( pname , (xmlNodePtr) self );
-        if( name == NULL ) {
+        name = nodeSv2C( pname , (xmlNodePtr) self );
+        if ( !LibXML_test_node_name( name ) ) {
+            xmlFree(name);
             XSRETURN_UNDEF;
         }
 
@@ -3289,6 +3445,10 @@ setNodeName( self , value )
         xmlChar* prefix;
     CODE:
         string = nodeSv2C( value , self );
+        if ( !LibXML_test_node_name( string ) ) {
+            xmlFree(string);
+            croak( "bad name" );
+        }
         if( self->ns ){
             localname = xmlSplitQName2(string, &prefix);
             xmlNodeSetName(self, localname );
@@ -3300,6 +3460,32 @@ setNodeName( self , value )
             xmlNodeSetName(self, string );
         }
         xmlFree(string);
+
+void
+setRawName( self, value ) 
+        xmlNodePtr self
+        SV * value
+    PREINIT:
+        xmlChar* string;
+        xmlChar* localname;
+        xmlChar* prefix;
+    CODE:
+        string = nodeSv2C( value , self );
+        if ( !string || xmlStrlen( string) <= 0 ) {
+            xmlFree(string);
+            XSRETURN_UNDEF;
+        }
+        if( self->ns ){
+            localname = xmlSplitQName2(string, &prefix);
+            xmlNodeSetName(self, localname );
+            xmlFree(localname);
+            xmlFree(prefix);
+        }
+        else {
+            xmlNodeSetName(self, string );
+        }
+        xmlFree(string);
+
 
 SV*
 nodeValue( self, useDomEncoding = &PL_sv_undef ) 
@@ -4399,12 +4585,16 @@ _setAttribute( self, attr_name, attr_value )
         SV * attr_name
         SV * attr_value
     PREINIT:
-        xmlChar * name;
+        xmlChar * name  = NULL;
         xmlChar * value = NULL;
+        xmlChar * cur   = NULL;
+        int err = 0;
     CODE:
         name  = nodeSv2C(attr_name, self );
-        if ( !name ) {
-            XSRETURN_UNDEF;
+
+        if ( !LibXML_test_node_name(name) ) {
+            xmlFree(name);
+            croak( "bad name" );
         }
         value = nodeSv2C(attr_value, self );
        
@@ -4560,14 +4750,13 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlChar * prefix    = NULL;
     INIT:
         name  = nodeSv2C( attr_name, self );        
-        nsURI = nodeSv2C( namespaceURI, self );
-        if ( !name && !xmlStrlen( name ) ) {
-            if ( nsURI ) {
-                xmlFree( nsURI);
-            }
-            croak( "no name" );
-            XSRETURN_UNDEF;
+
+        if ( !LibXML_test_node_name(name) ) {
+            xmlFree(name);
+            croak( "bad name" );
         }
+
+        nsURI = nodeSv2C( namespaceURI, self );
         localname = xmlSplitQName2(name, &prefix); 
         if ( localname ) {
             xmlFree( name ); 
@@ -4825,6 +5014,59 @@ appendTextChild( self, strname, strcontent=&PL_sv_undef, nsURI=&PL_sv_undef )
             xmlFree(encstr);
         xmlFree(name);
 
+SV *
+addNewChild( self, namespaceURI, nodename ) 
+        xmlNodePtr self
+        SV * namespaceURI
+        SV * nodename
+    ALIAS:
+        XML::LibXML::DocumentFragment::newRawChild = 1
+    PREINIT:
+        xmlChar * nsURI = NULL;
+        xmlChar * name  = NULL;
+        xmlChar * localname  = NULL;
+        xmlChar * prefix     = NULL;
+        xmlNodePtr newNode = NULL;
+        xmlNsPtr ns = NULL;
+    CODE:
+        name = nodeSv2C(nodename, self);
+        if ( name &&  xmlStrlen( name ) == 0 ) {
+            xmlFree(name);
+            XSRETURN_UNDEF;
+        }
+ 
+        nsURI = nodeSv2C(namespaceURI, self);
+        if ( nsURI &&  xmlStrlen( nsURI ) == 0 ) {
+            xmlFree(nsURI);
+            nsURI=NULL;
+        }
+
+        if ( nsURI != NULL ) {
+            localname = xmlSplitQName2(name, &prefix); 
+            ns = xmlSearchNsByHref(self->doc, self, nsURI);
+            if ( ns == NULL )  {
+                newNode = xmlNewChild( self, ns, 
+                                       localname?localname:name, NULL );
+                ns = xmlNewNs(newNode, nsURI, prefix);
+                newNode->ns = ns;
+            }     
+            else {
+                newNode = xmlNewChild( self, ns, 
+                                       localname?localname:name, NULL );
+            }           
+
+            xmlFree(localname);
+            xmlFree(prefix);
+            xmlFree(nsURI);
+        }
+        else {
+            newNode = xmlNewChild( self, NULL, name, NULL );
+        }
+     	RETVAL = PmmNodeToSv(newNode, PmmOWNERPO(PmmPROXYNODE(self)) );
+   
+        xmlFree(name);        
+    OUTPUT:
+        RETVAL
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 

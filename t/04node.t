@@ -250,7 +250,7 @@ print "# 3   Standalone With NameSpaces\n\n";
 
 {
     my $doc = XML::LibXML::Document->new();
-    my $URI = "http://kungfoo";
+    my $URI ="http://kungfoo";
     my $pre = "foo";
     my $name= "bar";
 
@@ -278,7 +278,7 @@ print "# 4.   Document swtiching\n";
         my $docB = XML::LibXML::Document->new;
         my $e1   = $docB->createElement( "A" );
         my $e2   = $docB->createElement( "B" );
-        my $e3   = $docB->createElementNS( "C:D","http://kungfoo" );
+        my $e3   = $docB->createElementNS( "http://kungfoo", "C:D" );
         $e1->appendChild( $e2 );
         $e1->appendChild( $e3 );
 

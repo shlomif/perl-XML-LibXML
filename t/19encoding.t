@@ -12,7 +12,7 @@ use Test;
 BEGIN { 
     my $tests        = 0;
     my $basics       = 0;
-    my $magic        = 6;    
+    my $magic        = 7;    
 
     if ( $] >= 5.008 ) {
         print "# Skipping test on this platform\n";
@@ -29,7 +29,7 @@ BEGIN {
             elsif ( $ENV{TEST_LANGUAGES} eq "EUC-JP"
                     or $ENV{TEST_LANGUAGES} eq "KIO8-R" ) {
                 $tests += $basics;  
-                $tests += $magic if $] >= 5.006;
+                $tests += $magic-1 if $] >= 5.006;
             }
         }
     }
@@ -71,6 +71,9 @@ else {
     ok( decodeFromUTF8( 'iso-8859-1' ,$elemlat1->toString()),
         "<$tstr_iso_latin1/>");
     ok( $elemlat1->toString(0,1), "<$tstr_iso_latin1/>");
+
+    my $elemlat2   = $dom_latin1->createElement( "Öl" );
+    ok( $elemlat2->toString(0,1), "<Öl/>");
 
     $elemlat1->appendText( $tstr_iso_latin1 );
 
