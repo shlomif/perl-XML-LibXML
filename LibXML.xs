@@ -37,6 +37,7 @@ extern "C" {
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
 #include <libxml/relaxng.h>
+#include <libxml/xmlschemas.h>
 
 #ifdef LIBXML_CATALOG_ENABLED
 #include <libxml/catalog.h>
@@ -6087,6 +6088,123 @@ validate( self, doc )
         sv_2mortal(LibXML_error);
 
         if ( RETVAL == 1 ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+        if ( RETVAL == -1 ) {
+            croak( "API Error" );
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::Schema
+
+void 
+DESTROY( self ) 
+        xmlSchemaPtr self
+    CODE:
+        xmlSchemaFree( self );
+
+
+xmlSchemaPtr
+parse_location( self, url )
+        SV * self
+        char * url
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Schema";
+        xmlSchemaParserCtxtPtr rngctxt = NULL;
+        STRLEN len;
+    CODE:
+        LibXML_init_error();
+        rngctxt = xmlSchemaNewParserCtxt( url );
+        if ( rngctxt == NULL ) {
+            croak( "failed to initialize Schema parser" );
+        }
+        /* Register Error callbacks */
+        xmlSchemaSetParserErrors( rngctxt,
+                                  (xmlSchemaValidityErrorFunc)LibXML_error_handler,
+                                  (xmlSchemaValidityWarningFunc)LibXML_error_handler,
+                                  rngctxt );
+
+        RETVAL = xmlSchemaParse( rngctxt );
+        xmlSchemaFreeParserCtxt( rngctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL == NULL ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+
+xmlSchemaPtr
+parse_buffer( self, perlstring )
+        SV * self
+        SV * perlstring
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Schema";
+        xmlSchemaParserCtxtPtr rngctxt = NULL;
+        char * string = NULL;
+        STRLEN len    = 0;
+    INIT:
+        string = SvPV( perlstring, len );
+        if ( string == NULL ) {
+            croak( "cannot parse empty string" );
+        }
+    CODE:
+        LibXML_init_error();
+        rngctxt = xmlSchemaNewMemParserCtxt( string,len );
+        if ( rngctxt == NULL ) {
+            croak( "failed to initialize Schema parser" );
+        }
+        /* Register Error callbacks */
+        xmlSchemaSetParserErrors( rngctxt,
+                                  (xmlSchemaValidityErrorFunc)LibXML_error_handler,
+                                  (xmlSchemaValidityWarningFunc)LibXML_error_handler,
+                                  NULL );
+
+        RETVAL = xmlSchemaParse( rngctxt );
+        xmlSchemaFreeParserCtxt( rngctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL == NULL ) {
+            LibXML_croak_error();
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+
+int
+validate( self, doc )
+        xmlSchemaPtr self
+        xmlDocPtr doc
+    PREINIT:
+        xmlSchemaValidCtxtPtr vctxt = NULL;
+        STRLEN len;
+    CODE:
+        LibXML_init_error();
+        vctxt  = xmlSchemaNewValidCtxt( self );
+        if ( vctxt == NULL ) {
+            croak( "cannot initialize the validation context" );
+        }
+        /* Register Error callbacks */
+        xmlSchemaSetValidErrors( vctxt,
+                                  (xmlSchemaValidityErrorFunc)LibXML_error_handler,
+                                  (xmlSchemaValidityWarningFunc)LibXML_error_handler,
+                                  NULL );
+
+        RETVAL = xmlSchemaValidateDoc( vctxt, doc );
+        xmlSchemaFreeValidCtxt( vctxt );
+
+        sv_2mortal(LibXML_error);
+
+        if ( RETVAL > 0 ) {
             LibXML_croak_error();
             XSRETURN_UNDEF;
         }

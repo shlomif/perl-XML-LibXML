@@ -3445,7 +3445,47 @@ $rngschema = XML::LibXML::RelaxNG-&#62;new( DOM =&#62; $doc );</funcsynopsisinfo
           <para>This function allows to validate a document against the given
           RelaxNG schema. If this function succeeds, it will return 0,
           otherwise it will die() and report the errors found. Because of this
-          validate() should be always evaluated. </para>
+          validate() should be always evaluated.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </chapter>
+  <chapter>
+    <title> XML Schema Validation</title>
+    <titleabbrev>XML::LibXML::Schema</titleabbrev>
+    <para>The XML::LibXML::Schema class is a tiny frontend to libxml2&#39;s
+    XML Schema implementation. Currently it supports only schema parsing and
+    document validation.</para>
+    <variablelist>
+      <varlistentry>
+        <term>new</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$xmlschema = XML::LibXML::Schema-&#62;new( location =&#62; $filename_or_url );
+$xmlschema = XML::LibXML::Schema-&#62;new( string =&#62; $xmlschemastring );</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>The constructor of XML::LibXML::Schema may get called with
+          either one of two parameters. The parameter tells the class from
+          which source it should generate a validation schema. It is
+          important, that each schema only have a single source.</para>
+          <para>The location parameter allows to parse a schema from the
+          filesystem or a URL.</para>
+          <para>The string parameter will parse the schema from the given XML
+          string.</para>
+          <para>Note that the constructor will die() if the schema does not
+          meed the constraints of the XML Schema specification.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>validate</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>eval { $xmlschema-&#62;validate( $doc ); };</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>This function allows to validate a document against the given
+          XML Schema. If this function succeeds, it will return 0, otherwise
+          it will die() and report the errors found. Because of this
+          validate() should be always evaluated.</para>
         </listitem>
       </varlistentry>
     </variablelist>
