@@ -1747,7 +1747,8 @@ findnodes( node, xpath )
                     element = 0;
                     tnode = nodelist->nodeTab[i];
                     element = sv_newmortal();
-                
+                    cls = domNodeTypeName( tnode );
+
                     proxy = make_proxy_node(tnode);
                     if ( node->extra != NULL ) {
                         proxy->extra = node->extra;
