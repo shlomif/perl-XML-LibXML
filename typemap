@@ -3,7 +3,8 @@ const char *                T_PV
 xmlParserCtxtPtr            O_OBJECT
 xmlNodeSetPtr               O_OBJECT
 perlxmlParserObjectPtr      O_OBJECT
-
+xmlDocPtr                   O_DOC_OBJECT
+xmlNodePtr                  O_NODE_OBJECT
 
 INPUT
 O_OBJECT
@@ -13,6 +14,33 @@ O_OBJECT
             warn( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
             XSRETURN_UNDEF;
     }
+
+O_DOC_OBJECT
+    if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) ) {
+            $var = ($type)PmmSvNode($arg);
+            if ( $var == NULL ) {
+               croak( \"${Package}::$func_name() -- $var contains no data\" );
+               XSRETURN_UNDEF;
+            }
+    }
+    else{
+            croak( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
+            XSRETURN_UNDEF;
+    }
+
+O_NODE_OBJECT
+    if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) ) {
+            $var = ($type)PmmSvNode($arg);
+            if ( $var == NULL ) {
+               croak( \"${Package}::$func_name() -- $var contains no data\" );
+               XSRETURN_UNDEF;
+            }
+    }
+    else{
+            croak( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
+            XSRETURN_UNDEF;
+    }
+
 
 OUTPUT
 

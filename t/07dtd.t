@@ -2,7 +2,7 @@
 
 use Test;
 
-BEGIN { plan tests => 20 };
+BEGIN { plan tests => 22 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -89,4 +89,19 @@ use XML::LibXML::Common qw(:libxml);
 }
 
 
+{
+    my $parser = XML::LibXML->new();
+    $parser->validation(1);
+    $parser->keep_blanks(1);
+    my $doc=$parser->parse_string(<<'EOF');
+<?xml version='1.0'?>
+<!DOCTYPE test [
+ <!ELEMENT test (#PCDATA)>
+]>
+<test>
+</test>
+EOF
+ok($doc->validate());
+ok($doc->is_valid());
 
+}

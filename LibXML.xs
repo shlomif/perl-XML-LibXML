@@ -2040,20 +2040,14 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Document
 
 SV *
 _toString(self, format=0)
-        SV * self
+        xmlDocPtr self
         int format
     PREINIT:
-        xmlDocPtr real_doc;
         xmlChar *result=NULL;
         int len=0;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
         xmlDtdPtr intSubset = NULL;
-    INIT:
-        real_doc = (xmlDocPtr)PmmNODE(SvPROXYNODE(self));        
-        if ( real_doc == NULL ) {
-            croak( "document is not available anymore\n" );
-        }
     CODE:
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
@@ -2062,7 +2056,7 @@ _toString(self, format=0)
 
         internalFlag = perl_get_sv("XML::LibXML::skipDTD", 0);
         if ( internalFlag && SvTRUE(internalFlag) ) {
-            intSubset = xmlGetIntSubset( real_doc );
+            intSubset = xmlGetIntSubset( self );
             if ( intSubset )
                 xmlUnlinkNode( (xmlNodePtr)intSubset );
         }
@@ -2071,21 +2065,23 @@ _toString(self, format=0)
 
         if ( format <= 0 ) {
             xs_warn( "use no formated toString!" );
-            xmlDocDumpMemory(real_doc, &result, &len);
+            xmlDocDumpMemory(self, &result, &len);
         }
         else {
             int t_indent_var = xmlIndentTreeOutput;
             xs_warn( "use formated toString!" );
             xmlIndentTreeOutput = 1;
-            xmlDocDumpFormatMemory( real_doc, &result, &len, format ); 
+            xmlDocDumpFormatMemory( self, &result, &len, format ); 
             xmlIndentTreeOutput = t_indent_var;
         }
 
         if ( intSubset != NULL ) {
-            if (real_doc->children == NULL)
-                 xmlAddChild((xmlNodePtr) real_doc, (xmlNodePtr) intSubset);
-            else
-                xmlAddPrevSibling(real_doc->children, (xmlNodePtr) intSubset);
+            if (self->children == NULL) {
+                xmlAddChild((xmlNodePtr) self, (xmlNodePtr) intSubset);
+            }
+            else {
+                xmlAddPrevSibling(self->children, (xmlNodePtr) intSubset);
+            }
         }
 
         xmlSaveNoEmptyTags = oldTagFlag;
@@ -2098,7 +2094,7 @@ _toString(self, format=0)
             XSRETURN_UNDEF;
     	} else {
             /* warn("%s, %d\n",result, len); */
-            RETVAL = C2Sv( result, real_doc->encoding );
+            RETVAL = C2Sv( result, self->encoding );
             xmlFree(result);
         }
     OUTPUT:
@@ -2106,7 +2102,7 @@ _toString(self, format=0)
 
 int 
 toFH( self, filehandler, format=0 )
-        SV * self
+        xmlDocPtr self
         SV * filehandler
         int format
     PREINIT:
@@ -2116,7 +2112,6 @@ toFH( self, filehandler, format=0 )
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
         xmlDtdPtr intSubset = NULL;
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode( self );
         int t_indent_var = xmlIndentTreeOutput;
         STRLEN len;
     CODE:
@@ -2127,13 +2122,13 @@ toFH( self, filehandler, format=0 )
 
         internalFlag = perl_get_sv("XML::LibXML::skipDTD", 0);
         if ( internalFlag && SvTRUE(internalFlag) ) {
-            intSubset = xmlGetIntSubset( doc );
+            intSubset = xmlGetIntSubset( self );
             if ( intSubset )
                 xmlUnlinkNode( (xmlNodePtr)intSubset );
         }
 
         xmlRegisterDefaultOutputCallbacks();
-        encoding = ((xmlDocPtr) PmmSvNode(self))->encoding;
+        encoding = (self)->encoding;
         if ( encoding != NULL ) {
             if ( xmlParseCharEncoding(encoding) != XML_CHAR_ENCODING_UTF8) {
                 handler = xmlFindCharEncodingHandler(encoding);
@@ -2160,15 +2155,17 @@ toFH( self, filehandler, format=0 )
         LibXML_init_error();
 
         RETVAL = xmlSaveFormatFileTo( buffer, 
-                                      doc,
+                                      self,
                                       encoding,
                                       format);
 
         if ( intSubset != NULL ) {
-            if (doc->children == NULL)
-                xmlAddChild((xmlNodePtr) doc, (xmlNodePtr) intSubset);
-            else
-                xmlAddPrevSibling(doc->children, (xmlNodePtr) intSubset);
+            if (self->children == NULL) {
+                xmlAddChild((xmlNodePtr) self, (xmlNodePtr) intSubset);
+            }
+            else {
+                xmlAddPrevSibling(self->children, (xmlNodePtr) intSubset);
+            }
         }
     
         xmlIndentTreeOutput = t_indent_var;
@@ -2180,7 +2177,7 @@ toFH( self, filehandler, format=0 )
 
 int 
 toFile( self, filename, format=0 )
-        SV * self
+        xmlDocPtr self
         char * filename
         int format
     PREINIT:
@@ -2197,13 +2194,13 @@ toFile( self, filename, format=0 )
 
         if ( format <= 0 ) {
             xs_warn( "use no formated toFile!" );
-            RETVAL = xmlSaveFile( filename, (xmlDocPtr)PmmSvNode(self) );
+            RETVAL = xmlSaveFile( filename, self );
         }
         else {
             int t_indent_var = xmlIndentTreeOutput;
             xmlIndentTreeOutput = 1;
             RETVAL =xmlSaveFormatFile( filename,
-                                       (xmlDocPtr)PmmSvNode(self),
+                                       self,
                                        format);
             xmlIndentTreeOutput = t_indent_var;
         }
@@ -2222,17 +2219,14 @@ toFile( self, filename, format=0 )
 
 SV *
 toStringHTML(self)
-        SV * self
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr real_doc;
         xmlChar *result=NULL;
         int len=0;
     CODE:
-        real_doc = (xmlDocPtr)PmmNODE(SvPROXYNODE(self));
         xs_warn( "use no formated toString!" );
-
         LibXML_init_error();
-        htmlDocDumpMemory(real_doc, &result, &len);
+        htmlDocDumpMemory(self, &result, &len);
 
         sv_2mortal( LibXML_error );
         LibXML_croak_error();
@@ -2249,23 +2243,22 @@ toStringHTML(self)
 
 
 const char *
-URI( pdoc )
-        SV * pdoc
+URI( self )
+        xmlDocPtr self
     CODE:
-        RETVAL = xmlStrdup(((xmlDocPtr)PmmSvNode(pdoc))->URL );
+        RETVAL = xmlStrdup(self->URL );
     OUTPUT:
         RETVAL
 
 void
-setBaseURI( doc, new_URI )
-        SV * doc
+setBaseURI( self, new_URI )
+        xmlDocPtr self
         char * new_URI
     CODE:
         if (new_URI) {
-            xmlFree((xmlChar*)((xmlDocPtr)PmmSvNode(doc))->URL );
-            ((xmlDocPtr)PmmSvNode(doc))->URL = xmlStrdup((const xmlChar*)new_URI);
+            xmlFree((xmlChar*)self->URL );
+            self->URL = xmlStrdup((const xmlChar*)new_URI);
         }
-
 
 
 SV*
@@ -2288,23 +2281,17 @@ createDocument( CLASS, version="1.0", encoding=NULL )
         RETVAL
 
 SV* 
-createInternalSubset( doc, Pname, extID, sysID )
-        SV * doc
+createInternalSubset( self, Pname, extID, sysID )
+        xmlDocPtr self
         SV * Pname
         SV * extID
         SV * sysID
     PREINIT:
-        xmlDocPtr document = NULL;
         xmlDtdPtr dtd = NULL;
         xmlChar * name = NULL;
         xmlChar * externalID = NULL;
         xmlChar * systemID = NULL; 
     CODE:
-        document = (xmlDocPtr)PmmSvNode( doc );
-        if ( document == NULL ) {
-            XSRETURN_UNDEF;   
-        }
-
         name = Sv2C( Pname, NULL );
         if ( name == NULL ) {
             XSRETURN_UNDEF;
@@ -2313,12 +2300,12 @@ createInternalSubset( doc, Pname, extID, sysID )
         externalID = Sv2C(extID, NULL);
         systemID   = Sv2C(sysID, NULL);
 
-        dtd = xmlCreateIntSubset( document, name, externalID, systemID );
+        dtd = xmlCreateIntSubset( self, name, externalID, systemID );
         xmlFree(externalID);
         xmlFree(systemID);
         xmlFree(name);
         if ( dtd ) {
-            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(doc) );
+            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, PmmPROXYNODE(self) );
         }
         else {
             XSRETURN_UNDEF;
@@ -2327,23 +2314,17 @@ createInternalSubset( doc, Pname, extID, sysID )
         RETVAL
 
 SV* 
-createExternalSubset( doc, Pname, extID, sysID )
-        SV * doc
+createExternalSubset( self, Pname, extID, sysID )
+        xmlDocPtr self
         SV * Pname
         SV * extID
         SV * sysID
     PREINIT:
-        xmlDocPtr real_doc = NULL;
         xmlDtdPtr dtd = NULL;
         xmlChar * name = NULL;
         xmlChar * externalID = NULL;
         xmlChar * systemID = NULL; 
     CODE:
-        real_doc = (xmlDocPtr)PmmSvNode( doc );
-        if ( real_doc == NULL ) {
-            XSRETURN_UNDEF;   
-        }
-
         name = Sv2C( Pname, NULL );
         if ( name == NULL ) {
             XSRETURN_UNDEF;
@@ -2352,13 +2333,13 @@ createExternalSubset( doc, Pname, extID, sysID )
         externalID = Sv2C(extID, NULL);
         systemID   = Sv2C(sysID, NULL);
 
-        dtd = xmlNewDtd( real_doc, name, externalID, systemID );
+        dtd = xmlNewDtd( self, name, externalID, systemID );
 
         xmlFree(externalID);
         xmlFree(systemID);
         xmlFree(name);
         if ( dtd ) {
-            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(doc) );
+            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, PmmPROXYNODE(self) );
         }
         else {
             XSRETURN_UNDEF;
@@ -2367,23 +2348,17 @@ createExternalSubset( doc, Pname, extID, sysID )
         RETVAL
 
 SV* 
-createDTD( doc, Pname, extID, sysID )
-        SV * doc
+createDTD( self, Pname, extID, sysID )
+        xmlDocPtr self
         SV * Pname
         SV * extID
         SV * sysID
     PREINIT:
-        xmlDocPtr real_doc = NULL;
         xmlDtdPtr dtd = NULL;
         xmlChar * name = NULL;
         xmlChar * externalID = NULL;
         xmlChar * systemID = NULL; 
     CODE:
-        real_doc = (xmlDocPtr)PmmSvNode( doc );
-        if ( real_doc == NULL ) {
-            XSRETURN_UNDEF;   
-        }
-
         name = Sv2C( Pname, NULL );
         if ( name == NULL ) {
             XSRETURN_UNDEF;
@@ -2393,13 +2368,13 @@ createDTD( doc, Pname, extID, sysID )
         systemID   = Sv2C(sysID, NULL);
 
         dtd = xmlNewDtd( NULL, name, externalID, systemID );
-        dtd->doc = real_doc;
+        dtd->doc = self;
 
         xmlFree(externalID);
         xmlFree(systemID);
         xmlFree(name);
         if ( dtd ) {
-            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(doc) );
+            RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, PmmPROXYNODE(self) );
         }
         else {
             XSRETURN_UNDEF;
@@ -2408,40 +2383,33 @@ createDTD( doc, Pname, extID, sysID )
         RETVAL
 
 SV*
-createDocumentFragment( doc )
-        SV * doc
+createDocumentFragment( self )
+        xmlDocPtr self
     PREINIT:
         xmlDocPtr real_doc;
         xmlNodePtr fragment= NULL;
     CODE:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        RETVAL = PmmNodeToSv(xmlNewDocFragment(real_doc),SvPROXYNODE(doc));
+        RETVAL = PmmNodeToSv(xmlNewDocFragment(self), PmmPROXYNODE(self));
     OUTPUT:
         RETVAL
 
 SV*
-createElement( doc, name )
-        SV * doc
+createElement( self, name )
+        xmlDocPtr self
         SV* name
     PREINIT:
         xmlNodePtr newNode;
-        xmlDocPtr real_doc;
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
         STRLEN len;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak("lost document node" );
-        }    
     CODE:
-        elname = nodeSv2C( name , (xmlNodePtr) real_doc );
+        elname = nodeSv2C( name , (xmlNodePtr) self);
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
             newNode = xmlNewNode(NULL , elname);
             xmlFree(elname);
             if ( newNode != NULL ) {        
-                docfrag = PmmNewFragment( real_doc );
-                newNode->doc = real_doc;
+                docfrag = PmmNewFragment( self );
+                newNode->doc = self;
                 xmlAddChild(PmmNODE(docfrag), newNode);
                 RETVAL = PmmNodeToSv(newNode,docfrag);
             }
@@ -2457,8 +2425,8 @@ createElement( doc, name )
         RETVAL
 
 SV*
-createElementNS( pdoc, nsURI, name )
-        SV * pdoc
+createElementNS( self, nsURI, name )
+        xmlDocPtr self
         SV * nsURI
         SV * name
     PREINIT:
@@ -2468,16 +2436,10 @@ createElementNS( pdoc, nsURI, name )
         xmlChar * eURI         = NULL;
         const xmlChar * pchar  = NULL;
         xmlNsPtr ns            = NULL;
-        xmlDocPtr doc          = NULL;
         ProxyNodePtr docfrag   = NULL;
         xmlNodePtr newNode     = NULL;
-    INIT:
-        doc = (xmlDocPtr)PmmSvNode( pdoc );
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        ename = nodeSv2C( name , (xmlNodePtr) doc );
+        ename = nodeSv2C( name , (xmlNodePtr) self );
         eURI  = Sv2C( nsURI , NULL );
 
         if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
@@ -2487,9 +2449,9 @@ createElementNS( pdoc, nsURI, name )
             }
 
             newNode = xmlNewNode( NULL , localname );
-            newNode->doc = doc;
+            newNode->doc = self;
             
-            ns = xmlSearchNsByHref( doc, newNode, eURI );
+            ns = xmlSearchNsByHref( self, newNode, eURI );
             if ( ns == NULL ) { 
                 /* create a new NS if the NS does not already exists */
                 ns = xmlNewNs(newNode, eURI , prefix );
@@ -2514,11 +2476,11 @@ createElementNS( pdoc, nsURI, name )
             localname = ename;
         
             newNode = xmlNewNode( NULL , localname );
-            newNode->doc = doc;
+            newNode->doc = self;
         }
         
         xmlSetNs(newNode, ns);
-        docfrag = PmmNewFragment( doc );
+        docfrag = PmmNewFragment( self );
         xmlAddChild(PmmNODE(docfrag), newNode);
         RETVAL = PmmNodeToSv(newNode, docfrag);
     
@@ -2533,29 +2495,22 @@ createElementNS( pdoc, nsURI, name )
         RETVAL
 
 SV *
-createTextNode( doc, content )
-        SV * doc
+createTextNode( self, content )
+        xmlDocPtr self
         SV * content
     PREINIT:
         xmlNodePtr newNode;
-        xmlDocPtr real_doc;
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
         STRLEN len;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-       
-        elname = nodeSv2C( content , (xmlNodePtr) real_doc );
+        elname = nodeSv2C( content , (xmlNodePtr) self );
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
-            newNode = xmlNewDocText( real_doc, elname );
+            newNode = xmlNewDocText( self, elname );
             xmlFree(elname);
             if ( newNode != NULL ) {        
-                docfrag = PmmNewFragment( real_doc );
-                newNode->doc = real_doc;
+                docfrag = PmmNewFragment( self );
+                newNode->doc = self;
                 xmlAddChild(PmmNODE(docfrag), newNode);
                 RETVAL = PmmNodeToSv(newNode,docfrag);
             }
@@ -2571,28 +2526,22 @@ createTextNode( doc, content )
         RETVAL
 
 SV *
-createComment( doc , content )
-        SV * doc
+createComment( self , content )
+        xmlDocPtr self
         SV * content
     PREINIT:
         xmlNodePtr newNode;
-        xmlDocPtr real_doc;
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
         STRLEN len;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        elname = nodeSv2C( content , (xmlNodePtr) real_doc );
+        elname = nodeSv2C( content , (xmlNodePtr) self );
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
-            newNode = xmlNewDocComment( real_doc, elname );
+            newNode = xmlNewDocComment( self, elname );
             xmlFree(elname);
             if ( newNode != NULL ) {        
-                docfrag = PmmNewFragment( real_doc );
-                newNode->doc = real_doc;
+                docfrag = PmmNewFragment( self );
+                newNode->doc = self;
                 xmlAddChild(PmmNODE(docfrag), newNode);
                 xs_warn( newNode->name );
                 RETVAL = PmmNodeToSv(newNode,docfrag);
@@ -2609,28 +2558,21 @@ createComment( doc , content )
         RETVAL
 
 SV *
-createCDATASection( doc, content )
-        SV * doc
+createCDATASection( self, content )
+        xmlDocPtr self
         SV * content
     PREINIT:
         xmlNodePtr newNode;
-        xmlDocPtr real_doc;
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
-    CODE:
-       
-        elname = nodeSv2C( content , (xmlNodePtr) real_doc );
+    CODE:       
+        elname = nodeSv2C( content , (xmlNodePtr)self );
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
-            newNode = xmlNewCDataBlock( real_doc, elname, xmlStrlen(elname) );
+            newNode = xmlNewCDataBlock( self, elname, xmlStrlen(elname) );
             xmlFree(elname);
             if ( newNode != NULL ) {        
-                newNode->doc = real_doc;
-                docfrag = PmmNewFragment( real_doc );
+                newNode->doc = self;
+                docfrag = PmmNewFragment( self );
                 xmlAddChild(PmmNODE(docfrag), newNode);
                 xs_warn( newNode->name );
                 RETVAL = PmmNodeToSv(newNode,docfrag);
@@ -2647,55 +2589,45 @@ createCDATASection( doc, content )
         RETVAL
 
 SV*
-createEntityReference( pdoc , pname )
-        SV * pdoc 
+createEntityReference( self , pname )
+        xmlDocPtr self
         SV * pname
     PREINIT:
         xmlNodePtr newNode;
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(pdoc);
         xmlChar * name = Sv2C( pname, NULL );
         ProxyNodePtr docfrag = NULL;      
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }  
     CODE:
         if ( name == NULL ) {
             XSRETURN_UNDEF;
         }
-        newNode = xmlNewReference( doc, name );
+        newNode = xmlNewReference( self, name );
         xmlFree(name);
         if ( newNode == NULL ) {
             XSRETURN_UNDEF;
         }
-        docfrag = PmmNewFragment( doc );
+        docfrag = PmmNewFragment( self );
         xmlAddChild(PmmNODE(docfrag), newNode);
         RETVAL = PmmNodeToSv( newNode, docfrag );
     OUTPUT:
         RETVAL
 
 SV*
-createAttribute( pdoc, pname, pvalue=&PL_sv_undef )
-        SV * pdoc
+createAttribute( self, pname, pvalue=&PL_sv_undef )
+        xmlDocPtr self
         SV * pname
         SV * pvalue
     PREINIT:
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode( pdoc );
         xmlChar * name = NULL;
         xmlChar * value = NULL;
-        xmlAttrPtr self = NULL;
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
+        xmlAttrPtr newAttr = NULL;
     CODE:
-        name = nodeSv2C( pname , (xmlNodePtr) doc );
+        name = nodeSv2C( pname , (xmlNodePtr) self );
         if ( name == NULL ) {
             XSRETURN_UNDEF;
         }
-        value = nodeSv2C( pvalue , (xmlNodePtr) doc );
-        self = xmlNewDocProp( doc, name, value );
-        RETVAL = PmmNodeToSv((xmlNodePtr)self, NULL); 
+        value = nodeSv2C( pvalue , (xmlNodePtr) self );
+        newAttr = xmlNewDocProp( self, name, value );
+        RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL); 
 
         xmlFree(name);
         if ( value ) {
@@ -2705,36 +2637,31 @@ createAttribute( pdoc, pname, pvalue=&PL_sv_undef )
         RETVAL
 
 SV*
-createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
-        SV * pdoc
+createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
+        xmlDocPtr self
         SV * URI
         SV * pname
         SV * pvalue
     PREINIT:
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode( pdoc );
         xmlChar * name = NULL;
         xmlChar * value = NULL;
         xmlChar * prefix = NULL;
         const xmlChar * pchar = NULL;
         xmlChar * localname = NULL;
         xmlChar * nsURI = NULL;
-        xmlAttrPtr self = NULL;
+        xmlAttrPtr newAttr = NULL;
         xmlNsPtr ns = NULL;
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        name  = nodeSv2C( pname , (xmlNodePtr) doc );
+        name  = nodeSv2C( pname , (xmlNodePtr) self );
         if( name == NULL ) {
             XSRETURN_UNDEF;
         }
 
         nsURI = Sv2C( URI , NULL );
-        value = nodeSv2C( pvalue, (xmlNodePtr) doc  );
+        value = nodeSv2C( pvalue, (xmlNodePtr) self  );
 
         if ( nsURI != NULL && xmlStrlen(nsURI) > 0 ) {
-            xmlNodePtr root = xmlDocGetRootElement( doc );
+            xmlNodePtr root = xmlDocGetRootElement(self );
             if ( root ) {
                 pchar = xmlStrchr(name, ':');
                 if ( pchar != NULL ) {
@@ -2743,7 +2670,7 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
                 else {
                     localname = xmlStrdup( name );
                 }
-                ns = xmlSearchNsByHref( doc, root, nsURI );
+                ns = xmlSearchNsByHref( self, root, nsURI );
                 if ( ns == NULL ) {
                     /* create a new NS if the NS does not already exists */
                     ns = xmlNewNs(root, nsURI , prefix );
@@ -2762,10 +2689,10 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
                     XSRETURN_UNDEF;
                 }
 
-                self = xmlNewDocProp( doc, localname, value );
-                self->ns = ns;
+                newAttr = xmlNewDocProp( self, localname, value );
+                newAttr->ns = ns;
 
-                RETVAL = PmmNodeToSv((xmlNodePtr)self, NULL );
+                RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL );
 
                 xmlFree(nsURI);
                 xmlFree(name);
@@ -2787,8 +2714,8 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
             }
         }
         else {
-            self = xmlNewDocProp( doc, name, value );
-            RETVAL = PmmNodeToSv((xmlNodePtr)self,NULL);
+            newAttr = xmlNewDocProp( self, name, value );
+            RETVAL = PmmNodeToSv((xmlNodePtr)newAttr,NULL);
             xmlFree(name);
             if ( value ) {
                 xmlFree(value);
@@ -2799,28 +2726,23 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
 
 SV*
 createProcessingInstruction(self, name, value=&PL_sv_undef)
-        SV * self
+        xmlDocPtr self
         SV * name
         SV * value
     ALIAS:
         createPI = 1
     PREINIT:
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(self);
         xmlChar * n = NULL;
         xmlChar * v = NULL;
         xmlNodePtr PI = NULL;
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        n = nodeSv2C(name, (xmlNodePtr)doc);
+        n = nodeSv2C(name, (xmlNodePtr)self);
         if ( !n ) {
             XSRETURN_UNDEF;
         }
-        v = nodeSv2C(value, (xmlNodePtr)doc);
+        v = nodeSv2C(value, (xmlNodePtr)self);
         PI = xmlNewPI(n,v);      
-        PI->doc = doc;
+        PI->doc = self;
 
         RETVAL = PmmNodeToSv(PI,NULL);
 
@@ -2832,11 +2754,10 @@ createProcessingInstruction(self, name, value=&PL_sv_undef)
 
 
 void 
-_setDocumentElement( doc , proxy )
-        SV * doc
+_setDocumentElement( self , proxy )
+        xmlDocPtr self
         SV * proxy
     PREINIT:
-        xmlDocPtr real_doc;
         xmlNodePtr elem, oelem;
         SV* oldsv =NULL;
     INIT:
@@ -2844,52 +2765,42 @@ _setDocumentElement( doc , proxy )
         if ( elem == NULL ) {
             XSRETURN_UNDEF;
         }          
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
         /* please correct me if i am wrong: the document element HAS to be
          * an ELEMENT NODE
          */ 
         if ( elem->type == XML_ELEMENT_NODE ) {
-            if ( real_doc != elem->doc ) {
-                domImportNode( real_doc, elem, 1 );
+            if ( self != elem->doc ) {
+                domImportNode( self, elem, 1 );
             }
 
-            oelem = xmlDocGetRootElement( real_doc );
+            oelem = xmlDocGetRootElement( self );
             if ( oelem == NULL || oelem->_private == NULL ) {
-                xmlDocSetRootElement( real_doc, elem );
+                xmlDocSetRootElement( self, elem );
             }
             else {
-                ProxyNodePtr docfrag = PmmNewFragment( real_doc );
+                ProxyNodePtr docfrag = PmmNewFragment( self );
                 xmlReplaceNode( oelem, elem );
                 xmlAddChild( PmmNODE(docfrag), oelem );
                 PmmFixOwner( ((ProxyNodePtr)oelem->_private), docfrag);
             }
 
             if ( elem->_private != NULL ) {
-                PmmFixOwner( SvPROXYNODE(proxy), SvPROXYNODE(doc));
+                PmmFixOwner( SvPROXYNODE(proxy), PmmPROXYNODE(self));
             }
         }
 
 SV *
-documentElement( doc )
-        SV * doc
+documentElement( self )
+        xmlDocPtr self
     ALIAS:
         XML::LibXML::Document::getDocumentElement = 1
     PREINIT:
         xmlNodePtr elem;
-        xmlDocPtr real_doc;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        elem = xmlDocGetRootElement( real_doc );
+        elem = xmlDocGetRootElement( self );
         if ( elem ) {
-            RETVAL = PmmNodeToSv(elem, SvPROXYNODE(doc));
+            RETVAL = PmmNodeToSv(elem, PmmPROXYNODE(self));
         }
         else {
             XSRETURN_UNDEF;
@@ -2898,112 +2809,90 @@ documentElement( doc )
         RETVAL
 
 SV *
-externalSubset( doc )
-        SV * doc
+externalSubset( self )
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr real_doc = NULL;
         xmlDtdPtr dtd;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        if ( real_doc->extSubset == NULL ) {
+        if ( self->extSubset == NULL ) {
             XSRETURN_UNDEF;
         }
 
-        dtd = ((xmlDocPtr)PmmSvNode(doc))->extSubset;
-        RETVAL = PmmNodeToSv((xmlNodePtr)dtd, SvPROXYNODE(doc));
+        dtd = self->extSubset;
+        RETVAL = PmmNodeToSv((xmlNodePtr)dtd, PmmPROXYNODE(self));
     OUTPUT:
         RETVAL
         
 SV *
-internalSubset( doc )
-        SV * doc
+internalSubset( self )
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr real_doc = NULL;
         xmlDtdPtr dtd;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        if ( real_doc->intSubset == NULL ) {
+        if ( self->intSubset == NULL ) {
             XSRETURN_UNDEF;
         }
 
-        dtd = real_doc->intSubset;
-        RETVAL = PmmNodeToSv((xmlNodePtr)dtd, SvPROXYNODE(doc));
+        dtd = self->intSubset;
+        RETVAL = PmmNodeToSv((xmlNodePtr)dtd, PmmPROXYNODE(self));
     OUTPUT:
         RETVAL
 
 void
-setExternalSubset( document, extdtd )
-        SV * document
+setExternalSubset( self, extdtd )
+        xmlDocPtr self
         SV * extdtd
     PREINIT:
-        xmlDocPtr real_doc = NULL;
         xmlDtdPtr dtd = NULL;
         xmlDtdPtr olddtd = NULL;
     INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(document);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
         dtd = (xmlDtdPtr)PmmSvNode(extdtd);
         if ( dtd == NULL ) {
             croak( "lost DTD node" );
         }
     CODE:
-        if ( dtd && dtd != real_doc->extSubset ) {
-            if ( dtd->doc != real_doc ) {
+        if ( dtd && dtd != self->extSubset ) {
+            if ( dtd->doc != self ) {
                 croak( "can't import DTDs" );
-                domImportNode( real_doc, (xmlNodePtr) dtd,1);
+                domImportNode( self, (xmlNodePtr) dtd,1);
             }
     
-            if ( dtd == real_doc->intSubset ) {
+            if ( dtd == self->intSubset ) {
                 xmlUnlinkNode( (xmlNodePtr)dtd );
-                real_doc->intSubset = NULL;
+                self->intSubset = NULL;
             }
 
-            olddtd = real_doc->extSubset;
+            olddtd = self->extSubset;
             if ( olddtd && olddtd->_private == NULL ) {
                 xmlFreeDtd( olddtd );
             }
-            real_doc->extSubset = dtd;
+            self->extSubset = dtd;
         }
 
 void
-setInternalSubset( document, extdtd )
-        SV * document
+setInternalSubset( self, extdtd )
+        xmlDocPtr self
         SV * extdtd
     PREINIT:
-        xmlDocPtr real_doc = NULL;
         xmlDtdPtr dtd = NULL;
         xmlDtdPtr olddtd = NULL;
     INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(document);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
         dtd = (xmlDtdPtr)PmmSvNode(extdtd);
         if ( dtd == NULL ) {
             croak( "lost DTD node" );
         }
     CODE:
-        if ( dtd && dtd != real_doc->intSubset ) {
-            if ( dtd->doc != real_doc ) {
+        if ( dtd && dtd != self->intSubset ) {
+            if ( dtd->doc != self ) {
                 croak( "can't import DTDs" );
-                domImportNode( real_doc, (xmlNodePtr) dtd,1);
+                domImportNode( self, (xmlNodePtr) dtd,1);
             }
     
-            if ( dtd == real_doc->extSubset ) {
-                real_doc->extSubset = NULL;
+            if ( dtd == self->extSubset ) {
+                self->extSubset = NULL;
             }
 
-            olddtd = xmlGetIntSubset( real_doc );
+            olddtd = xmlGetIntSubset( self );
             if( olddtd ) {
                 xmlReplaceNode( (xmlNodePtr)olddtd, (xmlNodePtr) dtd );
                 if ( olddtd->_private == NULL ) {
@@ -3011,84 +2900,63 @@ setInternalSubset( document, extdtd )
                 }
             }
             else {
-                if (real_doc->children == NULL)
-                    xmlAddChild((xmlNodePtr) real_doc, (xmlNodePtr) dtd);
+                if (self->children == NULL)
+                    xmlAddChild((xmlNodePtr) self, (xmlNodePtr) dtd);
                 else
-                    xmlAddPrevSibling(real_doc->children, (xmlNodePtr) dtd);
+                    xmlAddPrevSibling(self->children, (xmlNodePtr) dtd);
             }
-            real_doc->intSubset = dtd;
+            self->intSubset = dtd;
         }
 
 SV *
-removeInternalSubset( document ) 
-        SV * document
+removeInternalSubset( self ) 
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr real_doc = (xmlDocPtr)PmmSvNode(document);
         xmlDtdPtr dtd = NULL;
-    INIT:
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        dtd = xmlGetIntSubset(real_doc);
+        dtd = xmlGetIntSubset(self);
         if ( !dtd ) {
             XSRETURN_UNDEF;   
         }
         xmlUnlinkNode( (xmlNodePtr)dtd );
-        real_doc->intSubset = NULL;
-        RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(document) );
+        self->intSubset = NULL;
+        RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, PmmPROXYNODE(self) );
     OUTPUT:
         RETVAL
 
 SV *
-removeExternalSubset( document ) 
-        SV * document
+removeExternalSubset( self ) 
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(document);
         xmlDtdPtr dtd = NULL;
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        dtd = doc->extSubset;
+        dtd = self->extSubset;
         if ( !dtd ) {
             XSRETURN_UNDEF;   
         }
-        doc->extSubset = NULL;
-        RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, SvPROXYNODE(document) );
+        self->extSubset = NULL;
+        RETVAL = PmmNodeToSv( (xmlNodePtr)dtd, PmmPROXYNODE(self) );
     OUTPUT:
         RETVAL
 
 SV *
-importNode( doc, node, dummy=0 ) 
-        SV * doc
-        SV * node
+importNode( self, node, dummy=0 ) 
+        xmlDocPtr self
+        xmlNodePtr node
         int dummy
     PREINIT:
         xmlNodePtr ret = NULL;
-        xmlNodePtr real_node = NULL;
-        xmlDocPtr real_doc = NULL;
         ProxyNodePtr docfrag = NULL;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
-        real_node=  PmmSvNode(node);
-        if ( real_node == NULL ) {
-            croak( "no node to import!" );
-        }
     CODE:   
-        if ( real_node->type == XML_DOCUMENT_NODE 
-             || real_node->type == XML_HTML_DOCUMENT_NODE ) {
+        if ( node->type == XML_DOCUMENT_NODE 
+             || node->type == XML_HTML_DOCUMENT_NODE ) {
             croak( "Can't import Documents!" );
             XSRETURN_UNDEF;
         }
 
-        ret = domImportNode( real_doc, real_node, 0 );
+        ret = domImportNode( self, node, 0 );
         if ( ret ) {
-            docfrag = PmmNewFragment( real_doc );
+            docfrag = PmmNewFragment( self );
             xmlAddChild( PmmNODE(docfrag), ret );
             RETVAL = PmmNodeToSv( ret, docfrag);
         }
@@ -3099,35 +2967,24 @@ importNode( doc, node, dummy=0 )
         RETVAL
 
 SV *
-adoptNode( doc, node ) 
-        SV * doc
-        SV * node
+adoptNode( self, node ) 
+        xmlDocPtr self
+        xmlNodePtr node
     PREINIT:
         xmlNodePtr ret = NULL;
-        xmlNodePtr real_node = NULL;
-        xmlDocPtr real_doc = NULL;
         ProxyNodePtr docfrag = NULL;
-    INIT:
-        real_doc = (xmlDocPtr)PmmSvNode(doc);
-        if ( real_doc == NULL ) {
-            croak( "lost document node" );
-        }
-        real_node=  PmmSvNode(node);
-        if ( real_node == NULL ) {
-            croak( "no node to adopt!" );
-        }
     CODE:
-        if ( real_node->type == XML_DOCUMENT_NODE 
-             || real_node->type == XML_HTML_DOCUMENT_NODE ) {
+        if ( node->type == XML_DOCUMENT_NODE 
+             || node->type == XML_HTML_DOCUMENT_NODE ) {
             croak( "Can't adopt Documents!" );
             XSRETURN_UNDEF;
         }
 
-        ret = domImportNode( real_doc, real_node, 1 );
+        ret = domImportNode( self, node, 1 );
 
         if ( ret ) {
-            docfrag = PmmNewFragment( real_doc );
-            RETVAL = PmmNodeToSv(real_node, docfrag);
+            docfrag = PmmNewFragment( self );
+            RETVAL = PmmNodeToSv(node, docfrag);
             xmlAddChild( PmmNODE(docfrag), ret );
             PmmFixOwner(SvPROXYNODE(RETVAL), docfrag);
         }
@@ -3139,155 +2996,131 @@ adoptNode( doc, node )
 
 char*
 encoding( self )
-        SV* self
+        xmlDocPtr self
     ALIAS:
         XML::LibXML::Document::getEncoding    = 1
         XML::LibXML::Document::actualEncoding = 2
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        if( self != NULL && self!=&PL_sv_undef) {
-            RETVAL = xmlStrdup((xmlChar*)((xmlDocPtr)PmmSvNode(self))->encoding );
-        }
+        RETVAL = xmlStrdup((xmlChar*)self->encoding );
     OUTPUT:
         RETVAL
 
 void
 setEncoding( self, encoding )
-        SV* self
+        xmlDocPtr self
         char *encoding
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        ((xmlDocPtr)PmmSvNode(self))->encoding = xmlStrdup( encoding );
+        self->encoding = xmlStrdup( encoding );
 
 int
 standalone( self ) 
-        SV * self
+        xmlDocPtr self
     CODE:
-        RETVAL = ((xmlDocPtr)PmmSvNode(self))->standalone;
+        RETVAL = self->standalone;
     OUTPUT:
         RETVAL
 
 void
 setStandalone( self, value = 0 )
-        SV * self
+        xmlDocPtr self
         int value
     CODE:
         if ( value > 0 ) {
-            ((xmlDocPtr)PmmSvNode(self))->standalone = 1;
+            self->standalone = 1;
         }
         else if ( value < 0 ) {
-            ((xmlDocPtr)PmmSvNode(self))->standalone = -1;
+            self->standalone = -1;
         }
         else {
-            ((xmlDocPtr)PmmSvNode(self))->standalone = 0;
+            self->standalone = 0;
         }
 
 char*
 version( self ) 
-         SV * self
+         xmlDocPtr self
     ALIAS:
         XML::LibXML::Document::getVersion = 1
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        if( self != NULL && self != &PL_sv_undef ) {
-            RETVAL = xmlStrdup( ((xmlDocPtr)PmmSvNode(self))->version );
-        }
+        RETVAL = xmlStrdup(self->version );
     OUTPUT:
         RETVAL
 
 void
 setVersion( self, version )
-        SV* self
+        xmlDocPtr self
         char *version
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        ((xmlDocPtr)PmmSvNode(self))->version = xmlStrdup( version );
+        self->version = xmlStrdup( version );
 
 int
 compression( self )
-        SV * self
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost document node" );
-        }
+        xmlDocPtr self
     CODE:
-        RETVAL = xmlGetDocCompressMode((xmlDocPtr)PmmSvNode(self));
+        RETVAL = xmlGetDocCompressMode(self);
     OUTPUT:
         RETVAL
 
 void
 setCompression( self, zLevel )
-        SV * self
+        xmlDocPtr self
         int zLevel
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
-        xmlSetDocCompressMode((xmlDocPtr)PmmSvNode(self), zLevel);
+        xmlSetDocCompressMode(self, zLevel);
 
 
 int
 is_valid(self, ...)
-        SV * self
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(self);
         xmlValidCtxt cvp;
         xmlDtdPtr dtd;
         SV * dtd_sv;
         STRLEN n_a;
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
         LibXML_error = sv_2mortal(newSVpv("", 0));
         cvp.userData = (void*)PerlIO_stderr();
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
+
+        /* we need to initialize the node stack, because perl might 
+         * already messed it up.
+         */
+        cvp.nodeNr = 0;
+        cvp.nodeTab = NULL;
+
         if (items > 1) {
             dtd_sv = ST(1);
             if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
                 dtd = (xmlDtdPtr)PmmSvNode(dtd_sv);
             }
-            RETVAL = xmlValidateDtd(&cvp, doc, dtd);
+            RETVAL = xmlValidateDtd(&cvp, self, dtd);
         }
         else {
-            RETVAL = xmlValidateDocument(&cvp, doc);
+            RETVAL = xmlValidateDocument(&cvp, self);
         }
     OUTPUT:
         RETVAL
 
 int
 validate(self, ...)
-        SV * self
+        xmlDocPtr self
     PREINIT:
-        xmlDocPtr doc = (xmlDocPtr)PmmSvNode(self);
         xmlValidCtxt cvp;
         xmlDtdPtr dtd;
         SV * dtd_sv;
         STRLEN n_a;
-    INIT:
-        if ( doc == NULL ) {
-            croak( "lost document node" );
-        }
     CODE:
         LibXML_error = sv_2mortal(newSVpv("", 0));
         cvp.userData = (void*)PerlIO_stderr();
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
+
+        /* we need to initialize the node stack, because perl might 
+         * already messed it up.
+         */
+        cvp.nodeNr = 0;
+        cvp.nodeTab = NULL;
+
         if (items > 1) {
             dtd_sv = ST(1);
             if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
@@ -3296,11 +3129,11 @@ validate(self, ...)
             else {
                 croak("is_valid: argument must be a DTD object");
             }
-            RETVAL = xmlValidateDtd(&cvp, doc , dtd);
+            RETVAL = xmlValidateDtd(&cvp, self , dtd);
 
         }
         else {
-            RETVAL = xmlValidateDocument(&cvp, doc);
+            RETVAL = xmlValidateDocument(&cvp, self);
         }
         if (RETVAL == 0) {
             croak("%s",SvPV(LibXML_error, n_a));
@@ -3319,62 +3152,48 @@ DESTROY( node )
         PmmREFCNT_dec(SvPROXYNODE(node));
 
 SV*
-nodeName( node )
-        SV* node
+nodeName( self )
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getName = 1
         XML::LibXML::Element::tagName = 2
     PREINIT:
         char * name = NULL;
-        xmlNodePtr rnode = PmmSvNode(node);
     INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
-        if( rnode->name == NULL ) {
+        if( self->name == NULL ) {
             croak( "lost the name!?" );
         }
     CODE:
-        name =  domName( rnode );
+        name =  domName( self );
         RETVAL = C2Sv(name,NULL);
         xmlFree( name );
     OUTPUT:
         RETVAL
 
 SV*
-localname( node )
-        SV * node
+localname( self )
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getLocalName = 1
         XML::LibXML::Attr::name         = 2
     PREINIT:
-        xmlNodePtr rnode = PmmSvNode(node);
         xmlChar * lname;
-    INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = C2Sv(rnode->name,NULL);
+        RETVAL = C2Sv(self->name,NULL);
     OUTPUT:
         RETVAL
 
 SV*
-prefix( node )
-        SV * node
+prefix( self )
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getPrefix = 1
     PREINIT:
-        xmlNodePtr rnode = PmmSvNode(node);
         xmlChar * prefix;
-    INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if( rnode->ns != NULL
-            && rnode->ns->prefix != NULL ) {            
-            RETVAL = C2Sv(rnode->ns->prefix, NULL);
+        if( self->ns != NULL
+            && self->ns->prefix != NULL ) {            
+            RETVAL = C2Sv(self->ns->prefix, NULL);
         }
         else {
             XSRETURN_UNDEF;
@@ -3384,20 +3203,15 @@ prefix( node )
 
 SV*
 namespaceURI( self )
-        SV * self
+        xmlNodePtr self
     ALIAS:
         getNamespaceURI = 1
     PREINIT:
-        xmlNodePtr rnode = PmmSvNode(self);
         xmlChar * nsURI;
-    INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( rnode->ns != NULL
-             && rnode->ns->href != NULL ) {
-            nsURI =  xmlStrdup(rnode->ns->href);
+        if ( self->ns != NULL
+             && self->ns->href != NULL ) {
+            nsURI =  xmlStrdup(self->ns->href);
             RETVAL = C2Sv( nsURI, NULL );
             xmlFree( nsURI );
         }
@@ -3409,21 +3223,16 @@ namespaceURI( self )
         
 
 SV*
-lookupNamespaceURI( node, svprefix=&PL_sv_undef )
-        SV * node
+lookupNamespaceURI( self, svprefix=&PL_sv_undef )
+        xmlNodePtr self
         SV * svprefix
     PREINIT:
-        xmlNodePtr rnode = PmmSvNode(node);
         xmlChar * nsURI;
         xmlChar * prefix = NULL;
-    INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        prefix = nodeSv2C( svprefix , PmmSvNode(node) );
+        prefix = nodeSv2C( svprefix , self );
         if ( prefix != NULL && xmlStrlen(prefix) > 0) {
-            xmlNsPtr ns = xmlSearchNs( rnode->doc, rnode, prefix );
+            xmlNsPtr ns = xmlSearchNs( self->doc, self, prefix );
             xmlFree( prefix );
             if ( ns != NULL ) {
                 nsURI = xmlStrdup(ns->href);
@@ -3441,21 +3250,16 @@ lookupNamespaceURI( node, svprefix=&PL_sv_undef )
         RETVAL
 
 SV*
-lookupNamespacePrefix( node, svuri )
-        SV * node
+lookupNamespacePrefix( self, svuri )
+        xmlNodePtr self
         SV * svuri
     PREINIT:
-        xmlNodePtr rnode = PmmSvNode(node);
         xmlChar * nsprefix;
         xmlChar * href = NULL;
-    INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        href = nodeSv2C( svuri , PmmSvNode(node) );
+        href = nodeSv2C( svuri , self );
         if ( href != NULL && xmlStrlen(href) > 0) {
-            xmlNsPtr ns = xmlSearchNsByHref( rnode->doc, rnode, href );
+            xmlNsPtr ns = xmlSearchNsByHref( self->doc, self, href );
             xmlFree( href );
             if ( ns != NULL ) {
                 nsprefix = xmlStrdup( ns->prefix );
@@ -3473,37 +3277,32 @@ lookupNamespacePrefix( node, svuri )
         RETVAL
 
 void
-setNodeName( pnode , value )
-        SV * pnode
+setNodeName( self , value )
+        xmlNodePtr self
         SV* value
     ALIAS:
         setName = 1
     PREINIT:
-        xmlNodePtr node = PmmSvNode(pnode);
         xmlChar* string;
         xmlChar* localname;
         xmlChar* prefix;
-    INIT:
-        if( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        string = nodeSv2C( value , node );
-        if( node->ns ){
+        string = nodeSv2C( value , self );
+        if( self->ns ){
             localname = xmlSplitQName2(string, &prefix);
-            xmlNodeSetName(node, localname );
+            xmlNodeSetName(self, localname );
             xmlFree(localname);
             xmlFree(prefix);
         }
         else {
             xs_warn("node name normal\n");
-            xmlNodeSetName(node, string );
+            xmlNodeSetName(self, string );
         }
         xmlFree(string);
 
 SV*
-nodeValue( proxy_node, useDomEncoding = &PL_sv_undef ) 
-        SV * proxy_node 
+nodeValue( self, useDomEncoding = &PL_sv_undef ) 
+        xmlNodePtr self 
         SV * useDomEncoding
     ALIAS:
         XML::LibXML::Attr::value     = 1
@@ -3512,19 +3311,13 @@ nodeValue( proxy_node, useDomEncoding = &PL_sv_undef )
         XML::LibXML::Node::getValue  = 4
         XML::LibXML::Node::getData   = 5
     PREINIT:
-        xmlNodePtr node = NULL;
         xmlChar * content = NULL;
-    INIT:
-        node = PmmSvNode(proxy_node);
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        content = domGetNodeValue( node ); 
+        content = domGetNodeValue( self ); 
         
         if ( content != NULL ) {
             if ( SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv(content, node);
+                RETVAL = nodeC2Sv(content, self);
             }
             else {
                 RETVAL = C2Sv(content, NULL);
@@ -3538,71 +3331,53 @@ nodeValue( proxy_node, useDomEncoding = &PL_sv_undef )
         RETVAL
 
 int 
-nodeType( node ) 
-        SV* node
+nodeType( self ) 
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getType = 1
-    PREINIT:
-        xmlNodePtr xnode = PmmSvNode(node);
-    INIT:
-        if ( xnode == NULL ) {
-            croak( "lost my node" );
-        }
     CODE:
-        RETVAL =  xnode->type;
+        RETVAL = self->type;
     OUTPUT:
         RETVAL
 
 SV*
 parentNode( self )
-        SV *self
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Attr::ownerElement    = 1
         XML::LibXML::Node::getParentNode   = 2
         XML::LibXML::Attr::getOwnerElement = 3
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = PmmNodeToSv( PmmSvNode(self)->parent,
-                              PmmOWNERPO( SvPROXYNODE(self) ) ); 
+        RETVAL = PmmNodeToSv( self->parent,
+                              PmmOWNERPO( PmmPROXYNODE(self) ) ); 
     OUTPUT:
         RETVAL
 
 SV*
 nextSibling( self ) 
-        SV *self
+        xmlNodePtr self
     ALIAS:
         getNextSibling = 1
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = PmmNodeToSv( PmmSvNode(self)->next,
-                              PmmOWNERPO( SvPROXYNODE(self) ) ); 
+        RETVAL = PmmNodeToSv( self->next,
+                              PmmOWNERPO(PmmPROXYNODE(self)) ); 
     OUTPUT:
         RETVAL
 
 SV*
 previousSibling( self )
-        SV *self
+        xmlNodePtr self
     ALIAS:
         getPreviousSibling = 1
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = PmmNodeToSv( PmmSvNode(self)->prev,
-                              PmmOWNERPO( SvPROXYNODE(self) ) ); 
+        RETVAL = PmmNodeToSv( self->prev,
+                              PmmOWNERPO( PmmPROXYNODE(self) ) ); 
     OUTPUT:
         RETVAL
 
 void
-_childNodes( node )
-        SV* node
+_childNodes( self )
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getChildnodes = 1
     PREINIT:
@@ -3610,17 +3385,13 @@ _childNodes( node )
         SV * element;
         int len = 0;
         int wantarray = GIMME_V;
-    INIT:
-        if ( PmmSvNode(node) == NULL ) {
-            croak( "lost node" );
-        }
     PPCODE:
-        if ( PmmSvNode(node)->type != XML_ATTRIBUTE_NODE ) {
-            cld = PmmSvNode(node)->children;
+        if ( self->type != XML_ATTRIBUTE_NODE ) {
+            cld = self->children;
             xs_warn("childnodes start");
             while ( cld ) {
                 if( wantarray != G_SCALAR ) {
-	                element = PmmNodeToSv(cld, PmmOWNERPO(SvPROXYNODE(node)) );
+	                element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
                     XPUSHs(sv_2mortal(element));
                 }
                 cld = cld->next;
@@ -3633,65 +3404,51 @@ _childNodes( node )
 
 SV*
 firstChild( self )
-        SV *self
+        xmlNodePtr self
     ALIAS:
         getFirstChild = 1
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = PmmNodeToSv( PmmSvNode(self)->children,
-                              PmmOWNERPO( SvPROXYNODE(self) ) ); 
+        RETVAL = PmmNodeToSv( self->children,
+                              PmmOWNERPO( PmmPROXYNODE(self) ) ); 
     OUTPUT:
         RETVAL
 
 SV*
 lastChild( self )
-        SV *self
+        xmlNodePtr self
     ALIAS:
         getLastChild = 1
-    INIT:
-        if ( PmmSvNode(self) == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = PmmNodeToSv( PmmSvNode(self)->last,
-                              PmmOWNERPO( SvPROXYNODE(self) ) ); 
+        RETVAL = PmmNodeToSv( self->last,
+                              PmmOWNERPO( PmmPROXYNODE(self) ) ); 
     OUTPUT:
         RETVAL
 
 void
-_attributes( node )
-        SV* node
+_attributes( self )
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getAttributes = 1
     PREINIT:
         xmlAttrPtr attr = NULL;
-        xmlNodePtr real_node = NULL;
         xmlNsPtr ns = NULL;
         SV * element;
         int len=0;
         int wantarray = GIMME_V;
-    INIT:
-        real_node = PmmSvNode(node);
-        if ( real_node == NULL ) {
-            croak( "lost node" );
-        }
     PPCODE:
-        if ( real_node->type != XML_ATTRIBUTE_NODE ) {
-            attr      = real_node->properties;
+        if ( self->type != XML_ATTRIBUTE_NODE ) {
+            attr      = self->properties;
             while ( attr != NULL ) {
                 if ( wantarray != G_SCALAR ) {
                     element = PmmNodeToSv((xmlNodePtr)attr,
-                                           PmmOWNERPO(SvPROXYNODE(node)) );
+                                           PmmOWNERPO(PmmPROXYNODE(self)) );
                     XPUSHs(sv_2mortal(element));
                 }
                 attr = attr->next;
                 len++;
             }
 
-            ns = real_node->nsDef;
+            ns = self->nsDef;
             while ( ns != NULL ) {
                 const char * CLASS = "XML::LibXML::Namespace";
                 if ( wantarray != G_SCALAR ) {
@@ -3720,50 +3477,36 @@ _attributes( node )
         }
 
 int 
-hasChildNodes( elem )
-        SV* elem
-    INIT:
-        if ( PmmSvNode(elem) == NULL ) {
-            croak( "lost node" );
-        }
+hasChildNodes( self )
+        xmlNodePtr self
     CODE:
-        if ( PmmSvNode(elem)->type == XML_ATTRIBUTE_NODE ) {
+        if ( self->type == XML_ATTRIBUTE_NODE ) {
             RETVAL = 0;
         }
         else {
-            RETVAL =  PmmSvNode(elem)->children ? 1 : 0 ;
+            RETVAL =  self->children ? 1 : 0 ;
         }
     OUTPUT:
         RETVAL
 
 int 
-hasAttributes( elem )
-        SV* elem
-    INIT:
-        if ( PmmSvNode(elem) == NULL ) {
-            croak( "lost node" );
-        }
+hasAttributes( self )
+        xmlNodePtr self
     CODE:
-        if ( PmmSvNode(elem)->type == XML_ATTRIBUTE_NODE ) {
+        if ( self->type == XML_ATTRIBUTE_NODE ) {
             RETVAL = 0;
         }
         else {
-            RETVAL =  PmmSvNode(elem)->properties ? 1 : 0 ;
+            RETVAL =  self->properties ? 1 : 0 ;
         }
     OUTPUT:
         RETVAL
 
 SV*
-ownerDocument( elem )
-        SV* elem
+ownerDocument( self )
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getOwnerDocument = 1
-    PREINIT:
-        xmlNodePtr self = PmmSvNode(elem);
-    INIT:
-        if ( self == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
         xs_warn( "GET OWNERDOC\n" );
         if( self != NULL
@@ -3777,71 +3520,48 @@ ownerDocument( elem )
         RETVAL
 
 SV*
-ownerNode( elem ) 
-        SV* elem
+ownerNode( self ) 
+        xmlNodePtr self
     ALIAS:
         XML::LibXML::Node::getOwner = 1
         XML::LibXML::Node::getOwnerElement = 2
-    INIT:
-        if ( PmmSvNode(elem) == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if( PmmSvOwner(elem) != NULL ){
-            RETVAL = PmmNodeToSv(PmmSvOwner(elem), NULL);
-        }
-        else {
-            XSRETURN_UNDEF;
-        }
+        RETVAL = PmmNodeToSv(PmmNODE(PmmOWNERPO(PmmPROXYNODE(self))), NULL);
     OUTPUT:
         RETVAL
 
 
 int
 normalize( self )
-        SV * self
-    PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-    INIT:
-        if (node == NULL ) {
-            croak( "lost node" );
-        }
+        xmlNodePtr self
     CODE:
-        RETVAL = domNodeNormalize( node );
+        RETVAL = domNodeNormalize( self );
     OUTPUT:
         RETVAL
 
 
 SV*
-insertBefore( self, new, ref ) 
-        SV* self
-        SV* new
-        SV* ref
+insertBefore( self, nNode, ref ) 
+        xmlNodePtr self
+        xmlNodePtr nNode
+        SV * ref
     PREINIT:
-        xmlNodePtr pNode, nNode, oNode, rNode;
-    INIT: 
-        pNode = PmmSvNode(self);
-        if ( pNode == NULL ) {
-            croak( "lost parent node" );
-        }
-        nNode = PmmSvNode(new);
-        if ( nNode == NULL ) {
-            croak( "lost new node" );
-        }
+        xmlNodePtr oNode=NULL, rNode;
+    INIT:
         oNode = PmmSvNode(ref);
     CODE:
-        if ( pNode->type    == XML_DOCUMENT_NODE
+        if ( self->type    == XML_DOCUMENT_NODE
              && nNode->type == XML_ELEMENT_NODE ) {
             xs_warn( "NOT_SUPPORTED_ERR\n" );
             XSRETURN_UNDEF;
         }
         else {
-            rNode = domInsertBefore( pNode, nNode, oNode );
+            rNode = domInsertBefore( self, nNode, oNode );
             if ( rNode != NULL ) {
                 RETVAL = PmmNodeToSv( rNode,
-                                      PmmOWNERPO(SvPROXYNODE(self)) );
+                                      PmmOWNERPO(PmmPROXYNODE(self)) );
                 PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
-                            PmmOWNERPO(SvPROXYNODE(self)) );
+                            PmmOWNERPO(PmmPROXYNODE(self)) );
             }
             else {
                  XSRETURN_UNDEF;
@@ -3851,35 +3571,26 @@ insertBefore( self, new, ref )
         RETVAL
 
 SV* 
-insertAfter( self, new, ref )
-        SV* self
-        SV* new
+insertAfter( self, nNode, ref )
+        xmlNodePtr self
+        xmlNodePtr nNode
         SV* ref
     PREINIT:
-        xmlNodePtr pNode, nNode, oNode, rNode;
-    INIT: 
-        pNode = PmmSvNode(self);
-        if ( pNode == NULL ) {
-            croak( "lost parent node" );
-        }
-        nNode = PmmSvNode(new);
-        if ( nNode == NULL ) {
-            croak( "lost new node" );
-        }
-        oNode = PmmSvNode(ref);
+        xmlNodePtr oNode = NULL, rNode;
     CODE:
-        if ( pNode->type    == XML_DOCUMENT_NODE
+        oNode = PmmSvNode(ref);
+        if ( self->type    == XML_DOCUMENT_NODE
              && nNode->type == XML_ELEMENT_NODE ) {
             xs_warn( "NOT_SUPPORTED_ERR\n" );
             XSRETURN_UNDEF;
         }
         else {
-            rNode = domInsertAfter( pNode, nNode, oNode );
+            rNode = domInsertAfter( self, nNode, oNode );
             if ( rNode != NULL ) {
                 RETVAL = PmmNodeToSv( rNode,
-                                      PmmOWNERPO(SvPROXYNODE(self)) );
+                                      PmmOWNERPO(PmmPROXYNODE(self)) );
                 PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
-                            PmmOWNERPO(SvPROXYNODE(self)) );
+                            PmmOWNERPO(PmmPROXYNODE(self)) );
             }
             else {
                 XSRETURN_UNDEF;
@@ -3889,29 +3600,15 @@ insertAfter( self, new, ref )
         RETVAL
 
 SV*
-replaceChild( paren, newChild, oldChild ) 
-        SV* paren
-        SV* newChild
-        SV* oldChild
+replaceChild( self, nNode, oNode ) 
+        xmlNodePtr self
+        xmlNodePtr nNode
+        xmlNodePtr oNode
     PREINIT:
-        xmlNodePtr pNode, nNode, oNode;
         xmlNodePtr ret = NULL;
         ProxyNodePtr docfrag = NULL;
-    INIT: 
-        pNode = PmmSvNode(paren);
-        if ( pNode == NULL ) {
-            croak( "lost parent node" );
-        }
-        nNode = PmmSvNode(newChild);
-        if ( nNode == NULL ) {
-            croak( "lost new node" );
-        }
-        oNode = PmmSvNode(oldChild);
-        if ( oNode == NULL ) {
-            croak( "lost reference node" );
-        }
     CODE:
-       if ( pNode->type == XML_DOCUMENT_NODE ) {
+       if ( self->type == XML_DOCUMENT_NODE ) {
                 switch ( nNode->type ) {
                 case XML_ELEMENT_NODE:
                 case XML_DOCUMENT_FRAG_NODE:
@@ -3923,19 +3620,19 @@ replaceChild( paren, newChild, oldChild )
                     break;
                 }
         }
-        ret = domReplaceChild( pNode, nNode, oNode );
+        ret = domReplaceChild( self, nNode, oNode );
         if (ret == NULL) {
             XSRETURN_UNDEF;
         }
         else {
-                docfrag = PmmNewFragment( pNode->doc );
+                docfrag = PmmNewFragment( self->doc );
                 /* create document fragment */
                 xmlAddChild( PmmNODE(docfrag), ret );
                 RETVAL = PmmNodeToSv(ret, docfrag);
 
                 if ( nNode->_private != NULL ) {
-                    PmmFixOwner( SvPROXYNODE(newChild),
-                                 PmmOWNERPO(SvPROXYNODE(paren)) );
+                    PmmFixOwner( PmmPROXYNODE(nNode),
+                                 PmmOWNERPO(PmmPROXYNODE(self)) );
                 }
                 PmmFixOwner( SvPROXYNODE(RETVAL), docfrag );
         }
@@ -3943,45 +3640,34 @@ replaceChild( paren, newChild, oldChild )
         RETVAL
 
 SV* 
-replaceNode( self,newNode )
-        SV * self
-        SV * newNode
+replaceNode( self,nNode )
+        xmlNodePtr self
+        xmlNodePtr nNode
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlNodePtr other = PmmSvNode( newNode );
         xmlNodePtr ret = NULL;
         ProxyNodePtr docfrag = NULL;
-    INIT: 
-        node = PmmSvNode(self);
-        if ( node == NULL ) {
-            croak( "lost reference node" );
-        }
-        other = PmmSvNode(newNode);
-        if ( other == NULL ) {
-            croak( "lost new node" );
-        }
     CODE:
-        if ( domIsParent( node, other ) == 1 ) {
+        if ( domIsParent( self, nNode ) == 1 ) {
             XSRETURN_UNDEF;
         }
-        if ( node->doc != other->doc ) {
-            domImportNode( node->doc, other, 1 );
+        if ( self->doc != nNode->doc ) {
+            domImportNode( self->doc, nNode, 1 );
         }
-        ret = xmlReplaceNode( node, other );
+        ret = xmlReplaceNode( self, nNode );
         if ( ret ) {
             if ( ret->type == XML_ATTRIBUTE_NODE ) {
                 docfrag = NULL;
             }
             else {
                 /* create document fragment */
-                docfrag = PmmNewFragment( node->doc );
+                docfrag = PmmNewFragment( self->doc );
                 xmlAddChild( PmmNODE(docfrag), ret ); 
             }
                 
             RETVAL = PmmNodeToSv(ret, docfrag);
-            if ( other->_private != NULL ) {
-                PmmFixOwner( SvPROXYNODE(newNode),
-                             PmmOWNERPO(SvPROXYNODE(self)));
+            if ( nNode->_private != NULL ) {
+                PmmFixOwner( PmmPROXYNODE(nNode),
+                             PmmOWNERPO(PmmPROXYNODE(self)));
             }
             PmmFixOwner( SvPROXYNODE(RETVAL), docfrag );
         }
@@ -3993,22 +3679,13 @@ replaceNode( self,newNode )
         RETVAL
 
 SV*
-removeChild( pparen, child ) 
-        SV*  pparen
-        SV* child
+removeChild( self, node ) 
+        xmlNodePtr self
+        xmlNodePtr node
     PREINIT:
-        xmlNodePtr paren, ret, node;
-    INIT:
-        paren = PmmSvNode(pparen);
-        if ( paren == NULL ) {
-            croak( "lost reference node" );
-        }
-        node = PmmSvNode(child);
-        if ( node == NULL ) {
-            croak( "lost new node" );
-        }
+        xmlNodePtr ret;
     CODE:
-        ret = domRemoveChild( paren, node );
+        ret = domRemoveChild( self, node );
         if (ret == NULL) {
             XSRETURN_UNDEF;
         }
@@ -4022,20 +3699,15 @@ removeChild( pparen, child )
         RETVAL
 
 void
-removeChildNodes( pparen )
-        SV * pparen
+removeChildNodes( self )
+        xmlNodePtr self
     PREINIT:
-        xmlNodePtr paren, elem, fragment;
+        xmlNodePtr elem, fragment;
         ProxyNodePtr docfrag;
-    INIT:
-        paren = PmmSvNode(pparen);
-        if ( paren == NULL ) {
-            croak( "lost parent node" );
-        }
     CODE:
-        docfrag  = PmmNewFragment( paren->doc );
+        docfrag  = PmmNewFragment( self->doc );
         fragment = PmmNODE( docfrag );
-        elem = paren->children;
+        elem = self->children;
         while ( elem ) {
             xmlUnlinkNode( elem );
             /* this following piece is the function of domAppendChild()
@@ -4055,58 +3727,40 @@ removeChildNodes( pparen )
             elem = elem->next;
         }
 
-        paren->children = paren->last = NULL;
+        self->children = self->last = NULL;
         if ( PmmREFCNT(docfrag) <= 0 ) {
             xs_warn( "have not references left" );
             PmmREFCNT_dec( docfrag );
         }
 
 void
-unbindNode( proxyelem )
-        SV* proxyelem
+unbindNode( self )
+        xmlNodePtr self
     PREINIT:
-        xmlNodePtr elem       = NULL;
         ProxyNodePtr dfProxy  = NULL;
         ProxyNodePtr docfrag     = NULL;
-    INIT:
-        elem = PmmSvNode(proxyelem);
-        if ( elem == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( elem->type != XML_DOCUMENT_NODE
-             || elem->type != XML_DOCUMENT_FRAG_NODE ) {
-            xmlUnlinkNode( elem );
-            if ( elem->type != XML_ATTRIBUTE_NODE ) {
-                docfrag = PmmNewFragment( elem->doc );
-                xmlAddChild( PmmNODE(docfrag), elem );
+        if ( self->type != XML_DOCUMENT_NODE
+             || self->type != XML_DOCUMENT_FRAG_NODE ) {
+            xmlUnlinkNode( self );
+            if ( self->type != XML_ATTRIBUTE_NODE ) {
+                docfrag = PmmNewFragment( self->doc );
+                xmlAddChild( PmmNODE(docfrag), self );
             }
-            PmmFixOwner( SvPROXYNODE(proxyelem), docfrag );
+            PmmFixOwner( PmmPROXYNODE(self), docfrag );
         }
 
 SV*
-appendChild( parent, child )
-        SV* parent
-        SV* child
+appendChild( self, nNode )
+        xmlNodePtr self
+        xmlNodePtr nNode
     PREINIT:
-        ProxyNodePtr pproxy = NULL;
-        ProxyNodePtr cproxy = NULL;
-        xmlNodePtr test = NULL, pNode, cNode, rNode;
-    INIT:
-        pNode = PmmSvNode(parent);
-        cNode = PmmSvNode(child);
-
-        if ( pNode == NULL
-            || cNode == NULL ) {
-            warn( "one parameter contains no node data!" );
-            XSRETURN_UNDEF;
-        }
-
+        xmlNodePtr test = NULL, rNode;
     CODE:
-        if (pNode->type == XML_DOCUMENT_NODE ) {
+        if (self->type == XML_DOCUMENT_NODE ) {
             /* NOT_SUPPORTED_ERR
              */
-            switch ( cNode->type ) {
+            switch ( nNode->type ) {
             case XML_ELEMENT_NODE:
             case XML_DOCUMENT_FRAG_NODE:
             case XML_TEXT_NODE:
@@ -4118,72 +3772,53 @@ appendChild( parent, child )
             }
         }
 
-        rNode = domAppendChild( pNode, cNode );
+        rNode = domAppendChild( self, nNode );
 
         if ( rNode == NULL ) {
             XSRETURN_UNDEF;
         }
            
-        RETVAL = PmmNodeToSv( cNode,
-                              PmmOWNERPO(SvPROXYNODE(parent)) );
-        PmmFixOwner( SvPROXYNODE(RETVAL), SvPROXYNODE(parent) );
+        RETVAL = PmmNodeToSv( nNode,
+                              PmmOWNERPO(PmmPROXYNODE(self)) );
+        PmmFixOwner( SvPROXYNODE(RETVAL), PmmPROXYNODE(self) );
     OUTPUT:
         RETVAL
 
 SV*
-addChild( sv_parent, child )
-        SV * sv_parent
-        SV * child
+addChild( self, nNode )
+        xmlNodePtr self
+        xmlNodePtr nNode
     PREINIT:
-        xmlNodePtr parent = NULL, cur = NULL, retval = NULL;
-    INIT:
-        parent = PmmSvNode( sv_parent );
-        if ( parent == NULL ) {
-            croak( "parent contains no node!" );
-        }
-        cur = PmmSvNode( child );
-        if ( cur == NULL ) {
-            croak( "child contains no node" );
-        }
+        xmlNodePtr retval = NULL;
     CODE:
-        xmlUnlinkNode(cur);
-        retval = xmlAddChild( parent, cur );
+        xmlUnlinkNode(nNode);
+        retval = xmlAddChild( self, nNode );
 
         RETVAL = PmmNodeToSv( retval,
-                              PmmOWNERPO(SvPROXYNODE(sv_parent)) );
-        if ( retval != parent ) {
-            PmmFixOwner( SvPROXYNODE(RETVAL), SvPROXYNODE(sv_parent) );
+                              PmmOWNERPO(PmmPROXYNODE(self)) );
+        if ( retval != self ) {
+            PmmFixOwner( SvPROXYNODE(RETVAL), PmmPROXYNODE(self) );
         }
     OUTPUT:
         RETVAL
 
 
 SV*
-addSibling( self, newNode )
-        SV * self
-        SV * newNode
+addSibling( self, nNode )
+        xmlNodePtr self
+        xmlNodePtr nNode
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlNodePtr other = PmmSvNode( newNode );
         xmlNodePtr ret = NULL;
-        ProxyNodePtr oproxy = SvPROXYNODE( newNode ); 
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost reference node" );
-        }
-        if ( other == NULL ) {
-            croak("lost node" );
-        }
     CODE:
-        if ( other->type == XML_DOCUMENT_FRAG_NODE ) {
+        if ( nNode->type == XML_DOCUMENT_FRAG_NODE ) {
             XSRETURN_UNDEF;
         }
 
-        ret = xmlAddSibling( node, other );
+        ret = xmlAddSibling( self, nNode );
 
         if ( ret ) {
             RETVAL = PmmNodeToSv(ret,NULL);
-            PmmFixOwner( SvPROXYNODE(RETVAL), PmmOWNERPO(SvPROXYNODE(self)) );
+            PmmFixOwner( SvPROXYNODE(RETVAL), PmmOWNERPO(PmmPROXYNODE(self)) );
         }
         else {
             XSRETURN_UNDEF;
@@ -4193,19 +3828,14 @@ addSibling( self, newNode )
 
 SV*
 cloneNode( self, deep=0 ) 
-        SV* self
+        xmlNodePtr self
         int deep
     PREINIT:
-        xmlNodePtr ret, node;
+        xmlNodePtr ret;
         xmlDocPtr doc = NULL;
         ProxyNodePtr docfrag = NULL;
-    INIT:
-        node = PmmSvNode( self );
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        ret = PmmCloneNode( node, deep );
+        ret = PmmCloneNode( self, deep );
         if ( ret == NULL ) {
             XSRETURN_UNDEF;
         }
@@ -4214,14 +3844,14 @@ cloneNode( self, deep=0 )
             RETVAL = PmmNodeToSv(ret, NULL);
         }
         else {
-            doc = node->doc;
+            doc = self->doc;
             
             if ( doc != NULL ) {
                 xmlSetTreeDoc(ret, doc);
             }
             
             # make namespaces available
-            ret->ns = node->ns;
+            ret->ns = self->ns;
             docfrag = PmmNewFragment( doc );
             xmlAddChild( PmmNODE(docfrag), ret );
             RETVAL = PmmNodeToSv(ret, docfrag);
@@ -4231,41 +3861,23 @@ cloneNode( self, deep=0 )
         RETVAL
 
 int 
-isSameNode( self, other )
-        SV * self
-        SV * other
+isSameNode( self, oNode )
+        xmlNodePtr self
+        xmlNodePtr oNode
     ALIAS:
         XML::LibXML::Node::isEqual = 1
-    PREINIT:
-        xmlNodePtr thisnode = PmmSvNode(self);
-        xmlNodePtr thatnode = PmmSvNode(other);
-    INIT:
-        if ( thisnode == NULL ) {
-            croak( "lost reference node" );
-        }
-        if ( thatnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        RETVAL = 0;
-        if( thisnode == thatnode ) {
-            RETVAL = 1;
-        }
+        RETVAL = self == oNode ? 1 : 0;
     OUTPUT:
         RETVAL
 
 SV *
 baseURI( self )
-        SV * self
+        xmlNodePtr self
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
         xmlChar * uri;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        uri = xmlNodeGetBase( node->doc, node );
+        uri = xmlNodeGetBase( self->doc, self );
         RETVAL = C2Sv( uri, NULL );
         xmlFree( uri );
     OUTPUT:
@@ -4273,24 +3885,19 @@ baseURI( self )
 
 void
 setBaseURI( self, URI )
-        SV * self
+        xmlNodePtr self
         SV * URI
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
         xmlChar * uri;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        uri = nodeSv2C( URI, node );
+        uri = nodeSv2C( URI, self );
         if ( uri != NULL ) {
-            xmlNodeSetBase( node, uri );
+            xmlNodeSetBase( self, uri );
         }
 
 SV*
 toString( self, format=0, useDomEncoding = &PL_sv_undef )
-        SV * self
+        xmlNodePtr self
         SV * useDomEncoding
         int format
     PREINIT:
@@ -4298,11 +3905,6 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         char *ret = NULL;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
-        xmlNodePtr node = PmmSvNode( self );
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
 
@@ -4312,15 +3914,15 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         buffer = xmlBufferCreate();
         if ( format <= 0 ) {
             xmlNodeDump( buffer,
-                         node->doc,
-                         node, 0, format);
+                         self->doc,
+                         self, 0, format);
         }
         else {
             int t_indent_var = xmlIndentTreeOutput;
             xmlIndentTreeOutput = 1;
             xmlNodeDump( buffer,
-                         node->doc,
-                         node, 0, format);
+                         self->doc,
+                         self, 0, format);
             xmlIndentTreeOutput = t_indent_var;
         }
         if ( buffer->content != 0 ) {
@@ -4332,7 +3934,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
 
         if ( ret != NULL ) {
             if ( useDomEncoding!= &PL_sv_undef && SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv(ret, PmmNODE(SvPROXYNODE(self))) ;
+                RETVAL = nodeC2Sv(ret, PmmNODE(PmmPROXYNODE(self))) ;
             }
             else {
                 RETVAL = C2Sv(ret, NULL) ;
@@ -4347,25 +3949,20 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         RETVAL
 
 SV*
-string_value ( node, useDomEncoding = &PL_sv_undef )
-        SV * node
+string_value ( self, useDomEncoding = &PL_sv_undef )
+        xmlNodePtr self
         SV * useDomEncoding
     ALIAS:
         to_literal = 1
         textContent = 2
     PREINIT:
          xmlChar * string = NULL;
-         xmlNodePtr rnode = PmmSvNode( node );
-    INIT:
-        if( rnode == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
         /* we can't just return a string, because of UTF8! */
-        string = xmlXPathCastNodeToString(rnode);
+        string = xmlXPathCastNodeToString(self);
         if ( SvTRUE(useDomEncoding) ) {
             RETVAL = nodeC2Sv(string,
-                              rnode);
+                              self);
         }
         else {
             RETVAL = C2Sv(string,
@@ -4376,16 +3973,13 @@ string_value ( node, useDomEncoding = &PL_sv_undef )
         RETVAL
 
 double
-to_number ( node )
-        SV* node
-    INIT:
-        if ( PmmSvNode(node)  == NULL ) {
-            croak( "lost node" );
-        }
+to_number ( self )
+        xmlNodePtr self 
     CODE:
-        RETVAL = xmlXPathCastNodeToNumber(PmmSvNode(node));
+        RETVAL = xmlXPathCastNodeToNumber(self);
     OUTPUT:
         RETVAL
+
 
 void
 _find( pnode, pxpath )
@@ -4716,20 +4310,16 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
 
 int 
 hasAttribute( self, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name = nodeSv2C(attr_name, node );
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
+        xmlChar * name;
     CODE:
+        name  = nodeSv2C(attr_name, self );
         if ( ! name ) {
             XSRETURN_UNDEF;
         }
-        if ( xmlHasProp( node, name ) ) {
+        if ( xmlHasProp( self, name ) ) {
             RETVAL = 1;
         }
         else {
@@ -4741,18 +4331,16 @@ hasAttribute( self, attr_name )
 
 int 
 hasAttributeNS( self, namespaceURI, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name = nodeSv2C(attr_name, node );
-        xmlChar * nsURI = nodeSv2C(namespaceURI, node );
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
+        xmlChar * name; 
+        xmlChar * nsURI;
     CODE:
+        name = nodeSv2C(attr_name, self );
+        nsURI = nodeSv2C(namespaceURI, self );
+
         if ( !name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
@@ -4761,7 +4349,7 @@ hasAttributeNS( self, namespaceURI, attr_name )
             xmlFree(name);
             XSRETURN_UNDEF;
         }
-        if ( xmlHasNsProp( node, name, nsURI ) ) {
+        if ( xmlHasNsProp( self, name, nsURI ) ) {
             RETVAL = 1;
         }
         else {
@@ -4775,28 +4363,24 @@ hasAttributeNS( self, namespaceURI, attr_name )
 
 SV*
 getAttribute( self, attr_name, doc_enc = 0 )
-        SV * self
+        xmlNodePtr self
         SV * attr_name
         int doc_enc
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name = nodeSv2C(attr_name, node );
+        xmlChar * name;
         xmlChar * ret = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
+        name = nodeSv2C(attr_name, self );
         if( !name ) {
             XSRETURN_UNDEF;
         }
         
-        ret = xmlGetProp(node, name);
+        ret = xmlGetProp(self, name);
         xmlFree(name);
 
         if ( ret ) {
             if ( doc_enc == 1 ) { 
-                RETVAL = nodeC2Sv(ret, node);
+                RETVAL = nodeC2Sv(ret, self);
             }
             else {
                 RETVAL = C2Sv(ret, NULL);
@@ -4811,43 +4395,35 @@ getAttribute( self, attr_name, doc_enc = 0 )
 
 void
 _setAttribute( self, attr_name, attr_value )
-        SV * self
+        xmlNodePtr self
         SV * attr_name
         SV * attr_value
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name  = nodeSv2C(attr_name, node );
+        xmlChar * name;
         xmlChar * value = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
+        name  = nodeSv2C(attr_name, self );
         if ( !name ) {
             XSRETURN_UNDEF;
         }
-        value = nodeSv2C(attr_value, node );
+        value = nodeSv2C(attr_value, self );
        
-        xmlSetProp( node, name, value );
+        xmlSetProp( self, name, value );
         xmlFree(name);
         xmlFree(value);        
 
 
 void
 removeAttribute( self, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name  = nodeSv2C(attr_name, node );
+        xmlChar * name;
         xmlAttrPtr xattr = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
+        name  = nodeSv2C(attr_name, self );
         if ( name ) {
-            xattr = xmlHasProp( node, name );
+            xattr = xmlHasProp( self, name );
 
             if ( xattr ) {
                 xmlUnlinkNode((xmlNodePtr)xattr);
@@ -4863,27 +4439,23 @@ removeAttribute( self, attr_name )
 
 SV* 
 getAttributeNode( self, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name = nodeSv2C(attr_name, node );
+        xmlChar * name;
         xmlAttrPtr ret = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
+        name = nodeSv2C(attr_name, self );
         if ( !name ) {
             XSRETURN_UNDEF;
         }
 
-        ret = xmlHasProp( node, name );
+        ret = xmlHasProp( self, name );
         xmlFree(name);
 
         if ( ret ) {
             RETVAL = PmmNodeToSv( (xmlNodePtr)ret,
-                                   PmmOWNERPO(SvPROXYNODE(self)) );
+                                   PmmOWNERPO(PmmPROXYNODE(self)) );
         }
         else {
             XSRETURN_UNDEF;
@@ -4893,16 +4465,12 @@ getAttributeNode( self, attr_name )
 
 SV *
 setAttributeNode( self, attr_node )
-        SV * self
+        xmlNodePtr self
         SV * attr_node
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
         xmlAttrPtr attr = (xmlAttrPtr)PmmSvNode( attr_node );
         xmlAttrPtr ret = NULL;
     INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
         if ( attr == NULL ) {
             croak( "lost attribute" );
         }
@@ -4910,10 +4478,10 @@ setAttributeNode( self, attr_node )
         if ( attr != NULL && attr->type != XML_ATTRIBUTE_NODE ) {
             XSRETURN_UNDEF;
         }
-        if ( attr->doc != node->doc ) {
-            domImportNode( node->doc, (xmlNodePtr)attr, 1);
+        if ( attr->doc != self->doc ) {
+            domImportNode( self->doc, (xmlNodePtr)attr, 1);
         }
-        ret = xmlHasProp( node, attr->name );
+        ret = xmlHasProp( self, attr->name );
         if ( ret != NULL ) {
             if ( ret != attr ) {
                 xmlReplaceNode( (xmlNodePtr)ret, (xmlNodePtr)attr );
@@ -4923,11 +4491,11 @@ setAttributeNode( self, attr_node )
             }
         }
         else {
-            xmlAddChild( node, (xmlNodePtr)attr );
+            xmlAddChild( self, (xmlNodePtr)attr );
         }
 
         if ( attr->_private != NULL ) {
-            PmmFixOwner( SvPROXYNODE(attr_node), SvPROXYNODE(self) );
+            PmmFixOwner( SvPROXYNODE(attr_node), PmmPROXYNODE(self) );
         }
 
         if ( ret == NULL ) {
@@ -4941,28 +4509,25 @@ setAttributeNode( self, attr_node )
 
 SV *
 getAttributeNS( self, namespaceURI, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * name = nodeSv2C( attr_name, node );
-        xmlChar * nsURI = nodeSv2C( namespaceURI, node );
+        xmlChar * name;
+        xmlChar * nsURI;
         xmlChar * ret = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
+        name = nodeSv2C( attr_name, self );
+        nsURI = nodeSv2C( namespaceURI, self );
         if ( !name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
         }
         if ( nsURI && xmlStrlen(nsURI) ) {     
-            ret = xmlGetNsProp( node, name, nsURI );
+            ret = xmlGetNsProp( self, name, nsURI );
         }
         else {
-            ret = xmlGetProp( node, name );
+            ret = xmlGetProp( self, name );
         }
 
         xmlFree( name );
@@ -4970,7 +4535,7 @@ getAttributeNS( self, namespaceURI, attr_name )
             xmlFree( nsURI );
         }
         if ( ret ) {
-            RETVAL = nodeC2Sv( ret, node );
+            RETVAL = nodeC2Sv( ret, self );
             xmlFree( ret );
         }
         else {
@@ -4981,13 +4546,12 @@ getAttributeNS( self, namespaceURI, attr_name )
 
 void
 setAttributeNS( self, namespaceURI, attr_name, attr_value )
-        SV * self
+        xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
         SV * attr_value
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * nsURI = nodeSv2C( namespaceURI, node );
+        xmlChar * nsURI;
         xmlChar * name  = NULL;
         xmlChar * value = NULL;
         const xmlChar * pchar = NULL;
@@ -4995,7 +4559,8 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlChar * localname = NULL;
         xmlChar * prefix    = NULL;
     INIT:
-        name  = nodeSv2C( attr_name, node );        
+        name  = nodeSv2C( attr_name, self );        
+        nsURI = nodeSv2C( namespaceURI, self );
         if ( !name && !xmlStrlen( name ) ) {
             if ( nsURI ) {
                 xmlFree( nsURI);
@@ -5009,16 +4574,16 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
             name = localname;
         }
     CODE:
-        value = nodeSv2C( attr_value, node ); 
+        value = nodeSv2C( attr_value, self ); 
 
         if ( nsURI && xmlStrlen(nsURI) ) {
             xs_warn( "found uri" );
 
-            ns = xmlSearchNsByHref( node->doc, node, nsURI );
+            ns = xmlSearchNsByHref( self->doc, self, nsURI );
             if ( !ns ) {
                 /* create new ns */
                  if ( prefix && xmlStrlen( prefix ) ) {
-                    ns = xmlNewNs(node, nsURI , prefix );
+                    ns = xmlNewNs(self, nsURI , prefix );
                  }
                  else {
                     ns = NULL;
@@ -5029,7 +4594,7 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
                     ns = ns->next;
                 }
                 else if ( prefix && xmlStrlen( prefix ) ) {
-                    ns = xmlNewNs(node, nsURI , prefix );
+                    ns = xmlNewNs(self, nsURI , prefix );
                 }
                 else {
                     ns = NULL;
@@ -5042,7 +4607,7 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         }
         else {
             /* warn( "set attribute %s->%s", name, value ); */
-            xmlSetNsProp( node, ns, name, value );            
+            xmlSetNsProp( self, ns, name, value );            
         }
         
         if ( prefix ) {
@@ -5056,30 +4621,26 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
 
 void
 removeAttributeNS( self, namespaceURI, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * nsURI = nodeSv2C( namespaceURI, node );
+        xmlChar * nsURI;
         xmlChar * name  = NULL;
         xmlAttrPtr xattr = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        name  = nodeSv2C( attr_name, node );
+        nsURI = nodeSv2C( namespaceURI, self );
+        name  = nodeSv2C( attr_name, self );
         if ( ! name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
         }
 
         if ( nsURI && xmlStrlen(nsURI) ) {
-            xattr = xmlHasNsProp( node, name, nsURI );
+            xattr = xmlHasNsProp( self, name, nsURI );
         }
         else {
-            xattr = xmlHasNsProp( node, name, NULL );
+            xattr = xmlHasNsProp( self, name, NULL );
         }
         if ( xattr ) {
             xmlUnlinkNode((xmlNodePtr)xattr);
@@ -5096,19 +4657,16 @@ removeAttributeNS( self, namespaceURI, attr_name )
 
 SV* 
 getAttributeNodeNS( self,namespaceURI, attr_name )
-        SV * self
+        xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
-        xmlChar * nsURI = nodeSv2C(namespaceURI, node );
-        xmlChar * name = nodeSv2C(attr_name, node );
+        xmlChar * nsURI;
+        xmlChar * name;
         xmlAttrPtr ret = NULL;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
+        nsURI = nodeSv2C(namespaceURI, self );
+        name = nodeSv2C(attr_name, self );  
         if ( !name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
@@ -5118,13 +4676,13 @@ getAttributeNodeNS( self,namespaceURI, attr_name )
             XSRETURN_UNDEF;
         }
 
-        ret = xmlHasNsProp( node, name, nsURI );
+        ret = xmlHasNsProp( self, name, nsURI );
         xmlFree(name);
         xmlFree(nsURI);        
 
         if ( ret ) {
             RETVAL = PmmNodeToSv( (xmlNodePtr)ret,
-                                   PmmOWNERPO(SvPROXYNODE(self)) );
+                                   PmmOWNERPO(PmmPROXYNODE(self)) );
         }
         else {
             /* warn("no prop\n"); */
@@ -5135,17 +4693,13 @@ getAttributeNodeNS( self,namespaceURI, attr_name )
 
 SV *
 setAttributeNodeNS( self, attr_node )
-        SV * self
+        xmlNodePtr self
         SV * attr_node
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
         xmlAttrPtr attr = (xmlAttrPtr)PmmSvNode( attr_node );
         xmlNsPtr ns = NULL;
         xmlAttrPtr ret = NULL;
     INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
         if ( attr == NULL ) {
             croak( "lost attribute node" );
         }
@@ -5154,17 +4708,17 @@ setAttributeNodeNS( self, attr_node )
             XSRETURN_UNDEF;
         }
 
-        if ( attr->doc != node->doc ) {
-            domImportNode( node->doc, (xmlNodePtr)attr, 1);
+        if ( attr->doc != self->doc ) {
+            domImportNode( self->doc, (xmlNodePtr)attr, 1);
         }
 
 
         ns = attr->ns;
         if ( ns != NULL ) {
-            ret = xmlHasNsProp( node, ns->href, attr->name );
+            ret = xmlHasNsProp( self, ns->href, attr->name );
         }
         else {
-            ret = xmlHasProp( node, attr->name );
+            ret = xmlHasProp( self, attr->name );
         }
 
         if ( ret != NULL ) {
@@ -5176,11 +4730,11 @@ setAttributeNodeNS( self, attr_node )
             }
         }
         else {
-            xmlAddChild( node, (xmlNodePtr)attr );
-            xmlReconciliateNs(node->doc, node);
+            xmlAddChild( self, (xmlNodePtr)attr );
+            xmlReconciliateNs(self->doc, self);
         }
         if ( attr->_private != NULL ) {
-            PmmFixOwner( SvPROXYNODE(attr_node), SvPROXYNODE(self) );
+            PmmFixOwner( SvPROXYNODE(attr_node), PmmPROXYNODE(self) );
         }
         if ( ret == NULL ) {
             XSRETURN_UNDEF;
@@ -5192,24 +4746,20 @@ setAttributeNodeNS( self, attr_node )
 
 SV *
 removeAttributeNode( self, attr_node )
-        SV * self
+        xmlNodePtr self
         SV * attr_node
     PREINIT:
-        xmlNodePtr node = PmmSvNode( self );
         xmlAttrPtr attr = (xmlAttrPtr)PmmSvNode( attr_node );
         xmlAttrPtr ret;
     INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
         if ( attr == NULL ) {
             croak( "lost attribute node" );
         }
     CODE:
-        if ( attr == NULL || attr->type != XML_ATTRIBUTE_NODE ) {
+        if ( attr->type != XML_ATTRIBUTE_NODE ) {
             XSRETURN_UNDEF;
         }
-        if ( attr->parent != node ) {
+        if ( attr->parent != self ) {
             XSRETURN_UNDEF;
         }
         ret = attr;
@@ -5221,19 +4771,16 @@ removeAttributeNode( self, attr_node )
 
 void
 appendText( self, string )
-        SV * self
+        xmlNodePtr self
         SV * string
     ALIAS:
         appendTextNode = 1
         XML::LibXML::DocumentFragment::appendText = 2
         XML::LibXML::DocumentFragment::appendTextNode = 3
     PREINIT:
-        xmlNodePtr node   = PmmSvNode( self );
-        xmlChar * content = nodeSv2C( string, node );
+        xmlChar * content;
     INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
+        content = nodeSv2C( string, self );
         if ( content == NULL ) {
             XSRETURN_UNDEF;
         }
@@ -5242,43 +4789,37 @@ appendText( self, string )
             XSRETURN_UNDEF;
         }
     CODE:
-        xmlNodeAddContent( node, content );
+        xmlNodeAddContent( self, content );
         xmlFree(content);
 
 void
 appendTextChild( self, strname, strcontent=&PL_sv_undef, nsURI=&PL_sv_undef )
-        SV * self
+        xmlNodePtr self
         SV * strname
         SV * strcontent
         SV * nsURI
     PREINIT:
-        xmlNodePtr node   = PmmSvNode( self );
-        xmlChar * name    = nodeSv2C( strname, node );
+        xmlChar * name;
         xmlChar * content = NULL;
         xmlChar * encstr  = NULL;
     INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
-        if ( name == NULL ) {
-            XSRETURN_UNDEF;
-        }
+        name    = nodeSv2C( strname, self );
         if ( xmlStrlen(name) == 0 ) {
             xmlFree(name);
             XSRETURN_UNDEF;
         }
     CODE: 
-        content = nodeSv2C(strcontent, node);
+        content = nodeSv2C(strcontent, self);
         if ( content &&  xmlStrlen( content ) == 0 ) {
             xmlFree(content);
             content=NULL;
         }
         else if ( content ) {
-            encstr = xmlEncodeEntitiesReentrant( node->doc, content );
+            encstr = xmlEncodeEntitiesReentrant( self->doc, content );
             xmlFree(content);
         }
 
-        xmlNewChild( node, NULL, name, encstr );
+        xmlNewChild( self, NULL, name, encstr );
 
         if ( encstr ) 
             xmlFree(encstr);
@@ -5311,8 +4852,8 @@ new( CLASS, content )
         RETVAL
 
 SV *
-substringData( perlnode, offset, length ) 
-        SV * perlnode
+substringData( self, offset, length ) 
+        xmlNodePtr self
         int offset
         int length
     PREINIT:
@@ -5320,15 +4861,10 @@ substringData( perlnode, offset, length )
         xmlChar * substr = NULL;
         int len = 0;
         int dl = 0;
-        xmlNodePtr node = PmmSvNode( perlnode );
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( node != NULL && offset >= 0 && length > 0 ) {
+        if ( offset >= 0 && length > 0 ) {
             dl = offset + length - 1 ;
-            data = domGetNodeValue( node );
+            data = domGetNodeValue( self );
             len = xmlStrlen( data );
             if ( data != NULL && len > 0 && len > offset ) {
                 if ( dl > len ) 
@@ -5349,54 +4885,40 @@ substringData( perlnode, offset, length )
         RETVAL
 
 void
-setData( perlnode, value )
-        SV * perlnode
+setData( self, value )
+        xmlNodePtr self
         SV * value
     ALIAS:
         XML::LibXML::Attr::setValue = 1 
         XML::LibXML::PI::_setData = 2
     PREINIT:
         xmlChar * encstr = NULL;
-        xmlNodePtr node = PmmSvNode(perlnode);
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( node != NULL ) {
-            encstr = nodeSv2C(value,node);
-            domSetNodeValue( node, encstr );
-            xmlFree(encstr);
-        }
+        encstr = nodeSv2C(value,self);
+        domSetNodeValue( self, encstr );
+        xmlFree(encstr);
 
 void 
-appendData( perlnode, value )
-        SV * perlnode
+appendData( self, value )
+        xmlNodePtr self
         SV * value
     PREINIT:
         xmlChar * data = NULL;
         xmlChar * encstring = NULL;
-        xmlNodePtr node = PmmSvNode(perlnode);
         int strlen = 0;
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( node != NULL ) {
-            encstring = Sv2C( value,
-                              node->doc!=NULL ? node->doc->encoding : NULL );
+        encstring = Sv2C( value,
+                          self->doc!=NULL ? self->doc->encoding : NULL );
             
-            if ( encstring != NULL ) {
-                strlen = xmlStrlen( encstring );
-                xmlTextConcat( node, encstring, strlen );
-                xmlFree( encstring );
-            }
+       if ( encstring != NULL ) {
+            strlen = xmlStrlen( encstring );
+            xmlTextConcat( self, encstring, strlen );
+            xmlFree( encstring );
         }
 
 void
-insertData( perlnode, offset, value ) 
-        SV * perlnode
+insertData( self, offset, value ) 
+        xmlNodePtr self
         int offset
         SV * value
     PREINIT:
@@ -5405,21 +4927,16 @@ insertData( perlnode, offset, value )
         xmlChar * new  = NULL;
         xmlChar * encstring = NULL;
         int dl = 0;
-        xmlNodePtr node = PmmSvNode(perlnode);
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( node != NULL && offset >= 0 ) {
+        if ( offset >= 0 ) {
             encstring = Sv2C( value,
-                              node->doc!=NULL ? node->doc->encoding : NULL );
+                              self->doc!=NULL ? self->doc->encoding : NULL );
             if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
-                data = domGetNodeValue(node);
+                data = domGetNodeValue(self);
                 if ( data != NULL && xmlStrlen( data ) > 0 ) {
                     if ( xmlStrlen( data ) < offset ) {
                         data = xmlStrcat( data, encstring );
-                        domSetNodeValue( node, data );
+                        domSetNodeValue( self, data );
                     }
                     else {
                         dl = xmlStrlen( data ) - offset;
@@ -5439,7 +4956,7 @@ insertData( perlnode, offset, value )
                         if ( after != NULL ) 
                             new = xmlStrcat(new, after );
     
-                        domSetNodeValue( node, new );
+                        domSetNodeValue( self, new );
 
                         xmlFree( new );
                         xmlFree( after );
@@ -5447,15 +4964,15 @@ insertData( perlnode, offset, value )
                     xmlFree( data );
                 }
                 else {
-                    domSetNodeValue( node, encstring );
+                    domSetNodeValue( self, encstring );
                 }
                 xmlFree(encstring);
             }
         }
 
 void
-deleteData( perlnode, offset, length )
-        SV * perlnode
+deleteData( self, offset, length )
+        xmlNodePtr self
         int offset
         int length
     PREINIT:
@@ -5465,14 +4982,9 @@ deleteData( perlnode, offset, length )
         int len = 0;
         int dl1 = 0;
         int dl2 = 0;
-        xmlNodePtr node = PmmSvNode(perlnode);
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( node != NULL && length > 0 && offset >= 0 ) {
-            data = domGetNodeValue(node);
+        if ( length > 0 && offset >= 0 ) {
+            data = domGetNodeValue(self);
             len = xmlStrlen( data );
             if ( data != NULL
                  && len > 0
@@ -5493,14 +5005,14 @@ deleteData( perlnode, offset, length )
                     }
                 }
 
-                domSetNodeValue( node, new );
+                domSetNodeValue( self, new );
                 xmlFree(new);
             }
         }
 
 void
-replaceData( perlnode, offset,length, value ) 
-        SV * perlnode
+replaceData( self, offset,length, value ) 
+        xmlNodePtr self
         int offset
         int length
         SV * value
@@ -5512,18 +5024,13 @@ replaceData( perlnode, offset,length, value )
         int len = 0;
         int dl1 = 0;
         int dl2 = 0;
-        xmlNodePtr node = PmmSvNode(perlnode);
-    INIT:
-        if ( node == NULL ) {
-            croak( "lost node" );
-        }
     CODE:
-        if ( node != NULL && offset >= 0 ) {
+        if ( offset >= 0 ) {
             encstring = Sv2C( value,
-                              node->doc!=NULL ? node->doc->encoding : NULL );
+                              self->doc!=NULL ? self->doc->encoding : NULL );
 
             if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
-                data = domGetNodeValue(node);
+                data = domGetNodeValue(self);
                 len = xmlStrlen( data );
 
                 if ( data != NULL
@@ -5544,7 +5051,7 @@ replaceData( perlnode, offset,length, value )
                         after = xmlStrsub(data, dl1, dl2 );
                         new = xmlStrcat(new, after );
     
-                        domSetNodeValue( node, new );
+                        domSetNodeValue( self, new );
 
                         xmlFree( new );
                         xmlFree( after );
@@ -5558,7 +5065,7 @@ replaceData( perlnode, offset,length, value )
                         else {
                             new   = xmlStrdup( encstring );
                         }
-                        domSetNodeValue( node, new );
+                        domSetNodeValue( self, new );
                         xmlFree( new );
                     }
                     xmlFree( data );

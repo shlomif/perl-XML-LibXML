@@ -60,6 +60,7 @@ typedef ProxyNode* ProxyNodePtr;
 
 /* this my go only into the header used by the xs */
 #define SvPROXYNODE(x) ((ProxyNodePtr)SvIV(SvRV(x)))
+#define PmmPROXYNODE(x) ((ProxyNodePtr)x->_private)
 
 #define PmmREFCNT(node)      node->count
 #define PmmREFCNT_inc(node)  node->count++
