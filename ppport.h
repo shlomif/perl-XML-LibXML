@@ -216,12 +216,17 @@ __DATA__
 /* Replace: 0 */
 #endif
 
+#ifndef dTHX
+#  define dTHX         dNOOP
+#  define dTHXa(x)     dNOOP
+#  define dTHXoa(x)    dNOOP
+#endif
+
 #ifndef pTHX
-#    define dTHX int dTHX = 0
-#    define pTHX
-#    define pTHX_
-#    define aTHX
-#    define aTHX_
+#    define pTHX  
+#    define pTHX_ 
+#    define aTHX  
+#    define aTHX_ 
 #endif         
 
 #ifndef PTR2IV
