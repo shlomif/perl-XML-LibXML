@@ -111,7 +111,7 @@ LibXML_load_external_entity(
     STRLEN results_len;
     const char * results_pv;
     xmlParserInputBufferPtr input_buf;
-
+    
     if (ctxt->_private == NULL) {
         return xmlNewInputFromFile(ctxt, URL);
     }
@@ -336,47 +336,49 @@ void
 LibXML_error_handler(void * ctxt, const char * msg, ...)
 {
     va_list args;
-    char buffer[50000];
+    SV * sv;
     
-    buffer[0] = 0;
+    sv = NEWSV(0,0);
     
     va_start(args, msg);
-    vsprintf(&buffer[strlen(buffer)], msg, args);
+    sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
     va_end(args);
     
-    sv_catpv(LibXML_error, buffer);
-/*    croak(buffer); */
+    sv_catsv(LibXML_error, sv);
+    SvREFCNT_dec(sv);
 }
 
 void
 LibXML_validity_error(void * ctxt, const char * msg, ...)
 {
     va_list args;
-    char buffer[50000];
+    SV * sv;
     
-    buffer[0] = 0;
+    sv = NEWSV(0,0);
     
     va_start(args, msg);
-    vsprintf(&buffer[strlen(buffer)], msg, args);
+    sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
     va_end(args);
     
-    sv_catpv(LibXML_error, buffer);
-/*    croak(buffer); */
+    sv_catsv(LibXML_error, sv);
+    SvREFCNT_dec(sv);
 }
 
 void
 LibXML_validity_warning(void * ctxt, const char * msg, ...)
 {
     va_list args;
-    char buffer[50000];
+    STRLEN len;
+    SV * sv;
     
-    buffer[0] = 0;
+    sv = NEWSV(0,0);
     
     va_start(args, msg);
-    vsprintf(&buffer[strlen(buffer)], msg, args);
+    sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
     va_end(args);
     
-    warn(buffer);
+    warn(SvPV(sv, len));
+    SvREFCNT_dec(sv);
 }
 
 int
@@ -397,8 +399,8 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     PUSHMARK(SP);
     EXTEND(SP, 3);
     PUSHs(ioref);
-    PUSHs(tbuff);
-    PUSHs(tsize);
+    PUSHs(sv_2mortal(tbuff));
+    PUSHs(sv_2mortal(tsize));
     PUTBACK;
     
     cnt = perl_call_method("read", G_SCALAR);
@@ -422,9 +424,6 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     
     FREETMPS;
     LEAVE;
-    
-    SvREFCNT_dec(tbuff);
-    SvREFCNT_dec(tsize);
     
     return read_length;
 }
@@ -525,7 +524,6 @@ BOOT:
     xmlKeepBlanksDefaultValue = 1;
     xmlSetExternalEntityLoader((xmlExternalEntityLoader)LibXML_load_external_entity);
     xmlSetGenericErrorFunc(PerlIO_stderr(), (xmlGenericErrorFunc)LibXML_error_handler);
-    LibXML_error = newSVpv("", 0);
     xmlGetWarningsDefaultValue = 0;
     xmlLoadExtDtdDefaultValue = 1;
 
@@ -534,7 +532,6 @@ END()
     CODE:
         LibXML_free_all_callbacks();
         xmlCleanupParser();
-        SvREFCNT_dec(LibXML_error);
 
 SV *
 match_callback(self, ...)
@@ -649,7 +646,10 @@ get_last_error(CLASS)
     PREINIT:
         STRLEN len;
     CODE:
-        RETVAL = SvPV(LibXML_error, len);
+        RETVAL = NULL;
+        if (LibXML_error != NULL) {
+            RETVAL = SvPV(LibXML_error, len);
+        }
     OUTPUT:
         RETVAL
 
@@ -674,7 +674,7 @@ _parse_string(self, string)
         }
         ctxt->_private = (void*)self;
         
-        SvCUR_set(LibXML_error, 0);
+        LibXML_error = newSVpv("", 0);
         
         ret = xmlParseDocument(ctxt);
         
@@ -683,16 +683,14 @@ _parse_string(self, string)
         real_dom = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
         
+        sv_2mortal(LibXML_error);
+        
         if (!well_formed) {
             xmlFreeDoc(real_dom);
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
         }
         else {
-            #xmlFreeDoc(real_dom);
-            #RETVAL = &PL_sv_undef;    
-            #croak(SvPV(LibXML_error, len));
-
             proxy = make_proxy_node( (xmlNodePtr)real_dom ); 
 
             RETVAL = sv_newmortal();
@@ -713,9 +711,12 @@ _parse_fh(self, fh)
         xmlDocPtr real_dom;
         ProxyObject* proxy;
     CODE:
-        SvCUR_set(LibXML_error, 0);
+        LibXML_error = newSVpv("", 0);
         
         real_dom = LibXML_parse_stream(self, fh);
+        
+        sv_2mortal(LibXML_error);
+        
         if (real_dom == NULL) {
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
@@ -749,13 +750,15 @@ _parse_file(self, filename)
         }
         ctxt->_private = (void*)self;
         
-        SvCUR_set(LibXML_error, 0);
+        LibXML_error = newSVpv("", 0);
         
         xmlParseDocument(ctxt);
         well_formed = ctxt->wellFormed;
 
         real_dom = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
+        
+        sv_2mortal(LibXML_error);
         
         if (!well_formed) {
             xmlFreeDoc(real_dom);
@@ -789,9 +792,11 @@ parse_html_string(self, string)
     CODE:
         ptr = SvPV(string, len);
         
-        SvCUR_set(LibXML_error, 0);
+        LibXML_error = newSVpv("", 0);
         
         real_dom = htmlParseDoc(ptr, NULL);
+        
+        sv_2mortal(LibXML_error);
         
         if (!real_dom) {
             RETVAL = &PL_sv_undef;    
@@ -818,9 +823,12 @@ parse_html_fh(self, fh)
         xmlDocPtr real_dom;
         ProxyObject* proxy;
     CODE:
-        SvCUR_set(LibXML_error, 0);
+        LibXML_error = newSVpv("", 0);
         
         real_dom = LibXML_parse_html_stream(self, fh);
+        
+        sv_2mortal(LibXML_error);
+        
         if (real_dom == NULL) {
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
@@ -846,10 +854,12 @@ parse_html_file(self, filename)
         xmlDocPtr real_dom;
         ProxyObject * proxy;
     CODE:
-        SvCUR_set(LibXML_error, 0);
+        LibXML_error = newSVpv("", 0);
         
         real_dom = htmlParseFile(filename, NULL);
 
+        sv_2mortal(LibXML_error);
+        
         if (!real_dom) {
             RETVAL = &PL_sv_undef ;  
             croak(SvPV(LibXML_error, len));
@@ -2553,6 +2563,7 @@ appendWellBalancedChunk( self, chunk )
         if( self->doc != NULL ) {
             chunk = domEncodeString( self->doc->encoding, chunk );
         }
+        LibXML_error = sv_2mortal(newSVpv("", 0));
         rv = domReadWellBalancedString( self->doc, chunk );
         if ( rv != NULL ) {
             xmlAddChildList( self , rv );
