@@ -3,7 +3,7 @@
 
 use Test;
 use Devel::Peek;
-BEGIN { plan tests=>65; }
+BEGIN { plan tests=>86; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -78,7 +78,77 @@ ok( defined $attr && $attr->name() eq 'test' && $attr->getValue() eq 'value' );
 $attr->setValue( 'other' );
 ok( $attr->getValue(), 'other' );
 
-    
+###################################################
+print "# text node tests\n";
+
+my $textnode = $dom->createTextNode("test");
+ok( $textnode );
+ok( $textnode->nodeValue(), "test" );
+
+# DOM spec stuff
+
+my $tnstr = $textnode->substringData( 1,2 );
+ok( $tnstr , "es" );
+ok( $textnode->nodeValue(), "test" );
+
+$textnode->appendData( "test" );
+ok( $textnode->nodeValue(), "testtest" );
+
+# this should always work
+$textnode->insertData( 4, "TesT" );
+ok( $textnode->nodeValue(), "testTesTtest" );
+# this should append
+$textnode->setData( "test" );
+$textnode->insertData( 6, "Test" );
+ok( $textnode->nodeValue(), "testTest" );
+$textnode->setData( "test" );
+$textnode->insertData( 3, "" );
+ok( $textnode->nodeValue(), "test" );
+
+# delete data
+$textnode->deleteData( 1,2 );
+ok( $textnode->nodeValue(), "tt" );
+$textnode->setData( "test" );
+$textnode->deleteData( 1,10 );
+ok( $textnode->nodeValue(), "t" );
+$textnode->setData( "test" );
+$textnode->deleteData( 10,1 );
+ok( $textnode->nodeValue(), "test" );
+$textnode->deleteData( 1,0 );
+ok( $textnode->nodeValue(), "test" );
+$textnode->deleteData( 0,0 );
+ok( $textnode->nodeValue(), "test" );
+$textnode->deleteData( 0,2 );
+ok( $textnode->nodeValue(), "st" );
+
+$textnode->setData( "test" );
+$textnode->replaceData( 1,2, "phish" );
+ok( $textnode->nodeValue(), "tphisht" );
+$textnode->setData( "test" );
+$textnode->replaceData( 1,4, "phish" );
+ok( $textnode->nodeValue(), "tphish" );
+$textnode->setData( "test" );
+$textnode->replaceData( 1,0, "phish" );
+ok( $textnode->nodeValue(), "tphishest" );
+
+# now the cool functions they can't do in java :)
+$textnode->setData( "test" );
+
+$textnode->replaceDataString( "es", "new" );   
+ok( $textnode->nodeValue(), "tnewt" );
+
+$textnode->replaceDataRegEx( 'n(.)w', '$1s' );
+ok( $textnode->nodeValue(), "test" );
+
+$textnode->setData( "blue phish, white phish, no phish" );
+$textnode->replaceDataRegEx( 'phish', 'test' );
+ok( $textnode->nodeValue(), "blue test, white phish, no phish" );
+
+# replace them all!
+$textnode->replaceDataRegEx( 'phish', 'test', 'g' );
+ok( $textnode->nodeValue(), "blue test, white test, no test" );
+
+
 ###################################################
 print "# child node functions:\n";
 
