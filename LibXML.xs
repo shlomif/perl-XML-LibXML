@@ -97,6 +97,13 @@ LibXML_load_external_entity(
         return xmlNewInputFromFile(ctxt, URL);
     }
     
+    if (URL == NULL) {
+        URL = "";
+    }
+    if (ID == NULL) {
+        ID = "";
+    }
+    
     self = (SV *)ctxt->_private;
     real_obj = (HV *)SvRV(self);
     func = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
