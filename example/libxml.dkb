@@ -261,13 +261,13 @@ EOT</programlisting>
       <para>For further information, please check the following documentation:</para>
       <variablelist>
         <varlistentry>
-          <term>XML::LibXML-Parser</term>
+          <term>XML::LibXML::Parser</term>
           <listitem>
             <para>Parsing XML Files with XML::LibXML</para>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>XML::LibXML-DOM</term>
+          <term>XML::LibXML::DOM</term>
           <listitem>
             <para>XML::LibXML DOM Implementation</para>
           </listitem>
@@ -436,17 +436,17 @@ EOT</programlisting>
   <chapter>
     <title>Parsing XML Files with XML::LibXML</title>
     <titleabbrev>XML::LibXML-Parser</titleabbrev>
-    <para></para>
+    <para>TO BE DONE</para>
     <sect1>
       <title>Parsing</title>
-      <para></para>
+      <para>TO BE DONE</para>
       <sect2>
         <title>Input Callbacks</title>
-        <para></para>
+        <para>TO BE DONE</para>
       </sect2>
       <sect2>
         <title>DOM Parser</title>
-        <para></para>
+        <para>TO BE DONE</para>
       </sect2>
       <sect2>
         <title>Push Parser</title>
@@ -549,20 +549,20 @@ print $doc-&#62;toString(); # returns &#34;&#60;foo&#62;bar&#60;/foo&#62;&#34;</
       </sect2>
       <sect2>
         <title>SAX Parser</title>
-        <para></para>
+        <para>TO BE DONE</para>
       </sect2>
     </sect1>
     <sect1>
       <title>Serialization</title>
-      <para></para>
+      <para>TO BE DONE</para>
     </sect1>
     <sect1>
       <title>Options</title>
-      <para></para>
+      <para>TO BE DONE</para>
     </sect1>
     <sect1>
       <title>Error Reporting</title>
-      <para></para>
+      <para>TO BE DONE</para>
     </sect1>
   </chapter>
   <chapter>
@@ -858,6 +858,14 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
           returns the data in the document encoding rather than UTF8! If you
           want UTF8 ecoded XML, you have to change the conding by using
           <function>setEncoding()</function></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>toStringC14N</term>
+        <listitem>
+          <para><funcsynopsis><funcsynopsisinfo>$c14nstr = $doc-&#62;toStringC14N($comment_flag,$xpath); </funcsynopsisinfo></funcsynopsis>A
+          variation to toString, that returns the canonized from of the given
+          document.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -1722,6 +1730,31 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
           encoding of the document) rather than UTF8.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>toStringC14N</term>
+        <listitem>
+          <funcsynopsis>
+            <funcsynopsisinfo>$c14nstring = $node-&#62;toString($with_comments, $xpath_expression);</funcsynopsisinfo>
+          </funcsynopsis>
+          <para>The function is similar to toString(). Instead of simply
+          searializing the document tree, it transforms it as it is specified
+          in the XML-C14N Specification. Such transformation is known as
+          canonization. </para>
+          <para>If $with_comments is 0 or not defined, the result-document
+          will not contain any comments that exist in the original document.
+          To include comments into the canonized document, $with_comments has
+          to be set to 1.</para>
+          <para>The parameter $xpath_expression defines the nodeset of nodes
+          that should be visible in the resulting document. This can be used
+          to filter out some nodes. One has to note, that only the nodes that
+          are part of the nodeset, will be included into the result-document.
+          Their child-nodes will not exist in the resulting document, unless
+          they are part of the nodeset defined by the xpath expression.</para>
+          <para>If $xpath_expression is ommitted or empty, toStringC14N() will
+          include all nodes in the given sub-tree.</para>
+          <para>No serializing flags will be recognized by this function!</para>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <variablelist>
       <varlistentry>
@@ -1861,7 +1894,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
     </variablelist>
     <variablelist>
       <varlistentry>
-        <term>removeChildNodes</term>
+        <term>removeChildNode</term>
         <listitem>
           <funcsynopsis>
             <funcsynopsisinfo>$node-&#62;removeChildNodes();</funcsynopsisinfo>

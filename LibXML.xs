@@ -20,6 +20,8 @@ extern "C" {
  */
 #include <libxml/xmlversion.h>
 
+#define DEBUG_C14N
+
 /* libxml2 stuff */
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -45,8 +47,10 @@ extern "C" {
  * therefore there is the need to ship as well the GDOME core headers.
  */
 #ifdef XML_LIBXML_GDOME_SUPPORT
+
 #include <libgdome/gdome.h>
 #include <libgdome/gdome-libxml-util.h>
+
 #endif
 
 /* XML::LibXML stuff */
@@ -3980,6 +3984,9 @@ removeChildNodes( self )
 void
 unbindNode( self )
         xmlNodePtr self
+    ALIAS:
+        XML::LibXML::Node::unlink = 1
+        XML::LibXML::Node::unlinkNode = 2
     PREINIT:
         ProxyNodePtr dfProxy  = NULL;
         ProxyNodePtr docfrag     = NULL;
@@ -4197,6 +4204,133 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
             xmlBufferFree( buffer );
 	        xs_warn("Failed to convert doc to string");           
             XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+
+SV *
+_toStringC14N(self, comments, xpath)
+        xmlNodePtr self
+        int comments
+        SV * xpath
+    PREINIT:
+        xmlChar *result               = NULL;
+        xmlChar *nodepath             = NULL;
+        xmlXPathContextPtr child_ctxt = NULL;
+        xmlXPathObjectPtr child_xpath = NULL;
+        xmlNodeSetPtr nodelist        = NULL;
+        xmlNodePtr refNode            = NULL;
+    INIT:
+        /* due to how c14n is implemented, the nodeset it receives must
+          include child nodes; ie, child nodes aren't assumed to be rendered.
+          so we use an xpath expression to find all of the child nodes. */
+        
+        if ( self->doc == NULL ) {
+            croak("Node passed to toStringC14N must be part of a document");
+        }
+
+        refNode = self;
+    CODE:
+        if ( xpath != NULL && xpath != &PL_sv_undef ) {
+            nodepath = Sv2C( xpath, NULL );
+        }
+
+        if ( nodepath != NULL && xmlStrlen( nodepath ) == 0 ) {
+            xmlFree( nodepath );
+            nodepath = NULL;
+        }
+
+        if ( nodepath == NULL 
+             && self->type != XML_DOCUMENT_NODE 
+             && self->type != XML_HTML_DOCUMENT_NODE 
+             && self->type != XML_DOCB_DOCUMENT_NODE
+           ) {
+            nodepath = xmlStrdup( ".//*" );         
+        }
+
+        if ( nodepath != NULL ) {
+            if ( self->type == XML_DOCUMENT_NODE
+                 || self->type == XML_HTML_DOCUMENT_NODE
+                 || self->type == XML_DOCB_DOCUMENT_NODE ) {
+                refNode = xmlDocGetRootElement( self->doc );
+            }
+        
+            child_ctxt = xmlXPathNewContext(self->doc);
+            if (!child_ctxt) {
+                if ( nodepath != NULL ) {
+                    xmlFree( nodepath );
+                }
+                croak("Failed to create xpath context");
+            }
+    
+            child_ctxt->node = self;
+            /* get the namespace information */
+            if (self->type == XML_DOCUMENT_NODE) {
+                child_ctxt->namespaces = xmlGetNsList( self->doc,
+                                                       xmlDocGetRootElement( self->doc ) );
+            }
+            else {
+                child_ctxt->namespaces = xmlGetNsList(self->doc, self);
+            }
+            child_ctxt->nsNr = 0;
+            if (child_ctxt->namespaces != NULL) {
+                while (child_ctxt->namespaces[child_ctxt->nsNr] != NULL)
+                child_ctxt->nsNr++;
+            }
+
+            child_xpath = xmlXPathEval(nodepath, child_ctxt);
+            if (child_xpath == NULL) {
+                if (child_ctxt->namespaces != NULL) {
+                    xmlFree( child_ctxt->namespaces );
+                }
+                xmlXPathFreeContext(child_ctxt);
+                if ( nodepath != NULL ) {
+                    xmlFree( nodepath );
+                }
+                croak("2 Failed to compile xpath expression");
+            }
+
+            nodelist = child_xpath->nodesetval;        
+            if ( nodelist == NULL ) {
+                xmlFree( nodepath );
+                xmlXPathFreeObject(child_xpath);
+                if (child_ctxt->namespaces != NULL) {
+                    xmlFree( child_ctxt->namespaces );
+                }
+                xmlXPathFreeContext(child_ctxt);
+                croak( "cannot canonize empty nodeset!" );
+            }
+        }
+        /* LibXML_init_error(); */
+        
+        xmlC14NDocDumpMemory( self->doc,
+                              nodelist,
+                              0, NULL,
+                              comments,
+                              &result );
+
+        if ( child_xpath ) {
+            xmlXPathFreeObject(child_xpath);
+        }
+        if ( child_ctxt ) {
+            if (child_ctxt->namespaces != NULL) {
+                xmlFree( child_ctxt->namespaces );
+            }
+            xmlXPathFreeContext(child_ctxt);
+        }
+        if ( nodepath != NULL ) {
+            xmlFree( nodepath );
+        }
+
+        /* sv_2mortal( LibXML_error ); */
+        /* LibXML_croak_error(); */
+
+        if (result == NULL) {
+             croak("Failed to convert doc to string in doc->toStringC14N");
+        } else {
+            RETVAL = C2Sv( result, NULL );
+            xmlFree(result);
         }
     OUTPUT:
         RETVAL

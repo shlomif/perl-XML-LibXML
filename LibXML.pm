@@ -619,6 +619,14 @@ sub setOwnerDocument {
     $doc->adoptNode( $self );
 }
 
+sub toStringC14N {
+    my $self = shift;
+    my ($comments, $xpath) = @_;
+
+    $comments = 0 unless defined $comments;
+    return $self->_toStringC14N( $comments, $xpath );
+}
+
 1;
 
 #-------------------------------------------------------------------------#
@@ -627,7 +635,7 @@ sub setOwnerDocument {
 package XML::LibXML::Document;
 
 use vars qw(@ISA);
-@ISA = 'XML::LibXML::Node';
+@ISA = ('XML::LibXML::Node');
 
 sub setDocumentElement {
     my $doc = shift;
