@@ -356,7 +356,7 @@ is therefore a shortcut for
 
 
             <method name="toString" 
-                    synopsis="$docstring = $dom->toString([$format]);">
+                    synopsis="$docstring = $dom->toString($format);">
                 <p>
                     <st>toString</st> is a deparsing function, so the
                     DOM Tree can be translated into a string, ready
@@ -366,32 +366,60 @@ is therefore a shortcut for
                     The optional <st>$format</st> parameter sets the
                     indenting of the output. This parameter is
                     expected to be an <em>integer</em> value, that
-                    specifies the number of linebreaks for each node.
+                    specifies that indentation should be used. The
+                    format parameter can have three different values
+                    if it is used: 
                 </p>
                 <p>
-                    For more information about the formatted output
-                    check the documentation of
-                    <em>xmlDocDumpFormatMemory</em> in
-                    <em>libxml2/tree.h</em>.
+                    If $format is 0, than the document is dumped as it
+                    was originally parsed
+                </p>
+                <p>
+                    If $format is 1, libxml2 will add ignoreable
+                    whitespaces, so the nodes content is easier to read.
+                    Existing text nodes will not be altered
+                </p>
+                <p>
+                    If $format is 2 (or higher), libxml2 will act as
+                    $format == 1 but it add a leading and a trailing
+                    linebreak to each text node.
+                </p>
+                <p>
+                    libxml2 uses a hardcoded indentation of 2 space
+                    characters per indentation level. This value can
+                    not be altered on runtime.
+                </p>
+                <p>
+                    <st>NOTE</st>: XML::LibXML::Document::toString
+                    returns the data in the document encoding rather
+                    than UTF8! 
                 </p>
             </method>
             
             <method name="toFile"
-                    synopsis="$state = $doc->toFile">
+                    synopsis="$state = $doc->toFile($filename, $format);">
                 <p>
                     This function is similar to toString(), but it
                     writes the document directly into a
                     filesystem. This function is very usefull, if one
                     needs to store large documents.
                 </p>
+                <p>
+                     The format parameter has the same behaviour as in
+                     toString().
+                </p>
             </method>
 
             <method name="toFH"
-                    synopsis="$state = $doc->toFH">
+                    synopsis="$state = $doc->toFH($fh, $format);">
                 <p>
                     This function is similar to toString(), but it
                     writes the document directly to a filehandler or a
                     stream.
+                </p>
+                <p>
+                     The format parameter has the same behaviour as in
+                     toString().
                 </p>
             </method>
 
@@ -1013,7 +1041,7 @@ is therefore a shortcut for
             </method>
 
             <method name="toString"
-                    synopsis="$xmlstring = $node->toString($docencoding);">
+                    synopsis="$xmlstring = $node->toString($format,$docencoding);">
                 <p>
                     This is the equivalent to
                     <em>XML::LibXML::Document::toString</em> for a
@@ -1022,9 +1050,12 @@ is therefore a shortcut for
                 </p>
 
                 <p>
-                    If the optional $docencoding flag is set, this
-                    function returns the string in its original
-                    encoding (the encoding of the document)
+                    Additionally to the $format flag of
+                    XML::LibXML::Document, this version accepts the
+                    optional $docencoding flag. If this flag is set
+                    this function returns the string in its original
+                    encoding (the encoding of the document) rather
+                    than UTF8.
                 </p>
             </method>
 

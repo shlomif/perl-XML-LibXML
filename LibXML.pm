@@ -582,11 +582,10 @@ use vars qw(@ISA);
 
 sub toString {
     my $self = shift;
-    my $enc  = shift;
     my $retval = "";
     if ( $self->hasChildNodes() ) {
         foreach my $n ( $self->childNodes() ) {
-            $retval .= $n->toString($enc);
+            $retval .= $n->toString(@_);
         }
     }
     return $retval;
@@ -1254,6 +1253,10 @@ Additionally it is possible to serialize single nodes by using
 toString() for the node. Since a node has no DTD and no XML
 Declaration the related flags will take no effect. Nevertheless
 setTagCompression is supported.
+
+All basic serialization function recognize an additional formating
+flag. This flag is an easy way to format complex xml documents without
+adding ignoreable whitespaces.
 
 =head1 XML::LibXML::Document
 

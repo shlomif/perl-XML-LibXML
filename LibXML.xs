@@ -1890,7 +1890,7 @@ toFH( self, filehandler, format=0 )
 
 
         if ( format <= 0 ) {
-            # warn( "use no formated toString!" );
+            xs_warn( "use no formated toFH!" );
             RETVAL =xmlSaveFormatFileTo( buffer, 
                                          doc,
                                          encoding,
@@ -1933,7 +1933,7 @@ toFile( self, filename, format=0 )
         }
 
         if ( format <= 0 ) {
-            # warn( "use no formated toString!" );
+            xs_warn( "use no formated toFile!" );
             RETVAL = xmlSaveFile( filename, (xmlDocPtr)PmmSvNode(self) );
         }
         else {
@@ -3654,9 +3654,10 @@ setBaseURI( self, URI )
         }
 
 SV*
-toString( self, useDomEncoding = &PL_sv_undef )
+toString( self, format=0, useDomEncoding = &PL_sv_undef )
         SV * self
         SV * useDomEncoding
+        int format
     PREINIT:
         xmlBufferPtr buffer;
         char *ret = NULL;
@@ -3669,9 +3670,19 @@ toString( self, useDomEncoding = &PL_sv_undef )
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
         buffer = xmlBufferCreate();
-        xmlNodeDump( buffer,
-                     PmmNODE(SvPROXYNODE(self))->doc,
-                     PmmNODE(SvPROXYNODE(self)), 0, 0 );
+        if ( format <= 0 ) {
+            xmlNodeDump( buffer,
+                         PmmNODE(SvPROXYNODE(self))->doc,
+                         PmmNODE(SvPROXYNODE(self)), 0, format);
+        }
+        else {
+            int t_indent_var = xmlIndentTreeOutput;
+            xmlIndentTreeOutput = 1;
+            xmlNodeDump( buffer,
+                         PmmNODE(SvPROXYNODE(self))->doc,
+                         PmmNODE(SvPROXYNODE(self)), 0, format);
+            xmlIndentTreeOutput = t_indent_var;
+        }
         if ( buffer->content != 0 ) {
             ret= xmlStrdup( buffer->content );
         }
