@@ -1,10 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
 *NOTE:* 
-The General DOM API changed from Version 1.40 to 1.49/1.50. Therefore
-the behaviour of some functions may have changed to previous
-versions. Make shure you read the informations on the XML::LibXML::DOM
-manpage!
+Version 1.53 fixes potentional buffer overflows. 
 
 1.53
    - catalog interface
@@ -19,9 +16,11 @@ manpage!
    - fixed very stupid encoding bug. all UTF8 strings will now be marked as 
      UTF8
    - fixed namespace functions to work with empty namespaces
-   - made XML::LibXML::SAX parser running without errors in most cases 
-     (DTD handling is still not implemented)
+   - made XML::LibXML::SAX parser running without errors in most (all?) cases 
+     (DTD handling is still not implemented). 
+   - XML::LibXML::SAX speedups
    - more security checks
+   - removed some redundand code
    - more documentation
 
 1.52
