@@ -3,6 +3,7 @@
 package XML::LibXML::SAX::Builder;
 
 use XML::LibXML;
+use XML::NamespaceSupport;
 
 sub new {
     my $class = shift;
@@ -18,6 +19,8 @@ sub start_document {
         $self->xml_decl({Version => ($self->{Version} || '1.0') , Encoding => $self->{Encoding}});
     }
 
+    $self->{NamespaceStack} = XML::NamespaceSupport->new;
+    $self->{NamespaceStack}->push_context;
     $self->{Parent} = undef;
 }
 
@@ -37,10 +40,27 @@ sub end_document {
     my ($self, $doc) = @_;
     my $dom = $self->{DOM};
     $dom = $self->{Parent} unless defined $dom; # this is for parsing document chunks
+    delete $self->{NamespaceStack};
     delete $self->{Parent};
     delete $self->{DOM};
     return $dom;
 }
+
+sub start_prefix_mapping {
+    my $self = shift;
+    my $ns = shift;
+
+    $self->{NamespaceStack}->declare_prefix( $ns->{Prefix}, $ns->{NamespaceURI} );
+}
+
+
+sub end_prefix_mapping {
+    my $self = shift;
+    my $ns = shift;
+
+    $self->{NamespaceStack}->undeclare_prefix( $ns->{Prefix} );
+}
+
 
 sub start_element {
     my ($self, $el) = @_;
@@ -48,6 +68,8 @@ sub start_element {
 
     unless ( defined $self->{DOM} or defined $self->{Parent} ) {
         $self->{Parent} = XML::LibXML::DocumentFragment->new();
+        $self->{NamespaceStack} = XML::NamespaceSupport->new;
+        $self->{NamespaceStack}->push_context;
     }
 
     if ($el->{NamespaceURI}) {
@@ -57,7 +79,8 @@ sub start_element {
         }
         else {
             $node = XML::LibXML::Element->new( $el->{Name} );
-            $node->setNamespace( $el->{NamespaceURI},$el->{Prefix} , 1 );
+            $node->setNamespace( $el->{NamespaceURI},
+                                 $el->{Prefix} , 1 );
         }
     }
     else {
@@ -67,6 +90,12 @@ sub start_element {
         else {
             $node = XML::LibXML::Element->new( $el->{Name} );
         }
+    }
+
+    # build namespaces
+    foreach my $p ( $self->{NamespaceStack}->get_declared_prefixes() ) {
+        my $uri = $self->{NamespaceStack}->get_uri($p);
+        $node->setNamespace($uri, $p, $uri eq $el->{NamespaceURI} ? 1 : 0 );
     }
 
     # append
@@ -79,18 +108,15 @@ sub start_element {
         $self->{Parent} = $node;
     }
 
+     $self->{NamespaceStack}->push_context;
+
     # do attributes
     foreach my $key (keys %{$el->{Attributes}}) {
         my $attr = $el->{Attributes}->{$key};
         if (ref($attr)) {
-            if ( not defined $attr->{Prefix} or $attr->{Prefix} ne "xmlns" ) {
-                # SAX2 attributes
-                $node->setAttributeNS($attr->{NamespaceURI} || "",
-                                      $attr->{Name}, $attr->{Value});
-            }
-            else {
-                $node->setNamespace( $attr->{Value}, $attr->{LocalName},0 );
-            }
+            next if defined $attr->{Prefix} and $attr->{Prefix} eq "xmlns";
+            $node->setAttributeNS($attr->{NamespaceURI} || "",
+                                  $attr->{Name}, $attr->{Value});
         }
         else {
             $node->setAttribute($key => $attr);
@@ -101,6 +127,8 @@ sub start_element {
 sub end_element {
     my ($self, $el) = @_;
     return unless $self->{Parent};
+
+    $self->{NamespaceStack}->pop_context;
     $self->{Parent} = $self->{Parent}->parentNode();
 }
 
@@ -108,6 +136,8 @@ sub characters {
     my ($self, $chars) = @_;
     if ( not defined $self->{DOM} and not defined $self->{Parent} ) {
         $self->{Parent} = XML::LibXML::DocumentFragment->new();
+        $self->{NamespaceStack} = XML::NamespaceSupport->new;
+        $self->{NamespaceStack}->push_context;
     }
     return unless $self->{Parent};
     $self->{Parent}->appendText($chars->{Data});
@@ -118,6 +148,8 @@ sub comment {
     my $comment;
     if ( not defined $self->{DOM} and not defined $self->{Parent} ) {
         $self->{Parent} = XML::LibXML::DocumentFragment->new();
+        $self->{NamespaceStack} = XML::NamespaceSupport->new;
+        $self->{NamespaceStack}->push_context;
     }
 
     if ( defined $self->{DOM} ) {
@@ -159,6 +191,7 @@ sub warning {
 sub error {
     my $self = shift;
     my $error = shift;
+    delete $self->{NamespaceStack};
     delete $self->{Parent};
     delete $self->{DOM};
     $error->throw;
@@ -167,6 +200,7 @@ sub error {
 sub fatal_error {
     my $self = shift;
     my $error = shift;
+    delete $self->{NamespaceStack};
     delete $self->{Parent};
     delete $self->{DOM};
     $error->throw;

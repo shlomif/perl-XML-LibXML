@@ -929,6 +929,16 @@ sub xml_decl {
     $parser->{HANDLER}->xml_decl($decl);
 }
 
+sub start_prefix_mapping {
+    my ( $parser, $prefix, $uri ) = @_;
+    $parser->{HANDLER}->start_prefix_mapping( { Prefix => $prefix, NamespaceURI => $uri } );
+}
+
+sub end_prefix_mapping {
+    my ( $parser, $prefix, $uri ) = @_;
+    $parser->{HANDLER}->end_prefix_mapping( { Prefix => $prefix, NamespaceURI => $uri } );
+}
+
 sub start_element {
     my (  $parser, $elem, $attrs ) = @_;
     my $saxattr = {};
