@@ -13,33 +13,31 @@ EOX
 
 my $doc = XML::LibXML->new()->parse_string($xml);
 my $docElem = $doc->getDocumentElement();
+  
 my $child = ($docElem->getChildnodes())[0];
+    ok($child->hasAttributeNS('http://whatever','href'));
+    ok(not defined $child->getAttribute("abc"));
+    ok(defined($child->getLocalName()));
+    ok(!defined($child->getPrefix()));
+    ok(!defined($child->getNamespaceURI()));
 
-ok($child->hasAttributeNS('http://whatever','href'));
-
-ok(!defined($child->getAttribute('bogus')));
-
-ok(defined($child->getLocalName()));
-ok(!defined($child->getPrefix()));
-ok(!defined($child->getNamespaceURI()));
-
-my $val = $child->getAttributeNS('http://whatever','href');
-ok($val,'out.xml');
+    my $val = $child->getAttributeNS('http://whatever','href');
+    ok($val,'out.xml');
 
 $child = ($docElem->getChildnodes())[1];
-ok($child->getLocalName() eq 'c');
-ok($child->getPrefix() eq 'b');
-ok($child->getNamespaceURI() eq 'http://whatever');
+    ok($child->getLocalName() eq 'c');
+    ok($child->getPrefix() eq 'b');
+    ok($child->getNamespaceURI() eq 'http://whatever');
 
-$child->removeAttributeNS('http://whatever','href');
-ok(!$child->hasAttributeNS('http://whatever','href'));
+    $child->removeAttributeNS('http://whatever','href');
+    ok(!$child->hasAttributeNS('http://whatever','href'));
 
-my $added_attr = 'added.xml';
-$child->setAttributeNS('http://whatever', 'b2:href', $added_attr);
+    my $added_attr = 'added.xml';
+    $child->setAttributeNS('http://whatever', 'b2:href', $added_attr);
 
-ok($child->hasAttributeNS('http://whatever','href')
-   && $child->getAttributeNS('http://whatever','href') eq $added_attr);
-
+    ok($child->hasAttributeNS('http://whatever','href')
+        && $child->getAttributeNS('http://whatever','href') eq $added_attr);
+ 
 my @bytag = $docElem->getElementsByTagName('x');
 ok(scalar(@bytag) == 1);
 

@@ -3,7 +3,7 @@
 
 use Test;
 
-BEGIN { plan tests=>42; }
+BEGIN { plan tests=>47; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -210,7 +210,20 @@ if ( defined $elem1 ) {
       $elem3->hasChildNodes() && 
       $elem3->getFirstChild()->getType() == XML_CDATA_SECTION_NODE && 
       $elem3->getFirstChild()->getData() eq $cdata );
-  
+
+  my $testtxt = "täst";
+  my $elem = $dom->createElement( $testtxt );
+  ok( $elem->getName() eq $testtxt );
+  $elem->appendTextNode( $testtxt );
+  $elem->appendTextChild($testtxt, $testtxt);
+  $elem->setAttribute( 'test', $testtxt );
+
+  my ( $n1, $n2 ) = $elem->getChildnodes();
+  ok( $n1 && $n1->getData() eq $testtxt );
+  ok( $n2 && $n2->getName() eq $testtxt );
+  ok( $n2 && $n2->getLocalName() eq $testtxt );
+
+  ok( $elem->getAttribute( 'test' ) eq $testtxt );
 }
 
 

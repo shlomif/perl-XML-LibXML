@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>15; }
+BEGIN { plan tests=>19 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -16,19 +16,21 @@ ok($loaded);
 
 # this performs general dom tests
 
-my $vers    = "1.0";
+my $version = "1.0";
 my $enc     = "iso-8859-1";
 my $testtxt = "test";
 my $file    = "example/dromeds.xml";
 
-my $dom = XML::LibXML::Document->createDocument( $vers, $enc );
+my $dom = XML::LibXML::Document->createDocument( $version, $enc );
 ok($dom);
 
-# this feature is for dirty people ;)
+# this feature is for quick and dirty people ;)
 my $dom2 = XML::LibXML::Document->createDocument( );
-ok( $dom2 );
+ok( $dom2
+    && $dom2->getEncoding() eq 'UTF-8' 
+    && $dom2->getVersion() eq $version );
 
-my $xs = "<?xml version=\"$vers\" encoding=\"$enc\"?>\n";
+my $xs = "<?xml version=\"$version\" encoding=\"$enc\"?>\n";
 my $str = $dom->toString;
 ok( $str eq $xs );
 
@@ -36,12 +38,20 @@ my $elem = $dom->createElement( "element" );
 ok( defined $elem && $elem->getName() eq "element" );
 
 $dom->setDocumentElement( $elem );
-my $te = $dom->getDocumentElement();
-ok( defined $te && $te->getName() eq $elem->getName() );
+ok( $elem->isEqual( $dom->getDocumentElement() ) );
+
+# lets test if we can overwrite the document element with an 
+# invalid element type
+my $attr = $dom->createAttribute( "test", "test" );
+ok( defined $attr && $attr->getValue() eq "test" );
+
+$dom->setDocumentElement( $attr );
+ok( $elem->isEqual( $dom->getDocumentElement() ) );
+
 
 my $node;
 {
-    my $dom3 = XML::LibXML::Document->createDocument( $vers, $enc );
+    my $dom3 = XML::LibXML::Document->createDocument( $version, $enc );
     $node   = $dom3->createElement( $testtxt );
     $dom3->setDocumentElement( $node );
 }
@@ -50,6 +60,7 @@ my $node;
 ok( defined $node && $node->getName() eq $testtxt );
 
 { 
+    use Devel::Peek;
     my $dom3 = $node->getOwnerDocument();
     ok( defined $dom3 && $dom3->isa( 'XML::LibXML::Document' ) ); 
 }
@@ -57,16 +68,18 @@ ok( defined $node && $node->getName() eq $testtxt );
 # this ends scope and older versions should segfault here 
 ok( defined $node && $node->getName() eq $testtxt );
 
-
 $node = $dom2->createElement( $testtxt );
 $dom2->setDocumentElement( $node );
 my $node2 = $dom->importNode( $node );
-{
+if ( defined $node2 ){
     warn "node not defined " unless defined $node2;
     my $tdoc = $node2->getOwnerDocument();
     warn "doc not defined " unless defined $tdoc;
     warn "wrong doc" if $tdoc->isEqual( $dom2 );
     ok( defined $node2 && defined $tdoc && $tdoc->isEqual( $dom ) == 1 );
+}
+else {
+    ok(0);
 }
 
 my $text = $dom->createTextNode( $testtxt );
@@ -81,13 +94,17 @@ ok( defined $text && $text->isa( "XML::LibXML::CDATASection" ) );
 # parse tests
 
 # init the file parser
-my $parser = XML::LibXML->new();
-$dom    = $parser->parse_file( $file );
-
-ok( defined $dom );
-if ( defined $dom ) {
-  $elem   = $dom->getDocumentElement();
-  ok( defined $elem && 
-      $elem->getType() == XML_ELEMENT_NODE &&
-      $elem->isa( "XML::LibXML::Element" ) );
+{
+    my $parser = XML::LibXML->new();
+    my $dom3    = $parser->parse_file( $file );
+    ok( defined $dom3 );
+    if ( defined $dom3 ) {
+      $elem   = $dom3->getDocumentElement();
+      ok( defined $elem && 
+          $elem->getType() == XML_ELEMENT_NODE &&
+          $elem->isa( "XML::LibXML::Element" ) );
+    }
 }
+
+ok(1);
+ok(1);

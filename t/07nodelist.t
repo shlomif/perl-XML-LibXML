@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl test.pl'
 
 use Test;
-BEGIN { plan tests=>8; }
+BEGIN { plan tests=>13; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -45,7 +45,7 @@ if ( defined $dom ) {
     }	
   
     # we need to create a new document since dromeds is in ASCII ...
-    my $doc = XML::LibXML::Document->new( '1.0', 'iso-8859-1' );
+    my $doc = XML::LibXML::Document->new( '1.0' );
     my $elem2 = $doc->createElement( $camel );
     $doc->setDocumentElement( $elem2 ); 
 
@@ -66,4 +66,20 @@ if ( defined $dom ) {
     # test if the output of simple text nodes will be correct as well
     $elem4 = $doc->createTextNode( $string2 );
     ok( $string2 eq $elem4->toString() );
+}
+
+# attribute lists
+
+my $teststring = '<xml xmlns:b="http://whatever" attr1="1" attr2="2" b:attr3="3"/>';
+my $dom2 = $parser->parse_string( $teststring );
+if( defined $dom2 ) {
+    my $elem = $dom2->getDocumentElement();
+    ok($elem);
+    my @attr = $elem->getAttributes();
+    ok( scalar(@attr) , 3 );
+    ok( $attr[1]->getValue(), 2 );
+
+    my @nsattr = $elem->getAttributesNS("http://whatever");
+    ok( scalar(@nsattr) , 1 );
+    ok( $nsattr[0]->getValue(), 3 );
 }
