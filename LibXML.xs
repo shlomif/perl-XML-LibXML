@@ -622,7 +622,18 @@ LibXML_init_parser( SV * self ) {
     HV* real_obj = NULL;
     SV** item    = NULL;
     SV*  item2   = NULL;
-    /* xmlInitParser(); */ /* useless call */
+
+    /* A NOTE ABOUT xmlInitParser();                     */
+    /* xmlInitParser() should be used only at startup and*/
+    /* not for initializing a single parser. libxml2's   */
+    /* documentation is quite clear about this. If       */
+    /* something fails it is a problem elsewhere. Simply */
+    /* resetting the entire module will lead to unwanted */
+    /* results in server environments, such as if        */ 
+    /* mod_perl is use together with php's xml module.   */
+    /* calling xmlInitParser() here is definitly wrong!  */
+    /* xmlInitParser(); */ 
+
     xmlGetWarningsDefaultValue = 0;
 
     if ( self != NULL ) {
@@ -762,6 +773,12 @@ LibXML_init_parser( SV * self ) {
      /* LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();  */
      /* xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity ); */
 
+
+    xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
+                              (xmlInputOpenCallback) LibXML_input_open,
+                              (xmlInputReadCallback) LibXML_input_read,
+                              (xmlInputCloseCallback) LibXML_input_close);
+
     return real_obj;
 }
 
@@ -785,10 +802,13 @@ LibXML_cleanup_callbacks() {
 
 /*    xs_warn("      cleanup parser callbacks!\n"); */
 
-  /*
     xmlCleanupInputCallbacks();
     xmlRegisterDefaultInputCallbacks();
-    */
+
+    LibXML_read_cb  = NULL;
+    LibXML_match_cb = NULL;
+    LibXML_open_cb  = NULL;
+    LibXML_close_cb = NULL;
 
 /*    if ( LibXML_old_ext_ent_loader != NULL ) { */
 /*        xmlSetExternalEntityLoader( NULL ); */
