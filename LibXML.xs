@@ -1054,6 +1054,19 @@ process_xinclude(self)
     CODE:
         xmlXIncludeProcess((xmlDocPtr)self->object);
 
+char *
+URI (doc, new_URI=NULL)
+        xmlDocPtr doc
+        char * new_URI
+    CODE:
+        RETVAL = doc->URL;
+        if (new_URI) {
+            xmlFree(doc->URL);
+            doc->URL = xmlStrdup(new_URI);
+        }
+    OUTPUT:
+        RETVAL
+
 SV*
 createDocument( CLASS, version="1.0", encoding=0 )
         char * CLASS
