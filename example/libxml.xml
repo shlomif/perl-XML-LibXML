@@ -1017,6 +1017,33 @@ is therefore a shortcut for
                 </p>
             </method>
 
+            <method name="addNewChild"
+                    synopsis="$node = $parent->addNewChild( $nsURI, $name );">
+                <p>
+                    Similar to <em>addChild()</em>, this function uses
+                    low level libxml2 functionality to provide faster
+                    interface for DOM building. <st>addNewChild()</st>
+                    uses <em>xmlNewChild()</em> to create a new node
+                    on a given parent element. 
+                </p>
+                <p>
+                    addNewChild() has two parameters $nsURI and $name,
+                    where $nsURI is an (optional) namespace URI. $name
+                    is the fully qualified element name; addNewChild()
+                    will determine the correct prefix if nessecary.
+                </p>
+                <p>
+                    The function returns the newly created node.
+                </p>
+                <p>
+                    This function is very usefull for DOM building,
+                    where a created node can be directly associated to
+                    its parent. <st>NOTE</st> this function is not
+                    part of the DOM specification and its use will
+                    limit your code to XML::LibXML.
+                </p>
+            </method>
+
             <method name="addSibling" synopsis="$node->addSibling($newNode);">
                 <p>
                     addSibling() allows to add an additional node to
