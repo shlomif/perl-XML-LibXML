@@ -420,10 +420,11 @@ sub toString {
     my $retval = "";
 
     my $intDTD;
-    if ( defined $XML::LibXML::skipDTD
-         and $XML::LibXML::skipDTD == 1 ) {
-        $intDTD = $self->removeInternalSubset;
-    }
+    # if ( defined $XML::LibXML::skipDTD
+    #     and $XML::LibXML::skipDTD == 1 ) {
+    #    $intDTD = 1;
+    #    $self->setExternalSubset( $self->internalSubset );
+    #}
 
     if ( defined $XML::LibXML::skipXMLDeclaration
          and $XML::LibXML::skipXMLDeclaration == 1 ) {
@@ -435,9 +436,9 @@ sub toString {
         $retval =  $self->_toString($flag||0);
     }
 
-    if ( defined $intDTD ) {
-        $self->setInternalSubset( $intDTD );
-    }
+    # if ( defined $intDTD ) {
+    #    $self->setInternalSubset( $self->externalSubset );
+    # }
 
     return $retval;
 }
