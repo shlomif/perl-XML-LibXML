@@ -13,6 +13,23 @@ Revision history for Perl extension XML::LibXML
    - fixed XML::LibXML::Number to support negative numbers
    - added XML Schema validation interface (XML::LibXML::Schema)
    - added XML RelaxNG validation interface (XML::LibXML::RelaxNG)
+   - Michael K. Edwards' patch applied with some amendments from Petr Pajas:
+     * add debian build files (I added SKIP_SAX_INSTALL flag for
+       Makefile.PL and changed the patch so that it doesn't disable
+       sax parser registration completely by default, and rather made
+       debian build use this flag)
+     * general cleanup (use SV_nolen, etc.)
+     * SAX parsers cleanup
+     * general error reporting code cleanup/rewrite, try preventing 
+       possible memory leaks
+     * recover(1) now triggers warnings (disable with $SIG{__WARN__}=sub {})
+     * slighlty more strict parse_string behavior (now same as when
+       parsing fh, etc): e.g. parse_string("<foo:bar>"), i.e prefix without 
+       NS declaration, raises error unless recover(1) is used
+     * documentation fixes/updates
+     * slightly updated test set to reflect the new slightly more strict
+       parsing. 
+   - fixed default c14n XPath to include attributes and namespaces (Petr Pajas)
 
 1.56 
    - added line number interface (thanks to Peter Haworth)
