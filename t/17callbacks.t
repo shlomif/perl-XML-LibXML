@@ -2,6 +2,7 @@ use Test;
 BEGIN { plan tests => 25 }
 END { ok(0) unless $loaded }
 use XML::LibXML;
+use IO::File;
 $loaded = 1;
 ok(1);
 
