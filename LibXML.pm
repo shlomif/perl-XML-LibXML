@@ -580,6 +580,30 @@ sub process_xinclude {
     XML::LibXML->new->processXIncludes( $self );
 }
 
+sub insertProcessingInstruction {
+    my $self   = shift;
+    my $target = shift;
+    my $data   = shift;
+
+    my $pi     = $self->createPI( $target, $data );
+    my $root   = $self->documentElement;
+
+    if ( defined $root ) {
+        # this is actually not correct, but i guess it's what the user
+        # intends
+        $self->insertBefore( $pi, $root );
+    }
+    else {
+        # if no documentElement was found we just append the PI
+        $self->appendChild( $pi );
+    }
+}
+
+sub insertPI {
+    my $self = shift;
+    $self->insertProcessingInstruction( @_ );
+}
+
 1;
 
 package XML::LibXML::DocumentFragment;
