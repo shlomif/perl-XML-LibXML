@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>9; }
+BEGIN { plan tests=>11 }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -65,4 +65,23 @@ for (0..3) {
     my @nds = $doc->findnodes("processing-instruction('xsl-stylesheet')");
 }
 
-ok(1);
+$doc = $parser->parse_string(<<'EOT');
+<a:foo xmlns:a="http://foo.com" xmlns:b="http://bar.com">
+ <b:bar>
+  <a:foo xmlns:a="http://other.com"/>
+ </b:bar>
+</a:foo>
+EOT
+
+my $root = $doc->getDocumentElement;
+my @a = $root->findnodes('//a:foo');
+ok(@a, 1);
+
+@b = $root->findnodes('//b:bar');
+ok(@b, 1);
+
+@none = $root->findnodes('//b:foo');
+@none = (@none, $root->findnodes('//foo'));
+ok(@none, 0);
+
+
