@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 63 };
+BEGIN { plan tests => 67 };
 use XML::LibXML;
 
 {
@@ -133,6 +133,14 @@ use XML::LibXML;
         ok($pi->nodeType, XML_PI_NODE);
         ok($pi->nodeName, "foo");
         ok($pi->textContent, "bar");
+    }
+
+    {
+        my $pi = $doc->createProcessingInstruction( "foo" );
+        ok($pi);
+        ok($pi->nodeType, XML_PI_NODE);
+        ok($pi->nodeName, "foo");
+        ok( $pi->textContent, undef);
     }
 
 }

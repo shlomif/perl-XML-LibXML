@@ -103,7 +103,13 @@ sub start_element {
     # build namespaces
     foreach my $p ( $self->{NamespaceStack}->get_declared_prefixes() ) {
         my $uri = $self->{NamespaceStack}->get_uri($p);
-        $node->setNamespace($uri, $p, $uri eq $el->{NamespaceURI} ? 1 : 0 );
+        my $nodeflag = 0;
+        if ( defined $uri 
+             and defined $el->{NamespaceURI} 
+             and $uri eq $el->{NamespaceURI} ) {
+            $nodeflag = 1;
+        }      
+        $node->setNamespace($uri, $p, $nodeflag );
     }
 
     # append

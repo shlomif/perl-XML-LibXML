@@ -1085,7 +1085,7 @@ _parse_string(self, string, directory = NULL)
         SV * string
         char * directory
     PREINIT:
-        xmlParserCtxtPtr ctxt;
+        xmlParserCtxtPtr ctxt = NULL;
         STRLEN len;
         char * ptr;
         int well_formed;
@@ -2521,7 +2521,7 @@ createAttributeNS( pdoc, URI, pname, pvalue=&PL_sv_undef )
         RETVAL
 
 SV*
-createProcessingInstruction(self, name, value)
+createProcessingInstruction(self, name, value=&PL_sv_undef)
         SV * self
         SV * name
         SV * value
