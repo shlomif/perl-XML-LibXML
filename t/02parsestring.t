@@ -71,6 +71,7 @@ ok( !$fragment );
 
 $badchunk = undef;
 eval {
+    local $^W; # turn off uninitialised value warnings
     $fragment = $parser->parse_xml_chunk( $badchunk );
 };
 ok( !$fragment );
