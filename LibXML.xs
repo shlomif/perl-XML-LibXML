@@ -519,6 +519,14 @@ LibXML_parse_stream(SV * self, SV * ioref, char * directory)
     if (doc->encoding == NULL) {
         doc->encoding = xmlStrdup("utf-8");
     }
+
+    if ( directory == NULL ) {
+        STRLEN len;
+        SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)doc));
+        doc->URL = xmlStrdup(SvPV(newURI, len));
+    } else {
+        doc->URL = xmlStrdup(directory);
+    }
     
     return doc;
 }
@@ -751,6 +759,14 @@ _parse_string(self, string, directory = NULL)
         xmlFreeParserCtxt(ctxt);
 
         sv_2mortal(LibXML_error);
+        
+        if ( directory == NULL ) {
+            STRLEN len;
+            SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_dom));
+            real_dom->URL = xmlStrdup(SvPV(newURI, len));
+        } else {
+            real_dom->URL = xmlStrdup(directory);
+        }
 
         if (!well_formed || (xmlDoValidityCheckingDefaultValue && !valid && (real_dom->intSubset || real_dom->extSubset) )) {
             xmlFreeDoc(real_dom);
@@ -918,7 +934,7 @@ parse_html_string(self, string)
 
         sv_2mortal(LibXML_error);
         
-        if (!real_dom) {
+        if (!real_dom || ((*SvPV(LibXML_error, len)) != '\0')) {
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
         }
@@ -956,7 +972,7 @@ parse_html_fh(self, fh)
         
         sv_2mortal(LibXML_error);
         
-        if (real_dom == NULL) {
+        if (!real_dom || ((*SvPV(LibXML_error, len)) != '\0')) {
             RETVAL = &PL_sv_undef;    
             croak(SvPV(LibXML_error, len));
         }
@@ -1199,6 +1215,9 @@ is_valid(self, ...)
         SV * dtd_sv;
     CODE:
         LibXML_error = sv_2mortal(newSVpv("", 0));
+        cvp.userData = (void*)PerlIO_stderr();
+        cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
+        cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
         if (items > 1) {
             dtd_sv = ST(1);
             if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
@@ -1210,9 +1229,6 @@ is_valid(self, ...)
             else {
                 croak("is_valid: argument must be a DTD object");
             }
-            cvp.userData = (void*)PerlIO_stderr();
-            cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
-            cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
             RETVAL = xmlValidateDtd(&cvp, self, dtd);
         }
         else {
@@ -1232,6 +1248,9 @@ validate(self, ...)
         STRLEN n_a;
     CODE:
         LibXML_error = sv_2mortal(newSVpv("", 0));
+        cvp.userData = (void*)PerlIO_stderr();
+        cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
+        cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
         if (items > 1) {
             dtd_sv = ST(1);
             if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
@@ -1243,9 +1262,6 @@ validate(self, ...)
             else {
                 croak("is_valid: argument must be a DTD object");
             }
-            cvp.userData = (void*)PerlIO_stderr();
-            cvp.error = (xmlValidityErrorFunc)LibXML_validity_error;
-            cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning;
             RETVAL = xmlValidateDtd(&cvp, self , dtd);
         }
         else {

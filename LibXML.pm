@@ -3,7 +3,7 @@
 package XML::LibXML;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw($VERSION @ISA @EXPORT $ORIGINAL_STRING);
 use Carp;
 use XML::LibXML::NodeList;
 
