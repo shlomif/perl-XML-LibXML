@@ -1164,6 +1164,12 @@ parsing.
 
   my $doc = $parser->parse_file($filename);
 
+This function reads an absolute filename into the memory. It causes
+XML::LibXML to use libxml2's file parser instead of letting perl
+reading the file such as with parse_fh(). If you need to parse files
+directly, this function would be the faster choice, since this function
+is about 6-8 times faster then parse_fh().
+
 =head2 Parsing Html
 
 As of version 0.96, XML::LibXML is capable of parsing HTML into a
