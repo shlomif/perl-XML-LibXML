@@ -48,6 +48,7 @@ domNodeTypeName( xmlNodePtr elem ){
             name = "XML::LibXML::Attr"; 
             break;
         case XML_DOCUMENT_NODE:
+        case XML_HTML_DOCUMENT_NODE:
             name = "XML::LibXML::Document";
             break;
         case XML_DOCUMENT_FRAG_NODE:
