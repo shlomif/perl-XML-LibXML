@@ -3,7 +3,7 @@
 
 use Test;
 
-BEGIN { plan tests=>38; }
+BEGIN { plan tests=>42; }
 END {ok(0) unless $loaded;}
 use XML::LibXML;
 $loaded = 1;
@@ -51,12 +51,29 @@ if ( defined $elem1 ) {
   # in the first version it cause a method not found ... 
   ok( $estr eq $te->toString() );
 
+  # attribute tests
 
   $elem1->setAttribute( $aname, $bvalue );
   ok( $elem1->getAttribute( $aname ) eq $bvalue );
   $elem1->removeAttribute( $aname );
   ok( not $elem1->hasAttribute( $aname ) );
 
+    my $attr = XML::LibXML::Attr->new( 'test', 'value' );
+    ok( defined $attr && 
+        $attr->getName() eq 'test' &&
+        $attr->getValue() eq 'value' );
+
+    $attr->setValue( 'other' );
+    ok( $attr->getValue() eq 'other' );
+
+    my $attr2 = $dom->createAttribute( "deutsch", "überflieger" );
+    ok( defined $attr2 &&
+        $attr2->getName() eq "deutsch" &&
+        $attr2->getValue() eq "überflieger" );
+
+    $attr2->setValue( "drückeberger" );
+    ok( $attr2->getValue() eq "drückeberger" );
+     
   # child node functions:
   my $text = $dom->createTextNode( $testtxt );
   ok( defined $text && $text->getType == XML_TEXT_NODE );
@@ -193,7 +210,9 @@ if ( defined $elem1 ) {
       $elem3->hasChildNodes() && 
       $elem3->getFirstChild()->getType() == XML_CDATA_SECTION_NODE && 
       $elem3->getFirstChild()->getData() eq $cdata );
+  
 }
+
 
 # node creation 2 (unbound element)
 #
@@ -229,4 +248,5 @@ if ( defined $elem1 ) {
   }
 
  }
+
 }

@@ -313,12 +313,40 @@ domInsertAfter( xmlNodePtr self,
 
 void
 domSetNodeValue( xmlNodePtr n , xmlChar* val ){
+  xmlDocPtr doc = n->doc;
+  
   if ( n == NULL ) 
     return;
   if( n->content != NULL ) {
     xmlFree( n->content );
   }
-  n->content = xmlStrdup( val );
+
+  if ( doc != NULL ){
+    xmlCharEncodingHandlerPtr handler = xmlGetCharEncodingHandler( xmlParseCharEncoding(doc->encoding) );
+
+    if ( handler != NULL ){
+       xmlBufferPtr in  = xmlBufferCreate();
+       xmlBufferPtr out = xmlBufferCreate();   
+       int len=-1;
+
+       xmlBufferCat( in, val );
+       len = xmlCharEncInFunc( handler, out, in );
+
+       if ( len >= 0 ) {
+         n->content = xmlStrdup( out->content );
+       }
+       else {
+         printf( "\nencoding error %d \n", len );
+         n->content = xmlStrdup( "" );
+       }
+    }
+    else {
+      n->content = xmlStrdup( "" );
+    }
+  }
+  else {    
+    n->content = xmlStrdup( val );
+  }
 }
 
 
@@ -415,6 +443,9 @@ domNodeTypeName( xmlNodePtr elem ){
     case XML_CDATA_SECTION_NODE:
       name = "XML::LibXML::CDATASection";
       break;
+    case XML_ATTRIBUTE_NODE:
+      name = "XML::LibXML::Attr"; 
+      break;
     default:
       name = "XML::LibXML::Node";
       break;
@@ -504,8 +535,37 @@ domGetElementsByTagName( xmlNodePtr n, xmlChar* name ){
 
   if ( n != NULL && name != NULL ) {
     cld = n->children;
-    while ( cld ) {
+    while ( cld != NULL ) {
       if ( xmlStrcmp( name, cld->name ) == 0 ){
+        if ( rv == NULL ) {
+          rv = xmlXPathNodeSetCreate( cld ) ;
+        }
+        else {
+          xmlXPathNodeSetAdd( rv, cld );
+        }
+      }
+      cld = cld->next;
+    }
+  }
+  
+  return rv;
+}
+
+
+xmlNodeSetPtr
+domGetElementsByTagNameNS( xmlNodePtr n, xmlChar* nsURI, xmlChar* name ){
+  xmlNodeSetPtr rv = NULL;
+
+  if ( nsURI == NULL ) {
+    return domGetElementsByTagName( n, name );
+  }
+  
+  if ( n != NULL && name != NULL  ) {
+    xmlNodePtr cld = n->children;
+    while ( cld != NULL ) {
+      if ( xmlStrcmp( name, cld->name ) == 0 
+           && cld->ns != NULL
+           && xmlStrcmp( nsURI, cld->ns->href ) == 0  ){
         if ( rv == NULL ) {
           rv = xmlXPathNodeSetCreate( cld ) ;
         }
@@ -537,4 +597,108 @@ domSetOwnerDocument( xmlNodePtr self, xmlDocPtr newDoc ) {
     }
 
     return self;
+}
+
+xmlNsPtr
+domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href ) {
+  xmlNsPtr ns = NULL;
+  
+  if (elem != NULL) {
+    ns = xmlSearchNs( elem->doc, elem, prefix );
+  }
+  /* prefix is not in use */
+  if (ns == NULL) {
+    ns = xmlNewNs( elem , href , prefix );
+  } else {
+    /* prefix is in use; if it has same URI, let it go, otherwise it's
+       an error */
+    if (!xmlStrEqual(href, ns->href)) {
+      ns = NULL;
+    }
+  }
+  return ns;
+}
+
+/* This routine may or may not make it into libxml2; Matt wanted it in
+   here to be nice to those with older libxml2 installations.
+   This instance is renamed from xmlHasNsProp to domHasNsProp. */
+/**
+ * xmlHasNsProp:
+ * @node:  the node
+ * @name:  the attribute name
+ * @namespace:  the URI of the namespace
+ *
+ * Search for an attribute associated to a node
+ * This attribute has to be anchored in the namespace specified.
+ * This does the entity substitution.
+ * This function looks in DTD attribute declaration for #FIXED or
+ * default declaration values unless DTD use has been turned off.
+ *
+ * Returns the attribute or the attribute declaration or NULL
+ *     if neither was found.
+ */
+xmlAttrPtr
+domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace) {
+  xmlAttrPtr prop;
+  xmlDocPtr doc;
+  xmlNsPtr ns;
+  
+  if (node == NULL)
+ 	return(NULL);
+  
+  prop = node->properties;
+  if (namespace == NULL)
+    return(xmlHasProp(node, name));
+  while (prop != NULL) {
+    /*
+     * One need to have
+     *   - same attribute names
+     *   - and the attribute carrying that namespace
+ 	 *         or
+     
+     SJT: This following condition is wrong IMHO; I reported it as a bug on libxml2
+     
+	 *         no namespace on the attribute and the element carrying it
+	 */
+    if ((xmlStrEqual(prop->name, name)) &&
+        (/* ((prop->ns == NULL) && (node->ns != NULL) &&
+            (xmlStrEqual(node->ns->href, namespace))) || */
+         ((prop->ns != NULL) &&
+          (xmlStrEqual(prop->ns->href, namespace))))) {
+      return(prop);
+    }
+    prop = prop->next;
+  }
+  
+#if 0
+  /* xmlCheckDTD is static in libxml/tree.c; it is set there to 1
+     and never changed, so commenting this out doesn't change the
+     behaviour */
+  if (!xmlCheckDTD) return(NULL);
+#endif
+  
+  /*
+   * Check if there is a default declaration in the internal
+   * or external subsets
+   */
+  doc =  node->doc;
+  if (doc != NULL) {
+    if (doc->intSubset != NULL) {
+      xmlAttributePtr attrDecl;
+      
+      attrDecl = xmlGetDtdAttrDesc(doc->intSubset, node->name, name);
+      if ((attrDecl == NULL) && (doc->extSubset != NULL))
+        attrDecl = xmlGetDtdAttrDesc(doc->extSubset, node->name, name);
+      
+      if ((attrDecl != NULL) && (attrDecl->prefix != NULL)) {
+        /*
+         * The DTD declaration only allows a prefix search
+         */
+        ns = xmlSearchNs(doc, node, attrDecl->prefix);
+        if ((ns != NULL) && (xmlStrEqual(ns->href, namespace)))
+          return((xmlAttrPtr) attrDecl);
+      }
+    }
+  }
+  return(NULL);
 }

@@ -96,6 +96,11 @@
 	the name <i>$nodename</i>.
 </method>
 
+<method name="createElementNS" 
+	synopsis="$element = $dom->createElement( $nsURI, $nodename );">
+    Namespace version of <i>createElement</i>
+</method>
+
 <method name="createTextNode" 
 	synopsis="$text = $dom->createTextNode( $content_text );">
 	As an equivalent of <b>createElement</b>, but it creates a
@@ -108,9 +113,27 @@
 	<b>Comment Node</b> bound to the DOM.
 </method>
 
+<method name="createAttribute"
+     synopsis="$doc->createAttribute($name [,$value]);">
+     Creates a new Attribute node.  
+</method>
+
 <method name="createCDATASection" synopsis="$cdata = $dom->create( $cdata_content );">
 	Similar to createTextNode and createComment, this function creates a CDataSection 
 	bound to the current DOM.
+</method>
+
+<method name="importNode"
+    synopsis="$document->importNode( $node [, $move] );">
+
+    If a node is not part of a document, it can be imported to another
+    document. As specified in DOM  Level 2 Specification the Node will
+    not be altered or removed from its original document by default. 
+    (<i>$node->cloneNode(1)</i> will get called implicitly). 
+
+    Sometimes it is nessecary to <i>move</i> a node between
+    documents. In such a case the node will not be copied, but removed
+    from the original document.
 </method>
 
 </description>
@@ -118,6 +141,7 @@
   <item name="XML::LibXML"/>
   <item name="XML::LibXML::Element"/>
   <item name="XML::LibXML::Text"/>
+  <item name="XML::LibXML::Attr"/>
   <item name="XML::LibXML::Comment"/>
 </also>
 <version>0.90_a</version>
@@ -261,26 +285,26 @@
 	output.
 </method>
 
-<method name="importNode"
-    synopsis="$document->importNode( $node [, $move] );">
-    <b>THIS FUNCTION IS NOT IMPLEMENTED YET</b>
-
-    If a node is not part of a document, it can be imported to another
-    document. As specified in DOM  Level 2 Specification the Node will
-    not be altered or removed from its original document by default. 
-    (<i>$node->cloneNode(1)</i> will get called implicitly). 
-
-    Sometimes it is nessecary to <i>move</i> a node between
-    documents. In such a case the node will not be copied, but removed
-    from the original document.
+<method name="getLocalName" 
+    synopsis="$name = $node->getLocalName();">
+    Returns the local name of a tag. This is the part behind the colon.
 </method>
 
+<method name="getPrefix" 
+    synopsis="$name = $node->getPrefix();">
+    Returns the prefix of a tag. This is the part before the colon.
+</method>
+
+<method name="getNamespaceURI" synopsis="$uri = $node->getNamespaceURI()">
+    returns the URI of the current namespace.
+</method>
 </description>
 <also>
   <item name="XML::LibXML"/>
   <item name="XML::LibXML::Element"/>
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Comment"/>
+  <item name="XML::LibXML::Attr"/>
 </also>
 <version>0.90_a</version>
 </class>
@@ -298,10 +322,18 @@
 	<i>$aname</i> to the value <i>$avalue</i>
 </method>
 
+<method name="setAttributeNS" synopsis="$node->setAttributeNS( $nsURI, $aname, $avalue );">
+	Namespaceversion of <i>setAttribute</i>.
+</method>
+
 <method name="getAttribute" 
     synopsis="$avalue = $node->getAttribute( $aname );">
 	If <i>$node</i> has an attribute with the name <i>$aname</i>,
 	the value of this attribute will get returned.
+</method>
+
+<method name="getAttributeNS" synopsis="$avalue = $node->setAttributeNS( $nsURI, $aname );">
+	Namespaceversion of <i>getAttribute</i>.
 </method>
 
 <method name="removeAttribute" synopsis="$node->removeAttribute( $aname );">
@@ -309,11 +341,30 @@
 	attribute list, if the attribute can be found.
 </method>
 
+<method name="removeAttributeNS" synopsis="$node->removeAttributeNS( $nsURI, $aname );">
+    Namespace version of <i>removeAttribute</i>
+</method>
+
+<method name="hasAttribute" synopsis="$boolean = $node->hasAttribute( $aname );">
+    This funcion tests if the named attribute is set for the node. If
+    the attrbute is specified, TRUE (1) will be returned, otherwise
+    the returnvalue is FALSE (0).
+</method>
+
+<method name="hasAttributeNS" synopsis="$boolean = $node->hasAttributeNS( $nsURI, $aname );">
+    namespace version of <i>hasAttribute</i>
+</method>
+
 <method name="getElementsByTagName" 
     synopsis="@nodes = $node->getElementsByTagName($tagname);">
 	The function gives direct access to all childnodes of the current
 	node with the same tagname. It makes things a lot easier if you
 	need to handle big datasets.
+</method>
+
+<method name="getElementsByTagNameNS" 
+    synopsis="@nodes = $node->getElementsByTagNameNS($nsURI,$tagname);">
+    Namespace version of <i>getElementsByTagName</i>.
 </method>
 
 <method name="appendWellBalancedChunk" 
@@ -345,6 +396,7 @@
   <item name="XML::LibXML"/>
   <item name="XML::LibXML::Node"/>
   <item name="XML::LibXML::Document"/>
+  <item name="XML::LibXML::Attr"/>
   <item name="XML::LibXML::Text"/>
   <item name="XML::LibXML::Comment"/>
 </also>
@@ -424,6 +476,46 @@
   <item name="XML::LibXML::Document"/>
 </also>
 <version>0.90_a</version>
+</class>
+
+<class name="XML::LibXML::Attr">
+<short>The DOM Attribute Class</short>
+<description>
+    This is the interface to handle Attributes like ordinary
+    nodes. The naming of the class relies on the W3C DOM
+    documentation.
+
+<method name="new" synopsis="$attr = XML::LibXML::Attr->new($name [,$value]);">
+    Class constructor. If you need to work with iso encoded strings,
+    you should <b>allways</b> use the <i>createAttrbute</i> of
+    <b>XML::LibXML::Document</b>.
+</method>
+
+<method name="getValue" synopsis="$string = $attr->getValue();">
+    Returns the value stored for the attribute. If undef is returned,
+    the attribute has no value, which is different of being <i>not
+    specified</i>.
+</method>
+
+<method name="setValue" synopsis="$attr->setValue( $string );">
+    This is needed to set a new attributevalue. If iso encoded strings
+    are passed as parameter, the node has to be bound to a document,
+    otherwise the encoding might be wrong done.
+</method>
+
+<method name="getOwnerElement" synopsis="$node = $attr->getOwnerDocument();">
+    returns the node the attribute belongs to. If the attribute is not
+    bound to a node, undef will be returned.
+</method>
+
+</description>
+<also>
+  <item name="XML::LibXML"/>
+  <item name="XML::LibXML::Node"/>
+  <item name="XML::LibXML::Element"/>
+  <item name="XML::LibXML::Document"/>
+</also>
+<version>0.92</version>
 </class>
 
 </module>

@@ -104,7 +104,15 @@ domImportNode( xmlDocPtr document, xmlNodePtr node, int move );
 xmlNodeSetPtr
 domGetElementsByTagName( xmlNodePtr self, xmlChar* name );
 
+xmlNodeSetPtr
+domGetElementsByTagNameNS( xmlNodePtr self, xmlChar* nsURI, xmlChar* name );
+
 xmlNodePtr
 domSetOwnerDocument( xmlNodePtr self, xmlDocPtr doc );
 
+xmlNsPtr
+domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href );
+
+xmlAttrPtr
+domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace);
 #endif

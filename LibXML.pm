@@ -15,25 +15,25 @@ require DynaLoader;
 bootstrap XML::LibXML $VERSION;
 
 @EXPORT = qw( XML_ELEMENT_NODE 
-	      XML_ATTRIBUTE_NODE
-	      XML_TEXT_NODE
-	      XML_CDATA_SECTION_NODE
-	      XML_ENTITY_REF_NODE
-	      XML_ENTITY_NODE
-	      XML_PI_NODE
-	      XML_COMMENT_NODE
-	      XML_DOCUMENT_NODE
-	      XML_DOCUMENT_TYPE_NODE
-	      XML_DOCUMENT_FRAG_NODE
-	      XML_NOTATION_NODE
-	      XML_HTML_DOCUMENT_NODE
-	      XML_DTD_NODE
-	      XML_ELEMENT_DECL
-	      XML_ATTRIBUTE_DECL
-	      XML_ENTITY_DECL
-	      XML_NAMESPACE_DECL
-	      XML_XINCLUDE_START
-	      XML_XINCLUDE_END );
+              XML_ATTRIBUTE_NODE
+              XML_TEXT_NODE
+              XML_CDATA_SECTION_NODE
+              XML_ENTITY_REF_NODE
+              XML_ENTITY_NODE
+              XML_PI_NODE
+              XML_COMMENT_NODE
+              XML_DOCUMENT_NODE
+              XML_DOCUMENT_TYPE_NODE
+              XML_DOCUMENT_FRAG_NODE
+              XML_NOTATION_NODE
+              XML_HTML_DOCUMENT_NODE
+              XML_DTD_NODE
+              XML_ELEMENT_DECL
+              XML_ATTRIBUTE_DECL
+              XML_ENTITY_DECL
+              XML_NAMESPACE_DECL
+              XML_XINCLUDE_START
+              XML_XINCLUDE_END );
 
 
 sub new {
@@ -117,9 +117,24 @@ sub XML_XINCLUDE_END(){20;}
 @XML::LibXML::Text::ISA         = 'XML::LibXML::Node';
 @XML::LibXML::Comment::ISA      = 'XML::LibXML::Text';
 @XML::LibXML::CDATASection::ISA = 'XML::LibXML::Text';
-@XML::LibXML::NoGCDocument::ISA  = 'XML::LibXML::Document';
+@XML::LibXML::NoGCDocument::ISA = 'XML::LibXML::Document';
+@XML::LibXML::Attr::ISA         = 'XML::LibXML::Node';
 
 sub XML::LibXML::NoGCDocument::DESTROY () { }
+
+sub XML::LibXML::Node::iterator {
+    my $self = shift;
+    my $funcref = shift;
+    my $child = undef;
+
+    my $rv = $funcref->( $self );
+    $child = $self->getFirstChild();
+    while ( $child ) {
+        $rv = $child->iterator( $funcref );
+        $child = $child->getNextSibling();
+    }
+    return $rv;
+}
 
 1;
 __END__

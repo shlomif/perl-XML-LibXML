@@ -16,6 +16,7 @@ extern "C" {
 #include <libxml/debugXML.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
+#include <libxml/valid.h>
 
 #include "dom.h"
 #include "xpath.h"
@@ -711,7 +712,10 @@ toString(self, format=0)
             xmlDocDumpMemory(self, &result, &len);
         }
         else {
+            int t_indent_var = xmlIndentTreeOutput;
+            xmlIndentTreeOutput = 1;
             xmlDocDumpFormatMemory( self, &result, &len, format ); 
+            xmlIndentTreeOutput = t_indent_var;
         }
     	if (result == NULL) {
 	        croak("Failed to convert doc to string");
@@ -719,6 +723,7 @@ toString(self, format=0)
             RETVAL = newSVpvn((char *)result, (STRLEN)len);
 	        xmlFree(result);
 	    }
+        xmlReconciliateNs(self,xmlDocGetRootElement(self));
     OUTPUT:
         RETVAL
 
@@ -792,6 +797,28 @@ createElement( dom, name )
         RETVAL
 
 ProxyObject *
+createElementNS( dom, nsURI, qname)
+         SV * dom
+         char *nsURI
+         char* qname 
+     PREINIT:
+         char * CLASS = "XML::LibXML::Element";
+         xmlNodePtr newNode;
+         xmlChar *prefix;
+         xmlChar *lname;
+         xmlNsPtr ns;
+     CODE:
+         lname = xmlSplitQName2(qname, &prefix);
+         ns = domNewNs (0 , prefix , nsURI);
+         newNode = xmlNewNode( ns , lname );
+         newNode->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
+         RETVAL = make_proxy_node(newNode);
+         RETVAL->extra = dom;
+         SvREFCNT_inc(dom);
+     OUTPUT:
+         RETVAL
+
+ProxyObject *
 createTextNode( dom, content )
         SV * dom
         char * content
@@ -833,6 +860,26 @@ createCDATASection( dom, content )
         RETVAL = make_proxy_node(newNode);
         RETVAL->extra = dom;
         SvREFCNT_inc(dom);
+    OUTPUT:
+        RETVAL
+
+ProxyObject *
+createAttribute( dom, name , value="" )
+        SV * dom
+        char * name
+        char * value
+    PREINIT:
+        const char* CLASS = "XML::LibXML::Attr";
+        xmlNodePtr newNode;
+    CODE:
+        newNode = (xmlNodePtr)xmlNewProp(NULL, name , value );
+        newNode->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
+        if ( newNode->children!=NULL ) {
+            newNode->children->doc = (xmlDocPtr)SvIV((SV*)SvRV(dom));
+        }
+        RETVAL = make_proxy_node(newNode);
+        RETVAL->extra = dom;
+        SvREFCNT_inc(dom);    
     OUTPUT:
         RETVAL
 
@@ -1296,6 +1343,52 @@ isEqual( self, other )
     OUTPUT:
         RETVAL
 
+SV*
+getLocalName( node )
+        xmlNodePtr node
+    PREINIT:
+        const char * lname;
+    CODE:
+        if( node != NULL ) {
+            lname =  node->name;
+        }
+        RETVAL = newSVpvn( (char *)lname, xmlStrlen( lname ) );
+    OUTPUT:
+        RETVAL
+
+SV*
+getPrefix( node )
+        xmlNodePtr node
+    PREINIT:
+        const char * prefix;
+    CODE:
+        if( node != NULL 
+            && node->ns != NULL
+            && node->ns->prefix != NULL ) {
+            prefix =  node->ns->prefix;
+            RETVAL = newSVpvn( (char *)prefix, xmlStrlen( prefix ) );
+        } else {
+            RETVAL = NULL;
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+getNamespaceURI( node )
+        xmlNodePtr node
+    PREINIT:
+        const char * nsURI;
+    CODE:
+        if( node != NULL
+            && node->ns != NULL
+            && node->ns->href != NULL ) {
+            nsURI =  node->ns->href;
+            RETVAL = newSVpvn( (char *)nsURI, xmlStrlen( nsURI ) );
+        } else {
+            RETVAL = NULL;
+        }
+    OUTPUT:
+        RETVAL
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
@@ -1328,6 +1421,31 @@ setAttribute( elem, name, value )
     CODE:
         xmlSetProp( elem, name, value );
 
+void
+setAttributeNS( elem, nsURI, qname, value )
+        xmlNodePtr elem
+        char * nsURI
+        char * qname
+        char * value
+    PREINIT:
+        xmlNsPtr ns;
+        xmlChar *prefix;
+        xmlChar *lname;
+    CODE:
+        lname = xmlSplitQName2(qname, &prefix);
+        ns = domNewNs (elem , prefix , nsURI);
+        xmlSetNsProp( elem, ns, lname, value );
+
+ProxyObject *
+setAttributeNode( elem, attrnode ) 
+        xmlNodePtr elem
+        xmlNodePtr attrnode 
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Attr";
+    CODE:
+    OUTPUT:
+        RETVAL
+
 int 
 hasAttribute( elem, name ) 
         xmlNodePtr elem
@@ -1344,6 +1462,23 @@ hasAttribute( elem, name )
     OUTPUT:
         RETVAL
 
+int 
+hasAttributeNS( elem, nsURI, name ) 
+        xmlNodePtr elem
+        char * nsURI
+        char * name
+    PREINIT:
+        xmlAttrPtr att;
+    CODE:
+        /**
+         * domHasNsProp() returns the attribute node, which is not exactly what 
+         * we want as a boolean value 
+         **/
+        att = domHasNsProp( elem, name, nsURI );
+        RETVAL = att == NULL ? 0 : 1 ;
+    OUTPUT:
+        RETVAL
+
 SV*
 getAttribute( elem, name ) 
         xmlNodePtr elem
@@ -1356,7 +1491,48 @@ getAttribute( elem, name )
             RETVAL  = newSVpvn( content, xmlStrlen( content ) );
         }
         else {
-            RETVAL = NULL;
+            RETVAL = &PL_sv_undef;
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+getAttributeNS( elem, nsURI ,name ) 
+        xmlNodePtr elem
+        char * nsURI
+        char * name 
+    PREINIT:
+        xmlAttrPtr att;
+	    char * content;
+    CODE:
+        att = domHasNsProp( elem, name, nsURI );
+        if ( att != NULL && att->children != NULL ) {
+            content = att->children->content;
+        }
+        if ( content != NULL ) {
+            RETVAL  = newSVpvn( content, xmlStrlen( content ) );
+        }
+        else {
+            RETVAL = &PL_sv_undef;
+        }
+    OUTPUT:
+        RETVAL
+
+
+ProxyObject *
+getAttributeNode( elemobj, name )
+        ProxyObject* elemobj 
+        char * name
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Attr";
+        xmlNodePtr elem = (xmlNodePtr) elemobj->object;
+        xmlAttrPtr attrnode;
+    CODE:
+        attrnode = xmlHasProp( elem, name );
+        if ( attrnode != NULL ) {
+            RETVAL = make_proxy_node((xmlNodePtr)attrnode);
+            RETVAL->extra = elemobj->extra;
+            SvREFCNT_inc(elemobj->extra);
         }
     OUTPUT:
         RETVAL
@@ -1367,6 +1543,24 @@ removeAttribute( elem, name )
         char * name
     CODE:
         xmlRemoveProp( xmlHasProp( elem, name ) );	
+
+void
+removeAttributeNS( elem, nsURI, name )
+        xmlNodePtr elem
+        char * nsURI
+        char * name
+    PREINIT:
+        xmlChar *prefix;
+        xmlChar *lname;
+        xmlNsPtr ns;
+    CODE:
+        lname = xmlSplitQName2(name, &prefix);
+        if (lname == NULL) /* as it is supposed to be */
+            lname = name;
+        /* ignore the given prefix if any, and use whatever
+           is defined in scope for this nsURI */
+        ns = xmlSearchNsByHref(elem->doc, elem, nsURI);
+        xmlUnsetNsProp( elem, ns, lname );
 
 SV*
 getElementsByTagName( elem, name )
@@ -1405,6 +1599,46 @@ getElementsByTagName( elem, name )
             xmlXPathFreeNodeSet( nodelist );
         }
         XSRETURN(len);
+
+SV*
+getElementsByTagNameNS( node, nsURI, name )
+        xmlNodePtr node
+        char * nsURI
+        char * name 
+    PREINIT:
+        xmlNodeSetPtr nodelist;
+        SV * element;
+        int len;
+    PPCODE:
+        len = 0;
+        nodelist = domGetElementsByTagNameNS( node , nsURI , name );
+        if ( nodelist && nodelist->nodeNr > 0 ) {
+            int i = 0 ;
+            const char * cls = "XML::LibXML::Node";
+            xmlNodePtr tnode;
+            ProxyObject * proxy;
+
+            len = nodelist->nodeNr;
+         
+            for( i ; i < len; i++){
+                /* we have to create a new instance of an objectptr. and then 
+                 * place the current node into the new object. afterwards we can 
+                 * push the object to the array!
+                 */
+                element = 0;
+                tnode = nodelist->nodeTab[i];
+                element = sv_newmortal();
+                
+                proxy = make_proxy_node(tnode);
+
+                cls = domNodeTypeName( tnode );
+                XPUSHs( sv_setref_pv( element, (char *)cls, (void*)proxy ) );
+            }
+ 
+            xmlXPathFreeNodeSet( nodelist );
+        }
+        XSRETURN(len);
+
 
 void
 appendWellBalancedChunk( self, chunk )
@@ -1496,3 +1730,104 @@ new( CLASS , content )
     OUTPUT:
         RETVAL
 
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::Attr
+
+ProxyObject *
+new( CLASS , name="", value="" )
+        char * CLASS
+        char * name
+        char * value
+    PREINIT:
+        xmlNodePtr attr;
+    CODE:
+        attr = (xmlNodePtr)xmlNewProp( NULL, name, value );
+        if ( attr ) {
+            RETVAL = make_proxy_node( attr );
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+getValue( attr )
+        xmlNodePtr attr;
+    PREINIT:
+        xmlBufferPtr buffer;
+        xmlNodePtr doc;
+    CODE:
+        if ( attr != NULL && attr->children != NULL ) {
+            if ( attr->doc == NULL ) {
+                RETVAL = newSVpvn( attr->children->content, 
+                                   xmlStrlen( attr->children->content )  );
+            }
+            else {
+                # we have to decode the string!
+                xmlBufferPtr in  = xmlBufferCreate();
+                xmlBufferPtr out = xmlBufferCreate();                
+                xmlCharEncodingHandlerPtr handler;
+                int len = -1;
+                handler = xmlGetCharEncodingHandler( xmlParseCharEncoding(attr->doc->encoding) );
+                if( handler != NULL ) {
+                    xmlBufferCat( in, attr->children->content ) ;
+                
+                    xmlCharEncOutFunc( handler, out, NULL );
+                    len = xmlCharEncOutFunc( handler, out, in );
+                    if ( len >= 0 ) {
+                        RETVAL =  newSVpvn( out->content, 
+                                        out->use );
+                    }
+                    else {
+                        RETVAL = &PL_sv_undef;
+                    }                
+                }
+                else {
+                    croak("handler error" );
+                }
+            }
+        }
+    OUTPUT:
+        RETVAL
+
+void
+setValue( attr, value )
+        xmlNodePtr attr 
+        char * value
+    CODE:
+        if ( attr->children != NULL ) {
+            domSetNodeValue( attr->children , value );
+        }
+        else {
+            xmlNodePtr newNode; 
+            if ( attr->doc != NULL ) {
+                newNode = xmlNewDocText( attr->doc , value );
+            }
+            else {
+                newNode = xmlNewText( value );                
+            }
+            if( newNode != NULL ) {
+                domAppendChild( attr, newNode ); 
+            }
+            else {
+                croak( "out of memory" );
+            }
+        }
+
+ProxyObject *
+getOwnerElement( attrnode ) 
+        ProxyObject * attrnode 
+    PREINIT:
+        const char * CLASS = "XML::LibXML::Node";
+        xmlNodePtr attr;
+        xmlNodePtr parent;
+    CODE:
+        attr   = (xmlNodePtr) attrnode->object;
+        parent = attr->parent;
+        if ( parent ) {
+            CLASS  = domNodeTypeName( parent );
+            RETVAL = make_proxy_node(parent);
+            if ( attrnode->extra != NULL ) {
+                RETVAL->extra = attrnode->extra;
+                SvREFCNT_inc(attrnode->extra); 
+            }
+        }
+    OUTPUT:
+        RETVAL
