@@ -4,7 +4,7 @@
 <module name="XML::LibXML">
     <version>1.53</version>
     <authors>
-        <author>Matt Sergeant, chri</author>
+        <author>Matt Sergeant</author>
         <author>Christian Glahn</author>
     </authors>
 
@@ -978,6 +978,10 @@ is therefore a shortcut for
                     <em>$node</em>. Wether $deep is set to 1 (true)
                     the function will copy all childnodes as well. If
                     $deep is 0 only the current node will be copied.
+                </p>
+                <p>
+                    <st>cloneNode</st> will not copy any namespace
+                    information if it is not run recursivly. 
                 </p>
             </method>
 
