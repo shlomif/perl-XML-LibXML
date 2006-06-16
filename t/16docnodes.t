@@ -5,7 +5,7 @@ use Test;
 # second parsing.  it was fixed by putting in code in getChildNodes
 # to handle the special case where the node was the document node
 
-BEGIN { plan tests => 9 }
+BEGIN { plan tests => 11 }
 
   my $input = <<EOD;
 <doc>
@@ -55,5 +55,5 @@ if ( $] > 5.006 ) {
         $doc->setEncoding('utf-8');
         # Second output
         ok( $node->serialize(), encodeToUTF8( 'iso-8859-1',
-                                              '<test contents="Ã¤"/>' ) );
+                                              '<test contents="ä"/>' ) );
 }
