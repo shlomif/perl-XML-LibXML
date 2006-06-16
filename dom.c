@@ -759,6 +759,7 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
     }
   
     if( n->type == XML_ATTRIBUTE_NODE ){
+      /* can't use xmlNodeSetContent - for Attrs it parses entities */
         if ( n->children != NULL ) {
             n->last = NULL;
             xmlFreeNodeList( n->children );
@@ -769,9 +770,7 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
         n->last = n->children; 
     }
     else if( n->content != NULL ) {
-        /* free old content */
-        xmlFree( n->content );
-        n->content = xmlStrdup(val);   
+        xmlNodeSetContent( n, val );
     }
 }
 
