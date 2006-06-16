@@ -4633,6 +4633,7 @@ nodePath( self )
             croak( "cannot calculate path for the given node" );
         }
         RETVAL = nodeC2Sv( path, self );
+        xmlFree(path);
     OUTPUT:
         RETVAL
 
