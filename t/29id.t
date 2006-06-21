@@ -5,7 +5,7 @@ use XML::LibXML;
 
 BEGIN {
     if (XML::LibXML::LIBXML_VERSION() >= 20623) {
-        plan tests => 18;
+        plan tests => 21;
     }
     else {
         plan tests => 0;

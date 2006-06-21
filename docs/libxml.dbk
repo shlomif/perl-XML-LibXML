@@ -1365,13 +1365,13 @@ my $doc = $builder-&#62;result();</programlisting>
             compatibility reasons <emphasis>only</emphasis>. They might disappear in one of the future versions of XML::LibXML, so a user is requested to switch
             over to the official functions.</para>
 
-            <para>More recent versions of perl (e.g. 5.6.1 or higher) support special flags to disinguish between UTF8 and so called binary data. XML::LibXML
-            provides for these versions functionality to make efficient use of these flags: If a document has set an encoding other than UTF8 all strings that
-            are not already in UTF8 are implicitly encoded from the document encoding to UTF8. On output these strings are commonly returned as UTF8 unless a
+            <para>More recent versions of perl (e.g. 5.6.1 or higher) support special flags to disinguish between UTF-8 and so called binary data. XML::LibXML
+            provides for these versions functionality to make efficient use of these flags: If a document has set an encoding other than UTF-8 all strings that
+            are not already in UTF-8 are implicitly encoded from the document encoding to UTF-8. On output these strings are commonly returned as UTF-8 unless a
             user does request explicitly the original (aka. document) encoding.</para>
 
             <para>Older version of perl (such as 5.00503 or less) do not support these flags. If XML::LibXML is build for these versions, all strings have to
-            get encoded to UTF8 manualy before they are passed to any DOM functions.</para>
+            get encoded to UTF-8 manualy before they are passed to any DOM functions.</para>
 
             <para><emphasis>NOTE:</emphasis> XML::LibXML&#39;s magic encoding may not work on all plattforms. Some platforms are known to have a broken iconv(),
             which is partly used by libxml2. To test if your platform works correctly with your language encoding, build a simple document in the particular
@@ -1425,7 +1425,7 @@ my $doc = $builder-&#62;result();</programlisting>
         correct encoding. If an unbound textnode with an iso encoded string is created (e.g. with $CLASS-&#62;new()), the <function>toString</function> function
         may not return the expected result.</para>
 
-        <para>All this seems like a limitation as long as UTF8 encoding is assured. If iso encoded strings come into play it is much safer to use the node
+        <para>All this seems like a limitation as long as UTF-8 encoding is assured. If iso encoded strings come into play it is much safer to use the node
         creation functions of <emphasis>XML::LibXML::Document</emphasis>.</para>
 
         <variablelist>
@@ -1455,7 +1455,7 @@ my $doc = $builder-&#62;result();</programlisting>
                     <programlisting>&#60;?xml version=&#34;your version&#34; encoding=&#34;your encoding&#34;?&#62;</programlisting>
 
                     <para>Both parameter are optional. The default value for <emphasis>$version</emphasis> is <function>1.0</function>, of course. If the
-                    <emphasis>$encoding</emphasis> parameter is not set, the encoding will be left unset, which means UTF8 is implied.</para>
+                    <emphasis>$encoding</emphasis> parameter is not set, the encoding will be left unset, which means UTF-8 is implied.</para>
 
                     <para>The call of <emphasis>createDocument</emphasis>() without any parameter will result the following code:</para>
 
@@ -1464,11 +1464,11 @@ my $doc = $builder-&#62;result();</programlisting>
                     <para>Alternatively one can call this constructor directly from the XML::LibXML class level, to avoid some typing. This will not have any
                     effect on the class instance, which is always XML::LibXML::Document.</para>
 
-                    <programlisting> my $document = XML::LibXML-&#62;createDocument( &#34;1.0&#34;, &#34;UTF8&#34; );</programlisting>
+                    <programlisting> my $document = XML::LibXML-&#62;createDocument( &#34;1.0&#34;, &#34;UTF-8&#34; );</programlisting>
 
                     <para>is therefore a shortcut for</para>
 
-                    <programlisting>my $document = XML::LibXML::Document-&#62;createDocument( &#34;1.0&#34;, &#34;UTF8&#34; );</programlisting>
+                    <programlisting>my $document = XML::LibXML::Document-&#62;createDocument( &#34;1.0&#34;, &#34;UTF-8&#34; );</programlisting>
                 </listitem>
             </varlistentry>
 
@@ -1502,7 +1502,7 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
 
                     <para>Note that this function has to be used very carefully, since you can&#39;t simply convert one encoding in any other, since some (or
                     even all) characters may not exist in the new encoding. XML::LibXML will not test if the operation is allowed or possible for the given
-                    document. The only switching assured to work is to UTF8.</para>
+                    document. The only switching assured to work is to UTF-8.</para>
                 </listitem>
             </varlistentry>
 
@@ -1600,8 +1600,8 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
 
                     <para>libxml2 uses a hardcoded indentation of 2 space characters per indentation level. This value can not be altered on runtime.</para>
 
-                    <para><emphasis>NOTE</emphasis>: XML::LibXML::Document::toString returns the data in the document encoding rather than UTF8! If you want
-                    UTF8 ecoded XML, you have to change the conding by using <function>setEncoding()</function></para>
+                    <para><emphasis>NOTE</emphasis>: XML::LibXML::Document::toString returns the data in the document encoding rather than UTF-8! If you want
+                    UTF-8 ecoded XML, you have to change the conding by using <function>setEncoding()</function></para>
                 </listitem>
             </varlistentry>
 
@@ -2698,7 +2698,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                     childnodes will be dumped into the result string.</para>
 
                     <para>Additionally to the $format flag of XML::LibXML::Document, this version accepts the optional $docencoding flag. If this flag is set
-                    this function returns the string in its original encoding (the encoding of the document) rather than UTF8.</para>
+                    this function returns the string in its original encoding (the encoding of the document) rather than UTF-8.</para>
                 </listitem>
             </varlistentry>
 
