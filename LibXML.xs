@@ -1239,7 +1239,7 @@ _parse_sax_file(self, filename_sv)
         LibXML_report_error(saved_error, recover);
 
 SV*
-parse_html_string(self, string)
+_parse_html_string(self, string)
         SV * self
         SV * string
     PREINIT:
@@ -1281,7 +1281,7 @@ parse_html_string(self, string)
         RETVAL
 
 SV*
-parse_html_fh(self, fh)
+_parse_html_fh(self, fh)
         SV * self
         SV * fh
     PREINIT:
@@ -1356,7 +1356,7 @@ parse_html_fh(self, fh)
         RETVAL
 
 SV*
-parse_html_file(self, filename_sv)
+_parse_html_file(self, filename_sv)
         SV * self
         SV * filename_sv
     PREINIT:
@@ -2495,7 +2495,6 @@ createRawElement( self, name )
     OUTPUT:
         RETVAL
 
-
 SV*
 createElementNS( self, nsURI, name )
         xmlDocPtr self
@@ -2569,7 +2568,6 @@ createElementNS( self, nsURI, name )
         xmlFree(ename);
     OUTPUT:
         RETVAL
-
 
 SV*
 createRawElementNS( self, nsURI, name )
@@ -2840,7 +2838,7 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
                 }
 
                 newAttr = xmlNewDocProp( self, localname, value );
-                newAttr->ns = ns;
+                xmlSetNs(newAttr, ns);
 
                 RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL );
 
@@ -3436,22 +3434,24 @@ lookupNamespaceURI( self, svprefix=&PL_sv_undef )
     PREINIT:
         xmlChar * nsURI;
         xmlChar * prefix = NULL;
+        xmlNsPtr ns;
     CODE:
         prefix = nodeSv2C( svprefix , self );
-        if ( prefix != NULL && xmlStrlen(prefix) > 0) {
-            xmlNsPtr ns = xmlSearchNs( self->doc, self, prefix );
+        if ( prefix != NULL && xmlStrlen(prefix) == 0) {
             xmlFree( prefix );
-            if ( ns != NULL ) {
-                nsURI = xmlStrdup(ns->href);
-                RETVAL = C2Sv( nsURI, NULL );
-                xmlFree( nsURI );
-            }
-            else {
-                XSRETURN_UNDEF;
-            }
+            prefix = NULL;
         }
-        else {
-            XSRETURN_UNDEF;
+        ns = xmlSearchNs( self->doc, self, prefix );
+        if ( prefix != NULL) {
+            xmlFree( prefix );
+	}
+        if ( ns != NULL ) {
+	  nsURI = xmlStrdup(ns->href);
+	  RETVAL = C2Sv( nsURI, NULL );
+	  xmlFree( nsURI );
+	}
+	else {
+	  XSRETURN_UNDEF;
         }
     OUTPUT:
         RETVAL
@@ -4706,7 +4706,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
             RETVAL = 0;
 
         if ( flag && ns ) {
-            node->ns = ns;
+            xmlSetNs(node, ns);
         }
 
         xmlFree(nsPrefix);
@@ -5269,7 +5269,7 @@ addNewChild( self, namespaceURI, nodename )
                                 localname?localname:name,
                                 NULL);
             if ( ns == NULL )  {
-                newNode->ns = xmlNewNs(newNode, nsURI, prefix);
+	        xmlSetNs(newNode,xmlNewNs(newNode, nsURI, prefix));
             }
 
             xmlFree(localname);
@@ -5682,7 +5682,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
             RETVAL = 0;
 
         if ( ns )
-            node->ns = ns;
+	    xmlSetNs(node, ns);
 
         xmlFree(nsPrefix);
         xmlFree(nsURI);

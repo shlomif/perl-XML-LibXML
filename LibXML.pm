@@ -417,6 +417,7 @@ sub __write {
 #-------------------------------------------------------------------------#
 sub parse_string {
     my $self = shift;
+    croak("parse_string is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};
 
     unless ( defined $_[0] and length $_[0] ) {
@@ -460,6 +461,7 @@ sub parse_string {
 
 sub parse_fh {
     my $self = shift;
+    croak("parse_fh is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
@@ -495,6 +497,7 @@ sub parse_fh {
 
 sub parse_file {
     my $self = shift;
+    croak("parse_file is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
@@ -532,6 +535,7 @@ sub parse_xml_chunk {
     # max 2 parameter:
     # 1: the chunk
     # 2: the encoding of the string
+    croak("parse_xml_chunk is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};    my $result;
 
     unless ( defined $_[0] and length $_[0] ) {
@@ -622,6 +626,80 @@ sub process_xincludes {
     return $rv;
 }
 
+#-------------------------------------------------------------------------#
+# HTML parsing functions                                                  #
+#-------------------------------------------------------------------------#
+
+sub parse_html_string {
+    my $self = shift;
+    croak("parse_html_string is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
+    croak("parse already in progress") if $self->{_State_};
+
+    unless ( defined $_[0] and length $_[0] ) {
+        croak("Empty String");
+    }
+
+    $self->{_State_} = 1;
+    my $result;
+
+    $self->_init_callbacks();
+
+    eval { $result = $self->_parse_html_string( @_ ); };
+    
+    my $err = $@;
+    $self->{_State_} = 0;
+    if ($err) {
+      $self->_cleanup_callbacks();
+      croak $err;
+    }
+        
+    $self->_cleanup_callbacks();
+
+    return $result;
+}
+
+sub parse_html_file {
+    my $self = shift;
+    croak("parse_html_file is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
+    croak("parse already in progress") if $self->{_State_};
+    $self->{_State_} = 1;
+    my $result;
+
+    $self->_init_callbacks();
+    
+    eval { $result = $self->_parse_html_file(@_); };
+    my $err = $@;
+    $self->{_State_} = 0;
+    if ($err) {
+      $self->_cleanup_callbacks();
+      croak $err;
+    }
+    
+    $self->_cleanup_callbacks();
+
+    return $result;
+}
+
+sub parse_html_fh {
+    my $self = shift;
+    croak("parse_html_fh is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
+    croak("parse already in progress") if $self->{_State_};
+    $self->{_State_} = 1;
+    my $result;
+
+    $self->_init_callbacks();
+    
+    eval { $result = $self->_parse_html_fh( @_ ); };
+    my $err = $@;
+    $self->{_State_} = 0;
+    if ($err) {
+      $self->_cleanup_callbacks();
+      croak $err;
+    }
+    $self->_cleanup_callbacks();
+
+    return $result;
+}
 
 #-------------------------------------------------------------------------#
 # push parser interface                                                   #

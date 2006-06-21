@@ -101,7 +101,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,4,0], # schema error
                      [2,6,5,0], # broken xincludes
                      [2,6,8,1],
-
+                     [2,6,23,1],
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};

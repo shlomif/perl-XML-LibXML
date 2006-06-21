@@ -720,7 +720,7 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             <para>This function is similar to parse_fh(), but it parses a XML document that is available as a single string in memory. Again,
                             you can pass an optional base URI to the function.</para>
 
-                            <programlisting>my $doc = $parser-&#62;parse_stirng( $xmlstring, $baseuri );</programlisting>
+                            <programlisting>my $doc = $parser-&#62;parse_string( $xmlstring, $baseuri );</programlisting>
                         </listitem>
                     </varlistentry>
 

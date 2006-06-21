@@ -1,5 +1,15 @@
 Revision history for Perl extension XML::LibXML
 
+pre 1.59
+   - new parser and callback code (Christian Glahn)
+   - new XML::LibXML::InputCallback class
+   - bug fixes
+   - documentation and regression fixes and enhancements
+   - Perl wrappers for parse_html_*
+   - make sure parse_* methods are not called on class (bug 11126)
+   - DOM Layer 3 conformance fixes:
+     * lookupNamespaceURI(empty_or_undef) now returns the default NS
+
 1.58
    - fixed a pointer initialization in parse_xml_chunk(), fixes 
      random several segmentation faults on document fragments.
