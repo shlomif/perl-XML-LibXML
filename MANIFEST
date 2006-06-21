@@ -65,6 +65,7 @@ t/25relaxng.t
 t/26schema.t
 t/27new_callbacks_simple.t
 t/28new_callbacks_multiple.t
+t/29id.t
 lib/XML/LibXML/NodeList.pm
 lib/XML/LibXML/Literal.pm
 lib/XML/LibXML/Boolean.pm
