@@ -15,7 +15,7 @@ use XML::LibXML::NodeList;
 use IO::Handle; # for FH reads called as methods
 
 
-$VERSION = "1.58";
+$VERSION = "1.59";
 require Exporter;
 require DynaLoader;
 
@@ -1475,7 +1475,7 @@ sub _callback_open {
     # the open callback has to return a defined value. 
     # if one works on files this can be a file handle. But 
     # depending on the needs of the callback it also can be a 
-    # database handle or a integer lableing a certain dataset.
+    # database handle or a integer labeling a certain dataset.
 
     if ( defined $_CUR_CB ) {
         $retval = $_CUR_CB->[1]->( $uri );

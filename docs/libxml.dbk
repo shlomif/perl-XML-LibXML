@@ -17,7 +17,7 @@
             </author>
         </authorgroup>
 
-        <edition>1.58</edition>
+        <edition>1.59</edition>
 
         <copyright>
             <year>2001-2004</year>
@@ -670,7 +670,7 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                 <para>One of the common parser interfaces of XML::LibXML is the DOM parser. This parser reads XML data into a DOM like datastructure, so each
                 tag can get accessed and transformed.</para>
 
-                <para>XML::LibXML&#39;s DOM parser is not only capable to parse XML data, but also (strict) HTML and SGML files. There are three ways to parse
+                <para>XML::LibXML&#39;s DOM parser is not only capable to parse XML data, but also (strict) HTML files. There are three ways to parse
                 documents - as a string, as a Perl filehandle, or as a filename. The return value from each is a XML::LibXML::Document object, which is a DOM
                 object.</para>
 
@@ -757,42 +757,6 @@ my $fragment = $parser-&#62;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             </funcsynopsis>
 
                             <para>Similar to parse_file() but parses HTML (strict) strings.</para>
-                        </listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term>parse_sgml_file</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$doc = $parser-&#62;parse_sgml_file( $sgmlfile );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>Similar to parse_file() but parses SGML documents.</para>
-                        </listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term>parse_sgml_fh</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$doc = $parser-&#62;parse_sgml_fh( $io_fh );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>Similar to parse_file() but parses SGML streams.</para>
-                        </listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term>parse_sgml_string</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$doc = $parser-&#62;parse_sgml_string( $sgmlstring );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>Similar to parse_file() but parses SGML strings.</para>
                         </listitem>
                     </varlistentry>
                 </variablelist>
@@ -1161,8 +1125,12 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         </funcsynopsis>
 
                         <para>Load external DTD subsets while parsing.</para>
-                        <para>This flag is also required for DTD Validation, to provide complete attribute, and to expand entities, regardless if the document has an internal subset. Thus switching off external dtd loading, will disable entity expansion, validation, and complete attributes on internal subsets as well.</para>
-                        <para>If you leave this parser flag untouched, everythig will work, because the default is 1 (activated)</para>
+                        <para>This flag is also required for DTD Validation, to provide complete attribute,
+                              and to expand entities, regardless if the document has an internal subset.
+                              Thus switching off external DTD loading, will disable entity expansion,
+                              validation, and complete attributes on internal subsets as well.</para>
+                        <para>If you leave this parser flag untouched, everythig will work,
+                              because the default is 1 (activated)</para>
                     </listitem>
                 </varlistentry>
 
@@ -3903,24 +3871,23 @@ $parser-&#62;parse_file( $some_xml_file );</programlisting>
         <sect1>
             <title>Description</title>
 
-            <para>If libxml2 has to load external documents during parsing, this may cause strange results if the location is not a HTTP, FTP or relative
-            location. To get around this limitation, one may add its own input handler to open, read and close particular locations or URI classes. Using them,
-            you can for example handle your own custom URI schemes.</para>
+            <para>You may get unexpected results if you are trying to load external documents during libxml2 parsing if the location of the ressource is not a
+            HTTP, FTP or relative location but a absolute path for example. To get around this limitation, you may add your own input handler to open, read and
+            close particular types of locations or URI classes. Using this input callback handlers, you can handle your own custom URI schemes for example.</para>
 
-            <para>The input callbacks are used whenever LibXML has to get something other than external parsed entities from somewhere. They are implemented
+            <para>The input callbacks are used whenever LibXML has to get something other than externally parsed entities from somewhere. They are implemented
             using a callback stack on the Perl layer in analogy to libxml2&#39;s native callback stack.</para>
 
-            <para>The XML::LibXML::InputCallback class transparently registers the input callbacks for the libxml2&#39;s parser processes. Thus, initialization
-            of parser processes may happen at the Perl layer only.</para>
+            <para>The XML::LibXML::InputCallback class transparently registers the input callbacks for the libxml2&#39;s parser processes.</para>
 
             <sect2>
                 <title>How does XML::LibXML::InputCallback work?</title>
 
-                <para>The libxml2 library offers callback implementation as global functions only. To work-around the troubles resulting in having only global
+                <para>The libxml2 library offers a callback implementation as global functions only. To work-around the troubles resulting in having only global
                 callbacks - for example, if the same global callback stack is manipulated by different applications running together in a single Apache
-                Webserver environment, XML::LibXML::InputCallback comes with a object-oriented and a function-oriented part.</para>
+                Webserver environment -, XML::LibXML::InputCallback comes with a object-oriented and a function-oriented part.</para>
 
-                <para>Using the function-oriented part, the global callback stack of libxml2 can be manipulated. Those function can be used as interface to the
+                <para>Using the function-oriented part the global callback stack of libxml2 can be manipulated. Those functions can be used as interface to the
                 callbacks on the C- and XS Layer. At the object-oriented part, operations for working with the &#34;pseudo-localized&#34; callback stack are
                 implemented. Currently, you can register and de-register callbacks on the Perl layer and initialize them on a per parser basis.</para>
 
@@ -3935,28 +3902,28 @@ $parser-&#62;parse_file( $some_xml_file );</programlisting>
                 <sect3>
                     <title>The Parser Process</title>
 
-                    <para>The parser process work on a XML data stream, along which links to other resources can be embedded. This can be links to external DTDs
-                    or XIncludes for example. Those resources are identified by URIs. The callback implementation of libxml2 assumes that one callback group can
-                    handle a certain amount of URIs and a certain URI scheme. Per default, callback handlers for <emphasis>file://*</emphasis>,
+                    <para>The parser process work on a XML data stream, along which, links to other resources can be embedded. This can be links to external
+                    DTDs or XIncludes for example. Those resources are identified by URIs. The callback implementation of libxml2 assumes that one callback
+                    group can handle a certain amount of URIs and a certain URI scheme. Per default, callback handlers for <emphasis>file://*</emphasis>,
                     <emphasis>file:://*.gz</emphasis>, <emphasis>http://*</emphasis> and <emphasis>ftp://*</emphasis> are registered.</para>
 
                     <para>Callback groups in the callback stack are processed from top to bottom, meaning that callback groups registered later will be
-                    processed prior to the earlier registered ones.</para>
+                    processed before the earlier registered ones.</para>
 
-                    <para>While parsing the data stream the libxml2 parser checks if a registered callback group will handle a URI - if they do not, the URI
+                    <para>While parsing the data stream, the libxml2 parser checks if a registered callback group will handle a URI - if they will not, the URI
                     will be interpreted as <emphasis>file://URI</emphasis>. To handle a URI, the <emphasis>match</emphasis> callback will have to return
-                    &#39;1&#39;. If that happens, the handling of the URI will be passed to that callback group. Next the URI will be passed to the
-                    <emphasis>open</emphasis> callback, which should return a reference to the data stream if it successully opened the file, &#39;0&#39;
-                    otherwise. If opening the file was succesful, the <emphasis>read</emphasis> callback will be called repeatedly until it returns an empty
-                    string. After the read callback, the <emphasis>close</emphasis> callback will be called to close the file.</para>
+                    &#39;1&#39;. If that happens, the handling of the URI will be passed to that callback group. Next, the URI will be passed to the
+                    <emphasis>open</emphasis> callback, which should return a <emphasis>reference</emphasis> to the data stream if it successully opened the
+                    file, &#39;0&#39; otherwise. If opening the stream was succesful, the <emphasis>read</emphasis> callback will be called repeatedly until it
+                    returns an empty string. After the read callback, the <emphasis>close</emphasis> callback will be called to close the stream.</para>
                 </sect3>
 
                 <sect3>
                     <title>Organisation of callback groups in XML::LibXML::InputCallback</title>
 
-                    <para>Callback groups are implemented as a stack (Array), each entry holds a reference to an array of the for callbacks. For the libxml2
+                    <para>Callback groups are implemented as a stack (Array), each entry holds a reference to an array of the callbacks. For the libxml2
                     library, the XML::LibXML::InputCallback callback implementation appears as one single callback group. The Perl implementation however allows
-                    to manage different callback stacks on a per libxml2 parser basis.</para>
+                    to manage different callback stacks on a per libxml2-parser basis.</para>
                 </sect3>
             </sect2>
 
@@ -3980,14 +3947,19 @@ $parser-&#62;parse_file( $some_xml_file );</programlisting>
             <sect2>
                 <title>What about the old callback system prior to XML::LibXML::InputCallback?</title>
 
-                <para>In XML::LibXML prior to 1.59 - i.e. without XML::LibXML::InputCallback - you could define your callbacks either using globally or locally.
-                You still can do that using XML::LibXML::InputCallback, and in addition you can define the callbacks on a per parser basis.</para>
+                <para>In XML::LibXML versions prior to 1.59 - i.e. without the XML::LibXML::InputCallback module - you could define your callbacks either using
+                globally or locally. You still can do that using XML::LibXML::InputCallback, and in addition to that you can define the callbacks on a per
+                parser basis!</para>
 
                 <para>If you use the old callback interface through global callbacks, XML::LibXML::InputCallback will treat them with a lower priority as the
                 ones registered using the new interface. The global callbacks will not override the callback groups registered using the new interface. Local
                 callbacks are attached to a specific parser instance, therefore they are treated with highest priority. If the <emphasis>match</emphasis>
                 callback of the callback group registered as local variable is identical to one of the callback groups registered using the new interface, that
                 callback group will be replaced.</para>
+
+                <para>Users of the old callback implementation whose <emphasis>open</emphasis> callback returned a plain string, will have to adapt their code
+                to return a reference to that string after upgrading to version &#62;= 1.59. The new callback system can only deal with the
+                <emphasis>open</emphasis> callback returning a reference!</para>
             </sect2>
         </sect1>
 

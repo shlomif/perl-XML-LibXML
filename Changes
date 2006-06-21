@@ -9,6 +9,7 @@ pre 1.59
    - make sure parse_* methods are not called on class (bug 11126)
    - DOM Layer 3 conformance fixes:
      * lookupNamespaceURI(empty_or_undef) now returns the default NS
+   - remove the SGML parser code no longer supported by libxml (Michael Kröll)
 
 1.58
    - fixed a pointer initialization in parse_xml_chunk(), fixes 
