@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 109 };
+BEGIN { plan tests => 114 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -176,7 +176,9 @@ use XML::LibXML::Common qw(:libxml);
         ok($attr->nodeName, "kung:foo");
         ok($attr->name,"foo" );
         ok($attr->value, "bar" );
-        
+
+        $attr->setValue( q(bar&amp;) );
+        ok($attr->getValue, q(bar&amp;) );
     }
     {
         print "# bad attribute creation\n";
@@ -196,6 +198,7 @@ use XML::LibXML::Common qw(:libxml);
         ok($pi->nodeType, XML_PI_NODE);
         ok($pi->nodeName, "foo");
         ok($pi->textContent, "bar");
+        ok($pi->getData, "bar");
     }
 
     {
@@ -204,6 +207,10 @@ use XML::LibXML::Common qw(:libxml);
         ok($pi->nodeType, XML_PI_NODE);
         ok($pi->nodeName, "foo");
         ok( $pi->textContent, undef);
+        ok( $pi->getData, undef);
+	$pi->setData(q(bar&amp;));
+	ok( $pi->getData, q(bar&amp;));
+        ok($pi->textContent, q(bar&amp;));
     }
 }
 

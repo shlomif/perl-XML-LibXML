@@ -769,7 +769,7 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
         n->children->doc = n->doc;
         n->last = n->children; 
     }
-    else if( n->content != NULL ) {
+    else {
         xmlNodeSetContent( n, val );
     }
 }
