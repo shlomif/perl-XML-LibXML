@@ -3266,6 +3266,9 @@ setNodeName( self , value )
         }
         if( self->ns ){
             localname = xmlSplitQName2(string, &prefix);
+	    if ( localname == NULL ) {
+	      localname = xmlStrdup( string );
+	    }
             xmlNodeSetName(self, localname );
             xmlFree(localname);
             xmlFree(prefix);

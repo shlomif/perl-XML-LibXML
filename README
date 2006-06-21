@@ -55,6 +55,12 @@ modules:
 Note that you have to rebuild XML::LibXML once you upgrade libxml2. This avoids
 problems with binary incompatibilities between releases of the library.
 
+If Makefile.PL has problems detecting your libxml2 installation, try
+
+   perl Makefile.PL DEBUG=1
+
+for better diagnostics. See also the following section.
+
 
 Notes on libxml2 versions
 =========================
