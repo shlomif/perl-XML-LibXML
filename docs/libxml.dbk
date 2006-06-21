@@ -2228,23 +2228,6 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                     <para>this function returns the content of all text nodes in the descendants of the given node as spacified in DOM.</para>
                 </listitem>
             </varlistentry>
-
-            <varlistentry>
-                <term>line_number</term>
-
-                <listitem>
-                    <funcsynopsis>
-                        <funcsynopsisinfo>$lineno = $node-&#62;line_number();</funcsynopsisinfo>
-                    </funcsynopsis>
-
-                    <para>This function returns the line number where the tag was found during parsing. If a node is added to the document the line number is 0.
-                    Problems may occour, if a node from one document is passed to another one.</para>
-
-                    <para>Note: line_number() is special to XML::LibXML and not part of the DOM specification.</para>
-
-                    <para>If the line_numbers flag of the parser was not activated before parsing, line_number() will always return 0.</para>
-                </listitem>
-            </varlistentry>
         </variablelist>
 
         <variablelist>
@@ -2260,24 +2243,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                     value of this function is a numeric value. Therefore it differs from the result of perl ref function.</para>
                 </listitem>
             </varlistentry>
-
-            <varlistentry>
-                <term>line_number</term>
-
-                <listitem>
-                    <funcsynopsis>
-                        <funcsynopsisinfo>$lineno = $node-&#62;line_number();</funcsynopsisinfo>
-                    </funcsynopsis>
-
-                    <para>This function returns the line number where the tag was found during parsing. If a node is added to the document the line number is 0.
-                    Problems may occur, if a node from one document is passed to another one.</para>
-
-                    <para>Note: line_number() is special to XML::LibXML and not part of the DOM specification.</para>
-
-                    <para>If the line_numbers flag of the parser was not activated before parsing, line_number() will always return 0.</para>
-                </listitem>
-            </varlistentry>
-        </variablelist>
+	</variablelist>
 
         <variablelist>
             <varlistentry>
@@ -2936,6 +2902,26 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                 </listitem>
             </varlistentry>
         </variablelist>
+
+        <variablelist>
+            <varlistentry>
+                <term>line_number</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$lineno = $node-&#62;line_number();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>This function returns the line number where the tag was found during parsing. If a node is added to the document the line number is 0.
+                    Problems may occour, if a node from one document is passed to another one.</para>
+
+                    <para>Note: line_number() is special to XML::LibXML and not part of the DOM specification.</para>
+
+                    <para>If the line_numbers flag of the parser was not activated before parsing, line_number() will always return 0.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
     </chapter>
 
     <chapter>
