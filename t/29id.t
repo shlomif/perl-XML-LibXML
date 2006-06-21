@@ -4,7 +4,7 @@ use Test;
 use XML::LibXML;
 
 BEGIN {
-    if (XML::LibXML::LIBXML_VERSION() >= 20643) {
+    if (XML::LibXML::LIBXML_VERSION() >= 20623) {
         plan tests => 18;
     }
     else {
@@ -18,7 +18,7 @@ my $parser = XML::LibXML->new;
 
 my $xml1 = <<'EOF';
 <!DOCTYPE root [
-<!ELEMENT root EMPTY>
+<!ELEMENT root (root?)>
 <!ATTLIST root id ID #REQUIRED>
 ]>
 <root id="foo"/>
@@ -48,6 +48,14 @@ for my $do_validate (0..1) {
   ($n) = $doc->getElementsById('foo');
   ok( !defined($n) );
   # _debug("1: !foo: ",$n);
+
+  my $test = $doc->createElement('root');
+  $root->appendChild($test);
+  $test->setAttribute('id','new');
+  ok( $doc->validate ) if $do_validate;
+  ($n) = $doc->getElementsById('new');
+  ok( $test->isSameNode( $n ) );
+  # _debug("1: new: ",$n);
 }
 
 {
