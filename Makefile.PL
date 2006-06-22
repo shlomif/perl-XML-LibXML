@@ -100,8 +100,9 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,3,0],
                      [2,6,4,0], # schema error
                      [2,6,5,0], # broken xincludes
-                     [2,6,8,1],
-                     [2,6,23,1],
+                     [2,6,10,1], # all test pass for 2.6.8-10
+                     [2,6,18,undef], # untested: libxml2 won't compile with gcc4
+                     [2,6,26,1], # all test pass for 2.6.19-26
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
@@ -130,17 +131,18 @@ unless ( $is_Win32 ) { # cannot get config in W32
                     "  Check the README file for more informations and versions\n".
                     "  that are tested with XML::LibXML\n\n"; 
             }
-            if ( $@ =~ /^UNTESTED/ ) {
-                warn <<UNTESTED;
-WARNING!
-The installed version of libxml2 was not tested with this version of XML::LibXML.
+            if ( $@ =~ /^UNTESTED (\S*)/ ) {
+	      warn "Note: libxml2 $1 was not tested with this XML::LibXML version.\n"
+#                 warn <<UNTESTED;
+# WARNING!
+# The installed version of libxml2 was not tested with this version of XML::LibXML.
 
-    XML::LibXML may fail building or some tests may not pass.
-    Expect strange errors and unstable scripts.
+#     XML::LibXML may fail building or some tests may not pass.
+#     Expect strange errors and unstable scripts.
 
-    Check the README file for more informations
-END OF WARNING
-UNTESTED
+#     Check the README file for more informations
+# END OF WARNING
+# UNTESTED
             }
 
             if ( not defined $config{LIBS} and not defined $config{INC} ) {
@@ -197,7 +199,7 @@ GDOME
                 warn "The installed libgdome version is not supported\n";
             }
             elsif ( $@ =~ /^UNTESTED/ ) {
-                warn "The installed libgdome version is not tested, expect problems.\n";
+                warn "The installed libgdome version was not yet tested with XML::LibXML.\n";
                 print "NOTE: You will need to install XML::GDOME to use this feature\n";
             }
         }
@@ -308,8 +310,8 @@ sub MY::install {
      $script .= <<"INSTALL";
 
 install_sax_driver :
-\t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
-\t\@\$(PERL) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
+\t\@\$(PERL) -I\$(INSTALLSITELIB) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
+\t\@\$(PERL) -I\$(INSTALLSITELIB) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
 
 INSTALL
    } else {
@@ -587,7 +589,7 @@ sub try_libconfig {
         }
         if ( defined $state and $state == 0 ) {
             print "failed\n";
-            die "VERSION $ver";
+            die "VERSION $ver\n";
         }
 
         $config->{LIBS} = backtick("$cfgscript --libs");
@@ -595,7 +597,7 @@ sub try_libconfig {
 
         unless ( defined $state ) {
             print "untested\n";
-            die "UNTESTED $ver";
+            die "UNTESTED $ver\n";
         }
 
         print "ok\n";
