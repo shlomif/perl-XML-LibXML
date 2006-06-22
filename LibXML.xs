@@ -42,6 +42,10 @@ extern "C" {
 #include <libxml/xmlschemas.h>
 #endif
 
+#if LIBXML_VERSION >= 20600
+#define HAVE_SERRORS 1
+#endif
+
 #ifdef LIBXML_CATALOG_ENABLED
 #include <libxml/catalog.h>
 #endif
@@ -156,7 +160,6 @@ LibXML_validity_warning(void * ctxt, const char * msg, ...)
 
     SvREFCNT_dec(sv);
 }
-
 #ifdef HAVE_SERRORS
 void
 LibXML_struct_error_handler(void * userData, xmlErrorPtr error )
@@ -201,9 +204,10 @@ LibXML_struct_error_handler(void * userData, xmlErrorPtr error )
 
     if ( SvTRUE(ERRSV) ) {
         croak( "DIE: %s", SvPV_nolen(ERRSV) );
-        POPs;
     }
+    POPs;
 
+    PUTBACK;
     FREETMPS;
     LEAVE;
 }
@@ -213,6 +217,21 @@ LibXML_struct_error_handler(void * userData, xmlErrorPtr error )
 void
 LibXML_dummy_handler(void * ctxt, const char * msg, ...)
 {
+
+  dTHX;
+    va_list args;
+    SV * sv;
+    sv = NEWSV(0,512);
+
+    va_start(args, msg);
+    sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
+    va_end(args);
+
+    warn("got flat error %s\n",SvPV_nolen(sv));
+
+    SvREFCNT_dec(sv);
+
+
     return;
 }
 
@@ -223,7 +242,8 @@ LibXML_init_error(SV ** saved_errorp)
 #ifdef HAVE_SERRORS
     xmlSetGenericErrorFunc(NULL, LibXML_dummy_handler);
     xmlSetStructuredErrorFunc(NULL,
-			      (xmlStructuredErrorFunc)LibXML_struct_error_handler);
+    		      (xmlStructuredErrorFunc)LibXML_struct_error_handler);
+
     LibXML_error = &PL_sv_undef;
 #else
     LibXML_error = NEWSV(0, 512);
@@ -236,31 +256,25 @@ static void
 LibXML_report_error(SV * saved_error, int recover)
 {
 #ifdef HAVE_SERRORS
-   /* if (LibXML_error_OK) {
+    /* if HAVE_SERRORS is defined, XML::LibXML uses Perl level 
+     * Error reporting. 
+     * On C level we just take care on code consistency.
+     */
+    SvREFCNT_dec(LibXML_error);
+    LibXML_error = saved_error;
+#else
+    SV *my_error = LibXML_error;
+    LibXML_error = saved_error;
+    if ( SvCUR( my_error ) > 0 ) {
         if ( recover ) {
-            if ( recover == 1 ) {
+            /* this check is required, otherwise parsing a valid doc 
+             * in recover mode will cause segmentation faults 
+             */
+            if ( LibXML_error && SvCUR(LibXML_error) && recover == 1 ) {
                 warn("%s",SvPV_nolen(LibXML_error));
             }
             SvREFCNT_dec(LibXML_error);
             LibXML_error = saved_error;
-        } else {
-            SV* perl_err_var;
-            perl_err_var = get_sv("@", TRUE);
-            sv_setsv(perl_err_var, LibXML_error);
-            LibXML_error = saved_error;
-            croak(Nullch);
-        }
-    } else {
-        LibXML_error = saved_error;
-    } */
-#else
-    SV *my_error = sv_2mortal(LibXML_error);
-    LibXML_error = saved_error;
-    if ( SvCUR( my_error ) > 0 ) {
-        if ( recover ) {
-            if ( recover == 1 ) {
-                warn("%s", SvPV_nolen(my_error));
-            }
         } else {
             croak("%s", SvPV_nolen(my_error));
         }
@@ -944,7 +958,7 @@ BOOT:
                               (xmlInputCloseCallback) LibXML_input_close);
 #ifdef HAVE_SERRORS
     xmlSetStructuredErrorFunc( NULL ,
-                               (xmlStructuredErrorFunc)LibXML_serror_handler);
+                               (xmlStructuredErrorFunc)LibXML_struct_error_handler);
 #else
     xmlSetGenericErrorFunc(NULL , NULL);
 #endif /* HAVE_SERRORS */
@@ -975,6 +989,17 @@ LIBXML_VERSION()
     OUTPUT:
         RETVAL
 
+
+int
+HAVE_STRUCT_ERRORS()
+    CODE:
+#ifdef HAVE_SERRORS
+        RETVAL = 1;
+#else
+        RETVAL = 0;
+#endif
+    OUTPUT:
+        RETVAL
 
 void
 END()
@@ -1081,12 +1106,12 @@ _parse_string(self, string, dir = &PL_sv_undef)
                 xmlFreeDoc(real_doc);
             }
         }
-
         LibXML_cleanup_callbacks();
         LibXML_cleanup_parser();
         LibXML_report_error(saved_error, recover);
     OUTPUT:
         RETVAL
+
 
 int
 _parse_sax_string(self, string)
@@ -1991,7 +2016,7 @@ _processXIncludes(self, doc)
         LibXML_report_error(saved_error, recover);
 
         if ( RETVAL < 0 ) {
-            croak( "unknown error during XInclude processing" );
+            /* croak( "unknown error during XInclude processing" );*/
             XSRETURN_UNDEF;
         } else if ( RETVAL == 0 ) {
             RETVAL = 1;
@@ -2075,7 +2100,7 @@ _push(self, pctxt, data)
         LibXML_report_error(saved_error, recover);
 
         if ( ctxt->wellFormed == 0 ) {
-            croak( "XML not well-formed in xmlParseChunk" );
+            /* croak( "XML not well-formed in xmlParseChunk" ); */
             XSRETURN_UNDEF;
         }
         RETVAL = 1;
@@ -3483,7 +3508,7 @@ is_valid(self, ...)
         RETVAL
 
 int
-validate(self, ...)
+_validate(self, ...)
         xmlDocPtr self
     PREINIT:
         SV * saved_error;
@@ -4588,7 +4613,7 @@ to_number ( self )
         RETVAL
 
 
-void
+AV*
 _find( pnode, pxpath )
         SV* pnode
         SV * pxpath
@@ -4611,7 +4636,7 @@ _find( pnode, pxpath )
             croak( "empty XPath found" );
             XSRETURN_UNDEF;
         }
-    PPCODE:
+    CODE:
         if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement( node->doc ) );
         }
@@ -4621,6 +4646,15 @@ _find( pnode, pxpath )
 
         LibXML_init_error(&saved_error);
 
+        RETVAL = newAV();
+        /* This is required due a bug in perl; 
+         * see section "Returning SVs, AVs and HVs through RETVAL" 
+         * in perlxs
+         * Also note, that scalars which are pushed into the array
+         * must not be sv_2mortal()ed anymore.
+         */
+        sv_2mortal((SV*)RETVAL);
+
         found = domXPathFind( node, xpath );
         xmlFree( xpath );
 
@@ -4629,7 +4663,7 @@ _find( pnode, pxpath )
                 case XPATH_NODESET:
                     /* return as a NodeList */
                     /* access ->nodesetval */
-                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::NodeList", 0)));
+                    av_push(RETVAL, newSVpv("XML::LibXML::NodeList", 0));
                     nodelist = found->nodesetval;
                     if ( nodelist ) {
                         if ( nodelist->nodeNr > 0 ) {
@@ -4667,8 +4701,7 @@ _find( pnode, pxpath )
                                 else {
                                     element = PmmNodeToSv(tnode, owner);
                                 }
-
-                                XPUSHs( sv_2mortal(element) );
+                                av_push( RETVAL, element );
                             }
                         }
                         xmlXPathFreeNodeSet( found->nodesetval );
@@ -4678,30 +4711,32 @@ _find( pnode, pxpath )
                 case XPATH_BOOLEAN:
                     /* return as a Boolean */
                     /* access ->boolval */
-                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Boolean", 0)));
-                    XPUSHs(sv_2mortal(newSViv(found->boolval)));
+                    av_push(RETVAL, newSVpv("XML::LibXML::Boolean", 0));
+                    av_push(RETVAL, newSViv(found->boolval));
                     break;
                 case XPATH_NUMBER:
                     /* return as a Number */
                     /* access ->floatval */
-                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Number", 0)));
-                    XPUSHs(sv_2mortal(newSVnv(found->floatval)));
+                    av_push(RETVAL, newSVpv("XML::LibXML::Number", 0));
+                    av_push(RETVAL, newSVnv(found->floatval));
                     break;
                 case XPATH_STRING:
                     /* access ->stringval */
                     /* return as a Literal */
-                    XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-                    XPUSHs(sv_2mortal(C2Sv(found->stringval, NULL)));
+                    av_push(RETVAL, newSVpv("XML::LibXML::Literal", 0));
+                    av_push(RETVAL, C2Sv(found->stringval, NULL));
                     break;
                 default:
                     croak("Unknown XPath return type");
             }
             xmlXPathFreeObject(found);
         }
-
+    OUTPUT:
+        RETVAL
+    CLEANUP:
         LibXML_report_error(saved_error, 0);
 
-void
+AV*
 _findnodes( pnode, perl_xpath )
         SV* pnode
         SV * perl_xpath
@@ -4724,7 +4759,7 @@ _findnodes( pnode, perl_xpath )
             croak( "empty XPath found" );
             XSRETURN_UNDEF;
         }
-    PPCODE:
+    CODE:
         if ( node->doc ) {
             domNodeNormalize( xmlDocGetRootElement(node->doc ) );
         }
@@ -4733,6 +4768,15 @@ _findnodes( pnode, perl_xpath )
         }
 
         LibXML_init_error(&saved_error);
+        
+        RETVAL = newAV();
+        /* This is required due a bug in perl; 
+         * see section "Returning SVs, AVs and HVs through RETVAL" 
+         * in perlxs
+         * Also note, that scalars which are pushed into the array
+         * must not be sv_2mortal()ed anymore.
+         */
+        sv_2mortal((SV*)RETVAL);
 
         nodelist = domXPathSelect( node, xpath );
         xmlFree(xpath);
@@ -4768,13 +4812,14 @@ _findnodes( pnode, perl_xpath )
                     else {
                         element = PmmNodeToSv(tnode, owner);
                     }
-
-                    XPUSHs( sv_2mortal(element) );
+                    av_push(RETVAL, element );
                 }
             }
             xmlXPathFreeNodeSet( nodelist );
         }
-
+    OUTPUT:
+        RETVAL
+    CLEANUP:
         LibXML_report_error(saved_error, 0);
 
 void
@@ -6202,7 +6247,7 @@ parse_document( self, doc )
         RETVAL
 
 int
-validate( self, doc )
+_validate( self, doc )
         xmlRelaxNGPtr self
         xmlDocPtr doc
     PREINIT:
@@ -6316,7 +6361,7 @@ parse_buffer( self, perlstring )
 
 
 int
-validate( self, doc )
+_validate( self, doc )
         xmlSchemaPtr self
         xmlDocPtr doc
     PREINIT:

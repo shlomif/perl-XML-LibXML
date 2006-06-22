@@ -110,7 +110,7 @@ The following versions are tested:
    o past 2.4.20: tested; working.
    o 2.4.25: tested; not working
    o past 2.4.25: tested, working
-   o past 2.5.0: tested; working
+   o past 2.5.0: tested; brocken Attribute handling
    o version 2.5.5: tested; tests pass, but known as broken
    o up to version 2.5.11: tested; working
    o version 2.6.0: tested; not working
@@ -118,7 +118,7 @@ The following versions are tested:
    o version 2.6.3: tested; not working
    o version 2.6.4: tested; not working (XML Schema errors)
    o version 2.6.5: tested; not working (broken XIncludes)
-   o up to version 2.6.7: tested; working
+   o up to version 2.6.8: tested; working
 
 It happens, that an older version of libxml2 passes all tests under certain
 conditions. This is no reason to assume that version to work on all platforms.
@@ -143,8 +143,8 @@ appears this is related to special linker options for that OS prior to version
 10.2.2. Since I don't have full access to this OS, help/ patches from OS X
 gurus are highly apprecheated.
 
-It is confirmed that XML::LibXML builds and runs without problems with Mac OS X
-10.2.6.
+It is confirmed that XML::LibXML builds and runs without problems since Mac OS
+X 10.2.6.
 
 
 Notes for HPUX
@@ -191,8 +191,11 @@ Additionally I received the following Note from Rozi Kovesdi:
 CONTACT
 =======
 
-For suggestions, bugreports etc. you may contact the maintainer directly
+For suggestions etc. you may contact the maintainer directly
 christian.glahn@uibk.ac.at
+
+For bug reports, please use the CPAN request tracker on
+http://rt.cpan.org/NoAuth/Bugs.html?Dist=XML-LibXML
 
 Also XML::LibXML issues are discussed among other things on the perl XML
 mailing list (perl-xml@listserv.ActiveState.com). In case of problems you
@@ -208,7 +211,9 @@ Version < 0.98 were maintained by Matt Sergeant
 
 0.98 > Version > 1.49 were maintained by Matt Sergeant and Christian Glahn
 
-Version >= 1.49 are maintained by Christian Glahn
+Versions >= 1.49 are maintained by Christian Glahn
+
+Versions > 1.56 are co-maintained by Petr Pajas
 
 
 PATCHES AND DEVELOPER VERSION

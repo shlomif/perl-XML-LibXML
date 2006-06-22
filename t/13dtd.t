@@ -58,7 +58,7 @@ ok($dtdstr);
     eval {
         $xml->validate($dtd);
     };
-    print $@, "\n";
+    # print $@, "\n";
     ok($@);
 
     my $parser = XML::LibXML->new();
@@ -72,7 +72,7 @@ ok($dtdstr);
     eval {
         $parser->parse_file('example/article_internal_bad.xml');
     };
-    print $@, "\n";
+    # print $@, "\n";
     ok($@);
 }
 

@@ -9,10 +9,10 @@ use IO::File;
 
 BEGIN { use XML::LibXML;
     if ( XML::LibXML::LIBXML_VERSION >= 20600 ) {
-        plan tests => 472; 
+        plan tests => 423; 
     }
     else {
-        plan tests => 464;
+        plan tests => 415;
         print "# skip NS cleaning tests\n";
     }
 };
@@ -152,27 +152,61 @@ foreach my $str ( @badWFStrings ) {
     ok($@);
 }
 
-
 print "# 1.1.2 NO KEEP BLANKS\n";
 
-$parser->keep_blanks(0);
-
-{
+sub Test_no_keep_blanks_good {
+    my $p = XML::LibXML->new();
+    $p->keep_blanks(0);
     foreach my $str ( @goodWFStrings,@goodWFNSStrings,@goodWFDTDStrings ) {
-	my $doc = $parser->parse_string($str);
-        ok($doc);
+        my $doc;
+        eval {
+            $doc = $p->parse_string( $str );
+        };
+        return 0 unless defined $doc;
+        # warn "\$\@ is defined !!!! ($@)" if $@;
+        return 0 if $@;
     }
-}
 
-eval { my $fail = $parser->parse_string(undef); };
-ok($@);
+    return 1;
 
-foreach my $str ( @badWFStrings ) {
-    eval { my $fail = $parser->parse_string($str); };
-    ok($@);
-}
+} ok( Test_no_keep_blanks_good() );
 
-$parser->keep_blanks(1);
+sub Test_no_keep_blanks_undef_data {
+    my $fail;
+
+    my $p = XML::LibXML->new();
+    $p->keep_blanks(0);
+
+    eval { 
+        $fail = $parser->parse_string(undef); 
+    };
+    
+    return 0 if defined $fail;
+    return 0 unless $@;
+
+    return 1;
+
+} ok( Test_no_keep_blanks_undef_data() );
+
+sub Test_no_keep_blanks_bad {
+    my $p = XML::LibXML->new();
+    $p->keep_blanks(0);
+
+    
+    foreach my $str ( @badWFStrings ) {
+        my $fail;
+        eval {
+            $fail = $p->parse_string($str); 
+        };
+
+        return 0 if defined $fail;
+        return 0 unless $@;
+    }
+
+    return 1;
+
+} ok( Test_no_keep_blanks_bad() );
+
 
 print "# 1.1.3 EXPAND ENTITIES\n";
 
@@ -218,16 +252,40 @@ $parser->pedantic_parser(0);
 
 print "# 1.2 PARSE A FILE\n";
 
-{
-    my $doc = $parser->parse_file($goodfile);
-    ok($doc);
-}
- 
-eval {my $fail = $parser->parse_file($badfile1);};
-ok($@);
+sub Test_parse_file_good {
+    my $p = XML::LibXML->new();
+    my $doc; 
+    eval {
+        $doc = $parser->parse_file($goodfile);
+    };
 
-eval { $parser->parse_file($badfile2); };
-ok($@);
+    return 0 unless defined $doc;
+    return 1 if $@;
+
+    return 1;
+} ok( Test_parse_file_good() );
+
+sub Test_parse_file_bad {
+    my $p = XML::LibXML->new();
+    my $doc;
+    eval {
+        $doc = $p->parse_file($badfile1);
+    };
+
+    return 0 unless $@;
+    return 0 if $doc;
+
+    eval {
+        $doc = $p->parse_file($badfile2);
+    };
+    
+    return 0 unless $@;
+    return 0 if $doc;
+
+    return 1;
+
+} ok( Test_parse_file_bad() );
+
 
 {
     my $str = "<a>    <b/> </a>";
@@ -278,52 +336,120 @@ ok($@);
 
 print "# 1.4 x-include processing\n";
 
-my $goodXInclude = q{
+sub Test_XIncludes_good {
+    my $goodXInclude = <<EXML;
 <x>
 <xinclude:include 
  xmlns:xinclude="http://www.w3.org/2001/XInclude"
  href="test2.xml"/>
 </x>
-};
+EXML
+
+    my $p = XML::LibXML->new();
+    $p->base_uri( "example/" );
+    $p->keep_blanks(0);
+    my $doc;
+    eval {
+        $doc = $p->parse_string( $goodXInclude );
+    };
+    
+    return 0 if $@;
+    return 0 unless $doc;
+    
+    my $i;
+    eval { 
+        $i = $p->processXIncludes($doc); 
+    };
+    
+    return 0 unless $i;
+    return 0 if $@;
+
+    return 1;
+
+} ok( Test_XIncludes_good() );
 
 
-my $badXInclude = q{
+sub Test_XIncludes_bad {
+    my $badXInclude = <<EXML;
 <x xmlns:xinclude="http://www.w3.org/2001/XInclude">
 <xinclude:include href="bad.xml"/>
 </x>
-};
+EXML
 
-{
-    $parser->base_uri( "example/" );
-    $parser->keep_blanks(0);
-    my $doc = $parser->parse_string( $goodXInclude );
-    ok($doc);
+    my $p = XML::LibXML->new();
+    $p->base_uri( "example/" );
+    $p->keep_blanks(0);
+    my $doc;
+    eval {
+        $doc = $p->parse_string( $badXInclude );
+    };
+
+    return 0 if $@;
+    return 0 unless defined $doc;
 
     my $i;
-    eval { $i = $parser->processXIncludes($doc); };
-    ok( $i );
+     eval {
+        $i = $p->processXIncludes($doc); 
+    };
+    
+    return 0 unless $@;
+    return 0 if $i;
 
-    $doc = $parser->parse_string( $badXInclude );
-    $i= undef;
-    eval { $i = $parser->processXIncludes($doc); };
-    ok($@);
+
+    # some other bad stuff 
+    eval{ $p->processXIncludes(undef); };
+    return 0 unless $@;
+    eval{ $p->processXIncludes("blahblah"); };
+    return 0 unless $@;
+
+    return 1;
+
+} ok( Test_XIncludes_bad() );
+
+
+
+sub Test_auto_xincludes_good {
+    my $p = XML::LibXML->new();
+    
+    my $goodXInclude = <<EXML;
+<x>
+<xinclude:include 
+ xmlns:xinclude="http://www.w3.org/2001/XInclude"
+ href="test2.xml"/>
+</x>
+EXML
     
     # auto expand
-    $parser->expand_xinclude(1);
-    $doc = $parser->parse_string( $goodXInclude );
-    ok($doc);
+    $p->base_uri( "example/" );
+    $p->expand_xinclude(1);
+    my $doc ;
+    eval {
+        $doc = $p->parse_string( $goodXInclude );
+    };
+    return 0 unless defined $doc;
 
-    $doc = undef;
-    eval { $doc = $parser->parse_string( $badXInclude ); };
-    ok($@);
-    ok(!$doc);
+    return 1;
 
-    # some bad stuff 
-    eval{ $parser->processXIncludes(undef); };
-    ok($@);
-    eval{ $parser->processXIncludes("blahblah"); };
-    ok($@);
-}
+} ok ( Test_auto_xincludes_good() );
+
+sub Test_auto_xincludes_fail {
+    my $p = XML::LibXML->new();
+    $p->base_uri( "example/" );
+    $p->expand_xinclude(1);
+
+    my $badXInclude = <<EXML;
+<x xmlns:xinclude="http://www.w3.org/2001/XInclude">
+<xinclude:include href="bad.xml"/>
+</x>
+EXML
+
+    my $doc;
+    eval { $doc = $p->parse_string( $badXInclude ); };
+    return 0 unless $@;
+    return 0 if defined $doc;
+
+    return 1;
+} ok( Test_auto_xincludes_fail() );
 
 print "# 2 PUSH PARSER\n";
 
@@ -397,23 +523,36 @@ print "# 2 PUSH PARSER\n";
         }
 
     }
-
-    {
-        print "# 2.3 RECOVERING PUSH PARSER\n";
-        $parser->init_push;
-
-        foreach ( "<A>", "B" ) {
-            $parser->push( $_);
-        }
-
-        my $doc;
-        eval {
-	       local $SIG{'__WARN__'} = sub { };
-	       $doc = $parser->finish_push(1);
-	     };
-        ok( $doc );
-    }
 }
+sub Test_recovering_push_parser {
+    print "# 2.3 RECOVERING PUSH PARSER\n";
+
+    my $p = XML::LibXML->new;
+    
+    $p->init_push;
+
+    foreach ( "<A>", "B" ) {
+        $p->push( $_);
+    }
+
+    my $doc = $p->finish_push(1);
+
+    return 0 unless defined $doc;
+
+    if ( XML::LibXML::HAVE_STRUCT_ERRORS() ) {
+        # the following conditions will only work with the 
+        # struct error code
+        # warn "compiled with HAVE_SERRORS";
+        return 0 unless $@;
+        return 0 unless ref( $@ ) eq "XML::LibXML::Error";
+        return 0 unless $@->{level} == 3;
+    }
+    else {
+        # warn "compiled without HAVE_SERRORS";
+    }
+    return 1;
+
+} ok( Test_recovering_push_parser() );
 
 print "# 3 SAX PARSER\n";
 
@@ -741,10 +880,14 @@ EOXML
     eval { $parser->parse_string( $badxml ); };
     # correct line number may or may not be present
     # depending on libxml2 version
+
+    # [CG 1.59] fixed to work with the structured error implementation
     ok( $@ =~ /^:[03]:/ );
 
     $parser->line_numbers(1);
     eval { $parser->parse_string( $badxml ); };
+
+    # [CG 1.59] fixed to work with the structured error implementation
     ok( $@ =~ /^:3:/ );
 
     # switch off validation for the following tests

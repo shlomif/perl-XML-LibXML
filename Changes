@@ -1,5 +1,13 @@
 Revision history for Perl extension XML::LibXML
 
+1.59
+   - PP: fixed weired 2 -> c2 typo in dom.c
+
+   - refactored the input callback interface (1.60)
+   - implemented support for libxml2's structured errors
+   - cleaned up the test cases
+   - fixed a bunch of bugs from rt.cpan.org.
+
 1.58
    - fixed a pointer initialization in parse_xml_chunk(), fixes 
      random several segmentation faults on document fragments.

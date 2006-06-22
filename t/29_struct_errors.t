@@ -2,10 +2,16 @@
 # First version of the new structured error test suite
 
 use Test;
-BEGIN { plan tests => 4}
+BEGIN { 
+    use XML::LibXML;
+    if ( XML::LibXML::HAVE_STRUCT_ERRORS() ) {
+        plan tests => 4;
+    }else{
+        plan tests => 1;
+    }
+}
 END { ok(0) unless $loaded }
 
-use XML::LibXML;
 use XML::LibXML::Error;
 
 $loaded = 1;
@@ -25,7 +31,7 @@ if ( $@ ) {
         ok(ref($@), "XML::LibXML::Error");
         ok($@->domain(), "parser");
         ok($@->line(), 1);
-        warn "se: ", $@;
+        # warn "se: ", $@;
     }
 }
 

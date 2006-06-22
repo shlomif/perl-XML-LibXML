@@ -1,7 +1,7 @@
 package XML::LibXML::Error;
 
 use strict;
-use vars qw($AUTOLOAD @error_domains $ERROR);
+use vars qw($AUTOLOAD @error_domains);
 use Carp;
 use overload
   '""' => \&as_string;
@@ -43,37 +43,71 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 		  "Relax-NG parser", "Relax-NG validity",
 		  "Catalog", "C14N", "XSLT", "validity");
 
+{ 
+    # internal callback routines
+    my $ERROR = undef;
 
-sub _callback_error {
-    my $xE = shift;
-
-    my $terr =bless {
-        domain  => $xE->domain(),
-        level   => $xE->level(),
-        code    => $xE->code(),
-        message => $xE->message(),
-        file    => $xE->file(),
-        line    => $xE->line(),
-        str1    => $xE->str1(),
-        str2    => $xE->str2(),
-        str3    => $xE->str3(),
-        int1    => $xE->num1(),
-        int2    => $xE->num2(),
-    }, "XML::LibXML::Error";
-
-    unless ( defined $terr->{file} and length $terr->{file} ) {
-        $terr->{file} = 'string()'; # make it easier to recognize parsed strings
+    sub _init_error {
+        $ERROR = undef;
     }
 
-    if ( defined $ERROR ) {
-        $terr->{prev} = $ERROR;
+    sub _callback_error {
+        my $xE = shift;
+	my $terr;
+	
+	if (ref($xE)) {
+	  $terr =bless {
+            domain  => $xE->domain(),
+            level   => $xE->level(),
+            code    => $xE->code(),
+            message => $xE->message(),
+            file    => $xE->file(),
+            line    => $xE->line(),
+            str1    => $xE->str1(),
+            str2    => $xE->str2(),
+            str3    => $xE->str3(),
+            num1    => $xE->num1(),
+            num2    => $xE->num2(),
+	  }, "XML::LibXML::Error";
+	} else {
+	  # !!!! problem : got flat error
+	  warn("PROBLEM: GOT FLAT ERROR\n");
+	  $terr =bless {
+            domain  => 0,
+            level   => 2,
+            code    => -1,
+            message => $xE,
+            file    => undef,
+            line    => undef,
+            str1    => undef,
+            str2    => undef,
+            str3    => undef,
+            num1    => undef,
+            num2    => undef,
+	  }, "XML::LibXML::Error";
+	}
+
+        unless ( defined $terr->{file} and length $terr->{file} ) {
+            # this would make it easier to recognize parsed strings
+            # but it breaks old implementations
+            # [CG] $terr->{file} = 'string()'; 
+        }
+        
+        if ( defined $ERROR ) {
+            $terr->{prev} = $ERROR;
+        }
+        
+        $ERROR = $terr;
     }
 
-    $ERROR = $terr;
-}
-
-sub _report_error {
-    die $ERROR;
+    sub _report_error {
+        if ( defined $ERROR ) {
+	  print "reporting error ",$ERROR->dump;
+            my $err = $ERROR;
+            $ERROR = undef;
+            die $err;
+        }
+    }
 }
 
 
@@ -82,7 +116,7 @@ sub AUTOLOAD {
   return undef unless ref($self);
   my $sub = $AUTOLOAD;
   $sub =~ s/.*:://;
-  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|str[123]|int[12])$/) {
+  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|num[123]|num[12])$/) {
     return $self->{$sub};
   } else {
     croak("Unknown error field $sub");
@@ -133,7 +167,7 @@ sub as_string {
     if (($self->{domain} == XML_ERR_FROM_XPATH) and
         defined($self->{str1})) {
         $msg.=$self->{str1}."\n";
-        $msg.=(" " x $self->{int1})."^\n";
+        $msg.=(" " x $self->{num1})."^\n";
     }
     return $msg;
 }

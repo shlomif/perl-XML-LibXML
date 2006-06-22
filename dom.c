@@ -208,7 +208,7 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
            cur->parent = p;
        }
        
-       if (c1 && 2 && c1!=leader) {
+       if (c1 && c2 && c1!=leader) {
            if ( leader ) {
                leader->next = c1;
 	       c1->prev = leader;

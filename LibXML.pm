@@ -329,7 +329,9 @@ sub _auto_expand {
     if ( defined $self->{XML_LIBXML_EXPAND_XINCLUDE}
          and  $self->{XML_LIBXML_EXPAND_XINCLUDE} == 1 ) {
         $self->{_State_} = 1;
-        eval { $self->processXIncludes($result); };
+        eval { 
+            $self->processXIncludes($result); 
+        };
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
@@ -371,35 +373,45 @@ sub parse_string {
     $self->{_State_} = 1;
     my $result;
     my $err;
+
     if ( defined $self->{SAX} ) {
-        my $string = shift;
         $self->{SAX_ELSTACK} = [];
+        my $string = shift;
         eval {
+            XML::LibXML::Error::_init_error();
             $result = $self->_parse_sax_string($string); 
             XML::LibXML::Error::_report_error( );
         };
-
-        $err = $@;
         $self->{_State_} = 0;
-        if ($err) {
-            croak $err;
+
+        unless ( XML::LibXML::HAVE_STRUCT_ERRORS() 
+                 && $self->{XML_LIBXML_RECOVER} ) {
+            $err = $@;
+            if ($err) {
+                croak $err;
+            }
         }
     }
     else {
         eval { 
+            XML::LibXML::Error::_init_error();
             $result = $self->_parse_string( @_ );
             XML::LibXML::Error::_report_error();
         };
 
-        $err = $@;
         $self->{_State_} = 0;
-        if ($err) {
-            croak $err;
+
+        unless ( XML::LibXML::HAVE_STRUCT_ERRORS() 
+                 && $self->{XML_LIBXML_RECOVER} ) {
+        #unless ( $self->{XML_LIBXML_RECOVER} ) {
+            $err = $@;
+            if ($err) {
+                croak $err;
+            }
         }
-        else {
-            $result = $self->_auto_expand( $result, 
-                                           $self->{XML_LIBXML_BASE_URI} );
-        }
+
+        $result = $self->_auto_expand( $result, 
+                                       $self->{XML_LIBXML_BASE_URI} );
     }
 
     return $result;
@@ -412,19 +424,36 @@ sub parse_fh {
     my $result;
     if ( defined $self->{SAX} ) {
         $self->{SAX_ELSTACK} = [];
-        eval { $self->_parse_sax_fh( @_ );  };
-        my $err = $@;
-        $self->{_State_} = 0;
-        if ($err) {
-            croak $err;
+        eval { 
+            XML::LibXML::Error::_init_error();
+            $self->_parse_sax_fh( @_ );  
+            XML::LibXML::Error::_report_error();
+        };
+
+        unless ( XML::LibXML::HAVE_STRUCT_ERRORS()
+                 && $self->{XML_LIBXML_RECOVER} ) {
+        #unless ( $self->{XML_LIBXML_RECOVER} ) {
+            my $err = $@;
+            $self->{_State_} = 0;
+            if ($err) {
+                croak $err;
+            }
         }
     }
     else {
-        eval { $result = $self->_parse_fh( @_ ); };
-        my $err = $@;
-        $self->{_State_} = 0;
-        if ($err) {
-            croak $err;
+        eval { 
+            XML::LibXML::Error::_init_error();
+            $result = $self->_parse_fh( @_ ); 
+            XML::LibXML::Error::_report_error();
+        };
+        unless ( XML::LibXML::HAVE_STRUCT_ERRORS() 
+                 && $self->{XML_LIBXML_RECOVER} ) {
+        #unless ( $self->{XML_LIBXML_RECOVER} ) {
+            my $err = $@;
+            $self->{_State_} = 0;
+            if ($err) {
+                croak $err;
+            }
         }
 
         $result = $self->_auto_expand( $result, $self->{XML_LIBXML_BASE_URI} );
@@ -440,20 +469,35 @@ sub parse_file {
     my $result;
     if ( defined $self->{SAX} ) {
         $self->{SAX_ELSTACK} = [];
-        eval { $self->_parse_sax_file( @_ );  };
-        my $err = $@;
-        $self->{_State_} = 0;
-        if ($err) {
-            croak $err;
+        eval {
+            XML::LibXML::Error::_init_error();
+            $self->_parse_sax_file( @_ );
+            XML::LibXML::Error::_report_error();
+        };
+        unless ( XML::LibXML::HAVE_STRUCT_ERRORS() 
+                 && $self->{XML_LIBXML_RECOVER} ) {
+        #unless ( $self->{XML_LIBXML_RECOVER} ) {
+            my $err = $@;
+            $self->{_State_} = 0;
+            if ($err) {
+                croak $err;
+            }
         }
+
     }
     else {
-        eval { $result = $self->_parse_file(@_); };
-        my $err = $@;
-        $self->{_State_} = 0;
-        if ($err) {
-            croak $err;
-        }
+        eval { 
+            XML::LibXML::Error::_init_error();
+            $result = $self->_parse_file(@_); 
+            XML::LibXML::Error::_report_error();
+        };
+        #unless ( $self->{XML_LIBXML_RECOVER} ) {
+            my $err = $@;
+            $self->{_State_} = 0;
+            if ($err) {
+                croak $err;
+            }
+        #}
 
         $result = $self->_auto_expand( $result );
     }
@@ -473,8 +517,9 @@ sub parse_xml_chunk {
     }
 
     $self->{_State_} = 1;
-    if ( defined $self->{SAX} ) {
-        eval {
+    eval {
+        XML::LibXML::Error::_init_error();
+        if ( defined $self->{SAX} ) {
             $self->_parse_sax_xml_chunk( @_ );
 
             # this is required for XML::GenericChunk.
@@ -484,16 +529,21 @@ sub parse_xml_chunk {
             unless ( $self->{IS_FILTER} ) {
                 $result = $self->{HANDLER}->end_document();
             }
-        };
-    }
-    else {
-        eval { $result = $self->_parse_xml_chunk( @_ ); };
-    }
+        }
+        else {
+            $result = $self->_parse_xml_chunk( @_ ); 
+        }
+        XML::LibXML::Error::_report_error();
+    };
 
-    my $err = $@;
-    $self->{_State_} = 0;
-    if ($err) {
-        croak $err;
+    unless ( XML::LibXML::HAVE_STRUCT_ERRORS() 
+                 && $self->{XML_LIBXML_RECOVER} ) {
+    #unless ( $self->{XML_LIBXML_RECOVER} ) {
+        my $err = $@;
+        $self->{_State_} = 0;
+        if ($err) {
+            croak $err;
+        }
     }
 
     return $result;
@@ -508,14 +558,23 @@ sub parse_balanced_chunk {
 sub processXIncludes {
     my $self = shift;
     my $doc = shift;
-    return $self->_processXIncludes($doc || " ");
+    my $retval; 
+    eval {
+        XML::LibXML::Error::_init_error();
+        $retval =  $self->_processXIncludes($doc || " ");
+        XML::LibXML::Error::_report_error();
+    };
+    if ( $@ ) {
+        croak $@;
+    }
+    return $retval;
 }
 
 # perl style
 sub process_xincludes {
     my $self = shift;
     my $doc = shift;
-    return $self->_processXIncludes($doc || " ");
+    return $self->processXIncludes($doc);
 }
 
 
@@ -529,11 +588,19 @@ sub init_push {
         delete $self->{CONTEXT};
     }
 
-    if ( defined $self->{SAX} ) {
-        $self->{CONTEXT} = $self->_start_push(1);
-    }
-    else {
-        $self->{CONTEXT} = $self->_start_push(0);
+    eval {
+        XML::LibXML::Error::_init_error();
+        if ( defined $self->{SAX} ) {
+            $self->{CONTEXT} = $self->_start_push(1);
+        }
+        else {
+            $self->{CONTEXT} = $self->_start_push(0);
+        }
+        XML::LibXML::Error::_report_error();
+    };
+
+    if ( $@ ) {
+        croak($@);
     }
 }
 
@@ -545,7 +612,12 @@ sub push {
     }
 
     foreach ( @_ ) {
-        $self->_push( $self->{CONTEXT}, $_ );
+        eval {
+            XML::LibXML::Error::_init_error();
+            $self->_push( $self->{CONTEXT}, $_ );
+            XML::LibXML::Error::_report_error();
+        };
+        croak $@ if $@;
     }
 }
 
@@ -561,7 +633,7 @@ sub parse_chunk {
     }
 
     if ( defined $chunk and length $chunk ) {
-        $self->_push( $self->{CONTEXT}, $chunk );
+        $self->push( $chunk );
     }
 
     if ( $terminate ) {
@@ -574,24 +646,30 @@ sub finish_push {
     my $self = shift;
     my $restore = shift || 0;
     return undef unless defined $self->{CONTEXT};
-
+    
     my $retval;
-
-    if ( defined $self->{SAX} ) {
-        eval {
+    
+    eval {
+        XML::LibXML::Error::_init_error();
+          
+        if ( defined $self->{SAX} ) {
             $self->_end_sax_push( $self->{CONTEXT} );
             $retval = $self->{HANDLER}->end_document( {} );
-        };
-    }
-    else {
-        eval { $retval = $self->_end_push( $self->{CONTEXT}, $restore ); };
-    }
+        }
+        else {
+            $retval = $self->_end_push( $self->{CONTEXT}, $restore ); 
+        }
+       XML::LibXML::Error::_report_error(); 
+    };
 
     delete $self->{CONTEXT};
 
-    if ( $@ ) {
-        croak( $@ );
+    if ( $restore == 0 ) {
+        if ( $@ ) {
+            croak( $@ );
+        }
     }
+
     return $retval;
 }
 
@@ -630,7 +708,10 @@ sub iterator {
 
 sub findnodes {
     my ($node, $xpath) = @_;
-    my @nodes = $node->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$node->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
+
     if (wantarray) {
         return @nodes;
     }
@@ -653,7 +734,9 @@ sub findvalue {
 
 sub find {
     my ($node, $xpath) = @_;
-    my ($type, @params) = $node->_find($xpath);
+    XML::LibXML::Error::_init_error();
+    my ($type, @params) = @{$node->_find($xpath)};
+    XML::LibXML::Error::_report_error( );
     if ($type) {
         return $type->new(@params);
     }
@@ -758,27 +841,41 @@ sub insertPI {
 sub getElementsByTagName {
     my ( $doc , $name ) = @_;
     my $xpath = "descendant-or-self::node()/$name";
-    my @nodes = $doc->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$doc->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
-sub  getElementsByTagNameNS {
+sub getElementsByTagNameNS {
     my ( $doc, $nsURI, $name ) = @_;
     my $xpath = "descendant-or-self::*[local-name()='$name' and namespace-uri()='$nsURI']";
-    my @nodes = $doc->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$doc->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
 sub getElementsByLocalName {
     my ( $doc,$name ) = @_;
     my $xpath = "descendant-or-self::*[local-name()='$name']";
-    my @nodes = $doc->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$doc->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
 sub getElementsById {
     my ( $doc, $id ) = @_;
     return ($doc->findnodes( "id('$id')" ))[0];
+}
+
+sub validate {
+    my $self = shift;
+    XML::LibXML::Error::_init_error();
+    my $rv = $self->_validate(@_);
+    XML::LibXML::Error::_report_error();
+    return $rv;
 }
 
 1;
@@ -853,21 +950,27 @@ sub setAttribute {
 sub getElementsByTagName {
     my ( $node , $name ) = @_;
     my $xpath = "descendant::$name";
-    my @nodes = $node->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{ $node->_findnodes($xpath) };
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
 sub  getElementsByTagNameNS {
     my ( $node, $nsURI, $name ) = @_;
     my $xpath = "descendant::*[local-name()='$name' and namespace-uri()='$nsURI']";
-    my @nodes = $node->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$node->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
 sub getElementsByLocalName {
     my ( $node,$name ) = @_;
     my $xpath = "descendant::*[local-name()='$name']";
-        my @nodes = $node->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$node->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
@@ -880,7 +983,9 @@ sub getChildrenByTagName {
 sub getChildrenByTagNameNS {
     my ( $node, $nsURI, $name ) = @_;
     my $xpath = "*[local-name()='$name' and namespace-uri()='$nsURI']";
-    my @nodes = $node->_findnodes($xpath);
+    XML::LibXML::Error::_init_error();
+    my @nodes = @{$node->_findnodes($xpath)};
+    XML::LibXML::Error::_report_error( );
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
@@ -1201,6 +1306,7 @@ sub new {
     my %args = @_;
 
     my $self = undef;
+    XML::LibXML::Error::_init_error();
     if ( defined $args{location} ) {
         $self = $class->parse_location( $args{location} );
     }
@@ -1210,8 +1316,16 @@ sub new {
     elsif ( defined $args{DOM} ) {
         $self = $class->parse_document( $args{DOM} );
     }
-
+    XML::LibXML::Error::_report_error();
     return $self;
+}
+
+sub validate {
+    my $self = shift;
+    XML::LibXML::Error::_init_error();
+    my $rv = $self->_validate(@_);
+    XML::LibXML::Error::_report_error();
+    return $rv;
 }
 
 1;
@@ -1222,15 +1336,25 @@ sub new {
     my $class = shift;
     my %args = @_;
 
-    my $self = undef;
+    XML::LibXML::Error::_init_error();
+    my $self;
     if ( defined $args{location} ) {
         $self = $class->parse_location( $args{location} );
     }
     elsif ( defined $args{string} ) {
         $self = $class->parse_buffer( $args{string} );
     }
+    XML::LibXML::Error::_report_error();
 
     return $self;
+}
+
+sub validate {
+    my $self = shift;
+    XML::LibXML::Error::_init_error();
+    my $rv = $self->_validate(@_);
+    XML::LibXML::Error::_report_error();
+    return $rv;
 }
 
 1;

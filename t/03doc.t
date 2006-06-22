@@ -337,14 +337,31 @@ use XML::LibXML::Common qw(:libxml);
             @as   = $doc2->getElementsByLocalName( "A" );
             ok( scalar( @as ), 3);
         }
-        {
-	    $parser2->recover(1);
-	    local $SIG{'__WARN__'} = sub { }; 
-            my $doc2 = $parser2->parse_string($string4);
-#            my @as   = $doc2->getElementsByTagName( "C:A" );
-#            ok( scalar( @as ), 3);
-            my @as   = $doc2->getElementsByLocalName( "A" );
-            ok( scalar( @as ), 3);
-        }
     }
 }
+
+sub Test_recovered_doc_access  {
+    my $string = '<C:A><C:A><C:B/></C:A><C:A><C:B/></C:A></C:A>';
+
+    my $p = XML::LibXML->new();
+    my $doc;
+
+    $p->recover(1);
+    
+#    local $SIG{'__WARN__'} = sub {}; 
+
+    $doc = $p->parse_string($string);
+
+    return 0 unless defined $doc;
+
+#            my @as   = $doc2->getElementsByTagName( "C:A" );
+#            ok( scalar( @as ), 3);
+
+    my @as;
+    @as   = $doc->getElementsByLocalName( "A" );
+
+    return 0 unless scalar( @as ) == 3;
+
+    return 1;
+
+} ok( Test_recovered_doc_access() );
