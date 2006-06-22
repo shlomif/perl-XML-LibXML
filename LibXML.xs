@@ -990,7 +990,10 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                       strerror(errno));
             }
             xs_warn( "context created\n");
-
+#ifdef LIBXML_VERSION > 20600
+	    /* dictionaries not support yet */
+	    ctxt->dictNames = 0;
+#endif
             if ( directory != NULL ) {
                 ctxt->directory = directory;
             }
