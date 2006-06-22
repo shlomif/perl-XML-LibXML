@@ -412,11 +412,11 @@ domName(xmlNodePtr node) {
     case XML_DOCUMENT_NODE :
     case XML_HTML_DOCUMENT_NODE :
     case XML_DOCB_DOCUMENT_NODE :
-        name = "document";
+        name = (const xmlChar *) "document";
         break;
 
     case XML_DOCUMENT_FRAG_NODE :
-        name = "document_fragment";
+        name = (const xmlChar *) "document_fragment";
         break;
 
     case XML_ELEMENT_NODE :
@@ -975,6 +975,9 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
 
     return attr;
 }
+
+int
+domNodeNormalize( xmlNodePtr node );
 
 int
 domNodeNormalizeList( xmlNodePtr nodelist )

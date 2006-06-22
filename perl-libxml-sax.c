@@ -97,7 +97,6 @@ xmlSAXHandlerPtr PSaxGetHandler();
 void
 PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser )
 {
-    xmlNodePtr ns_stack = NULL;
     PmmSAXVectorPtr vec = NULL;
     SV ** th;
     dTHX;
@@ -149,7 +148,7 @@ PmmSAXCloseContext( xmlParserCtxtPtr ctxt )
     vec->parser = NULL;
 
     xmlFreeDoc( vec->ns_stack_root );
-    vec->ns_stack_root;
+    vec->ns_stack_root = NULL;
     xmlFree( vec );
     ctxt->_private = NULL;
 }
@@ -315,7 +314,6 @@ PmmAddNamespace( PmmSAXVectorPtr sax, const xmlChar * name,
                  const xmlChar * href, SV *handler)
 {
     xmlNsPtr ns         = NULL;
-    xmlChar * nodename  = NULL;
     xmlChar * prefix    = NULL;
     xmlChar * localname = NULL;
 
@@ -356,7 +354,6 @@ HV *
 PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name )
 {
     HV * retval = newHV();
-    SV * tmp;
     xmlChar * localname = NULL;
     xmlChar * prefix    = NULL;
 
@@ -468,11 +465,11 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                              _C2Sv(name, NULL), NameHash);
 
                     hv_store(atV, "Prefix", 6,
-                             _C2Sv("", NULL), PrefixHash);
+                             _C2Sv((const xmlChar *)"", NULL), PrefixHash);
                     hv_store(atV, "LocalName", 9,
                              _C2Sv(name,NULL), LocalNameHash);
                     hv_store(atV, "NamespaceURI", 12,
-                             _C2Sv("", NULL), NsURIHash);
+                             _C2Sv((const xmlChar *)"", NULL), NsURIHash);
                     
                 }
                 else if (xmlStrncmp((const xmlChar *)"xmlns:", name, 6 ) == 0 ) {
@@ -949,7 +946,6 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
     int count             = 0;
     dTHX;
-    HV* empty             = newHV();
     SV * handler          = sax->handler;
 
     SV * element;

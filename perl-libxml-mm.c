@@ -54,7 +54,6 @@ PmmNodeTypeName( xmlNodePtr elem ){
     const char *name = "XML::LibXML::Node";
 
     if ( elem != NULL ) {
-        char * ptrHlp;
         switch ( elem->type ) {
         case XML_ELEMENT_NODE:
             name = "XML::LibXML::Element";   
@@ -692,7 +691,6 @@ PmmContextSv( xmlParserCtxtPtr ctxt )
     ProxyNodePtr dfProxy= NULL;
     SV * retval = &PL_sv_undef;
     const char * CLASS = "XML::LibXML::ParserContext";
-    void * saxvector = NULL;
 
     if ( ctxt != NULL ) {
         dfProxy = PmmNewContext(ctxt);
@@ -812,7 +810,7 @@ PmmFastDecodeString( int charset,
         
         xmlBufferCat( in, string );        
         if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
-            retval = xmlCharStrndup(xmlBufferContent(out), xmlBufferLength(out));
+	  retval = xmlCharStrndup((const char *)xmlBufferContent(out), xmlBufferLength(out));
         }
         else {
             xs_warn("PmmFastEncodeString: decoding error\n");
@@ -833,7 +831,6 @@ xmlChar*
 PmmEncodeString( const char *encoding, const xmlChar *string ){
     xmlCharEncoding enc;
     xmlChar *ret = NULL;
-    xmlCharEncodingHandlerPtr coder = NULL;
     
     if ( string != NULL ) {
         if( encoding != NULL ) {
@@ -859,7 +856,6 @@ char*
 PmmDecodeString( const char *encoding, const xmlChar *string){
     char *ret=NULL;
     xmlCharEncoding enc;
-    xmlCharEncodingHandlerPtr coder = NULL;
 
     if ( string != NULL ) {
         xs_warn( "PmmDecodeString called\n" );

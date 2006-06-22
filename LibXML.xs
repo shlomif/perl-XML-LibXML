@@ -850,9 +850,9 @@ _parse_string(self, string, dir = &PL_sv_undef)
             /* make libxml2-2.6 display line number on error */
             if ( ctxt->input != NULL ) {
                 if (directory != NULL) {
-                    ctxt->input->filename = xmlStrdup(directory);
+		  ctxt->input->filename = (char *) xmlStrdup((const xmlChar *) directory);
                 } else {
-                    ctxt->input->filename = xmlStrdup((const xmlChar *) "");
+		  ctxt->input->filename = (char *) xmlStrdup((const xmlChar *) "");
                 }
             }
 
@@ -994,7 +994,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                       strerror(errno));
             }
             xs_warn( "context created\n");
-#ifdef LIBXML_VERSION > 20600
+#if LIBXML_VERSION > 20600
 	    /* dictionaries not support yet */
 	    ctxt->dictNames = 0;
 #endif
@@ -2610,7 +2610,7 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
                 }
 
                 newAttr = xmlNewDocProp( self, localname, value );
-                xmlSetNs(newAttr, ns);
+                xmlSetNs((xmlNodePtr)newAttr, ns);
 
                 RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL );
 
@@ -3010,7 +3010,7 @@ is_valid(self, ...)
     PREINIT:
         SV * saved_error;
         xmlValidCtxt cvp;
-        xmlDtdPtr dtd;
+        xmlDtdPtr dtd = NULL;
         SV * dtd_sv;
     CODE:
         LibXML_init_error(&saved_error);
@@ -4024,9 +4024,9 @@ toStringC14N(self, comments=0, xpath = &PL_sv_undef)
              && self->type != XML_DOCB_DOCUMENT_NODE
            ) {
             if (comments)
-                nodepath = xmlStrdup( "(. | .//node() | .//@* | .//namespace::*)" );
+	      nodepath = xmlStrdup( (const xmlChar *) "(. | .//node() | .//@* | .//namespace::*)" );
             else
-                nodepath = xmlStrdup( "(. | .//node() | .//@* | .//namespace::*)[not(self::comment())]" );
+                nodepath = xmlStrdup( (const xmlChar *) "(. | .//node() | .//@* | .//namespace::*)[not(self::comment())]" );
         }
 
         if ( nodepath != NULL ) {
@@ -4346,7 +4346,7 @@ getNamespaces( pnode )
         xmlNodePtr node;
         xmlNsPtr ns = NULL;
         xmlNsPtr newns = NULL;
-        SV* element;
+        SV* element = &PL_sv_undef;
         const char * class = "XML::LibXML::Namespace";
     INIT:
         node = PmmSvNode(pnode);
@@ -4388,7 +4388,9 @@ getNamespace( node )
                                        (const char *)class,
                                        (void*)newns
                                       );
-            }
+            } else {
+                XSRETURN_UNDEF;
+	    }
         }
         else {
             XSRETURN_UNDEF;
@@ -5461,7 +5463,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
             RETVAL = 0;
 
         if ( ns )
-	    xmlSetNs(node, ns);
+            xmlSetNs((xmlNodePtr)node, ns);
 
         xmlFree(nsPrefix);
         xmlFree(nsURI);
@@ -5480,6 +5482,8 @@ new(CLASS, namespaceURI, namespacePrefix=&PL_sv_undef)
         xmlChar* nsURI;
         xmlChar* nsPrefix;
     CODE:
+        RETVAL = &PL_sv_undef;
+
         nsURI = Sv2C(namespaceURI,NULL);
         if ( !nsURI ) {
             XSRETURN_UNDEF;
@@ -5491,7 +5495,7 @@ new(CLASS, namespaceURI, namespacePrefix=&PL_sv_undef)
             RETVAL = sv_setref_pv( RETVAL,
                                    CLASS,
                                    (void*)ns);
-        }
+	}
         xmlFree(nsURI);
         if ( nsPrefix )
             xmlFree(nsPrefix);
