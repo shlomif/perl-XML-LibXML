@@ -4515,13 +4515,15 @@ hasAttributeNS( self, namespaceURI, attr_name )
         name = nodeSv2C(attr_name, self );
         nsURI = nodeSv2C(namespaceURI, self );
 
-        if ( !name ) {
-            xmlFree(nsURI);
+        if ( name == NULL ) {
+            if ( nsURI != NULL ) {
+              xmlFree(nsURI);
+            }
             XSRETURN_UNDEF;
         }
-        if ( !nsURI ){
-            xmlFree(name);
-            XSRETURN_UNDEF;
+        if ( nsURI != NULL && xmlStrlen(nsURI) == 0 ){
+            xmlFree(nsURI);
+            nsURI = NULL;
         }
         if ( xmlHasNsProp( self, name, nsURI ) ) {
             RETVAL = 1;
@@ -4531,7 +4533,9 @@ hasAttributeNS( self, namespaceURI, attr_name )
         }
 
         xmlFree(name);
-        xmlFree(nsURI);
+        if ( nsURI != NULL ){
+            xmlFree(nsURI);
+        }
     OUTPUT:
         RETVAL
 

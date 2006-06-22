@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 70 };
+BEGIN { plan tests => 81 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -87,6 +87,25 @@ print "# 1. bound node\n";
 
     $elem->removeAttributeNode( $tattr );
     ok( !$elem->hasAttributeNS($nsURI, $foo) );
+
+
+    # empty NS
+    $elem->setAttributeNS( '', $foo, $attvalue2 );
+    ok( $elem->hasAttribute( $foo ) );
+    $tattr = $elem->getAttributeNode( $foo );
+    ok($tattr);
+    ok($tattr->name, $foo);
+    ok($tattr->nodeName, $foo);
+    ok(!defined($tattr->namespaceURI));
+    ok($tattr->value, $attvalue2 );
+
+    ok($elem->hasAttribute($foo) == 1);
+    ok($elem->hasAttributeNS(undef, $foo) == 1);
+    ok($elem->hasAttributeNS('', $foo) == 1);
+     
+    $elem->removeAttributeNode( $tattr );
+    ok( !$elem->hasAttributeNS('', $foo) );
+    ok( !$elem->hasAttributeNS(undef, $foo) );
 
     # node based functions
     my $e2 = $doc->createElement($foo);

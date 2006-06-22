@@ -63,16 +63,16 @@ sub _parse {
     eval {
       $args->{ParseFunc}->($args->{LibParser}, $args->{ParseFuncParam});
     };
-    # break a possible circular reference    
-    $args->{LibParser}->set_handler( undef );
-    if ( $@ ) {
-        croak $@;
-    }
 
     if ( $args->{LibParser}->{SAX}->{State} == 1 ) {
         croak( "SAX Exception not implemented, yet; Data ended before document ended\n" );
     }
 
+    # break a possible circular reference    
+    $args->{LibParser}->set_handler( undef );
+    if ( $@ ) {
+        croak $@;
+    }
     return $self->end_document({});
 }
 
