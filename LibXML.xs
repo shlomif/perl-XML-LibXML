@@ -849,7 +849,11 @@ _parse_string(self, string, dir = &PL_sv_undef)
 
             /* make libxml2-2.6 display line number on error */
             if ( ctxt->input != NULL ) {
-                ctxt->input->filename = xmlStrdup((const xmlChar *) "");
+                if (directory != NULL) {
+                    ctxt->input->filename = xmlStrdup(directory);
+                } else {
+                    ctxt->input->filename = xmlStrdup((const xmlChar *) "");
+                }
             }
 
             xs_warn( "context initialized\n" );
