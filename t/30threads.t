@@ -3,7 +3,7 @@ use Config;
 use constant MAX_THREADS => 10;
 BEGIN {
 	if( $Config{useithreads} ) {
-		plan tests => 11;
+		plan tests => 14;
 		require threads;
 	} else {
 		plan tests => 0;
