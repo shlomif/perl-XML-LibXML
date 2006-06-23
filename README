@@ -55,12 +55,6 @@ modules:
 Note that you have to rebuild XML::LibXML once you upgrade libxml2. This avoids
 problems with binary incompatibilities between releases of the library.
 
-If Makefile.PL has problems detecting your libxml2 installation, try
-
-   perl Makefile.PL DEBUG=1
-
-for better diagnostics. See also the following section.
-
 
 Notes on libxml2 versions
 =========================
@@ -123,9 +117,7 @@ The following versions are tested:
    o version 2.6.3: tested; not working
    o version 2.6.4: tested; not working (XML Schema errors)
    o version 2.6.5: tested; not working (broken XIncludes)
-   o up to version 2.6.10: tested; working
-   o up to version 2.6.18: not tested (won't compile with gcc4)
-   o up to version 2.6.26: tested; working
+   o up to version 2.6.8: tested; working
 
 It happens, that an older version of libxml2 passes all tests under certain
 conditions. This is no reason to assume that version to work on all platforms.

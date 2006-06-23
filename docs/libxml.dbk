@@ -1226,24 +1226,16 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             <title>Error Reporting</title>
 
             <para>XML::LibXML throws exceptions during parsing, validation or XPath processing (and some other occations). These errors can be caught by using
-            <emphasis>eval</emphasis> blocks. The error then will be stored in <emphasis>$@</emphasis>. Alternatively one can use the get_last_error() function
-            of XML::LibXML. It will return the same string that is stored in <emphasis>$@</emphasis>. Using get_last_error() makes it still nessecary to eval
-            the statement, since these function groups will die() on errors.</para>
+            <emphasis>eval</emphasis> blocks. The error then will be stored in <emphasis>$@</emphasis>.</para>
 
-            <para>Note, that the use of get_last_error() still requires eval blocks. XML::LibXML throws errors as they occour and does not wait if a user test
+            <para>XML::LibXML throws errors as they occour and does not wait if a user test
             for them. This is a very common misunderstanding in the use of XML::LibXML. If the eval is ommited, XML::LibXML will allways halt your script by
             &#34;croaking&#34; (see Carp man page for details).</para>
 
-            <para>Also note that an increasing number throws errors if bad data is passed. If you cannot asure valid data passed to XML::LibXML you should eval
+            <para>Also note that an increasing number of functions throw errors if bad data is passed. If you cannot asure valid data passed to XML::LibXML you should eval
             these functions.</para>
 
-            <para>get_last_error() can be called either by the class itself or by a parser instance:</para>
-
-            <programlisting>$errstring = XML::LibXML-&#62;get_last_error();
-$errstring = $parser-&#62;get_last_error();</programlisting>
-
-            <para>However, XML::LibXML exceptions are global. That means if get_last_error() is called on an parser instance, the last <emphasis>global</emphasis>
-            error will be returned. This is not necessarily the error caused by the parser instance itself.</para>
+            <para>Note: since version 1.59, get_last_error() is no longer available in XML::LibXML for thread-safety reasons.</para>
         </sect1>
     </chapter>
 
