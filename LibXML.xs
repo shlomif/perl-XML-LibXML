@@ -214,10 +214,10 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     PUTBACK;
 
     if (sv_isobject(ioref)) {
-        cnt = perl_call_method("read", G_SCALAR | G_EVAL);
+        cnt = call_method("read", G_SCALAR | G_EVAL);
     }
     else {
-        cnt = perl_call_pv("XML::LibXML::__read", G_SCALAR | G_EVAL);
+        cnt = call_pv("XML::LibXML::__read", G_SCALAR | G_EVAL);
     }
 
     SPAGAIN;
@@ -242,6 +242,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     chars = SvPV(tbuff, read_length);
     strncpy(buffer, chars, read_length);
 
+    PUTBACK;
     FREETMPS;
     LEAVE;
 
@@ -269,7 +270,7 @@ LibXML_input_match(char const * filename)
         PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
         PUTBACK;
 
-        count = perl_call_pv("XML::LibXML::InputCallback::_callback_match", 
+        count = call_pv("XML::LibXML::InputCallback::_callback_match", 
                              G_SCALAR | G_EVAL);
 
         SPAGAIN;
@@ -313,7 +314,7 @@ LibXML_input_open(char const * filename)
     PUSHs(sv_2mortal(newSVpv((char*)filename, 0)));
     PUTBACK;
 
-    count = perl_call_pv("XML::LibXML::InputCallback::_callback_open", 
+    count = call_pv("XML::LibXML::InputCallback::_callback_open", 
                               G_SCALAR | G_EVAL);
 
     SPAGAIN;
@@ -363,7 +364,7 @@ LibXML_input_read(void * context, char * buffer, int len)
         PUSHs(sv_2mortal(newSViv(len)));
         PUTBACK;
 
-        count = perl_call_pv("XML::LibXML::InputCallback::_callback_read", 
+        count = call_pv("XML::LibXML::InputCallback::_callback_read", 
                              G_SCALAR | G_EVAL);
 
         SPAGAIN;
@@ -388,6 +389,7 @@ LibXML_input_read(void * context, char * buffer, int len)
             }
         }
 
+	PUTBACK;
         FREETMPS;
         LEAVE;
     }
@@ -397,7 +399,6 @@ LibXML_input_read(void * context, char * buffer, int len)
 void
 LibXML_input_close(void * context)
 {
-    int count;
     SV * ctxt;
 
     ctxt = (SV *)context;
@@ -414,23 +415,15 @@ LibXML_input_close(void * context)
         PUSHs(ctxt);
         PUTBACK;
 
-        count = perl_call_pv("XML::LibXML::InputCallback::_callback_close", 
-                             G_SCALAR | G_EVAL);
-
-        SPAGAIN;
+        call_pv("XML::LibXML::InputCallback::_callback_close", 
+                             G_SCALAR | G_EVAL | G_DISCARD);
 
         SvREFCNT_dec(ctxt);
 
-        if (!count) {
-            croak("close callback failed");
-        }
-
         if (SvTRUE(ERRSV)) {
             croak("close callback died: %s", SvPV_nolen(ERRSV));
-            POPs ;
         }
 
-        PUTBACK;
         FREETMPS;
         LEAVE;
     }
@@ -458,17 +451,10 @@ LibXML_output_write_handler(void * ioref, char * buffer, int len)
         PUSHs(sv_2mortal(tsize));
         PUTBACK;
 
-        cnt = perl_call_pv("XML::LibXML::__write", G_SCALAR | G_EVAL);
-
-        SPAGAIN;
-
-        if (cnt != 1) {
-            croak("write method call failed");
-        }
+        call_pv("XML::LibXML::__write", G_SCALAR | G_EVAL | G_DISCARD );
 
         if (SvTRUE(ERRSV)) {
             croak("write method call died: %s", SvPV_nolen(ERRSV));
-            POPs ;
         }
 
         FREETMPS;
@@ -525,11 +511,11 @@ LibXML_load_external_entity(
         XPUSHs(sv_2mortal(newSVpv((char*)ID, 0)));
         PUTBACK;
 
-        count = perl_call_sv(*func, G_SCALAR | G_EVAL);
+        count = call_sv(*func, G_SCALAR | G_EVAL);
 
         SPAGAIN;
 
-        if (!count) {
+        if (count == 0) {
             croak("external entity handler did not return a value");
         }
 
@@ -547,6 +533,7 @@ LibXML_load_external_entity(
                         XML_CHAR_ENCODING_NONE
                         );
 
+        PUTBACK;
         FREETMPS;
         LEAVE;
 
