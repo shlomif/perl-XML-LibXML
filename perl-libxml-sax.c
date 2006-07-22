@@ -854,7 +854,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
         XPUSHs(rv);
         PUTBACK;
 
-        call_method( "comment", G_SCALAR | G_EVAL );
+        call_method( "comment", G_SCALAR | G_EVAL | G_DISCARD );
         sv_2mortal(rv);
 
         if (SvTRUE(ERRSV)) {
