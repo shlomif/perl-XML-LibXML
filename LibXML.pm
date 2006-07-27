@@ -1070,8 +1070,7 @@ sub getChildrenByTagName {
 
 sub getChildrenByTagNameNS {
     my ( $node, $nsURI, $name ) = @_;
-    my $xpath = "*[local-name()='$name' and namespace-uri()='$nsURI']";
-    my @nodes = $node->_findnodes($xpath);
+    my @nodes = $node->_getChildrenByTagNameNS($nsURI,$name);
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 

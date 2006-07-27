@@ -3379,6 +3379,46 @@ _childNodes( self )
             XPUSHs(sv_2mortal(newSViv(len)) );
         }
 
+void
+_getChildrenByTagNameNS( self, namespaceURI, node_name )
+        xmlNodePtr self
+        SV * namespaceURI
+        SV * node_name
+    PREINIT:
+        xmlChar * name;
+        xmlChar * nsURI;
+        xmlNodePtr cld;
+        SV * element;
+        int len = 0;
+        int wantarray = GIMME_V;
+    PPCODE:
+        name = nodeSv2C(node_name, self );
+        nsURI = nodeSv2C(namespaceURI, self );
+
+        if ( nsURI != NULL && xmlStrlen(nsURI) == 0 ){
+            xmlFree(nsURI);
+            nsURI = NULL;
+        }
+        if ( self->type != XML_ATTRIBUTE_NODE ) {
+            cld = self->children;
+            xs_warn("childnodes start");
+            while ( cld ) {
+	      if ( xmlStrcmp( name, cld->name ) == 0 
+		   && ((cld->ns != NULL && xmlStrcmp( nsURI, cld->ns->href ) == 0 )
+		       || (cld->ns == NULL && nsURI == NULL))) {
+                if( wantarray != G_SCALAR ) {
+                    element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
+                    XPUSHs(sv_2mortal(element));
+                }
+                len++;
+	      }
+	      cld = cld->next;
+            }
+        }
+        if ( wantarray == G_SCALAR ) {
+            XPUSHs(sv_2mortal(newSViv(len)) );
+        }
+
 SV*
 firstChild( self )
         xmlNodePtr self
