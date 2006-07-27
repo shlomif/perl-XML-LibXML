@@ -2,7 +2,7 @@
 
 use Test;
 
-BEGIN { plan tests => 22 };
+BEGIN { plan tests => 24 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -103,5 +103,24 @@ use XML::LibXML::Common qw(:libxml);
 EOF
 ok($doc->validate());
 ok($doc->is_valid());
+
+}
+{
+
+my $parser = XML::LibXML->new();
+$parser->validation(0);
+$parser->load_ext_dtd(0); # This should make libxml not try to get the DTD
+
+my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
+my $doc = eval {
+    $parser->parse_string($xml);
+};
+
+ok(!$@);
+if ($@) {
+    warn "Parsing error: $@\n";
+}
+ok($doc);
 
 }
