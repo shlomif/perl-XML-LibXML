@@ -898,7 +898,7 @@ _parse_sax_string(self, string)
             }
             xs_warn( "context created\n");
 
-            PmmSAXInitContext( ctxt, self );
+            PmmSAXInitContext( ctxt, self, saved_error );
             xs_warn( "context initialized \n");
 
             {
@@ -1065,7 +1065,7 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
             if ( directory != NULL ) {
                 ctxt->directory = directory;
             }
-            PmmSAXInitContext( ctxt, self );
+            PmmSAXInitContext( ctxt, self, saved_error );
             xs_warn( "context initialized \n");
 
             {
@@ -1194,7 +1194,7 @@ _parse_sax_file(self, filename_sv)
             xs_warn( "context created\n");
 
             ctxt->sax = PSaxGetHandler();
-            PmmSAXInitContext( ctxt, self );
+            PmmSAXInitContext( ctxt, self, saved_error );
             xs_warn( "context initialized \n");
 
             {
@@ -1475,7 +1475,7 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
             }
             xs_warn( "context created\n");
 
-            PmmSAXInitContext( ctxt, self );
+            PmmSAXInitContext( ctxt, self, saved_error );
             handler = PSaxGetHandler();
 
             retCode = xmlParseBalancedChunkMemory( NULL,
@@ -1561,7 +1561,7 @@ _start_push(self, with_sax=0)
         }
 #endif
         if ( with_sax == 1 ) {
-            PmmSAXInitContext( ctxt, self );
+	    PmmSAXInitContext( ctxt, self, saved_error );
         }
 
         RETVAL = PmmContextSv( ctxt );

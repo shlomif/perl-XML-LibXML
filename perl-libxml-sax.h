@@ -21,7 +21,7 @@ void
 PmmSAXInitialize(pTHX);
 
 void
-PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser );
+PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser, SV * saved_error );
 
 void 
 PmmSAXCloseContext( xmlParserCtxtPtr ctxt );

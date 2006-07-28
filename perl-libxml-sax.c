@@ -35,6 +35,7 @@ typedef struct {
     xmlSAXLocator * locator;
     xmlDocPtr ns_stack_root;
     SV * handler;
+    SV * saved_error;
 } PmmSAXVector;
 
 typedef PmmSAXVector* PmmSAXVectorPtr;
@@ -112,7 +113,7 @@ xmlSAXHandlerPtr PSaxGetHandler();
 
 
 void
-PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser )
+PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser, SV * saved_error )
 {
     PmmSAXVectorPtr vec = NULL;
     SV ** th;
@@ -129,6 +130,8 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser )
     xmlAddChild((xmlNodePtr)vec->ns_stack_root, vec->ns_stack);
 
     vec->locator = NULL;
+
+    vec->saved_error = saved_error;
 
     vec->parser  = SvREFCNT_inc( parser );
     th = hv_fetch( (HV*)SvRV(parser), "HANDLER", 7, 0 );
@@ -1050,9 +1053,12 @@ PmmSaxError(void * ctx, const char * msg, ...)
     sv_vsetpvfn(svMessage, msg, xmlStrlen((const xmlChar *)msg), &args, NULL, 0, NULL);
     va_end(args);
 
+    sv_catsv( sax->saved_error, svMessage );
+
     XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
+
     PUTBACK;
     /* 
        this is a workaround: at least some versions of libxml2 didn't not call 
@@ -1098,9 +1104,12 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
 
+    sv_catsv( sax->saved_error, svMessage );
+
     XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
+
     PUTBACK;
     call_pv( "XML::LibXML::_SAXParser::fatal_error", G_SCALAR | G_EVAL | G_DISCARD );
     if (SvTRUE(ERRSV)) {
