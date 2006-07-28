@@ -1032,7 +1032,8 @@ PmmSaxError(void * ctx, const char * msg, ...)
 
     va_list args;
     SV * svMessage;
- 
+    xmlErrorPtr last_err = xmlCtxtGetLastError( ctxt );
+    
     dTHX;
     dSP;
 
@@ -1053,7 +1054,15 @@ PmmSaxError(void * ctx, const char * msg, ...)
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
     PUTBACK;
-    call_pv( "XML::LibXML::_SAXParser::error", G_SCALAR | G_EVAL | G_DISCARD );
+    /* 
+       this is a workaround: at least some versions of libxml2 didn't not call 
+       the fatalError callback at all
+    */
+    if (last_err && last_err->level == XML_ERR_FATAL) {
+      call_pv( "XML::LibXML::_SAXParser::fatal_error", G_SCALAR | G_EVAL | G_DISCARD );
+    } else {
+      call_pv( "XML::LibXML::_SAXParser::error", G_SCALAR | G_EVAL | G_DISCARD );
+    }
     if (SvTRUE(ERRSV)) {
         STRLEN n_a;
         croak(SvPV(ERRSV, n_a));
