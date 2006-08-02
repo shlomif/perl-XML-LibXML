@@ -1,14 +1,15 @@
 Revision history for Perl extension XML::LibXML
 
-pre 1.59
+1.59
    - new parser and callback code (Christian Glahn)
    - new XML::LibXML::InputCallback class
-   - bug fixes
+   - many bug fixes (including several memory leaks)
    - documentation and regression fixes and enhancements
    - Perl wrappers for parse_html_*
    - make sure parse_* methods are not called on class (bug 11126)
    - DOM Layer 3 conformance fixes:
      * lookupNamespaceURI(empty_or_undef) now returns the default NS
+   - faster getChildrenByTagNameNS implementation
    - remove the SGML parser code no longer supported by libxml (Michael Kröll)
 
 1.58
