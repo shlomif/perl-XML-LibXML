@@ -3062,6 +3062,39 @@ cloneNode( self, deep=0 )
     OUTPUT:
         RETVAL
 
+SV*
+getElementById( self, id )
+        xmlDocPtr self
+        const char * id
+    ALIAS:
+        XML::LibXML::Document::getElementsById = 1
+    PREINIT:
+        xmlNodePtr elem;
+        xmlAttrPtr attr;
+    CODE:
+        if ( id != NULL ) {
+            attr = xmlGetID(self, id);
+            if (attr == NULL)
+                elem = NULL;
+            else if (attr->type == XML_ATTRIBUTE_NODE)
+                elem = attr->parent;
+            else if (attr->type == XML_ELEMENT_NODE)
+                elem = (xmlNodePtr) attr;
+            else
+                elem = NULL;
+            if (elem != NULL) {
+                RETVAL = PmmNodeToSv(elem, PmmPROXYNODE(self));
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
 int
 indexElements ( self )
         xmlDocPtr self

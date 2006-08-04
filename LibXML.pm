@@ -967,11 +967,6 @@ sub getElementsByLocalName {
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
-sub getElementsById {
-    my ( $doc, $id ) = @_;
-    return ($doc->findnodes( "id('$id')" ))[0];
-}
-
 1;
 
 #-------------------------------------------------------------------------#
