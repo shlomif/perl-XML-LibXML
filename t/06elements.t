@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 81 };
+BEGIN { plan tests => 82 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -78,6 +78,7 @@ print "# 1. bound node\n";
 
     $elem->setAttributeNS( $nsURI, $prefix . ":". $foo, $attvalue2 );
     ok( $elem->hasAttributeNS( $nsURI, $foo ) );
+    ok( ! $elem->hasAttribute( $foo ) );
     # warn $elem->toString() , "\n";
     $tattr = $elem->getAttributeNodeNS( $nsURI, $foo );
     ok($tattr);
@@ -127,7 +128,7 @@ print "# 1. bound node\n";
     $elem->removeAttributeNS("",$attname1);
     # warn $elem->toString;
 
-    ok( $elem->hasAttribute($attname1) );
+    ok( ! $elem->hasAttribute($attname1) );
     ok( $elem->hasAttributeNS($nsURI,$attname1) );
     # warn $elem->toString;
 

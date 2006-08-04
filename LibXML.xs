@@ -4540,7 +4540,7 @@ hasAttribute( self, attr_name )
         if ( ! name ) {
             XSRETURN_UNDEF;
         }
-        if ( xmlHasProp( self, name ) ) {
+        if ( domGetAttrNode( self, name ) ) {
             RETVAL = 1;
         }
         else {
@@ -4593,16 +4593,31 @@ getAttribute( self, attr_name, doc_enc = 0 )
         int doc_enc
     PREINIT:
         xmlChar * name;
+        xmlChar * prefix    = NULL;
+        xmlChar * localname = NULL;
         xmlChar * ret = NULL;
+        xmlNsPtr ns = NULL;
     CODE:
         name = nodeSv2C(attr_name, self );
         if( !name ) {
             XSRETURN_UNDEF;
         }
 
-        ret = xmlGetProp(self, name);
+        ret = xmlGetNoNsProp(self, name);
+        if ( ret == NULL ) {
+            localname = xmlSplitQName2(name, &prefix);
+            if ( localname != NULL ) {
+                ns = xmlSearchNs( self->doc, self, prefix );
+                if ( ns != NULL ) {
+                     ret = xmlGetNsProp(self, localname, ns->href);
+                }
+                if ( prefix != NULL) {
+                    xmlFree( prefix );
+                }
+                xmlFree( localname );
+	    }
+        }
         xmlFree(name);
-
         if ( ret ) {
             if ( doc_enc == 1 ) {
                 RETVAL = nodeC2Sv(ret, self);
@@ -4611,10 +4626,11 @@ getAttribute( self, attr_name, doc_enc = 0 )
                 RETVAL = C2Sv(ret, NULL);
             }
             xmlFree( ret );
-        }
+        } 
         else {
             XSRETURN_UNDEF;
-        }
+	}
+
     OUTPUT:
         RETVAL
 
@@ -4650,7 +4666,7 @@ removeAttribute( self, attr_name )
     CODE:
         name  = nodeSv2C(attr_name, self );
         if ( name ) {
-            xattr = xmlHasProp( self, name );
+            xattr = domGetAttrNode( self, name );
 
             if ( xattr ) {
                 xmlUnlinkNode((xmlNodePtr)xattr);
@@ -4677,7 +4693,7 @@ getAttributeNode( self, attr_name )
             XSRETURN_UNDEF;
         }
 
-        ret = xmlHasProp( self, name );
+        ret = domGetAttrNode( self, name );
         xmlFree(name);
 
         if ( ret ) {
@@ -4708,7 +4724,7 @@ setAttributeNode( self, attr_node )
         if ( attr->doc != self->doc ) {
             domImportNode( self->doc, (xmlNodePtr)attr, 1);
         }
-        ret = xmlHasProp( self, attr->name );
+        ret = domGetAttrNode( self, attr->name );
         if ( ret != NULL ) {
             if ( ret != attr ) {
                 xmlReplaceNode( (xmlNodePtr)ret, (xmlNodePtr)attr );
@@ -4896,15 +4912,16 @@ getAttributeNodeNS( self,namespaceURI, attr_name )
             xmlFree(nsURI);
             XSRETURN_UNDEF;
         }
-        if ( !nsURI ){
-            xmlFree(name);
-            XSRETURN_UNDEF;
+        if ( nsURI && xmlStrlen(nsURI) ) {
+            ret = xmlHasNsProp( self, name, nsURI );
         }
-
-        ret = xmlHasNsProp( self, name, nsURI );
+        else {
+            ret = xmlHasNsProp( self, name, NULL );
+        }
         xmlFree(name);
-        xmlFree(nsURI);
-
+        if ( nsURI ) {
+            xmlFree(nsURI);
+        }
         if ( ret ) {
             RETVAL = PmmNodeToSv( (xmlNodePtr)ret,
                                    PmmOWNERPO(PmmPROXYNODE(self)) );
@@ -4943,7 +4960,7 @@ setAttributeNodeNS( self, attr_node )
             ret = xmlHasNsProp( self, ns->href, attr->name );
         }
         else {
-            ret = xmlHasProp( self, attr->name );
+            ret = xmlHasNsProp( self, NULL, attr->name );
         }
 
         if ( ret != NULL ) {
@@ -5505,6 +5522,24 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
 
         xmlFree(nsPrefix);
         xmlFree(nsURI);
+    OUTPUT:
+        RETVAL
+
+int
+isId( self )
+        SV * self
+    PREINIT:
+        xmlAttrPtr attr = (xmlAttrPtr)PmmSvNode(self);
+	xmlNodePtr elem;
+    CODE:
+        if ( attr == NULL ) {
+          XSRETURN_UNDEF;
+        }
+	elem = attr->parent;
+	if ( elem == NULL || elem->doc == NULL ) {
+	  XSRETURN_UNDEF;
+        }
+        RETVAL = xmlIsID( elem->doc, elem, attr );
     OUTPUT:
         RETVAL
 

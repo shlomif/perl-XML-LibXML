@@ -861,86 +861,33 @@ domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href ) {
     return ns;
 }
 
-/* This routine may or may not make it into libxml2; Matt wanted it in
-   here to be nice to those with older libxml2 installations.
-   This instance is renamed from xmlHasNsProp to domHasNsProp. */
-/* prolly not required anymore ... */
-/**
- * xmlHasNsProp:
- * @node:  the node
- * @name:  the attribute name
- * @namespace:  the URI of the namespace
- *
- * Search for an attribute associated to a node
- * This attribute has to be anchored in the namespace specified.
- * This does the entity substitution.
- * This function looks in DTD attribute declaration for #FIXED or
- * default declaration values unless DTD use has been turned off.
- *
- * Returns the attribute or the attribute declaration or NULL
- *     if neither was found.
- */
 xmlAttrPtr
-domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace) {
-    xmlAttrPtr prop = NULL;
-    xmlDocPtr doc = NULL;
+domGetAttrNode(xmlNodePtr node, const xmlChar *qname) {
+    xmlChar * prefix    = NULL;
+    xmlChar * localname = NULL;
+    xmlAttrPtr * ret = NULL;
     xmlNsPtr ns = NULL;
-    
-    if (node == NULL)
-        return(NULL);
-    
-    prop = node->properties;
-    if (namespace == NULL)
-        return(xmlHasProp(node, name));
-    while (prop != NULL) {
-        /*
-         * One need to have
-         *   - same attribute names
-         *   - and the attribute carrying that namespace
-         *         or
-         *   - no namespace on the attribute and the element carrying it
-         */
-        if ((xmlStrEqual(prop->name, name)) &&
-            (/* ((prop->ns == NULL) && (node->ns != NULL) &&
-                (xmlStrEqual(node->ns->href, namespace))) || */
-             ((prop->ns != NULL) &&
-              (xmlStrEqual(prop->ns->href, namespace))))) {
-            return(prop);
-        }
-        prop = prop->next;
+
+    if ( qname == NULL || node == NULL )
+       return NULL;
+
+    /* first try qname without namespace */
+    ret = xmlHasNsProp(node, qname, NULL);
+    if ( ret == NULL ) {
+      localname = xmlSplitQName2(qname, &prefix);
+      if ( localname != NULL ) {
+	ns = xmlSearchNs( node->doc, node, prefix );
+	if ( ns != NULL ) {
+          /* then try localname with the namespace bound to prefix */
+	  ret = xmlHasNsProp( node, localname, ns->href );
+	}
+	if ( prefix != NULL) {
+	  xmlFree( prefix );
+	}
+	xmlFree( localname );
+      }
     }
-  
-#if 0
-    /* xmlCheckDTD is static in libxml/tree.c; it is set there to 1
-       and never changed, so commenting this out doesn't change the
-       behaviour */
-    if (!xmlCheckDTD) return(NULL);
-#endif
-  
-    /*
-     * Check if there is a default declaration in the internal
-     * or external subsets
-     */
-    doc =  node->doc;
-    if (doc != NULL) {
-        if (doc->intSubset != NULL) {
-            xmlAttributePtr attrDecl;
-      
-            attrDecl = xmlGetDtdAttrDesc(doc->intSubset, node->name, name);
-            if ((attrDecl == NULL) && (doc->extSubset != NULL))
-                attrDecl = xmlGetDtdAttrDesc(doc->extSubset, node->name, name);
-            
-            if ((attrDecl != NULL) && (attrDecl->prefix != NULL)) {
-                /*
-                 * The DTD declaration only allows a prefix search
-                 */
-                ns = xmlSearchNs(doc, node, attrDecl->prefix);
-                if ((ns != NULL) && (xmlStrEqual(ns->href, namespace)))
-                    return((xmlAttrPtr) attrDecl);
-            }
-        }
-    }
-    return(NULL);
+    return ret;
 }
 
 xmlAttrPtr 

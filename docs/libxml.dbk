@@ -6,14 +6,17 @@
         <authorgroup>
             <author>
                 <firstname>Matt</firstname>
-
                 <surname>Sergeant</surname>
             </author>
 
             <author>
                 <firstname>Christian</firstname>
-
                 <surname>Glahn</surname>
+            </author>
+
+            <author>
+                <firstname>Petr</firstname>
+                <surname>Pajas</surname>
             </author>
         </authorgroup>
 
@@ -2058,16 +2061,31 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
             </varlistentry>
 
             <varlistentry>
-                <term>getElementsById</term>
+                <term>getElementById</term>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>my $node = $doc-&#62;getElementsById($id);</funcsynopsisinfo>
+                        <funcsynopsisinfo>my $node = $doc-&#62;getElementById($id);</funcsynopsisinfo>
                     </funcsynopsis>
-
-                    <para>This allows the fetching of the node at a given position in the DOM.</para>
-
-                    <para>Note: The Id of a node might change while manipulating the document.</para>
+                    <para>Returns the element that has an ID attribute
+		      with the given value. If no such element exists,
+		      this returns undef.</para>
+		    <para>Note: the ID of an element
+		      may change while manipulating the document.
+                      For documents with a DTD, the information about ID attributes
+                      is only available if DTD loading/validation has been requested.
+                      For HTML documents parsed with the HTML
+		      parser ID detection is done
+		      automatically. In XML documents, all "xml:id"
+		      attributes are considered to be of type ID.
+                      You can test ID-ness of an attribute node
+                      with $attr-&gt;isId().
+		    </para>
+		    <para>In versions 1.59 and earlier this method was
+		      called getElementsById() (plural) by
+		      mistake. Starting from 1.60 this name is 
+		      maintained as an alias only for backward compatibility.
+		    </para>
                 </listitem>
             </varlistentry>
 
@@ -2955,7 +2973,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>$avalue = $node-&#62;setAttributeNS( $nsURI, $aname );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Namespaceversion of <function>getAttribute</function>.</para>
+                    <para>Retrieves an attribute value by local name and namespace URI.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -2969,7 +2987,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>$attrnode = $node-&#62;getAttributeNode( $aname );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Returns the attribute as a node if the attribute exists. If the Attribute does not exists <function>undef</function> will be returned.</para>
+                    <para>Retrieve an attribute node by name. If no attribute with a given name exists, <function>undef</function> is returned.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -2983,7 +3001,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>$attrnode = $node-&#62;getAttributeNodeNS( $namespaceURI, $aname );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Namespaceversion of <function>getAttributeNode</function>.</para>
+                    <para>Retrieves an attribute node by local name and namespace URI. If no attribute with a given localname and namespace exists, <function>undef</function> is returned.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -3084,7 +3102,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>@nodes = $node-&#62;;getElementsByTagName($tagname);</funcsynopsisinfo>
+                        <funcsynopsisinfo>@nodes = $node-&#62;getElementsByTagName($tagname);</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This function is part of the spec it fetches all descendants of a node with a given tagname. If one is as confused with
@@ -3583,6 +3601,24 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                     <para>This function activates a namespace for the given attribute. If the attribute was not previously declared in the context of the
                     attribute this function will be silently ignored. In this case you may wish to call setNamespace() on the ownerElement.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+	<variablelist>
+            <varlistentry>
+                <term>isId</term>
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$bool = $attr-&#62;isId;</funcsynopsisinfo>
+                    </funcsynopsis>
+                    <para>Determine whether an attribute is of type
+		      ID. For documents with a DTD, this information
+                      is only available if DTD loading/validation has been requested.
+                      For HTML documents parsed with the HTML
+		      parser ID detection is done
+		      automatically. In XML documents, all "xml:id"
+		      attributes are considered to be of type ID.
+		    </para>
                 </listitem>
             </varlistentry>
         </variablelist>

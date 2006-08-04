@@ -235,7 +235,7 @@ xmlNsPtr
 domNewNs ( xmlNodePtr elem , xmlChar *prefix, xmlChar *href );
 
 xmlAttrPtr
-domHasNsProp(xmlNodePtr node, const xmlChar *name, const xmlChar *namespace);
+domGetAttrNode(xmlNodePtr node, const xmlChar *qname);
 
 xmlAttrPtr
 domSetAttributeNode( xmlNodePtr node , xmlAttrPtr attr );
