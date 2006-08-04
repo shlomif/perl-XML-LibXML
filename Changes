@@ -1,5 +1,17 @@
 Revision history for Perl extension XML::LibXML
 
+1.60pre
+   - getElementsById corrected to getElementById and the old name kept
+     as an alias. Also re-implemented without XPath for improved
+     performance
+   - DOM Level 3 method $attr->isId() added
+   - make {get,set,has}Attribute(Node)? methods work with full
+     attribute names rather than just localnames.
+     (Although DOM Level 3 is not very clear about the behavior of
+     these methods for an attributes with namespaces, it certainly
+     does not imply that getAttribute('foo') should return value of a
+     bar:foo, which was the old behavior.)
+
 1.59
    - new parser and callback code (Christian Glahn)
    - new XML::LibXML::InputCallback class
