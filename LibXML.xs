@@ -159,7 +159,9 @@ LibXML_report_error_ctx(SV * saved_error, int recover)
 {
 	if( 0 < SvCUR( saved_error ) ) {
 		if( recover ) {
+                   if ( recover == 1 ) {
 			warn("%s", SvPV_nolen(saved_error));
+                   } /* else recover silently */
 		} else {
 			croak("%s", SvPV_nolen(saved_error));
 		}
@@ -803,7 +805,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Couldn't create memory parser context: %s", strerror(errno));
+                croak("Could not create memory parser context!");
             }
             xs_warn( "context created\n");
 
@@ -894,7 +896,7 @@ _parse_sax_string(self, string)
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Couldn't create memory parser context: %s", strerror(errno));
+                croak("Could not create memory parser context!");
             }
             xs_warn( "context created\n");
 
@@ -955,8 +957,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Could not create xml push parser context: %s",
-                      strerror(errno));
+                croak("Could not create xml push parser context!");
             }
             xs_warn( "context created\n");
 #if LIBXML_VERSION > 20600
@@ -1057,8 +1058,7 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
             ctxt = xmlCreatePushParserCtxt(sax, NULL, buffer, read_length, NULL);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Could not create xml push parser context: %s",
-                      strerror(errno));
+                croak("Could not create xml push parser context!");
             }
             xs_warn( "context created\n");
 
@@ -1120,7 +1120,7 @@ _parse_file(self, filename_sv)
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Couldn't create file parser context for file \"%s\": %s",
+                croak("Could not create file parser context for file \"%s\": %s",
                       filename, strerror(errno));
             }
             xs_warn( "context created\n");
@@ -1188,7 +1188,7 @@ _parse_sax_file(self, filename_sv)
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Couldn't create file parser context for file \"%s\": %s",
+                croak("Could not create file parser context for file \"%s\": %s",
                       filename, strerror(errno));
             }
             xs_warn( "context created\n");
@@ -1281,8 +1281,7 @@ _parse_html_fh(self, fh)
                                             NULL, XML_CHAR_ENCODING_NONE);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Could not create html push parser context: %s",
-                      strerror(errno));
+                croak("Could not create html push parser context!");
             }
             xs_warn( "context created\n");
 
@@ -1471,7 +1470,7 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
                 LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Couldn't create memory parser context: %s", strerror(errno));
+                croak("Could not create memory parser context!");
             }
             xs_warn( "context created\n");
 
@@ -5714,7 +5713,7 @@ parse_string(CLASS, str, ...)
         buffer = xmlAllocParserInputBuffer(enc);
         /* buffer = xmlParserInputBufferCreateMem(str, xmlStrlen(str), enc); */
         if ( !buffer)
-            croak("cant create buffer!\n" );
+            croak("cannot create buffer!\n" );
 
         new_string = xmlStrdup((const xmlChar*)str);
         xmlParserInputBufferPush(buffer, xmlStrlen(new_string), (const char*)new_string);
