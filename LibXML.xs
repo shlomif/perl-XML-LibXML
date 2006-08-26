@@ -5678,6 +5678,34 @@ new(CLASS, external, system)
     OUTPUT:
         RETVAL
 
+SV*
+systemId( self )
+        xmlDtdPtr self
+    ALIAS:
+        getSystemId = 1
+    CODE:
+	if ( self->SystemID == NULL ) {
+            XSRETURN_UNDEF;
+	} else {
+            RETVAL = C2Sv(self->SystemID,NULL);
+	}
+    OUTPUT:
+        RETVAL
+
+SV*
+publicId( self )
+        xmlDtdPtr self
+    ALIAS:
+        getPublicId = 1
+    CODE:
+	if ( self->ExternalID == NULL ) {
+            XSRETURN_UNDEF;
+	} else {
+            RETVAL = C2Sv(self->ExternalID,NULL);
+	}
+    OUTPUT:
+        RETVAL
+
 void
 DESTROY( node )
         SV * node

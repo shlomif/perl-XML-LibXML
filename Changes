@@ -11,6 +11,7 @@ Revision history for Perl extension XML::LibXML
      these methods for an attributes with namespaces, it certainly
      does not imply that getAttribute('foo') should return value of a
      bar:foo, which was the old behavior.)
+   - added publicId and systemId methods to XML::LibXML::Dtd
 
 1.59
    - new parser and callback code (Christian Glahn)

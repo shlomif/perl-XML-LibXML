@@ -2,32 +2,41 @@
 
 use Test;
 
-BEGIN { plan tests => 24 };
+BEGIN { plan tests => 32 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
+
+my $htmlPublic = "-//W3C//DTD XHTML 1.0 Transitional//EN";
+my $htmlSystem = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
 
 {
     my $doc = XML::LibXML::Document->new;
     my $dtd = $doc->createExternalSubset( "html",
-                                          "-//W3C//DTD XHTML 1.0 Transitional//EN",
-                                          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+                                          $htmlPublic,
+                                          $htmlSystem
                                         );
 
     ok( $dtd->isSameNode(  $doc->externalSubset ) );
-
+    ok( $dtd->publicId, $htmlPublic );
+    ok( $dtd->systemId, $htmlSystem );
+    ok( $dtd->getName, 'html' );
+    
 }
 
 {
     my $doc = XML::LibXML::Document->new;
     my $dtd = $doc->createInternalSubset( "html",
-                                          "-//W3C//DTD XHTML 1.0 Transitional//EN",
-                                          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+                                          $htmlPublic,
+                                          $htmlSystem
                                         );
     ok( $dtd->isSameNode( $doc->internalSubset ) );
 
     $doc->setExternalSubset( $dtd );
     ok(not defined $doc->internalSubset );
     ok( $dtd->isSameNode( $doc->externalSubset ) );
+
+    ok( $dtd->getPublicId, $htmlPublic );
+    ok( $dtd->getSystemId, $htmlSystem );
 
     $doc->setInternalSubset( $dtd );
     ok(not defined  $doc->externalSubset );
@@ -60,7 +69,12 @@ use XML::LibXML::Common qw(:libxml);
     my $doc = $parser->parse_file( "example/dtd.xml" );
     
     ok($doc);
- 
+    
+    my $dtd = $doc->internalSubset;
+    ok( $dtd->getName, 'doc' );
+    ok( $dtd->publicId, undef );
+    ok( $dtd->systemId, undef );
+
     my $entity = $doc->createEntityReference( "foo" );
     ok($entity);
     ok($entity->nodeType, XML_ENTITY_REF_NODE );

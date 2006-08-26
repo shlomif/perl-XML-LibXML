@@ -23,9 +23,9 @@
         <edition>1.59</edition>
 
         <copyright>
-            <year>2001-2004</year>
+            <year>2001-2006</year>
 
-            <holder>AxKit.com Ltd; 2002-2004 Christian Glahn</holder>
+            <holder>AxKit.com Ltd; 2002-2006 Christian Glahn; 2006 Petr Pajas</holder>
         </copyright>
     </bookinfo>
 
@@ -1097,7 +1097,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 
                     <listitem>
                         <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&#62;pedantic_parser(1)</funcsynopsisinfo>
+                            <funcsynopsisinfo>$parser-&#62;pedantic_parser(1);</funcsynopsisinfo>
                         </funcsynopsis>
 
                         <para>You can make XML::LibXML more pedantic if you want to.</para>
@@ -1109,7 +1109,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 
                     <listitem>
                         <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&#62;line_numbers(1)</funcsynopsisinfo>
+                            <funcsynopsisinfo>$parser-&#62;line_numbers(1);</funcsynopsisinfo>
                         </funcsynopsis>
 
                         <para>If this option is activated XML::LibXML will store the line number of a node. This gives more information where a validation error
@@ -1793,7 +1793,7 @@ print $doc-&#62;encoding; # prints ISO-8859-15</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$fragment = $doc-&#62;createDocumentFragment()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$fragment = $doc-&#62;createDocumentFragment();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This function creates a DocumentFragment.</para>
@@ -2229,7 +2229,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node-&#62;unbindNode()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node-&#62;unbindNode();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Unbinds the Node from its siblings and Parent, but not from the Document it belongs to. If the node is not inserted into the DOM
@@ -2245,7 +2245,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$childnode = $node-&#62;removeChild( $childnode )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$childnode = $node-&#62;removeChild( $childnode );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This will unbind the Child Node from its parent <function>$node</function>. The function returns the unbound node. If
@@ -2260,7 +2260,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$oldnode = $node-&#62;replaceChild( $newNode, $oldNode )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$oldnode = $node-&#62;replaceChild( $newNode, $oldNode );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Replaces the <function>$oldNode</function> with the <function>$newNode</function>. The <function>$oldNode</function> will be unbound
@@ -2379,7 +2379,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$newnode =$node-&#62;cloneNode( $deep )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$newnode =$node-&#62;cloneNode( $deep );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para><emphasis>cloneNode</emphasis> creates a copy of <function>$node</function>. When $deep is set to 1 (true) the function will copy all
@@ -2410,7 +2410,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$nextnode = $node-&#62;nextSibling()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$nextnode = $node-&#62;nextSibling();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns the next sibling if any .</para>
@@ -2424,7 +2424,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$prevnode = $node-&#62;previousSibling()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$prevnode = $node-&#62;previousSibling();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Analogous to <emphasis>getNextSibling</emphasis> the function returns the previous sibling if any.</para>
@@ -2526,7 +2526,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node-&#62;insertBefore( $newNode, $refNode )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node-&#62;insertBefore( $newNode, $refNode );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>The method inserts <function>$newNode</function> before <function>$refNode</function>. If <function>$refNode</function> is undefined,
@@ -2550,7 +2550,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node-&#62;insertAfter( $newNode, $refNode )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node-&#62;insertAfter( $newNode, $refNode );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>The method inserts <function>$newNode</function> after <function>$refNode</function>. If <function>$refNode</function> is undefined,
@@ -2729,7 +2729,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$uri = $node-&#62;namespaceURI()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$uri = $node-&#62;namespaceURI();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>returns the URI of the current namespace.</para>
@@ -2913,7 +2913,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node = XML::LibXML::Element-&#62;new( $name )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node = XML::LibXML::Element-&#62;new( $name );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This function creates a new node unbound to any DOM.</para>
@@ -3152,7 +3152,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node-&#62;appendWellBalancedChunk( $chunk )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node-&#62;appendWellBalancedChunk( $chunk );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Sometimes it is nessecary to append a string coded XML Tree to a node. <emphasis>appendWellBalancedChunk</emphasis> will do the trick
@@ -3202,7 +3202,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node-&#62;appendTextChild( $childname , $PCDATA )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node-&#62;appendTextChild( $childname , $PCDATA );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Somewhat similar with <function>appendTextNode</function>: It lets you set an Element, that contains only a <function>text node</function>
@@ -3217,7 +3217,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node-&#62;setNamespace( $nsURI , $nsPrefix, $activate )</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node-&#62;setNamespace( $nsURI , $nsPrefix, $activate );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>setNamespace() allows one to apply a namespace to an element. The function takes three parameters: 1. the namespace URI, which is
@@ -3669,7 +3669,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;getName()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;getName();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns &#34;xmlns:prefix&#34;, where prefix is the prefix for this namespace.</para>
@@ -3681,7 +3681,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;name()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;name();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for getName()</para>
@@ -3693,7 +3693,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;prefix()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;prefix();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns the prefix bound to this namespace declaration.</para>
@@ -3705,7 +3705,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$localname = $ns-&#62;getLocalName()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$localname = $ns-&#62;getLocalName();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for prefix()</para>
@@ -3717,7 +3717,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;getData()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;getData();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns the URI of the namespace.</para>
@@ -3729,7 +3729,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;getValue()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;getValue();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for getData()</para>
@@ -3741,7 +3741,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;value()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;value();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for getData()</para>
@@ -3753,7 +3753,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&#62;uri()</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&#62;uri();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for getData()</para>
@@ -3765,7 +3765,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$known_uri = $ns-&#62;getNamespaceURI()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$known_uri = $ns-&#62;getNamespaceURI();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns the string &#34;http://www.w3.org/2000/xmlns/&#34;</para>
@@ -3777,7 +3777,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$known_prefix = $ns-&#62;getPredix()</funcsynopsisinfo>
+                        <funcsynopsisinfo>$known_prefix = $ns-&#62;getPredix();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns the string &#34;xmlns&#34;</para>
@@ -3848,7 +3848,7 @@ $pinode-&#62;setData( name=&#62;string_value [...] );</funcsynopsisinfo>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$dtd = XML::LibXML::Dtd-&#62;new($public_id, $system_id)</funcsynopsisinfo>
+                        <funcsynopsisinfo>$dtd = XML::LibXML::Dtd-&#62;new($public_id, $system_id);</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Parse a DTD from the system identifier, and return a DTD object that you can pass to $doc-&#62;is_valid() or $doc-&#62;validate().</para>
@@ -3867,10 +3867,43 @@ $pinode-&#62;setData( name=&#62;string_value [...] );</funcsynopsisinfo>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$dtd = XML::LibXML::Dtd-&#62;parse_string($dtd_str)</funcsynopsisinfo>
+                        <funcsynopsisinfo>$dtd = XML::LibXML::Dtd-&#62;parse_string($dtd_str);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>The same as new() above, except you can parse a DTD from a string.</para>
+                    <para>The same as new() above, except you can parse a DTD from a string. Note that parsing from string may fail if the DTD contains external parametric-entity references with relative URLs.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>getName</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$publicId = $dtd-&#62;getName();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the name of DTD; i.e., the name immediately following the DOCTYPE keyword.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>publicId</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$publicId = $dtd-&#62;publicId();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the public identifier of the external subset.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>systemId</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$systemId = $dtd-&#62;systemId();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the system identifier of the external subset.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
