@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-1.60pre
+1.60
    - getElementsById corrected to getElementById and the old name kept
      as an alias. Also re-implemented without XPath for improved
      performance
