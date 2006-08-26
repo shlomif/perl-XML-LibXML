@@ -946,26 +946,9 @@ sub insertPI {
 # DOM L3 Document functions.
 # added after robins implicit feature requst
 #-------------------------------------------------------------------------#
-sub getElementsByTagName {
-    my ( $doc , $name ) = @_;
-    my $xpath = "descendant-or-self::node()/$name";
-    my @nodes = $doc->_findnodes($xpath);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
-}
-
-sub  getElementsByTagNameNS {
-    my ( $doc, $nsURI, $name ) = @_;
-    my $xpath = "descendant-or-self::*[local-name()='$name' and namespace-uri()='$nsURI']";
-    my @nodes = $doc->_findnodes($xpath);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
-}
-
-sub getElementsByLocalName {
-    my ( $doc,$name ) = @_;
-    my $xpath = "descendant-or-self::*[local-name()='$name']";
-    my @nodes = $doc->_findnodes($xpath);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
-}
+*getElementsByTagName = \&XML::LibXML::Element::getElementsByTagName;
+*getElementsByTagNameNS = \&XML::LibXML::Element::getElementsByTagNameNS;
+*getElementsByLocalName = \&XML::LibXML::Element::getElementsByLocalName;
 
 1;
 
@@ -1045,21 +1028,56 @@ sub getElementsByTagName {
 
 sub  getElementsByTagNameNS {
     my ( $node, $nsURI, $name ) = @_;
-    my $xpath = "descendant::*[local-name()='$name' and namespace-uri()='$nsURI']";
+    my $xpath;
+    if ( $name eq '*' ) {
+      if ( $nsURI eq '*' ) {
+	$xpath = "descendant::*";
+      } else {
+	$xpath = "descendant::*[namespace-uri()='$nsURI']";
+      }
+    } elsif ( $nsURI eq '*' ) {
+      $xpath = "descendant::*[local-name()='$name']";
+    } else {
+      $xpath = "descendant::*[local-name()='$name' and namespace-uri()='$nsURI']";
+    }
     my @nodes = $node->_findnodes($xpath);
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
 sub getElementsByLocalName {
     my ( $node,$name ) = @_;
-    my $xpath = "descendant::*[local-name()='$name']";
-        my @nodes = $node->_findnodes($xpath);
+    my $xpath;
+    if ($name eq '*') {
+      $xpath = "descendant::*";
+    } else {
+      $xpath = "descendant::*[local-name()='$name']";
+    }
+    my @nodes = $node->_findnodes($xpath);
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 
 sub getChildrenByTagName {
     my ( $node, $name ) = @_;
-    my @nodes = grep { $_->nodeName eq $name } $node->childNodes();
+    my @nodes;
+    if ($name eq '*') {
+      @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() }
+	$node->childNodes();
+    } else {
+      @nodes = grep { $_->nodeName eq $name } $node->childNodes();
+    }
+    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+}
+
+sub getChildrenByLocalName {
+    my ( $node, $name ) = @_;
+    my @nodes;
+    if ($name eq '*') {
+      @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() }
+	$node->childNodes();
+    } else {
+      @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() and
+		      $_->localName eq $name } $node->childNodes();
+    }
     return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
 }
 

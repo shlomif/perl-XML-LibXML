@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 114 };
+BEGIN { plan tests => 131 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -318,19 +318,31 @@ use XML::LibXML::Common qw(:libxml);
         my $string2 = '<C:A xmlns:C="xml://D"><C:A><C:B/></C:A><C:A><C:B/></C:A></C:A>';
         my $string3 = '<A xmlns="xml://D"><A><B/></A><A><B/></A></A>';
         my $string4 = '<C:A><C:A><C:B/></C:A><C:A><C:B/></C:A></C:A>';
+        my $string5 = '<A xmlns:C="xml://D"><C:A>foo<A/>bar</C:A><A><C:B/>X</A>baz</A>';
         {
             my $doc2 = $parser2->parse_string($string1);
             my @as   = $doc2->getElementsByTagName( "A" );
             ok( scalar( @as ), 3);
 
+            @as   = $doc2->getElementsByTagName( "*" );
+            ok( scalar( @as ), 5);
+
+            @as   = $doc2->getElementsByTagNameNS( "*", "B" );
+            ok( scalar( @as ), 2);
+
             @as   = $doc2->getElementsByLocalName( "A" );
             ok( scalar( @as ), 3);
+
+            @as   = $doc2->getElementsByLocalName( "*" );
+            ok( scalar( @as ), 5);
         }
         {
             my $doc2 = $parser2->parse_string($string2);
             my @as   = $doc2->getElementsByTagName( "C:A" );
             ok( scalar( @as ), 3);
             @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
+            ok( scalar( @as ), 3);
+            @as   = $doc2->getElementsByTagNameNS( "*", "A" );
             ok( scalar( @as ), 3);
             @as   = $doc2->getElementsByLocalName( "A" );
             ok( scalar( @as ), 3);
@@ -352,6 +364,37 @@ use XML::LibXML::Common qw(:libxml);
 #            ok( scalar( @as ), 3);
             my @as   = $doc2->getElementsByLocalName( "A" );
             ok( scalar( @as ), 3);
+        }
+        {
+            my $doc2 = $parser2->parse_string($string5);
+            my @as   = $doc2->getElementsByTagName( "C:A" );
+            ok( scalar( @as ), 1);
+            @as   = $doc2->getElementsByTagName( "A" );
+            ok( scalar( @as ), 3);
+            @as   = $doc2->getElementsByTagNameNS( "*", "A" );
+            ok( scalar( @as ), 4);
+            @as   = $doc2->getElementsByTagNameNS( "*", "*" );
+            ok( scalar( @as ), 5);
+            @as   = $doc2->getElementsByTagNameNS( "xml://D", "*" );
+            ok( scalar( @as ), 2);
+
+	    my $A = $doc2->getDocumentElement;
+            @as   = $A->getChildrenByTagName( "A" );
+	    ok( scalar( @as ), 1);
+            @as   = $A->getChildrenByTagName( "C:A" );
+	    ok( scalar( @as ), 1);
+            @as   = $A->getChildrenByTagName( "C:B" );
+	    ok( scalar( @as ), 0);
+            @as   = $A->getChildrenByTagName( "*" );
+	    ok( scalar( @as ), 2);
+            @as   = $A->getChildrenByTagNameNS( "*", "A" );
+	    ok( scalar( @as ), 2);
+            @as   = $A->getChildrenByTagNameNS( "xml://D", "*" );
+	    ok( scalar( @as ), 1);
+            @as   = $A->getChildrenByTagNameNS( "*", "*" );
+            ok( scalar( @as ), 2);
+            @as   = $A->getChildrenByLocalName( "A" );
+            ok( scalar( @as ), 2);
         }
     }
 }

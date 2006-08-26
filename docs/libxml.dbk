@@ -3072,10 +3072,12 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>@nodes = $node-&#62;getChildrenByTagName($tagname);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>The function gives direct access to all childnodes of the current node with the same tagname. It makes things a lot easier if you need
-                    to handle big datasets.</para>
+                    <para>The function gives direct access to all child elements of the current node with a given tagname, where
+	    tagname is a qualified name, that is, in case of namespace usage it may consist of a prefix and local
+	    name. This function makes things a lot easier if one needs
+                    to handle big datasets. A special tagname '*' can be used to match any name.</para>
 
-                    <para>If this function is called in SCALAR context, it returns the number of Elements found.</para>
+                    <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -3089,9 +3091,27 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>@nodes = $node-&#62;getChildrenByTagNameNS($nsURI,$tagname);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Namespace version of <function>getChildrenByTagName</function>.</para>
+	  <para>Namespace version of <function>getChildrenByTagName</function>. A special nsURI '*' matches any namespace URI,
+	    in which case the function behaves just like <function>getChildrenByLocalName</function>.</para>
 
-                    <para>If this function is called in SCALAR context, it returns the number of Elements found.</para>
+                    <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
+        <variablelist>
+            <varlistentry>
+                <term>getChildrenByLocalName</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>@nodes = $node-&#62;getChildrenByLocalName($localname);</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>The function gives direct access to all child elements of the current node with a given local name. It makes things a lot easier if one needs
+	    to handle big datasets. A special <function>localname</function> '*' can be used to match any local name.</para>
+
+                    <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -3105,8 +3125,13 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>@nodes = $node-&#62;getElementsByTagName($tagname);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function is part of the spec it fetches all descendants of a node with a given tagname. If one is as confused with
-                    <function>tagname</function> as I was, tagname is a qualified tagname which is in case of namespace useage prefix and local name</para>
+                    <para>This function is part of the spec. It
+	    fetches all descendants of a node with a given tagname,
+	    where <function>tagname</function> is a qualified name,
+	    that is, in case of namespace usage it may consist of a prefix and
+	    local name.
+	    A special <function>tagname</function> '*' can be used to match any tag name.
+	  </para>
 
                     <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
                 </listitem>
@@ -3122,7 +3147,9 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>@nodes = $node-&#62;getElementsByTagNameNS($nsURI,$localname);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Namespace version of <function>getElementsByTagName</function> as found in the DOM spec.</para>
+                    <para>Namespace version of <function>getElementsByTagName</function> as found in the DOM spec.
+               	    A special <function>localname</function> '*' can be used to match any local name
+	            and <function>nsURI</function> '*' can be used to match any namespace URI.</para>
 
                     <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
                 </listitem>

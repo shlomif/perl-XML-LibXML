@@ -3072,7 +3072,7 @@ getElementById( self, id )
         xmlAttrPtr attr;
     CODE:
         if ( id != NULL ) {
-            attr = xmlGetID(self, id);
+            attr = xmlGetID(self, (xmlChar *) id);
             if (attr == NULL)
                 elem = NULL;
             else if (attr->type == XML_ATTRIBUTE_NODE)
@@ -3422,22 +3422,34 @@ _getChildrenByTagNameNS( self, namespaceURI, node_name )
         xmlNodePtr cld;
         SV * element;
         int len = 0;
+	int name_wildcard = 0;
+	int ns_wildcard = 0;
         int wantarray = GIMME_V;
     PPCODE:
         name = nodeSv2C(node_name, self );
         nsURI = nodeSv2C(namespaceURI, self );
 
-        if ( nsURI != NULL && xmlStrlen(nsURI) == 0 ){
-            xmlFree(nsURI);
-            nsURI = NULL;
+        if ( nsURI != NULL ) { 
+            if (xmlStrlen(nsURI) == 0 ) {
+                xmlFree(nsURI);
+                nsURI = NULL;
+            } else if (xmlStrcmp( nsURI, (xmlChar *)"*" )==0) {
+                ns_wildcard = 1;	        
+            }
+        }
+        if ( name !=NULL && xmlStrcmp( name, (xmlChar *)"*" ) == 0) {
+            name_wildcard = 1;
         }
         if ( self->type != XML_ATTRIBUTE_NODE ) {
             cld = self->children;
             xs_warn("childnodes start");
             while ( cld ) {
-	      if ( xmlStrcmp( name, cld->name ) == 0 
-		   && ((cld->ns != NULL && xmlStrcmp( nsURI, cld->ns->href ) == 0 )
-		       || (cld->ns == NULL && nsURI == NULL))) {
+	      if ((name_wildcard && (cld->type == XML_ELEMENT_NODE) || 
+		   xmlStrcmp( name, cld->name ) == 0)
+		   && (ns_wildcard ||
+		       (cld->ns != NULL && 
+                        xmlStrcmp(nsURI,cld->ns->href) == 0 ) ||
+                       (cld->ns == NULL && nsURI == NULL))) {
                 if( wantarray != G_SCALAR ) {
                     element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
                     XPUSHs(sv_2mortal(element));
