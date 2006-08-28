@@ -5681,12 +5681,13 @@ new(CLASS, external, system)
         LibXML_init_error_ctx(saved_error);
         dtd = xmlParseDTD((const xmlChar*)external, (const xmlChar*)system);
         if ( dtd == NULL ) {
+            LibXML_report_error_ctx(saved_error, 0);
             XSRETURN_UNDEF;
         } else {
             xmlSetTreeDoc((xmlNodePtr)dtd, NULL);
             RETVAL = PmmNodeToSv( (xmlNodePtr) dtd, NULL );
+            LibXML_report_error_ctx(saved_error, 0);
         }
-        LibXML_report_error_ctx(saved_error, 0);
     OUTPUT:
         RETVAL
 

@@ -2,7 +2,7 @@
 
 use Test;
 
-BEGIN { plan tests => 32 };
+BEGIN { plan tests => 38 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -137,4 +137,39 @@ if ($@) {
 }
 ok($doc);
 
+}
+{
+  my $bad = 'example/bad.dtd';
+  ok( -f $bad );
+  eval { XML::LibXML::Dtd->new("-//Foo//Test DTD 1.0//EN", 'example/bad.dtd') };
+  ok ($@);
+
+  undef $@;
+  my $dtd;
+  {
+    local $/;
+    open my $f, '<', $bad; 
+    $dtd = <$f>;
+  }
+  ok( length($dtd) > 5 );
+  eval { XML::LibXML::Dtd->parse_string($dtd) };
+  ok ($@);
+
+  my $xml = "<!DOCTYPE test SYSTEM \"example/bad.dtd\">\n<test/>";
+
+  {	    
+    my $parser = XML::LibXML->new;
+    $parser->load_ext_dtd(0);
+    $parser->validation(0);
+    my $doc = $parser->parse_string($xml);
+    ok( $doc );
+  }
+  {
+    my $parser = XML::LibXML->new;
+    $parser->load_ext_dtd(1);
+    $parser->validation(0);
+    undef $@;
+    eval { $parser->parse_string($xml) };
+    ok( $@ );
+  }
 }
