@@ -282,9 +282,9 @@ perl Makefile.PL LIBS=&#39;-L/path/to/lib&#39; INC=&#39;-I/path/to/include&#39;<
             <title>Patches and Developer Version</title>
 
             <para>As XML::LibXML is open source software help and patches are appreciated. If you find a bug in the current release, make sure this bug still
-            exists in the developer version of XML::LibXML. This version can be downloaded from cvs. The cvs version can be be loaded via</para>
+            exists in the developer version of XML::LibXML. This version can be downloaded from its Subversion repository. It can be checket out via</para>
 
-            <para>cvs -d:pserver:anonymous@axkit.org:/home/cvs -z3 co XML-LibXML</para>
+            <para>svn co svn://axkit.org/XML-LibXML/trunk</para>
 
             <para>Note this account does not allow direct commits.</para>
 

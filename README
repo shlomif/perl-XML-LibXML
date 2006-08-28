@@ -220,10 +220,10 @@ PATCHES AND DEVELOPER VERSION
 
 As XML::LibXML is open source software help and patches are appreciated. If you
 find a bug in the current release, make sure this bug still exists in the
-developer version of XML::LibXML. This version can be downloaded from cvs. The
-cvs version can be be loaded via
+developer version of XML::LibXML. This version can be downloaded from its
+Subversion repository. The Subversion version can be checked out via:
 
-cvs -d:pserver:anonymous@axkit.org:/home/cvs -z3 co XML-LibXML
+    svn co svn://axkit.org/XML-LibXML/trunk
 
 Note this account does not allow direct commits.
 
@@ -232,7 +232,6 @@ related to a bug.
 
 If you find documentation bugs, please fix them in the libxml.dkb file, stored
 in the docs directory.
-
 
 KNOWN ISSUES
 ============
