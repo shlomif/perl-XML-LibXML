@@ -353,9 +353,8 @@ sub dump_pod {
             my $sp= "  ";
             $self->{OFILE}->print( "\n=over 4\n\n" );
             foreach my $item ( @items ) {
-                my $str = $item->string_value();
-                $str =~ s/^\s*|\s*$//g;
-                $self->{OFILE}->print( "=item * ".$str );
+                $self->{OFILE}->print( "=item *\n\n" );
+		$self->dump_pod( $item );
                 $self->{OFILE}->print( "\n\n" );
             }
             $self->{OFILE}->print( "=back\n\n" );

@@ -282,13 +282,13 @@ perl Makefile.PL LIBS=&#39;-L/path/to/lib&#39; INC=&#39;-I/path/to/include&#39;<
             <title>Patches and Developer Version</title>
 
             <para>As XML::LibXML is open source software help and patches are appreciated. If you find a bug in the current release, make sure this bug still
-            exists in the developer version of XML::LibXML. This version can be downloaded from its Subversion repository. It can be checket out via</para>
+            exists in the developer version of XML::LibXML. This version can be downloaded from its Subversion repository, e.g. via</para>
 
             <para>svn co svn://axkit.org/XML-LibXML/trunk</para>
 
-            <para>Note this account does not allow direct commits.</para>
+            <para>Note that this account does not allow direct commits.</para>
 
-            <para>Please consider the tests as correct. If any test fails it is most certainly related to a bug.</para>
+            <para>Please consider all regression tests as correct. If any test fails it is most certainly related to a bug.</para>
 
             <para>If you find documentation bugs, please fix them in the libxml.dkb file, stored in the docs directory.</para>
         </sect1>
@@ -2567,11 +2567,85 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>@nodes = $node-&#62;findnodes( $xpath_statement );</funcsynopsisinfo>
+                        <funcsynopsisinfo>@nodes = $node-&#62;findnodes( $xpath_expression );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>findnodes</emphasis> performs the xpath statement on the current node and returns the result as an array. In scalar context
-                    returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <function>XML::LibXML::NodeList</function> object.</para>
+
+	  <para><emphasis>NOTE ON NAMESPACES AND XPATH</emphasis>:</para>
+	  <para>A common mistake about
+	    XPath is to assume that node tests consisting of an
+	    element name with no prefix match elements in the default
+	    namespace. This assumption is wrong - by XPath
+	    specification, such node tests can only match elements
+	    that are in no (i.e. null) namespace.
+	  </para>
+	  <para>
+	    So, for example, one cannot match the root element of an
+	    XHTML document with <code>$node->find('/html')</code>
+	    since <literal>'/html'</literal> would only match if the
+	    root element <literal>&lt;html></literal> had no
+	    namespace, but all XHTML elements belong to the namespace
+	    http://www.w3.org/1999/xhtml. (Note that
+	    <literal>xmlns="..."</literal> namespace declarations can
+	    also be specified in a DTD, which makes the situation even worse, since
+	    the XML document looks as if there was no default namespace).
+	  </para>
+          <para>There are several possible ways to deal with namespaces in XPath:
+	  </para>
+	  <itemizedlist>
+	    <listitem><para>If the document declares a prefix for the
+		namespace in question (and the context node is in the
+		scope of the declaration),
+		<function>XML::LibXML</function> allows you to use the
+		prefix in the XPath expression, e.g.:
+	      </para>
+	      <programlisting>$node->find('/x:html');</programlisting>
+	      <para>
+		Some people use this feature and add a namespace
+		declaration to the DOM manually with e.g.:
+	      </para>
+	      <programlisting>$doc->getDocumentElement->setNamespace('http://www.w3.org/1999/xhtml','x',0);</programlisting>
+	      <para>
+		While this works just fine in most cases, it should be
+		noted that namespace declarations added in this way
+		will appear on the root element in an XML
+		serialization of the document, which may in some cases
+		be inconvenient. More importantly, one has to be
+		careful not to choose a prefix that is already used
+		for a different namespace in the document.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>
+		A cleaner way, which is independent of the queried
+		document, is to use the
+		<function>XML::LibXML::XPathContext</function> package
+		(distributed separately) to create an explicit context
+		for XPath evaluation, in which a document independent
+		prefix-to-namespace mapping can be defined. For
+		example:
+	      </para>
+	      <programlisting>use XML::LibXML::XPathContext;
+my $xpc = XML::LibXML::XPathContext->new;
+$xpc->registerNs('x', 'http://www.w3.org/1999/xhtml');
+$xpc->find('/x:html',$node);</programlisting>
+	      <para>
+		Apart from namespace registration,
+		<function>XML::LibXML::XPathContext</function>
+		provides several other nice features, such as use of
+		variables within XPath and the possibility to define custom XPath
+		functions written in Perl.
+	      </para>
+	    </listitem>
+	    <listitem>
+	      <para>A fallback solution wich is also independent of
+		the queried document is to rewrite all node tests in the
+		XPath expression to an explicit form:
+	      </para>
+	      <programlisting>$node->find('/*[local-name()="html" and namespace-uri="http://www.w3.org/1999/xhtml"]');</programlisting>
+	    </listitem>
+	  </itemizedlist>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -2585,7 +2659,7 @@ my $dtd      = $document-&#62;createInternalSubset( &#34;foo&#34;, &#34;-//FOO//
                         <funcsynopsisinfo>$result = $node-&#62;find( $xpath );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>find</emphasis> performs the xpath expression using the current node as the context of the expression, and returns the
+                    <para><emphasis>find</emphasis> evaluates the XPath 1.0 expression using the current node as the context of the expression, and returns the
                     result depending on what type of result the XPath expression had. For example, the XPath &#34;1 * 3 + 52&#34; results in a
                     <function>XML::LibXML::Number</function> object being returned. Other expressions might return a <function>XML::LibXML::Boolean</function>
                     object, or a <function>XML::LibXML::Literal</function> object (a string). Each of those objects uses Perl&#39;s overload feature to &#34;do
