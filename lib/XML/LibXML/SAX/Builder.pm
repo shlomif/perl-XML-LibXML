@@ -26,6 +26,8 @@ sub done {
     return $dom;
 }
 
+sub set_document_locator {
+}
 
 sub start_document {
     my ($self, $doc) = @_;
