@@ -3,6 +3,7 @@ Revision history for Perl extension XML::LibXML
 1.61pre 
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now
      obey wildcards '*', getChildrenByLocalName was added.
+   - XML::LibXML::XPathContext merged in
 
 1.60
    - getElementsById corrected to getElementById and the old name kept

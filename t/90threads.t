@@ -1,6 +1,7 @@
 use Test;
 use Config;
 use constant MAX_THREADS => 10;
+use constant MAX_LOOP => 50;
 BEGIN {
 	if( $Config{useithreads} ) {
 		plan tests => 14;
@@ -35,7 +36,7 @@ EOF
 {
 for(1..MAX_THREADS)
 {
-	threads->new(sub { $p->parse_string($xml) for 1..100; 1; });
+	threads->new(sub { $p->parse_string($xml) for 1..MAX_LOOP; 1; });
 }
 $_->join for(threads->list);
 ok(1);
@@ -50,7 +51,7 @@ EOF
 {
 for(1..MAX_THREADS)
 {
-	threads->new(sub { eval { my $x = $p->parse_string($xml_bad)} for(1..100); 1; });
+	threads->new(sub { eval { my $x = $p->parse_string($xml_bad)} for(1..MAX_LOOP); 1; });
 }
 $_->join for(threads->list);
 ok(1);
@@ -70,7 +71,7 @@ EOF
 for(1..MAX_THREADS)
 {
   threads->new(sub {
-		 for (1..100) {
+		 for (1..MAX_LOOP) {
 		   my $x = $p->parse_string($xml_invalid); 
 		   die if $x->is_valid;
 		   eval { $x->validate };
@@ -100,7 +101,7 @@ for(1..MAX_THREADS)
 {
   threads->new(
     sub {
-      for (1..100) {
+      for (1..MAX_LOOP) {
 	my $x = $p->parse_string($xml);
 	eval { XML::LibXML::RelaxNG->new( string => $rngschema )->validate( $x ) };
 	die unless $@;
@@ -126,7 +127,7 @@ for(1..MAX_THREADS)
 {
   threads->new(
     sub {
-      for (1..100) {
+      for (1..MAX_LOOP) {
  	my $x = $p->parse_string($xml);
  	eval { XML::LibXML::Schema->new( string => $xsdschema )->validate( $x ) };
  	die unless $@;

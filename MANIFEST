@@ -10,6 +10,7 @@ dom.c
 dom.h
 xpath.c
 xpath.h
+xpathcontext.h
 perl-libxml-mm.c
 perl-libxml-mm.h
 perl-libxml-sax.c
@@ -85,11 +86,16 @@ t/26schema.t
 t/27new_callbacks_simple.t
 t/28new_callbacks_multiple.t
 t/29id.t
+t/30xpathcontext.t
+t/31xpc_functions.t
+t/32xpc_variables.t
+t/90threads.t
 lib/XML/LibXML/NodeList.pm
 lib/XML/LibXML/Literal.pm
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/Number.pm
 lib/XML/LibXML/SAX.pm
+lib/XML/LibXML/XPathContext.pm
 lib/XML/LibXML/SAX/Generator.pm
 lib/XML/LibXML/SAX/Builder.pm
 lib/XML/LibXML/SAX/Parser.pm
