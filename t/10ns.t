@@ -1,5 +1,6 @@
+# -*- cperl -*-
 use Test;
-BEGIN { plan tests=>76; }
+BEGIN { plan tests=>96; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -183,11 +184,15 @@ print "# 7. changing namespace declarations\n";
     ok ( $root->setNamespaceDeclURI('','http://test') );	
     ok ( $root->lookupNamespaceURI(''), 'http://test' );
     ok ( $root->getNamespaceURI(), 'http://test' );
+
+    # changing prefix of the default ns declaration
     ok ( $root->setNamespaceDeclPrefix('','foo') );	
     ok ( $root->lookupNamespaceURI(''), undef );
     ok ( $root->lookupNamespaceURI('foo'), 'http://test' );
     ok ( $root->getNamespaceURI(),  'http://test' );
     ok ( $root->prefix(),  'foo' );
+
+    # turning a ns declaration to a default ns declaration
     ok ( $root->setNamespaceDeclPrefix('foo','') );	
     ok ( $root->lookupNamespaceURI('foo'), undef );
     ok ( $root->lookupNamespaceURI(''), 'http://test' );
@@ -195,6 +200,7 @@ print "# 7. changing namespace declarations\n";
     ok ( $root->getNamespaceURI(),  'http://test' );
     ok ( $root->prefix(),  undef );
 
+    # removing the default ns declaration
     ok ( $root->setNamespaceDeclURI('',undef) );
     ok ( $root->lookupNamespaceURI(''), undef );
     ok ( $root->getNamespaceURI(), undef );
@@ -202,24 +208,51 @@ print "# 7. changing namespace declarations\n";
     $strnode = $root->toString();
     ok ( $strnode !~ /xmlns=/ );
 
+    # namespaced attributes
+    $root->setAttribute('xxx:attr', 'value');
+    ok ( $root->getAttributeNode('xxx:attr') );
+    ok ( $root->getAttribute('xxx:attr'), 'value' );
+    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
 
-    # removing xmlns declarations (from output)
+    # removing other xmlns declarations
     $root->addNewChild('http://example.com', 'xxx:foo');
-    ok( $root->setNamespaceDeclURI('xxx',"") );	
+    ok( $root->setNamespaceDeclURI('xxx',undef) );	
     ok ( $root->lookupNamespaceURI('xxx'), undef );
     ok ( $root->getNamespaceURI(), undef );
     ok ( $root->firstChild->getNamespaceURI(), undef );
     ok ( $root->prefix(),  undef );
-    ok ( $root->firstChild->prefix(),  'xxx' );
+    ok ( $root->firstChild->prefix(),  undef );
+
+
+    # check namespaced attributes
+    ok ( $root->getAttributeNode('xxx:attr'), undef );
+    ok ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef );
+    ok ( $root->getAttributeNode('attr') );
+    ok ( $root->getAttribute('attr'), 'value' );
+    ok ( $root->getAttributeNodeNS(undef,'attr') );
+    ok ( $root->getAttributeNS(undef,'attr'), 'value' );
+    ok ( $root->getAttributeNode('attr')->getNamespaceURI(), undef);
+
 
     $strnode = $root->toString();
     ok ( $strnode !~ /xmlns=/ );
     ok ( $strnode !~ /xmlns:xxx=/ );
-    ok ( $strnode =~ /<xxx:foo/ );
-    ok ( $doc->findnodes('/document/foo')->size() == 1 );
+    ok ( $strnode =~ /<foo/ );
+    
+    ok ( $root->setNamespaceDeclPrefix('xxx',undef) );
 
-    # the document still contains <xxx:foo>.
-    # this is how to get rid of the prefix
-    $root->firstChild->setNamespace(undef,undef,1);
+    ok ( $doc->findnodes('/document/foo')->size(), 1 );
+    ok ( $doc->findnodes('/document[foo]')->size(), 1 );
+    ok ( $doc->findnodes('/*[*]')->size(), 1 );
+
+    $xp = XML::LibXML::XPathContext->new($doc);
+    ok ( $xp->findnodes('/document/foo')->size(), 1 );
+    ok ( $xp->findnodes('/document[foo]')->size(), 1 );
+    ok ( $xp->findnodes('/document[@attr and foo]')->size(), 1 );
+    ok ( $xp->findvalue('/document/@attr'), 'value' );
+    ok ( $xp->findnodes('/document[foo]')->size(), 1 );
+
     ok ( $root->firstChild->prefix(),  undef );
 }

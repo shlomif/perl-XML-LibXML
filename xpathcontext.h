@@ -5,8 +5,6 @@
  * xpathcontext.h
  * 
  * This file is directly included into LibXML.xs.
- * It defines support routines for XML::LibXML::XPathContext
- * implementation.
  *
  */
 

@@ -156,18 +156,30 @@ LibXML_init_error_ctx(SV * saved_error)
     xmlSetGenericErrorFunc((void *) saved_error, (xmlGenericErrorFunc) LibXML_error_handler_ctx);
 }
 
+static int
+LibXML_will_die_ctx(SV * saved_error, int recover)
+{
+    if( 0 < SvCUR( saved_error ) ) {
+	if ( recover == 0 ) {
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+
 static void
 LibXML_report_error_ctx(SV * saved_error, int recover)
 {
-	if( 0 < SvCUR( saved_error ) ) {
-		if( recover ) {
-                   if ( recover == 1 ) {
-			warn("%s", SvPV_nolen(saved_error));
-                   } /* else recover silently */
-		} else {
-			croak("%s", SvPV_nolen(saved_error));
-		}
+    if( 0 < SvCUR( saved_error ) ) {
+	if( recover ) {
+	    if ( recover == 1 ) {
+		warn("%s", SvPV_nolen(saved_error));
+	    } /* else recover silently */
+	} else {
+	    croak("%s", SvPV_nolen(saved_error));
 	}
+    }
 }
 
 static int
@@ -1272,10 +1284,11 @@ _parse_string(self, string, dir = &PL_sv_undef)
             } else {
                 real_doc->URL = xmlStrdup((const xmlChar*)directory);
             }
-            if ( recover || ( well_formed &&
+            if ( ! LibXML_will_die_ctx(saved_error, recover) &&
+		 (recover || ( well_formed &&
                               ( !xmlDoValidityCheckingDefaultValue
                                 || ( valid || ( real_doc->intSubset == NULL
-                                                && real_doc->extSubset == NULL ))))) {
+                                                && real_doc->extSubset == NULL )))))) {
                 RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
             } else {
                 xmlFreeDoc(real_doc);
@@ -3686,31 +3699,33 @@ setNamespaceDeclURI( self, svprefix, newURI )
         prefix = nodeSv2C( svprefix , self );
         nsURI = nodeSv2C( newURI , self );
         /* null empty values */
-        if ( prefix != NULL && xmlStrlen(prefix) == 0) {
+        if ( prefix && xmlStrlen(prefix) == 0) {
             xmlFree( prefix );
             prefix = NULL;
         }
-        /* only allow xmlns="" with empty prefix */
-        if ( prefix != NULL && nsURI != NULL && xmlStrlen(nsURI) == 0) {
+        if ( nsURI && xmlStrlen(nsURI) == 0) {
 	     xmlFree( nsURI );
 	     nsURI = NULL;
         }
         RETVAL = 0;
         ns = self->nsDef;
-        while ( ns != NULL ) {
-		if ((ns->prefix != NULL || ns->href != NULL) &&
+        while ( ns ) {
+		if ((ns->prefix || ns->href ) &&
 		    ( xmlStrcmp( ns->prefix, prefix ) == 0 )) {
-			  if (ns->href != NULL) xmlFree((char*)ns->href);
+			  if (ns->href) xmlFree((char*)ns->href);
 			  ns->href = nsURI;
-			  nsURI = NULL; /* do not free it */
+			  if ( nsURI == NULL ) {
+			      domRemoveNsRefs( self, ns );
+			  } else
+			      nsURI = NULL; /* do not free it */
 			  RETVAL = 1;
-			  ns = NULL; /* end loop */
+			  break;
 		} else {
 		    ns = ns->next;
 		}
 	  }
-        if ( prefix != NULL) xmlFree( prefix );
-        if ( nsURI != NULL ) xmlFree( nsURI );
+        if ( prefix ) xmlFree( prefix );
+        if ( nsURI ) xmlFree( nsURI );
     OUTPUT:
         RETVAL
 
@@ -3751,11 +3766,16 @@ setNamespaceDeclPrefix( self, svprefix, newPrefix )
 		while ( ns != NULL ) {
 		    if ((ns->prefix != NULL || ns->href != NULL) &&
 			  xmlStrcmp( ns->prefix, prefix ) == 0 ) {
+			  if ( ns->href == NULL && nsPrefix != NULL ) {
+			      /* xmlns:foo="" - no go */
+			      if ( prefix != NULL) xmlFree(prefix);
+			      croak("setNamespaceDeclPrefix: cannot set non-empty prefix for empty namespace");
+			  }
 			  if ( ns->prefix != NULL ) xmlFree( ns->prefix );
 			  ns->prefix = nsPrefix;
 			  nsPrefix = NULL; /* do not free it */
 			  RETVAL = 1;
-			  ns = NULL; /* end loop */
+			  break;
 		    } else {
 			  ns = ns->next;
 		    }
@@ -5036,7 +5056,21 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
             xmlFree(nsURI);
             nsURI = NULL;
         }
-        if ( (ns = xmlSearchNsByHref(node->doc, node, nsURI)) ) {
+        if ( nsPrefix == NULL && nsURI == NULL ) {
+	    /* special case: empty namespace */
+	    if ( (ns = xmlSearchNs(node->doc, node, NULL)) &&
+		 ( ns->href && xmlStrlen( ns->href ) != 0 ) ) {
+		/* won't take it */
+		RETVAL = 0;
+	    } else if ( flag ) {
+		/* no namespace */
+		xmlSetNs(node, NULL);
+		RETVAL = 1;
+	    } else {
+		RETVAL = 0;
+	    }
+	}
+        else if ( (ns = xmlSearchNsByHref(node->doc, node, nsURI)) ) {
             if ( ns->prefix == nsPrefix               /* both are NULL then */
                  || xmlStrEqual( ns->prefix, nsPrefix ) ) {
                 RETVAL = 1;
@@ -5056,11 +5090,11 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
         if ( flag && ns ) {
             xmlSetNs(node, ns);
         }
-
-        xmlFree(nsPrefix);
-        xmlFree(nsURI);
+        if ( nsPrefix ) xmlFree(nsPrefix);
+        if ( nsURI ) xmlFree(nsURI);
     OUTPUT:
         RETVAL
+
 
 SV*
 _getNamespaceDeclURI( self, ns_prefix )
@@ -5082,8 +5116,8 @@ _getNamespaceDeclURI( self, ns_prefix )
         while ( ns != NULL ) {
 		if ( (ns->prefix != NULL || ns->href != NULL) &&
 		     xmlStrcmp( ns->prefix, prefix ) == 0 ) {
-                RETVAL = C2Sv(ns->href, NULL);
-		    ns = NULL;
+		    RETVAL = C2Sv(ns->href, NULL);
+		    break;
 		} else {
 		    ns = ns->next;
 		}
@@ -6318,7 +6352,8 @@ parse_string(CLASS, str, ...)
 
         /* NOTE: xmlIOParseDTD is documented to free its InputBuffer */
         xmlFree(new_string);
-
+        if ( res && LibXML_will_die_ctx(saved_error, 0) )
+	    xmlFreeDtd( res );
         LibXML_report_error_ctx(saved_error, 0);
         if (res == NULL) {
             croak("no DTD parsed!");
