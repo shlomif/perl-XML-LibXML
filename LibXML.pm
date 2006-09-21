@@ -804,7 +804,7 @@ sub getChildNodes { my $self = shift; return $self->childNodes(); }
 sub childNodes {
     my $self = shift;
     my @children = $self->_childNodes();
-    return wantarray ? @children : XML::LibXML::NodeList->new( @children );
+    return wantarray ? @children : XML::LibXML::NodeList->new_from_ref(\@children , 1);
 }
 
 sub attributes {
@@ -826,7 +826,7 @@ sub findnodes {
         return @nodes;
     }
     else {
-        return XML::LibXML::NodeList->new(@nodes);
+        return XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
     }
 }
 
@@ -1038,7 +1038,7 @@ sub getElementsByTagName {
     my ( $node , $name ) = @_;
     my $xpath = "descendant::$name";
     my @nodes = $node->_findnodes($xpath);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
 sub  getElementsByTagNameNS {
@@ -1056,7 +1056,7 @@ sub  getElementsByTagNameNS {
       $xpath = "descendant::*[local-name()='$name' and namespace-uri()='$nsURI']";
     }
     my @nodes = $node->_findnodes($xpath);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
 sub getElementsByLocalName {
@@ -1068,7 +1068,7 @@ sub getElementsByLocalName {
       $xpath = "descendant::*[local-name()='$name']";
     }
     my @nodes = $node->_findnodes($xpath);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
 sub getChildrenByTagName {
@@ -1080,7 +1080,7 @@ sub getChildrenByTagName {
     } else {
       @nodes = grep { $_->nodeName eq $name } $node->childNodes();
     }
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
 sub getChildrenByLocalName {
@@ -1093,13 +1093,13 @@ sub getChildrenByLocalName {
       @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() and
 		      $_->localName eq $name } $node->childNodes();
     }
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
 sub getChildrenByTagNameNS {
     my ( $node, $nsURI, $name ) = @_;
     my @nodes = $node->_getChildrenByTagNameNS($nsURI,$name);
-    return wantarray ? @nodes : XML::LibXML::NodeList->new(@nodes);
+    return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
 sub appendWellBalancedChunk {

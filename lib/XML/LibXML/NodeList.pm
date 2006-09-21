@@ -16,6 +16,11 @@ sub new {
 	bless [@_], $class;
 }
 
+sub new_from_ref {
+	my ($class,$array_ref,$reuse) = @_;
+	return bless $reuse ? $array_ref : [@$array_ref], $class;
+}
+
 sub pop {
 	my $self = CORE::shift;
 	CORE::pop @$self;
