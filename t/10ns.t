@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>77; }
+BEGIN { plan tests=>76; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
