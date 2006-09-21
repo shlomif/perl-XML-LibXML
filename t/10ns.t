@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests=>22; }
+BEGIN { plan tests=>77; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -118,9 +118,8 @@ EOX
     ok( $attrb[0]->nodeType, 18 );
 }
 
-print "# 6. lossless stetting of namespaces with setAttribute\n";
+print "# 6. lossless setting of namespaces with setAttribute\n";
 # reported by Kurt George Gjerde
-
 {
     my $doc = XML::LibXML->createDocument; 
     my $root = $doc->createElementNS('http://example.com', 'document');
@@ -130,4 +129,97 @@ print "# 6. lossless stetting of namespaces with setAttribute\n";
 
     my $strnode = $root->toString();
     ok ( $strnode =~ /xmlns:xxx/ and $strnode =~ /xmlns=/ );
+}
+
+print "# 7. changing namespace declarations\n";
+{
+    my $doc = XML::LibXML->createDocument; 
+    my $root = $doc->createElementNS('http://example.com', 'document');
+    $root->setAttribute('xmlns:xxx', 'http://example.com');
+    $root->setAttribute('xmlns:yyy', 'http://yonder.com');
+    $doc->setDocumentElement( $root );
+
+    # can we get the namespaces ?
+    ok ( $root->getAttribute('xmlns:xxx'), 'http://example.com');
+    ok ( $root->getAttribute('xmlns'), 'http://example.com' );
+    ok ( $root->getAttribute('xmlns:yyy'), 'http://yonder.com');
+    ok ( $root->lookupNamespacePrefix('http://yonder.com'), 'yyy');
+    ok ( $root->lookupNamespaceURI('yyy'), 'http://yonder.com');
+
+    # can we change the namespaces ?
+    $root->setAttribute('xmlns:yyy', 'http://newyonder.com');
+    ok ( $root->getAttribute('xmlns:yyy'), 'http://newyonder.com');
+    ok ( $root->lookupNamespacePrefix('http://newyonder.com'), 'yyy');
+    ok ( $root->lookupNamespaceURI('yyy'), 'http://newyonder.com');
+
+    # can we change the default namespace ?
+    $root->setAttribute('xmlns', 'http://other.com' );
+    ok ( $root->getAttribute('xmlns'), 'http://other.com' );
+    ok ( $root->lookupNamespacePrefix('http://other.com'), "" );
+    ok ( $root->lookupNamespaceURI(''), 'http://other.com' );
+
+    # non-existent namespaces
+    ok ( $root->lookupNamespaceURI('foo'), undef );
+    ok ( $root->lookupNamespacePrefix('foo'), undef );
+    ok ( $root->getAttribute('xmlns:foo'), undef );
+
+    # changing namespace declaration URI and prefix
+    ok ( $root->setNamespaceDeclURI('yyy', 'http://changed.com') );
+    ok ( $root->getAttribute('xmlns:yyy'), 'http://changed.com');
+    ok ( $root->lookupNamespaceURI('yyy'), 'http://changed.com');
+    eval { $root->setNamespaceDeclPrefix('yyy','xxx'); };
+    ok ( $@ );  # prefix occupied
+    eval { $root->setNamespaceDeclPrefix('yyy',''); };
+    ok ( $@ );  # prefix occupied
+    ok ( $root->setNamespaceDeclPrefix('yyy', 'zzz') );
+    ok ( $root->lookupNamespaceURI('yyy'), undef );
+    ok ( $root->lookupNamespaceURI('zzz'), 'http://changed.com' );
+    ok ( $root->setNamespaceDeclURI('zzz',undef ) ); 
+    ok ( $root->lookupNamespaceURI('zzz'), undef );
+    $strnode = $root->toString();
+    ok ( $strnode !~ /xmlns:zzz/ );
+
+    # changing the default namespace declaration
+    ok ( $root->setNamespaceDeclURI('','http://test') );	
+    ok ( $root->lookupNamespaceURI(''), 'http://test' );
+    ok ( $root->getNamespaceURI(), 'http://test' );
+    ok ( $root->setNamespaceDeclPrefix('','foo') );	
+    ok ( $root->lookupNamespaceURI(''), undef );
+    ok ( $root->lookupNamespaceURI('foo'), 'http://test' );
+    ok ( $root->getNamespaceURI(),  'http://test' );
+    ok ( $root->prefix(),  'foo' );
+    ok ( $root->setNamespaceDeclPrefix('foo','') );	
+    ok ( $root->lookupNamespaceURI('foo'), undef );
+    ok ( $root->lookupNamespaceURI(''), 'http://test' );
+    ok ( $root->lookupNamespaceURI(undef), 'http://test' );
+    ok ( $root->getNamespaceURI(),  'http://test' );
+    ok ( $root->prefix(),  undef );
+
+    ok ( $root->setNamespaceDeclURI('',undef) );
+    ok ( $root->lookupNamespaceURI(''), undef );
+    ok ( $root->getNamespaceURI(), undef );
+
+    $strnode = $root->toString();
+    ok ( $strnode !~ /xmlns=/ );
+
+
+    # removing xmlns declarations (from output)
+    $root->addNewChild('http://example.com', 'xxx:foo');
+    ok( $root->setNamespaceDeclURI('xxx',"") );	
+    ok ( $root->lookupNamespaceURI('xxx'), undef );
+    ok ( $root->getNamespaceURI(), undef );
+    ok ( $root->firstChild->getNamespaceURI(), undef );
+    ok ( $root->prefix(),  undef );
+    ok ( $root->firstChild->prefix(),  'xxx' );
+
+    $strnode = $root->toString();
+    ok ( $strnode !~ /xmlns=/ );
+    ok ( $strnode !~ /xmlns:xxx=/ );
+    ok ( $strnode =~ /<xxx:foo/ );
+    ok ( $doc->findnodes('/document/foo')->size() == 1 );
+
+    # the document still contains <xxx:foo>.
+    # this is how to get rid of the prefix
+    $root->firstChild->setNamespace(undef,undef,1);
+    ok ( $root->firstChild->prefix(),  undef );
 }

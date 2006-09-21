@@ -999,19 +999,34 @@ sub setNamespace {
     return 0;
 }
 
+sub getAttribute {
+    my $self = shift;
+    my $name = $_[0];
+    if ( $name =~ /^xmlns(?::|$)/ ) {
+        # user wants to get a namespace ...
+        (my $prefix = $name )=~s/^xmlns:?//;
+	$self->_getNamespaceDeclURI($prefix);
+    }
+    else {
+        $self->_getAttribute(@_);
+    }
+}
+
 sub setAttribute {
     my ( $self, $name, $value ) = @_;
-    if ( $name =~ /^xmlns/ ) {
+    if ( $name =~ /^xmlns(?::|$)/ ) {
         # user wants to set a namespace ...
 
-        (my $lname = $name )=~s/^xmlns://;
+        (my $prefix = $name )=~s/^xmlns:?//;
         my $nn = $self->nodeName;
-        if ( $nn =~ /^$lname\:/ ) {
-            $self->setNamespace($value, $lname);
+        if ( $nn =~ /^$prefix\:/ ) {
+	  $self->setNamespaceDeclURI($prefix,$value) &&
+	    $self->setNamespace($value,$prefix,1);
         }
         else {
-            # use a ($active = 0) namespace
-            $self->setNamespace($value, $lname, 0);
+	  # use a ($active = 0) namespace
+	  $self->setNamespaceDeclURI($prefix, $value) ||
+	    $self->setNamespace($value,$prefix,0);
         }
     }
     else {
