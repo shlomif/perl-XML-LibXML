@@ -246,4 +246,7 @@ domNodeNormalize( xmlNodePtr node );
 int
 domNodeNormalizeList( xmlNodePtr nodelist );
 
+int
+domRemoveNsRefs(xmlNodePtr tree, xmlNsPtr ns);
+
 #endif

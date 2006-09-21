@@ -2,14 +2,20 @@ use Test;
 use Config;
 use constant MAX_THREADS => 10;
 use constant MAX_LOOP => 50;
+use constant PLAN => 14;
 BEGIN {
-	if( $Config{useithreads} ) {
-		plan tests => 14;
-		require threads;
-	} else {
-		plan tests => 0;
-		exit;
-	}
+  plan tests => PLAN;
+  if( $Config{useithreads} ) {
+    if ($ENV{THREAD_TEST}) {
+      require threads;;
+    } else {
+      skip("optional (set THREAD_TEST=1 to run these tests)\n") for (1..PLAN);
+      exit;
+    }
+  } else {
+    skip("no ithreads in this Perl\n") for (1..PLAN);
+    exit;
+  }
 }
 use XML::LibXML;
 ok(1);

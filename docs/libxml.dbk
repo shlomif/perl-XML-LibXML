@@ -3364,16 +3364,11 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	             the change.
            	  </para>
 	          <para>If the new URI is undef or empty, the nodes
-	             have no namespace after the change, but they
-	             retain their prefix. If the prefix is non-empty,
-                     it is recommended to move these nodes
-	             to the null namespace using
-	             e.g. <literal>setNamespace(undef,undef,1)</literal>
-	             in order to make the document namespace well-formed.
+	             have no namespace and no prefix after the change. 
 	             Namespace declarations
-	             that were once nulled in this way do not
+	             once nulled in this way do not
 	             further appear in the serialized output
-	             (but do actually remain in the document for internal integrity
+	             (but do remain in the document for internal integrity
 	             of libxml2 data structures).
                	  </para>
              	  <para>This function is NOT part of any DOM API.</para>
@@ -3395,8 +3390,10 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	            <para>The function dies with an error
 	             if the element is in the scope of
 	             another declaration whose prefix equals
-	             to the new prefix. Otherwise,
-                     it returns 1 if the namespace declaration
+	             to the new prefix, or if the change should
+                     result in a declaration with a non-empty prefix but
+	             empty namespace URI.
+	             Otherwise, it returns 1 if the namespace declaration
 	             was found and changed and 0 if not found.</para>
 	            <para>All elements and attributes (even those previously
 	             unbound from the document) for which the

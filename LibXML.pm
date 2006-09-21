@@ -12,6 +12,7 @@ use Carp;
 use XML::LibXML::Common qw(:encoding :libxml);
 
 use XML::LibXML::NodeList;
+use XML::LibXML::XPathContext;
 use IO::Handle; # for FH reads called as methods
 
 
@@ -1036,7 +1037,7 @@ sub setAttribute {
 
 sub getElementsByTagName {
     my ( $node , $name ) = @_;
-    my $xpath = "descendant::$name";
+    my $xpath = $name eq '*' ? "descendant::*" : "descendant::*[name()='$name']";
     my @nodes = $node->_findnodes($xpath);
     return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }

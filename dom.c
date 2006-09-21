@@ -865,7 +865,7 @@ xmlAttrPtr
 domGetAttrNode(xmlNodePtr node, const xmlChar *qname) {
     xmlChar * prefix    = NULL;
     xmlChar * localname = NULL;
-    xmlAttrPtr * ret = NULL;
+    xmlAttrPtr ret = NULL;
     xmlNsPtr ns = NULL;
 
     if ( qname == NULL || node == NULL )
@@ -974,3 +974,49 @@ domNodeNormalize( xmlNodePtr node )
     return(1);
 }
 
+int
+domRemoveNsRefs(xmlNodePtr tree, xmlNsPtr ns) {
+    xmlAttrPtr attr;
+    xmlNodePtr node = tree;
+
+    if ((node == NULL) || (node->type != XML_ELEMENT_NODE)) return(0);
+    while (node != NULL) {
+	if (node->ns == ns)
+	    node->ns = NULL; /* remove namespace reference */
+	attr = node->properties;
+	while (attr != NULL) {
+	    if (attr->ns == ns)
+		attr->ns = NULL; /* remove namespace reference */
+	    attr = attr->next;
+	}
+	/*
+	 * Browse the full subtree, deep first
+	 */
+	if (node->children != NULL && node->type != XML_ENTITY_REF_NODE) {
+	    /* deep first */
+	    node = node->children;
+	} else if ((node != tree) && (node->next != NULL)) {
+	    /* then siblings */
+	    node = node->next;
+	} else if (node != tree) {
+	    /* go up to parents->next if needed */
+	    while (node != tree) {
+		if (node->parent != NULL)
+		    node = node->parent;
+		if ((node != tree) && (node->next != NULL)) {
+		    node = node->next;
+		    break;
+		}
+		if (node->parent == NULL) {
+		    node = NULL;
+		    break;
+		}
+	    }
+	    /* exit condition */
+	    if (node == tree) 
+		node = NULL;
+	} else
+	    break;
+    }
+    return(1);
+}
