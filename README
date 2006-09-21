@@ -231,7 +231,10 @@ Please consider all regression tests as correct. If any test fails it is most
 certainly related to a bug.
 
 If you find documentation bugs, please fix them in the libxml.dkb file, stored
-in the docs directory.
+in the docs directory. 
+
+Use 'make docs' to get the POD and manual pages.
+
 
 
 KNOWN ISSUES
