@@ -1,6 +1,6 @@
 # -*- cperl -*-
 use Test;
-BEGIN { plan tests=>96; }
+BEGIN { plan tests=>103; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -132,7 +132,23 @@ print "# 6. lossless setting of namespaces with setAttribute\n";
     ok ( $strnode =~ /xmlns:xxx/ and $strnode =~ /xmlns=/ );
 }
 
-print "# 7. changing namespace declarations\n";
+print "# 7. namespaced attributes\n";
+{
+  my $doc = XML::LibXML->new->parse_string(<<'EOF');
+<test xmlns:xxx="http://example.com"/>
+EOF
+  my $root = $doc->getDocumentElement();
+  # namespaced attributes
+  $root->setAttribute('xxx:attr', 'value');
+  ok ( $root->getAttributeNode('xxx:attr') );
+  ok ( $root->getAttribute('xxx:attr'), 'value' );
+  print $root->toString(1),"\n";
+  ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+  ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+  ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+}
+
+print "# 8. changing namespace declarations\n";
 {
     my $doc = XML::LibXML->createDocument; 
     my $root = $doc->createElementNS('http://example.com', 'document');
@@ -212,9 +228,10 @@ print "# 7. changing namespace declarations\n";
     $root->setAttribute('xxx:attr', 'value');
     ok ( $root->getAttributeNode('xxx:attr') );
     ok ( $root->getAttribute('xxx:attr'), 'value' );
-    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+    print $root->toString(1),"\n";
+   ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+   ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+   ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
 
     # removing other xmlns declarations
     $root->addNewChild('http://example.com', 'xxx:foo');
@@ -226,13 +243,14 @@ print "# 7. changing namespace declarations\n";
     ok ( $root->firstChild->prefix(),  undef );
 
 
+    print $root->toString(1),"\n";
     # check namespaced attributes
     ok ( $root->getAttributeNode('xxx:attr'), undef );
-    ok ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef );
-    ok ( $root->getAttributeNode('attr') );
+   ok ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef );
+   ok ( $root->getAttributeNode('attr') );
     ok ( $root->getAttribute('attr'), 'value' );
-    ok ( $root->getAttributeNodeNS(undef,'attr') );
-    ok ( $root->getAttributeNS(undef,'attr'), 'value' );
+   ok ( $root->getAttributeNodeNS(undef,'attr') );
+   ok ( $root->getAttributeNS(undef,'attr'), 'value' );
     ok ( $root->getAttributeNode('attr')->getNamespaceURI(), undef);
 
 
@@ -245,14 +263,17 @@ print "# 7. changing namespace declarations\n";
 
     ok ( $doc->findnodes('/document/foo')->size(), 1 );
     ok ( $doc->findnodes('/document[foo]')->size(), 1 );
-    ok ( $doc->findnodes('/*[*]')->size(), 1 );
+    ok ( $doc->findnodes('/document[*]')->size(), 1 );
+   ok ( $doc->findnodes('/document[@attr and foo]')->size(), 1 );
+   ok ( $doc->findvalue('/document/@attr'), 'value' );
 
     $xp = XML::LibXML::XPathContext->new($doc);
     ok ( $xp->findnodes('/document/foo')->size(), 1 );
     ok ( $xp->findnodes('/document[foo]')->size(), 1 );
-    ok ( $xp->findnodes('/document[@attr and foo]')->size(), 1 );
-    ok ( $xp->findvalue('/document/@attr'), 'value' );
-    ok ( $xp->findnodes('/document[foo]')->size(), 1 );
+    ok ( $xp->findnodes('/document[*]')->size(), 1 );
+
+   ok ( $xp->findnodes('/document[@attr and foo]')->size(), 1 );
+   ok ( $xp->findvalue('/document/@attr'), 'value' );
 
     ok ( $root->firstChild->prefix(),  undef );
 }

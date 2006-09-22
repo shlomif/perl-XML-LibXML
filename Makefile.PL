@@ -15,7 +15,7 @@ my %config;
 
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #
-# common informations go to the top, so they are easier to find
+# common information go to the top, so they are easier to find
 # -------------------------------------------------------------------------- #
 my %INFOS = (
     'NAME'	=> 'XML::LibXML',
@@ -123,13 +123,13 @@ unless ( $is_Win32 ) { # cannot get config in W32
 
         if ( $@ ) {
             if ( $@ =~ /^VERSION/ ) {
-                die "The installed version of libxml2 is known not to work.\n\n".
-                    "The installed version was tested and prooved not as stable\n\n".
-                    "  Don't expect XML::LibXML to build or work correctly.\n".
-                    "  Don't report errors!!!\n".
-                    "  Don't send patches!\n\n".
-                    "  Check the README file for more informations and versions\n".
-                    "  that are tested with XML::LibXML\n\n"; 
+                die "The installed version of libxml2 not compatible with XML::LibXML.\n\n".
+                    "You may continue at your own risk, but:\n\n".
+                    "  - don't expect XML::LibXML to build or work correctly!\n".
+                    "  - don't report errors!\n".
+                    "  - don't send patches!\n\n".
+                    "Check the README file for more information on versions\n".
+                    "that are tested with XML::LibXML\n\n"; 
             }
             if ( $@ =~ /^UNTESTED (\S*)/ ) {
 	      warn "Note: libxml2 $1 was not tested with this XML::LibXML version.\n"
