@@ -79,6 +79,7 @@ print "# 1. bound node\n";
     $elem->setAttributeNS( $nsURI, $prefix . ":". $foo, $attvalue2 );
     ok( $elem->hasAttributeNS( $nsURI, $foo ) );
     ok( ! $elem->hasAttribute( $foo ) );
+    ok( $elem->hasAttribute( $prefix.":".$foo ) );
     # warn $elem->toString() , "\n";
     $tattr = $elem->getAttributeNodeNS( $nsURI, $foo );
     ok($tattr);

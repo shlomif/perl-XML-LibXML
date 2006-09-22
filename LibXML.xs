@@ -5242,6 +5242,10 @@ _setAttribute( self, attr_name, attr_value )
     PREINIT:
         xmlChar * name  = NULL;
         xmlChar * value = NULL;
+#if LIBXML_VERSION < 20621
+        xmlChar * prefix    = NULL;
+        xmlChar * localname = NULL;
+#endif
     CODE:
         name  = nodeSv2C(attr_name, self );
 
@@ -5250,8 +5254,33 @@ _setAttribute( self, attr_name, attr_value )
             croak( "bad name" );
         }
         value = nodeSv2C(attr_value, self );
-
-        xmlSetProp( self, name, value );
+#if LIBXML_VERSION >= 20621
+	/* 
+	 * For libxml2-2.6.21 and later we can use just xmlSetProp
+         */
+        xmlSetProp(self,name,value);
+#else
+        /* 
+         * but xmlSetProp does not work correctly for older libxml2 versions
+	 * The following is copied from libxml2 source
+         * with xmlSplitQName3 replaced by xmlSplitQName2 for compatibility
+         * with older libxml2 versions
+         */
+        localname = xmlSplitQName2(name, &prefix);
+        if (localname != NULL) {
+          xmlNsPtr ns;
+	  ns = xmlSearchNs(self->doc, self, prefix);
+	  if (prefix != NULL)
+	      xmlFree(prefix);
+	  if (ns != NULL)
+	      xmlSetNsProp(self, ns, localname, value);
+	  else
+              xmlSetNsProp(self, NULL, name, value);
+          xmlFree(localname);
+        } else {
+            xmlSetNsProp(self, NULL, name, value);
+        }
+#endif
         xmlFree(name);
         xmlFree(value);
 
