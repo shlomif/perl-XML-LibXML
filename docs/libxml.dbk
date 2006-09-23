@@ -34,14 +34,21 @@
 
         <titleabbrev>README</titleabbrev>
 
-        <para>This module implements a Perl interface to the Gnome libxml2 library. The libxml2 libxml2 library provides interfaces for parsing and manipulating
-        XML Files. This Module allows Perl programmers to make use of the highly capable validating XML parser and the high performance DOM implementation.</para>
+        <para>This module implements a Perl interface to the Gnome
+          libxml2 library which provides
+          interfaces for parsing and manipulating XML files. This
+          module allows Perl programmers to make use of the highly
+          capable validating XML parser and the high performance DOM
+          implementation.</para>
 
         <sect1>
             <title>Important Notes</title>
 
             <para>XML::LibXML was almost entirely reimplemented between version 1.40 to version 1.49. This may cause problems on some production machines. With
             version 1.50 a lot of compatibility fixes were applied, so programs written for XML::LibXML 1.40 or less should run with version 1.50 again.</para>
+            <para>In 1.59, a new callback API was introduced. This new API is not compatible with the previous one.
+	       See XML::LibXML::InputCallback manual page for details.</para>
+ 	    <para>In 1.61 the XML::LibXML::XPathContext module, previously distributed separately, was merged in.</para>
         </sect1>
 
         <sect1>
@@ -73,7 +80,9 @@
 
             <para>Again, libxml2 is required to make XML::LibXML work. The library is not just requiered to build XML::LibXML, it has to be accessible during
             runtime as well. Because of this you need to make sure libxml2 is installed properly. To test this, run the xmllint program on your system. xmllint
-            is shipped with libxml2 and therefore should be available.</para>
+            is shipped with libxml2 and therefore should be available.
+            For building the module you will also need the header file for libxml2, which in binary
+            (.rpm,.deb) etc. distributions usually dwell in a package named libxml2-devel or similar.</para>
         </sect1>
 
         <sect1>
@@ -99,25 +108,28 @@
                 </listitem>
             </orderedlist>
 
-            <para>Note that you have to rebuild XML::LibXML once you upgrade libxml2. This avoids problems with binary incompatibilities between releases of the
-            library.</para>
+            <para>Note that XML::LibXML is an XS based Perl extension and you need a C compiler
+              to build it.</para>
+            <para>Note also that you should rebuild XML::LibXML if you upgrade libxml2
+                  in order to avoid problems with possible binary incompatibilities between releases of the library.</para>
 
             <sect2>
                 <title>Notes on libxml2 versions</title>
 
-                <para>libxml2 claims binary compatibility between its patch levels. This is not all true:</para>
+                <para>XML::LibXML requires at least
+                  libxml2 2.6.16 to compile and pass all tests.
+                  For some older OS versions this means that an
+                  update of the prebuild packages is required.</para>
 
-                <para>First of all XML::LibXML requires at least libxml2 2.4.25. For most OS this means that an update of the prebuild packages is required,
-                since most distributors ship ancient libxml2 versions most users will need to upgrade their installation.</para>
+                <para>Although libxml2 claims binary compatibility between
+                 its patch levels, it is a good idea to recompile XML::LibXML and
+                 XML::LibXML::Common and run its tests after an upgrade of libxml2.
+	        </para>
 
-                <para>If you already run an older version of XML::LibXML and you wish to upgrade to a bug fixed version of libxml2. libxml2 2.4.25 and 2.5.x
-                versions are not 100% binary compatible. So if you intend to upgrade to such a version you will need to rebuild XML::LibXML (and
-                XML::LibXML::Common) as well.</para>
-
-                <para>Users of perl 5.005_03 and perl 5.6.1 with thread support will also like to avoid libxml2 version 2.4.25 and use later versions instead.</para>
-
-                <para>If your libxml2 installation is not within your $PATH. you can set the environment variable XMLPREFIX=$YOURLIBXMLPREFIX to make
-                XML::LibXML recognize the correct libxml2 version in use.</para>
+                <para>If your libxml2 installation is not within your
+                  $PATH. you can set the environment variable
+                  XMLPREFIX=$YOURLIBXMLPREFIX to make XML::LibXML
+                  recognize the correct libxml2 version in use.</para>
 
                 <para>e.g.</para>
 
@@ -125,80 +137,44 @@
 
                 <para>will ask '/usr/brand-new/bin/xml2-config' about your real libxml2 configuration.</para>
 
-                <para>Try to avoid to set INC and LIBS on the commandline. One will skip the configuration tests in these cases. There will be no report, if the
-                given installation is known to be broken.</para>
+                <para>Try to avoid setting INC and LIBS directly on the
+                commandline, for if used, Makefile.PL does not check
+                the libxml2 version for compatibility with XML::LibXML.</para>
             </sect2>
 
             <sect2>
                 <title>Which version of libxml2 should be used?</title>
 
-                <para>XML::LibXML is tested against many versions of libxml2 before it is released. Thus there are versions of libxml2 that are known not to
-                work properly with XML::LibXML. The Makefile.PL keeps a blacklist of these broken libxml2 versions.</para>
+                <para>XML::LibXML is tested against a couple versions of
+                libxml2 before it is released. Thus there are versions
+                of libxml2 that are known not to work properly with
+                XML::LibXML. The Makefile.PL keeps a blacklist of
+                the incompatible libxml2 versions.</para>
 
-                <para>If one has one of these versions it will be notified during installation. One may find that XML::LibXML builds and tests fine in a
-                particular environment. But if XML::LibXML is run in such an environment, there will be no support at all!</para>
+                <para>If Makefile.PL detects one of the incompatible versions,
+                it notifies the user. It may still happen that
+                XML::LibXML builds and pass its tests with such
+                a version, but that does not mean everything
+                is ok. There will be no support at all for blacklisted versions!</para>
 
-                <para>The following versions are tested:</para>
+                <para>As of XML::LibXML 1.61, only versions 2.6.16 and higher are supported.
+                   XML::LibXML will probably not compile with earlier libxml2 versions than
+                   2.5.6. Versions prior to 2.6.8 are known to be broken for various reasons,
+                   versions prior to 2.1.16 exhibit problems with namespaced attributes
+                   and do not therefore pass XML::LibXML regression tests.
+                </para>
 
-                <itemizedlist>
-                    <listitem>
-                        <para>past 2.4.20: tested; working.</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>2.4.25: tested; not working</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>past 2.4.25: tested, working</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>past 2.5.0: tested; brocken Attribute handling</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>version 2.5.5: tested; tests pass, but known as broken</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>up to version 2.5.11: tested; working</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>version 2.6.0: tested; not working</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>to version 2.6.2: tested; working</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>version 2.6.3: tested; not working</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>version 2.6.4: tested; not working (XML Schema errors)</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>version 2.6.5: tested; not working (broken XIncludes)</para>
-                    </listitem>
-
-                    <listitem>
-                        <para>up to version 2.6.8: tested; working</para>
-                    </listitem>
-                </itemizedlist>
-
-                <para>It happens, that an older version of libxml2 passes all tests under certain conditions. This is no reason to assume that version to work
-                on all platforms. If versions of libxml2 are marked as not working this is done for good reasons.</para>
+                <para>It may happen that an unsupported version of libxml2
+                passes all tests under certain conditions. This is no
+                reason to assume that it shall work without problems.
+                If Makefile.PL marks a version of libxml2 as incompatible or broken
+                it is done for a good reason.</para>
             </sect2>
 
             <sect2>
                 <title>Notes for Microsoft Windows</title>
 
                 <para>Thanks to Randy Kobes there is a precompiled PPM package available on</para>
-
                 <para>http://theoryx5.uwinnipeg.ca/ppmpackages/</para>
 
                 <para>Usually it takes a little time to build the package for the latest release.</para>
@@ -207,18 +183,26 @@
             <sect2>
                 <title>Notes for Mac OS X</title>
 
-                <para>Due refactoring the module, XML::LibXML will not run with Mac OS X anymore. It appears this is related to special linker options for that
-                OS prior to version 10.2.2. Since I don't have full access to this OS, help/ patches from OS X gurus are highly apprecheated.</para>
+                <para>Due refactoring the module, XML::LibXML will not
+                run with some earlier versions of Mac OS X. It appears that this is related
+                to special linker options for that OS prior to version
+                10.2.2. Since the developers do not have full access to this OS,
+                help/ patches from OS X gurus are highly
+                apprecheated.</para>
 
-                <para>It is confirmed that XML::LibXML builds and runs without problems since Mac OS X 10.2.6.</para>
+                <para>It is confirmed that XML::LibXML builds and runs
+                without problems since Mac OS X 10.2.6.</para>
             </sect2>
 
             <sect2>
                 <title>Notes for HPUX</title>
 
-                <para>XML::LibXML requires libxml2 2.4.25 or later. That means there may not exist a usable binary libxml2 package for HPUX and XML::LibXML. For
-                some reasons the HPUX cc will not compile libxml2 correctly, which will force you to recompile perl with gcc (if you havn't already done
-                that).</para>
+                <para>XML::LibXML requires libxml2 2.6.16 or
+                later. There may not exist a usable binary
+                libxml2 package for HPUX and XML::LibXML. If
+                HPUX cc does not compile libxml2
+                correctly, you will be forced to recompile perl with
+                gcc (unless you have already done that).</para>
 
                 <para>Additionally I received the following Note from Rozi Kovesdi:</para>
 
@@ -257,13 +241,17 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
         <sect1>
             <title>Contact</title>
 
-            <para>For suggestions etc. you may contact the maintainer directly <email>christian.glahn@uibk.ac.at</email></para>
+            <para>For suggestions etc. you may contact the maintainer directly at "pajas at ufal.mff.cuni.cz".</para>
 
             <para>For bug reports, please use the CPAN request tracker on http://rt.cpan.org/NoAuth/Bugs.html?Dist=XML-LibXML</para>
 
-            <para>Also XML::LibXML issues are discussed among other things on the perl XML mailing list (<email>perl-xml@listserv.ActiveState.com</email>). In
-            case of problems you should check the archives of that list first. Many problems are already discussed there. You can find the list's archives
-            at http://mailarchive.activestate.com/browse/perl-xml/</para>
+            <para>Also XML::LibXML issues are discussed among other
+            things on the perl XML mailing list
+            (<email>perl-xml@listserv.ActiveState.com</email>). In
+            case of problems you should check the archives of that
+            list first. Many problems are already discussed there. You
+            can find the list's archives at
+            http://mailarchive.activestate.com/browse/perl-xml/</para>
         </sect1>
 
         <sect1>
@@ -276,21 +264,29 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
             <para>Versions &gt;= 1.49 are maintained by Christian Glahn</para>
 
             <para>Versions &gt; 1.56 are co-maintained by Petr Pajas</para>
+
+            <para>Versions &gt;= 1.59 are provisionally maintained by Petr Pajas</para>
         </sect1>
 
         <sect1>
             <title>Patches and Developer Version</title>
 
-            <para>As XML::LibXML is open source software help and patches are appreciated. If you find a bug in the current release, make sure this bug still
-            exists in the developer version of XML::LibXML. This version can be downloaded from its Subversion repository, e.g. via</para>
+            <para>As XML::LibXML is open source software help and
+            patches are appreciated. If you find a bug in the current
+            release, make sure this bug still exists in the developer
+            version of XML::LibXML. This version can be downloaded
+            from its Subversion repository, e.g. via</para>
 
             <para>svn co svn://axkit.org/XML-LibXML/trunk</para>
 
             <para>Note that this account does not allow direct commits.</para>
 
-            <para>Please consider all regression tests as correct. If any test fails it is most certainly related to a bug.</para>
+            <para>Please consider all regression tests as correct. If
+            any test fails it is most certainly related to a
+            bug.</para>
 
-            <para>If you find documentation bugs, please fix them in the libxml.dkb file, stored in the docs directory.</para>
+            <para>If you find documentation bugs, please fix them in
+            the libxml.dkb file, stored in the docs directory.</para>
         </sect1>
 
         <sect1>
@@ -312,8 +308,10 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
         <sect1>
             <title>Disclaimer</title>
 
-            <para>THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, BUT WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY
-            OR FITNESS FOR A PARTICULAR PURPOSE.</para>
+            <para>THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL
+            BE USEFUL, BUT WITHOUT ANY WARRANTY; WITHOUT EVEN THE
+            IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS FOR A
+            PARTICULAR PURPOSE.</para>
         </sect1>
     </chapter>
 
