@@ -5,6 +5,10 @@ package XML::LibXML::SAX::Builder;
 use XML::LibXML;
 use XML::NamespaceSupport;
 
+use vars qw ($VERSION);
+
+$VERSION = "1.61"; # VERSION TEMPLATE: DO NOT CHANGE
+
 sub new {
     my $class = shift;
     return bless {@_}, $class;

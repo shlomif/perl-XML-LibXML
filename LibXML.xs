@@ -5379,7 +5379,7 @@ setAttributeNode( self, attr_node )
         RETVAL
 
 SV *
-getAttributeNS( self, namespaceURI, attr_name )
+_getAttributeNS( self, namespaceURI, attr_name )
         xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
@@ -5416,7 +5416,7 @@ getAttributeNS( self, namespaceURI, attr_name )
         RETVAL
 
 void
-setAttributeNS( self, namespaceURI, attr_name, attr_value )
+_setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
@@ -5472,7 +5472,11 @@ setAttributeNS( self, namespaceURI, attr_name, attr_value )
         }
 
         if ( nsURI && xmlStrlen(nsURI) && !ns ) {
-            xs_warn( "bad ns attribute!" );
+	  if ( prefix ) xmlFree( prefix );
+	  if ( nsURI ) xmlFree( nsURI );
+	  xmlFree( name );
+	  xmlFree( value );
+	  croak( "bad ns attribute!" );
         }
         else {
             /* warn( "set attribute %s->%s", name, value ); */

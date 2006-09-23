@@ -5,6 +5,9 @@ use XML::LibXML::Boolean;
 use XML::LibXML::Literal;
 use strict;
 
+use vars qw ($VERSION);
+$VERSION = "1.61"; # VERSION TEMPLATE: DO NOT CHANGE
+
 use overload
         '""' => \&value,
         '0+' => \&value,

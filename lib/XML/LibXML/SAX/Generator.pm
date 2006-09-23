@@ -5,6 +5,9 @@ package XML::LibXML::SAX::Generator;
 use strict;
 
 use XML::LibXML;
+use vars qw ($VERSION);
+
+$VERSION = "1.61"; # VERSION TEMPLATE: DO NOT CHANGE
 
 warn("This class (", __PACKAGE__, ") is deprecated!");
 

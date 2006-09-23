@@ -1,6 +1,6 @@
 # -*- cperl -*-
 use Test;
-BEGIN { plan tests=>103; }
+BEGIN { plan tests=>104; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -150,21 +150,23 @@ EOF
 
 print "# 8. changing namespace declarations\n";
 {
+  my $xmlns = 'http://www.w3.org/2000/xmlns/';
+
     my $doc = XML::LibXML->createDocument; 
     my $root = $doc->createElementNS('http://example.com', 'document');
-    $root->setAttribute('xmlns:xxx', 'http://example.com');
+    $root->setAttributeNS($xmlns, 'xmlns:xxx', 'http://example.com');
     $root->setAttribute('xmlns:yyy', 'http://yonder.com');
     $doc->setDocumentElement( $root );
 
     # can we get the namespaces ?
     ok ( $root->getAttribute('xmlns:xxx'), 'http://example.com');
-    ok ( $root->getAttribute('xmlns'), 'http://example.com' );
+    ok ( $root->getAttributeNS($xmlns,'xmlns'), 'http://example.com' );
     ok ( $root->getAttribute('xmlns:yyy'), 'http://yonder.com');
     ok ( $root->lookupNamespacePrefix('http://yonder.com'), 'yyy');
     ok ( $root->lookupNamespaceURI('yyy'), 'http://yonder.com');
 
     # can we change the namespaces ?
-    $root->setAttribute('xmlns:yyy', 'http://newyonder.com');
+    ok ( $root->setAttribute('xmlns:yyy', 'http://newyonder.com') );
     ok ( $root->getAttribute('xmlns:yyy'), 'http://newyonder.com');
     ok ( $root->lookupNamespacePrefix('http://newyonder.com'), 'yyy');
     ok ( $root->lookupNamespaceURI('yyy'), 'http://newyonder.com');
