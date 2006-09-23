@@ -5,9 +5,10 @@ package XML::LibXML::XPathContext;
 use strict;
 use vars qw($VERSION @ISA $USE_LIBXML_DATA_TYPES);
 
+use XML::LibXML;
 use XML::LibXML::NodeList;
 
-*VERSION = \$XML::LibXML::VERSION;
+$VERSION = $XML::LibXML::VERSION;
 
 # should LibXML XPath data types be used for simple objects
 # when passing parameters to extension functions (default: no)
