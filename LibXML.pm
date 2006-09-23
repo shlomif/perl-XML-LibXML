@@ -11,16 +11,18 @@ use Carp;
 
 use XML::LibXML::Common qw(:encoding :libxml);
 
+use constant XML_XMLNS_NS => 'http://www.w3.org/2000/xmlns/';
+use constant XML_XML_NS => 'http://www.w3.org/XML/1998/namespace';
+
 use XML::LibXML::NodeList;
 use XML::LibXML::XPathContext;
 use IO::Handle; # for FH reads called as methods
 
-
-$VERSION = "1.61";
-require Exporter;
-require DynaLoader;
-
-@ISA = qw(DynaLoader Exporter);
+BEGIN {
+  $VERSION = "1.61"; # VERSION TEMPLATE: DO NOT CHANGE
+  require Exporter;
+  require DynaLoader;
+  @ISA = qw(DynaLoader Exporter);
 
 #-------------------------------------------------------------------------#
 # export information                                                      #
@@ -49,6 +51,8 @@ require DynaLoader;
                            XML_XINCLUDE_START
                            encodeToUTF8
                            decodeFromUTF8
+		           XML_XMLNS_NS
+		           XML_XML_NS
                           )],
                 libxml => [qw(
                            XML_ELEMENT_NODE
@@ -76,6 +80,10 @@ require DynaLoader;
                                 encodeToUTF8
                                 decodeFromUTF8
                                )],
+		ns => [qw(
+		           XML_XMLNS_NS
+		           XML_XML_NS		    
+		 )],
                );
 
 @EXPORT_OK = (
@@ -102,6 +110,8 @@ $CloseCB = undef;
 # bootstrapping                                                           #
 #-------------------------------------------------------------------------#
 bootstrap XML::LibXML $VERSION;
+
+} # BEGIN
 
 #-------------------------------------------------------------------------#
 # parser constructor                                                      #
@@ -987,6 +997,8 @@ package XML::LibXML::Element;
 
 use vars qw(@ISA);
 @ISA = ('XML::LibXML::Node');
+use XML::LibXML qw(:ns :libxml);
+use Carp;
 
 sub setNamespace {
     my $self = shift;
@@ -1016,23 +1028,70 @@ sub getAttribute {
 sub setAttribute {
     my ( $self, $name, $value ) = @_;
     if ( $name =~ /^xmlns(?::|$)/ ) {
-        # user wants to set a namespace ...
+      # user wants to set the special attribute for declaring XML namespace ...
 
-        (my $prefix = $name )=~s/^xmlns:?//;
-        my $nn = $self->nodeName;
-        if ( $nn =~ /^$prefix\:/ ) {
-	  $self->setNamespaceDeclURI($prefix,$value) &&
-	    $self->setNamespace($value,$prefix,1);
-        }
-        else {
-	  # use a ($active = 0) namespace
-	  $self->setNamespaceDeclURI($prefix, $value) ||
-	    $self->setNamespace($value,$prefix,0);
-        }
+      # this is fine but not exactly DOM conformant behavior, btw (according to DOM we should
+      # probably declare an attribute which looks like XML namespace declaration
+      # but isn't)
+      (my $nsprefix = $name )=~s/^xmlns:?//;
+      my $nn = $self->nodeName;
+      if ( $nn =~ /^\Q${nsprefix}\E:/ ) {
+	# the element has the same prefix
+	$self->setNamespaceDeclURI($nsprefix,$value) ||
+	  $self->setNamespace($value,$nsprefix,1);
+        ##
+        ## We set the namespace here.
+        ## This is helpful, as in:
+        ##
+        ## |  $e = XML::LibXML::Element->new('foo:bar');
+        ## |  $e->setAttribute('xmlns:foo','http://yoyodine')
+        ##
+      }
+      else {
+	# just modify the namespace
+	$self->setNamespaceDeclURI($nsprefix, $value) ||
+	  $self->setNamespace($value,$nsprefix,0);
+      }
     }
     else {
         $self->_setAttribute($name, $value);
     }
+}
+
+sub getAttributeNS {
+    my $self = shift;
+    my ($nsURI, $name) = @_;
+    croak("invalid attribute name") if !defined($name) or $name eq q{};
+    if ( defined($nsURI) and $nsURI eq XML_XMLNS_NS ) {
+	$self->_getNamespaceDeclURI($name eq 'xmlns' ? undef : $name);
+    }
+    else {
+        $self->_getAttributeNS(@_);
+    }
+}
+
+sub setAttributeNS {
+  my ($self, $nsURI, $qname, $value)=@_;
+  unless (defined $qname and length $qname) {
+    croak("bad name");
+  }
+  if (defined($nsURI) and $nsURI eq XML_XMLNS_NS) {
+    if ($qname !~ /^xmlns(?::|$)/) {
+      croak("NAMESPACE ERROR: Namespace declartions must have the prefix 'xmlns'");
+    }
+    $self->setAttribute($qname,$value); # see implementation above
+    return;
+  }
+  if ($qname=~/:/ and not (defined($nsURI) and length($nsURI))) {
+    croak("NAMESPACE ERROR: Attribute without a prefix cannot be in a namespace");
+  }
+  if ($qname=~/^xmlns(?:$|:)/) {
+    croak("NAMESPACE ERROR: 'xmlns' prefix and qualified-name are reserved for the namespace ".XML_XMLNS_NS);
+  }
+  if ($qname=~/^xml:/ and not (defined $nsURI and $nsURI eq XML_XML_NS)) {
+    croak("NAMESPACE ERROR: 'xml' prefix is reserved for the namespace ".XML_XML_NS);
+  }
+  $self->_setAttributeNS( defined $nsURI ? $nsURI : undef, $qname, $value );
 }
 
 sub getElementsByTagName {
@@ -1076,7 +1135,7 @@ sub getChildrenByTagName {
     my ( $node, $name ) = @_;
     my @nodes;
     if ($name eq '*') {
-      @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() }
+      @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() }
 	$node->childNodes();
     } else {
       @nodes = grep { $_->nodeName eq $name } $node->childNodes();
@@ -1088,10 +1147,10 @@ sub getChildrenByLocalName {
     my ( $node, $name ) = @_;
     my @nodes;
     if ($name eq '*') {
-      @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() }
+      @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() }
 	$node->childNodes();
     } else {
-      @nodes = grep { $_->nodeType == XML::LibXML::XML_ELEMENT_NODE() and
+      @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() and
 		      $_->localName eq $name } $node->childNodes();
     }
     return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);

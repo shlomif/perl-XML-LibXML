@@ -1,14 +1,17 @@
 Revision history for Perl extension XML::LibXML
 
-1.61pre 
+1.61
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now
      obey wildcards '*', getChildrenByLocalName was added.
    - XML::LibXML::XPathContext merged in
-   - added setNamespaceDecl{URI,Prefix}
    - many new tests added
    - the module should now be fully compatibile with libxml2 >= 2.6.16
      (some older versions compile but have problems with namespaced attributes)
    - threads test skipped by default
+   - documentation updates (namely DOM namespace conformance in XML::LibXML::DOM)
+   - added setNamespaceDecl{URI,Prefix}
+   - get/setAttribute(NS)? implementation made xmlns aware
+   - all sub-modules have the same version as XML::LibXML
 
 1.60
    - getElementsById corrected to getElementById and the old name kept
