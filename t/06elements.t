@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 82 };
+BEGIN { plan tests => 83 };
 use XML::LibXML;
 
 my $foo       = "foo";

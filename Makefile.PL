@@ -86,23 +86,27 @@ delete $config{SKIP_SAX_INSTALL};
 
 unless ( $is_Win32 ) { # cannot get config in W32
     my @blacklist = (
+		     # format X,Y,Z,is_ok, X,Y,Z is version,
+                     # is_ok applies also to *preceding* versions
                      [2,4,22,0],
-                     [2,4,25,0], # broken xpaths
-                     [2,4,28,1],
-                     [2,4,29,0],
-                     [2,4,30,0],
-                     [2,5,0,1],
+                     [2,4,25,0], # broken XPath
+                     [2,4,28,0], # unsupported, may work fine with earlier XML::LibXML versions
+                     [2,4,29,0], # broken
+                     [2,4,30,0], # broken
+                     [2,5,0,0], # unsupported
                      [2,5,1,0], # all pre 2.5.4 version have broken attr output
                      [2,5,5,0], # tests pass, but known as broken
-                     [2,5,11,1],
-                     [2,6,0,0],
-                     [2,6,2,1],
-                     [2,6,3,0],
+                     [2,5,11,0], # will partially work
+                     [2,6,0,0], # unsupported
                      [2,6,4,0], # schema error
                      [2,6,5,0], # broken xincludes
-                     [2,6,10,1], # all test pass for 2.6.8-10
-                     [2,6,18,undef], # untested: libxml2 won't compile with gcc4
-                     [2,6,26,1], # all test pass for 2.6.19-26
+		     [2,6,15,0],
+                   # [2,6,16,1], # first version to pass all tests
+                     [2,6,19,1], # up to 2.6.19 all ok
+                     [2,6,20,0], # broken schemas
+                     [2,6,24,1], # all tests pass
+                     [2,6,25,0], # broken XPath
+                     [2,6,26,1], # tested, works ok
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
