@@ -3771,7 +3771,7 @@ setNamespaceDeclPrefix( self, svprefix, newPrefix )
 			      if ( prefix != NULL) xmlFree(prefix);
 			      croak("setNamespaceDeclPrefix: cannot set non-empty prefix for empty namespace");
 			  }
-			  if ( ns->prefix != NULL ) xmlFree( ns->prefix );
+			  if ( ns->prefix != NULL ) xmlFree( (xmlChar*)ns->prefix );
 			  ns->prefix = nsPrefix;
 			  nsPrefix = NULL; /* do not free it */
 			  RETVAL = 1;
@@ -5104,7 +5104,6 @@ _getNamespaceDeclURI( self, ns_prefix )
     PREINIT:
         xmlChar * prefix;
         xmlNsPtr ns;
-        xmlChar * ret = NULL;
     CODE:
         prefix = nodeSv2C(ns_prefix, self );
         if ( prefix != NULL && xmlStrlen(prefix) == 0) {
