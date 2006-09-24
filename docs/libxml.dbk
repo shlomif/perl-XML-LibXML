@@ -3423,19 +3423,26 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     required and the two optional values prefix, which
                     is the namespace prefix, as it should be used in
                     child elements or attributes as well as the
-                    additional activate parameter.</para>
+                    additional activate parameter. If prefix is not given,
+                    undefined or empty, this function tries to create a
+                    declaration of the default namespace.
+                    </para>
                     <para>The activate parameter is most useful: If
-                    this parameter is set to FALSE (0), the namespace
-                    is simply added to the namespacelist of the node,
+                    this parameter is set to FALSE (0), a new namespace
+                    declaration is simply added to the element
                     while the element's namespace itself is not
                     altered. Nevertheless, activate is set to TRUE (1)
                     on default. In this case the namespace
-                    automatically is used as the nodes effective
+                    is used as the node's effective
                     namespace. This means the namespace prefix is
                     added to the node name and if there was a
-                    namespace already active for the node, this will
-                    be replaced (but not removed from the global
-                    namespace list)</para>
+                    namespace already active for the node, it will
+                    be replaced (but its declaration is not removed from the document).
+                    A new namespace declaration is only created if necessary
+                    (that is, if the element is already in the scope
+                    of a namespace declaration associating the prefix
+                    with the namespace URI, then this declaration is reused).
+	            </para>
 
                     <para>The following example may clarify this:</para>
 
@@ -3458,6 +3465,12 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>By using $activate == 0 it is possible to
                     create multiple namepace declarations on a single
                     element.</para>
+                    <para>The function fails if it is required to
+                      create a declaration associating the prefix 
+                      with the namespace URI but the element already
+                      carries a declaration with the same prefix but
+                      different namespace URI.
+                    </para>
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -3873,8 +3886,21 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$attr-&gt;setNamespace($nsURI, $prefix);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function activates a namespace for the given attribute. If the attribute was not previously declared in the context of the
-                    attribute this function will be silently ignored. In this case you may wish to call setNamespace() on the ownerElement.</para>
+                    <para>This function tries to activate a namespace for the given attribute.
+            If <function>$nsURI</function> is undefined or empty, 
+            the function discards any previous association of the attribute with a namespace.
+	    If the namespace was not previously declared in the context of the
+	    attribute, this function will fail. 
+	    In this case you may wish to call setNamespace() on the ownerElement.
+	    If the namespace URI is non-empty and
+	    declared in the context of the attribute, but only with a different
+	    (non-empty) prefix, then the attribute is still associated with the namespace
+	    but gets a different prefix than <function>$prefix</function>.
+	    The function also fails if the prefix is empty but the namespace URI
+	    is not (because unprefixed attributes should by definition belong to 
+	    no namespace).
+	    This function returns 1 on success, 0 otherwise.
+	  </para>
                 </listitem>
             </varlistentry>
         

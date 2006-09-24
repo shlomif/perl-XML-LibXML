@@ -6138,21 +6138,33 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
             croak( "lost node" );
         }
     CODE:
-        if ( !nsURI ){
-            XSRETURN_UNDEF;
+        if ( !nsURI || xmlStrlen(nsURI)==0 ){
+	    xmlSetNs((xmlNodePtr)node, NULL);
+            RETVAL = 1;
         }
         if ( !node->parent ) {
             XSRETURN_UNDEF;
         }
         nsPrefix = nodeSv2C(namespacePrefix, (xmlNodePtr)node);
-        if ( (ns = xmlSearchNsByHref(node->doc, node->parent, nsURI)) )
+        if ( (ns = xmlSearchNs(node->doc, node->parent, nsPrefix)) &&
+             xmlStrEqual( ns->href, nsURI) ) {
+	    /* same uri and prefix */
+	    RETVAL = 1;
+	}
+	else if ( (ns = xmlSearchNsByHref(node->doc, node->parent, nsURI)) ) {
+	    /* set uri, but with a different prefix */
             RETVAL = 1;
+	}
         else
             RETVAL = 0;
 
-        if ( ns )
-            xmlSetNs((xmlNodePtr)node, ns);
-
+        if ( ns ) {
+	    if ( ns->prefix ) {
+		xmlSetNs((xmlNodePtr)node, ns);
+	    } else {
+                RETVAL = 0;
+	    }
+	}
         xmlFree(nsPrefix);
         xmlFree(nsURI);
     OUTPUT:
