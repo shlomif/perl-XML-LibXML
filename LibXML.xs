@@ -5070,9 +5070,8 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
 		RETVAL = 0;
 	    }
 	}
-        else if ( (ns = xmlSearchNsByHref(node->doc, node, nsURI)) ) {
-            if ( ns->prefix == nsPrefix               /* both are NULL then */
-                 || xmlStrEqual( ns->prefix, nsPrefix ) ) {
+        else if ( (ns = xmlSearchNs(node->doc, node, nsPrefix)) ) {
+            if ( xmlStrEqual( ns->href, nsURI ) ) {
                 RETVAL = 1;
             }
             else if ( (ns = xmlNewNs( node, nsURI, nsPrefix )) ) {
