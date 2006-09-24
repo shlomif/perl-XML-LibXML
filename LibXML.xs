@@ -5070,7 +5070,9 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
 		RETVAL = 0;
 	    }
 	}
-        else if ( (ns = xmlSearchNs(node->doc, node, nsPrefix)) ) {
+        else if ( flag && (ns = xmlSearchNs(node->doc, node, nsPrefix)) ) {
+	  /* user just wants to set the namespace for the node */
+	  /* try to reuse an existing declaration for the prefix */
             if ( xmlStrEqual( ns->href, nsURI ) ) {
                 RETVAL = 1;
             }
@@ -5082,9 +5084,9 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
             }
         }
         else if ( (ns = xmlNewNs( node, nsURI, nsPrefix )) )
-            RETVAL = 1;
-        else
-            RETVAL = 0;
+	  RETVAL = 1;
+	else
+	  RETVAL = 0;
 
         if ( flag && ns ) {
             xmlSetNs(node, ns);
