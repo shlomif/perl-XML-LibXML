@@ -23,6 +23,7 @@ example/article_internal_bad.xml
 example/article_internal.xml
 example/article.xml
 example/bad.xml
+example/bad.dtd
 example/catalog.xml
 example/cb_example.pl
 example/complex/complex.dtd
@@ -117,4 +118,5 @@ lib/XML/LibXML/Parser.pod
 lib/XML/LibXML/PI.pod
 lib/XML/LibXML/RelaxNG.pod
 lib/XML/LibXML/Schema.pod
+lib/XML/LibXML/XPathContext.pod
 LibXML.pod
