@@ -6,6 +6,7 @@ Revision history for Perl extension XML::LibXML
    - XML::LibXML::Attr->serializeContent added (convenience function)
    - fix getAttributeNode etc. w.r.t. #FIXED attributes (as well as some
      cases with old buggy libxml2 versions)
+   - warn if runtime libxml2 is older than the one used at the compile time
 
 1.61
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now
