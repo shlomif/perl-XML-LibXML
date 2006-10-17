@@ -5,6 +5,7 @@ package XML::LibXML::XPathContext;
 use strict;
 use vars qw($VERSION @ISA $USE_LIBXML_DATA_TYPES);
 
+use Carp;
 use XML::LibXML;
 use XML::LibXML::NodeList;
 
@@ -58,7 +59,11 @@ sub _guarded_find_call {
     $self->_free_node_pool;
     $self->setContextNode($prev_node) if ref($node);
 
-    if ($@) { die "ERROR: $@"; }
+    if ($@) { 
+      my $err = $@;
+      chomp $err;
+      croak $err; 
+    }
 
     return @ret;
 }

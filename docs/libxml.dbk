@@ -2792,7 +2792,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$c14nstring = $node-&gt;toString($with_comments, $xpath_expression);</funcsynopsisinfo>
+                        <funcsynopsisinfo>$c14nstring = $node-&gt;toStringC14N($with_comments, $xpath_expression);</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>The function is similar to toString(). Instead of simply serializing the document tree, it transforms it as it is specified in the
@@ -3839,7 +3839,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$value = $attr-&gt;value;</funcsynopsisinfo>
+                        <funcsynopsisinfo>$string = $attr-&gt;value;</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for <emphasis>getValue()</emphasis></para>
@@ -3921,6 +3921,27 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 		    </para>
                 </listitem>
             </varlistentry>
+
+            <varlistentry>
+                <term>serializeContent($docencoding)</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$string = $attr-&gt;serializeContent;</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>This functin is not part of DOM API. It returns attribute content
+                       in the form in which it serializes into XML, that is
+	               with all meta-characters properly quoted and with raw
+	               entity references (except for entities expanded during parse time).
+	               Setting the optional $docencoding flag to 1 enforces document
+	               encoding for the output string (wich is then passed to Perl as a
+	               byte string). Otherwise the string is passed to Perl as (UTF-8 encododed)
+	               characters.
+                    </para>
+                </listitem>
+            </varlistentry>
+
         </variablelist>
     </chapter>
 

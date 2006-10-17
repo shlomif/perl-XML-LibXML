@@ -450,6 +450,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+	    chomp $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -460,6 +461,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+	    chomp $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -486,6 +488,7 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+	    chomp $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -495,6 +498,7 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+	    chomp $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -522,6 +526,7 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+	    chomp $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -531,6 +536,7 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
+	    chomp $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -580,6 +586,7 @@ sub parse_xml_chunk {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
+        chomp $err;
         croak $err;
     }
 
@@ -593,9 +600,11 @@ sub parse_balanced_chunk {
     eval {
         $rv = $self->parse_xml_chunk( @_ );
     };
+    my $err = $@;
     $self->_cleanup_callbacks();
-    if ( $@ ) {
-        croak $@;
+    if ( $err ) {
+        chomp $err;
+        croak $err;
     }
     return $rv
 }
@@ -611,13 +620,14 @@ sub processXIncludes {
     eval {
         $rv = $self->_processXIncludes($doc || " ");
     };
-
+    my $err = $@;
     if ( $self->{_State_} != 1 ) {
         $self->_cleanup_callbacks();
     }
 
-    if ( $@ ) {
-        croak $@;
+    if ( $err ) {
+        chomp $err;
+        croak $err;
     }
     return $rv;
 }
@@ -631,8 +641,10 @@ sub process_xincludes {
     eval {
         $rv = $self->_processXIncludes($doc || " ");
     };
+    my $err = $@;
     $self->_cleanup_callbacks();
-    if ( $@ ) {
+    if ( $err ) {
+        chomp $err;
         croak $@;
     }
     return $rv;
@@ -661,6 +673,7 @@ sub parse_html_string {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
+      chomp $err;
       $self->_cleanup_callbacks();
       croak $err;
     }
@@ -683,6 +696,7 @@ sub parse_html_file {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
+      chomp $err;
       $self->_cleanup_callbacks();
       croak $err;
     }
@@ -705,6 +719,7 @@ sub parse_html_fh {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
+      chomp $err;
       $self->_cleanup_callbacks();
       croak $err;
     }
@@ -745,10 +760,11 @@ sub push {
             $self->_push( $self->{CONTEXT}, $_ );
         }
     };
-
+    my $err = $@;
     $self->_cleanup_callbacks();
-    if ( $@ ) {
-        croak $@;
+    if ( $err ) {
+        chomp $err;
+        croak $err;
     }
 }
 
@@ -789,11 +805,11 @@ sub finish_push {
     else {
         eval { $retval = $self->_end_push( $self->{CONTEXT}, $restore ); };
     }
-
     delete $self->{CONTEXT};
-
-    if ( $@ ) {
-        croak( $@ );
+    my $err = $@;
+    if ( $err ) {
+        chomp $err;
+        croak( $err );
     }
     return $retval;
 }
@@ -983,11 +999,7 @@ sub toString {
     return $retval;
 }
 
-
-sub serialize {
-    my $self = shift;
-    return $self->toString(@_);
-}
+*serialize = \&toString;
 
 1;
 

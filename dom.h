@@ -249,4 +249,7 @@ domNodeNormalizeList( xmlNodePtr nodelist );
 int
 domRemoveNsRefs(xmlNodePtr tree, xmlNsPtr ns);
 
+void
+domAttrSerializeContent(xmlBufferPtr buffer, xmlAttrPtr attr);
+
 #endif
