@@ -162,8 +162,7 @@ sub use_dom
 }
 
 {
-for(1..1) #MAX_THREADS)
-{
+for(1..MAX_THREADS) {
 	threads->new(sub { use_dom($p->parse_string($xml)) for 1..5; 1; });
 }
 $_->join for(threads->list);

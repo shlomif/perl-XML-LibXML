@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 83 };
+BEGIN { plan tests => 187 };
 use XML::LibXML;
 
 my $foo       = "foo";
@@ -261,4 +261,116 @@ print "# 5. XML::LibXML extensions\n";
     ok( scalar(@cn), 3 );
     ok( !$cn[1]->hasChildNodes);
     ok( $cn[2]->hasChildNodes);
+}
+
+print "# 6. XML::LibXML::Attr nodes\n";
+{
+  my $dtd = <<'EOF';
+<!DOCTYPE root [
+<!ELEMENT root EMPTY>
+<!ATTLIST root fixed CDATA  #FIXED "foo">
+<!ATTLIST root a:ns_fixed CDATA  #FIXED "ns_foo">
+<!ATTLIST root name NMTOKEN #IMPLIED>
+<!ENTITY ent "ENT">
+]>
+EOF
+  my $ns = q(urn:xx);
+  my $xml_nons = qq(<root foo="&quot;bar&ent;&quot;" xmlns:a="$ns"/>);
+  my $xml_ns = qq(<root xmlns="$ns" xmlns:a="$ns" foo="&quot;bar&ent;&quot;"/>);
+
+  for my $xml ($xml_nons, $xml_ns) {
+    my $parser = new XML::LibXML;
+    $parser->complete_attributes(0);
+    $parser->expand_entities(0);
+    my $doc = $parser->parse_string($dtd.$xml);
+
+    ok ($doc);
+    my $root = $doc->getDocumentElement;
+    {
+      my $attr = $root->getAttributeNode('foo');
+      ok ($attr);
+      ok (ref($attr), 'XML::LibXML::Attr');
+      ok ($root->isSameNode($attr->ownerElement));
+      ok ($attr->value, '"barENT"');
+      ok ($attr->serializeContent, '&quot;bar&ent;&quot;');
+      ok ($attr->toString, ' foo="&quot;bar&ent;&quot;"');
+    }
+    {
+      my $attr = $root->getAttributeNodeNS(undef,'foo');
+      ok ($attr);
+      ok (ref($attr), 'XML::LibXML::Attr');
+      ok ($root->isSameNode($attr->ownerElement));
+      ok ($attr->value, '"barENT"');
+    }
+    # fixed values are defined
+    ok ($root->getAttribute('fixed'),'foo');
+    ok ($root->getAttributeNS($ns,'ns_fixed'),'ns_foo');
+    ok ($root->getAttribute('a:ns_fixed'),'ns_foo');
+
+    ok ($root->hasAttribute('fixed'),0);
+    ok ($root->hasAttributeNS($ns,'ns_fixed'),0);
+    ok ($root->hasAttribute('a:ns_fixed'),0);
+
+
+    # but no attribute nodes correspond to them
+    ok (!defined $root->getAttributeNode('a:ns_fixed'));
+    ok (!defined $root->getAttributeNode('fixed'));
+    ok (!defined $root->getAttributeNode('name'));
+    ok (!defined $root->getAttributeNode('baz'));
+    ok (!defined $root->getAttributeNodeNS($ns,'foo'));
+    ok (!defined $root->getAttributeNodeNS($ns,'fixed'));
+    ok (!defined $root->getAttributeNodeNS($ns,'ns_fixed'));
+    ok (!defined $root->getAttributeNodeNS(undef,'fixed'));
+    ok (!defined $root->getAttributeNodeNS(undef,'name'));
+    ok (!defined $root->getAttributeNodeNS(undef,'baz'));
+  }
+
+  for my $xml ($xml_nons, $xml_ns) {
+    my $parser = new XML::LibXML;
+    $parser->complete_attributes(1);
+    $parser->expand_entities(1);
+    my $doc = $parser->parse_string($dtd.$xml);
+    ok ($doc);
+    my $root = $doc->getDocumentElement;
+    {
+      my $attr = $root->getAttributeNode('foo');
+      ok ($attr);
+      ok (ref($attr), 'XML::LibXML::Attr');
+      ok ($root->isSameNode($attr->ownerElement));
+      ok ($attr->value, '"barENT"');
+      ok ($attr->serializeContent, '&quot;barENT&quot;');
+      ok ($attr->toString, ' foo="&quot;barENT&quot;"');
+    }
+    # fixed values are defined
+    ok ($root->getAttribute('fixed'),'foo');
+    ok ($root->getAttributeNS($ns,'ns_fixed'),'ns_foo');
+    ok ($root->getAttribute('a:ns_fixed'),'ns_foo');
+
+    # and attribute nodes are created
+    {
+      my $attr = $root->getAttributeNode('fixed');
+      ok (ref($attr), 'XML::LibXML::Attr');
+      ok ($attr->value,'foo');
+      ok ($attr->toString, ' fixed="foo"');
+    }
+    {
+      my $attr = $root->getAttributeNode('a:ns_fixed');
+      ok (ref($attr), 'XML::LibXML::Attr');
+      ok ($attr->value,'ns_foo');
+    }
+    {
+      my $attr = $root->getAttributeNodeNS($ns,'ns_fixed');
+      ok (ref($attr), 'XML::LibXML::Attr');
+      ok ($attr->value,'ns_foo');
+      ok ($attr->toString, ' a:ns_fixed="ns_foo"');
+    }
+
+    ok (!defined $root->getAttributeNode('ns_fixed'));
+    ok (!defined $root->getAttributeNode('name'));
+    ok (!defined $root->getAttributeNode('baz'));
+    ok (!defined $root->getAttributeNodeNS($ns,'foo'));
+    ok (!defined $root->getAttributeNodeNS($ns,'fixed'));
+    ok (!defined $root->getAttributeNodeNS(undef,'name'));
+    ok (!defined $root->getAttributeNodeNS(undef,'baz'));
+  }
 }

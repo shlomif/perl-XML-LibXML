@@ -887,7 +887,12 @@ domGetAttrNode(xmlNodePtr node, const xmlChar *qname) {
 	xmlFree( localname );
       }
     }
-    return ret;
+    if (ret && ret->type != XML_ATTRIBUTE_NODE) {
+      return NULL;  /* we don't want fixed attribute decls */
+    }
+    else {
+      return ret;
+    }
 }
 
 xmlAttrPtr 
@@ -922,6 +927,33 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
 
     return attr;
 }
+
+void
+domAttrSerializeContent(xmlBufferPtr buffer, xmlAttrPtr attr)
+{
+    xmlNodePtr children;
+
+    children = attr->children;
+    while (children != NULL) {
+        switch (children->type) {
+            case XML_TEXT_NODE:
+	        xmlAttrSerializeTxtContent(buffer, attr->doc,
+		                           attr, children->content);
+		break;
+            case XML_ENTITY_REF_NODE:
+                xmlBufferAdd(buffer, BAD_CAST "&", 1);
+                xmlBufferAdd(buffer, children->name,
+                             xmlStrlen(children->name));
+                xmlBufferAdd(buffer, BAD_CAST ";", 1);
+                break;
+            default:
+                /* should not happen unless we have a badly built tree */
+                break;
+        }
+        children = children->next;
+    }
+}
+
 
 int
 domNodeNormalize( xmlNodePtr node );
