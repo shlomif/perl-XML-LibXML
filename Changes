@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+1.62pre
+   - make error messages intended to the user report the line of the
+     application call rather than that of the internal XS call
+   - XML::LibXML::Attr->serializeContent added (convenience function)
+   - fix getAttributeNode etc. w.r.t. #FIXED attributes (as well as some
+     cases with old buggy libxml2 versions)
+
 1.61
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now
      obey wildcards '*', getChildrenByLocalName was added.
