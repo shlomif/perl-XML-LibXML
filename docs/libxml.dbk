@@ -473,9 +473,17 @@ EOT</programlisting>
         <sect1>
             <title>Version Information</title>
 
-            <para>Sometimes it is usefull to figure out, for which version XML::LibXML was compiled for. In most cases this is for debugging or to check if a
-            given installation meets all functionality for the package. The functiones XML::LibXML::LIBXML_DOTTED_VERSION and XML::LibXML::LIBXML_VERSION
-            provide this version information. Both functions simply pass through the values of the similar named macros of libxml2.</para>
+            <para>Sometimes it is usefull to figure out, for which
+            version XML::LibXML was compiled for. In most cases this
+            is for debugging or to check if a given installation meets
+            all functionality for the package. The functiones
+            XML::LibXML::LIBXML_DOTTED_VERSION and
+            XML::LibXML::LIBXML_VERSION provide this version
+            information. Both functions simply pass through the values
+            of the similar named macros of libxml2.
+	    Similarly, XML::LibXML::LIBXML_RUNTIME_VERSION returns
+            the version of the (usually dynamically) linked libxml2.
+            </para>
 
             <variablelist>
                 <varlistentry>
@@ -504,6 +512,27 @@ EOT</programlisting>
                         first contains the version of libxml2 XML::LibXML was compiled for.</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>XML::LibXML::LIBXML_RUNTIME_VERSION</term>
+
+                    <listitem>
+                        <funcsynopsis>
+                            <funcsynopsisinfo>$DLL_Version = XML::LibXML::LIBXML_RUNTIME_VERSION;</funcsynopsisinfo>
+                        </funcsynopsis>
+
+                        <para>Returns a version string of the libxml2
+                        which is (usually dynamically) linked by
+                        XML::LibXML. This will be "20602" for libxml2
+                        released as "2.6.2" and something like
+                        "20602-CVS2032" for a CVS build of
+                        libxml2.</para>
+                        <para>XML::LibXML issues a warning if the version
+                         of libxml2 dynamically linked to it is less than the version of libxml2 
+                         which it was compiled against. 
+                         </para>
+                    </listitem>
+                </varlistentry>
+
             </variablelist>
         </sect1>
 

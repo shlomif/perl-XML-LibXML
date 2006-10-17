@@ -115,6 +115,17 @@ bootstrap XML::LibXML $VERSION;
 } # BEGIN
 
 #-------------------------------------------------------------------------#
+# test exact version (up to patch-level)                                  #
+#-------------------------------------------------------------------------#
+{
+  my ($runtime_version) = LIBXML_RUNTIME_VERSION() =~ /^(\d+)/;
+  if ( $runtime_version < LIBXML_VERSION ) {
+    warn "Warning: XML::LibXML compiled against libxml2 ".LIBXML_VERSION.
+      ", but runtime libxml2 is older $runtime_version\n";
+  }
+}
+
+#-------------------------------------------------------------------------#
 # parser constructor                                                      #
 #-------------------------------------------------------------------------#
 sub new {

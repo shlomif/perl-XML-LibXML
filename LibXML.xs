@@ -1191,6 +1191,12 @@ LIBXML_VERSION()
     OUTPUT:
         RETVAL
 
+const char *
+LIBXML_RUNTIME_VERSION()
+    CODE:
+        RETVAL = xmlParserVersion;
+    OUTPUT:
+        RETVAL
 
 void
 END()
@@ -5101,7 +5107,6 @@ SV*
 _getNamespaceDeclURI( self, ns_prefix )
         xmlNodePtr self
         SV * ns_prefix
-        int doc_enc
     PREINIT:
         xmlChar * prefix;
         xmlNsPtr ns;
