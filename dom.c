@@ -470,10 +470,6 @@ domAppendChild( xmlNodePtr self,
     if ( self == NULL ) {
         return newChild;
     }
-    if ( newChild->type == XML_DOCUMENT_FRAG_NODE &&
-         newChild->children == NULL ) {
-        return NULL;
-    }
 
     if ( !(domTestHierarchy(self, newChild)
            && domTestDocument(self, newChild))){
@@ -496,7 +492,6 @@ domAppendChild( xmlNodePtr self,
     }
     else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
         xmlNodePtr c1 = NULL;
-        newChild->children->parent = self;
         self->children = newChild->children;
         c1 = newChild->children;
         while ( c1 ){
