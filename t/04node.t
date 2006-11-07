@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 130 };
+BEGIN { plan tests => 131 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -424,4 +424,13 @@ print "# 7. importing and adopting\n";
     $xnode2->setOwnerDocument( $doc3 ); # alternate version of adopt node
     ok( $xnode2->ownerDocument );
     ok( $doc3->isSameNode( $xnode2->ownerDocument ) );    
+}
+
+{
+  # appending empty fragment
+  my $doc = XML::LibXML::Document->new();
+  my $frag = $doc->createDocumentFragment();
+  my $root = $doc->createElement( 'foo' );
+  my $r = $root->appendChild( $frag );
+  ok( !defined($r) );
 }
