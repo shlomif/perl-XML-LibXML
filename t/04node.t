@@ -432,5 +432,5 @@ print "# 7. importing and adopting\n";
   my $frag = $doc->createDocumentFragment();
   my $root = $doc->createElement( 'foo' );
   my $r = $root->appendChild( $frag );
-  ok( !defined($r) );
+  ok( $r );
 }
