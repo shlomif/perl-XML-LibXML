@@ -1403,16 +1403,16 @@ my $doc = $builder-&gt;result();</programlisting>
             <para>XML::LibXML's DOM implementation is 
             limitted by the DOM implementation of libxml2
             which treats namespaces slightly differently than
-            required by the DOM Layer 2 specification.
+            required by the DOM Level 2 specification.
             </para>
-            <para>According to the DOM Layer 2 specification,
+            <para>According to the DOM Level 2 specification,
              namespaces of elements and attributes should be
              persistent, and nodes should be permanently bound to
              namespace URIs as they get created; it should be
              possible to manipulate the special attributes used for
              declaring XML namespaces just as other attributes
              without affecting the namespaces of other nodes.
-             In DOM Layer 2, the application is responsible
+             In DOM Level 2, the application is responsible
              for creating the special attributes consistently and/or for correct
              serialization of the document.
             </para>
@@ -1436,7 +1436,7 @@ my $doc = $builder-&gt;result();</programlisting>
              Therefore current DOM implementation in XML::LibXML tries
              to treat namespace declarations in a compromise between
              reason, common sense, limitations of libxml2, and the DOM
-             Layer 2 specification.
+             Level 2 specification.
             </para>
             <para>In XML::LibXML, special attributes declaring XML namespaces
 	     are often created automatically, usually when
@@ -1445,7 +1445,7 @@ my $doc = $builder-&gt;result();</programlisting>
              scope to be reused.
              In this respect,
 	     XML::LibXML DOM implementation differs from the DOM
-             Layer 2 specification according to which special
+             Level 2 specification according to which special
               attributes for declaring the appropriate XML namespaces
               should not be added when a node with a namespace prefix
               and namespace URI is created.
@@ -3136,7 +3136,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                        to declare the prefix specified in <function>$aname</function>
                        and dies if the prefix is already taken by some other namespace.
 	            </para>
-                    <para>According to DOM Layer 2 specification, this method can also be used to
+                    <para>According to DOM Level 2 specification, this method can also be used to
 	              create or modify special attributes used for declaring XML namespaces
 	              (which belong to the namespace "http://www.w3.org/2000/xmlns/" and
 	              have prefix or name "xmlns"). This should work since version 1.61,
