@@ -49,6 +49,8 @@ example/xmlns/badguy.xml
 example/xmlns/goodguy.xml
 example/xml2pod.pl
 example/xpath.pl
+example/enc_latin2.html
+example/enc2_latin2.html
 test/relaxng/badschema.rng
 test/relaxng/invaliddemo.xml
 test/relaxng/demo.rng

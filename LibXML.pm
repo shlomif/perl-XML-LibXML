@@ -665,22 +665,36 @@ sub process_xincludes {
 # HTML parsing functions                                                  #
 #-------------------------------------------------------------------------#
 
+sub _html_options {
+  my ($self,$opts)=@_;
+  return (undef,undef) unless ref $opts;
+  my $flags = 0;
+  $flags |=     1 if $opts->{recover} || $self->recover;
+  $flags |=    32 if $opts->{suppress_errors};
+  $flags |=    64 if $opts->{suppress_warnings};
+  $flags |=   128 if $opts->{pedantic_parser} || $self->pedantic_parser;
+  $flags |=   256 if $opts->{no_blanks} || !$self->keep_blanks();
+  $flags |=  2048 if $opts->{no_network};
+  return ($opts->{URI},$opts->{encoding},$flags);
+}
+
 sub parse_html_string {
-    my $self = shift;
+    my ($self,$str,$opts) = @_;
     croak("parse_html_string is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};
 
-    unless ( defined $_[0] and length $_[0] ) {
+    unless ( defined $str and length $str ) {
         croak("Empty String");
     }
-
     $self->{_State_} = 1;
     my $result;
 
     $self->_init_callbacks();
-
-    eval { $result = $self->_parse_html_string( @_ ); };
-    
+    eval { 
+      $result = $self->_parse_html_string( $str,
+					   $self->_html_options($opts)
+					  ); 
+    };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
@@ -695,15 +709,16 @@ sub parse_html_string {
 }
 
 sub parse_html_file {
-    my $self = shift;
+    my ($self,$file,$opts) = @_;
     croak("parse_html_file is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
     my $result;
 
     $self->_init_callbacks();
-    
-    eval { $result = $self->_parse_html_file(@_); };
+    eval { $result = $self->_parse_html_file($file,
+					     $self->_html_options($opts)
+					    ); };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
@@ -718,15 +733,18 @@ sub parse_html_file {
 }
 
 sub parse_html_fh {
-    my $self = shift;
+    my ($self,$fh,$opts) = @_;
     croak("parse_html_fh is not a class method! Create a parser object with XML::LibXML->new first!") unless ref $self;
     croak("parse already in progress") if $self->{_State_};
     $self->{_State_} = 1;
-    my $result;
 
+    my $result;
     $self->_init_callbacks();
     
-    eval { $result = $self->_parse_html_fh( @_ ); };
+    eval { $result = $self->_parse_html_fh( $fh, 
+					    $self->_html_options($opts)
+					   ); 
+	 };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
