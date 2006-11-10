@@ -3570,10 +3570,6 @@ nodeName( self )
         XML::LibXML::Element::tagName = 2
     PREINIT:
         xmlChar * name = NULL;
-    INIT:
-        if( self->name == NULL ) {
-            croak( "lost the name!?" );
-        }
     CODE:
         name =  (xmlChar*)domName( self );
         if ( name != NULL ) {
@@ -4563,9 +4559,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
             xmlIndentTreeOutput = t_indent_var;
         }
 
-        if ( xmlBufferLength(buffer) > 0 ) {
-            ret = xmlBufferContent( buffer );
-        }
+        ret = xmlBufferContent( buffer );
 
         xmlSaveNoEmptyTags = oldTagFlag;
 

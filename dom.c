@@ -393,9 +393,6 @@ domName(xmlNodePtr node) {
     }
 
     switch ( node->type ) {
-    case XML_TEXT_NODE :
-    case XML_COMMENT_NODE :
-    case XML_CDATA_SECTION_NODE :
     case XML_XINCLUDE_START :
     case XML_XINCLUDE_END :
     case XML_ENTITY_REF_NODE :
@@ -409,14 +406,27 @@ domName(xmlNodePtr node) {
         name = node->name;
         break;
 
+    case XML_COMMENT_NODE :
+        name = (const xmlChar *) "#comment";
+        break;
+
+    case XML_CDATA_SECTION_NODE :
+        name = (const xmlChar *) "#cdata-section";
+        break;
+
+    case XML_TEXT_NODE :
+        name = (const xmlChar *) "#text";
+        break;
+
+
     case XML_DOCUMENT_NODE :
     case XML_HTML_DOCUMENT_NODE :
     case XML_DOCB_DOCUMENT_NODE :
-        name = (const xmlChar *) "document";
+        name = (const xmlChar *) "#document";
         break;
 
     case XML_DOCUMENT_FRAG_NODE :
-        name = (const xmlChar *) "document_fragment";
+        name = (const xmlChar *) "#document-fragment";
         break;
 
     case XML_ELEMENT_NODE :
@@ -444,7 +454,7 @@ domName(xmlNodePtr node) {
         qname = xmlStrcat( qname , name );
     } 
     else {
-        qname = xmlStrdup( node->name );
+        qname = xmlStrdup( name );
     }
 
     return qname;

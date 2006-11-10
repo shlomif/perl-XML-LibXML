@@ -8,6 +8,8 @@ Revision history for Perl extension XML::LibXML
      cases with old buggy libxml2 versions)
    - warn if runtime libxml2 is older than the one used at the compile time
    - parse_html_* implementation updated to allow options (such as encoding)
+   - DOM-compliant nodeNames: #comment, #text, #cdata, #document, #document-fragment
+   - toString on empty text node returns empty string, not undef
 
 1.61
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now

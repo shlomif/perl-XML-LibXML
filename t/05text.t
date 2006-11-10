@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 30 };
+BEGIN { plan tests => 32 };
 use XML::LibXML;
 
 my $doc = XML::LibXML::Document->new();
@@ -15,7 +15,7 @@ my $doc = XML::LibXML::Document->new();
     my $foo = "foobar";
     my $textnode = $doc->createTextNode($foo);
     ok( $textnode );
-    ok( $textnode->nodeName(), 'text' );
+    ok( $textnode->nodeName(), '#text' );
     ok( $textnode->nodeValue(), $foo );
 
     print "# 2. substring\n";
@@ -105,7 +105,7 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::CDATASection->new("test");
 
     ok( $node->string_value(), "test" );
-    ok( $node->nodeName(), "cdata" );
+    ok( $node->nodeName(), "#cdata-section" );
 }
 
 {
@@ -114,5 +114,20 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::Comment->new("test");
 
     ok( $node->string_value(), "test" );
-    ok( $node->nodeName(), "comment" );
+    ok( $node->nodeName(), "#comment" );
+}
+
+{
+    print "# Document node name test\n";
+
+    my $node = XML::LibXML::Document->new();
+
+    ok( $node->nodeName(), "#document" );
+}
+{
+    print "# Document fragment node name test\n";
+
+    my $node = XML::LibXML::DocumentFragment->new();
+
+    ok( $node->nodeName(), "#document-fragment" );
 }
