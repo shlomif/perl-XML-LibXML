@@ -1646,12 +1646,17 @@ _parse_sax_file(self, filename_sv)
         LibXML_report_error_ctx(saved_error, recover);
 
 SV*
-_parse_html_string(self, string)
+_parse_html_string(self, string, svURL, svEncoding, options = 0)
         SV * self
         SV * string
+	SV * svURL
+	SV * svEncoding
+        int options
     PREINIT:
         STRLEN len;
         char * ptr;
+        char* URL = NULL;
+        char * encoding = NULL;
         SV * saved_error = sv_2mortal(newSVpv("",0));
         HV * real_obj;
         htmlDocPtr real_doc;
@@ -1662,17 +1667,28 @@ _parse_html_string(self, string)
             croak("Empty string\n");
             XSRETURN_UNDEF;
         }
+        if (SvOK(svURL))
+          URL = SvPV_nolen( svURL );
+        if (SvOK(svEncoding))
+          encoding = SvPV_nolen( svEncoding );
     CODE:
         RETVAL = &PL_sv_undef;
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
+        if (encoding == NULL && SvUTF8( string )) {
+	  encoding = "UTF-8";
+        }
+        recover = LibXML_get_recover(real_obj);
+        if (recover)
+          options |= HTML_PARSE_RECOVER;
 
-        real_doc = htmlParseDoc((xmlChar*)ptr, NULL);
+        real_doc = htmlReadDoc((xmlChar*)ptr, URL, encoding, options);
 
         if ( real_doc != NULL ) {
-            recover = LibXML_get_recover(real_obj);
-
-            {
+            if (real_doc->URL) xmlFree(real_doc->URL);
+   	    if (URL) {
+                real_doc->URL = xmlStrdup((const xmlChar*) URL);
+            } else {
                 SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
@@ -1688,72 +1704,49 @@ _parse_html_string(self, string)
         RETVAL
 
 SV*
-_parse_html_fh(self, fh)
+_parse_html_fh(self, fh, svURL, svEncoding, options = 0)
         SV * self
         SV * fh
+	SV * svURL
+	SV * svEncoding
+        int options
     PREINIT:
         SV * saved_error = sv_2mortal(newSVpv("",0));
         HV * real_obj;
         htmlDocPtr real_doc;
         int well_formed;
         int recover = 0;
+        char * URL = NULL;
+        char * encoding = NULL;
+    INIT:
+        if (SvOK(svURL))
+          URL = SvPV_nolen( svURL );
+        if (SvOK(svEncoding))
+          encoding = SvPV_nolen( svEncoding );
     CODE:
         RETVAL = &PL_sv_undef;
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
         recover = LibXML_get_recover(real_obj);
+        if (recover)
+          options |= HTML_PARSE_RECOVER;
 
-        {
-            int read_length;
-            char buffer[1024];
-            htmlParserCtxtPtr ctxt;
-
-            read_length = LibXML_read_perl(fh, buffer, 4);
-            if (read_length <= 0) {
-                croak( "Empty Stream\n" );
-            }
-
-            ctxt = htmlCreatePushParserCtxt(NULL, NULL, buffer, read_length,
-                                            NULL, XML_CHAR_ENCODING_NONE);
-            if (ctxt == NULL) {
-                LibXML_report_error_ctx(saved_error, recover ? recover : 1);
-                croak("Could not create html push parser context!\n");
-            }
-            xs_warn( "context created\n");
-
-            ctxt->_private = (void*)self;
-            xs_warn( "context initialized \n");
-
-            {
-                int ret;
-                while ((read_length = LibXML_read_perl(fh, buffer, 1024))) {
-                    ret = htmlParseChunk(ctxt, buffer, read_length, 0);
-                    if ( ret != 0 ) {
-                        break;
-                    }
-                }
-                ret = htmlParseChunk(ctxt, buffer, 0, 1);
-                xs_warn( "document parsed \n");
-            }
-
-            well_formed = ctxt->wellFormed;
-            real_doc = ctxt->myDoc;
-            ctxt->myDoc = NULL;
-            htmlFreeParserCtxt(ctxt);
-        }
-
+          real_doc = htmlReadIO((xmlInputReadCallback) LibXML_read_perl,
+				NULL,
+				(void *) fh,
+				URL,
+				encoding,
+				options);
         if ( real_doc != NULL ) {
-
-            {
+            if (real_doc->URL) xmlFree(real_doc->URL);
+	    if (URL) {
+                real_doc->URL = xmlStrdup((const xmlChar*) URL);
+	    } else {
                 SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
 
-            if ( recover || well_formed ) {
-                RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
-            } else {
-                xmlFreeDoc(real_doc);
-            }
+	    RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
         }
 
         LibXML_cleanup_parser();
@@ -1762,12 +1755,17 @@ _parse_html_fh(self, fh)
         RETVAL
 
 SV*
-_parse_html_file(self, filename_sv)
+_parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
         SV * self
         SV * filename_sv
+	SV * svURL
+	SV * svEncoding
+	int options
     PREINIT:
         STRLEN len;
         char * filename;
+        char * URL = NULL;
+	char * encoding = NULL;
         SV * saved_error = sv_2mortal(newSVpv("",0));
         HV * real_obj;
         htmlDocPtr real_doc;
@@ -1778,19 +1776,32 @@ _parse_html_file(self, filename_sv)
             croak("Empty filename\n");
             XSRETURN_UNDEF;
         }
+        if (SvOK(svURL))
+          URL = SvPV_nolen( svURL );
+        if (SvOK(svEncoding))
+          encoding = SvPV_nolen( svEncoding );
     CODE:
         RETVAL = &PL_sv_undef;
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
+        recover = LibXML_get_recover(real_obj);
+        if (recover)
+          options |= HTML_PARSE_RECOVER;
 
-        real_doc = htmlParseFile((const char *)filename, NULL);
+        real_doc = htmlReadFile((const char *)filename, 
+				encoding,
+				options);
 
         if ( real_doc != NULL ) {
-            recover = LibXML_get_recover(real_obj);
 
             /* This HTML file parser doesn't use a ctxt; there is no "well-formed"
              * distinction, and if it manages to parse the HTML, it returns non-null. */
+	    if (URL) {
+                if (real_doc->URL) xmlFree(real_doc->URL);
+                real_doc->URL = xmlStrdup((const xmlChar*) URL);
+	    }
             RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+
         }
 
         LibXML_cleanup_parser();
@@ -5178,7 +5189,7 @@ hasAttributeNS( self, namespaceURI, attr_name )
             xmlFree(nsURI);
             nsURI = NULL;
         }
-        attr = xmlHasNsProp( self, name, nsURI );
+        attr = (xmlNodePtr) xmlHasNsProp( self, name, nsURI );
         if ( attr && attr->type == XML_ATTRIBUTE_NODE ) {
             RETVAL = 1;
         }
@@ -7241,7 +7252,6 @@ _find( pxpath_context, pxpath )
         ProxyNodePtr owner = NULL;
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
-        SV* element = NULL ;
         STRLEN len = 0 ;
         xmlChar * xpath = NULL;
         SV * saved_error = sv_2mortal(newSVpv("",0));

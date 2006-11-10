@@ -694,7 +694,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                 tag can get accessed and transformed.</para>
 
                 <para>XML::LibXML's DOM parser is not only capable to parse XML data, but also (strict) HTML files. There are three ways to parse
-                documents - as a string, as a Perl filehandle, or as a filename. The return value from each is a XML::LibXML::Document object, which is a DOM
+                documents - as a string, as a Perl filehandle, or as a filename/URL. The return value from each is a XML::LibXML::Document object, which is a DOM
                 object.</para>
 
                 <para>All of the functions listed below will throw an exception if the document is invalid. To prevent this causing your program exiting, wrap
@@ -709,9 +709,11 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                                 <funcsynopsisinfo>$doc = $parser-&gt;parse_file( $xmlfilename );</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>This function reads an absolute filename into the memory. It causes XML::LibXML to use libxml2's file parser instead of
-                            letting perl reading the file such as with parse_fh(). If you need to parse files directly, this function would be the faster
-                            choice, since this function is about 6-8 times faster then parse_fh().</para>
+                            <para>This function parses an XML document from a file or network;
+		              $xmlfilename can be either a filename or an URL.
+                              Note that for parsing files, this function is the fastest choice,
+		              about 6-8 times faster then parse_fh().
+	                     </para>
                         </listitem>
                     </varlistentry>
 
@@ -752,10 +754,17 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
 
                         <listitem>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$doc = $parser-&gt;parse_html_file( $htmlfile );</funcsynopsisinfo>
+                                <funcsynopsisinfo>$doc = $parser-&gt;parse_html_file( $htmlfile, \%opts );</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>Similar to parse_file() but parses HTML (strict) documents.</para>
+                            <para>Similar to parse_file() but parses HTML (strict) documents;
+		               $htmlfile can be filename or URL.
+                               An optional second argument can be used to pass some options to the
+                               HTML parser as a HASH reference. Possible options are:
+		               encoding, URI, recover, suppress_errors, suppress_warnings, pedantic_parser,
+		               no_blanks, no_network. Note that in this case, the URI option is only used
+		               to setup the $doc->URI after the document is parsed.
+	                    </para>
                         </listitem>
                     </varlistentry>
 
@@ -764,10 +773,14 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
 
                         <listitem>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$doc = $parser-&gt;parse_html_fh( $io_fh );</funcsynopsisinfo>
+                                <funcsynopsisinfo>$doc = $parser-&gt;parse_html_fh( $io_fh, \%opts );</funcsynopsisinfo>
                             </funcsynopsis>
-
-                            <para>Similar to parse_fh() but parses HTML (strict) streams.</para>
+                            <para>Similar to parse_fh() but parses HTML (strict) streams.
+                               An optional second argument can be used to pass some options to the
+                               HTML parser as a HASH reference. Possible options are:
+		               encoding, URI, recover, suppress_errors, suppress_warnings, pedantic_parser,
+		               no_blanks, no_network.
+	                    </para>
                         </listitem>
                     </varlistentry>
 
@@ -776,22 +789,36 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
 
                         <listitem>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$doc = $parser-&gt;parse_html_string( $htmlstring );</funcsynopsisinfo>
+                                <funcsynopsisinfo>$doc = $parser-&gt;parse_html_string( $htmlstring, \%opts );</funcsynopsisinfo>
                             </funcsynopsis>
-
-                            <para>Similar to parse_file() but parses HTML (strict) strings.</para>
+                            <para>Similar to parse_file() but parses HTML (strict) strings.
+                               The optional second argument can be used to pass some options to the
+                               HTML parser as a HASH reference. Possible options are:
+		               encoding, URI, recover, suppress_errors, suppress_warnings, pedantic_parser,
+		               no_blanks, no_network.
+	                    </para>
                         </listitem>
                     </varlistentry>
                 </variablelist>
 
-                <para>Parsing HTML may cause problems, especially if the ampersand ('&amp;') is used. This is a common problem if HTML code is parsed
-                that contains links to CGI-scripts. Such links cause the parser to throw errors. In such cases libxml2 still parses the entire document as there
-                was no error, but the error causes XML::LibXML to stop the parsing process. However, the document is not lost. Such HTML documents should be
-                parsed using the <emphasis>recover</emphasis> flag. By default recovering is deactivated.</para>
+                <para>Parsing HTML may cause problems, especially if
+                the ampersand ('&amp;') is used. This is a common
+                problem if HTML code is parsed that contains links to
+                CGI-scripts. Such links cause the parser to throw
+                errors. In such cases libxml2 still parses the entire
+                document as there was no error, but the error causes
+                XML::LibXML to stop the parsing process. However, the
+                document is not lost. Such HTML documents should be
+                parsed using the <emphasis>recover</emphasis> flag. By
+                default recovering is deactivated.</para>
 
-                <para>The functions described above are implemented to parse well formed documents. In some cases a program gets well balanced XML instead of
-                well formed documents (e.g. a XML fragment from a Database). With XML::LibXML it is not required to wrap such fragments in the code, because
-                XML::LibXML is capable even to parse well balanced XML fragments.</para>
+                <para>The functions described above are implemented to
+                parse well formed documents. In some cases a program
+                gets well balanced XML instead of well formed
+                documents (e.g. a XML fragment from a Database). With
+                XML::LibXML it is not required to wrap such fragments
+                in the code, because XML::LibXML is capable even to
+                parse well balanced XML fragments.</para>
 
                 <variablelist>
                     <varlistentry>
