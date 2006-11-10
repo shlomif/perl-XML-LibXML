@@ -10,6 +10,7 @@ Revision history for Perl extension XML::LibXML
    - parse_html_* implementation updated to allow options (such as encoding)
    - DOM-compliant nodeNames: #comment, #text, #cdata, #document, #document-fragment
    - toString on empty text node returns empty string, not undef
+   - cloneNode copies attributes on an element as required by the DOM spec
 
 1.61
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now
