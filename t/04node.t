@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 131 };
+BEGIN { plan tests => 135 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -93,6 +93,8 @@ print "# 1.1 Node Attributes\n";
         print "# 1.2 Node Cloning\n";
         {
             my $cnode  = $doc->createElement("foo");
+	    $cnode->setAttribute('aaa','AAA');
+	    $cnode->setAttributeNS('http://ns','x:bbb','BBB');
             my $c1node = $doc->createElement("bar");
             $cnode->appendChild( $c1node );
             
@@ -100,11 +102,16 @@ print "# 1.1 Node Attributes\n";
             ok( $xnode );
             ok( $xnode->nodeName, "foo" );
             ok( not $xnode->hasChildNodes );
-            
+	    ok( $xnode->getAttribute('aaa'),'AAA' );
+	    ok( $xnode->getAttributeNS('http://ns','bbb'),'BBB' );
+
             $xnode = $cnode->cloneNode(1);
             ok( $xnode );
             ok( $xnode->nodeName, "foo" );
             ok( $xnode->hasChildNodes );
+	    ok( $xnode->getAttribute('aaa'),'AAA' );
+	    ok( $xnode->getAttributeNS('http://ns','bbb'),'BBB' );
+
             my @cn = $xnode->childNodes;
             ok( @cn );
             ok( scalar(@cn), 1);
@@ -434,3 +441,10 @@ print "# 7. importing and adopting\n";
   my $r = $root->appendChild( $frag );
   ok( $r );
 }
+
+{ 
+  for my $obj (qw(Document DocumentFragment Comment CDATASection PI Text)) { 
+    
+  } 
+}
+

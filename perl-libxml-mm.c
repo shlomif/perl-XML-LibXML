@@ -400,31 +400,43 @@ PmmCloneNode( xmlNodePtr node, int recursive )
     if ( node != NULL ) {
         switch ( node->type ) {
         case XML_ELEMENT_NODE:
-		case XML_TEXT_NODE:
-		case XML_CDATA_SECTION_NODE:
-		case XML_ENTITY_REF_NODE:
-		case XML_PI_NODE:
-		case XML_COMMENT_NODE:
-		case XML_DOCUMENT_FRAG_NODE:
-		case XML_ENTITY_DECL: 
-            retval = xmlCopyNode( node, recursive );
-            break;
-		case XML_ATTRIBUTE_NODE:
-            retval = (xmlNodePtr) xmlCopyProp( NULL, (xmlAttrPtr) node );
-            break;
+	retval = xmlCopyNode( node, recursive );
+	if (!recursive && 
+	    ((xmlElementPtr)node)->attributes != NULL &&
+	    ((xmlElementPtr)retval)->attributes == NULL) {
+	  /* non-recursive copy didn't copy attributes; *
+           * we do them now                             */	  
+	  
+	  ((xmlElementPtr) retval)->attributes = 
+	    xmlCopyPropList(retval, ((xmlElementPtr)node)->attributes);
+	}
+	break;
+
+	case XML_TEXT_NODE:
+	case XML_CDATA_SECTION_NODE:
+	case XML_ENTITY_REF_NODE:
+	case XML_PI_NODE:
+	case XML_COMMENT_NODE:
+	case XML_DOCUMENT_FRAG_NODE:
+	case XML_ENTITY_DECL: 
+	  retval = xmlCopyNode( node, recursive );
+	  break;
+	case XML_ATTRIBUTE_NODE:
+	  retval = (xmlNodePtr) xmlCopyProp( NULL, (xmlAttrPtr) node );
+	  break;
         case XML_DOCUMENT_NODE:
-		case XML_HTML_DOCUMENT_NODE:
-            retval = (xmlNodePtr) xmlCopyDoc( (xmlDocPtr)node, recursive );
-            break;
+	case XML_HTML_DOCUMENT_NODE:
+	  retval = (xmlNodePtr) xmlCopyDoc( (xmlDocPtr)node, recursive );
+	  break;
         case XML_DOCUMENT_TYPE_NODE:
         case XML_DTD_NODE:
-            retval = (xmlNodePtr) xmlCopyDtd( (xmlDtdPtr)node );
-            break;
+	  retval = (xmlNodePtr) xmlCopyDtd( (xmlDtdPtr)node );
+	  break;
         case XML_NAMESPACE_DECL:
-            retval = ( xmlNodePtr ) xmlCopyNamespace( (xmlNsPtr) node );
-            break;
+	  retval = ( xmlNodePtr ) xmlCopyNamespace( (xmlNsPtr) node );
+	  break;
         default:
-            break;
+	  break;
         }
     }
 
