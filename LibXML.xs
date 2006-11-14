@@ -1679,11 +1679,11 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
 	  encoding = "UTF-8";
         }
         recover = LibXML_get_recover(real_obj);
-#if LIBXML_VERSION < 20627
-        real_doc = htmlParseDoc((xmlChar*)ptr, encoding);
-#else
+#if LIBXML_VERSION >= 20627
         if (recover) options |= HTML_PARSE_RECOVER;
         real_doc = htmlReadDoc((xmlChar*)ptr, URL, encoding, options);
+#else
+        real_doc = htmlParseDoc((xmlChar*)ptr, encoding);
 #endif
         if ( real_doc != NULL ) {
             if (real_doc->URL) xmlFree((xmlChar *)real_doc->URL);
@@ -1736,7 +1736,7 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
         recover = LibXML_get_recover(real_obj);
-#if LIBXML_VERSION < 20627
+#if LIBXML_VERSION >= 20627
         if (recover) options |= HTML_PARSE_RECOVER;
         real_doc = htmlReadFile((const char *)filename, 
 				encoding,
@@ -1775,7 +1775,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
         int well_formed;
         int recover = 0;
         char * URL = NULL;
-#if LIBXML_VERSION > 20627
+#if LIBXML_VERSION >= 20627
         char * encoding = NULL;
 #else
         xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
@@ -1783,7 +1783,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
     INIT:
         if (SvOK(svURL))
           URL = SvPV_nolen( svURL );
-#if LIBXML_VERSION > 20627
+#if LIBXML_VERSION >= 20627
         if (SvOK(svEncoding))
           encoding = SvPV_nolen( svEncoding );
 #else
@@ -1795,7 +1795,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
         recover = LibXML_get_recover(real_obj);
-#if LIBXML_VERSION > 20627
+#if LIBXML_VERSION >= 20627
         if (recover) options |= HTML_PARSE_RECOVER;
         real_doc = htmlReadIO((xmlInputReadCallback) LibXML_read_perl,
                               NULL,
@@ -1803,7 +1803,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
 			      URL,
 			      encoding,
 			      options);
-#else /* LIBXML_VERSION > 20627 */
+#else /* LIBXML_VERSION >= 20627 */
         {
             int read_length;
             char buffer[1024];
@@ -1835,7 +1835,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
             ctxt->myDoc = NULL;
             htmlFreeParserCtxt(ctxt);
         }
-#endif /* LIBXML_VERSION > 20627 */
+#endif /* LIBXML_VERSION >= 20627 */
         if ( real_doc != NULL ) {
             if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
 	    if (URL) {
