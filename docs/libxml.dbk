@@ -759,11 +759,13 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
 
                             <para>Similar to parse_file() but parses HTML (strict) documents;
 		               $htmlfile can be filename or URL.
-                               An optional second argument can be used to pass some options to the
+                            </para>
+                            <para>An optional second argument can be used to pass some options to the
                                HTML parser as a HASH reference. Possible options are:
-		               encoding, URI, recover, suppress_errors, suppress_warnings, pedantic_parser,
-		               no_blanks, no_network. Note that in this case, the URI option is only used
-		               to setup the $doc->URI after the document is parsed.
+                               Possible options are:
+		               encoding and URI for libxml2 < 2.6.27, and for later versions of libxml2 additionally:
+                               recover, suppress_errors, suppress_warnings, pedantic_parser,
+		               no_blanks, and no_network.
 	                    </para>
                         </listitem>
                     </varlistentry>
@@ -775,11 +777,16 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             <funcsynopsis>
                                 <funcsynopsisinfo>$doc = $parser-&gt;parse_html_fh( $io_fh, \%opts );</funcsynopsisinfo>
                             </funcsynopsis>
-                            <para>Similar to parse_fh() but parses HTML (strict) streams.
+                            <para>Similar to parse_fh() but parses HTML (strict) streams.</para>
+                            <para>
                                An optional second argument can be used to pass some options to the
-                               HTML parser as a HASH reference. Possible options are:
-		               encoding, URI, recover, suppress_errors, suppress_warnings, pedantic_parser,
-		               no_blanks, no_network.
+                               HTML parser as a HASH reference.
+                               Possible options are:
+		               encoding and URI for libxml2 < 2.6.27, and for later versions of libxml2 additionally:
+                               recover, suppress_errors, suppress_warnings, pedantic_parser,
+		               no_blanks, and no_network. Note: encoding option may not work correctly
+                               with this function in libxml2 < 2.6.27 if the HTML file declares charset
+                               using a META tag.
 	                    </para>
                         </listitem>
                     </varlistentry>
@@ -791,11 +798,12 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             <funcsynopsis>
                                 <funcsynopsisinfo>$doc = $parser-&gt;parse_html_string( $htmlstring, \%opts );</funcsynopsisinfo>
                             </funcsynopsis>
-                            <para>Similar to parse_file() but parses HTML (strict) strings.
-                               The optional second argument can be used to pass some options to the
+                            <para>Similar to parse_string() but parses HTML (strict) strings.</para>
+                            <para>An optional second argument can be used to pass some options to the
                                HTML parser as a HASH reference. Possible options are:
-		               encoding, URI, recover, suppress_errors, suppress_warnings, pedantic_parser,
-		               no_blanks, no_network.
+		               encoding and URI for libxml2 < 2.6.27, and for later versions of libxml2 additionally:
+                               recover, suppress_errors, suppress_warnings, pedantic_parser,
+		               no_blanks, and no_network.
 	                    </para>
                         </listitem>
                     </varlistentry>

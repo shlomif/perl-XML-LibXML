@@ -91,12 +91,13 @@ EOHTML
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
 
+
   my $iso_str = Encode::encode('iso-8859-2', $strhref);
-  $htmldoc = $parser->parse_html_string( $iso_str, 
-					 { 
-					   encoding => 'iso-8859-2' 
-					 }
-				       );
+  $htmldoc = $parser->parse_html_string( $iso_str,
+					 {
+					   encoding => 'iso-8859-2'
+					  }
+					);
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
 
@@ -105,7 +106,7 @@ EOHTML
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;
-      charset=iso-8859-2">    
+      charset=iso-8859-2">
   </head>
   <body>
     <p>$utf_str</p>
@@ -163,13 +164,17 @@ print "parse example/enc_latin2.html...\n";
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->URI, 'foo');
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
-  
-  # translate to UTF8 on perl-side
-  open $fh, '<:encoding(iso-8859-2)', $test_file;
-  $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' });
-  close $fh;
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+
+  if (XML::LibXML::LIBXML_VERSION > 20627) { 
+    # translate to UTF8 on perl-side
+    open $fh, '<:encoding(iso-8859-2)', $test_file;
+    $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' });
+    close $fh;
+    ok( $htmldoc && $htmldoc->getDocumentElement );
+    ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  } else {
+    skip("skipping for libxml2 <= 2.6.27") for 1..2;
+  }
 }
 
 print "parse example/enc2_latin2.html...\n";
