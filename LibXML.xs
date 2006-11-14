@@ -744,7 +744,7 @@ LibXML_test_node_name( xmlChar * name )
  * at least one reference.                                           *
  * If pnode is NULL, only return current value for hashkey           */
 static SV*
-LibXML_XPathContext_pool ( xmlXPathContextPtr ctxt, int hashkey, SV * pnode ) {
+LibXML_XPathContext_pool ( xmlXPathContextPtr ctxt, void * hashkey, SV * pnode ) {
     SV ** value;
     SV * key;
     STRLEN len;
@@ -760,7 +760,7 @@ LibXML_XPathContext_pool ( xmlXPathContextPtr ctxt, int hashkey, SV * pnode ) {
         }
     }
 
-    key = newSViv(hashkey);
+    key = newSViv((IV) hashkey);
     strkey = SvPV(key, len);
     if (pnode != NULL && !hv_exists(XPathContextDATA(ctxt)->pool,strkey,len)) {        
         value = hv_store(XPathContextDATA(ctxt)->pool,strkey,len, SvREFCNT_inc(pnode),0);
@@ -804,7 +804,7 @@ LibXML_perldata_to_LibXMLdata(xmlXPathParserContextPtr ctxt,
                                    (xmlNodePtr)PmmSvNode(*pnode));
                 if(ctxt) {
                     LibXML_XPathContext_pool(ctxt->context,
-                                             (int) PmmSvNode(*pnode), *pnode);
+                                             PmmSvNode(*pnode), *pnode);
                 }
             } else {
                 warn("XPathContext: ignoring non-node member of a nodelist");
@@ -822,7 +822,7 @@ LibXML_perldata_to_LibXMLdata(xmlXPathParserContextPtr ctxt,
                 tmp_node = (xmlNodePtr)PmmSvNode(perl_result);
                 xmlXPathNodeSetAdd(ret->nodesetval,tmp_node);
                 if(ctxt) {
-                    LibXML_XPathContext_pool(ctxt->context, (int) PmmSvNode(perl_result), 
+                    LibXML_XPathContext_pool(ctxt->context, PmmSvNode(perl_result), 
                                              perl_result);
                 }
 
@@ -1679,13 +1679,13 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
 	  encoding = "UTF-8";
         }
         recover = LibXML_get_recover(real_obj);
-        if (recover)
-          options |= HTML_PARSE_RECOVER;
-
+#if LIBXML_VERSION >= 20621
+        if (recover) options |= HTML_PARSE_RECOVER;
+#endif
         real_doc = htmlReadDoc((xmlChar*)ptr, URL, encoding, options);
 
         if ( real_doc != NULL ) {
-            if (real_doc->URL) xmlFree(real_doc->URL);
+            if (real_doc->URL) xmlFree((xmlChar *)real_doc->URL);
    	    if (URL) {
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
             } else {
@@ -1728,9 +1728,9 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
         recover = LibXML_get_recover(real_obj);
-        if (recover)
-          options |= HTML_PARSE_RECOVER;
-
+#if LIBXML_VERSION >= 20621
+        if (recover) options |= HTML_PARSE_RECOVER;
+#endif
           real_doc = htmlReadIO((xmlInputReadCallback) LibXML_read_perl,
 				NULL,
 				(void *) fh,
@@ -1738,7 +1738,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
 				encoding,
 				options);
         if ( real_doc != NULL ) {
-            if (real_doc->URL) xmlFree(real_doc->URL);
+            if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
 	    if (URL) {
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
 	    } else {
@@ -1785,9 +1785,9 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
         LibXML_init_error_ctx(saved_error);
         real_obj = LibXML_init_parser(self);
         recover = LibXML_get_recover(real_obj);
-        if (recover)
-          options |= HTML_PARSE_RECOVER;
-
+#if LIBXML_VERSION >= 20621
+        if (recover) options |= HTML_PARSE_RECOVER;
+#endif
         real_doc = htmlReadFile((const char *)filename, 
 				encoding,
 				options);
@@ -1797,7 +1797,7 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
             /* This HTML file parser doesn't use a ctxt; there is no "well-formed"
              * distinction, and if it manages to parse the HTML, it returns non-null. */
 	    if (URL) {
-                if (real_doc->URL) xmlFree(real_doc->URL);
+                if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
 	    }
             RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
