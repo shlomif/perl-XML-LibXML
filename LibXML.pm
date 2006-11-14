@@ -702,7 +702,7 @@ sub parse_html_string {
       $self->_cleanup_callbacks();
       croak $err;
     }
-        
+
     $self->_cleanup_callbacks();
 
     return $result;
@@ -740,11 +740,9 @@ sub parse_html_fh {
 
     my $result;
     $self->_init_callbacks();
-    
     eval { $result = $self->_parse_html_fh( $fh, 
 					    $self->_html_options($opts)
-					   ); 
-	 };
+					   ); };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {

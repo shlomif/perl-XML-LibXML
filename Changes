@@ -7,7 +7,8 @@ Revision history for Perl extension XML::LibXML
    - fix getAttributeNode etc. w.r.t. #FIXED attributes (as well as some
      cases with old buggy libxml2 versions)
    - warn if runtime libxml2 is older than the one used at the compile time
-   - parse_html_* implementation updated to allow options (such as encoding)
+   - if compiled against libxml2 >= 2.6.27, new parse_html_* implementation is used
+     allowing encoding and other options to be passed to the parser
    - DOM-compliant nodeNames: #comment, #text, #cdata, #document, #document-fragment
    - toString on empty text node returns empty string, not undef
    - cloneNode copies attributes on an element as required by the DOM spec
