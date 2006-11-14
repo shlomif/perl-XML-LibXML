@@ -165,7 +165,7 @@ print "parse example/enc_latin2.html...\n";
   ok($htmldoc->URI, 'foo');
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
 
-  if (XML::LibXML::LIBXML_VERSION > 20627) { 
+  if (XML::LibXML::LIBXML_VERSION >= 20627) {
     # translate to UTF8 on perl-side
     open $fh, '<:encoding(iso-8859-2)', $test_file;
     $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' });
