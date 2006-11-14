@@ -1742,7 +1742,7 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
 				encoding,
 				options);
 #else
-        real_doc = htmlParseFile((const char *)filename, NULL);
+        real_doc = htmlParseFile((const char *)filename, encoding);
 #endif
         if ( real_doc != NULL ) {
 
