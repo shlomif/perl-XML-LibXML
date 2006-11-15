@@ -43,6 +43,10 @@ extern "C" {
 #define HAVE_SCHEMAS
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
+
+#define HAVE_XMLTEXTREADER
+#include <libxml/xmlreader.h>
+
 #endif
 
 #ifdef LIBXML_CATALOG_ENABLED
@@ -73,11 +77,23 @@ extern "C" {
 }
 #endif
 
+
 #define TEST_PERL_FLAG(flag) \
     SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
 
+#define LIBXML_READER_TEST_ELEMENT(reader,name,nsURI) \
+  (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT) &&	\
+   ((!nsURI && !name) \
+    || \
+    (!nsURI && xmlStrcmp((const xmlChar*)name, xmlTextReaderConstName(reader) ) == 0 ) \
+    || \
+    (nsURI && xmlStrcmp((const xmlChar*)nsURI, xmlTextReaderConstNamespaceUri(reader))==0 \
+     && \
+     (!name || xmlStrcmp((const xmlChar*)name, xmlTextReaderLocalName(reader)) == 0)))
+
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
+
 
 /* ****************************************************************
  * Error handler
@@ -263,6 +279,14 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     LEAVE;
 
     return read_length;
+}
+
+/* used only by Reader */
+int
+LibXML_close_perl (SV * ioref)
+{
+  SvREFCNT_dec(ioref);
+  return 0;
 }
 
 int
@@ -1797,6 +1821,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
         recover = LibXML_get_recover(real_obj);
 #if LIBXML_VERSION >= 20627
         if (recover) options |= HTML_PARSE_RECOVER;
+
         real_doc = htmlReadIO((xmlInputReadCallback) LibXML_read_perl,
                               NULL,
 			      (void *) fh,
@@ -7426,4 +7451,667 @@ lib_init_callbacks( self )
                                   (xmlInputReadCallback) LibXML_input_read,
                                   (xmlInputCloseCallback) LibXML_input_close);
         
+#ifdef HAVE_XMLTEXTREADER
 
+MODULE = XML::LibXML	PACKAGE = XML::LibXML::Reader
+
+xmlTextReaderPtr
+_newForFile(CLASS, filename, encoding, options)
+	const char* CLASS
+	const char* filename
+	const char * encoding = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	int options = SvOK($arg) ? SvIV($arg) : 0;
+    CODE:
+        RETVAL = xmlReaderForFile(filename, encoding, options);
+    OUTPUT:
+	RETVAL
+
+xmlTextReaderPtr
+_newForIO(CLASS, fh, url, encoding, options)
+	const char* CLASS
+	SV * fh
+	const char * url = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	const char * encoding = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	int options = SvOK($arg) ? SvIV($arg) : 0;
+    CODE:
+        SvREFCNT_inc(fh); /* _dec'd by LibXML_close_perl */
+        RETVAL = xmlReaderForIO((xmlInputReadCallback) LibXML_read_perl,
+				(xmlInputCloseCallback) LibXML_close_perl,
+				(void *) fh, url, encoding, options);
+    OUTPUT:
+	RETVAL
+
+xmlTextReaderPtr
+_newForString(CLASS, string, url, encoding, options)
+	const char* CLASS
+	SV * string
+	const char * url = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	const char * encoding = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	int options = SvOK($arg) ? SvIV($arg) : 0;
+    CODE:
+        RETVAL = xmlReaderForDoc(Sv2C(string, (const xmlChar*) encoding),
+				 url, encoding, options);
+    OUTPUT:
+	RETVAL
+
+xmlTextReaderPtr
+_newForFd(CLASS, fd, url, encoding, options)
+	const char* CLASS
+	int fd
+	const char * url = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	const char * encoding = SvOK($arg) ? SvPV_nolen($arg) : NULL;
+	int options = SvOK($arg) ? SvIV($arg) : 0;
+    CODE:
+        RETVAL = xmlReaderForFd(fd, url, encoding, options);
+    OUTPUT:
+	RETVAL
+
+xmlTextReaderPtr
+_newForDOM(CLASS, perl_doc)
+	const char* CLASS
+	SV * perl_doc
+    CODE:
+        PmmREFCNT_inc(SvPROXYNODE(perl_doc)); /* _dec in DESTROY */
+        RETVAL = xmlReaderWalker((xmlDocPtr) PmmSvNode(perl_doc));
+    OUTPUT:
+	RETVAL
+
+int
+attributeCount(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderAttributeCount(reader);
+    OUTPUT:
+	RETVAL
+
+SV *
+baseURI(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstBaseUri(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+int
+byteConsumed(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderByteConsumed(reader);
+    OUTPUT:
+	RETVAL
+
+
+int
+_close(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderClose(reader);
+    OUTPUT:
+	RETVAL
+
+SV *
+encoding(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstEncoding(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+localName(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstLocalName(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+name(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstName(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+namespaceURI(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstNamespaceUri(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+prefix(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstPrefix(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+value(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstValue(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+xmlLang(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstXmlLang(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+
+SV *
+xmlVersion(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderConstXmlVersion(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+
+int
+depth(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderDepth(reader);
+    OUTPUT:
+	RETVAL
+
+
+SV *
+getAttribute(reader, name)
+	xmlTextReaderPtr reader
+	SV * name
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderGetAttribute(reader, Sv2C(name, NULL));
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+getAttributeNo(reader, no)
+	xmlTextReaderPtr reader
+	int no
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderGetAttributeNo(reader, no);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+	
+SV *
+getAttributeNs(reader, localName, namespaceURI)
+	xmlTextReaderPtr reader
+	SV * localName
+        SV * namespaceURI
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderGetAttributeNs(reader, Sv2C(localName, NULL), Sv2C(namespaceURI, NULL));
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+int
+columnNumber(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderGetParserColumnNumber(reader);
+    OUTPUT:
+	RETVAL
+
+int
+lineNumber(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderGetParserLineNumber(reader);
+    OUTPUT:
+	RETVAL
+
+int
+getParserProp(reader, prop)
+	xmlTextReaderPtr reader
+	int prop
+    CODE:
+	RETVAL = xmlTextReaderGetParserProp(reader, prop);
+    OUTPUT:
+	RETVAL
+
+int
+hasAttributes(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderHasAttributes(reader);
+    OUTPUT:
+	RETVAL
+
+int
+hasValue(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderHasValue(reader);
+    OUTPUT:
+	RETVAL
+
+int
+isDefault(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderIsDefault(reader);
+    OUTPUT:
+	RETVAL
+
+int
+isEmptyElement(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderIsEmptyElement(reader);
+    OUTPUT:
+	RETVAL
+
+int
+isNamespaceDecl(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderIsNamespaceDecl(reader);
+    OUTPUT:
+	RETVAL
+
+int
+isValid(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderIsValid(reader);
+    OUTPUT:
+	RETVAL
+
+SV *
+lookupNamespace(reader, prefix)
+	xmlTextReaderPtr reader
+	SV * prefix
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderLookupNamespace(reader, Sv2C(prefix, NULL));
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+
+int
+moveToAttribute(reader, name)
+	xmlTextReaderPtr reader
+	SV * name
+    CODE:
+	RETVAL = xmlTextReaderMoveToAttribute(reader, Sv2C(name, NULL));
+    OUTPUT:
+	RETVAL
+
+int
+moveToAttributeNo(reader, no)
+	xmlTextReaderPtr reader
+	int no
+    CODE:
+	RETVAL = xmlTextReaderMoveToAttributeNo(reader, no);
+    OUTPUT:
+	RETVAL
+	
+int
+moveToAttributeNs(reader, localName, namespaceURI)
+	xmlTextReaderPtr reader
+	SV * localName
+        SV * namespaceURI
+    CODE:
+	RETVAL = xmlTextReaderMoveToAttributeNs(reader, Sv2C(localName, NULL), Sv2C(namespaceURI, NULL));
+    OUTPUT:
+	RETVAL
+
+int
+moveToElement(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderMoveToElement(reader);
+    OUTPUT:
+	RETVAL
+
+int
+moveToFirstAttribute(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderMoveToFirstAttribute(reader);
+    OUTPUT:
+	RETVAL
+
+int
+moveToNextAttribute(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderMoveToNextAttribute(reader);
+    OUTPUT:
+	RETVAL
+
+int
+next(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderNext(reader);
+    OUTPUT:
+	RETVAL
+
+int
+nextSibling(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderNextSibling(reader);
+    OUTPUT:
+	RETVAL
+
+int
+nextElement(reader, name = NULL, nsURI = NULL)
+	xmlTextReaderPtr reader
+	const char * name
+	const char * nsURI
+    CODE:
+	do {
+	  RETVAL = xmlTextReaderNext(reader);
+	  if (LIBXML_READER_TEST_ELEMENT(reader,name,nsURI)) {
+	    break;
+	  }
+	} while (RETVAL == 1);
+    OUTPUT:
+	RETVAL
+
+int
+nextTag(reader, name = NULL, nsURI = NULL)
+	xmlTextReaderPtr reader
+	const char * name
+	const char * nsURI
+    CODE:
+	do {
+	  RETVAL = xmlTextReaderRead(reader);
+	  if (LIBXML_READER_TEST_ELEMENT(reader,name,nsURI)) {
+	    break;
+	  }
+	} while (RETVAL == 1);
+    OUTPUT:
+	RETVAL
+
+int
+skipSiblings(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+        int depth;
+    CODE:
+        depth = xmlTextReaderDepth(reader);
+        RETVAL = -1;
+        if (depth > 0) {
+          do {
+   	     RETVAL = xmlTextReaderNext(reader);
+	  } while (RETVAL == 1 && xmlTextReaderDepth(reader) >= depth);
+	  if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+	    RETVAL = -1;
+	  }
+        }
+    OUTPUT:
+	RETVAL
+
+int
+nodeType(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderNodeType(reader);
+    OUTPUT:
+	RETVAL
+
+int
+quoteChar(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderQuoteChar(reader);
+    OUTPUT:
+	RETVAL
+
+int
+read(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderRead(reader);
+    OUTPUT:
+	RETVAL
+
+int
+readAttributeValue(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderReadAttributeValue(reader);
+    OUTPUT:
+	RETVAL
+
+
+SV *
+readInnerXml(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderReadInnerXml(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+SV *
+readOuterXml(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	const xmlChar *result = NULL;
+    CODE:
+	result = xmlTextReaderReadOuterXml(reader);
+	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+    OUTPUT:
+	RETVAL
+
+int
+readState(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderReadState(reader);
+    OUTPUT:
+	RETVAL
+
+int
+setParserProp(reader, prop, value)
+	xmlTextReaderPtr reader
+	int prop
+	int value
+    CODE:
+	RETVAL = xmlTextReaderSetParserProp(reader, prop, value);
+    OUTPUT:
+	RETVAL
+
+int
+standalone(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderStandalone(reader);
+    OUTPUT:
+	RETVAL
+
+SV *
+copyCurrentNode(reader,expand = 0)
+	xmlTextReaderPtr reader
+        int expand
+    PREINIT:
+	xmlNodePtr node = NULL;
+	xmlNodePtr copy;
+        xmlDocPtr  doc;
+        SV * perl_doc;
+    CODE:
+	if (expand) {
+	  node = xmlTextReaderExpand(reader);
+        }
+	else {
+	  node = xmlTextReaderCurrentNode(reader);
+	}
+        if (!node) XSRETURN_UNDEF;
+
+	doc = xmlTextReaderCurrentDoc(reader);
+        if (!doc) XSRETURN_UNDEF;
+        perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
+        if ( PmmREFCNT(SvPROXYNODE(perl_doc))==1 ) {
+	  /* will be decremented in Reader destructor */
+	  PmmREFCNT_inc(SvPROXYNODE(perl_doc));
+	}
+
+        copy = PmmCloneNode( node, expand );
+        if ( copy == NULL ) {
+            XSRETURN_UNDEF;
+        }
+        if ( copy->type  == XML_DTD_NODE ) {
+            RETVAL = PmmNodeToSv(copy, NULL);
+        }
+        else {
+	    ProxyNodePtr docfrag = NULL;
+
+            if ( doc != NULL ) {
+                xmlSetTreeDoc(copy, doc);
+            }
+            docfrag = PmmNewFragment( doc );
+            xmlAddChild( PmmNODE(docfrag), copy );
+            RETVAL = PmmNodeToSv(copy, docfrag);
+        }
+    OUTPUT:
+        RETVAL
+
+SV *
+document(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	xmlDocPtr doc = NULL;
+    CODE:
+	doc = xmlTextReaderCurrentDoc(reader);
+        if (!doc) XSRETURN_UNDEF;
+        RETVAL = PmmNodeToSv((xmlNodePtr)doc, NULL);
+        if ( PmmREFCNT(SvPROXYNODE(RETVAL))==1 ) {
+	  /* will be decremented in Reader destructor */
+	  PmmREFCNT_inc(SvPROXYNODE(RETVAL));
+	}
+    OUTPUT:
+        RETVAL
+
+int
+_preservePattern(reader,pattern,ns_map=NULL)
+	xmlTextReaderPtr reader
+        char * pattern
+        AV * ns_map 
+    PREINIT:
+        xmlChar** namespaces = NULL;
+	SV** aux;
+        int length,i;
+    CODE:
+        if (ns_map) {
+          length = av_len(ns_map);
+          Newx(namespaces, length, xmlChar*);
+          for( i = 0; i <= length ; i++ ) {
+              aux = av_fetch(ns_map,i,0);
+	      namespaces[i]=(xmlChar*) SvPV_nolen(*aux);
+          }
+	}
+        Safefree(namespaces);
+	RETVAL = xmlTextReaderPreservePattern(reader,(const xmlChar*) pattern, 
+					      (const xmlChar**)namespaces);
+    OUTPUT:
+        RETVAL
+
+SV *
+preserveNode(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+        xmlNodePtr node;
+        xmlDocPtr doc;
+        SV * perl_doc;
+    CODE:
+	doc = xmlTextReaderCurrentDoc(reader);
+        if (!doc) XSRETURN_UNDEF;
+        perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
+        if ( PmmREFCNT(SvPROXYNODE(perl_doc))==1 ) {
+	  /* will be decremented in Reader destructor */
+	  PmmREFCNT_inc(SvPROXYNODE(perl_doc));
+	}
+	node = xmlTextReaderPreserve(reader);
+        if (node) {
+           RETVAL = PmmNodeToSv(node, PmmOWNERPO(PmmPROXYNODE(doc)));
+	} else {
+	    XSRETURN_UNDEF;
+	}
+    OUTPUT:
+        RETVAL
+
+int
+finish(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	while (1) {
+	  RETVAL = xmlTextReaderRead(reader);
+	  if (RETVAL!=1) break;
+	}
+    OUTPUT:
+	RETVAL
+
+void
+DESTROY(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+        xmlDocPtr doc;
+        SV * perl_doc;
+    CODE:
+	doc = xmlTextReaderCurrentDoc(reader);
+        if (doc) {
+          perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
+          if ( PmmREFCNT(SvPROXYNODE(perl_doc))>1 ) {
+	    /* was incremented in document() to pervent from PMM destruction */
+	    PmmREFCNT_dec(SvPROXYNODE(perl_doc));
+	  }
+          SvREFCNT_dec(perl_doc);
+	}
+        if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_CLOSED) {
+	  xmlTextReaderClose(reader);
+	}
+	xmlFreeTextReader(reader);
+
+#endif
