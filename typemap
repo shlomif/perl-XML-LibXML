@@ -8,6 +8,7 @@ perlxmlParserObjectPtr      O_OBJECT
 xmlDocPtr                   O_DOC_OBJECT
 xmlNodePtr                  O_NODE_OBJECT
 xmlDtdPtr                   O_NODE_OBJECT
+xmlTextReaderPtr            O_OBJECT
 
 INPUT
 O_OBJECT
