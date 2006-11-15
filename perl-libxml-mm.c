@@ -400,18 +400,6 @@ PmmCloneNode( xmlNodePtr node, int recursive )
     if ( node != NULL ) {
         switch ( node->type ) {
         case XML_ELEMENT_NODE:
-	retval = xmlCopyNode( node, recursive );
-	if (!recursive && 
-	    ((xmlElementPtr)node)->attributes != NULL &&
-	    ((xmlElementPtr)retval)->attributes == NULL) {
-	  /* non-recursive copy didn't copy attributes; *
-           * we do them now                             */	  
-	  
-	  ((xmlElementPtr) retval)->attributes = 
-	    xmlCopyPropList(retval, ((xmlElementPtr)node)->attributes);
-	}
-	break;
-
 	case XML_TEXT_NODE:
 	case XML_CDATA_SECTION_NODE:
 	case XML_ENTITY_REF_NODE:
@@ -419,7 +407,7 @@ PmmCloneNode( xmlNodePtr node, int recursive )
 	case XML_COMMENT_NODE:
 	case XML_DOCUMENT_FRAG_NODE:
 	case XML_ENTITY_DECL: 
-	  retval = xmlCopyNode( node, recursive );
+	  retval = xmlCopyNode( node, recursive ? 1 : 2 );
 	  break;
 	case XML_ATTRIBUTE_NODE:
 	  retval = (xmlNodePtr) xmlCopyProp( NULL, (xmlAttrPtr) node );
