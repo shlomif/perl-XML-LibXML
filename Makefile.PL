@@ -39,10 +39,15 @@ my %INFOS = (
 
 # -------------------------------------------------------------------------- #
 # read extra configurations from the commandline
-while($_ = shift) {
-    my ($key, $val) = split(/=/, $_, 2);
-    $config{$key} = $val;
-}
+my %params;
+@params{qw(DEBUG DEFINE EXTRALIBDIR GDOME INC LIBS SKIP_SAX_INSTALL XMLPREFIX)}=();
+
+@ARGV = grep {
+  my ($key, $val) = split(/=/, $_, 2);
+  if (exists $params{$key}) {
+    $config{$key} = $val; 0
+  } else { 1 }
+} @ARGV;
 
 $extralibdir = $config{EXTRALIBDIR};
 delete $config{EXTRALIBDIR};
