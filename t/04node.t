@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 135 };
+BEGIN { plan tests => 136 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -119,11 +119,12 @@ print "# 1.1 Node Attributes\n";
             ok( !$cn[0]->isSameNode( $c1node ) );
 
             print "# clone namespaced elements\n";
-            my $nsnode = $doc->createElementNS( "foo", "foo:bar" );
+            my $nsnode = $doc->createElementNS( "fooNS", "foo:bar" );
 
             my $cnsnode = $nsnode->cloneNode(0);
-            ok( $cnsnode->nodeName, "bar" );
-            ok( $cnsnode->localNS(), undef );
+            ok( $cnsnode->nodeName, "foo:bar" );
+            ok( $cnsnode->localNS() );
+            ok( $cnsnode->namespaceURI(), 'fooNS' );
 
             print "# clone namespaced elements (recursive)\n";
             my $c2nsnode = $nsnode->cloneNode(1);

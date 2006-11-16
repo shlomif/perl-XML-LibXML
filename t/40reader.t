@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 use strict;
 use warnings;
-use Test::More tests => 81;
+use Test::More;
+
+if (XML::LibXML::LIBXML_VERSION() >= 20621) {
+   plan tests => 82;
+} else {
+   plan skip_all => "Reader not supported for libxml2 <= 2.6.20";
+}
 
 BEGIN{use_ok('XML::LibXML::Reader');};
 
@@ -155,6 +161,7 @@ EOF
     is($reader->namespaceURI, "foo","namespaceURI");
     $reader->nextElement;
     $node3= $reader->preserveNode;
+    ok($node3,"preserve node");
     $reader->finish;
     my $doc = $reader->document;
     ok($doc, "document");

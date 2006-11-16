@@ -7452,6 +7452,7 @@ lib_init_callbacks( self )
                                   (xmlInputCloseCallback) LibXML_input_close);
         
 #ifdef HAVE_XMLTEXTREADER
+#if LIBXML_VERSION >= 20621
 
 MODULE = XML::LibXML	PACKAGE = XML::LibXML::Reader
 
@@ -7542,7 +7543,6 @@ byteConsumed(reader)
 	RETVAL = xmlTextReaderByteConsumed(reader);
     OUTPUT:
 	RETVAL
-
 
 int
 _close(reader)
@@ -8124,4 +8124,5 @@ DESTROY(reader)
 	}
 	xmlFreeTextReader(reader);
 
+#endif
 #endif
