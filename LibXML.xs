@@ -7955,6 +7955,14 @@ readState(reader)
 	RETVAL
 
 int
+normalization(reader)
+	xmlTextReaderPtr reader
+    CODE:
+	RETVAL = xmlTextReaderNormalization(reader);
+    OUTPUT:
+	RETVAL
+
+int
 setParserProp(reader, prop, value)
 	xmlTextReaderPtr reader
 	int prop
@@ -8092,6 +8100,8 @@ finish(reader)
 	}
     OUTPUT:
 	RETVAL
+
+
 
 void
 DESTROY(reader)
