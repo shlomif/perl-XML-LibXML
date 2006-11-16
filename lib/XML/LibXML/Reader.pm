@@ -382,7 +382,6 @@ Provides the text value of the node if present.
 
 =item lookupNamespace(prefix)
 
-
 =item encoding()
 
 =item standalone()
@@ -401,12 +400,24 @@ The depth of the node in the tree, starts at 0 for the root node.
 
 The xml:lang scope within which the node resides.
 
+=item lineNumber()
+
+Provide the line number of the current parsing point.
+Available if libxml2 >= 2.6.17.
 
 =item columnNumber()
 
-=item lineNumber()
+Provide the column number of the current parsing point.
+Available if libxml2 >= 2.6.17.
 
 =item byteConsumed()
+
+This function provides the current index of the parser relative to the
+start of the current entity. This function is computed in bytes from
+the beginning starting at zero and finishing at the size in bytes of
+the file if parsing a file. The function is of constant cost if the
+input is UTF-8 but can be costly if run on non-UTF-8 input.
+Available if libxml2 >= 2.6.18.
 
 =item setParserProp(prop,value)
 
