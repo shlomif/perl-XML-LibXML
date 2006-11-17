@@ -79,6 +79,7 @@ BEGIN {
 @EXPORT    = (@{$EXPORT_TAGS{types}},@{$EXPORT_TAGS{states}});
 @EXPORT_OK = @EXPORT;
 $EXPORT_TAGS{all}=\@EXPORT_OK;
+}
 
 {
   my %flags = (
