@@ -337,14 +337,15 @@ sub MY::test {
    return $script;
 }
 
+#	echo perl -pi~ -e '$$_=q($(version))."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM)
 sub MY::postamble {
   return <<'MAKE_FRAG';
 
 # used to update version numbers in all modules
-version:=$(shell grep '\# VERSION TEMPLATE' $(VERSION_FROM))
 version:
-	@echo "New version line: $(version)"
-	@perl -pi~ -e '$$_=q($(version))."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM)
+	@version=`grep '\# VERSION TEMPLATE' $(VERSION_FROM)`; \
+	echo "New version line: $$version"; \
+	perl -pi~ -e '$$_=q('"$$version"')."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM)
 
 MAKE_FRAG
 }

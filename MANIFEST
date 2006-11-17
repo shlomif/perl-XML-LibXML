@@ -123,4 +123,4 @@ LibXML.pod
 lib/XML/LibXML/Reader.pm
 t/40reader.t
 test/textReader/countries.xml
-META.yml                                 Module meta-data (added by MakeMaker)
+
