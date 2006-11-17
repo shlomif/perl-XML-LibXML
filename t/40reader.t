@@ -4,16 +4,18 @@ use warnings;
 use Test::More;
 
 if (XML::LibXML::LIBXML_VERSION() >= 20621) {
-   plan tests => 82;
+   plan tests => 84;
 } else {
    plan skip_all => "Reader not supported for libxml2 <= 2.6.20";
 }
 
-BEGIN{use_ok('XML::LibXML::Reader');};
+BEGIN{
+  use_ok('XML::LibXML::Reader');
+};
 
 my $file = "test/textReader/countries.xml";
 {
-  my $reader = new XML::LibXML::Reader(location => $file);
+  my $reader = new XML::LibXML::Reader(location => $file, {expand_entities => 1});
   isa_ok($reader, "XML::LibXML::Reader");
   is($reader->read, 1, "read");
   is($reader->byteConsumed, 488, "byteConsumed");
@@ -57,19 +59,16 @@ my $file = "test/textReader/countries.xml";
   $reader->moveToElement;
   is($reader->name, "country", "name");
   is($reader->namespaceURI, undef, "namespaceURI");
-  ok($reader->quoteChar, "quoteChar");
-  ok($reader->next, "next");
 
   ok($reader->nextSibling, "nextSibling");
   is($reader->nodeType, XML_READER_TYPE_SIGNIFICANT_WHITESPACE, "nodeType");
-  ok($reader->normalization, "normalization");
   is($reader->prefix, undef, "prefix");
 
   is($reader->readInnerXml, "", "readInnerXml");
   is($reader->readOuterXml, "\n", "readOuterXml");
   ok($reader->readState, "readState");
 
-  ok($reader->setParserProp(0,1), "setParserProp");
+  is($reader->getParserProp('expand_entities'), 1, "getParserProp");
 
   ok($reader->standalone, "standalone");
   is($reader->value, "\n", "value");
@@ -130,8 +129,10 @@ for my $how (qw(FD IO)) {
   my $xml = <<'EOF';
 <root>
   <AA foo="FOO"> text1 <inner/> </AA>
-  <DD/><BB bar="BAR"> text2 <CC> xx </CC> </BB>
+  <DD/><BB bar="BAR">text2<CC> xx </CC>foo<FF/> </BB>x
   <EE baz="BAZ"> xx <PP>preserved</PP> yy <XX>FOO</XX></EE>
+  <a/>
+  <b/>
   <x:ZZ xmlns:x="foo"/>
   <QQ/>
   <YY/>
@@ -139,34 +140,43 @@ for my $how (qw(FD IO)) {
 EOF
   {
     my $reader = new XML::LibXML::Reader(string => $xml);
+    $reader->preservePattern('//PP');
+    $reader->preservePattern('//x:ZZ',{ x => "foo"});
+
     isa_ok($reader, "XML::LibXML::Reader");
-    $reader->nextTag;
+    $reader->nextElement;
     is($reader->name, "root","root node");
-    $reader->nextTag;
+    $reader->nextElement;
     $node1 = $reader->copyCurrentNode(1);
     is($node1->nodeName, "AA","deep copy node");
-    ok($reader->nextElement,"next element");
-    is($reader->name, "DD");
-    ok($reader->nextElement('BB'));
-    is($reader->name, "BB");
+    $reader->next;
+    ok($reader->nextElement("DD"),"next named element");
+    is($reader->name, "DD","name");
+    is($reader->readOuterXml, "<DD/>","readOuterXml");
+    ok($reader->read,"read");
+    is($reader->name, "BB","name");
     $node2 = $reader->copyCurrentNode(0);
     is($node2->nodeName, "BB","shallow copy node");
     $reader->nextElement;
-    $reader->nextTag;
-    $node3 = $reader->preserveNode;
-    is( $reader->readOuterXml(), $node3->toString(),"outer xml");
+    is($reader->name, "CC","nextElement");
+    $reader->nextSibling;
+    is( $reader->nodeType(), XML_READER_TYPE_TEXT, "text node" );
+    is( $reader->value,"foo", "text content" );
     $reader->skipSiblings;
     is( $reader->nodeType(), XML_READER_TYPE_END_ELEMENT, "end element type" );
-    ok($reader->nextElement("ZZ","foo"),"namespace");
+    $reader->nextElement;
+    is($reader->name, "EE","name");
+    ok($reader->nextSiblingElement("ZZ","foo"),"namespace");
     is($reader->namespaceURI, "foo","namespaceURI");
     $reader->nextElement;
     $node3= $reader->preserveNode;
+    is( $reader->readOuterXml(), $node3->toString(),"outer xml");
     ok($node3,"preserve node");
     $reader->finish;
     my $doc = $reader->document;
     ok($doc, "document");
     ok($doc->documentElement, "doc root element");
-    is($doc->documentElement->toString,q(<root><EE baz="BAZ"><PP>preserved</PP></EE><QQ/></root>),
+    is($doc->documentElement->toString,q(<root><EE baz="BAZ"><PP>preserved</PP></EE><x:ZZ xmlns:x="foo"/><QQ/></root>),
        "preserved content");
   }
   ok($node1->hasChildNodes,"copy w/  child nodes");
@@ -176,3 +186,21 @@ EOF
   ok($node3->toString(),q(<QQ/>));
 }
 
+{
+  my $bad_xml = <<'EOF';
+<root>
+  <x>
+     foo
+  </u>
+</root>
+EOF
+  {
+    my $reader = new XML::LibXML::Reader(
+      string => $bad_xml,
+      URI => "mystring"
+     );
+    eval { $reader->finish };
+    ok((defined $@ and $@ =~ /stopped at mystring:2/), 'catchin error');
+    print $@;
+  }
+}

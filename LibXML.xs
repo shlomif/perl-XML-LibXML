@@ -123,6 +123,37 @@ LibXML_error_handler_ctx(void * ctxt, const char * msg, ...)
 }
 
 static void
+LibXML_reader_error_handler_ctx(void * ctxt, 
+				const char * msg,  
+				xmlParserSeverities severity, 
+				xmlTextReaderLocatorPtr locator)
+{
+  char * locatorFile = xmlTextReaderLocatorBaseURI(locator);
+  SV * sv = sv_2mortal(C2Sv(locatorFile,NULL));
+  char * file;
+
+  xmlFree(locatorFile);
+  if (severity == XML_PARSER_SEVERITY_VALIDITY_WARNING ||
+      severity == XML_PARSER_SEVERITY_WARNING ) {
+    if (SvOK(sv)) {
+      warn("Warning: %s - reader at %s:%d", msg, SvPV_nolen(sv),
+	    xmlTextReaderLocatorLineNumber(locator));
+    } else {
+      warn("Warning: %s - reader line %d", msg,
+	    xmlTextReaderLocatorLineNumber(locator));
+    }        
+  } else {
+    if (SvOK(sv)) {
+      croak("Error: %s - reader stopped at %s:%d", msg, SvPV_nolen(sv),
+	    xmlTextReaderLocatorLineNumber(locator));
+    } else {
+      croak("Error: %s - reader stopped at line %d", msg,
+	    xmlTextReaderLocatorLineNumber(locator));
+    }    
+  }
+}
+
+static void
 LibXML_validity_error_ctx(void * ctxt, const char *msg, ...)
 {
 	va_list args;
@@ -7492,6 +7523,9 @@ _newForString(CLASS, string, url, encoding, options)
     CODE:
         RETVAL = xmlReaderForDoc(Sv2C(string, (const xmlChar*) encoding),
 				 url, encoding, options);
+        if (RETVAL) {
+          xmlTextReaderSetErrorHandler(RETVAL, LibXML_reader_error_handler_ctx,NULL);
+        }
     OUTPUT:
 	RETVAL
 
@@ -7656,10 +7690,11 @@ getAttribute(reader, name)
 	xmlTextReaderPtr reader
 	SV * name
     PREINIT:
-	const xmlChar *result = NULL;
+	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttribute(reader, Sv2C(name, NULL));
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        xmlFree(result);
     OUTPUT:
 	RETVAL
 
@@ -7668,10 +7703,11 @@ getAttributeNo(reader, no)
 	xmlTextReaderPtr reader
 	int no
     PREINIT:
-	const xmlChar *result = NULL;
+	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttributeNo(reader, no);
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        xmlFree(result);
     OUTPUT:
 	RETVAL
 	
@@ -7681,10 +7717,11 @@ getAttributeNs(reader, localName, namespaceURI)
 	SV * localName
         SV * namespaceURI
     PREINIT:
-	const xmlChar *result = NULL;
+	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttributeNs(reader, Sv2C(localName, NULL), Sv2C(namespaceURI, NULL));
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        xmlFree(result);
     OUTPUT:
 	RETVAL
 
@@ -7705,7 +7742,7 @@ lineNumber(reader)
 	RETVAL
 
 int
-getParserProp(reader, prop)
+_getParserProp(reader, prop)
 	xmlTextReaderPtr reader
 	int prop
     CODE:
@@ -7766,10 +7803,11 @@ lookupNamespace(reader, prefix)
 	xmlTextReaderPtr reader
 	SV * prefix
     PREINIT:
-	const xmlChar *result = NULL;
+	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderLookupNamespace(reader, Sv2C(prefix, NULL));
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        xmlFree(result);
     OUTPUT:
 	RETVAL
 
@@ -7834,22 +7872,40 @@ next(reader)
     OUTPUT:
 	RETVAL
 
+#define LIBXML_READER_NEXT_SIBLING(ret,reader)	\
+	ret = xmlTextReaderNextSibling(reader); \
+        if (ret == -1) {			\
+	  int depth;				\
+          depth = xmlTextReaderDepth(reader);	\
+	  ret = xmlTextReaderRead(reader);			   \
+	  while (ret == 1 && xmlTextReaderDepth(reader) > depth) { \
+	    ret = xmlTextReaderNext(reader);			   \
+	  }							   \
+	  if (ret == 1) {					   \
+	    if (xmlTextReaderDepth(reader) > depth) {		   \
+	      ret = 0;							\
+	    } else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT) { \
+	      ret = xmlTextReaderRead(reader);				\
+	    }								\
+	  }								\
+        }
+
 int
 nextSibling(reader)
 	xmlTextReaderPtr reader
     CODE:
-	RETVAL = xmlTextReaderNextSibling(reader);
+	LIBXML_READER_NEXT_SIBLING(RETVAL,reader)
     OUTPUT:
 	RETVAL
 
 int
-nextElement(reader, name = NULL, nsURI = NULL)
+nextSiblingElement(reader, name = NULL, nsURI = NULL)
 	xmlTextReaderPtr reader
 	const char * name
 	const char * nsURI
     CODE:
 	do {
-	  RETVAL = xmlTextReaderNext(reader);
+	  LIBXML_READER_NEXT_SIBLING(RETVAL,reader)
 	  if (LIBXML_READER_TEST_ELEMENT(reader,name,nsURI)) {
 	    break;
 	  }
@@ -7858,7 +7914,7 @@ nextElement(reader, name = NULL, nsURI = NULL)
 	RETVAL
 
 int
-nextTag(reader, name = NULL, nsURI = NULL)
+nextElement(reader, name = NULL, nsURI = NULL)
 	xmlTextReaderPtr reader
 	const char * name
 	const char * nsURI
@@ -7899,11 +7955,15 @@ nodeType(reader)
     OUTPUT:
 	RETVAL
 
-int
+SV*
 quoteChar(reader)
 	xmlTextReaderPtr reader
+    PREINIT:
+        int ret;
     CODE:
-	RETVAL = xmlTextReaderQuoteChar(reader);
+	ret = xmlTextReaderQuoteChar(reader);
+        if (ret == -1) XSRETURN_UNDEF;
+        RETVAL = newSVpvf("%c",ret);
     OUTPUT:
 	RETVAL
 
@@ -7928,10 +7988,12 @@ SV *
 readInnerXml(reader)
 	xmlTextReaderPtr reader
     PREINIT:
-	const xmlChar *result = NULL;
+	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderReadInnerXml(reader);
+        if (!result) XSRETURN_UNDEF;
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        xmlFree(result);
     OUTPUT:
 	RETVAL
 
@@ -7939,10 +8001,12 @@ SV *
 readOuterXml(reader)
 	xmlTextReaderPtr reader
     PREINIT:
-	const xmlChar *result = NULL;
+	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderReadOuterXml(reader);
+        if (!result) XSRETURN_UNDEF;
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        xmlFree(result);
     OUTPUT:
 	RETVAL
 
@@ -7955,15 +8019,7 @@ readState(reader)
 	RETVAL
 
 int
-normalization(reader)
-	xmlTextReaderPtr reader
-    CODE:
-	RETVAL = xmlTextReaderNormalization(reader);
-    OUTPUT:
-	RETVAL
-
-int
-setParserProp(reader, prop, value)
+_setParserProp(reader, prop, value)
 	xmlTextReaderPtr reader
 	int prop
 	int value
@@ -8050,19 +8106,20 @@ _preservePattern(reader,pattern,ns_map=NULL)
     PREINIT:
         xmlChar** namespaces = NULL;
 	SV** aux;
-        int length,i;
+        int last,i;
     CODE:
         if (ns_map) {
-          length = av_len(ns_map);
-          Newx(namespaces, length, xmlChar*);
-          for( i = 0; i <= length ; i++ ) {
+          last = av_len(ns_map);
+          Newx(namespaces, last+2, xmlChar*);
+          for( i = 0; i <= last ; i++ ) {
               aux = av_fetch(ns_map,i,0);
 	      namespaces[i]=(xmlChar*) SvPV_nolen(*aux);
           }
+	  namespaces[i]=0;
 	}
-        Safefree(namespaces);
 	RETVAL = xmlTextReaderPreservePattern(reader,(const xmlChar*) pattern, 
 					      (const xmlChar**)namespaces);
+        Safefree(namespaces);
     OUTPUT:
         RETVAL
 
@@ -8098,9 +8155,27 @@ finish(reader)
 	  RETVAL = xmlTextReaderRead(reader);
 	  if (RETVAL!=1) break;
 	}
+        RETVAL++;
     OUTPUT:
 	RETVAL
 
+int
+_setRelaxNGFile(reader,rng)
+	xmlTextReaderPtr reader
+	char* rng
+    CODE:
+	RETVAL = xmlTextReaderRelaxNGValidate(reader,rng);
+    OUTPUT:
+	RETVAL
+
+int
+_setXSDFile(reader,xsd)
+	xmlTextReaderPtr reader
+	char* xsd
+    CODE:
+	RETVAL = xmlTextReaderSchemaValidate(reader,xsd);
+    OUTPUT:
+	RETVAL
 
 
 void
