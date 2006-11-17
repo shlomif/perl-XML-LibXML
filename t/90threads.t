@@ -144,7 +144,7 @@ $_->join for(threads->list);
 ok(1);
 }
 
-my $bigfile = "example/libxml.dkb";
+my $bigfile = "docs/libxml.dbk";
 open my $fh, "<:utf8", $bigfile or die $!;
 $xml = join '', <$fh>;
 close $fh;

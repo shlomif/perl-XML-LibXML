@@ -34,8 +34,6 @@ example/complex/dtd/g.dtd
 example/dromeds.xml
 example/dtd.xml
 example/ext_ent.dtd
-example/libxml.dkb
-example/libxml.xml
 example/ns.xml
 example/test.dtd
 example/test.html
@@ -47,7 +45,6 @@ example/test4.xml
 example/xmllibxmldocs.pl
 example/xmlns/badguy.xml
 example/xmlns/goodguy.xml
-example/xml2pod.pl
 example/xpath.pl
 example/enc_latin2.html
 example/enc2_latin2.html
