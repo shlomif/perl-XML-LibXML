@@ -140,10 +140,9 @@ $VERSION = 0.02;
     }
     return;
   }
-}
 
-
-sub new {
+  my (%string_pool,%rng_pool,%xsd_pool); # used to preserve data passed to the reader
+  sub new {
     my ($class) = shift;
     my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
     my $encoding = $args{encoding};
@@ -156,6 +155,7 @@ sub new {
     }
     elsif ( defined $args{string} ) {
       $self = $class->_newForString( $args{string}, $URI, $encoding, $options );
+      $string_pool{$self} = \$args{string};
     }
     elsif ( defined $args{IO} ) {
       $self = $class->_newForIO( $args{IO}, $URI, $encoding, $options  );
@@ -173,14 +173,31 @@ sub new {
       croak("XML::LibXML::Reader->new: specify location, string, IO, DOM, or FD");
     }
     if ($args{RelaxNG}) {
-      $self->_setRelaxNGFile($args{RNG});
+      if (ref($args{RelaxNG})) {
+	$rng_pool{$self} = \$args{RelaxNG};
+	$self->_setRelaxNG($args{RelaxNG});
+      } else {
+	$self->_setRelaxNGFile($args{RelaxNG});
+      }
     }
     if ($args{Schema}) {
-      $self->_setXSDFile($args{XSD});
+      if (ref($args{Schema})) {
+	$xsd_pool{$self} = \$args{Schema};
+	$self->_setXSD($args{Schema});
+      } else {
+	$self->_setXSDFile($args{Schema});
+      }
     }
     return $self;
+  }
+  sub DESTROY {
+    my $self = shift;
+    delete $string_pool{$self};
+    delete $rng_pool{$self};
+    delete $xsd_pool{$self};
+    $self->_DESTROY;
+  }
 }
-
 sub close {
     my ($reader) = @_;
     # _close return -1 on failure, 0 on success
@@ -321,15 +338,17 @@ can be used to provide baseURI when parsing strings or filehandles.
 
 override document encoding.
 
-=item RNG
+=item RelaxNG
 
-can be used to specify a path to a RelaxNG schema which is then used
+can be used to pass either a XML::LibXML::RelaxNG object or a filename
+or URL of a RelaxNG schema to the constructor. The schema is then used
 to validate the document as it is processed.
 
-=item XSD
+=item Schema
 
-can be used to specify a path to a W3C XSD schema which is then used
-to validate the document as it is processed. 
+can be used to pass either a XML::LibXML::Schema object or a filename
+or URL of a W3C XSD schema to the constructor. The schema is then used
+to validate the document as it is processed.
 
 =item recover
 

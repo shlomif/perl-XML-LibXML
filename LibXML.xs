@@ -43,10 +43,11 @@ extern "C" {
 #define HAVE_SCHEMAS
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
+#endif
 
-#define HAVE_XMLTEXTREADER
+#if LIBXML_VERSION >= 20621
+#define HAVE_READER_SUPPORT
 #include <libxml/xmlreader.h>
-
 #endif
 
 #ifdef LIBXML_CATALOG_ENABLED
@@ -81,6 +82,7 @@ extern "C" {
 #define TEST_PERL_FLAG(flag) \
     SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
 
+#ifdef HAVE_READER_SUPPORT
 #define LIBXML_READER_TEST_ELEMENT(reader,name,nsURI) \
   (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT) &&	\
    ((!nsURI && !name) \
@@ -89,7 +91,8 @@ extern "C" {
     || \
     (nsURI && xmlStrcmp((const xmlChar*)nsURI, xmlTextReaderConstNamespaceUri(reader))==0 \
      && \
-     (!name || xmlStrcmp((const xmlChar*)name, xmlTextReaderLocalName(reader)) == 0)))
+     (!name || xmlStrcmp((const xmlChar*)name, xmlTextReaderConstLocalName(reader)) == 0)))
+#endif
 
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
@@ -120,37 +123,6 @@ LibXML_error_handler_ctx(void * ctxt, const char * msg, ...)
    		sv_vcatpvfn(saved_error, msg, strlen(msg), &args, NULL, 0, NULL);
 		va_end(args);
 	}
-}
-
-static void
-LibXML_reader_error_handler_ctx(void * ctxt, 
-				const char * msg,  
-				xmlParserSeverities severity, 
-				xmlTextReaderLocatorPtr locator)
-{
-  char * locatorFile = xmlTextReaderLocatorBaseURI(locator);
-  SV * sv = sv_2mortal(C2Sv(locatorFile,NULL));
-  char * file;
-
-  xmlFree(locatorFile);
-  if (severity == XML_PARSER_SEVERITY_VALIDITY_WARNING ||
-      severity == XML_PARSER_SEVERITY_WARNING ) {
-    if (SvOK(sv)) {
-      warn("Warning: %s - reader at %s:%d", msg, SvPV_nolen(sv),
-	    xmlTextReaderLocatorLineNumber(locator));
-    } else {
-      warn("Warning: %s - reader line %d", msg,
-	    xmlTextReaderLocatorLineNumber(locator));
-    }        
-  } else {
-    if (SvOK(sv)) {
-      croak("Error: %s - reader stopped at %s:%d", msg, SvPV_nolen(sv),
-	    xmlTextReaderLocatorLineNumber(locator));
-    } else {
-      croak("Error: %s - reader stopped at line %d", msg,
-	    xmlTextReaderLocatorLineNumber(locator));
-    }    
-  }
 }
 
 static void
@@ -228,6 +200,66 @@ LibXML_report_error_ctx(SV * saved_error, int recover)
 	}
     }
 }
+
+#ifdef HAVE_READER_SUPPORT
+static void
+LibXML_reader_error_handler(void * ctxt, 
+				const char * msg,  
+				xmlParserSeverities severity, 
+				xmlTextReaderLocatorPtr locator)
+{
+  int line = xmlTextReaderLocatorLineNumber(locator);
+  xmlChar * filename = xmlTextReaderLocatorBaseURI(locator);
+  SV * msg_sv = sv_2mortal(C2Sv((xmlChar*) msg,NULL));
+  SV * error = sv_2mortal(newSVpv("", 0));
+
+  switch (severity) {
+  case XML_PARSER_SEVERITY_VALIDITY_WARNING:
+    sv_catpv(error, "Validity WARNING");
+    break;
+  case XML_PARSER_SEVERITY_WARNING:
+    sv_catpv(error, "Reader WARNING");
+    break;
+  case XML_PARSER_SEVERITY_VALIDITY_ERROR:
+    sv_catpv(error, "Validity ERROR");
+    break;
+  case XML_PARSER_SEVERITY_ERROR:
+    sv_catpv(error, "Reader ERROR");
+    break;
+  }
+  if (filename) {
+    sv_catpvf(error, " in %s", filename);
+    xmlFree(filename);    
+  }
+  if (line >= 0) {
+    sv_catpvf(error, " at line %d", line);
+  }
+  sv_catpvf(error, ": %s", SvPV_nolen(msg_sv));
+  if (severity == XML_PARSER_SEVERITY_VALIDITY_WARNING ||
+      severity == XML_PARSER_SEVERITY_WARNING ) {
+    warn("%s", SvPV_nolen(error));
+  } else {
+    SV * error_sv = (SV*) ctxt;
+    if (error_sv) {
+      sv_catpvf(error_sv, "%s  ", SvPV_nolen(error));
+    } else {
+      croak("%s",SvPV_nolen(error));
+    }
+  }
+}
+
+static void
+LibXML_report_reader_error(xmlTextReaderPtr reader)
+{
+  SV * error_sv = NULL;
+  xmlTextReaderErrorFunc f = NULL;
+
+  xmlTextReaderGetErrorHandler(reader, &f, (void **) &error_sv);
+  if ( error_sv && SvOK( error_sv) && 0 < SvCUR( error_sv ) ) {
+    croak("%s", SvPV_nolen(error_sv));
+  }
+}
+#endif /* HAVE_READER_SUPPORT */
 
 static int
 LibXML_get_recover(HV * real_obj)
@@ -7481,9 +7513,8 @@ lib_init_callbacks( self )
                                   (xmlInputOpenCallback) LibXML_input_open,
                                   (xmlInputReadCallback) LibXML_input_read,
                                   (xmlInputCloseCallback) LibXML_input_close);
-        
-#ifdef HAVE_XMLTEXTREADER
-#if LIBXML_VERSION >= 20621
+
+#ifdef HAVE_READER_SUPPORT        
 
 MODULE = XML::LibXML	PACKAGE = XML::LibXML::Reader
 
@@ -7495,6 +7526,9 @@ _newForFile(CLASS, filename, encoding, options)
 	int options = SvOK($arg) ? SvIV($arg) : 0;
     CODE:
         RETVAL = xmlReaderForFile(filename, encoding, options);
+        if (RETVAL) {
+          xmlTextReaderSetErrorHandler(RETVAL, LibXML_reader_error_handler,newSVpv("",0));
+        }
     OUTPUT:
 	RETVAL
 
@@ -7510,6 +7544,9 @@ _newForIO(CLASS, fh, url, encoding, options)
         RETVAL = xmlReaderForIO((xmlInputReadCallback) LibXML_read_perl,
 				(xmlInputCloseCallback) LibXML_close_perl,
 				(void *) fh, url, encoding, options);
+        if (RETVAL) {
+	  xmlTextReaderSetErrorHandler(RETVAL, LibXML_reader_error_handler,newSVpv("",0));
+        }
     OUTPUT:
 	RETVAL
 
@@ -7521,10 +7558,12 @@ _newForString(CLASS, string, url, encoding, options)
 	const char * encoding = SvOK($arg) ? SvPV_nolen($arg) : NULL;
 	int options = SvOK($arg) ? SvIV($arg) : 0;
     CODE:
-        RETVAL = xmlReaderForDoc(Sv2C(string, (const xmlChar*) encoding),
-				 url, encoding, options);
+        if (encoding == NULL && SvUTF8( string )) {
+	  encoding = "UTF-8";
+        }
+        RETVAL = xmlReaderForDoc((xmlChar* )SvPV_nolen(string), url, encoding, options);
         if (RETVAL) {
-          xmlTextReaderSetErrorHandler(RETVAL, LibXML_reader_error_handler_ctx,NULL);
+	  xmlTextReaderSetErrorHandler(RETVAL, LibXML_reader_error_handler,newSVpv("",0));
         }
     OUTPUT:
 	RETVAL
@@ -7538,6 +7577,9 @@ _newForFd(CLASS, fd, url, encoding, options)
 	int options = SvOK($arg) ? SvIV($arg) : 0;
     CODE:
         RETVAL = xmlReaderForFd(fd, url, encoding, options);
+        if (RETVAL) {
+          xmlTextReaderSetErrorHandler(RETVAL, LibXML_reader_error_handler,newSVpv("",0));
+        }
     OUTPUT:
 	RETVAL
 
@@ -7688,11 +7730,11 @@ depth(reader)
 SV *
 getAttribute(reader, name)
 	xmlTextReaderPtr reader
-	SV * name
+	char * name
     PREINIT:
 	xmlChar *result = NULL;
     CODE:
-	result = xmlTextReaderGetAttribute(reader, Sv2C(name, NULL));
+	result = xmlTextReaderGetAttribute(reader, (xmlChar*) name);
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
         xmlFree(result);
     OUTPUT:
@@ -7714,12 +7756,13 @@ getAttributeNo(reader, no)
 SV *
 getAttributeNs(reader, localName, namespaceURI)
 	xmlTextReaderPtr reader
-	SV * localName
-        SV * namespaceURI
+	char * localName
+        char * namespaceURI = SvOK($arg) ? SvPV_nolen($arg) : NULL;
     PREINIT:
 	xmlChar *result = NULL;
     CODE:
-	result = xmlTextReaderGetAttributeNs(reader, Sv2C(localName, NULL), Sv2C(namespaceURI, NULL));
+	result = xmlTextReaderGetAttributeNs(reader,  (xmlChar*) localName, 
+					     (xmlChar*) namespaceURI);
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
         xmlFree(result);
     OUTPUT:
@@ -7801,11 +7844,11 @@ isValid(reader)
 SV *
 lookupNamespace(reader, prefix)
 	xmlTextReaderPtr reader
-	SV * prefix
+	char * prefix = SvOK($arg) ? SvPV_nolen($arg) : NULL;
     PREINIT:
 	xmlChar *result = NULL;
     CODE:
-	result = xmlTextReaderLookupNamespace(reader, Sv2C(prefix, NULL));
+	result = xmlTextReaderLookupNamespace(reader, (xmlChar*) prefix);
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
         xmlFree(result);
     OUTPUT:
@@ -7815,9 +7858,9 @@ lookupNamespace(reader, prefix)
 int
 moveToAttribute(reader, name)
 	xmlTextReaderPtr reader
-	SV * name
+	char * name
     CODE:
-	RETVAL = xmlTextReaderMoveToAttribute(reader, Sv2C(name, NULL));
+	RETVAL = xmlTextReaderMoveToAttribute(reader, (xmlChar*) name);
     OUTPUT:
 	RETVAL
 
@@ -7833,10 +7876,11 @@ moveToAttributeNo(reader, no)
 int
 moveToAttributeNs(reader, localName, namespaceURI)
 	xmlTextReaderPtr reader
-	SV * localName
-        SV * namespaceURI
+	char * localName
+	char * namespaceURI = SvOK($arg) ? SvPV_nolen($arg) : NULL;
     CODE:
-	RETVAL = xmlTextReaderMoveToAttributeNs(reader, Sv2C(localName, NULL), Sv2C(namespaceURI, NULL));
+	RETVAL = xmlTextReaderMoveToAttributeNs(reader, 
+						(xmlChar*) localName, (xmlChar*) namespaceURI);
     OUTPUT:
 	RETVAL
 
@@ -7869,6 +7913,7 @@ next(reader)
 	xmlTextReaderPtr reader
     CODE:
 	RETVAL = xmlTextReaderNext(reader);
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7895,6 +7940,7 @@ nextSibling(reader)
 	xmlTextReaderPtr reader
     CODE:
 	LIBXML_READER_NEXT_SIBLING(RETVAL,reader)
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7910,6 +7956,7 @@ nextSiblingElement(reader, name = NULL, nsURI = NULL)
 	    break;
 	  }
 	} while (RETVAL == 1);
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7925,6 +7972,7 @@ nextElement(reader, name = NULL, nsURI = NULL)
 	    break;
 	  }
 	} while (RETVAL == 1);
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7944,6 +7992,7 @@ skipSiblings(reader)
 	    RETVAL = -1;
 	  }
         }
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7972,6 +8021,7 @@ read(reader)
 	xmlTextReaderPtr reader
     CODE:
 	RETVAL = xmlTextReaderRead(reader);
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7980,6 +8030,7 @@ readAttributeValue(reader)
 	xmlTextReaderPtr reader
     CODE:
 	RETVAL = xmlTextReaderReadAttributeValue(reader);
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -7993,6 +8044,7 @@ readInnerXml(reader)
 	result = xmlTextReaderReadInnerXml(reader);
         if (!result) XSRETURN_UNDEF;
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+        LibXML_report_reader_error(reader);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8007,6 +8059,7 @@ readOuterXml(reader)
         if (!result) XSRETURN_UNDEF;
 	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
         xmlFree(result);
+        LibXML_report_reader_error(reader);
     OUTPUT:
 	RETVAL
 
@@ -8052,6 +8105,7 @@ copyCurrentNode(reader,expand = 0)
 	else {
 	  node = xmlTextReaderCurrentNode(reader);
 	}
+        LibXML_report_reader_error(reader);
         if (!node) XSRETURN_UNDEF;
 
 	doc = xmlTextReaderCurrentDoc(reader);
@@ -8155,9 +8209,12 @@ finish(reader)
 	  RETVAL = xmlTextReaderRead(reader);
 	  if (RETVAL!=1) break;
 	}
-        RETVAL++;
+        LibXML_report_reader_error(reader);
+        RETVAL++; /* we want 0 - fail, 1- success */
     OUTPUT:
 	RETVAL
+
+#ifdef HAVE_SCHEMAS
 
 int
 _setRelaxNGFile(reader,rng)
@@ -8165,6 +8222,15 @@ _setRelaxNGFile(reader,rng)
 	char* rng
     CODE:
 	RETVAL = xmlTextReaderRelaxNGValidate(reader,rng);
+    OUTPUT:
+	RETVAL
+
+int
+_setRelaxNG(reader,rng_doc)
+	xmlTextReaderPtr reader
+	xmlRelaxNGPtr rng_doc
+    CODE:
+	RETVAL = xmlTextReaderRelaxNGSetSchema(reader,rng_doc);
     OUTPUT:
 	RETVAL
 
@@ -8177,13 +8243,25 @@ _setXSDFile(reader,xsd)
     OUTPUT:
 	RETVAL
 
+int
+_setXSD(reader,xsd_doc)
+	xmlTextReaderPtr reader
+	xmlSchemaPtr xsd_doc
+    CODE:
+	RETVAL =  xmlTextReaderSetSchema(reader,xsd_doc);
+    OUTPUT:
+	RETVAL
+
+#endif
 
 void
-DESTROY(reader)
+_DESTROY(reader)
 	xmlTextReaderPtr reader
     PREINIT:
         xmlDocPtr doc;
         SV * perl_doc;
+	SV * error_sv = NULL;
+	xmlTextReaderErrorFunc f = NULL;
     CODE:
 	doc = xmlTextReaderCurrentDoc(reader);
         if (doc) {
@@ -8197,7 +8275,10 @@ DESTROY(reader)
         if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_CLOSED) {
 	  xmlTextReaderClose(reader);
 	}
+        xmlTextReaderGetErrorHandler(reader, &f, (void **) &error_sv);
+        if (error_sv) {
+           sv_2mortal(error_sv);
+        }
 	xmlFreeTextReader(reader);
 
-#endif
-#endif
+#endif /* HAVE_READER_SUPPORT */
