@@ -1,7 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
 1.62pre
-   - reader API (most of the code contributed by Heiko Klein)
+   - interface to libxml2's pull-parser XML::LibXML::Reader
+     (initiated by Heiko Klein)
    - make error messages intended to the user report the line of the
      application call rather than that of the internal XS call
    - XML::LibXML::Attr->serializeContent added (convenience function)
