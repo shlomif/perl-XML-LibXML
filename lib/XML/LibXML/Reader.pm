@@ -24,13 +24,24 @@ use constant {
     XML_READER_TYPE_SIGNIFICANT_WHITESPACE => 14,
     XML_READER_TYPE_END_ELEMENT => 15,
     XML_READER_TYPE_END_ENTITY => 16,
-    XML_READER_TYPE_XML_DECLARATION => 17
+    XML_READER_TYPE_XML_DECLARATION => 17,
+
+    XML_READER_NONE      => -1,
+    XML_READER_START     =>  0,
+    XML_READER_ELEMENT   =>  1,
+    XML_READER_END       =>  2,
+    XML_READER_EMPTY     =>  3,
+    XML_READER_BACKTRACK =>  4,
+    XML_READER_DONE      =>  5,
+    XML_READER_ERROR     =>  6
 };
-use vars qw( @EXPORT @EXPORT_OK );
+use vars qw( @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
 BEGIN {
 
-@EXPORT = qw(
+%EXPORT_TAGS = (
+  types =>
+  [qw(
     XML_READER_TYPE_NONE
     XML_READER_TYPE_ELEMENT
     XML_READER_TYPE_ATTRIBUTE
@@ -49,8 +60,22 @@ BEGIN {
     XML_READER_TYPE_END_ELEMENT
     XML_READER_TYPE_END_ENTITY
     XML_READER_TYPE_XML_DECLARATION
+    )],
+  states =>
+  [qw(
+    XML_READER_NONE
+    XML_READER_START
+    XML_READER_ELEMENT
+    XML_READER_END
+    XML_READER_EMPTY
+    XML_READER_BACKTRACK
+    XML_READER_DONE
+    XML_READER_ERROR
+   )]
 );
+@EXPORT    = (@{$EXPORT_TAGS{types}},@{$EXPORT_TAGS{states}});
 @EXPORT_OK = @EXPORT;
+$EXPORT_TAGS{all}=\@EXPORT_OK;
 
 $VERSION = 0.02;
 }
@@ -80,7 +105,7 @@ $VERSION = 0.02;
     my $no_dict = 4096;
     my $flags = $no_dict;     # safety precaution
 
-    my ($key, $value)=@_;
+    my ($key, $value);
     while (($key,$value) = each %$opts) {
       my $f = $flags{ $key };
       if (defined $f) {
@@ -91,6 +116,29 @@ $VERSION = 0.02;
 	}
       }
     }
+    return $flags;
+  }
+  my %props = (
+    load_ext_dtd => 1,		 # load the external subset
+    complete_attributes => 2,	 # default DTD attributes
+    validation => 3,		 # validate with the DTD
+    expand_entities => 4,	 # substitute entities
+  );
+  sub getParserProp {
+    my ($self, $name) = @_;
+    my $prop = $props{$name};
+    return undef unless defined $prop;
+    return $self->_getParserProp($prop);
+  }
+  sub setParserProp {
+    my $self = shift;
+    my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+    my ($key, $value);
+    while (($key,$value) = each %args) {
+      my $prop = $props{ $key };
+      $self->_setParserProp($prop,$value);
+    }
+    return;
   }
 }
 
@@ -124,6 +172,12 @@ sub new {
     else {
       croak("XML::LibXML::Reader->new: specify location, string, IO, DOM, or FD");
     }
+    if ($args{RelaxNG}) {
+      $self->_setRelaxNGFile($args{RNG});
+    }
+    if ($args{Schema}) {
+      $self->_setXSDFile($args{XSD});
+    }
     return $self;
 }
 
@@ -139,7 +193,7 @@ sub preservePattern {
   my ($pattern,$ns_map)=@_;
   if (ref($ns_map) eq 'HASH') {
     # translate prefix=>URL hash to a (URL,prefix) list
-    $reader->_preservePattern($pattern,[reverse %$ns_map])
+    $reader->_preservePattern($pattern,[reverse %$ns_map]);
   } else {
     $reader->_preservePattern(@_);
   }
@@ -151,7 +205,7 @@ __END__
 
 =head1 NAME
 
-XML::LibXML::Reader - libXml pull parser
+XML::LibXML::Reader - interface to libxml2 pull parser
 
 =head1 SYNOPSIS
 
@@ -166,10 +220,18 @@ XML::LibXML::Reader - libXml pull parser
   sub processNode {
       $reader = shift;
       printf "%d %d %s %d\n", ($reader->depth,
-                                $reader->nodeType,
-                                $reader->name,
-			        $reader->isEmptyElement);
+                               $reader->nodeType,
+                               $reader->name,
+		               $reader->isEmptyElement);
   }
+
+or
+
+  $reader = new XML::LibXML::Reader("file.xml")
+       or die "cannot read file.xml\n";
+  $reader->preservePattern('//table/tr');
+  $reader->finish;
+  print $reader->document->toString(1);
 
 =head1 DESCRIPTION
 
@@ -202,44 +264,24 @@ Reader API also supports namespaces, xml:base, entity handling, and
 DTD validation. Schema and RelaxNG validation support will probably be
 added in some later revision of the Perl interface.
 
-=head2 ADDITIONAL INFORMATION
+The naming of methods compared to libxml2 and C# XmlTextReader has
+been changed slightly to match the conventions of XML::LibXML. Some
+functions have been changed or added with respect to the C interface.
 
-L<http://dotgnu.org/pnetlib-doc/System/Xml/XmlTextReader.html>
+=head1 CONSTRUCTOR
 
-=over 4
-
-=head1 PUBLIC METHODS
-
-Please find a complete overview and descripton of functions in
-L<http://xmlsoft.org/html/libxml-xmlreader.html>. The naming has been
-changed slightly to match the conventions of XML::LibXML.
-
-For example, C:
-
-  xmlTextReaderPtr reader = xmlNewTextReaderFilename("file.xml");
-  xmlChar* baseUri = xmlTextReaderBaseUri(reader);
-
-is in perl:
-
-  my $reader = XML::LibXML::Reader->new(location => "file.xml");
-  my $baseURI = $reader->baseURI;
-
-Some functions have been changed or added with respect to the C
-interface.
-
-=over 4
-
-=item new()
-
-Creates a new reader object.
+Depending on the XML source, the Reader object can be created with
+either of:
 
   my $reader = XML::LibXML::Reader->new( location => "file.xml", ... );
   my $reader = XML::LibXML::Reader->new( string => $xml_string, ... );
   my $reader = XML::LibXML::Reader->new( IO => $file_handle, ... );
   my $reader = XML::LibXML::Reader->new( DOM => $dom, ... );
 
-where ... are (optional) reader options described below.  The
+where ... are (optional) reader options described below in L<PARSER OPTIONS>. The
 constructor recognizes the following XML sources:
+
+=head2 SOURCE SPECIFICATION
 
 =over 8
 
@@ -267,66 +309,285 @@ Use reader API to walk through a preparsed XML::LibXML::Document.
 
 =back
 
+=head2 PARSING OPTIONS
+
+=over 4
+
+=item URI
+
+can be used to provide baseURI when parsing strings or filehandles.
+
+=item encoding
+
+override document encoding.
+
+=item RNG
+
+can be used to specify a path to a RelaxNG schema which is then used
+to validate the document as it is processed.
+
+=item XSD
+
+can be used to specify a path to a W3C XSD schema which is then used
+to validate the document as it is processed. 
+
+=item recover
+
+recover on errors (0/1)
+
+=item expand_entities
+
+substitute entities (0/1)
+
+=item load_ext_dtd
+
+load the external subset (0/1)
+
+=item complete_attributes
+
+default DTD attributes (0/1)
+
+=item validation
+
+validate with the DTD (0/1)
+
+=item suppress_errors
+
+suppress error reports (0/1)
+
+=item suppress_warnings
+
+suppress warning reports (0/1)
+
+=item pedantic_parser
+
+pedantic error reporting (0/1)
+
+=item no_blanks
+
+remove blank nodes (0/1)
+
+=item expand_xinclude
+
+Implement XInclude substitition (0/1)
+
+=item no_network
+
+Forbid network access (0/1)
+
+=item clean_namespaces
+
+remove redundant namespaces declarations (0/1)
+
+=item no_cdata
+
+merge CDATA as text nodes (0/1)
+
+=item no_xinclude_nodes
+
+do not generate XINCLUDE START/END nodes (0/1)
+
+=back
+
+=head1 METHODS (CONTROLLING PARSING PROGRESS)
+
+=over 4
+
 =item read()
+
+Moves the position to the next node in the stream, exposing its
+properties.
+
+Returns 1 if the node was read successfully, 0 if there is no more
+nodes to read, or -1 in case of error
 
 =item readAttributeValue()
 
-=item readInnerXml()
+Parses an attribute value into one or more Text and EntityReference nodes.
 
-=item readOuterXml()
+Returns 1 in case of success, 0 if the reader was not positionned on
+an attribute node or all the attribute values have been read, or -1 in
+case of error.
 
 =item readState()
 
+Gets the read state of the reader. Returns the state value, or -1 in
+case of error. The module exports constants for the Reader states, see
+C<STATES> below.
+
+=item depth()
+
+The depth of the node in the tree, starts at 0 for the root node.
 
 =item next()
 
-=item nextSibling()
+Skip to the node following the current one in the document order while
+avoiding the subtree if any.  Returns 1 if the node was read
+successfully, 0 if there is no more nodes to read, or -1 in case of
+error.
 
-=item nextElement(name?,nsURI?)
+=item nextElement(localname?,nsURI?)
 
-=item nextTag(name?,nsURI?)
+Skip nodes following the current one in the document order until a
+specific element is reached.  The element's name must be equal to a
+given localname if defined, and its namespace must equal to a given
+nsURI if defined. Either of the arguments can be undefined (or
+omitted, in case of the latter or both).
+
+Returns 1 if the element was found, 0 if there is no more nodes to
+read, or -1 in case of error.
 
 =item skipSiblings()
 
+Skip all nodes on the same or lower level until the first node on a
+higher level is reached.  In particular, if the current node occurs in
+an element, the reader stops at the end tag of the parent element,
+otherwise it stops at a node immediately following the parent node.
+
+Returns 1 if successful, 0 if end of the document is reached, or -1 in
+case of error.
+
+=item nextSibling()
+
+It skips to the node following the current one in the document order
+while avoiding the subtree if any.
+
+Returns 1 if the node was read successfully, 0 if there is no more
+nodes to read, or -1 in case of error
+
+=item nextSiblingElement(name?,nsURI?)
+
+Like nextElement but only processes sibling elements of the current
+node (moving forward using nextSibling() rather than read(),
+internally).
+
+Returns 1 if the element was found, 0 if there is no more sibling
+nodes, or -1 in case of error.
+
 =item finish()
 
+Skip all remaining nodes in the document, reaching end of the
+document.
 
+Returns 1 if successful, 0 in case of error.
+
+=item close()
+
+This method releases any resources allocated by the current instance
+and closes any underlying input. It returns 0 on failure and 1 on
+success. This method is automatically called by the destructor when
+the reader is forgotten, therefore you do not have to call it
+directly.
+
+=back
+
+=head1 METHODS (EXTRACTING INFORMATION)
+
+=over 4
 
 =item name()
 
-The qualified name of the current node, equal to (Prefix:)LocalName.
+Returns the qualified name of the current node, equal to (Prefix:)LocalName.
 
 =item nodeType()
 
-Type of the current node. See L<NODE TYPES> below.
+Returns the type of the current node. See L<NODE TYPES> below.
 
 =item localName()
 
-The local name of the node.
+Returns the local name of the node.
 
 =item prefix()
 
-The prefix of the namespace associated with the node.
+Returns the prefix of the namespace associated with the node.
 
 =item namespaceURI()
 
-The URI defining the namespace associated with the node.
+Returns the URI defining the namespace associated with the node.
 
 =item isEmptyElement()
 
 Check if the current node is empty, this is a bit bizarre in the sense
 that <a/> will be considered empty while <a></a> will not.
 
+=item hasValue()
+
+Returns true if the node can have a text value.
+
+=item value()
+
+Provides the text value of the node if present or undef if not
+available.
+
+=item readInnerXml()
+
+Reads the contents of the current node, including child nodes and
+markup. Returns a string containing the XML of the node's content, or
+undef if the current node is neither an element nor attribute, or has
+no child nodes.
+
+=item readOuterXml()
+
+Reads the contents of the current node, including child nodes and markup.
+
+Returns a string containing the XML of the node including its content,
+or undef if the current node is neither an element nor attribute.
+
+=back
+
+=head1 METHODS (EXTRACTING DOM NODES)
+
+=over 4
 
 =item document()
 
-=item copyCurrentNode(reader,expand=0)
+Provides access to the document tree built by the reader. This
+function can be used to collect the preserved nodes (see
+preserveNode() and preservePattern).
+
+CAUTION: Never use this function to modify the tree unless reading of
+the whole document is completed!
+
+=item copyCurrentNode(deep)
+
+This function is similar a DOM function copyNode(). It returns a copy
+of the currently processed node as a corresponding DOM object. Use
+deep = 1 to obtain the full subtree.
 
 =item preserveNode()
 
-=item preservePattern(reader,pattern,%ns_map)
+This tells the XML Reader to preserve the current node in the document
+tree. A document tree consisting of the preserved nodes and their
+content can be obtained using the method document() once parsing is
+finished.
 
+Returns the node or NULL in case of error.
 
+=item preservePattern(pattern,\%ns_map)
+
+This tells the XML Reader to preserve all nodes matched by the pattern
+(which is a streaming XPath subset).  A document tree consisting of
+the preserved nodes and their content can be obtained using the method
+document() once parsing is finished.
+
+An optional second argument can be used to provide a HASH reference
+mapping prefixes used by the XPath to namespace URIs.
+
+The XPath subset available with this function is described at
+
+  http://www.w3.org/TR/xmlschema-1/#Selector
+
+and matches the production
+
+   Path ::= ('.//')? ( Step '/' )* ( Step | '@' NameTest )
+
+Returns a positive number in case of success and -1 in case of error
+
+=back
+
+=head1 METHODS (PROCESSING ATTRIBUTES)
+
+=over 4
 
 =item attributeCount()
 
@@ -336,65 +597,123 @@ Provides the number of attributes of the current node.
 
 Whether the node has attributes.
 
-
-
 =item getAttribute(name)
 
-=item getAttributeNo(no)
+Provides the value of the attribute with the specified qualified name.
+
+Returns a string containing the value of the specified attribute, or
+undef in case of error.
 
 =item getAttributeNs(localName, namespaceURI)
 
+Provides the value of the specified attribute.
+
+Returns a string containing the value of the specified attribute, or
+undef in case of error.
+
+=item getAttributeNo(no)
+
+Provides the value of the attribute with the specified index relative
+to the containing element.
+
+Returns a string containing the value of the specified attribute, or
+undef in case of error.
+
 =item isDefault()
 
-Whether an Attribute node was generated from the default value defined
-in the DTD or schema (not yet supported).
-
-
-=item hasValue()
-
-Whether the node can have a text value.
-
-=item value()
-
-Provides the text value of the node if present.
-
+Returns true if the current attribute node was generated from the
+default value defined in the DTD.
 
 =item moveToAttribute(name)
 
+Moves the position to the attribute with the
+specified local name and namespace URI.
+
+Returns 1 in case of success, -1 in case of error, 0 if not found
+
 =item moveToAttributeNo(no)
+
+Moves the position to the attribute with the
+specified index relative to the containing element.
+
+Returns 1 in case of success, -1 in case of error, 0 if not found
 
 =item moveToAttributeNs(localName,namespaceURI)
 
+Moves the position to the attribute with the
+specified local name and namespace URI.
+
+Returns 1 in case of success, -1 in case of error, 0 if not found
+
 =item moveToFirstAttribute()
+
+Moves the position to the first attribute
+associated with the current node.
+
+Returns 1 in case of success, -1 in case of error, 0 if not found
 
 =item moveToNextAttribute()
 
+Moves the position to the next attribute
+associated with the current node.
+
+Returns 1 in case of success, -1 in case of error, 0 if not found
+
 =item moveToElement()
 
+Moves the position to the node that contains the current attribute
+node.
+
+Returns 1 in case of success, -1 in case of error, 0 if not moved
 
 =item isNamespaceDecl()
 
-=item isValid()
+Determine whether the current node is a namespace declaration rather
+than a regular attribute.
 
-=item normalization()
+Returns 1 if the current node is a namespace declaration, 0 if it is a
+regular attribute or other type of node, or -1 in case of error.
 
-=item quoteChar()
+=back
+
+=head1 OTHER METHODS
+
+=over 4
 
 =item lookupNamespace(prefix)
 
+Resolves a namespace prefix in the scope of the current element.
+
+Returns a string containing the namespace URI to which the prefix maps
+or undef in case of error.
+
 =item encoding()
+
+Returns a string containing the encoding of the document or undef in
+case of error.
 
 =item standalone()
 
+Determine the standalone status of the document being read.  Returns 1
+if the document was declared to be standalone, 0 if it was declared to
+be not standalone, or -1 if the document did not specify its
+standalone status or in case of error.
+
 =item xmlVersion()
+
+Determine the XML version of the document being read. Returns a
+string containing the XML version of the document or undef in case of
+error.
 
 =item baseURI()
 
 The base URI of the node. See the XML Base W3C specification.
 
-=item depth()
+=item isValid()
 
-The depth of the node in the tree, starts at 0 for the root node.
+Retrieve the validity status from the parser.
+
+Returns 1 if valid, 0 if no, and -1 in case of error.
 
 =item xmlLang()
 
@@ -419,18 +738,30 @@ the file if parsing a file. The function is of constant cost if the
 input is UTF-8 but can be costly if run on non-UTF-8 input.
 Available if libxml2 >= 2.6.18.
 
-=item setParserProp(prop,value)
+=item setParserProp(prop => value, ...)
+
+Change the parser processing behaviour by changing some of its
+internal properties.  The following properties are available with this
+function: "load_ext_dtd", "complete_attributes", "validation",
+"expand_entities".  
+
+Since some of the properties can only be changed before any read has
+been done, it is best to set the parsing properties at the
+constructor.
+
+Returns 0 if the call was successful, or -1 in case of error
 
 =item getParserProp(prop)
 
-=item close
+Get value of an parser internal property. The following property names
+can be used: "load_ext_dtd", "complete_attributes", "validation",
+"expand_entities".
 
-This method releases any resources allocated by the current instance
-and closes any underlying input. It returns 0 on failure and 1 on
-success. This method is automatically called by the destructor,
-therefore you do not have to call it directly.
+Returns the value, usually 0 or 1, or -1 in case of error.
 
-=head2 DESTRUCTION
+=back
+
+=head1 DESTRUCTION
 
 XML::LibXML takes care of the reader object destruction when the last
 reference to the reader object goes out of scope. The document tree is
@@ -438,13 +769,11 @@ preserved, though, if either of $reader->document or
 $reader->preserveNode was used and references to the document tree
 exist.
 
+=head1 NODE TYPES
 
-=back
-
-=head2 NODE TYPES
-
-The reader interface uses the following node types (exported by
-default as constants).
+The reader interface provides the following constants for node types
+(the constant symbols are exported by default or if tag C<:types> is
+used).
 
   XML_READER_TYPE_NONE                    => 0
   XML_READER_TYPE_ELEMENT                 => 1
@@ -465,48 +794,20 @@ default as constants).
   XML_READER_TYPE_END_ENTITY              => 16
   XML_READER_TYPE_XML_DECLARATION         => 17
 
-=head2 MISSING FUNCTIONS
+=head1 STATES
 
-Function missing compared to libxml2 can be grouped into the following
-categories:
+The following constants represent the values returned by
+readState(). They are exported by default, or if tag C<:states> is
+used:
 
-=over 4
-
-=item functions working with Schema/RelaxNG
-
-=item functions enabling low-level interoperability between libxml components
-
-=item libxml-specific error-handling
-
-=back
-
-Below, find the functions listed by name:
-
-=over 4
-
-=item xmlTextReaderGetErrorHandler
-
-=item xmlTextReaderGetRemainder
-
-=item xmlTextReaderLocatorBaseURI	
-
-=item xmlTextReaderLocatorLineNumber	
-
-=item xmlTextReaderRelaxNGSetSchema
-
-=item xmlTextReaderRelaxNGValidate	
-
-=item xmlTextReaderSchemaValidate
-
-=item xmlTextReaderSchemaValidateCtxt
-
-=item xmlTextReaderSetErrorHandler
-
-=item xmlTextReaderSetSchema	
-
-=item xmlTextReaderSetStructuredErrorHandler	
-
-=back
+  XML_READER_NONE      => -1
+  XML_READER_START     =>  0
+  XML_READER_ELEMENT   =>  1
+  XML_READER_END       =>  2
+  XML_READER_EMPTY     =>  3
+  XML_READER_BACKTRACK =>  4
+  XML_READER_DONE      =>  5
+  XML_READER_ERROR     =>  6
 
 =head1 VERSION
 
@@ -523,5 +824,7 @@ Petr Pajas, E<lt>pajas@matfyz.cz<gt>
 =head1 SEE ALSO
 
 L<http://xmlsoft.org/html/libxml-xmlreader.html>
+
+L<http://dotgnu.org/pnetlib-doc/System/Xml/XmlTextReader.html>
 
 =cut
