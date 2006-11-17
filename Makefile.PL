@@ -27,7 +27,6 @@ my %INFOS = (
                      'XML::LibXML::Common' => 0,
                    },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
-    # 'dist'      => { PREOP => "$^X -Iblib/arch -Iblib/lib example/xml2pod.pl" },
             );
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #
