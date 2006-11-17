@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 
 if (XML::LibXML::LIBXML_VERSION() >= 20621) {
-   plan tests => 84;
+   plan tests => 92;
 } else {
    plan skip_all => "Reader not supported for libxml2 <= 2.6.20";
 }
@@ -194,13 +194,54 @@ EOF
   </u>
 </root>
 EOF
-  {
-    my $reader = new XML::LibXML::Reader(
-      string => $bad_xml,
-      URI => "mystring"
-     );
-    eval { $reader->finish };
-    ok((defined $@ and $@ =~ /stopped at mystring:2/), 'catchin error');
-    print $@;
+  my $reader = new XML::LibXML::Reader(
+    string => $bad_xml,
+    URI => "mystring.xml"
+   );
+  eval { $reader->finish };
+  ok((defined $@ and $@ =~ /in mystring.xml at line 2:/), 'catchin error');
+}
+
+{
+  my $rng = "test/relaxng/demo.rng";
+  for my $RNG ($rng, XML::LibXML::RelaxNG->new(location => $rng)) {
+    {
+      my $reader = new XML::LibXML::Reader(
+	location => "test/relaxng/demo.xml",
+	RelaxNG => $RNG,
+       );
+      ok($reader->finish, "validate using ".(ref($RNG) ? 'XML::LibXML::RelaxNG' : 'RelaxNG file'));
+    }
+    {
+      my $reader = new XML::LibXML::Reader(
+	location => "test/relaxng/invaliddemo.xml",
+	RelaxNG => $RNG,
+       );
+      eval { $reader->finish };
+      ok($@, "catch validation error for ".(ref($RNG) ? 'XML::LibXML::RelaxNG' : 'RelaxNG file'));
+    }
+
+  }
+}
+
+{
+  my $xsd = "test/schema/schema.xsd";
+  for my $XSD ($xsd, XML::LibXML::Schema->new(location => $xsd)) {
+    {
+      my $reader = new XML::LibXML::Reader(
+	location => "test/schema/demo.xml",
+	Schema => $XSD,
+       );
+      ok($reader->finish, "validate using ".(ref($XSD) ? 'XML::LibXML::Schema' : 'Schema file'));
+    }
+    {
+      my $reader = new XML::LibXML::Reader(
+	location => "test/schema/invaliddemo.xml",
+	Schema => $XSD,
+       );
+      eval { $reader->finish };
+      ok($@, "catch validation error for ".(ref($XSD) ? 'XML::LibXML::Schema' : 'Schema file'));
+    }
+
   }
 }
