@@ -3,7 +3,10 @@ use XML::LibXML;
 
 use strict;
 use warnings;
-use vars qw/$VERSION/;
+
+use vars qw ($VERSION);
+$VERSION = "1.61"; # VERSION TEMPLATE: DO NOT CHANGE
+
 use Carp;
 use base qw(Exporter);
 use constant {
@@ -76,9 +79,6 @@ BEGIN {
 @EXPORT    = (@{$EXPORT_TAGS{types}},@{$EXPORT_TAGS{states}});
 @EXPORT_OK = @EXPORT;
 $EXPORT_TAGS{all}=\@EXPORT_OK;
-
-$VERSION = 0.02;
-}
 
 {
   my %flags = (
