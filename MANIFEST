@@ -118,6 +118,7 @@ lib/XML/LibXML/PI.pod
 lib/XML/LibXML/RelaxNG.pod
 lib/XML/LibXML/Schema.pod
 lib/XML/LibXML/XPathContext.pod
+lib/XML/LibXML/Reader.pod
 LibXML.pod
 lib/XML/LibXML/Reader.pm
 t/40reader.t
