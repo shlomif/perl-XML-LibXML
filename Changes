@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-1.62pre
+1.62
    - interface to libxml2's pull-parser XML::LibXML::Reader
      (initiated by Heiko Klein)
    - make error messages intended to the user report the line of the
