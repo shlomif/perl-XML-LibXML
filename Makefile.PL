@@ -622,7 +622,7 @@ sub try_libconfig {
             die "UNTESTED $ver\n";
         }
 
-        print "ok\n";
+        print "ok ($ver)\n";
     }
     else {
         print "failed\n";
