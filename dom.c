@@ -93,8 +93,9 @@ _domReconcileNsAttr(xmlAttrPtr attr, xmlNsPtr * unused)
         xmlNodePtr tree = attr->parent;
         if( attr->ns != NULL )
         {
-                xmlNsPtr ns = xmlSearchNs( tree->doc, tree, attr->ns->prefix );
-                if( ns != NULL && xmlStrcmp(ns->href,attr->ns->href) == 0 )
+                xmlNsPtr ns = xmlSearchNs( tree->doc, tree->parent, attr->ns->prefix );
+                if( ns != NULL && ns->href != NULL && attr->ns->href != NULL &&
+                    xmlStrcmp(ns->href,attr->ns->href) == 0 )
                 {
                         /* Remove the declaration from the element */
                         if( domRemoveNsDef(tree, attr->ns) )
@@ -125,7 +126,8 @@ _domReconcileNs(xmlNodePtr tree, xmlNsPtr * unused)
         if( tree->ns != NULL )
         {
                 xmlNsPtr ns = xmlSearchNs( tree->doc, tree->parent, tree->ns->prefix );
-                if( ns != NULL && xmlStrcmp(ns->href,tree->ns->href) == 0 )
+                if( ns != NULL && ns->href != NULL && tree->ns->href != NULL &&
+                    xmlStrcmp(ns->href,tree->ns->href) == 0 )
                 {
                         /* Remove the declaration (if present) */
                         if( domRemoveNsDef(tree, tree->ns) )
