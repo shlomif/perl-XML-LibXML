@@ -1,6 +1,6 @@
 # -*- cperl -*-
 use Test;
-BEGIN { plan tests=>119; }
+BEGIN { plan tests=>122; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -336,6 +336,35 @@ print "# 9. namespace reconciliation\n";
 	# $doca declares the child namespace, so the declaration
 	# should now get stripped from $a
 	ok( !defined($a->getAttribute( 'xmlns:child' )) );
+
+
+	$doc = XML::LibXML::Document->new;
+	$n = $doc->createElement( 'didl' );
+	$n->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
+	
+	$a = $doc->createElement( 'dc' );
+	$a->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
+	$a->setAttribute( "xsi:schemaLocation"=>"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives
+.org/OAI/2.0/oai_dc.xsd" );
+	
+	$n->appendChild( $a );
+	
+	# the declaration for xsi should be stripped
+	ok( !defined($a->getAttribute( 'xmlns:xsi' )) );
+	
+	$n->removeChild( $a );
+	
+	# should be a new declaration for xsi in $a
+	ok( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance' );
+	
+	$b = $doc->createElement( 'foo' );
+	$b->setAttribute( 'xsi:bar', 'bar' );
+	$n->appendChild( $b );
+	$n->removeChild( $b );
+	
+	# a prefix without a namespace can't be reliably compared,
+	# so $b doesn't acquire a declaration from $n!
+	ok( !defined($b->getAttribute( 'xmlns:xsi' )) );
 
 	# tests for reconciliation during setAttributeNodeNS
 	my $attr = $doca->createAttributeNS('http://children',
