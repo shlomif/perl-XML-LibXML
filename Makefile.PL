@@ -24,7 +24,7 @@ my %INFOS = (
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'PREREQ_PM' => { 'XML::SAX' => '0.11',
                      'XML::NamespaceSupport' => '1.07',
-                     'XML::LibXML::Common' => 0,
+                     'XML::LibXML::Common' => '0.13',
                    },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
             );

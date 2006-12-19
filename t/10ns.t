@@ -1,6 +1,6 @@
 # -*- cperl -*-
 use Test;
-BEGIN { plan tests=>104; }
+BEGIN { plan tests=>119; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -278,4 +278,80 @@ print "# 8. changing namespace declarations\n";
    ok ( $xp->findvalue('/document/@attr'), 'value' );
 
     ok ( $root->firstChild->prefix(),  undef );
+}
+
+print "# 9. namespace reconciliation\n";
+{
+	my $doc = XML::LibXML->createDocument( 'http://default', 'root' );
+	my $root = $doc->documentElement;
+	$root->setNamespace( 'http://children', 'child', 0 );
+	
+	$root->appendChild( my $n = $doc->createElementNS( 'http://default', 'branch' ));
+	# appending an element in the same namespace will
+	# strip its declaration
+	ok( !defined($n->getAttribute( 'xmlns' )) );
+	
+	$n->appendChild( my $a = $doc->createElementNS( 'http://children', 'child:a' ));
+	$n->appendChild( my $b = $doc->createElementNS( 'http://children', 'child:b' ));
+	
+	$n->appendChild( my $c = $doc->createElementNS( 'http://children', 'child:c' ));
+	# appending $c strips the declaration
+	ok( !defined($c->getAttribute('xmlns:child')) );
+
+	# add another prefix for children
+	$c->setAttribute( 'xmlns:foo', 'http://children' );
+	ok( $c->getAttribute( 'xmlns:foo' ), 'http://children' );
+
+	$n->appendChild( my $d = $doc->createElementNS( 'http://other', 'branch' ));
+	# appending an element with a new default namespace
+	# will leave it declared
+	ok( $d->getAttribute( 'xmlns' ), 'http://other' );
+
+	my $doca = XML::LibXML->createDocument( 'http://default/', 'root' );
+	$doca->adoptNode( $a );
+	$doca->adoptNode( $b );
+	$doca->documentElement->appendChild( $a );
+	$doca->documentElement->appendChild( $b );
+
+	# Because the child namespace isn't defined in $doca
+	# it should get declared on both child nodes $a and $b
+	ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
+	ok( $b->getAttribute( 'xmlns:child' ), 'http://children' );
+
+	$doca = XML::LibXML->createDocument( 'http://children', 'child:root' );
+	$doca->adoptNode( $a );
+	$doca->documentElement->appendChild( $a );
+
+	# $doca declares the child namespace, so the declaration
+	# should now get stripped from $a
+	ok( !defined($a->getAttribute( 'xmlns:child' )) );
+
+	$doca->documentElement->removeChild( $a );
+
+	# $a should now have its namespace re-declared
+	ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
+
+	$doca->documentElement->appendChild( $a );
+
+	# $doca declares the child namespace, so the declaration
+	# should now get stripped from $a
+	ok( !defined($a->getAttribute( 'xmlns:child' )) );
+
+	# tests for reconciliation during setAttributeNodeNS
+	my $attr = $doca->createAttributeNS('http://children',
+					    'child:attr','value');
+	ok($attr);
+	my $child= $doca->documentElement->firstChild;
+	ok($child);
+	$child->setAttributeNodeNS($attr);
+	ok ( !defined($child->getAttribute( 'xmlns:child' )) );
+
+	# due to libxml2 limitation, XML::LibXML declares the namespace
+	# on the root element
+	$attr = $doca->createAttributeNS('http://other','other:attr','value');
+	ok($attr);
+	$child->setAttributeNodeNS($attr);
+	#
+	ok ( !defined($child->getAttribute( 'xmlns:other' )) );
+	ok ( defined($doca->documentElement->getAttribute( 'xmlns:other' )) );
 }

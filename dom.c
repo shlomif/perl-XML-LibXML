@@ -20,6 +20,169 @@
 #endif
 
 /**
+ * Name: domReconcileNs
+ * Synopsis: void domReconcileNs( xmlNodePtr tree );
+ * @tree: the tree to reconcile
+ *
+ * Reconciles namespacing on a tree by removing declarations
+ * of element and attribute namespaces that are already
+ * declared in the scope of the corresponding node.
+ **/
+
+void
+domAddNsDef(xmlNodePtr tree, xmlNsPtr ns)
+{
+        xmlNsPtr i = tree->nsDef;
+        while(i != NULL && i != ns)
+                i = i->next;
+        if( i == NULL )
+        {
+                ns->next = tree->nsDef;
+                tree->nsDef = ns;
+        }
+}
+
+char
+domRemoveNsDef(xmlNodePtr tree, xmlNsPtr ns)
+{
+        xmlNsPtr i = tree->nsDef;
+
+        if( ns == tree->nsDef )
+        {
+                tree->nsDef = tree->nsDef->next;
+                ns->next = NULL;
+                return(1);
+        }
+        while( i != NULL )
+        {
+                if( i->next == ns )
+                {
+                        i->next = ns->next;
+                        ns->next = NULL;
+                        return(1);
+                }
+                i = i->next;
+        }
+        return(0);
+}
+
+/* ns->next must be NULL, or bad things could happen */
+xmlNsPtr 
+_domAddNsChain(xmlNsPtr c, xmlNsPtr ns)
+{
+        if( c == NULL )
+                return(ns);
+        else
+        {
+                xmlNsPtr i = c;
+                while(i != NULL && i != ns)
+                        i = i->next;
+                if(i == NULL)
+                {
+                        ns->next = c;
+                        return(ns);
+                }
+        }
+        return(c);
+}
+
+/* We need to be smarter with attributes, because the declaration is on the parent element */
+void
+_domReconcileNsAttr(xmlAttrPtr attr, xmlNsPtr * unused)
+{
+        xmlNodePtr tree = attr->parent;
+        if( attr->ns != NULL )
+        {
+                xmlNsPtr ns = xmlSearchNs( tree->doc, tree, attr->ns->prefix );
+                if( ns != NULL && xmlStrcmp(ns->href,attr->ns->href) == 0 )
+                {
+                        /* Remove the declaration from the element */
+                        if( domRemoveNsDef(tree, attr->ns) )
+                                /* Queue up this namespace for freeing */
+                                *unused = _domAddNsChain(*unused, attr->ns);
+
+                        /* Replace the namespace with the one found */
+                        attr->ns = ns;
+                }
+                else
+                {
+                        /* If the declaration is here, we don't need to do anything */
+                        if( domRemoveNsDef(tree, attr->ns) )
+                                domAddNsDef(tree, attr->ns);
+                        else
+                        {
+                                /* Replace/Add the namespace declaration on the element */
+                                attr->ns = xmlCopyNamespace(attr->ns);
+                                domAddNsDef(tree, attr->ns);
+                        }
+                }
+        }
+}
+
+void
+_domReconcileNs(xmlNodePtr tree, xmlNsPtr * unused)
+{
+        if( tree->ns != NULL )
+        {
+                xmlNsPtr ns = xmlSearchNs( tree->doc, tree->parent, tree->ns->prefix );
+                if( ns != NULL && xmlStrcmp(ns->href,tree->ns->href) == 0 )
+                {
+                        /* Remove the declaration (if present) */
+                        if( domRemoveNsDef(tree, tree->ns) )
+                                /* Queue the namespace for freeing */
+                                *unused = _domAddNsChain(*unused, tree->ns);
+                
+                        /* Replace the namespace with the one found */
+                        tree->ns = ns;
+                }
+                else
+                {
+                        /* If the declaration is here, we don't need to do anything */
+                        if( domRemoveNsDef(tree, tree->ns) ) {
+                              domAddNsDef(tree, tree->ns);
+                        }
+                        else
+                        {
+                                /* Restart the namespace at this point */
+                                tree->ns = xmlCopyNamespace(tree->ns);
+                                domAddNsDef(tree, tree->ns);
+                        }
+                }
+        }
+        /* Fix attribute namespacing */
+        if( tree->type == XML_ELEMENT_NODE )
+        {
+                xmlElementPtr ele = (xmlElementPtr) tree;
+                /* attributes is set to xmlAttributePtr, 
+                   but is an xmlAttrPtr??? */
+                xmlAttrPtr attr = (xmlAttrPtr) ele->attributes;
+                while( attr != NULL )
+                {
+                        _domReconcileNsAttr(attr, unused);
+                        attr = attr->next;
+                }
+        }
+        {
+          /* Recurse through all child nodes */
+          xmlNodePtr child = tree->children;
+          while( child != NULL ) 
+          {
+              _domReconcileNs(child, unused);
+              child = child->next;
+            }
+        }
+}
+
+void
+domReconcileNs(xmlNodePtr tree)
+{
+        xmlNsPtr unused = NULL;
+        _domReconcileNs(tree, &unused);
+        if( unused != NULL )
+                xmlFreeNsList(unused);
+}
+
+/**
  * NAME domParseChar
  * TYPE function
  * SYNOPSIS
@@ -52,19 +215,19 @@ int
 domParseChar( xmlChar *cur, int *len ) 
 {
     unsigned char c;
-	unsigned int val;
+        unsigned int val;
 
-	/*
-	 * We are supposed to handle UTF8, check it's valid
-	 * From rfc2044: encoding of the Unicode values on UTF-8:
-	 *
-	 * UCS-4 range (hex.)           UTF-8 octet sequence (binary)
-	 * 0000 0000-0000 007F   0xxxxxxx
-	 * 0000 0080-0000 07FF   110xxxxx 10xxxxxx
-	 * 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx 
-	 *
-	 * Check for the 0x110000 limit too
-	 */
+        /*
+         * We are supposed to handle UTF8, check it's valid
+         * From rfc2044: encoding of the Unicode values on UTF-8:
+         *
+         * UCS-4 range (hex.)           UTF-8 octet sequence (binary)
+         * 0000 0000-0000 007F   0xxxxxxx
+         * 0000 0080-0000 07FF   110xxxxx 10xxxxxx
+         * 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx 
+         *
+         * Check for the 0x110000 limit too
+         */
     
     if ( cur == NULL || *cur == 0 ) {
         *len = 0;
@@ -88,21 +251,21 @@ domParseChar( xmlChar *cur, int *len )
                 val |= (cur[1] & 0x3f) << 6;
                 val |= cur[2] & 0x3f;
             }
-	    } else {
+            } else {
             /* 2-byte code */
             *len = 2;
             val = (cur[0] & 0x1f) << 6;
             val |= cur[1] & 0x3f;
-	    }
+            }
         if ( !IS_CHAR(val) ) {
             *len = -1;
             return(0);
         }
-	    return(val);
+            return(val);
     }
     else {
         /* 1-byte code */
-	    *len = 1;
+            *len = 1;
         return((int)c); 
     }
 }
@@ -211,12 +374,12 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
        if (c1 && 2 && c1!=leader) {
            if ( leader ) {
                leader->next = c1;
-	       c1->prev = leader;
+               c1->prev = leader;
            }
            else if ( p ) {
                p->children = c1;
            }
-	   
+           
            if ( followup ) {
                followup->prev = c2;
                c2->next = followup;
@@ -341,7 +504,7 @@ domUnlinkNode( xmlNodePtr node ) {
 }
 
 xmlNodePtr
-domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
+domImportNode( xmlDocPtr doc, xmlNodePtr node, int move, int reconcileNS ) {
     xmlNodePtr return_node = node;
 
     if ( move ) {
@@ -365,10 +528,9 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move ) {
         xmlSetTreeDoc(return_node, doc);
     }
 
-    if ( doc != NULL 
-         && return_node != NULL
+    if ( reconcileNS && doc && return_node 
          && return_node->type != XML_ENTITY_REF_NODE ) {
-        xmlReconciliateNs(doc, return_node);     
+                domReconcileNs(return_node);
     }
 
     return return_node;
@@ -477,6 +639,7 @@ domName(xmlNodePtr node) {
 xmlNodePtr
 domAppendChild( xmlNodePtr self,
                 xmlNodePtr newChild ){
+  xmlNodePtr fragment = NULL;
     if ( self == NULL ) {
         return newChild;
     }
@@ -494,16 +657,19 @@ domAppendChild( xmlNodePtr self,
     else {
         xs_warn("WRONG_DOCUMENT_ERR - non conform implementation\n"); 
         /* xmlGenericError(xmlGenericErrorContext,"WRONG_DOCUMENT_ERR\n"); */
-        newChild= domImportNode( self->doc, newChild, 1 );
+        newChild = domImportNode( self->doc, newChild, 1, 0 );
     }
  
     if ( self->children != NULL ) {
+        if (newChild->type == XML_DOCUMENT_FRAG_NODE )
+            fragment = newChild->children;
         domAddNodeToList( newChild, self->last, NULL );
     }
     else if (newChild->type == XML_DOCUMENT_FRAG_NODE ) {
         xmlNodePtr c1 = NULL;
         self->children = newChild->children;
-        c1 = newChild->children;
+        fragment = newChild->children;
+        c1 = fragment;
         while ( c1 ){
             c1->parent = self;
             c1 = c1->next;
@@ -517,8 +683,16 @@ domAppendChild( xmlNodePtr self,
         newChild->parent= self;
     }
  
-    if ( newChild->type != XML_ENTITY_REF_NODE ) {
-        xmlReconciliateNs(self->doc, newChild);     
+    if ( fragment ) {
+        /* we must reconcile all nodes in the fragment */
+        newChild = fragment; /* return the first node in the fragment */
+        while ( fragment ) {
+            domReconcileNs(fragment);
+            fragment = fragment->next;
+        }
+    }
+    else if ( newChild->type != XML_ENTITY_REF_NODE ) {
+                domReconcileNs(newChild);
     }
 
     return newChild;
@@ -539,6 +713,10 @@ domRemoveChild( xmlNodePtr self, xmlNodePtr old ) {
     }
 
     domUnlinkNode( old );    
+        if ( old->type == XML_ELEMENT_NODE ) {
+                domReconcileNs( old );
+        }
+
     return old ;
 }
 
@@ -572,7 +750,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     }
     else {
         /* WRONG_DOCUMENT_ERR - non conform implementation */
-        new = domImportNode( self->doc, new, 1 );
+        new = domImportNode( self->doc, new, 1, 1 );
     }
     
     if( old == self->children && old == self->last ) {
@@ -597,6 +775,7 @@ xmlNodePtr
 domInsertBefore( xmlNodePtr self, 
                  xmlNodePtr newChild,
                  xmlNodePtr refChild ){
+    xmlNodePtr fragment = NULL;
     if ( refChild == newChild ) {
         return newChild;
     }
@@ -629,18 +808,27 @@ domInsertBefore( xmlNodePtr self,
         domUnlinkNode( newChild );
     }
     else {
-        newChild = domImportNode( self->doc, newChild, 1 );
+        newChild = domImportNode( self->doc, newChild, 1, 0 );
     }
     
+    if ( newChild->type == XML_DOCUMENT_FRAG_NODE ) {
+      fragment = newChild->children;
+    }
     if ( refChild == NULL ) {
         domAddNodeToList(newChild, self->last, NULL);
     }
     else { 
         domAddNodeToList(newChild, refChild->prev, refChild);
     }
-
-    if ( newChild->type != XML_ENTITY_REF_NODE ) {
-        xmlReconciliateNs(self->doc, newChild);     
+    
+    if ( fragment ) {
+        newChild = fragment; /* return the first node in the fragment */
+        while ( fragment && fragment != refChild ) {
+            domReconcileNs(fragment);
+            fragment = fragment->next;
+        }
+    } else if ( newChild->type != XML_ENTITY_REF_NODE ) {
+                domReconcileNs(newChild);
     }
 
     return newChild;
@@ -661,7 +849,7 @@ domInsertAfter( xmlNodePtr self,
 
 xmlNodePtr
 domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
-    xmlNodePtr prev = NULL, next = NULL, par = NULL;
+    xmlNodePtr prev = NULL, next = NULL, par = NULL, fragment = NULL;
     
     if ( oldNode == NULL
          || newNode == NULL ) {
@@ -692,16 +880,24 @@ domReplaceNode( xmlNodePtr oldNode, xmlNodePtr newNode ) {
         domUnlinkNode( oldNode );
     }
 
+    if ( newNode->type == XML_DOCUMENT_FRAG_NODE ) {
+        fragment = newNode->children;
+    }
     if( prev == NULL && next == NULL ) {
         /* oldNode was the only child */
-        domAppendChild( par ,newNode ); 
+        domAppendChild( par , newNode ); 
     }
     else {
         domAddNodeToList( newNode, prev,  next );
     }
 
-    if ( newNode->type != XML_ENTITY_REF_NODE ) {
-        xmlReconciliateNs(newNode->doc, newNode); 
+    if ( fragment ) {
+        while ( fragment && fragment != next ) {
+            domReconcileNs(fragment);
+            fragment = fragment->next;
+        }
+    } else if ( newNode->type != XML_ENTITY_REF_NODE ) {
+                domReconcileNs(newNode);
     }
 
     return oldNode;
@@ -885,15 +1081,15 @@ domGetAttrNode(xmlNodePtr node, const xmlChar *qname) {
     if ( ret == NULL ) {
       localname = xmlSplitQName2(qname, &prefix);
       if ( localname != NULL ) {
-	ns = xmlSearchNs( node->doc, node, prefix );
-	if ( ns != NULL ) {
+        ns = xmlSearchNs( node->doc, node, prefix );
+        if ( ns != NULL ) {
           /* then try localname with the namespace bound to prefix */
-	  ret = xmlHasNsProp( node, localname, ns->href );
-	}
-	if ( prefix != NULL) {
-	  xmlFree( prefix );
-	}
-	xmlFree( localname );
+          ret = xmlHasNsProp( node, localname, ns->href );
+        }
+        if ( prefix != NULL) {
+          xmlFree( prefix );
+        }
+        xmlFree( localname );
       }
     }
     if (ret && ret->type != XML_ATTRIBUTE_NODE) {
@@ -915,7 +1111,7 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
         return attr; /* attribute is allready part of the node */
     }  
     if ( attr->doc != node->doc ){
-        attr = (xmlAttrPtr) domImportNode( node->doc, (xmlNodePtr) attr, 1 ); 
+        attr = (xmlAttrPtr) domImportNode( node->doc, (xmlNodePtr) attr, 1, 1 ); 
     } 
     else {
         xmlUnlinkNode( (xmlNodePtr) attr );
@@ -946,9 +1142,9 @@ domAttrSerializeContent(xmlBufferPtr buffer, xmlAttrPtr attr)
     while (children != NULL) {
         switch (children->type) {
             case XML_TEXT_NODE:
-	        xmlAttrSerializeTxtContent(buffer, attr->doc,
-		                           attr, children->content);
-		break;
+                xmlAttrSerializeTxtContent(buffer, attr->doc,
+                                           attr, children->content);
+                break;
             case XML_ENTITY_REF_NODE:
                 xmlBufferAdd(buffer, BAD_CAST "&", 1);
                 xmlBufferAdd(buffer, children->name,
@@ -1022,42 +1218,43 @@ domRemoveNsRefs(xmlNodePtr tree, xmlNsPtr ns) {
 
     if ((node == NULL) || (node->type != XML_ELEMENT_NODE)) return(0);
     while (node != NULL) {
-	if (node->ns == ns)
-	    node->ns = NULL; /* remove namespace reference */
-	attr = node->properties;
-	while (attr != NULL) {
-	    if (attr->ns == ns)
-		attr->ns = NULL; /* remove namespace reference */
-	    attr = attr->next;
-	}
-	/*
-	 * Browse the full subtree, deep first
-	 */
-	if (node->children != NULL && node->type != XML_ENTITY_REF_NODE) {
-	    /* deep first */
-	    node = node->children;
-	} else if ((node != tree) && (node->next != NULL)) {
-	    /* then siblings */
-	    node = node->next;
-	} else if (node != tree) {
-	    /* go up to parents->next if needed */
-	    while (node != tree) {
-		if (node->parent != NULL)
-		    node = node->parent;
-		if ((node != tree) && (node->next != NULL)) {
-		    node = node->next;
-		    break;
-		}
-		if (node->parent == NULL) {
-		    node = NULL;
-		    break;
-		}
-	    }
-	    /* exit condition */
-	    if (node == tree) 
-		node = NULL;
-	} else
-	    break;
+        if (node->ns == ns)
+            node->ns = NULL; /* remove namespace reference */
+        attr = node->properties;
+        while (attr != NULL) {
+            if (attr->ns == ns)
+                attr->ns = NULL; /* remove namespace reference */
+            attr = attr->next;
+        }
+        /*
+         * Browse the full subtree, deep first
+         */
+        if (node->children != NULL && node->type != XML_ENTITY_REF_NODE) {
+            /* deep first */
+            node = node->children;
+        } else if ((node != tree) && (node->next != NULL)) {
+            /* then siblings */
+            node = node->next;
+        } else if (node != tree) {
+            /* go up to parents->next if needed */
+            while (node != tree) {
+                if (node->parent != NULL)
+                    node = node->parent;
+                if ((node != tree) && (node->next != NULL)) {
+                    node = node->next;
+                    break;
+                }
+                if (node->parent == NULL) {
+                    node = NULL;
+                    break;
+                }
+            }
+            /* exit condition */
+            if (node == tree) 
+                node = NULL;
+        } else
+            break;
     }
     return(1);
 }
+
