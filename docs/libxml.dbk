@@ -2530,7 +2530,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
  $t1-&gt;addChild( $t2 );       # is ok
  my $val = $t2-&gt;nodeValue(); # will fail, script dies</programlisting>
 
-                    <para>Also addChild() will not check it the added node belongs to the same document as the node it will be added to. This could lead to
+                    <para>Also addChild() will not check if the added node belongs to the same document as the node it will be added to. This could lead to
                     inconsistent documents and in more worse cases even to memory violations, if one does not keep track of this issue.</para>
 
                     <para>Although this sounds like a lot of trouble, addChild() is useful if a document is built from a stream, such as happens sometimes in

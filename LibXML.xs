@@ -2838,25 +2838,9 @@ createElementNS( self, nsURI, name )
                 localname = xmlStrdup( ename );
             }
 
-            newNode = xmlNewNode( NULL , localname );
-            newNode->doc = self;
-
-            ns = xmlSearchNsByHref( self, newNode, eURI );
-            if ( ns == NULL ) {
-                /* create a new NS if the NS does not already exists */
-                ns = xmlNewNs(newNode, eURI , prefix );
-            }
-
-            if ( ns == NULL ) {
-                xmlFreeNode( newNode );
-                xmlFree(eURI);
-                xmlFree(localname);
-                if ( prefix != NULL ) {
-                    xmlFree(prefix);
-                }
-                xmlFree(ename);
-                XSRETURN_UNDEF;
-            }
+			ns = xmlNewNs( NULL, eURI, prefix );
+            newNode = xmlNewDocNode( self, ns, localname, NULL );
+			newNode->nsDef = ns;
 
             xmlFree(localname);
         }
@@ -2865,11 +2849,9 @@ createElementNS( self, nsURI, name )
             /* ordinary element */
             localname = ename;
 
-            newNode = xmlNewNode( NULL , localname );
-            newNode->doc = self;
+            newNode = xmlNewDocNode( self, NULL , localname, NULL );
         }
 
-        xmlSetNs(newNode, ns);
         docfrag = PmmNewFragment( self );
         xmlAddChild(PmmNODE(docfrag), newNode);
         RETVAL = PmmNodeToSv(newNode, docfrag);
@@ -3233,7 +3215,7 @@ _setDocumentElement( self , proxy )
          */
         if ( elem->type == XML_ELEMENT_NODE ) {
             if ( self != elem->doc ) {
-                domImportNode( self, elem, 1 );
+	        domImportNode( self, elem, 1, 1 );
             }
 
             oelem = xmlDocGetRootElement( self );
@@ -3317,7 +3299,7 @@ setExternalSubset( self, extdtd )
             if ( dtd->doc == NULL ) {
                 xmlSetTreeDoc( (xmlNodePtr) dtd, self );
             } else if ( dtd->doc != self ) {
-                domImportNode( self, (xmlNodePtr) dtd,1); 
+	        domImportNode( self, (xmlNodePtr) dtd,1,1); 
             }
 
             if ( dtd == self->intSubset ) {
@@ -3348,7 +3330,7 @@ setInternalSubset( self, extdtd )
         if ( dtd && dtd != self->intSubset ) {
             if ( dtd->doc != self ) {
                 croak( "can't import DTDs" );
-                domImportNode( self, (xmlNodePtr) dtd,1);
+                domImportNode( self, (xmlNodePtr) dtd,1,1);
             }
 
             if ( dtd == self->extSubset ) {
@@ -3417,7 +3399,7 @@ importNode( self, node, dummy=0 )
             XSRETURN_UNDEF;
         }
 
-        ret = domImportNode( self, node, 0 );
+        ret = domImportNode( self, node, 0, 1 );
         if ( ret ) {
             docfrag = PmmNewFragment( self );
             xmlAddChild( PmmNODE(docfrag), ret );
@@ -3443,7 +3425,7 @@ adoptNode( self, node )
             XSRETURN_UNDEF;
         }
 
-        ret = domImportNode( self, node, 1 );
+        ret = domImportNode( self, node, 1, 1 );
 
         if ( ret ) {
             docfrag = PmmNewFragment( self );
@@ -4396,7 +4378,7 @@ replaceNode( self,nNode )
             XSRETURN_UNDEF;
         }
         if ( self->doc != nNode->doc ) {
-            domImportNode( self->doc, nNode, 1 );
+            domImportNode( self->doc, nNode, 1, 1 );
         }
 
         if ( self->type != XML_ATTRIBUTE_NODE ) {
@@ -5494,7 +5476,7 @@ setAttributeNode( self, attr_node )
             XSRETURN_UNDEF;
         }
         if ( attr->doc != self->doc ) {
-            domImportNode( self->doc, (xmlNodePtr)attr, 1);
+	    domImportNode( self->doc, (xmlNodePtr)attr, 1, 1);
         }
         ret = domGetAttrNode( self, attr->name );
         if ( ret != NULL ) {
@@ -5729,7 +5711,7 @@ setAttributeNodeNS( self, attr_node )
         }
 
         if ( attr->doc != self->doc ) {
-            domImportNode( self->doc, (xmlNodePtr)attr, 1);
+           domImportNode( self->doc, (xmlNodePtr)attr, 1,1);
         }
 
 
