@@ -78,8 +78,8 @@
 
             <para>These packages are required. If one is missing some tests will fail.</para>
 
-            <para>Again, libxml2 is required to make XML::LibXML work. The library is not just requiered to build XML::LibXML, it has to be accessible during
-            runtime as well. Because of this you need to make sure libxml2 is installed properly. To test this, run the xmllint program on your system. xmllint
+            <para>Again, libxml2 is required to make XML::LibXML work. The library is not just required to build XML::LibXML, it has to be accessible during
+            run-time as well. Because of this you need to make sure libxml2 is installed properly. To test this, run the xmllint program on your system. xmllint
             is shipped with libxml2 and therefore should be available.
             For building the module you will also need the header file for libxml2, which in binary
             (.rpm,.deb) etc. distributions usually dwell in a package named libxml2-devel or similar.</para>
@@ -119,7 +119,7 @@
                 <para>XML::LibXML requires at least
                   libxml2 2.6.16 to compile and pass all tests.
                   For some older OS versions this means that an
-                  update of the prebuild packages is required.</para>
+                  update of the pre-built packages is required.</para>
 
                 <para>Although libxml2 claims binary compatibility between
                  its patch levels, it is a good idea to recompile XML::LibXML and
@@ -138,7 +138,7 @@
                 <para>will ask '/usr/brand-new/bin/xml2-config' about your real libxml2 configuration.</para>
 
                 <para>Try to avoid setting INC and LIBS directly on the
-                commandline, for if used, Makefile.PL does not check
+                command-line, for if used, Makefile.PL does not check
                 the libxml2 version for compatibility with XML::LibXML.</para>
             </sect2>
 
@@ -155,7 +155,7 @@
                 it notifies the user. It may still happen that
                 XML::LibXML builds and pass its tests with such
                 a version, but that does not mean everything
-                is ok. There will be no support at all for blacklisted versions!</para>
+                is OK. There will be no support at all for blacklisted versions!</para>
 
                 <para>As of XML::LibXML 1.61, only versions 2.6.16 and higher are supported.
                    XML::LibXML will probably not compile with earlier libxml2 versions than
@@ -174,7 +174,7 @@
             <sect2>
                 <title>Notes for Microsoft Windows</title>
 
-                <para>Thanks to Randy Kobes there is a precompiled PPM package available on</para>
+                <para>Thanks to Randy Kobes there is a pre-compiled PPM package available on</para>
                 <para>http://theoryx5.uwinnipeg.ca/ppmpackages/</para>
 
                 <para>Usually it takes a little time to build the package for the latest release.</para>
@@ -188,7 +188,7 @@
                 to special linker options for that OS prior to version
                 10.2.2. Since the developers do not have full access to this OS,
                 help/ patches from OS X gurus are highly
-                apprecheated.</para>
+                appreciated.</para>
 
                 <para>It is confirmed that XML::LibXML builds and runs
                 without problems since Mac OS X 10.2.6.</para>
@@ -286,7 +286,7 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
             bug.</para>
 
             <para>If you find documentation bugs, please fix them in
-            the libxml.dkb file, stored in the docs directory.</para>
+            the libxml.dbk file, stored in the docs directory.</para>
         </sect1>
 
         <sect1>
@@ -496,10 +496,10 @@ EOT</programlisting>
         <sect1>
             <title>Version Information</title>
 
-            <para>Sometimes it is usefull to figure out, for which
+            <para>Sometimes it is useful to figure out, for which
             version XML::LibXML was compiled for. In most cases this
             is for debugging or to check if a given installation meets
-            all functionality for the package. The functiones
+            all functionality for the package. The functions
             XML::LibXML::LIBXML_DOTTED_VERSION and
             XML::LibXML::LIBXML_VERSION provide this version
             information. Both functions simply pass through the values
@@ -607,7 +607,7 @@ EOT</programlisting>
 
             <para>Although both modules make use of libxml2's XML capabilities, the DOM implementation of both modules are not compatible. But still it is
             possible to exchange nodes from one DOM to the other. The concept of this exchange is pretty similar to the function cloneNode(): The particular
-            node is copied on the lowlevel to the opposite DOM implementation.</para>
+            node is copied on the low-level to the opposite DOM implementation.</para>
 
             <para>Since the DOM implementations cannot coexist within one document, one is forced to copy each node that should be used. Because you are always
             keeping two nodes this may cause quite an impact on a machines memory usage.</para>
@@ -616,7 +616,7 @@ EOT</programlisting>
             node and a flag for recursive import. The flag works as in cloneNode().</para>
 
             <para>The two functions allow to export and import XML::GDOME nodes explicitly, however, XML::LibXML allows also the transparent import of
-            XML::GDOME nodes in functions such as appendChild(), insertAfter() and so on. While native nodes are automaticly adopted in most functions
+            XML::GDOME nodes in functions such as appendChild(), insertAfter() and so on. While native nodes are automatically adopted in most functions
             XML::GDOME nodes are always cloned in advance. Thus if the original node is modified after the operation, the node in the XML::LibXML document will
             not have this information.</para>
 
@@ -672,8 +672,8 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
         <sect1>
             <title>Parsing</title>
 
-            <para>A XML document is read into a datastructure such as a DOM tree by a piece of software, called a parser. XML::LibXML currently provides four
-            diffrent parser interfaces:</para>
+            <para>A XML document is read into a data structure such as a DOM tree by a piece of software, called a parser. XML::LibXML currently provides four
+            different parser interfaces:</para>
 
             <itemizedlist>
                 <listitem>
@@ -720,7 +720,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
             <sect2>
                 <title>DOM Parser</title>
 
-                <para>One of the common parser interfaces of XML::LibXML is the DOM parser. This parser reads XML data into a DOM like datastructure, so each
+                <para>One of the common parser interfaces of XML::LibXML is the DOM parser. This parser reads XML data into a DOM like data structure, so each
                 tag can get accessed and transformed.</para>
 
                 <para>XML::LibXML's DOM parser is not only capable to parse XML data, but also (strict) HTML files. There are three ways to parse
@@ -941,11 +941,11 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                 pushed into it.</para>
 
                 <para>This allows one to parse large documents without waiting for the parser to finish. The interface is especially useful if a program needs
-                to preprocess the incoming pieces of XML (e.g. to detect document boundaries).</para>
+                to pre-process the incoming pieces of XML (e.g. to detect document boundaries).</para>
 
-                <para>While XML::LibXML parse_*() functions force the data to be a wellformed XML, the push parser will take any arbitrary string that contains
+                <para>While XML::LibXML parse_*() functions force the data to be a well-formed XML, the push parser will take any arbitrary string that contains
                 some XML data. The only requirement is that all the pushed strings are together a well formed document. With the push parser interface a
-                programm can interrupt the parsing process as required, where the parse_*() functions give not enough flexibility.</para>
+                program can interrupt the parsing process as required, where the parse_*() functions give not enough flexibility.</para>
 
                 <para>Different to the pull parser implemented in parse_fh() or parse_file(), the push parser is not able to find out about the documents end
                 itself. Thus the calling program needs to indicate explicitly when the parsing is done.</para>
@@ -961,12 +961,12 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                                 <funcsynopsisinfo>$parser-&gt;parse_chunk($string, $terminate);</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>parse_chunk() tries to parse a given chunk of data, which isn't nessecarily well balanced data. The function takes two
+                            <para>parse_chunk() tries to parse a given chunk of data, which isn't necessarily well balanced data. The function takes two
                             parameters: The chunk of data as a string and optional a termination flag. If the termination flag is set to a true value (e.g. 1),
-                            the parsing will be stopped and the resulting document will be returned as the following exable describes:</para>
+                            the parsing will be stopped and the resulting document will be returned as the following example describes:</para>
 
                             <programlisting>my $parser = XML::LibXML-&gt;new;
-for my $string ( "&lt;", "foo", ' bar="hello worls"', "/&gt;") {
+for my $string ( "&lt;", "foo", ' bar="hello world"', "/&gt;") {
      $parser-&gt;parse_chunk( $string );
 }
 my $doc = $parser-&gt;parse_chunk("", 1); # terminate the parsing</programlisting>
@@ -1010,7 +1010,7 @@ my $doc = $parser-&gt;parse_chunk("", 1); # terminate the parsing</programlistin
                             </funcsynopsis>
 
                             <para>This function returns the result of the parsing process. If this function is called without a parameter it will complain about
-                            non wellformed documents. If $restore is 1, the push parser can be used to restore broken or non well formed (XML) documents as the
+                            non well-formed documents. If $restore is 1, the push parser can be used to restore broken or non well formed (XML) documents as the
                             following example shows:</para>
 
                             <programlisting>eval {
@@ -1095,7 +1095,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 
             <para>If skipDTD is defined and not '0', an existing DTD would not be serialized with the document.</para>
 
-            <para>If setTagCompression is defined and not '0' empty tags are displayed as open and closing tags ranther than the shortcut. For example
+            <para>If setTagCompression is defined and not '0' empty tags are displayed as open and closing tags rather than the shortcut. For example
             the empty tag <emphasis>foo</emphasis> will be rendered as <emphasis>&lt;foo&gt;&lt;/foo&gt;</emphasis> rather than <emphasis>&lt;foo/&gt;</emphasis>.</para>
         </sect1>
 
@@ -1132,13 +1132,13 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         <para>Turn the parsers recover mode on (or off). Defaults to off.</para>
 
                         <para>This allows one to parse broken XML data into memory. This switch will only work with XML data rather than HTML data. Also the
-                        validation will be switched off automaticly.</para>
+                        validation will be switched off automatically.</para>
 
-                        <para>The recover mode helps to recover documents that are almost wellformed very efficiently. That is for example a document that
+                        <para>The recover mode helps to recover documents that are almost well-formed very efficiently. That is for example a document that
                         forgets to close the document tag (or any other tag inside the document). The recover mode of XML::LibXML has problems restoring
-                        documents that are more like well ballanced chunks.</para>
+                        documents that are more like well balanced chunks.</para>
 
-                        <para>XML::LibXML will only parse until the first fatal error occours, reporting recoverable parsing errors as warnings. To suppress
+                        <para>XML::LibXML will only parse until the first fatal error occurs, reporting recoverable parsing errors as warnings. To suppress
                         these warnings use $parser-&gt;recover_silently(1); or, equivalently, $parser-&gt;recover(2).</para>
                     </listitem>
                 </varlistentry>
@@ -1181,7 +1181,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                             <funcsynopsisinfo>$parser-&gt;keep_blanks(0);</funcsynopsisinfo>
                         </funcsynopsis>
 
-                        <para>Allows you to turn off XML::LibXML's default behaviour of maintaining whitespace in the document.</para>
+                        <para>Allows you to turn off XML::LibXML's default behaviour of maintaining white-space in the document.</para>
                     </listitem>
                 </varlistentry>
 
@@ -1206,7 +1206,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         </funcsynopsis>
 
                         <para>If this option is activated XML::LibXML will store the line number of a node. This gives more information where a validation error
-                        occoured. It could be also used to find out about the position of a node after parsing (see also XML::LibXML::Node::line_number())</para>
+                        occurred. It could be also used to find out about the position of a node after parsing (see also XML::LibXML::Node::line_number())</para>
 
                         <para>By default line numbering is switched off (0).</para>
                     </listitem>
@@ -1225,7 +1225,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                               and to expand entities, regardless if the document has an internal subset.
                               Thus switching off external DTD loading, will disable entity expansion,
                               validation, and complete attributes on internal subsets as well.</para>
-                        <para>If you leave this parser flag untouched, everythig will work,
+                        <para>If you leave this parser flag untouched, everything will work,
                               because the default is 1 (activated)</para>
                     </listitem>
                 </varlistentry>
@@ -1321,14 +1321,14 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
         <sect1>
             <title>Error Reporting</title>
 
-            <para>XML::LibXML throws exceptions during parsing, validation or XPath processing (and some other occations). These errors can be caught by using
+            <para>XML::LibXML throws exceptions during parsing, validation or XPath processing (and some other occasions). These errors can be caught by using
             <emphasis>eval</emphasis> blocks. The error then will be stored in <emphasis>$@</emphasis>.</para>
 
-            <para>XML::LibXML throws errors as they occour and does not wait if a user test
-            for them. This is a very common misunderstanding in the use of XML::LibXML. If the eval is ommited, XML::LibXML will allways halt your script by
+            <para>XML::LibXML throws errors as they occurs and does not wait if a user test
+            for them. This is a very common misunderstanding in the use of XML::LibXML. If the eval is omitted, XML::LibXML will always halt your script by
             "croaking" (see Carp man page for details).</para>
 
-            <para>Also note that an increasing number of functions throw errors if bad data is passed. If you cannot asure valid data passed to XML::LibXML you should eval
+            <para>Also note that an increasing number of functions throw errors if bad data is passed. If you cannot assure valid data passed to XML::LibXML you should eval
             these functions.</para>
 
             <para>Note: since version 1.59, get_last_error() is no longer available in XML::LibXML for thread-safety reasons.</para>
@@ -1347,14 +1347,14 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             parsing a document. While using the SAX parser XML::LibXML will not create a DOM Document tree.</para>
 
             <para>Such an interface is useful if very large XML documents have to be processed and no DOM functions are required. By using this interface it is
-            possible to read data stored within a XML document directly into the application datastructures without loading the document into memory.</para>
+            possible to read data stored within a XML document directly into the application data structures without loading the document into memory.</para>
 
             <para>The SAX interface of XML::LibXML is based on the famous XML::SAX interface. It uses the generic interface as provided by XML::SAX::Base.</para>
 
             <para>Additionally to the generic functions, which are only able to process entire documents, XML::LibXML::SAX provides <emphasis>parse_chunk()</emphasis>.
-            This method generates SAX events from well ballanced data such as is often provided by databases.</para>
+            This method generates SAX events from well balanced data such as is often provided by databases.</para>
 
-            <para><emphasis>NOTE:</emphasis> At the moment XML::LibXML provides only an incomplete interface to libxml2's native SAX implementaion. The
+            <para><emphasis>NOTE:</emphasis> At the moment XML::LibXML provides only an incomplete interface to libxml2's native SAX implementation. The
             current implementation is not tested in production environment. It may causes significant memory problems or shows wrong behaviour. If you run into
             specific problems using this part of XML::LibXML, let me know.</para>
         </sect1>
@@ -1397,7 +1397,7 @@ my $doc = $builder-&gt;result();</programlisting>
         <sect1>
             <title>Description</title>
 
-            <para>XML::LibXML provides an lightwight interface to
+            <para>XML::LibXML provides an light-wight interface to
             <emphasis>modify</emphasis> a node of the document tree
             generated by the XML::LibXML parser.  This interface
             follows as far as possible the DOM Level 3
@@ -1445,7 +1445,7 @@ my $doc = $builder-&gt;result();</programlisting>
             to switch over to the official functions.</para>
 
             <para>More recent versions of perl (e.g. 5.6.1 or higher)
-            support special flags to disinguish between UTF-8 and so
+            support special flags to distinguish between UTF-8 and so
             called binary data. XML::LibXML provides for these
             versions functionality to make efficient use of these
             flags: If a document has set an encoding other than UTF-8
@@ -1457,11 +1457,11 @@ my $doc = $builder-&gt;result();</programlisting>
 
             <para>Older version of perl (such as 5.00503 or less) do
             not support these flags. If XML::LibXML is build for these
-            versions, all strings have to get encoded to UTF-8 manualy
+            versions, all strings have to get encoded to UTF-8 manually
             before they are passed to any DOM functions.</para>
 
             <para><emphasis>NOTE:</emphasis> XML::LibXML's magic
-            encoding may not work on all plattforms. Some platforms
+            encoding may not work on all platforms. Some platforms
             are known to have a broken iconv(), which is partly used
             by libxml2. To test if your platform works correctly with
             your language encoding, build a simple document in the
@@ -1474,7 +1474,7 @@ my $doc = $builder-&gt;result();</programlisting>
             <para><emphasis>Namespaces and XML::LibXML's DOM implementation</emphasis></para>
 
             <para>XML::LibXML's DOM implementation is 
-            limitted by the DOM implementation of libxml2
+            limited by the DOM implementation of libxml2
             which treats namespaces slightly differently than
             required by the DOM Level 2 specification.
             </para>
@@ -1490,7 +1490,7 @@ my $doc = $builder-&gt;result();</programlisting>
              serialization of the document.
             </para>
             <para>
-	     This is both unconvenient, causes problems in serialization
+	     This is both inconvenient, causes problems in serialization
 	     of DOM to XML, and most importantly, seems almost impossible
              to implement over libxml2.
             </para>
@@ -1528,7 +1528,7 @@ my $doc = $builder-&gt;result();</programlisting>
              XML::LibXML::Document's
              createElementNS() or createAttributeNS() function are used. If the
              a namespace is not declared on the documentElement, the
-             namespace will be localy declared for the newly created
+             namespace will be locally declared for the newly created
              node. In case of Attributes this may look a bit confusing,
 	     since these nodes cannot have namespace declarations
 	     itself. In this case the namespace is internally applied
@@ -1576,12 +1576,12 @@ my $doc = $builder-&gt;result();</programlisting>
         <para>It inherits all functions from <function>XML::LibXML::Node</function> as specified in the DOM specification. This enables access to the nodes
         besides the root element on document level - a <function>DTD</function> for example. The support for these nodes is limited at the moment.</para>
 
-        <para>While generaly nodes are bound to a document in the DOM concept it is suggested that one should always create a node not bound to any document.
+        <para>While generally nodes are bound to a document in the DOM concept it is suggested that one should always create a node not bound to any document.
         There is no need of really including the node to the document, but once the node is bound to a document, it is quite safe that all strings have the
-        correct encoding. If an unbound textnode with an iso encoded string is created (e.g. with $CLASS-&gt;new()), the <function>toString</function> function
+        correct encoding. If an unbound text node with an ISO encoded string is created (e.g. with $CLASS-&gt;new()), the <function>toString</function> function
         may not return the expected result.</para>
 
-        <para>All this seems like a limitation as long as UTF-8 encoding is assured. If iso encoded strings come into play it is much safer to use the node
+        <para>All this seems like a limitation as long as UTF-8 encoding is assured. If ISO encoded strings come into play it is much safer to use the node
         creation functions of <emphasis>XML::LibXML::Document</emphasis>.</para>
 
         <variablelist>
@@ -1712,7 +1712,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>my $compression = $doc-&gt;compression;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>libxml2 allows reading of documents directly from gziped files. In this case the compression variable is set to the compression level
+                    <para>libxml2 allows reading of documents directly from gzipped files. In this case the compression variable is set to the compression level
                     of that file (0-8). If XML::LibXML parsed a different source or the file wasn't compressed, the returned value will be
                     <emphasis>-1</emphasis>.</para>
                 </listitem>
@@ -1741,7 +1741,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$docstring = $dom-&gt;toString($format);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>toString</emphasis> is a deparsing function, so the DOM Tree can be translated into a string, ready for output.</para>
+                    <para><emphasis>toString</emphasis> is a DOM serializing function, so the DOM Tree can be translated into a string, ready for output.</para>
 
                     <para>The optional <emphasis>$format</emphasis> parameter sets the indenting of the output. This parameter is expected to be an
                     <function>integer</function> value, that specifies that indentation should be used. The format parameter can have three different values if
@@ -1749,15 +1749,15 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
                     <para>If $format is 0, than the document is dumped as it was originally parsed</para>
 
-                    <para>If $format is 1, libxml2 will add ignorable whitespaces, so the nodes content is easier to read. Existing text nodes will not be
+                    <para>If $format is 1, libxml2 will add ignorable white spaces, so the nodes content is easier to read. Existing text nodes will not be
                     altered</para>
 
-                    <para>If $format is 2 (or higher), libxml2 will act as $format == 1 but it add a leading and a trailing linebreak to each text node.</para>
+                    <para>If $format is 2 (or higher), libxml2 will act as $format == 1 but it add a leading and a trailing line break to each text node.</para>
 
-                    <para>libxml2 uses a hardcoded indentation of 2 space characters per indentation level. This value can not be altered on runtime.</para>
+                    <para>libxml2 uses a hard-coded indentation of 2 space characters per indentation level. This value can not be altered on run-time.</para>
 
                     <para><emphasis>NOTE</emphasis>: XML::LibXML::Document::toString returns the data in the document encoding rather than UTF-8! If you want
-                    UTF-8 ecoded XML, you have to change the conding by using <function>setEncoding()</function></para>
+                    UTF-8 encoded XML, you have to change the encoding by using <function>setEncoding()</function></para>
                 </listitem>
             </varlistentry>
 
@@ -1775,10 +1775,11 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$str = $doc-&gt;serialze($format); </funcsynopsisinfo>
+                        <funcsynopsisinfo>$str = $doc-&gt;serialize($format); </funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Alternative form of toString(). This function name added to be more conformant with libxml2's examples.</para>
+                    <para>An alias for toString(). This function was name added to be more consistent
+		      with libxml2.</para>
                 </listitem>
             </varlistentry>
 
@@ -1790,7 +1791,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$c14nstr = $doc-&gt;serialize_c14n($comment_flag,$xpath); </funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Alternative form of toStringC14N().</para>
+                    <para>An alias for toStringC14N().</para>
                 </listitem>
             </varlistentry>
 
@@ -1817,7 +1818,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$state = $doc-&gt;toFH($fh, $format);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function is similar to toString(), but it writes the document directly to a filehandler or a stream.</para>
+                    <para>This function is similar to toString(), but it writes the document directly to a filehandle or a stream.</para>
 
                     <para>The format parameter has the same behaviour as in toString().</para>
                 </listitem>
@@ -1831,7 +1832,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$str = $document-&gt;toStringHTML();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>toStringHTML</emphasis> deparses the tree to a string as HTML. With this method indenting is automatic and managed by
+                    <para><emphasis>toStringHTML</emphasis> serialize the tree to a string as HTML. With this method indenting is automatic and managed by
                     libxml2 internally.</para>
                 </listitem>
             </varlistentry>
@@ -1844,7 +1845,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$str = $document-&gt;serialize_html();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Alternative form of toStringHTML().</para>
+                    <para>An alias for toStringHTML().</para>
                 </listitem>
             </varlistentry>
 
@@ -1891,7 +1892,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
                     <para>Returns the root element of the Document. A document can have just one root element to contain the documents data.</para>
 
-                    <para>Optionaly one can use <emphasis>getDocumentElement</emphasis>.</para>
+                    <para>Optionally one can use <emphasis>getDocumentElement</emphasis>.</para>
                 </listitem>
             </varlistentry>
 
@@ -2049,7 +2050,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$dtd = $document-&gt;createInternalSubset( $rootnode, $public, $system);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function creates and adds an internal subset to the given document. Because the function automaticly adds the DTD to the document
+                    <para>This function creates and adds an internal subset to the given document. Because the function automatically adds the DTD to the document
                     there is no need to add the created node explicitly to the document.</para>
 
                     <programlisting> my $document = XML::LibXML::Document-&gt;new();
@@ -2060,7 +2061,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                     <programlisting>&lt;?xml version="1.0"?&gt;
  &lt;!DOCTYPE foo SYSTEM "foo.dtd"&gt;                    </programlisting>
 
-                    <para>By setting the public parameter it is possible to set PUBLIC dtds to a given document. So</para>
+                    <para>By setting the public parameter it is possible to set PUBLIC DTDs to a given document. So</para>
 
                     <programlisting>my $document = XML::LibXML::Document-&gt;new();
 my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//EN", undef );
@@ -2097,8 +2098,8 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>If a node is not part of a document, it can be imported to another document. As specified in DOM Level 2 Specification the Node will
                     not be altered or removed from its original document (<function>$node-&gt;cloneNode(1)</function> will get called implicitly).</para>
 
-                    <para><emphasis>NOTE:</emphasis> Don't try to use importNode() to import subtrees that contain an entity reference - even if the entity
-                    reference is the root node of the subtree. This will cause serious problems to your program. This is a limitation of libxml2 and not of
+                    <para><emphasis>NOTE:</emphasis> Don't try to use importNode() to import sub-trees that contain an entity reference - even if the entity
+                    reference is the root node of the sub-tree. This will cause serious problems to your program. This is a limitation of libxml2 and not of
                     XML::LibXML itself.</para>
                 </listitem>
             </varlistentry>
@@ -2117,8 +2118,8 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>After a document adopted a node, the node, its attributes and all its descendants belong to the new document. Because the node does
                     not belong to the old document, it will be unlinked from its old location first.</para>
 
-                    <para><emphasis>NOTE:</emphasis> Don't try to adoptNode() to import subtrees that contain entity references - even if the entity
-                    reference is the root node of the subtree. This will cause serious problems to your program. This is a limitation of libxml2 and not of
+                    <para><emphasis>NOTE:</emphasis> Don't try to adoptNode() to import sub-trees that contain entity references - even if the entity
+                    reference is the root node of the sub-tree. This will cause serious problems to your program. This is a limitation of libxml2 and not of
                     XML::LibXML itself.</para>
                 </listitem>
             </varlistentry>
@@ -2409,7 +2410,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$content = $node-&gt;textContent;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>this function returns the content of all text nodes in the descendants of the given node as spacified in DOM.</para>
+                    <para>this function returns the content of all text nodes in the descendants of the given node as specified in DOM.</para>
                 </listitem>
             </varlistentry>
         
@@ -2423,7 +2424,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$type = $node-&gt;nodeType;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Retrun the node's type. The possible types are described in the libxml2 <emphasis>tree.h</emphasis> documentation. The return
+                    <para>Return the node's type. The possible types are described in the libxml2 <emphasis>tree.h</emphasis> documentation. The return
                     value of this function is a numeric value. Therefore it differs from the result of perl ref function.</para>
                 </listitem>
             </varlistentry>
@@ -2439,7 +2440,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para>Unbinds the Node from its siblings and Parent, but not from the Document it belongs to. If the node is not inserted into the DOM
-                    afterwards it will be lost after the programm terminated. From a low level view, the unbound node is stripped from the context it is and
+                    afterwards it will be lost after the program terminated. From a low level view, the unbound node is stripped from the context it is and
                     inserted into a (hidden) document-fragment.</para>
                 </listitem>
             </varlistentry>
@@ -2527,7 +2528,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <programlisting> my $t1 = $doc-&gt;createTextNode( "foo" );
  my $t2 = $doc-&gt;createTextNode( "bar" );
- $t1-&gt;addChild( $t2 );       # is ok
+ $t1-&gt;addChild( $t2 );       # is OK
  my $val = $t2-&gt;nodeValue(); # will fail, script dies</programlisting>
 
                     <para>Also addChild() will not check if the added node belongs to the same document as the node it will be added to. This could lead to
@@ -2555,7 +2556,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     building. <emphasis>addNewChild()</emphasis> uses <function>xmlNewChild()</function> to create a new node on a given parent element.</para>
 
                     <para>addNewChild() has two parameters $nsURI and $name, where $nsURI is an (optional) namespace URI. $name is the fully qualified element
-                    name; addNewChild() will determine the correct prefix if nessecary.</para>
+                    name; addNewChild() will determine the correct prefix if necessary.</para>
 
                     <para>The function returns the newly created node.</para>
 
@@ -2593,7 +2594,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     set to 1 (true) the function will copy all
                     childnodes as well. If $deep is 0 only the current
                     node will be copied. Note that in case of element,
-                    attributes are copied iven if $deep is 0.
+                    attributes are copied even if $deep is 0.
                     </para>
                     <para>Note that the behavior of this function for $deep=0
 	              has changed in 1.62 in order to be consistent with the DOM spec
@@ -2727,7 +2728,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>This function binds a node to another DOM. This method unbinds the node first, if it is allready bound to another document.</para>
 
-                    <para>This function is the oposite calling of XML::LibXML::Document's adoptNode() function. Because of this it has the same limitations
+                    <para>This function is the opposite calling of XML::LibXML::Document's adoptNode() function. Because of this it has the same limitations
                     with Entity References as adoptNode().</para>
                 </listitem>
             </varlistentry>
@@ -2927,7 +2928,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     filter out some nodes. One has to note, that only the nodes that are part of the nodeset, will be included into the result-document. Their
                     child-nodes will not exist in the resulting document, unless they are part of the nodeset defined by the xpath expression.</para>
 
-                    <para>If $xpath_expression is ommitted or empty, toStringC14N() will include all nodes in the given sub-tree.</para>
+                    <para>If $xpath_expression is omitted or empty, toStringC14N() will include all nodes in the given sub-tree.</para>
 
                     <para>No serializing flags will be recognized by this function!</para>
                 </listitem>
@@ -2938,10 +2939,10 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$str = $doc-&gt;serialze($format); </funcsynopsisinfo>
+                        <funcsynopsisinfo>$str = $doc-&gt;serialize($format); </funcsynopsisinfo>
                     </funcsynopsis>
-
-                    <para>Alternative form of toString(). This function name added to be more conform with libxml2's examples.</para>
+                    <para>An alias for toString(). This function was name added to be more consistent
+		      with libxml2.</para>
                 </listitem>
             </varlistentry>
 
@@ -2953,7 +2954,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$c14nstr = $doc-&gt;serialize_c14n($comment_flag,$xpath); </funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Alternative form of toStringC14N().</para>
+                    <para>An alias for toStringC14N().</para>
                 </listitem>
             </varlistentry>
         
@@ -3091,7 +3092,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$node-&gt;normalize;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function normalizes adjacent textnodes. This function is not as strict as libxml2's xmlTextMerge() function, since it will
+                    <para>This function normalizes adjacent text nodes. This function is not as strict as libxml2's xmlTextMerge() function, since it will
                     not free a node that is still referenced by the perl layer.</para>
                 </listitem>
             </varlistentry>
@@ -3139,7 +3140,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$node-&gt;nodePath();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function is not specified for any DOM level: It returns a cannonical structure based XPath for a given node.</para>
+                    <para>This function is not specified for any DOM level: It returns a canonical structure based XPath for a given node.</para>
                 </listitem>
             </varlistentry>
         
@@ -3154,7 +3155,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>This function returns the line number where the tag was found during parsing. If a node is added to the document the line number is 0.
-                    Problems may occour, if a node from one document is passed to another one.</para>
+                    Problems may occur, if a node from one document is passed to another one.</para>
 
                     <para>Note: line_number() is special to XML::LibXML and not part of the DOM specification.</para>
 
@@ -3214,7 +3215,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                        in order to create an attribute which has no namespace.
 	            </para>
 	            <para>
-	               The current implementation differs from DOM in the following aspectse
+	               The current implementation differs from DOM in the following aspects
                     </para>
 	            <para>
                        If an attribute with the same local name and namespace URI already exists
@@ -3338,8 +3339,8 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$boolean = $node-&gt;hasAttribute( $aname );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This funcion tests if the named attribute is set for the node. If the attribute is specified, TRUE (1) will be returned, otherwise the
-                    returnvalue is FALSE (0).</para>
+                    <para>This function tests if the named attribute is set for the node. If the attribute is specified, TRUE (1) will be returned, otherwise the
+                    return value is FALSE (0).</para>
                 </listitem>
             </varlistentry>
         
@@ -3370,7 +3371,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>The function gives direct access to all child elements of the current node with a given tagname, where
 	    tagname is a qualified name, that is, in case of namespace usage it may consist of a prefix and local
 	    name. This function makes things a lot easier if one needs
-                    to handle big datasets. A special tagname '*' can be used to match any name.</para>
+                    to handle big data sets. A special tagname '*' can be used to match any name.</para>
 
                     <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
@@ -3404,7 +3405,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>The function gives direct access to all child elements of the current node with a given local name. It makes things a lot easier if one needs
-	    to handle big datasets. A special <function>localname</function> '*' can be used to match any local name.</para>
+	    to handle big data sets. A special <function>localname</function> '*' can be used to match any local name.</para>
 
                     <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
@@ -3461,7 +3462,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>This function is not found in the DOM specification. It is a mix of getElementsByTagName and getElementsByTagNameNS. It will fetch all
-                    tags matching the given local-name. This alows one to select tags with the same local name across namespace borders.</para>
+                    tags matching the given local-name. This allows one to select tags with the same local name across namespace borders.</para>
 
                     <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
                 </listitem>
@@ -3477,7 +3478,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$node-&gt;appendWellBalancedChunk( $chunk );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Sometimes it is nessecary to append a string coded XML Tree to a node. <emphasis>appendWellBalancedChunk</emphasis> will do the trick
+                    <para>Sometimes it is necessary to append a string coded XML Tree to a node. <emphasis>appendWellBalancedChunk</emphasis> will do the trick
                     for you. But this is only done if the String is <function>well-balanced</function>.</para>
 
                     <para><emphasis>Note that appendWellBalancedChunk() is only left for compatibility reasons</emphasis>. Implicitly it uses</para>
@@ -3585,7 +3586,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <programlisting> &lt;bar xmlns:foo="http://foobar.org"/&gt;</programlisting>
 
                     <para>By using $activate == 0 it is possible to
-                    create multiple namepace declarations on a single
+                    create multiple namespace declarations on a single
                     element.</para>
                     <para>The function fails if it is required to
                       create a declaration associating the prefix 
@@ -3660,7 +3661,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                      a declaration of a default namespace.
                      The corresponding nodes drop their namespace prefix
 	             (but remain in the, now default, namespace).
-	             In this case the function fails, if the containig element
+	             In this case the function fails, if the containing element
 	             is in the scope of another default namespace declaration.
                	  </para>
              	  <para>This function is NOT part of any DOM API.</para>
@@ -3676,7 +3677,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <titleabbrev>XML::LibXML::Text</titleabbrev>
 
         <para>Different to the DOM specification XML::LibXML implements the text node as the base class of all character data node. Therefor there exists no
-        CharacterData class. This allow one to use all methods that are available for textnodes as well for Comments or CDATA-sections.</para>
+        CharacterData class. This allow one to use all methods that are available for text nodes as well for Comments or CDATA-sections.</para>
 
         <variablelist>
             <varlistentry>
@@ -3687,7 +3688,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$text = XML::LibXML::Text-&gt;new( $content ); </funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>The constuctor of the class. It creates an unbound text node.</para>
+                    <para>The constructor of the class. It creates an unbound text node.</para>
                 </listitem>
             </varlistentry>
         
@@ -3741,9 +3742,9 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>Extracts a range of data from the node. (DOM Spec) This function takes the two parameters $offset and $length and returns the
-                    substring, if available.</para>
+                    sub-string, if available.</para>
 
-                    <para>If the node contains no data or $offset refers to an nonexisting string index, this function will return <emphasis>undef</emphasis>.
+                    <para>If the node contains no data or $offset refers to an non-existing string index, this function will return <emphasis>undef</emphasis>.
                     If $length is out of range <function>substringData</function> will return the data starting at $offset instead of causing an error.</para>
                 </listitem>
             </varlistentry>
@@ -3810,7 +3811,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     string to remove from a text node, this method allows more perlish code :)</para>
 
                     <para>The functions takes two parameters: <emphasis>$string</emphasis> and optional the <emphasis>$all</emphasis> flag. If $all is not set,
-                    <emphasis>undef</emphasis> or <emphasis>0</emphasis>, <function>deleteDataString</function> will remove only the first occourance of
+                    <emphasis>undef</emphasis> or <emphasis>0</emphasis>, <function>deleteDataString</function> will remove only the first occurrence of
                     $string. If $all is <emphasis>TRUE</emphasis> <function>deleteDataString</function> will remove all occurrences of <emphasis>$string</emphasis>
                     from the node data.</para>
                 </listitem>
@@ -3843,7 +3844,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>The more programmer friendly version of replaceData() :)</para>
 
                     <para>Instead of giving offsets and length one can specify the exact string (<emphasis>$oldstring</emphasis>) to be replaced. Additionally
-                    the <emphasis>$all</emphasis> flag allows to replace all occourences of <emphasis>$oldstring</emphasis>.</para>
+                    the <emphasis>$all</emphasis> flag allows to replace all occurrences of <emphasis>$oldstring</emphasis>.</para>
                 </listitem>
             </varlistentry>
         
@@ -3879,7 +3880,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <titleabbrev>XML::LibXML::Comment</titleabbrev>
 
         <para>This class provides all functions of <emphasis>XML::LibXML::Text</emphasis>, but for comment nodes. This can be done, since only the output of the
-        nodetypes is different, but not the datastructure. :-)</para>
+        node types is different, but not the data structure. :-)</para>
 
         <variablelist>
             <varlistentry>
@@ -3914,7 +3915,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>The constructor is the only provided function for this package. It is required, because <emphasis>libxml2</emphasis> treats the
-                    different textnode types slightly differently.</para>
+                    different text node types slightly differently.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -3936,7 +3937,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$attr = XML::LibXML::Attr-&gt;new($name [,$value]);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Class constructor. If you need to work with iso encoded strings, you should <emphasis>always</emphasis> use the <function>createAttrbute</function>
+                    <para>Class constructor. If you need to work with ISO encoded strings, you should <emphasis>always</emphasis> use the <function>createAttrbute</function>
                     of <emphasis>XML::LibXML::Document</emphasis>.</para>
                 </listitem>
             </varlistentry>
@@ -3978,7 +3979,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$attr-&gt;setValue( $string );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This is needed to set a new attribute value. If iso encoded strings are passed as parameter, the node has to be bound to a document,
+                    <para>This is needed to set a new attribute value. If ISO encoded strings are passed as parameter, the node has to be bound to a document,
                     otherwise the encoding might be done incorrectly.</para>
                 </listitem>
             </varlistentry>
@@ -4052,13 +4053,13 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$string = $attr-&gt;serializeContent;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This functin is not part of DOM API. It returns attribute content
+                    <para>This function is not part of DOM API. It returns attribute content
                        in the form in which it serializes into XML, that is
 	               with all meta-characters properly quoted and with raw
 	               entity references (except for entities expanded during parse time).
 	               Setting the optional $docencoding flag to 1 enforces document
-	               encoding for the output string (wich is then passed to Perl as a
-	               byte string). Otherwise the string is passed to Perl as (UTF-8 encododed)
+	               encoding for the output string (which is then passed to Perl as a
+	               byte string). Otherwise the string is passed to Perl as (UTF-8 encoded)
 	               characters.
                     </para>
                 </listitem>
@@ -4075,7 +4076,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <para>This class is a helper class as described in the DOM Level 2 Specification. It is implemented as a node without name. All adding, inserting or
         replacing functions are aware of document fragments now.</para>
 
-        <para>As well <emphasis>all</emphasis> unbound nodes (all nodes that do not belong to any document subtree) are implicit members of document fragments.</para>
+        <para>As well <emphasis>all</emphasis> unbound nodes (all nodes that do not belong to any document sub-tree) are implicit members of document fragments.</para>
     </chapter>
 
     <chapter>
@@ -4102,7 +4103,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     call all XML::LibXML::Node Functions. All functions available for this node are listed below.</para>
 
                     <para>Optionally you can pass the prefix to the namespace constructor. If this second parameter is omitted you will create a so called
-                    default namespace. Note, the newly created namespace is not bound to any docuement or node, therefore you should not expect it to be
+                    default namespace. Note, the newly created namespace is not bound to any document or node, therefore you should not expect it to be
                     available in an existing document.</para>
                 </listitem>
             </varlistentry>
@@ -4267,8 +4268,8 @@ $dom-&gt;appendChild( $pi );</programlisting>
 $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This method allows to change the content data of a PI. Additionaly to the interface specified for DOM Level2, the method provides a
-                    named parameter interface to set the data. This parameterlist is converted into a string before it is appended to the PI.</para>
+                    <para>This method allows to change the content data of a PI. Additionally to the interface specified for DOM Level2, the method provides a
+                    named parameter interface to set the data. This parameter list is converted into a string before it is appended to the PI.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -4375,7 +4376,7 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
         <sect1>
             <title>Description</title>
 
-            <para>You may get unexpected results if you are trying to load external documents during libxml2 parsing if the location of the ressource is not a
+            <para>You may get unexpected results if you are trying to load external documents during libxml2 parsing if the location of the resource is not a
             HTTP, FTP or relative location but a absolute path for example. To get around this limitation, you may add your own input handler to open, read and
             close particular types of locations or URI classes. Using this input callback handlers, you can handle your own custom URI schemes for example.</para>
 
@@ -4389,7 +4390,7 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
 
                 <para>The libxml2 library offers a callback implementation as global functions only. To work-around the troubles resulting in having only global
                 callbacks - for example, if the same global callback stack is manipulated by different applications running together in a single Apache
-                Webserver environment -, XML::LibXML::InputCallback comes with a object-oriented and a function-oriented part.</para>
+                Web-server environment -, XML::LibXML::InputCallback comes with a object-oriented and a function-oriented part.</para>
 
                 <para>Using the function-oriented part the global callback stack of libxml2 can be manipulated. Those functions can be used as interface to the
                 callbacks on the C- and XS Layer. At the object-oriented part, operations for working with the "pseudo-localized" callback stack are
@@ -4417,8 +4418,8 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
                     <para>While parsing the data stream, the libxml2 parser checks if a registered callback group will handle a URI - if they will not, the URI
                     will be interpreted as <emphasis>file://URI</emphasis>. To handle a URI, the <emphasis>match</emphasis> callback will have to return
                     '1'. If that happens, the handling of the URI will be passed to that callback group. Next, the URI will be passed to the
-                    <emphasis>open</emphasis> callback, which should return a <emphasis>reference</emphasis> to the data stream if it successully opened the
-                    file, '0' otherwise. If opening the stream was succesful, the <emphasis>read</emphasis> callback will be called repeatedly until it
+                    <emphasis>open</emphasis> callback, which should return a <emphasis>reference</emphasis> to the data stream if it successfully opened the
+                    file, '0' otherwise. If opening the stream was successful, the <emphasis>read</emphasis> callback will be called repeatedly until it
                     returns an empty string. After the read callback, the <emphasis>close</emphasis> callback will be called to close the stream.</para>
                 </sect3>
 
@@ -4683,7 +4684,7 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
 
                     <para>The string parameter will parse the schema from the given XML string.</para>
 
-                    <para>The DOM parameter allows to parse the schema from a preparsed XML::LibXML::Document.</para>
+                    <para>The DOM parameter allows to parse the schema from a pre-parsed XML::LibXML::Document.</para>
 
                     <para>Note that the constructor will die() if the schema does not meed the constraints of the RelaxNG specification.</para>
                 </listitem>
@@ -4807,7 +4808,7 @@ my %variables = (
   B =&gt; $areas-&gt;find('/areas/area[district='Brooklyn']/street'), 
 );
         
-# get names of employees from $A woring in an area listed in $B
+# get names of employees from $A working in an area listed in $B
 $xc-&gt;registerVarLookupFunc(\&amp;var_lookup, \%variables);
 my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 </programlisting>
@@ -5072,7 +5073,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
     <sect1>
       <title>Historical remark</title>
       <para>Prior to XML::LibXML 1.61 this module was distributed separately
-	for maintanance reasons.
+	for maintenance reasons.
       </para>
     </sect1>
   </chapter>
@@ -5122,13 +5123,13 @@ sub processNode {
       <para>The user's code keeps control of the progress and simply
 	calls the <literal>read()</literal> function repeatedly to
 	progress to the next node in the document order. Other
-	functions provide means for skipping complete subtrees, or
+	functions provide means for skipping complete sub-trees, or
 	nodes until a specific element, etc.</para>
-      <para>At every time, only a very limitted portion of the
+      <para>At every time, only a very limited portion of the
 	document is kept in the memory, which makes the API more
 	memory-efficient than using DOM. However, it is also possible
 	to mix Reader with DOM. At every point the user may copy the
-	current node (optionally expanded into a complete subtree)
+	current node (optionally expanded into a complete sub-tree)
 	from the processed document to another DOM tree, or to
 	instruct the Reader to collect sub-document in form of a DOM
 	tree consisting of selected nodes.</para>
@@ -5184,7 +5185,7 @@ sub processNode {
           <varlistentry>
             <term>DOM</term>
             <listitem>
-              <para>Use reader API to walk through a preparsed
+              <para>Use reader API to walk through a pre-parsed
 		XML::LibXML::Document.</para>
             </listitem>
           </varlistentry>
@@ -5281,7 +5282,7 @@ sub processNode {
           <varlistentry>
             <term>expand_xinclude</term>
             <listitem>
-              <para>Implement XInclude substitition (0 or 1)</para>
+              <para>Implement XInclude substitution (0 or 1)</para>
             </listitem>
           </varlistentry>
           <varlistentry>
@@ -5329,7 +5330,7 @@ sub processNode {
           <listitem>
             <para>Parses an attribute value into one or more Text and
 	      EntityReference nodes.</para>
-            <para>Returns 1 in case of success, 0 if the reader was not positionned on an attribute node or all the attribute values have been read, or -1 in case of error.</para>
+            <para>Returns 1 in case of success, 0 if the reader was not positioned on an attribute node or all the attribute values have been read, or -1 in case of error.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5352,7 +5353,7 @@ sub processNode {
           <term>next ()</term>
           <listitem>
             <para>Skip to the node following the current one in the
-	      document order while avoiding the subtree if any.
+	      document order while avoiding the sub-tree if any.
 	      Returns 1 if the node was read successfully, 0 if there
 	      is no more nodes to read, or -1 in case of error.</para>
           </listitem>
@@ -5385,7 +5386,7 @@ sub processNode {
           <term>nextSibling ()</term>
           <listitem>
             <para>It skips to the node following the current one in
-	      the document order while avoiding the subtree if
+	      the document order while avoiding the sub-tree if
 	      any.</para>
             <para>Returns 1 if the node was read successfully, 0 if
 	      there is no more nodes to read, or -1 in case of
@@ -5519,7 +5520,7 @@ sub processNode {
             <para>This function is similar a DOM function
 	      <literal>copyNode()</literal>. It returns a copy of the
 	      currently processed node as a corresponding DOM object.
-	      Use deep = 1 to obtain the full subtree.</para>
+	      Use deep = 1 to obtain the full sub-tree.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
