@@ -2502,7 +2502,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para>The function will add the <function>$childnode</function> to the end of <function>$node</function>'s children. The function should
-                    fail, if the new childnode is allready a child of <function>$node</function>. This function differs from the DOM L2 specification, in the
+                    fail, if the new childnode is already a child of <function>$node</function>. This function differs from the DOM L2 specification, in the
                     case, if the new node is not part of the document, the node will be imported first.</para>
                 </listitem>
             </varlistentry>
@@ -2726,7 +2726,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$node-&gt;setOwnerDocument( $doc );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function binds a node to another DOM. This method unbinds the node first, if it is allready bound to another document.</para>
+                    <para>This function binds a node to another DOM. This method unbinds the node first, if it is already bound to another document.</para>
 
                     <para>This function is the opposite calling of XML::LibXML::Document's adoptNode() function. Because of this it has the same limitations
                     with Entity References as adoptNode().</para>
