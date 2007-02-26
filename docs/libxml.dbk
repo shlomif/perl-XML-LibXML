@@ -4698,7 +4698,9 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
                         <funcsynopsisinfo>eval { $rngschema-&gt;validate( $doc ); };</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function allows to validate a document against the given RelaxNG schema. If this function succeeds, it will return 0, otherwise
+                    <para>This function allows to validate a (parsed) document
+	            against the given RelaxNG schema. The argument of this function should be a XML::LibXML::Document object.
+	            If this function succeeds, it will return 0, otherwise
                     it will die() and report the errors found. Because of this validate() should be always evaluated.</para>
                 </listitem>
             </varlistentry>
@@ -4742,7 +4744,9 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
                         <funcsynopsisinfo>eval { $xmlschema-&gt;validate( $doc ); };</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function allows to validate a document against the given XML Schema. If this function succeeds, it will return 0, otherwise it
+                    <para>This function allows to validate a (parsed) document against the given XML Schema.
+                     The argument of this function should be a XML::LibXML::Document object.
+	             If this function succeeds, it will return 0, otherwise it
                     will die() and report the errors found. Because of this validate() should be always evaluated.</para>
                 </listitem>
             </varlistentry>
