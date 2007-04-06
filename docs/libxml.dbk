@@ -1786,11 +1786,20 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                 <term>toStringC14N</term>
 
                 <listitem>
-                    <para><funcsynopsis><funcsynopsisinfo>$c14nstr = $doc-&gt;toStringC14N($comment_flag,$xpath); </funcsynopsisinfo></funcsynopsis> A variation
-                    to toString, that returns the canonized form of the given document.</para>
+                    <para><funcsynopsis><funcsynopsisinfo>$c14nstr = $doc-&gt;toStringC14N($comment_flag,$xpath); </funcsynopsisinfo></funcsynopsis>
+	            See the documentation in XML::LibXML::Node.
+                    </para>
                 </listitem>
             </varlistentry>
+            <varlistentry>
+                <term>toStringEC14N</term>
 
+                <listitem>
+                    <para><funcsynopsis><funcsynopsisinfo>$ec14nstr = $doc-&gt;toStringEC14N($inclusive_prefix_list, $comment_flag,$xpath); </funcsynopsisinfo></funcsynopsis>
+	            See the documentation in XML::LibXML::Node.
+                   </para>
+                </listitem>
+            </varlistentry>
             <varlistentry>
                 <term>serialize</term>
 
@@ -1813,6 +1822,17 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                     </funcsynopsis>
 
                     <para>An alias for toStringC14N().</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>serialize_exc_c14n</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$ec14nstr = $doc-&gt;serialize_exc_c14n($comment_flag,$xpath,$inclusive_prefix_list); </funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>An alias for toStringEC14N().</para>
                 </listitem>
             </varlistentry>
 
@@ -2940,7 +2960,8 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>The function is similar to toString(). Instead of simply serializing the document tree, it transforms it as it is specified in the
-                    XML-C14N Specification. Such transformation is known as canonization.</para>
+                    XML-C14N Specification (see <ulink url="http://www.w3.org/TR/xml-c14n">http://www.w3.org/TR/xml-c14n</ulink>). 
+                    Such transformation is known as canonization.</para>
 
                     <para>If $with_comments is 0 or not defined, the result-document will not contain any comments that exist in the original document. To
                     include comments into the canonized document, $with_comments has to be set to 1.</para>
@@ -2950,8 +2971,24 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     child-nodes will not exist in the resulting document, unless they are part of the nodeset defined by the xpath expression.</para>
 
                     <para>If $xpath_expression is omitted or empty, toStringC14N() will include all nodes in the given sub-tree.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>toStringEC14N</term>
 
-                    <para>No serializing flags will be recognized by this function!</para>
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $inclusive_prefix_list);</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>The function is similar to toStringC14N() but follows
+                    the XML-EXC-C14N Specification (see <ulink url="http://www.w3.org/TR/xml-exc-c14n">http://www.w3.org/TR/xml-exc-c14n</ulink>)
+	            for exclusive canonization of XML.</para>
+
+                    <para>The first two arguments are as above. If $inclusive_prefix_list is
+	              used, it should be an ARRAY reference listing 
+                      namespace prefixes that are to be handled in the manner described by the Canonical XML Recommendation (i.e. preserved in the output even if the namespace is not used). C.f. the spec for details.
+	            </para>
                 </listitem>
             </varlistentry>
 
@@ -2976,6 +3013,17 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>An alias for toStringC14N().</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>serialize_exc_c14n</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$ec14nstr = $doc-&gt;serialize_ec14n($comment_flag,$xpath,$inclusive_prefix_list); </funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>An alias for toStringEC14N().</para>
                 </listitem>
             </varlistentry>
         

@@ -950,10 +950,26 @@ sub setOwnerDocument {
     $doc->adoptNode( $self );
 }
 
-sub serialize_c14n {
-    my $self = shift;
-    return $self->toStringC14N( @_ );
+sub toStringC14N {
+    my ($self, $comments, $xpath) = (shift, shift, shift);
+    return $self->_toStringC14N( $comments || 0,
+				 (defined $xpath ? $xpath : undef),
+				 0,
+				 undef );
 }
+sub toStringEC14N {
+    my ($self, $comments, $xpath, $inc_prefix_list) = @_;
+    if (defined($inc_prefix_list) and !UNIVERSAL::isa($inc_prefix_list,'ARRAY')) {
+      croak("toStringEC14N: inclusive_prefix_list must be undefined or ARRAY");
+    }
+    return $self->_toStringC14N( $comments || 0,
+				 (defined $xpath ? $xpath : undef),
+				 1,
+				 (defined $inc_prefix_list ? $inc_prefix_list : undef));
+}
+
+*serialize_c14n = \&toStringC14N;
+*serialize_exc_c14n = \&toStringEC14N;
 
 1;
 

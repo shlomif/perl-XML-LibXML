@@ -15,6 +15,8 @@ perl-libxml-mm.c
 perl-libxml-mm.h
 perl-libxml-sax.c
 perl-libxml-sax.h
+Av_CharPtrPtr.c
+Av_CharPtrPtr.h
 typemap
 docs/libxml.dbk
 example/article_bad.xml
@@ -123,4 +125,3 @@ LibXML.pod
 lib/XML/LibXML/Reader.pm
 t/40reader.t
 test/textReader/countries.xml
-

@@ -9,6 +9,7 @@ extern "C" {
 #include "perl.h"
 #include "XSUB.h"
 #include "ppport.h"
+#include "Av_CharPtrPtr.h"  /* XS_*_charPtrPtr() */
 
 #include <fcntl.h>
 
@@ -114,12 +115,14 @@ LibXML_error_handler_ctx(void * ctxt, const char * msg, ...)
 	if( NULL == saved_error ) {
 		SV * sv = sv_2mortal(newSV(0));
 		va_start(args, msg);
+                /* vfprintf(stderr, msg, args); */
    		sv_vsetpvfn(sv, msg, strlen(msg), &args, NULL, 0, NULL);
    		va_end(args);
 		croak("%s", SvPV_nolen(sv));
 	/* Otherwise, save the error */
 	} else {
 		va_start(args, msg);
+                /* vfprintf(stderr, msg, args);	*/
    		sv_vcatpvfn(saved_error, msg, strlen(msg), &args, NULL, 0, NULL);
 		va_end(args);
 	}
@@ -4718,10 +4721,13 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
 
 
 SV *
-toStringC14N(self, comments=0, xpath = &PL_sv_undef)
+_toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list=NULL)
         xmlNodePtr self
         int comments
         SV * xpath
+        int exclusive
+        char** inc_prefix_list
+
     PREINIT:
         SV * saved_error = sv_2mortal(newSVpv("",0));
         xmlChar *result               = NULL;
@@ -4819,7 +4825,7 @@ toStringC14N(self, comments=0, xpath = &PL_sv_undef)
 
         xmlC14NDocDumpMemory( self->doc,
                               nodelist,
-                              0, NULL,
+                              exclusive, inc_prefix_list,
                               comments,
                               &result );
 
@@ -6764,7 +6770,12 @@ validate( self, doc )
                                   (xmlRelaxNGValidityErrorFunc)LibXML_error_handler_ctx,
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
-
+	/* ** test only **
+          xmlRelaxNGSetValidErrors( vctxt,
+                                    (xmlRelaxNGValidityErrorFunc)fprintf,
+                                    (xmlRelaxNGValidityWarningFunc)fprintf,
+                                    stderr );
+	*/
         RETVAL = xmlRelaxNGValidateDoc( vctxt, doc );
         xmlRelaxNGFreeValidCtxt( vctxt );
 
