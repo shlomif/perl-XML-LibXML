@@ -111,6 +111,7 @@ $CloseCB = undef;
 # bootstrapping                                                           #
 #-------------------------------------------------------------------------#
 bootstrap XML::LibXML $VERSION;
+undef &AUTOLOAD;
 
 } # BEGIN
 
