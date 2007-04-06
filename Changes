@@ -2,6 +2,7 @@ Revision history for Perl extension XML::LibXML
 
 post 1.63
    - added no_network parser flag
+   - added support for exclusive canonicalization (http://www.w3.org/TR/xml-exc-c14n/)
    - make XInclude reflect parser flags
    - documentation fixes
  

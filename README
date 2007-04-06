@@ -41,7 +41,7 @@ Also XML::LibXML requires the following packages:
 These packages are required. If one is missing some tests will fail.
 
 Again, libxml2 is required to make XML::LibXML work. The library is not just
-requiered to build XML::LibXML, it has to be accessible during runtime as well.
+required to build XML::LibXML, it has to be accessible during run-time as well.
 Because of this you need to make sure libxml2 is installed properly. To test
 this, run the xmllint program on your system. xmllint is shipped with libxml2
 and therefore should be available. For building the module you will also need
@@ -71,9 +71,9 @@ the library.
 Notes on libxml2 versions
 =========================
 
-XML::LibXML requires at least libxml2 2.6.16 to compile and pass all tests. For
-some older OS versions this means that an update of the prebuild packages is
-required.
+XML::LibXML requires at least libxml2 2.6.16 to compile and pass all tests and
+at least 2.6.21 is required for XML::LibXML::Reader. For some older OS versions
+this means that an update of the pre-built packages is required.
 
 Although libxml2 claims binary compatibility between its patch levels, it is a
 good idea to recompile XML::LibXML and XML::LibXML::Common and run its tests
@@ -90,7 +90,7 @@ e.g.
 will ask '/usr/brand-new/bin/xml2-config' about your real libxml2
 configuration.
 
-Try to avoid setting INC and LIBS directly on the commandline, for if used,
+Try to avoid setting INC and LIBS directly on the command-line, for if used,
 Makefile.PL does not check the libxml2 version for compatibility with
 XML::LibXML.
 
@@ -105,7 +105,7 @@ incompatible libxml2 versions.
 
 If Makefile.PL detects one of the incompatible versions, it notifies the user.
 It may still happen that XML::LibXML builds and pass its tests with such a
-version, but that does not mean everything is ok. There will be no support at
+version, but that does not mean everything is OK. There will be no support at
 all for blacklisted versions!
 
 As of XML::LibXML 1.61, only versions 2.6.16 and higher are supported.
@@ -123,7 +123,7 @@ it is done for a good reason.
 Notes for Microsoft Windows
 ===========================
 
-Thanks to Randy Kobes there is a precompiled PPM package available on
+Thanks to Randy Kobes there is a pre-compiled PPM package available on
 
 http://theoryx5.uwinnipeg.ca/ppmpackages/
 
@@ -136,7 +136,7 @@ Notes for Mac OS X
 Due refactoring the module, XML::LibXML will not run with some earlier versions
 of Mac OS X. It appears that this is related to special linker options for that
 OS prior to version 10.2.2. Since the developers do not have full access to
-this OS, help/ patches from OS X gurus are highly apprecheated.
+this OS, help/ patches from OS X gurus are highly appreciated.
 
 It is confirmed that XML::LibXML builds and runs without problems since Mac OS
 X 10.2.6.
@@ -228,7 +228,7 @@ Note that this account does not allow direct commits.
 Please consider all regression tests as correct. If any test fails it is most
 certainly related to a bug.
 
-If you find documentation bugs, please fix them in the libxml.dkb file, stored
+If you find documentation bugs, please fix them in the libxml.dbk file, stored
 in the docs directory.
 
 

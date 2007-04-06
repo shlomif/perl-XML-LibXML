@@ -1,3 +1,4 @@
+# -*- cperl -*-
 # $Id$
 
 ##
@@ -7,7 +8,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 14 };
+BEGIN { plan tests => 20 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -119,4 +120,58 @@ EOX
     $rootnode = $doc->documentElement->firstChild;
     $c14n_res = $rootnode->toStringC14N(0);
     ok( $c14n_res, '<b xmlns="http://foo/test#"><c></c><d><e></e></d></b>' );
+}
+
+print "# exclusive canonicalization\n";
+
+{
+  my $xml1 = <<EOX;
+<n0:local xmlns:n0="http://something.org" xmlns:n3="ftp://example.org">
+  <n1:elem2 xmlns:n1="http://example.net" xml:lang="en">
+     <n3:stuff xmlns:n3="ftp://example.org"/>
+  </n1:elem2>
+</n0:local>
+EOX
+
+  my $xml2 = <<EOX;
+<n2:pdu xmlns:n1="http://example.com"
+           xmlns:n2="http://foo.example"
+           xml:lang="fr"
+           xml:space="retain">
+  <n1:elem2 xmlns:n1="http://example.net" xml:lang="en">
+     <n3:stuff xmlns:n3="ftp://example.org"/>
+  </n1:elem2>
+</n2:pdu>
+EOX
+    my $xpath = "(//. | //@* | //namespace::*)[ancestor-or-self::*[name()='n1:elem2']]";
+    my $result = qq(<n1:elem2 xmlns:n1="http://example.net" xml:lang="en">\n     <n3:stuff xmlns:n3="ftp://example.org"></n3:stuff>\n  </n1:elem2>);
+    my $result_n0n2 = qq(<n1:elem2 xmlns:n1="http://example.net" xmlns:n2="http://foo.example" xml:lang="en">\n     <n3:stuff xmlns:n3="ftp://example.org"></n3:stuff>\n  </n1:elem2>);
+  my $doc1 = $parser->parse_string( $xml1 );
+  my $doc2 = $parser->parse_string( $xml2 );
+
+  {
+    my $c14n_res = $doc1->toStringEC14N(0, $xpath);
+    ok( $c14n_res, $result);
+  }
+  {
+    my $c14n_res = $doc2->toStringEC14N(0, $xpath);
+    ok( $c14n_res, $result);
+  }
+  {
+    my $c14n_res = $doc1->toStringEC14N(0, $xpath,[]);
+    ok( $c14n_res, $result);
+  }
+  {
+    my $c14n_res = $doc2->toStringEC14N(0, $xpath,[]);
+    ok( $c14n_res, $result);
+  }
+  {
+    my $c14n_res = $doc2->toStringEC14N(0, $xpath,['n1','n3']);
+    ok( $c14n_res, $result);
+  }
+  {
+    my $c14n_res = $doc2->toStringEC14N(0, $xpath,['n0','n2']);
+    ok( $c14n_res, $result_n0n2);
+  }
+
 }
