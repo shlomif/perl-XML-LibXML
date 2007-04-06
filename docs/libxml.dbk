@@ -117,7 +117,8 @@
                 <title>Notes on libxml2 versions</title>
 
                 <para>XML::LibXML requires at least
-                  libxml2 2.6.16 to compile and pass all tests.
+                  libxml2 2.6.16 to compile and pass all tests and
+	          at least 2.6.21 is required for XML::LibXML::Reader.
                   For some older OS versions this means that an
                   update of the pre-built packages is required.</para>
 
@@ -5115,6 +5116,7 @@ sub processNode {
       <para>This is a perl interface to libxml2's pull-parser implementation
 	xmlTextReader
 	<emphasis>http://xmlsoft.org/html/libxml-xmlreader.html</emphasis>. 
+	This feature requires at least libxml2-2.6.21.
 	Pull-parser (StAX in Java, XmlReader in C#) use an iterator
 	approach to parse a xml-file. They are easier to program than
 	event-based parser (SAX) and much more lightweight than
@@ -5743,14 +5745,14 @@ sub processNode {
           <term>lineNumber ()</term>
           <listitem>
             <para>Provide the line number of the current parsing
-	      point. Available if libxml2 &gt;= 2.6.17.</para>
+	      point.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>columnNumber ()</term>
           <listitem>
             <para>Provide the column number of the current parsing
-	      point. Available if libxml2 &gt;= 2.6.17.</para>
+	      point.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5762,8 +5764,7 @@ sub processNode {
 	      starting at zero and finishing at the size in bytes of
 	      the file if parsing a file. The function is of constant
 	      cost if the input is UTF-8 but can be costly if run on
-	      non-UTF-8 input. Available if libxml2 &gt;=
-	      2.6.18.</para>
+	      non-UTF-8 input.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
