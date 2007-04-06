@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+post 1.63
+   - added no_network parser flag
+   - make XInclude reflect parser flags
+   - documentation fixes
+ 
 1.62
    - interface to libxml2's pull-parser XML::LibXML::Reader
      (initiated by Heiko Klein)

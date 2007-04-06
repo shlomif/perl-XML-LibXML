@@ -754,13 +754,18 @@ LibXML_init_parser( SV * self ) {
             /* xmlLoadExtDtdDefaultValue ^= 1;*/
             xmlLoadExtDtdDefaultValue = 0;
         }
-        
+
         item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
         if ( item != NULL  && SvTRUE(*item)) {
             LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
             xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
         }
         else {
+	    item = hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
+            if (item != NULL && SvTRUE(*item)) {
+                LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
+                xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+            }
             /* LibXML_old_ext_ent_loader =  NULL; */
         }
     }
@@ -868,6 +873,7 @@ static xmlXPathObjectPtr
 LibXML_perldata_to_LibXMLdata(xmlXPathParserContextPtr ctxt,
                               SV* perl_result) {
     dTHX;
+
     if (!SvOK(perl_result)) {
         return (xmlXPathObjectPtr)xmlXPathNewCString("");        
     }
@@ -1048,7 +1054,7 @@ LibXML_generic_variable_lookup(void* varLookupData,
 
     PUTBACK;
     FREETMPS;
-    LEAVE;    
+    LEAVE;
     return ret;
 }
 
@@ -1353,6 +1359,10 @@ _parse_string(self, string, dir = &PL_sv_undef)
                 if ( item != NULL && SvTRUE(*item) ) {
                     ctxt->options |= XML_PARSE_NSCLEAN;
                 }
+                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NONET;
+                }
 #endif
                 xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
@@ -1499,8 +1509,11 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                 if ( item != NULL && SvTRUE(*item) ) {
                     ctxt->options |= XML_PARSE_NSCLEAN;
                 }
+                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NONET;
+                }
 #endif
-
                 while ((read_length = LibXML_read_perl(fh, buffer, 1024))) {
                     ret = xmlParseChunk(ctxt, buffer, read_length, 0);
                     if ( ret != 0 ) {
@@ -1656,6 +1669,10 @@ _parse_file(self, filename_sv)
                 SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
                 if ( item != NULL && SvTRUE(*item) ) {
                     ctxt->options |= XML_PARSE_NSCLEAN;
+                }
+                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NONET;
                 }
 #endif
                 xmlParseDocument(ctxt);
@@ -2079,9 +2096,10 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
         }
 
 int
-_processXIncludes(self, doc)
+_processXIncludes(self, doc, options=0)
         SV * self
         SV * doc
+        int options
     PREINIT:
         xmlDocPtr real_doc;
         SV * saved_error = sv_2mortal(newSVpv("",0));
@@ -2099,7 +2117,7 @@ _processXIncludes(self, doc)
         real_obj = LibXML_init_parser(self);
         recover = LibXML_get_recover(real_obj);
 
-        RETVAL = xmlXIncludeProcess(real_doc);
+        RETVAL = xmlXIncludeProcessFlags(real_doc,options);
 
         LibXML_cleanup_parser();
         LibXML_report_error_ctx(saved_error, recover);
@@ -2135,6 +2153,10 @@ _start_push(self, with_sax=0)
                 SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
                 if ( item != NULL && SvTRUE(*item) ) {
                     ctxt->options |= XML_PARSE_NSCLEAN;
+                }
+                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
+                if ( item != NULL && SvTRUE(*item) ) {
+                    ctxt->options |= XML_PARSE_NONET;
                 }
         }
 #endif

@@ -146,7 +146,7 @@ sub new {
     }
 
     $self->{XML_LIBXML_EXT_DTD} = 1;
-
+    $self->{_State_} = 0;
     return $self;
 }
 
@@ -312,6 +312,12 @@ sub line_numbers {
     return $self->{XML_LIBXML_LINENUMBERS};
 }
 
+sub no_network {
+    my $self = shift;
+    $self->{XML_LIBXML_NONET} = shift if scalar @_;
+    return $self->{XML_LIBXML_NONET};
+}
+
 sub load_ext_dtd {
     my $self = shift;
     $self->{XML_LIBXML_EXT_DTD} = shift if scalar @_;
@@ -430,6 +436,32 @@ sub __write {
         $_[0]->write( $_[1] );
     }
 }
+
+# currently this is only used in the XInlcude processor
+# but in the future, all parsing functions should turn to
+# the new libxml2 parsing API internally and this will
+# become handy
+sub _parser_options {
+  my ($self,$opts)=@_;
+  $opts = {} unless ref $opts;
+  my $flags = 0;
+  $flags |=     1 if  exists $opts->{recover} ? $opts->{recover} : $self->recover;
+  $flags |=     2 if  exists $opts->{expand_entities} ? $opts->{expand_entities} : $self->expand_entities;
+  $flags |=     4 if  exists $opts->{load_ext_dtd} ? $opts->{load_ext_dtd} : $self->load_ext_dtd;
+  $flags |=     8 if  exists $opts->{complete_attributes} ? $opts->{complete_attributes} : $self->complete_attributes;
+  $flags |=    16 if  exists $opts->{validation} ? $opts->{validation} : $self->validation;
+  $flags |=    32 if  $opts->{suppress_errors};
+  $flags |=    64 if  $opts->{suppress_warnings};
+  $flags |=   128 if  exists $opts->{pedantic_parser} ? $opts->{pedantic_parser} : $self->pedantic_parser;
+  $flags |=   256 if  exists $opts->{no_blanks} ? $opts->{no_blanks} : !$self->keep_blanks();
+  $flags |=  1024 if  exists $opts->{expand_xinclude} ? $opts->{expand_xinclude} : $self->expand_xinclude;
+  $flags |=  2048 if  exists $opts->{no_network} ? $opts->{no_network} : $self->no_network;
+  $flags |=  8192 if  exists $opts->{clean_namespaces} ? $opts->{clean_namespaces} : $self->clean_namespaces;
+  $flags |= 16384 if  $opts->{no_cdata};
+  $flags |= 32768 if  $opts->{no_xinclude_nodes};
+  return ($flags);
+}
+
 
 #-------------------------------------------------------------------------#
 # parsing functions                                                       #
@@ -624,12 +656,14 @@ sub parse_balanced_chunk {
 sub processXIncludes {
     my $self = shift;
     my $doc = shift;
+    my $opts = shift;
+    my $options = $self->_parser_options($opts);
     if ( $self->{_State_} != 1 ) {
         $self->_init_callbacks();
     }
     my $rv;
     eval {
-        $rv = $self->_processXIncludes($doc || " ");
+        $rv = $self->_processXIncludes($doc || " ", $options);
     };
     my $err = $@;
     if ( $self->{_State_} != 1 ) {
@@ -647,10 +681,13 @@ sub processXIncludes {
 sub process_xincludes {
     my $self = shift;
     my $doc = shift;
+    my $opts = shift;
+    my $options = $self->_parser_options($opts);
+
     my $rv;
     $self->_init_callbacks();
     eval {
-        $rv = $self->_processXIncludes($doc || " ");
+        $rv = $self->_processXIncludes($doc || " ", $options);
     };
     my $err = $@;
     $self->_cleanup_callbacks();
@@ -667,14 +704,15 @@ sub process_xincludes {
 
 sub _html_options {
   my ($self,$opts)=@_;
-  return (undef,undef) unless ref $opts;
+  $opts = {} unless ref $opts;
+  #  return (undef,undef) unless ref $opts;
   my $flags = 0;
-  $flags |=     1 if $opts->{recover} || $self->recover;
+  $flags |=     1 if exists $opts->{recover} ? $opts->{recover} : $self->recover;
   $flags |=    32 if $opts->{suppress_errors};
   $flags |=    64 if $opts->{suppress_warnings};
-  $flags |=   128 if $opts->{pedantic_parser} || $self->pedantic_parser;
-  $flags |=   256 if $opts->{no_blanks} || !$self->keep_blanks();
-  $flags |=  2048 if $opts->{no_network};
+  $flags |=   128 if exists $opts->{pedantic_parser} ? $opts->{pedantic_parser} : $self->pedantic_parser;
+  $flags |=   256 if exists $opts->{no_blanks} ? $opts->{no_blanks} : !$self->keep_blanks;
+  $flags |=  2048 if exists $opts->{no_network} ? $opts->{no_network} : !$self->no_network;
   return ($opts->{URI},$opts->{encoding},$flags);
 }
 
@@ -970,7 +1008,8 @@ sub serialize {
 #-------------------------------------------------------------------------#
 sub process_xinclude {
     my $self = shift;
-    XML::LibXML->new->processXIncludes( $self );
+    my $opts = shift;
+    XML::LibXML->new->processXIncludes( $self, $opts );
 }
 
 sub insertProcessingInstruction {
