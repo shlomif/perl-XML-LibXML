@@ -1316,6 +1316,26 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         clean_namespaces() to 1 (TRUE). By default no namespace cleanup is done.</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>no_network</term>
+
+                    <listitem>
+                        <funcsynopsis>
+                            <funcsynopsisinfo>$parser-&gt;no_network(1);</funcsynopsisinfo>
+                        </funcsynopsis>
+
+                        <para>Turn networking support on or off,
+                        enabled by default.  If networking is off, all
+                        attempts to fetch non-local resources (such as
+                        DTD or external entities) will fail (unless
+                        custom callbacks are defined).  It may be
+                        necessary to use $parser->recover(1) for
+                        processing documents requiring such resources
+                        while networking is off.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
             </variablelist>
         </sect1>
 
