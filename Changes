@@ -6,6 +6,8 @@ post 1.63
    - make XInclude reflect parser flags
    - documentation fixes
    - better namespace reconciliation implemented by Tim Brody
+   - $document->toString always returns octets
+   - $document->actualEncoding returns UTF8 if no document encoding is declared
  
 1.62
    - interface to libxml2's pull-parser XML::LibXML::Reader

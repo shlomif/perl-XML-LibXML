@@ -1662,7 +1662,26 @@ my $doc = $builder-&gt;result();</programlisting>
                     <programlisting>my $doc = XML::LibXML-&gt;createDocument( "1.0", "ISO-8859-15" );
 print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
-                    <para>Optionally this function can be accessed by <emphasis>actualEncoding</emphasis> or <emphasis>getEncoding</emphasis>.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>actualEncoding</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$strEncoding = $doc-&gt;actualEncoding();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>returns the encoding in which the XML will be returned by $doc->toString().
+                      This is usually the original encoding of the document as declared
+                      in the XML declaration and returned by $doc->encoding.
+                      If the original encoding is not known (e.g. if created in memory or parsed from a
+                      XML without a declared encoding), 'UTF-8' is returned.
+		    </para>
+
+                    <programlisting>my $doc = XML::LibXML-&gt;createDocument( "1.0", "ISO-8859-15" );
+print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
+
                 </listitem>
             </varlistentry>
 
@@ -1674,12 +1693,11 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$doc-&gt;setEncoding($new_encoding);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>From time to time it is useful to change the effective encoding of a document. This method provides the interface to manipulate the
-                    encoding of a document.</para>
-
-                    <para>Note that this function has to be used very carefully, since you can't simply convert one encoding in any other, since some (or
-                    even all) characters may not exist in the new encoding. XML::LibXML will not test if the operation is allowed or possible for the given
-                    document. The only switching assured to work is to UTF-8.</para>
+                    <para>This method allows to change the declaration of
+                      encoding in the XML declaration of the document.
+		      The value also affects the encoding in which the
+		      document is serialized to XML by $doc->toString().
+		    </para>
                 </listitem>
             </varlistentry>
 
@@ -1762,7 +1780,11 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$docstring = $dom-&gt;toString($format);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>toString</emphasis> is a DOM serializing function, so the DOM Tree can be translated into a string, ready for output.</para>
+                    <para><emphasis>toString</emphasis> is a DOM serializing function,
+                     so the DOM Tree can be serialized into a XML string, ready for output.</para>
+                    <para>IMPORTANT: unlike toString for other nodes, on document nodes
+		      this function returns the XML as a byte string in the original encoding of the
+                      document (see the actualEncoding() method)!</para>
 
                     <para>The optional <emphasis>$format</emphasis> parameter sets the indenting of the output. This parameter is expected to be an
                     <function>integer</function> value, that specifies that indentation should be used. The format parameter can have three different values if
@@ -1776,9 +1798,6 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                     <para>If $format is 2 (or higher), libxml2 will act as $format == 1 but it add a leading and a trailing line break to each text node.</para>
 
                     <para>libxml2 uses a hard-coded indentation of 2 space characters per indentation level. This value can not be altered on run-time.</para>
-
-                    <para><emphasis>NOTE</emphasis>: XML::LibXML::Document::toString returns the data in the document encoding rather than UTF-8! If you want
-                    UTF-8 encoded XML, you have to change the encoding by using <function>setEncoding()</function></para>
                 </listitem>
             </varlistentry>
 

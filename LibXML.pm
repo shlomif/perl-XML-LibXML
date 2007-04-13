@@ -981,6 +981,12 @@ package XML::LibXML::Document;
 use vars qw(@ISA);
 @ISA = ('XML::LibXML::Node');
 
+sub actualEncoding {
+  my $doc = shift;
+  my $enc = $doc->encoding;
+  return (defined $enc and length $enc) ? $enc : 'UTF-8';
+}
+
 sub setDocumentElement {
     my $doc = shift;
     my $element = shift;
