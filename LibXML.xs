@@ -7524,6 +7524,7 @@ void
 lib_init_callbacks( self )
         SV * self
     CODE:
+        xmlRegisterDefaultInputCallbacks(); /* important */
         xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
                                   (xmlInputOpenCallback) LibXML_input_open,
                                   (xmlInputReadCallback) LibXML_input_read,
