@@ -2272,7 +2272,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>my @nodelist = $doc-&gt;getElementsByTagName($nsURI,$tagname);</funcsynopsisinfo>
+                        <funcsynopsisinfo>my @nodelist = $doc-&gt;getElementsByTagNameNS($nsURI,$tagname);</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Implements the DOM Level 2 function</para>
