@@ -2480,7 +2480,8 @@ _toString(self, format=0)
             XSRETURN_UNDEF;
         } else {
             /* warn("%s, %d\n",result, len); */
-            RETVAL = C2Sv( result, self->encoding );
+            RETVAL = newSVpvn( (const char *)result, len );
+	    /* C2Sv( result, self->encoding ); */
             xmlFree(result);
         }
     OUTPUT:
@@ -2632,6 +2633,8 @@ toStringHTML(self)
 const char *
 URI( self )
         xmlDocPtr self
+    ALIAS:
+        XML::LibXML::Document::documentURI = 1
     CODE:
         RETVAL = (const char*)xmlStrdup(self->URL );
     OUTPUT:
@@ -3469,9 +3472,9 @@ encoding( self )
         xmlDocPtr self
     ALIAS:
         XML::LibXML::Document::getEncoding    = 1
-        XML::LibXML::Document::actualEncoding = 2
+        XML::LibXML::Document::xmlEncoding    = 2
     CODE:
-        RETVAL = (char*)xmlStrdup(self->encoding );
+        RETVAL = self->encoding;
     OUTPUT:
         RETVAL
 
@@ -3498,6 +3501,8 @@ setEncoding( self, encoding )
 int
 standalone( self )
         xmlDocPtr self
+    ALIAS:
+        XML::LibXML::Document::xmlStandalone    = 1
     CODE:
         RETVAL = self->standalone;
     OUTPUT:
@@ -3523,8 +3528,9 @@ version( self )
          xmlDocPtr self
     ALIAS:
         XML::LibXML::Document::getVersion = 1
+        XML::LibXML::Document::xmlVersion = 2
     CODE:
-        RETVAL = (char*)xmlStrdup(self->version );
+        RETVAL = self->version;
     OUTPUT:
         RETVAL
 
@@ -4825,7 +4831,7 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
 
         xmlC14NDocDumpMemory( self->doc,
                               nodelist,
-                              exclusive, inc_prefix_list,
+                              exclusive, (xmlChar **) inc_prefix_list,
                               comments,
                               &result );
 
