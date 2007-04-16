@@ -20,12 +20,12 @@
             </author>
         </authorgroup>
 
-        <edition>1.62</edition>
+        <edition>1.63</edition>
 
         <copyright>
-            <year>2001-2006</year>
+            <year>2001-2007</year>
 
-            <holder>AxKit.com Ltd; 2002-2006 Christian Glahn; 2006 Petr Pajas</holder>
+            <holder>AxKit.com Ltd; 2002-2006 Christian Glahn; 2006-2007 Petr Pajas</holder>
         </copyright>
     </bookinfo>
 
