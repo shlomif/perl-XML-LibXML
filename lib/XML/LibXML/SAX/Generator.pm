@@ -7,7 +7,7 @@ use strict;
 use XML::LibXML;
 use vars qw ($VERSION);
 
-$VERSION = "1.62"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.63"; # VERSION TEMPLATE: DO NOT CHANGE
 
 warn("This class (", __PACKAGE__, ") is deprecated!");
 

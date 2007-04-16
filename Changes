@@ -1,13 +1,14 @@
 Revision history for Perl extension XML::LibXML
 
-post 1.63
+1.63
    - added no_network parser flag
    - added support for exclusive canonicalization (http://www.w3.org/TR/xml-exc-c14n/)
    - make XInclude reflect parser flags
    - documentation fixes
    - better namespace reconciliation implemented by Tim Brody
-   - $document->toString always returns octets
-   - $document->actualEncoding returns UTF8 if no document encoding is declared
+   - $doc->toString always returns octets
+   - $doc->actualEncoding returns UTF8 if no document encoding is declared
+     (unlike $doc->getEncoding, which returns undef)
  
 1.62
    - interface to libxml2's pull-parser XML::LibXML::Reader

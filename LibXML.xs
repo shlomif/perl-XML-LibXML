@@ -3474,7 +3474,7 @@ encoding( self )
         XML::LibXML::Document::getEncoding    = 1
         XML::LibXML::Document::xmlEncoding    = 2
     CODE:
-        RETVAL = self->encoding;
+        RETVAL = (char *) self->encoding;
     OUTPUT:
         RETVAL
 
@@ -3530,7 +3530,7 @@ version( self )
         XML::LibXML::Document::getVersion = 1
         XML::LibXML::Document::xmlVersion = 2
     CODE:
-        RETVAL = self->version;
+        RETVAL = (char *) self->version;
     OUTPUT:
         RETVAL
 
