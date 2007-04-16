@@ -106,7 +106,8 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,5,0], # broken xincludes
 		     [2,6,15,0],
                    # [2,6,16,1], # first version to pass all tests
-                     [2,6,19,1], # up to 2.6.19 all ok
+                     [2,6,18,1], # up to 2.6.18 all ok
+                     [2,6,19,0], # broken c14n
                      [2,6,20,0], # broken schemas
                      [2,6,24,1], # all tests pass
                      [2,6,25,0], # broken XPath
