@@ -1,6 +1,6 @@
 # -*- cperl -*-
 use Test;
-BEGIN { plan tests=>122; }
+BEGIN { plan tests=>124; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -383,4 +383,16 @@ print "# 9. namespace reconciliation\n";
 	#
 	ok ( !defined($child->getAttribute( 'xmlns:other' )) );
 	ok ( defined($doca->documentElement->getAttribute( 'xmlns:other' )) );
+}
+
+print "# 10. xml namespace\n";
+{
+  my $docOne = XML::LibXML->new->parse_string('<foo><inc xml:id="test"/></foo>');
+  my $docTwo = XML::LibXML->new->parse_string('<bar><urgh xml:id="foo"/></bar>');
+
+  my $inc = $docOne->getElementById('test');
+  my $rep = $docTwo->getElementById('foo');
+  $inc->parentNode->replaceChild($rep, $inc);
+  ok($inc->getAttributeNS('http://www.w3.org/XML/1998/namespace','id'),'test');
+  ok($inc->isSameNode($docOne->getElementById('test')));
 }

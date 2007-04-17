@@ -40,7 +40,7 @@ extern "C" {
  * for warn!!
  */
 #ifdef XS_WARNINGS
-#define xs_warn(string) warn(string) 
+#define xs_warn(string) warn("%s",string) 
 #else
 #define xs_warn(string)
 #endif

@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+pre1.64
+   - fix reconcilation of the "xml" namespace [rt.cpan.org #26450] 
+
 1.63
    - added no_network parser flag
    - added support for exclusive canonicalization (http://www.w3.org/TR/xml-exc-c14n/)

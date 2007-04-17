@@ -14,7 +14,7 @@
 /* #define warn(string) fprintf(stderr, string) */
 
 #ifdef XS_WARNINGS
-#define xs_warn(string) warn(string) 
+#define xs_warn(string) warn("%s",string) 
 #else
 #define xs_warn(string)
 #endif
@@ -91,9 +91,20 @@ void
 _domReconcileNsAttr(xmlAttrPtr attr, xmlNsPtr * unused)
 {
         xmlNodePtr tree = attr->parent;
+	if (tree == NULL)
+		return;
         if( attr->ns != NULL )
         {
-                xmlNsPtr ns = xmlSearchNs( tree->doc, tree->parent, attr->ns->prefix );
+		xmlNsPtr ns;
+		if ((attr->ns->prefix != NULL) && 
+		    (xmlStrEqual(attr->ns->prefix, BAD_CAST "xml"))) {
+			/* prefix 'xml' has no visible declaration */
+			ns = xmlSearchNsByHref(tree->doc, tree, XML_XML_NAMESPACE);
+			attr->ns = ns;
+			return;
+		} else {
+			ns = xmlSearchNs( tree->doc, tree->parent, attr->ns->prefix );
+		}
                 if( ns != NULL && ns->href != NULL && attr->ns->href != NULL &&
                     xmlStrcmp(ns->href,attr->ns->href) == 0 )
                 {
@@ -114,7 +125,9 @@ _domReconcileNsAttr(xmlAttrPtr attr, xmlNsPtr * unused)
                         {
                                 /* Replace/Add the namespace declaration on the element */
                                 attr->ns = xmlCopyNamespace(attr->ns);
-                                domAddNsDef(tree, attr->ns);
+				if (attr->ns) {
+				  domAddNsDef(tree, attr->ns);
+				}
                         }
                 }
         }
