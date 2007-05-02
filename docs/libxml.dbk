@@ -5175,7 +5175,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML::Reader;</programlisting>
-      <programlisting>$reader = new XML::LibXML::Reader("file.xml")
+      <programlisting>$reader = new XML::LibXML::Reader(location => "file.xml")
        or die "cannot read file.xml\n";
 while ($reader-&gt;read) {
   processNode($reader);
@@ -5191,7 +5191,7 @@ sub processNode {
 </programlisting>
       <para>or</para>
       <programlisting>
-  $reader = new XML::LibXML::Reader("file.xml")
+  $reader = new XML::LibXML::Reader(location => "file.xml")
        or die "cannot read file.xml\n";
   $reader-&gt;preservePattern('//table/tr');
   $reader-&gt;finish;
