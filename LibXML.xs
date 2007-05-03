@@ -4711,6 +4711,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         if ( ret != NULL ) {
             if ( useDomEncoding != &PL_sv_undef && SvTRUE(useDomEncoding) ) {
                 RETVAL = nodeC2Sv((xmlChar*)ret, PmmNODE(PmmPROXYNODE(self))) ;
+                SvUTF8_off(RETVAL);
             }
             else {
                 RETVAL = C2Sv((xmlChar*)ret, NULL) ;
