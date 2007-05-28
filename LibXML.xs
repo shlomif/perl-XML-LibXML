@@ -7942,7 +7942,8 @@ next(reader)
 
 #define LIBXML_READER_NEXT_SIBLING(ret,reader)	\
 	ret = xmlTextReaderNextSibling(reader); \
-        if (ret == -1) {			\
+        if (ret == -1)                          \
+        {			                \
 	  int depth;				\
           depth = xmlTextReaderDepth(reader);	\
 	  ret = xmlTextReaderRead(reader);			   \
@@ -7950,7 +7951,7 @@ next(reader)
 	    ret = xmlTextReaderNext(reader);			   \
 	  }							   \
 	  if (ret == 1) {					   \
-	    if (xmlTextReaderDepth(reader) > depth) {		   \
+	    if (xmlTextReaderDepth(reader) != depth) {		   \
 	      ret = 0;							\
 	    } else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT) { \
 	      ret = xmlTextReaderRead(reader);				\
