@@ -206,8 +206,11 @@ use XML::LibXML::Common qw(:libxml);
         ok($pi);
         ok($pi->nodeType, XML_PI_NODE);
         ok($pi->nodeName, "foo");
-        ok( $pi->textContent, undef);
-        ok( $pi->getData, undef);
+	my $data = $pi->textContent;
+	# undef or "" depending on libxml2 version
+        ok( !defined $data or length($data)==0 );
+	$data = $pi->getData;
+        ok( !defined $data or length($data)==0 );
 	$pi->setData(q(bar&amp;));
 	ok( $pi->getData, q(bar&amp;));
         ok($pi->textContent, q(bar&amp;));
