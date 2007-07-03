@@ -1,7 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
-pre1.64
+1.64
    - fix reconcilation of the "xml" namespace [rt.cpan.org #26450] 
+   - make tests pass with libxml2 2.9.29 - PI regression tests now
+     accept "" as data of an empty PI [rt.cpan.org #27659]
 
 1.63
    - added no_network parser flag
