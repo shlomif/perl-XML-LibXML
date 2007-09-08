@@ -4,6 +4,14 @@ Revision history for Perl extension XML::LibXML
    - fix reconcilation of the "xml" namespace [rt.cpan.org #26450] 
    - make tests pass with libxml2 2.9.29 - PI regression tests now
      accept "" as data of an empty PI [rt.cpan.org #27659]
+   - strip-off UTF8 flag with $node->toString($format,1) for consistent
+     behavior independent on the actual document encoding
+   - fix in XML::LibXML::Reader::nextSiblingElment
+   - fix synopsis for XML::LibXML::Reader
+   - skip tests that require Encode module if not available (perl 5.6)
+   - finally removed the iterator() method deprecated since 1.54
+   - set_document_locator support in XML::LibXML::SAX::Parser
+   
 
 1.63
    - added no_network parser flag

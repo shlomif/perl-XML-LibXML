@@ -20,7 +20,7 @@ use IO::Handle; # for FH reads called as methods
 
 BEGIN {
 
-$VERSION = "1.63"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.64"; # VERSION TEMPLATE: DO NOT CHANGE
 require Exporter;
 require DynaLoader;
 @ISA = qw(DynaLoader Exporter);
@@ -905,11 +905,6 @@ sub attributes {
     my $self = shift;
     my @attr = $self->_attributes();
     return wantarray ? @attr : XML::LibXML::NamedNodeMap->new( @attr );
-}
-
-sub iterator {
-    warn "this function is obsolete!\nIt was disabled in version 1.54\n";
-    return undef;
 }
 
 
