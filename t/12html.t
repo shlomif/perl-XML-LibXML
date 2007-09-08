@@ -63,8 +63,7 @@ ok( $htmldoc );
 
 print "parse_html_string with encoding...\n";
 # encodings
-{
-  use Encode qw(encode decode is_utf8);
+if (eval { require Encode; }) {
   use utf8;
 
   my $utf_str = "ěščř";
@@ -78,7 +77,7 @@ print "parse_html_string with encoding...\n";
 </html>
 EOHTML
    
-  ok( is_utf8($strhref) );
+  ok( Encode::is_utf8($strhref) );
   $htmldoc = $parser->parse_html_string( $strhref );
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
@@ -129,6 +128,8 @@ EOHTML
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
   ok($htmldoc->URI, 'foo');
+} else {
+  skip("Encoding related tests require Encode") for 1..14;
 }
 
 print "parse example/enc_latin2.html...\n";
