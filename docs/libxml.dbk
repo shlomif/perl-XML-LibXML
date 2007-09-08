@@ -20,7 +20,7 @@
             </author>
         </authorgroup>
 
-        <edition>1.63</edition>
+        <edition>1.64</edition>
 
         <copyright>
             <year>2001-2007</year>
@@ -889,7 +889,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             </funcsynopsis>
 
                             <para>This is the old name of parse_balanced_chunk(). Because it may causes confusion with the push parser interface, this function
-                            should be used anymore.</para>
+                            should not be used anymore.</para>
                         </listitem>
                     </varlistentry>
                 </variablelist>
@@ -3153,24 +3153,6 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         
-
-        
-            <varlistentry>
-                <term>iterator</term>
-
-                <listitem>
-                    <funcsynopsis>
-                        <funcsynopsisinfo>$iter = $node-&gt;iterator;</funcsynopsisinfo>
-                    </funcsynopsis>
-
-                    <para>This function is deprecated since XML::LibXML 1.54. It is only a dummy function that will get removed entirely in one of the next
-                    versions.</para>
-
-                    <para>To make use of iterator functions use XML::LibXML::Iterator Module available on CPAN.</para>
-                </listitem>
-            </varlistentry>
-        
-
         
             <varlistentry>
                 <term>normalize</term>

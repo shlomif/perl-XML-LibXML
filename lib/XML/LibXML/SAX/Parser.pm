@@ -8,9 +8,8 @@ use vars qw($VERSION @ISA);
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 use XML::SAX::Base;
-use XML::SAX::DocumentLocator;
 
-$VERSION = "1.63"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.64"; # VERSION TEMPLATE: DO NOT CHANGE
 @ISA = ('XML::SAX::Base');
 
 sub _parse_characterstream {
@@ -43,6 +42,30 @@ sub generate {
     my $self = shift;
     my ($node) = @_;
 
+    my $doc = $node->ownerDocument();
+    {
+      # provide DocumentLocator
+      my %locator = (
+	ColumnNumber => 1, # not updated
+	LineNumber => 1,
+	PublicId => undef,
+	SystemId => undef,
+	Encoding => undef,
+	XMLVersion => undef,
+       );
+      my $dtd = defined $doc ? $doc->externalSubset() : undef;
+      if (defined $dtd) {
+	$locator{PublicId} = $dtd->publicId();
+	$locator{SystemId} = $dtd->systemId();
+      }
+      if (defined $doc) {
+	$locator{Encoding} = $doc->encoding();
+	$locator{XMLVersion} = $doc->version();
+      }
+      $self->{locator} = \%locator;
+    }
+    $self->set_document_locator($self->{locator});
+
     if ( $node->nodeType() == XML_DOCUMENT_NODE
          || $node->nodeType == XML_HTML_DOCUMENT_NODE ) {
         $self->start_document({});
@@ -54,6 +77,8 @@ sub generate {
 
 sub process_node {
     my ($self, $node) = @_;
+
+    local $self->{locator}{LineNumber} = $node->line_number();
 
     my $node_type = $node->nodeType();
     if ($node_type == XML_COMMENT_NODE) {
@@ -102,6 +127,7 @@ sub process_node {
     else {
         # warn("unsupported node type: $node_type");
     }
+
 }
 
 sub process_element {
