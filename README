@@ -79,11 +79,9 @@ Although libxml2 claims binary compatibility between its patch levels, it is a
 good idea to recompile XML::LibXML and XML::LibXML::Common and run its tests
 after an upgrade of libxml2.
 
-If your libxml2 installation is not within your $PATH. you can set the
-environment variable XMLPREFIX=$YOURLIBXMLPREFIX to make XML::LibXML recognize
-the correct libxml2 version in use.
-
-e.g.
+If your libxml2 installation is not within your $PATH, you can pass the
+XMLPREFIX=$YOURLIBXMLPREFIX parameter to Makefile.PL determining
+the correct libxml2 version in use. e.g.
 
 >  perl Makefile.PL XMLPREFIX=/usr/brand-new 
 
