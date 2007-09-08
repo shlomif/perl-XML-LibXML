@@ -1403,6 +1403,13 @@ package XML::LibXML::Namespace;
 
 # this is infact not a node!
 sub prefix { return "xmlns"; }
+sub getPrefix { return "xmlns"; }
+sub getNamespaceURI { return "http://www.w3.org/2000/xmlns/" };
+
+sub declaredPrefix { shift->localname; }
+sub declaredURI    { shift->value;     }
+
+
 
 sub getNamespaces { return (); }
 
@@ -1411,8 +1418,9 @@ sub nodeName {
     my $nsP  = $self->name;
     return ( defined($nsP) && length($nsP) ) ? "xmlns:$nsP" : "xmlns";
 }
+sub getName { shift->nodeName; }
+sub getValue { shift->value; }
 
-sub getNodeName { my $self = shift; return $self->nodeName; }
 
 sub isEqualNode {
     my ( $self, $ref ) = @_;

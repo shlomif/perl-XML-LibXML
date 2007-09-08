@@ -4242,17 +4242,29 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
             </varlistentry>
 
             <varlistentry>
-                <term>getName</term>
+                <term>declaredURI</term>
+                <listitem>
+                   <para>Returns the URI for this namespace.</para>
+		</listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>declaredPrefix</term>
+                <listitem>
+                   <para>Returns the prefix for this namespace.</para>
+		</listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>nodeName</term>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&gt;getName();</funcsynopsisinfo>
+                        <funcsynopsisinfo>print $ns-&gt;nodeName();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Returns "xmlns:prefix", where prefix is the prefix for this namespace.</para>
                 </listitem>
             </varlistentry>
-
             <varlistentry>
                 <term>name</term>
 
@@ -4261,19 +4273,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>print $ns-&gt;name();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Alias for getName()</para>
-                </listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term>prefix</term>
-
-                <listitem>
-                    <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&gt;prefix();</funcsynopsisinfo>
-                    </funcsynopsis>
-
-                    <para>Returns the prefix bound to this namespace declaration.</para>
+                    <para>Alias for nodeName()</para>
                 </listitem>
             </varlistentry>
 
@@ -4285,7 +4285,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$localname = $ns-&gt;getLocalName();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Alias for prefix()</para>
+                    <para>Returns the local name of this node as if it were an attribute, that is, the prefix associated with the namespace.</para>
                 </listitem>
             </varlistentry>
 
@@ -4297,7 +4297,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>print $ns-&gt;getData();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Returns the URI of the namespace.</para>
+                    <para>Returns the URI of the namespace, i.e. the value of this node as if it were an attribute.</para>
                 </listitem>
             </varlistentry>
 
@@ -4319,18 +4319,6 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 <listitem>
                     <funcsynopsis>
                         <funcsynopsisinfo>print $ns-&gt;value();</funcsynopsisinfo>
-                    </funcsynopsis>
-
-                    <para>Alias for getData()</para>
-                </listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term>uri</term>
-
-                <listitem>
-                    <funcsynopsis>
-                        <funcsynopsisinfo>print $ns-&gt;uri();</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Alias for getData()</para>
