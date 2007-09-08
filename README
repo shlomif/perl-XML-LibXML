@@ -80,8 +80,8 @@ good idea to recompile XML::LibXML and XML::LibXML::Common and run its tests
 after an upgrade of libxml2.
 
 If your libxml2 installation is not within your $PATH, you can pass the
-XMLPREFIX=$YOURLIBXMLPREFIX parameter to Makefile.PL determining
-the correct libxml2 version in use. e.g.
+XMLPREFIX=$YOURLIBXMLPREFIX parameter to Makefile.PL determining the correct
+libxml2 version in use. e.g.
 
 >  perl Makefile.PL XMLPREFIX=/usr/brand-new 
 
@@ -184,17 +184,19 @@ Additionally I received the following Note from Rozi Kovesdi:
 CONTACT
 =======
 
-For suggestions etc. you may contact the maintainer directly at "pajas at
-ufal.mff.cuni.cz".
-
 For bug reports, please use the CPAN request tracker on
 http://rt.cpan.org/NoAuth/Bugs.html?Dist=XML-LibXML
 
-Also XML::LibXML issues are discussed among other things on the perl XML
-mailing list (perl-xml@listserv.ActiveState.com). In case of problems you
-should check the archives of that list first. Many problems are already
-discussed there. You can find the list's archives at
-http://mailarchive.activestate.com/browse/perl-xml/
+For suggestions etc. you may contact the maintainer directly at "pajas at ufal
+dot mff dot cuni dot cz", but in general, it is recommended to use the mailing
+list given below.
+
+For suggestions etc., and other issues related to XML::LibXML you may use the
+perl XML mailing list (perl-xml@listserv.ActiveState.com), where most
+XML-related Perl modules are discussed. In case of problems you should check
+the archives of that list first. Many problems are already discussed there. You
+can find the list's archives and subscription options at
+http://aspn.activestate.com/ASPN/Mail/Browse/Threaded/perl-xml
 
 
 PACKAGE HISTORY
