@@ -8,6 +8,7 @@ use vars qw($VERSION @ISA);
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 use XML::SAX::Base;
+use XML::SAX::DocumentLocator;
 
 $VERSION = "1.64"; # VERSION TEMPLATE: DO NOT CHANGE
 @ISA = ('XML::SAX::Base');
@@ -44,10 +45,8 @@ sub generate {
 
     my $doc = $node->ownerDocument();
     {
-      # provide DocumentLocator
+      # precompute some DocumentLocator values
       my %locator = (
-	ColumnNumber => 1, # not updated
-	LineNumber => 1,
 	PublicId => undef,
 	SystemId => undef,
 	Encoding => undef,
@@ -62,9 +61,17 @@ sub generate {
 	$locator{Encoding} = $doc->encoding();
 	$locator{XMLVersion} = $doc->version();
       }
-      $self->{locator} = \%locator;
+      $self->set_document_locator(
+	XML::SAX::DocumentLocator->new(
+	  sub { $locator{PublicId} },
+	  sub { $locator{SystemId} },
+	  sub { defined($self->{current_node}) ? $self->{current_node}->line_number() : undef },
+	  sub { 1 },
+	  sub { $locator{Encoding} },
+	  sub { $locator{XMLVersion} },
+	 ),
+       );
     }
-    $self->set_document_locator($self->{locator});
 
     if ( $node->nodeType() == XML_DOCUMENT_NODE
          || $node->nodeType == XML_HTML_DOCUMENT_NODE ) {
@@ -78,7 +85,7 @@ sub generate {
 sub process_node {
     my ($self, $node) = @_;
 
-    local $self->{locator}{LineNumber} = $node->line_number();
+    local $self->{current_node} = $node;
 
     my $node_type = $node->nodeType();
     if ($node_type == XML_COMMENT_NODE) {
