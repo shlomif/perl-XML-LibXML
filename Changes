@@ -13,7 +13,7 @@ Revision history for Perl extension XML::LibXML
    - set_document_locator support in XML::LibXML::SAX::Parser
    - SYNOPSIS sections of the docs now mention which module to use
      and which other manpage to look into for inherited methods
-   - XML::LibXML::Namespace API fixed so as to achieve
+   - XML::LibXML::Namespace API fixed in order to achieve
      an agreement between the docs and the implementation
 
 1.63

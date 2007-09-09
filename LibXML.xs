@@ -6486,13 +6486,15 @@ nodeType(self)
         RETVAL
 
 SV*
-href(self)
+declaredURI(self)
         SV * self
     ALIAS:
         value = 1
         nodeValue = 2
         getData = 3
-        getNamespaceURI = 4
+        getValue = 4
+        value = 5
+	href = 6
     PREINIT:
         xmlNsPtr ns = (xmlNsPtr)SvIV(SvRV(self));
         xmlChar * href;
@@ -6504,13 +6506,11 @@ href(self)
         RETVAL
 
 SV*
-localname(self)
+declaredPrefix(self)
         SV * self
     ALIAS:
-        name = 1
+	localname = 1
         getLocalName = 2
-        getName = 3
-        getPrefix = 4
     PREINIT:
         xmlNsPtr ns = (xmlNsPtr)SvIV(SvRV(self));
         xmlChar * prefix;

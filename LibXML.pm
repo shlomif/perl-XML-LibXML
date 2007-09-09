@@ -1406,21 +1406,15 @@ sub prefix { return "xmlns"; }
 sub getPrefix { return "xmlns"; }
 sub getNamespaceURI { return "http://www.w3.org/2000/xmlns/" };
 
-sub declaredPrefix { shift->localname; }
-sub declaredURI    { shift->value;     }
-
-
-
 sub getNamespaces { return (); }
 
 sub nodeName {
-    my $self = shift;
-    my $nsP  = $self->name;
-    return ( defined($nsP) && length($nsP) ) ? "xmlns:$nsP" : "xmlns";
+  my $self = shift;
+  my $nsP  = $self->localname;
+  return ( defined($nsP) && length($nsP) ) ? "xmlns:$nsP" : "xmlns";
 }
-sub getName { shift->nodeName; }
-sub getValue { shift->value; }
-
+sub name    { goto &nodeName }
+sub getName { goto &nodeName }
 
 sub isEqualNode {
     my ( $self, $ref ) = @_;
