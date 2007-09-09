@@ -4221,7 +4221,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
         <para>The namespace node API is not part of any current DOM API, and so it is quite minimal. It should be noted that namespace nodes are
         <emphasis>not</emphasis> a sub class of XML::LibXML::Node, however Namespace nodes act a lot like attribute nodes, and similarly named methods will
-        return what you would expect if you treated the namespace node as an attribute.</para>
+        return what you would expect if you treated the namespace node as an attribute. Note that in order to fix several inconsistencies between the API and the documentation, the behavior of some functions have been changed in 1.64.</para>
 
         <variablelist>
             <varlistentry>
@@ -4233,8 +4233,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>Creates a new Namespace node. Note that this is not a 'node' as an attribute or an element node. Therefore you can't do
-                    call all XML::LibXML::Node Functions. All functions available for this node are listed below.
-	    Note that in order to fix several inconsistencies between the API and the documentation, the behavior of some functions have been changed in 1.64.</para>
+                    call all XML::LibXML::Node Functions. All functions available for this node are listed below.</para>
 
                     <para>Optionally you can pass the prefix to the namespace constructor. If this second parameter is omitted you will create a so called
                     default namespace. Note, the newly created namespace is not bound to any document or node, therefore you should not expect it to be
