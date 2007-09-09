@@ -126,3 +126,7 @@ lib/XML/LibXML/Reader.pm
 t/40reader.t
 t/41xinclude.t
 test/textReader/countries.xml
+test/xinclude/test.xm
+test/xinclude/entity.txt
+test/xinclude/test.xml
+test/xinclude/xinclude.xml
