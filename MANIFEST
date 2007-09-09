@@ -124,4 +124,5 @@ lib/XML/LibXML/Reader.pod
 LibXML.pod
 lib/XML/LibXML/Reader.pm
 t/40reader.t
+t/41xinclude.t
 test/textReader/countries.xml
