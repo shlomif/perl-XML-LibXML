@@ -4233,7 +4233,8 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>Creates a new Namespace node. Note that this is not a 'node' as an attribute or an element node. Therefore you can't do
-                    call all XML::LibXML::Node Functions. All functions available for this node are listed below.</para>
+                    call all XML::LibXML::Node Functions. All functions available for this node are listed below.
+	    Note that in order to fix several inconsistencies between the API and the documentation, the behavior of some functions have been changed in 1.64.</para>
 
                     <para>Optionally you can pass the prefix to the namespace constructor. If this second parameter is omitted you will create a so called
                     default namespace. Note, the newly created namespace is not bound to any document or node, therefore you should not expect it to be
