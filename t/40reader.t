@@ -3,13 +3,15 @@ use strict;
 use warnings;
 use Test::More;
 
-if (XML::LibXML::LIBXML_VERSION() >= 20621) {
-   plan tests => 92;
-} else {
-   plan skip_all => "Reader not supported for libxml2 <= 2.6.20";
-}
+use XML::LibXML;
 
 BEGIN{
+  if (XML::LibXML::LIBXML_VERSION() >= 20621) {
+     plan tests => 93;
+  } else {
+     plan skip_all => "Reader not supported for libxml2 <= 2.6.20";
+  }
+
   use_ok('XML::LibXML::Reader');
 };
 
