@@ -3099,7 +3099,7 @@ createAttribute( self, pname, pvalue=&PL_sv_undef )
 
         value = nodeSv2C( pvalue , (xmlNodePtr) self );
         newAttr = xmlNewDocProp( self, name, value );
-        RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL);
+        RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, PmmPROXYNODE(self));
 
         xmlFree(name);
         if ( value ) {
@@ -3165,7 +3165,7 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
                 newAttr = xmlNewDocProp( self, localname, value );
                 xmlSetNs((xmlNodePtr)newAttr, ns);
 
-                RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, NULL );
+                RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, PmmPROXYNODE(self) );
 
                 xmlFree(nsURI);
                 xmlFree(name);
@@ -3188,7 +3188,7 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
         }
         else {
             newAttr = xmlNewDocProp( self, name, value );
-            RETVAL = PmmNodeToSv((xmlNodePtr)newAttr,NULL);
+            RETVAL = PmmNodeToSv((xmlNodePtr)newAttr,PmmPROXYNODE(self));
             xmlFree(name);
             if ( value ) {
                 xmlFree(value);
@@ -3207,24 +3207,28 @@ createProcessingInstruction(self, name, value=&PL_sv_undef)
     PREINIT:
         xmlChar * n = NULL;
         xmlChar * v = NULL;
-        xmlNodePtr pinode = NULL;
+        xmlNodePtr newNode = NULL;
+        ProxyNodePtr docfrag = NULL;
     CODE:
         n = nodeSv2C(name, (xmlNodePtr)self);
         if ( !n ) {
             XSRETURN_UNDEF;
         }
         v = nodeSv2C(value, (xmlNodePtr)self);
-        pinode = xmlNewPI(n,v);
-        pinode->doc = self;
-
-        RETVAL = PmmNodeToSv(pinode,NULL);
-
+        newNode = xmlNewPI(n,v);
         xmlFree(v);
         xmlFree(n);
+	if ( newNode != NULL ) {
+ 	   docfrag = PmmNewFragment( self );
+           newNode->doc = self;
+	   xmlAddChild(PmmNODE(docfrag), newNode);
+	   RETVAL = PmmNodeToSv(newNode,docfrag);
+	} else {
+ 	   xs_warn( "no node created!" );
+ 	   XSRETURN_UNDEF;
+        }
     OUTPUT:
         RETVAL
-
-
 
 void
 _setDocumentElement( self , proxy )

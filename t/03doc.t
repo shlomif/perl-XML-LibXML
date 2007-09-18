@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 131 };
+BEGIN { plan tests => 135 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -277,7 +277,7 @@ use XML::LibXML::Common qw(:libxml);
 }
 
 {
-    print "# 4. Document Storeing\n";
+    print "# 4. Document Storing\n";
     my $parser = XML::LibXML->new;
     my $doc = $parser->parse_string("<foo>bar</foo>");  
 
@@ -400,4 +400,36 @@ use XML::LibXML::Common qw(:libxml);
             ok( scalar( @as ), 2);
         }
     }
+}
+{
+    print "# 5. Bug fixes (to be use with valgrind)\n";
+    {  
+       my $doc=XML::LibXML->createDocument(); # create a doc
+       my $x=$doc->createPI(foo=>"bar");      # create a PI
+       undef $doc;                            # should not free
+       undef $x;                              # free the PI
+       ok(1);
+    }
+    {  
+       my $doc=XML::LibXML->createDocument(); # create a doc
+       my $x=$doc->createAttribute(foo=>"bar"); # create an attribute
+       undef $doc;                            # should not free
+       undef $x;                              # free the attribute
+       ok(1);
+    }
+    {  
+       my $doc=XML::LibXML->createDocument(); # create a doc
+       my $x=$doc->createAttributeNS(undef,foo=>"bar"); # create an attribute
+       undef $doc;                            # should not free
+       undef $x;                              # free the attribute
+       ok(1);
+    }
+    {  
+       my $doc=XML::LibXML->new->parse_string('<foo xmlns:x="http://foo.bar"/>');
+       my $x=$doc->createAttributeNS('http://foo.bar','x:foo'=>"bar"); # create an attribute
+       undef $doc;                            # should not free
+       undef $x;                              # free the attribute
+       ok(1);
+    }
+
 }
