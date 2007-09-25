@@ -2,6 +2,7 @@ use Test;
 BEGIN { plan tests => 3}
 END { ok(0) unless $loaded }
 use XML::LibXML;
+
 $loaded = 1;
 ok(1);
 
@@ -10,4 +11,6 @@ ok($p);
 
 ok(XML::LibXML::LIBXML_VERSION, XML::LibXML::LIBXML_RUNTIME_VERSION);
 
-# warn "# $tstr2\n";
+warn "\n\nCompiled against libxml2 version: ",XML::LibXML::LIBXML_VERSION,
+     "\nRunning libxml2 version:          ",XML::LibXML::LIBXML_RUNTIME_VERSION,
+     "\n\n";

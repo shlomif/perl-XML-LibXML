@@ -124,7 +124,9 @@ EOX
 
 print "# exclusive canonicalization\n";
 
-{
+if (20620 > XML::LibXML::LIBXML_VERSION) {
+    skip("skipping Exclusive C14N tests for libxml2 < 2.6.17") for 15..20;
+} else {
   my $xml1 = <<EOX;
 <n0:local xmlns:n0="http://something.org" xmlns:n3="ftp://example.org">
   <n1:elem2 xmlns:n1="http://example.net" xml:lang="en">
