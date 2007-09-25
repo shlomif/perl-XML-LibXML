@@ -111,7 +111,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,20,0], # broken schemas
                      [2,6,24,1], # all tests pass
                      [2,6,25,0], # broken XPath
-                     [2,6,27,1], # tested, works ok
+                     [2,6,30,1], # tested, works ok
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
