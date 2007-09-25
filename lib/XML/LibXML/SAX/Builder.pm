@@ -7,7 +7,7 @@ use XML::NamespaceSupport;
 
 use vars qw ($VERSION);
 
-$VERSION = "1.64"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.65"; # VERSION TEMPLATE: DO NOT CHANGE
 
 sub new {
     my $class = shift;

@@ -166,15 +166,17 @@ print "parse example/enc_latin2.html...\n";
   ok($htmldoc->URI, 'foo');
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
 
-  if (XML::LibXML::LIBXML_VERSION >= 20627) {
+  if (1000*$] < 5008) {
+    skip("skipping for Perl < 5.8") for 1..2;
+  } elsif (20627 > XML::LibXML::LIBXML_VERSION) {
+    skip("skipping for libxml2 < 2.6.27") for 1..2;
+  } else {
     # translate to UTF8 on perl-side
     open $fh, '<:encoding(iso-8859-2)', $test_file;
     $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' });
     close $fh;
     ok( $htmldoc && $htmldoc->getDocumentElement );
     ok($htmldoc->findvalue('//p/text()'), $utf_str);
-  } else {
-    skip("skipping for libxml2 <= 2.6.27") for 1..2;
   }
 }
 
@@ -196,10 +198,14 @@ print "parse example/enc2_latin2.html...\n";
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
 
-  # translate to UTF8 on perl-side
-  open $fh, '<:encoding(iso-8859-2)', $test_file;
-  $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' } );
-  close $fh;
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  if (1000*$] < 5008) {
+    skip("skipping for Perl < 5.8") for 1..2;
+  } else {
+    # translate to UTF8 on perl-side
+    open $fh, '<:encoding(iso-8859-2)', $test_file;
+    $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' } );
+    close $fh;
+    ok( $htmldoc && $htmldoc->getDocumentElement );
+    ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  }
 }
