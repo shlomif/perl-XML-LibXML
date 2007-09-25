@@ -14,3 +14,7 @@ ok(XML::LibXML::LIBXML_VERSION, XML::LibXML::LIBXML_RUNTIME_VERSION);
 warn "\n\nCompiled against libxml2 version: ",XML::LibXML::LIBXML_VERSION,
      "\nRunning libxml2 version:          ",XML::LibXML::LIBXML_RUNTIME_VERSION,
      "\n\n";
+
+if (XML::LibXML::LIBXML_VERSION != XML::LibXML::LIBXML_RUNTIME_VERSION) {
+   warn "DO NOT REPORT THIS FAILURE: Your setup of library paths is incorrect!\n\n";
+}
