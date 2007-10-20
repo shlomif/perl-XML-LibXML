@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 135 };
+BEGIN { plan tests => 138 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -432,4 +432,19 @@ use XML::LibXML::Common qw(:libxml);
        ok(1);
     }
 
+}
+
+
+{
+  my $xml = q{<?xml version="1.0" encoding="UTF-8"?>
+<test/>
+};
+  my $out = q{<?xml version="1.0"?>
+<test/>
+};
+  my $dom = XML::LibXML->new->parse_string($xml);
+  ok($dom->getEncoding,"UTF-8");
+  $dom->setEncoding();
+  ok($dom->getEncoding,undef);
+  ok($dom->toString,$out);
 }

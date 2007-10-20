@@ -3483,7 +3483,7 @@ encoding( self )
         RETVAL
 
 void
-setEncoding( self, encoding )
+setEncoding( self, encoding = NULL )
         xmlDocPtr self
         char *encoding
     PREINIT:
@@ -3492,15 +3492,19 @@ setEncoding( self, encoding )
         if ( self->encoding != NULL ) {
             xmlFree( (xmlChar*) self->encoding );
         }
-        self->encoding = xmlStrdup( (const xmlChar *)encoding );
-        charset = (int)xmlParseCharEncoding( (const char*)self->encoding );
-        if ( charset > 0 ) {
+        if (encoding!=NULL && strlen(encoding)) {
+	  self->encoding = xmlStrdup( (const xmlChar *)encoding );
+	  charset = (int)xmlParseCharEncoding( (const char*)self->encoding );
+	  if ( charset > 0 ) {
             ((ProxyNodePtr)self->_private)->encoding = charset;
-        }
-        else {
+	  }
+	  else {
             ((ProxyNodePtr)self->_private)->encoding = XML_CHAR_ENCODING_ERROR;
-        }
-
+	  }
+	} else {
+	  self->encoding=NULL;
+	  ((ProxyNodePtr)self->_private)->encoding = XML_CHAR_ENCODING_UTF8;
+	}
 
 int
 standalone( self )

@@ -1718,6 +1718,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                       encoding in the XML declaration of the document.
 		      The value also affects the encoding in which the
 		      document is serialized to XML by $doc->toString().
+	              Use setEncoding() to remove the encoding declaration.
 		    </para>
                 </listitem>
             </varlistentry>
@@ -2160,7 +2161,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$dtd = $document-&gt;createExternalSubset( $rootnode, $public, $system);</funcsynopsisinfo>
+                        <funcsynopsisinfo>$dtd = $document-&gt;createExternalSubset( $rootnode_name, $publicId, $systemId);</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This function is similar to <function>createInternalSubset()</function> but this DTD is considered to be external and is therefore not
