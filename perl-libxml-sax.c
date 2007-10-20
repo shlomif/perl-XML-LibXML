@@ -50,6 +50,8 @@ static U32 DataHash;
 static U32 TargetHash;
 static U32 VersionHash;
 static U32 EncodingHash;
+static U32 PublicIdHash;
+static U32 SystemIdHash;
 
 /* helper function C2Sv is ment to work faster than the perl-libxml-mm
    version. this shortcut is usefull, because SAX handles only UTF8
@@ -107,6 +109,8 @@ PmmSAXInitialize(pTHX)
     PERL_HASH(TargetHash,     "Target",        6);
     PERL_HASH(VersionHash,    "Version",       7);
     PERL_HASH(EncodingHash,   "Encoding",      8);
+    PERL_HASH(PublicIdHash,   "PublicId",      8);
+    PERL_HASH(SystemIdHash,   "SystemId",      8);
 }
 
 xmlSAXHandlerPtr PSaxGetHandler();
@@ -594,6 +598,28 @@ PmmGenPISV( pTHX_ PmmSAXVectorPtr sax,
     return retval;
 }
 
+HV * 
+PmmGenDTDSV( pTHX_ PmmSAXVectorPtr sax,
+	     const xmlChar * name,
+	     const xmlChar * publicId,
+	     const xmlChar * systemId )
+{
+    HV * retval = newHV();
+    if ( name != NULL && xmlStrlen( name ) ) {
+      hv_store(retval, "Name", 4,
+	       _C2Sv(name, NULL), NameHash);
+    }
+    if ( publicId != NULL && xmlStrlen( publicId ) ) {
+      hv_store(retval, "PublicId", 8,
+	       _C2Sv(publicId, NULL), PublicIdHash);
+    }
+    if ( systemId != NULL && xmlStrlen( systemId ) ) {
+      hv_store(retval, "SystemId", 8,
+	       _C2Sv(systemId, NULL), SystemIdHash);
+    }
+    return retval;
+}
+
 int
 PSaxStartDocument(void * ctx)
 {
@@ -978,6 +1004,118 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     return 1;
 }
 
+void PSaxExternalSubset (void * ctx, 
+			const xmlChar * name, 
+			const xmlChar * ExternalID, 
+			const xmlChar * SystemID)
+{
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
+    dTHX;
+    SV * handler          = sax->handler;
+
+    SV * element;
+    SV * rv = NULL;
+
+    if ( handler != NULL ) {
+        dSP;
+    
+        ENTER;
+        SAVETMPS;
+
+        PUSHMARK(SP) ;
+        XPUSHs(handler);
+        element = (SV*)PmmGenDTDSV(aTHX_ sax, 
+				   name,
+				   ExternalID,
+				   SystemID);
+        rv = newRV_noinc((SV*)element);
+        XPUSHs(rv);
+
+        PUTBACK;
+
+        call_method( "start_dtd", G_SCALAR | G_EVAL | G_DISCARD );
+        sv_2mortal(rv);
+
+        if (SvTRUE(ERRSV)) {
+            STRLEN n_a;
+            croak(SvPV(ERRSV, n_a));
+        }
+
+        PUSHMARK(SP) ;
+        XPUSHs(handler);
+        rv = newRV_noinc((SV*)newHV()); /* empty */
+        XPUSHs(rv);
+
+        PUTBACK;
+
+        call_method( "end_dtd", G_SCALAR | G_EVAL | G_DISCARD );
+        
+        FREETMPS ;
+        LEAVE ;
+    }
+    return;
+}
+
+
+/*
+
+void PSaxInternalSubset (void * ctx, 
+			const xmlChar * name, 
+			const xmlChar * ExternalID, 
+			const xmlChar * SystemID)
+{
+  // called before ExternalSubset
+  // if used, how do we generate the correct start_dtd ?
+}
+
+void PSaxElementDecl (void *ctx, const xmlChar *name,
+		      int type, 
+		      xmlElementContentPtr content) {
+  // this one is  not easy to implement
+  // since libxml2 has no (reliable) public method
+  // for dumping xmlElementContent :-(
+}
+
+void
+PSaxAttributeDecl (void * ctx, 
+		   const xmlChar * elem, 
+		   const xmlChar * fullname, 
+		   int type, 
+		   int def, 
+		   const xmlChar * defaultValue, 
+		   xmlEnumerationPtr tree)
+{
+}
+
+void
+PSaxEntityDecl (void * ctx, 
+		const xmlChar * name, 
+		int type, 
+		const xmlChar * publicId, 
+		const xmlChar * systemId, 
+		xmlChar * content)
+{
+}
+
+void
+PSaxNotationDecl (void * ctx, 
+		  const xmlChar * name, 
+		  const xmlChar * publicId, 
+		  const xmlChar * systemId)
+{
+}
+
+void
+PSaxUnparsedEntityDecl (void * ctx, 
+			const xmlChar * name, 
+			const xmlChar * publicId, 
+			const xmlChar * systemId, 
+			const xmlChar * notationName)
+{
+}
+*/
+
 int
 PmmSaxWarning(void * ctx, const char * msg, ...)
 {
@@ -1160,6 +1298,17 @@ PSaxGetHandler()
     retval->warning    = (warningSAXFunc)&PmmSaxWarning;
     retval->error      = (errorSAXFunc)&PmmSaxError;
     retval->fatalError = (fatalErrorSAXFunc)&PmmSaxFatalError;
+
+    retval->externalSubset = (externalSubsetSAXFunc)&PSaxExternalSubset;
+
+    /*
+    retval->internalSubset = (internalSubsetSAXFunc)&PSaxInternalSubset;
+    retval->elementDecl = (elementDeclSAXFunc)&PSaxElementDecl;
+    retval->entityDecl  = (entityDeclSAXFunc)&PSaxEntityDecl;
+    retval->notationDecl  = (notationDeclSAXFunc)&PSaxNotationDecl;
+    retval->attributeDecl  = (attributeDeclSAXFunc)&PSaxAttributeDecl;
+    retval->unparsedEntityDecl  = (unparsedEntityDeclSAXFunc)&PSaxUnparsedEntityDecl;
+    */
 
     return retval;
 }
