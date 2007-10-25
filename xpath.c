@@ -211,6 +211,8 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
             /* after looking through a fragment, we need to drop the
                fake document again */
             xmlSetTreeDoc(froot, NULL);
+	    froot->doc = NULL;
+	    froot->parent = NULL;
             tdoc->children = NULL;
             tdoc->last     = NULL;
             /* next line is not required anymore */
@@ -295,9 +297,9 @@ domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
                fake document again */
 	    xmlSetTreeDoc(froot,NULL);
             froot->doc = NULL;
+            froot->parent  = NULL;
             tdoc->children = NULL;
             tdoc->last     = NULL;
-            froot->parent  = NULL;
             ctxt->node->doc = NULL;
 
             xmlFreeDoc( tdoc );
