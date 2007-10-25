@@ -10,6 +10,8 @@ use Config;
 use Symbol;
 use File::Spec;
 
+use v5.6.1; # refuse to compile on earlier
+
 $|=0;
 my %config;
 
@@ -22,9 +24,10 @@ my %INFOS = (
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
     'AUTHOR'    => 'Christian Glahn',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
-    'PREREQ_PM' => { 'XML::SAX' => '0.11',
-                     'XML::NamespaceSupport' => '1.07',
-                     'XML::LibXML::Common' => '0.13',
+    'PREREQ_PM' => {
+		    'XML::SAX' => '0.11',
+		    'XML::NamespaceSupport' => '1.07',
+		    'XML::LibXML::Common' => '0.13',
                    },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
             );
