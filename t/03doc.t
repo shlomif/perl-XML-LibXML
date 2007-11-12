@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 138 };
+BEGIN { plan tests => 139 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -431,7 +431,16 @@ use XML::LibXML::Common qw(:libxml);
        undef $x;                              # free the attribute
        ok(1);
     }
-
+    {
+      # rt.cpan.org #30610
+      # valgrind this
+      my $object=XML::LibXML::Element->new( 'object' );
+      my $xml = qq(<?xml version="1.0" encoding="UTF-8"?>\n<lom/>);
+      my $lom_doc=XML::LibXML->new->parse_string($xml);
+      my $lom_root=$lom_doc->getDocumentElement();
+      $object->appendChild( $lom_root );
+      ok(!defined($object->firstChild->ownerDocument));
+    }   
 }
 
 

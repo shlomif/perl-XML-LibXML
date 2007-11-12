@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 1.66pre
+   - fix [rt.cpan.org #30610] possible segmentation fault when importing nodes from a document to an element created with XML::LibXML::Element->new
    - fix [rt.cpan.org #30261] Segmentation fault when extracting elements from an XML chunk
    - make Makefile.PL require Perl 5.6.1
 
