@@ -539,7 +539,7 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move, int reconcileNS ) {
 
 
     /* tell all children about the new boss */ 
-    if ( node && doc && node->doc != doc ) {
+    if ( node && node->doc != doc ) {
         xmlSetTreeDoc(return_node, doc);
     }
 
