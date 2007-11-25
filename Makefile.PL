@@ -135,13 +135,14 @@ unless ( $is_Win32 ) { # cannot get config in W32
 
         if ( $@ ) {
             if ( $@ =~ /^VERSION/ ) {
-                die "The installed version of libxml2 not compatible with XML::LibXML.\n\n".
+                print STDERR "The installed version of libxml2 not compatible with XML::LibXML.\n\n".
                     "You may continue at your own risk, but:\n\n".
                     "  - don't expect XML::LibXML to build or work correctly!\n".
                     "  - don't report errors!\n".
                     "  - don't send patches!\n\n".
                     "Check the README file for more information on versions\n".
                     "that are tested with XML::LibXML\n\n"; 
+		exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
             }
             if ( $@ =~ /^UNTESTED (\S*)/ ) {
 	      warn "Note: libxml2 $1 was not tested with this XML::LibXML version.\n"
@@ -259,7 +260,7 @@ if ($config{LIBS} !~ /\-lm\b/) {
 # -------------------------------------------------------------------------- #
 # test if the libraries are really installed!
 unless (have_library("xml2") or have_library("libxml2")) {
-    die <<DEATH;
+    print STDERR <<DEATH;
 libxml2 not found
 Try setting LIBS and INC values on the command line
 Or get libxml2 from 
@@ -267,6 +268,7 @@ Or get libxml2 from
 If you install via RPMs, make sure you also install the -devel
 RPMs, as this is where the headers (.h files) are.
 DEATH
+exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
 }
 # -------------------------------------------------------------------------- #
 
