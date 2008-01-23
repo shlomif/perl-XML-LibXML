@@ -8,7 +8,7 @@ use vars qw ($VERSION);
 $VERSION = "1.65"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use Carp;
-use 5.8.0;
+use 5.008_000;
 use base qw(Exporter);
 use constant {
     XML_READER_TYPE_NONE => 0,
