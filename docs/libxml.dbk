@@ -20,7 +20,7 @@
             </author>
         </authorgroup>
 
-        <edition>1.64</edition>
+        <edition>1.66</edition>
 
         <copyright>
             <year>2001-2007</year>
@@ -49,6 +49,7 @@
             <para>In 1.59, a new callback API was introduced. This new API is not compatible with the previous one.
 	       See XML::LibXML::InputCallback manual page for details.</para>
  	    <para>In 1.61 the XML::LibXML::XPathContext module, previously distributed separately, was merged in.</para>
+	    <para>In 1.66, an experimental support for Perl threads has been implemented.</para>
         </sect1>
 
         <sect1>

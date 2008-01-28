@@ -2,12 +2,13 @@ use Test;
 use Config;
 use constant MAX_THREADS => 10;
 use constant MAX_LOOP => 50;
-use constant PLAN => 14;
+use constant PLAN => 16;
 BEGIN {
   plan tests => PLAN;
   if( $Config{useithreads} ) {
     if ($ENV{THREAD_TEST}) {
       require threads;;
+	  require threads::shared;
     } else {
       skip("optional (set THREAD_TEST=1 to run these tests)\n") for (1..PLAN);
       exit;
@@ -37,6 +38,33 @@ my $xml = <<EOF;
 <?xml version="1.0" encoding="utf-8"?>
 <root><node><leaf/></node></root>
 EOF
+
+# Spawn threads with a document in scope
+{
+my $doc = $p->parse_string( $xml );
+for(1..MAX_THREADS)
+{
+	threads->new(sub {});
+}
+$_->join for(threads->list);
+}
+ok(1);
+
+# Spawn threads that use document that has gone out of scope from where it was
+# created
+{
+my $waitfor : shared;
+{
+lock $waitfor;
+my $doc = $p->parse_string($xml);
+for(1..MAX_THREADS)
+{
+	threads->new(sub { lock $waitfor; $doc->toString; });
+}
+}
+$_->join for(threads->list);
+ok(1);
+}
 
 # Parse a correct XML document
 {
