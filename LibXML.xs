@@ -1285,7 +1285,7 @@ _leaked_nodes()
     OUTPUT:
         RETVAL
 
-char *
+const char *
 LIBXML_DOTTED_VERSION()
     CODE:
         RETVAL = LIBXML_DOTTED_VERSION;
@@ -1776,7 +1776,7 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
         STRLEN len;
         char * ptr;
         char* URL = NULL;
-        char * encoding = NULL;
+        const char * encoding = NULL;
         SV * saved_error = sv_2mortal(newSVpv("",0));
         HV * real_obj;
         htmlDocPtr real_doc;
@@ -1981,7 +1981,7 @@ _parse_xml_chunk(self, svchunk, enc = &PL_sv_undef)
         SV * enc
     PREINIT:
         STRLEN len;
-        char * encoding = "UTF-8";
+        const char * encoding = "UTF-8";
         SV * saved_error = sv_2mortal(newSVpv("",0));
         HV * real_obj;
         int recover = 0;
@@ -2052,7 +2052,7 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
     PREINIT:
         STRLEN len;
         char * ptr;
-        char * encoding = "UTF-8";
+        const char * encoding = "UTF-8";
         SV * saved_error = sv_2mortal(newSVpv("",0));
         HV * real_obj;
         int recover = 0;
