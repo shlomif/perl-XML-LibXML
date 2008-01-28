@@ -62,6 +62,7 @@ typedef ProxyNode* ProxyNodePtr;
 /* this my go only into the header used by the xs */
 #define SvPROXYNODE(x) ((ProxyNodePtr)SvIV(SvRV(x)))
 #define PmmPROXYNODE(x) ((ProxyNodePtr)x->_private)
+#define SvNAMESPACE(x) ((xmlNsPtr)SvIV(SvRV(x)))
 
 #define PmmREFCNT(node)      node->count
 #define PmmREFCNT_inc(node)  node->count++
@@ -69,6 +70,8 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmOWNER(node)       node->owner
 #define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
 #define PmmENCODING(node)    node->encoding
+#define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
+#define PmmDocEncoding(node) (node->charset)
 
 ProxyNodePtr
 PmmNewNode(xmlNodePtr node);
@@ -140,7 +143,7 @@ PmmSvOwner( SV * perlnode );
 SV*
 PmmSetSvOwner(SV * perlnode, SV * owner );
 
-void
+int
 PmmFixOwner(ProxyNodePtr node, ProxyNodePtr newOwner );
 
 void
@@ -200,7 +203,7 @@ const char*
 PmmNodeTypeName( xmlNodePtr elem );
 
 xmlChar*
-PmmEncodeString( const char *encoding, const char *string );
+PmmEncodeString( const char *encoding, const xmlChar *string );
 
 char*
 PmmDecodeString( const char *encoding, const xmlChar *string);
