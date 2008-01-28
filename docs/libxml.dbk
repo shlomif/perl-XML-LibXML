@@ -3013,11 +3013,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$xmlstring = $node-&gt;toString($format,$docencoding);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This is the equivalent to <function>XML::LibXML::Document::toString</function> for a single node. This means a node and all its
-                    childnodes will be dumped into the result string.</para>
-
-                    <para>Additionally to the $format flag of XML::LibXML::Document, this version accepts the optional $docencoding flag. If this flag is set
-                    this function returns the string in its original encoding (the encoding of the document) rather than UTF-8.</para>
+                    <para>This method is similar to <function>XML::LibXML::Document::toString</function> but for a single node. It returns a string consisting of XML serialization of the given node and all its descendants. Unlike <function>XML::LibXML::Document::toString</function>, in this case the resulting string is by default a character string (UTF-8 encoded with UTF8 flag on). An optional flag $format controls indentation, as in <function>XML::LibXML::Document::toString</function>. If the second optional $docencoding flag is true, the result will be a byte string in the document encoding (see <function>XML::LibXML::Document::actualEncoding</function>).</para>
                 </listitem>
             </varlistentry>
 
