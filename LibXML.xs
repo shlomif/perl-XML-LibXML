@@ -1272,6 +1272,19 @@ BOOT:
     xmlInitializeCatalog(); /* use catalog data */
 #endif
 
+void
+_CLONE( class )
+        char * class
+    CODE:
+        PmmCloneProxyNodes();
+
+int
+_leaked_nodes()
+    CODE:
+        RETVAL = PmmProxyNodeRegistrySize();
+    OUTPUT:
+        RETVAL
+
 char *
 LIBXML_DOTTED_VERSION()
     CODE:

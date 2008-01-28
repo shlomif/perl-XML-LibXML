@@ -50,6 +50,7 @@ struct _ProxyNode {
     xmlNodePtr owner;
     int count;
     int encoding;
+    struct _ProxyNode * _registry;
 };
 
 /* helper type for the proxy structure */

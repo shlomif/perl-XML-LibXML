@@ -101,6 +101,7 @@ PmmNodeTypeName( xmlNodePtr elem ){
  *         (in case of document fragments, they are not the same!)
  * @count: this is the internal reference count!
  * @encoding: this value is missing in libxml2's doc structure
+ * @_registry: used to build the proxy node registry
  *
  * Since XML::LibXML will not know, is a certain node is already
  * defined in the perl layer, it can't shurely tell when a node can be
@@ -113,6 +114,7 @@ struct _ProxyNode {
     xmlNodePtr owner;
     int count;
     int encoding; 
+    struct _ProxyNode * _registry;
 };
 
 /* helper type for the proxy structure */
@@ -134,6 +136,79 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmENCODING(node)    node->encoding
 #define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
 #define PmmDocEncoding(node) (node->charset)
+
+/*
+ * registry of all current proxy nodes
+ */
+ProxyNodePtr PROXY_NODE_REGISTRY = NULL;
+
+/*
+ * @proxy: proxy node to register
+ *
+ * adds a proxy node to the proxy node registry
+ */
+void
+PmmRegisterProxyNode(ProxyNodePtr proxy)
+{
+    proxy->_registry = PROXY_NODE_REGISTRY;
+    PROXY_NODE_REGISTRY = proxy;
+}
+
+/*
+ * @proxy: proxy node to remove
+ *
+ * removes a proxy node from the proxy node registry
+ */
+void
+PmmUnregisterProxyNode(ProxyNodePtr proxy)
+{
+    ProxyNodePtr cur = PROXY_NODE_REGISTRY;
+    if( PROXY_NODE_REGISTRY == proxy ) {
+        PROXY_NODE_REGISTRY = proxy->_registry;
+    }
+    else {
+        while(cur->_registry != NULL)
+        {
+            if( cur->_registry == proxy )
+            {
+                cur->_registry = proxy->_registry;
+                break;
+            }
+            cur = cur->_registry;
+        }
+    }
+}
+
+/*
+ * increments all proxy node counters by one (called on thread spawn)
+ */
+void
+PmmCloneProxyNodes()
+{
+    ProxyNodePtr cur = PROXY_NODE_REGISTRY;
+    while(cur != NULL)
+    {
+        PmmREFCNT_inc(cur);
+        cur = cur->_registry;
+    }
+}
+
+/*
+ * returns the current number of proxy nodes in the registry
+ */
+int
+PmmProxyNodeRegistrySize()
+{
+    int i = 0;
+    ProxyNodePtr cur = PROXY_NODE_REGISTRY;
+    while(cur != NULL)
+    {
+        ++i;
+        cur = cur->_registry;
+    }
+    return i;
+}
+
 /* creates a new proxy node from a given node. this function is aware
  * about the fact that a node may already has a proxy structure.
  */
@@ -155,7 +230,9 @@ PmmNewNode(xmlNodePtr node)
             proxy->owner   = NULL;
             proxy->count   = 0;
             proxy->encoding= 0;
+            proxy->_registry = NULL;
             node->_private = (void*) proxy;
+            PmmRegisterProxyNode(proxy);
         }
     }
     else {
@@ -283,6 +360,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
                 
                 PmmFreeNode( libnode );
             }
+            PmmUnregisterProxyNode(node);
             Safefree( node );
             /* free( node ); */
         }
