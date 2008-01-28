@@ -25,7 +25,7 @@
         <copyright>
             <year>2001-2007</year>
 
-            <holder>AxKit.com Ltd; 2002-2006 Christian Glahn; 2006-2007 Petr Pajas</holder>
+            <holder>AxKit.com Ltd; 2002-2006 Christian Glahn; 2006-2008 Petr Pajas</holder>
         </copyright>
     </bookinfo>
 
@@ -1221,8 +1221,13 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         </funcsynopsis>
 
                         <para>If this option is activated XML::LibXML will store the line number of a node. This gives more information where a validation error
-                        occurred. It could be also used to find out about the position of a node after parsing (see also XML::LibXML::Node::line_number())</para>
-
+                        occurred. It could be also used to find out about the position of a node after parsing (see also XML::LibXML::Node::line_number()). 
+			</para>
+			<para>IMPORTANT:
+			  Due to limitations in the libxml2 library line numbers greater than
+			  65535 will be returned as 65535. Please see
+			  <ulink url="http://bugzilla.gnome.org/show_bug.cgi?id=325533">http://bugzilla.gnome.org/show_bug.cgi?id=325533</ulink> for more details.
+                        </para>
                         <para>By default line numbering is switched off (0).</para>
                     </listitem>
                 </varlistentry>
@@ -1608,10 +1613,11 @@ my $doc = $builder-&gt;result();</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Document nodes listed here,
+# Only methods specific to Document nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
-
+	<sect1>
+            <title>Description</title>
         <para>The Document Class is in most cases the result of a parsing process. But sometimes it is necessary to create a Document from scratch. The DOM
         Document Class provides functions that conform to the DOM Core naming style.</para>
 
@@ -1625,6 +1631,9 @@ my $doc = $builder-&gt;result();</programlisting>
 
         <para>All this seems like a limitation as long as UTF-8 encoding is assured. If ISO encoded strings come into play it is much safer to use the node
         creation functions of <emphasis>XML::LibXML::Document</emphasis>.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
 
         <variablelist>
             <varlistentry>
@@ -2383,6 +2392,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                 </listitem>
             </varlistentry>
         </variablelist>
+      </sect1>
     </chapter>
 
     <chapter>
@@ -2393,6 +2403,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;</programlisting>
         </sect1>
+        <sect1>
+            <title>Description</title>
+
         <para>XML::LibXML::Node defines functions that are common to
         all Node Types. A LibXML::Node should never be created
         standalone, but as an instance of a high level class such as
@@ -2401,7 +2414,10 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
         part either of a document or a document-fragment. Because of
         this there is no node without a parent. This may causes
         confusion with "unbound" nodes.</para>
-
+	</sect1>
+        <sect1>
+            <title>Methods</title>
+	
         <variablelist>
             <varlistentry>
                 <term>nodeName</term>
@@ -2881,7 +2897,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 	  </para>
 	  <para>
 	    So, for example, one cannot match the root element of an
-	    XHTML document with <code>$node-&gt;find('/html')</code>
+	    XHTML document with <literal>$node-&gt;find('/html')</literal>
 	    since <literal>'/html'</literal> would only match if the
 	    root element <literal>&lt;html&gt;</literal> had no
 	    namespace, but all XHTML elements belong to the namespace
@@ -3251,14 +3267,18 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para>This function returns the line number where the tag was found during parsing. If a node is added to the document the line number is 0.
                     Problems may occur, if a node from one document is passed to another one.</para>
-
+		    <para>IMPORTANT:
+		    Due to limitations in the libxml2 library line numbers greater than
+		    65535 will be returned as 65535. Please see
+		    <ulink url="http://bugzilla.gnome.org/show_bug.cgi?id=325533">http://bugzilla.gnome.org/show_bug.cgi?id=325533</ulink> for more details.
+		    </para>
                     <para>Note: line_number() is special to XML::LibXML and not part of the DOM specification.</para>
 
                     <para>If the line_numbers flag of the parser was not activated before parsing, line_number() will always return 0.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
-
+      </sect1>
     </chapter>
 
     <chapter>
@@ -3268,9 +3288,11 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Element nodes listed here,
+# Only methods specific to Element nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
+	<sect1>
+	  <title>Methods</title>
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -3769,6 +3791,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
             </varlistentry>
 
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -3778,13 +3801,17 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Text nodes listed here,
+# Only methods specific to Text nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
+        <sect1>
+            <title>Description</title>
 
-        <para>Different to the DOM specification XML::LibXML implements the text node as the base class of all character data node. Therefor there exists no
-        CharacterData class. This allow one to use all methods that are available for text nodes as well for Comments or CDATA-sections.</para>
-
+        <para>Unlike the DOM specification, XML::LibXML implements the text node as the base class of all character data node. Therefor there exists no
+        CharacterData class. This allows one to apply methods of text nodes also to Comments and CDATA-sections.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -3978,6 +4005,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -3987,13 +4015,17 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Comment nodes listed here,
+# Only methods specific to Comment nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
-
+        <sect1>
+            <title>Description</title>
+	
         <para>This class provides all functions of <emphasis>XML::LibXML::Text</emphasis>, but for comment nodes. This can be done, since only the output of the
         node types is different, but not the data structure. :-)</para>
-
+	</sect1>
+        <sect1>
+            <title>Methods</title>
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -4008,6 +4040,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4017,11 +4050,15 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to CDATA nodes listed here,
+# Only methods specific to CDATA nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
-
+	<sect1>
+	  <title>Description</title>
         <para>This class provides all functions of <emphasis>XML::LibXML::Text</emphasis>, but for CDATA nodes.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
 
         <variablelist>
             <varlistentry>
@@ -4037,6 +4074,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4046,11 +4084,16 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Attribute nodes listed here,
+# Only methods specific to Attribute nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
+	<sect1>
+	  <title>Description</title>
 
         <para>This is the interface to handle Attributes like ordinary nodes. The naming of the class relies on the W3C DOM documentation.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
 
         <variablelist>
             <varlistentry>
@@ -4190,6 +4233,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
             </varlistentry>
 
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4200,11 +4244,14 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;</programlisting>
         </sect1>
+        <sect1>
+            <title>Description</title>
 
         <para>This class is a helper class as described in the DOM Level 2 Specification. It is implemented as a node without name. All adding, inserting or
         replacing functions are aware of document fragments now.</para>
 
         <para>As well <emphasis>all</emphasis> unbound nodes (all nodes that do not belong to any document sub-tree) are implicit members of document fragments.</para>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4214,15 +4261,20 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Namespace nodes listed here,
+# Only methods specific to Namespace nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
+	<sect1>
+	  <title>Description</title>
 
         <para>Namespace nodes are returned by both $element-&gt;findnodes('namespace::foo') or by $node-&gt;getNamespaces().</para>
 
         <para>The namespace node API is not part of any current DOM API, and so it is quite minimal. It should be noted that namespace nodes are
         <emphasis>not</emphasis> a sub class of XML::LibXML::Node, however Namespace nodes act a lot like attribute nodes, and similarly named methods will
         return what you would expect if you treated the namespace node as an attribute. Note that in order to fix several inconsistencies between the API and the documentation, the behavior of some functions have been changed in 1.64.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
 
         <variablelist>
             <varlistentry>
@@ -4350,6 +4402,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4359,9 +4412,11 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-# Only methods specific to Processing Instruction nodes listed here,
+# Only methods specific to Processing Instruction nodes are listed here,
 # see XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
+	<sect1>
+	  <title>Description</title>
 
         <para>Processing instructions are implemented with XML::LibXML with read and write access. The PI data is the PI without the PI target (as specified in
         XML 1.0 [17]) as a string. This string can be accessed with getData as implemented in XML::LibXML::Node.</para>
@@ -4385,6 +4440,9 @@ $dom-&gt;appendChild( $pi );</programlisting>
         <para>will have the same result as above.</para>
 
         <para>XML::LibXML::PI's implementation of setData() differs a bit from the the standard version as available in XML::LibXML::Node():</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
 
         <variablelist>
             <varlistentry>
@@ -4401,6 +4459,7 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4411,12 +4470,18 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;</programlisting>
         </sect1>
+        <sect1>
+            <title>Description</title>
 
         <para>This class holds a DTD. You may parse a DTD from either a string, or from an external SYSTEM identifier.</para>
 
         <para>No support is available as yet for parsing from a filehandle.</para>
 
         <para>XML::LibXML::Dtd is a sub-class of Node, so all the methods available to nodes (particularly toString()) are available to Dtd objects.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
+
 
         <variablelist>
             <varlistentry>
@@ -4483,6 +4548,7 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4803,9 +4869,14 @@ $parser-&gt;parse_file( $some_xml_file );
             <programlisting>use XML::LibXML;
 $doc = XML::LibXML->new->parse_file($url);</programlisting>
         </sect1>
+        <sect1>
+            <title>Description</title>
 
         <para>The XML::LibXML::RelaxNG class is a tiny frontend to libxml2's RelaxNG implementation. Currently it supports only schema parsing and document
         validation.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
 
         <variablelist>
             <varlistentry>
@@ -4846,6 +4917,7 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
 
     <chapter>
@@ -4857,10 +4929,14 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
             <programlisting>use XML::LibXML;
 $doc = XML::LibXML->new->parse_file($url);</programlisting>
         </sect1>
+        <sect1>
+            <title>Description</title>
 
         <para>The XML::LibXML::Schema class is a tiny frontend to libxml2's XML Schema implementation. Currently it supports only schema parsing and
         document validation.</para>
-
+	</sect1>
+        <sect1>
+            <title>Methods</title>
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -4897,6 +4973,7 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
                 </listitem>
             </varlistentry>
         </variablelist>
+	</sect1>
     </chapter>
   <chapter>
     <title>XPath Evaluation</title>
