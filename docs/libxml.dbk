@@ -743,7 +743,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                 documents - as a string, as a Perl filehandle, or as a filename/URL. The return value from each is a XML::LibXML::Document object, which is a DOM
                 object.</para>
 
-                <para>All of the functions listed below will throw an exception if the document is invalid. To prevent this causing your program exiting, wrap
+		<para>All of the functions listed below will throw an exception if the document is invalid. To prevent this causing your program exiting, wrap
                 the call in an eval{} block</para>
 
                 <variablelist>
@@ -1471,7 +1471,7 @@ my $doc = $builder-&gt;result();</programlisting>
 
             <para>One of the most important parts of the XML::LibXML
             DOM interface is, that the interfaces try do follow the
-            DOM Level 3 specification rather strictly. This means the
+            <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink> rather strictly. This means the
             interface functions are named as the DOM specification
             says and not what widespread Java interfaces claim to be
             standard.  Although there are several functions that have
@@ -1630,12 +1630,16 @@ my $doc = $builder-&gt;result();</programlisting>
         correct encoding. If an unbound text node with an ISO encoded string is created (e.g. with $CLASS-&gt;new()), the <function>toString</function> function
         may not return the expected result.</para>
 
-        <para>All this seems like a limitation as long as UTF-8 encoding is assured. If ISO encoded strings come into play it is much safer to use the node
-        creation functions of <emphasis>XML::LibXML::Document</emphasis>.</para>
+        <para>To prevent such problems, it is recommended to pass all data to XML::LibXML methods
+	as character strings (i.e. UTF-8 encoded, with the UTF8 flag on).</para>
 	</sect1>
         <sect1>
             <title>Methods</title>
-
+	    <para>
+	      Many functions listed here are
+	      extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	      the specification for extensive documentation.
+	    </para>
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -2418,7 +2422,12 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 	</sect1>
         <sect1>
             <title>Methods</title>
-	
+		    <para>
+	      Many functions listed here are
+	      extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	      the specification for extensive documentation.
+	    </para>
+
         <variablelist>
             <varlistentry>
                 <term>nodeName</term>
@@ -3294,7 +3303,16 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         </sect1>
 	<sect1>
 	  <title>Methods</title>
-        <variablelist>
+	  <para>
+	    The class inherits from XML::LibXML::Node. 
+	    The documentation for Inherited methods is not listed here.
+	  </para>
+	  <para>
+	    Many functions listed here are
+	    extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	    the specification for extensive documentation.
+	  </para>
+	  <variablelist>
             <varlistentry>
                 <term>new</term>
 
@@ -3813,6 +3831,16 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
         <sect1>
             <title>Methods</title>
+	  <para>
+	    The class inherits from XML::LibXML::Node. 
+	    The documentation for Inherited methods is not listed here.
+	  </para>
+	  <para>
+	    Many functions listed here are
+	    extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	    the specification for extensive documentation.
+	  </para>
+
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -4027,6 +4055,16 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
         <sect1>
             <title>Methods</title>
+	  <para>
+	    The class inherits from XML::LibXML::Node. 
+	    The documentation for Inherited methods is not listed here.
+	  </para>
+	  <para>
+	    Many functions listed here are
+	    extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	    the specification for extensive documentation.
+	  </para>
+
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -4060,6 +4098,16 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
         <sect1>
             <title>Methods</title>
+	  <para>
+	    The class inherits from XML::LibXML::Node. 
+	    The documentation for Inherited methods is not listed here.
+	  </para>
+	  <para>
+	    Many functions listed here are
+	    extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	    the specification for extensive documentation.
+	  </para>
+
 
         <variablelist>
             <varlistentry>
@@ -4095,7 +4143,15 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
         <sect1>
             <title>Methods</title>
-
+	  <para>
+	    The class inherits from XML::LibXML::Node. 
+	    The documentation for Inherited methods is not listed here.
+	  </para>
+	  <para>
+	    Many functions listed here are
+	    extensively documented in the <ulink url="http://www.w3.org/TR/DOM-Level-3-Core/">DOM Level 3 specification</ulink>. Please refer to
+	    the specification for extensive documentation.
+	  </para>
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -4276,7 +4332,6 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
         <sect1>
             <title>Methods</title>
-
         <variablelist>
             <varlistentry>
                 <term>new</term>
@@ -4440,11 +4495,7 @@ $dom-&gt;appendChild( $pi );</programlisting>
 
         <para>will have the same result as above.</para>
 
-        <para>XML::LibXML::PI's implementation of setData() differs a bit from the the standard version as available in XML::LibXML::Node():</para>
-	</sect1>
-        <sect1>
-            <title>Methods</title>
-
+        <para>XML::LibXML::PI's implementation of setData() documented below differs a bit from the the standard version as available in XML::LibXML::Node():</para>
         <variablelist>
             <varlistentry>
                 <term>setData</term>
