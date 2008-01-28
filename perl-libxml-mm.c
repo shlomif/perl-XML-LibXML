@@ -15,11 +15,9 @@ extern "C" {
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
+#include "perl-libxml-mm.h"
 
-#include <libxml/parser.h>
+#include "XSUB.h"
 #include <libxml/tree.h>
 
 #ifdef XML_LIBXML_GDOME_SUPPORT
@@ -30,17 +28,9 @@ extern "C" {
 #endif
 
 #include "perl-libxml-sax.h"
-#include "perl-libxml-mm.h"
 
 #ifdef __cplusplus
 }
-#endif
-
-#ifdef XS_WARNINGS
-#define xs_warn(string) warn(string) 
-/* #define xs_warn(string) fprintf(stderr, string) */
-#else
-#define xs_warn(string)
 #endif
 
 /**
