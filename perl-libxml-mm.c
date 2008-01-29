@@ -88,8 +88,22 @@ PmmNodeTypeName( xmlNodePtr elem ){
 
 /*
  * registry of all current proxy nodes
+ *
+ * other classes like XML::LibXSLT must get a pointer
+ * to this registry via XML::LibXML::__proxy_registry
+ *
  */
-ProxyNodePtr PROXY_NODE_REGISTRY = NULL;
+extern ProxyNodePtr PROXY_NODE_REGISTRY;
+
+/*
+ * returns the address of the proxy registry
+ */
+ProxyNodePtr*
+PmmProxyNodeRegistryPtr(ProxyNodePtr proxy)
+{
+    return &PROXY_NODE_REGISTRY;
+}
+
 
 /*
  * @proxy: proxy node to register
@@ -115,7 +129,7 @@ PmmUnregisterProxyNode(ProxyNodePtr proxy)
     if( PROXY_NODE_REGISTRY == proxy ) {
         PROXY_NODE_REGISTRY = proxy->_registry;
     }
-    else {
+    else if (cur) {
         while(cur->_registry != NULL)
         {
             if( cur->_registry == proxy )
@@ -125,6 +139,8 @@ PmmUnregisterProxyNode(ProxyNodePtr proxy)
             }
             cur = cur->_registry;
         }
+    } else {
+      warn("XML::LibXML: unregistering node, while no nodes have been registered?\n");
     }
 }
 

@@ -1,7 +1,1 @@
-1.59
-
-* Add a comment on findvalue() - no list context!!! why? findvalue is
-a XPath function (in libxml2.) it must not return lists
-
-- Make warning (wg. sgml parser veraltet) - pepl
-
+- use structured error API so that at least RelaxNG and Schema validators report line numbers on error

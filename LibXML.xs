@@ -97,7 +97,7 @@ extern "C" {
 
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
-
+ProxyNodePtr PROXY_NODE_REGISTRY = NULL;
 
 /* ****************************************************************
  * Error handler
@@ -1300,6 +1300,18 @@ int
 _leaked_nodes()
     CODE:
         RETVAL = PmmProxyNodeRegistrySize();
+    OUTPUT:
+        RETVAL
+
+#### The following function is called by XML::LibXSLT 
+#### It passes the other library the pointer to our internal proxy_node registry
+#### so that nodes created there get properly registered before they are disposed
+#### by our DESTROY
+SV*
+__proxy_registry()
+    CODE:
+        RETVAL = NEWSV(0,0);
+	sv_setref_pv( RETVAL, NULL, (void*) &PROXY_NODE_REGISTRY );	       
     OUTPUT:
         RETVAL
 

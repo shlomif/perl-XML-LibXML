@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use vars qw ($VERSION);
-$VERSION = "1.65"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use Carp;
 use 5.008_000;
