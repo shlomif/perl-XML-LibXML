@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <book lang="en-us">
     <title>XML::LibXML</title>
 
@@ -20,6 +19,7 @@
             </author>
         </authorgroup>
 
+
         <edition>1.66</edition>
 
         <copyright>
@@ -29,7 +29,7 @@
         </copyright>
     </bookinfo>
 
-    <chapter>
+    <chapter id="README">
         <title>Introduction</title>
 
         <titleabbrev>README</titleabbrev>
@@ -47,7 +47,7 @@
             <para>XML::LibXML was almost entirely reimplemented between version 1.40 to version 1.49. This may cause problems on some production machines. With
             version 1.50 a lot of compatibility fixes were applied, so programs written for XML::LibXML 1.40 or less should run with version 1.50 again.</para>
             <para>In 1.59, a new callback API was introduced. This new API is not compatible with the previous one.
-	       See XML::LibXML::InputCallback manual page for details.</para>
+	       See XML-LibXML-InputCallback manual page for details.</para>
  	    <para>In 1.61 the XML::LibXML::XPathContext module, previously distributed separately, was merged in.</para>
 	    <para>In 1.66, an experimental support for Perl threads has been implemented.</para>
         </sect1>
@@ -298,7 +298,7 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="LICENSE">
         <title>License</title>
 
         <titleabbrev>LICENSE</titleabbrev>
@@ -317,7 +317,7 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML">
         <title>Perl Binding for libxml2</title>
 
         <titleabbrev>XML::LibXML</titleabbrev>
@@ -336,14 +336,19 @@ EOT</programlisting>
         <sect1>
             <title>Description</title>
 
-            <para>This module is an interface to the gnome libxml2 DOM and SAX parser and the DOM tree. It also provides an XML::XPath-like findnodes()
-            interface, providing access to the XPath API in libxml2. The module is split into several packages which are not described in this section.</para>
+            <para>This module is an interface to libxml2, providing 
+	    XML and HTML parsers with DOM, SAX and XMLReader interfaces,
+	    a large subset of DOM Layer 3 interface and 
+	    a  XML::XPath-like interface to XPath API of libxml2. 
+	    The module is split into several packages which are not described in this section;
+	    unless stated otherwise, you only need to <literal>use XML::LibXML;</literal>
+	    in your programs.</para>
 
             <para>For further information, please check the following documentation:</para>
 
             <variablelist>
                 <varlistentry>
-                    <term>XML::LibXML::Parser</term>
+                    <term><xref linkend="XML-LibXML-Parser"/></term>
 
                     <listitem>
                         <para>Parsing XML Files with XML::LibXML</para>
@@ -351,7 +356,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::DOM</term>
+                    <term><xref linkend="XML-LibXML-DOM"/></term>
 
                     <listitem>
                         <para>XML::LibXML DOM Implementation</para>
@@ -359,7 +364,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::SAX</term>
+                    <term><xref linkend="XML-LibXML-SAX"/></term>
 
                     <listitem>
                         <para>XML::LibXML direct SAX parser</para>
@@ -367,7 +372,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Reader</term>
+                    <term><xref linkend="XML-LibXML-Reader"/></term>
 
                     <listitem>
                         <para>Reading XML with a pull-parser</para>
@@ -375,7 +380,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Document</term>
+                    <term><xref linkend="XML-LibXML-Document"/></term>
 
                     <listitem>
                         <para>XML::LibXML DOM Document Class</para>
@@ -383,7 +388,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Node</term>
+                    <term><xref linkend="XML-LibXML-Node"/></term>
 
                     <listitem>
                         <para>Abstract Base Class of XML::LibXML Nodes</para>
@@ -391,7 +396,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Element</term>
+                    <term><xref linkend="XML-LibXML-Element"/></term>
 
                     <listitem>
                         <para>XML::LibXML Class for Element Nodes</para>
@@ -399,7 +404,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Text</term>
+                    <term><xref linkend="XML-LibXML-Text"/></term>
 
                     <listitem>
                         <para>XML::LibXML Class for Text Nodes</para>
@@ -407,7 +412,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Comment</term>
+                    <term><xref linkend="XML-LibXML-Comment"/></term>
 
                     <listitem>
                         <para>XML::LibXML Comment Nodes</para>
@@ -415,7 +420,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::CDATASection</term>
+                    <term><xref linkend="XML-LibXML-CDATASection"/></term>
 
                     <listitem>
                         <para>XML::LibXML Class for CDATA Sections</para>
@@ -423,7 +428,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Attr</term>
+                    <term><xref linkend="XML-LibXML-Attr"/></term>
 
                     <listitem>
                         <para>XML::LibXML Attribute Class</para>
@@ -431,7 +436,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::DocumentFragment</term>
+                    <term><xref linkend="XML-LibXML-DocumentFragment"/></term>
 
                     <listitem>
                         <para>XML::LibXML's DOM L2 Document Fragment Implementation</para>
@@ -439,7 +444,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Namespace</term>
+                    <term><xref linkend="XML-LibXML-Namespace"/></term>
 
                     <listitem>
                         <para>XML::LibXML Namespace Implementation</para>
@@ -447,7 +452,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::PI</term>
+                    <term><xref linkend="XML-LibXML-PI"/></term>
 
                     <listitem>
                         <para>XML::LibXML Processing Instructions</para>
@@ -455,7 +460,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Dtd</term>
+                    <term><xref linkend="XML-LibXML-Dtd"/></term>
 
                     <listitem>
                         <para>XML::LibXML DTD Support</para>
@@ -463,7 +468,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::RelaxNG</term>
+                    <term><xref linkend="XML-LibXML-RelaxNG"/></term>
 
                     <listitem>
                         <para>XML::LibXML frontend for RelaxNG schema validation</para>
@@ -471,7 +476,7 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Schema</term>
+                    <term><xref linkend="XML-LibXML-Schema"/></term>
 
                     <listitem>
                         <para>XML::LibXML frontend for W3C Schema schema validation</para>
@@ -479,22 +484,114 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::XPathContext</term>
+                    <term><xref linkend="XML-LibXML-XPathContext"/></term>
                     <listitem>
-                        <para>API for evaluating XPath expressions</para>
+                        <para>API for evaluating XPath expressions with enhanced support
+			for the evaluation context</para>
                     </listitem>
                 </varlistentry>
 
-
-                <varlistentry>
-                    <term>XML::LibXMLguts</term>
-                    <listitem>
-                        <para>Internal of the Perl Layer for libxml2 (not done yet)</para>
-                    </listitem>
-                </varlistentry>
             </variablelist>
         </sect1>
-
+	<sect1>
+            <title>Encodings support in XML::LibXML</title>
+            <para>Recall that since version 5.6.1, Perl distinguishes between
+            character strings (internally encoded in UTF-8) and so
+            called binary data and, accordingly, applies either
+            character or byte semantics to them.  A scalar
+            representing a character string is distinguished from 
+	    a byte string by special flag (UTF8). Please refer to <emphasis>perlunicode</emphasis> for details.
+	    </para>
+	    <para>
+	      XML::LibXML's API is designed to deal with many
+	      encodings of XML documents completely transparently, so
+	      that the application using XML::LibXML can be completely
+	      ignorant about the encoding of the XML documents it works with.
+	      On the other hand, functions like <function>XML::LibXML::Document-&gt;setEncoding</function>
+	      give the user control over the document encoding. 
+	    </para>
+	    <para>
+	      To ensure the aforementioned transparency and
+	      uniformity, most functions of XML::LibXML that work with
+	      in-memory trees accept and return data as character
+	      strings (i.e. UTF-8 encoded with the UTF8 flag on)
+	      regardless of the original document encoding; however,
+	      the functions related to I/O operations (i.e. parsing
+	      and saving) operate with binary data (in the original
+	      document encoding) obeying the encoding declaration of
+	      the XML documents.</para>
+	    <para>Below we summarize basic rules and principles 
+	    regarding encoding:
+	    </para>
+	    <orderedlist>
+	      <listitem><para>Do NOT apply any encoding-related PerlIO layers
+	      (<literal>:utf8</literal> or <literal>:encoding(...)</literal>)
+	      to file handles that are an imput for the parses
+	      or an ouptut for a serializer of (full) XML documents.
+	      This is because the conversion of the data to/from the internal character representation
+	      is provided by libxml2 itself which must be able to enforce the encoding
+	      specified by the <literal>&lt;?xml version="1.0" encoding="..."?&gt;</literal>
+	      declaration. Here is an example to follow:
+	      <programlisting>use XML::LibXML;
+my $parser = XML::LibXML-&gt;new;
+open my $fh, "file.xml";
+binmode $fh; # drop all PerlIO layers possibly created by a <literal>use open</literal> pragma
+$doc = $parser-&gt;parse_fh($fh);
+open my $out, "out.xml";
+binmode $fh; # as above
+$doc-&gt;toFh($fh);
+# or
+print $fh $doc-&gt;toString();</programlisting>
+	      </para>
+	      </listitem>
+	      <listitem>
+		<para>All functions working with DOM accept and return
+		character strings (UTF-8 encoded with UTF8 flag on). E.g.
+		<programlisting><![CDATA[
+my $doc = XML::LibXML:Document->new('1.0',$some_encoding);
+my $element = $doc->createElement($name);
+$element->appendText($text);
+$xml_fragment = $element->toString(); # returns a character string
+$xml_document = $doc->toString(); # returns a byte string
+]]>
+		</programlisting>
+		where
+		<literal>$some_encoding</literal> is the document encoding
+		that will be used when saving the document,
+		and <literal>$name</literal> and <literal>$text</literal>
+		contain character strings (UTF-8 encoded with UTF8 flag on).
+		Note that the method <function>toString</function>
+		returns XML as a character string if applied to 
+		other node than the Document node and 
+		a byte string containing the apropriate
+		<programlisting>&lt;?xml version="1.0" encoding="..."?&gt;</programlisting>
+		declaration if appliled to a <xref linkend="XML-LibXML-Document"/>.
+		</para>
+	      </listitem>
+	      <listitem>
+		<para>DOM methods also accept binary strings in the original encoding of the
+		document to which the node belongs (UTF-8 is assumed if the node is not
+		attached to any document). Exploiting this feature is NOT RECOMMENDED
+		since it is considered a bad practice.
+		</para>
+		<programlisting><![CDATA[
+my $doc = XML::LibXML:Document->new('1.0','iso-8859-2');
+my $text = $doc->createTextNode($some_latin2_encoded_byte_string);
+# WORKS, BUT NOT RECOMMENDED!
+]]>
+		</programlisting>
+	      </listitem>
+	    </orderedlist>
+            <para><emphasis>NOTE:</emphasis> libxml2 support for many
+            encodings is based on the iconv library.  The actual list
+            of supported encodings may vary from platform to
+            platform. To test if your platform works correctly with
+            your language encoding, build a simple document in the
+            particular encoding and try to parse it with XML::LibXML
+            to see if the parser produces any errors. Occasional
+            crashes were reported on rare platforms that ship with a broken
+            version of iconv.</para>
+	</sect1>
         <sect1>
             <title>Version Information</title>
 
@@ -567,7 +664,74 @@ EOT</programlisting>
 
             </variablelist>
         </sect1>
-
+        <sect1>
+	  <title>EXPORTS</title>
+	  <para>
+	    By default the module exports all constants and functions
+	    listed in the :all tag, described below.
+	  </para>
+	</sect1>
+        <sect1>
+	  <title>EXPORT TAGS</title>
+	  <variablelist>
+	    <varlistentry>
+	      <term><literal>:all</literal></term>
+	      <listitem>
+		<para>Includes the tags <literal>:libxml</literal>, <literal>:encoding</literal>, and 
+		<literal>:ns</literal> described below.</para>
+	      </listitem>
+	    </varlistentry>
+	    <varlistentry>
+	      <term><literal>:libxml</literal></term>
+	      <listitem>
+		<para>Exports integer constants for DOM node types (defined in a separately distributed
+		XML::LibXML::Common module).</para>
+		<programlisting>XML_ELEMENT_NODE            =&gt; 1
+XML_ATTRIBUTE_NODE          =&gt; 2
+XML_TEXT_NODE               =&gt; 3
+XML_CDATA_SECTION_NODE      =&gt; 4
+XML_ENTITY_REF_NODE         =&gt; 5
+XML_ENTITY_NODE             =&gt; 6
+XML_PI_NODE                 =&gt; 7
+XML_COMMENT_NODE            =&gt; 8
+XML_DOCUMENT_NODE           =&gt; 9
+XML_DOCUMENT_TYPE_NODE      =&gt; 10
+XML_DOCUMENT_FRAG_NODE      =&gt; 11
+XML_NOTATION_NODE           =&gt; 12
+XML_HTML_DOCUMENT_NODE      =&gt; 13
+XML_DTD_NODE                =&gt; 14
+XML_ELEMENT_DECL            =&gt; 15
+XML_ATTRIBUTE_DECL          =&gt; 16
+XML_ENTITY_DECL             =&gt; 17
+XML_NAMESPACE_DECL          =&gt; 18
+XML_XINCLUDE_START          =&gt; 19
+XML_XINCLUDE_END            =&gt; 20</programlisting>
+	      </listitem>
+	    </varlistentry>
+	    <varlistentry>
+	      <term><literal>:encoding</literal></term>
+	      <listitem>
+		<para>Exports two encoding conversion functions from the (separate) module XML::LibXML::Common.</para>
+		<programlisting>
+encodeToUTF8()
+decodeFromUTF8()
+		</programlisting>
+	      </listitem>
+	    </varlistentry>
+	    <varlistentry>
+	      <term><literal>:libxml</literal></term>
+	      <listitem>
+		<para>Exports two convenience constants: the implicit namespace of the
+		reserved <literal>xml:</literal> prefix,
+		and the implicit namespace for the reserved <literal>xmlns:</literal> prefix.</para>
+		<programlisting>
+XML_XML_NS    =&gt; 'http://www.w3.org/XML/1998/namespace'
+XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
+		</programlisting>
+	      </listitem>
+	    </varlistentry>
+	  </variablelist>
+	</sect1>
         <sect1>
             <title>Related Modules</title>
 
@@ -576,23 +740,22 @@ EOT</programlisting>
 
             <variablelist>
                 <varlistentry>
-                    <term>XML::LibXSLT</term>
+                    <term><olink targetdoc="XML::LibXSLT">XML::LibXSLT</olink></term>
 
                     <listitem>
-                        <para>XSLT Processor using libxslt and XML::LibXML</para>
+                        <para>XSLT 1.0 Processor using libxslt and XML::LibXML</para>
                     </listitem>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Common</term>
-
+                    <term><olink targetdoc="XML::LibXML::Common">XML::LibXML::Common</olink></term>
                     <listitem>
                         <para>Common functions for XML::LibXML related Classes</para>
                     </listitem>
                 </varlistentry>
 
                 <varlistentry>
-                    <term>XML::LibXML::Iterator</term>
+                    <term><olink targetdoc="XML::LibXML::Iterator">XML::LibXML::Iterator</olink></term>
 
                     <listitem>
                         <para>XML::LibXML Implementation of the DOM Traversal Specification</para>
@@ -664,7 +827,7 @@ EOT</programlisting>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Parser">
         <title>Parsing XML Data with XML::LibXML</title>
 
         <titleabbrev>XML::LibXML::Parser</titleabbrev>
@@ -740,7 +903,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                 tag can get accessed and transformed.</para>
 
                 <para>XML::LibXML's DOM parser is not only capable to parse XML data, but also (strict) HTML files. There are three ways to parse
-                documents - as a string, as a Perl filehandle, or as a filename/URL. The return value from each is a XML::LibXML::Document object, which is a DOM
+                documents - as a string, as a Perl filehandle, or as a filename/URL. The return value from each is a <xref linkend="XML-LibXML-Document"/> object, which is a DOM
                 object.</para>
 
 		<para>All of the functions listed below will throw an exception if the document is invalid. To prevent this causing your program exiting, wrap
@@ -891,7 +1054,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                                 <funcsynopsisinfo>$fragment = $parser-&gt;parse_balanced_chunk( $wbxmlstring );</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>This function parses a well balanced XML string into a XML::LibXML::DocumentFragment.</para>
+                            <para>This function parses a well balanced XML string into a <xref linkend="XML-LibXML-DocumentFragment"/>.</para>
                         </listitem>
                     </varlistentry>
 
@@ -1056,7 +1219,8 @@ print $doc-&gt;toString(); # returns "&lt;foo&gt;bar&lt;/foo&gt;"</programlistin
             <sect2>
                 <title>DOM based SAX Parser</title>
 
-                <para>XML::LibXML provides a DOM based SAX parser. The SAX parser is defined in XML::LibXML::SAX::Parser. As it is not a stream based parser, it
+                <para>XML::LibXML provides a DOM based SAX parser. The SAX parser is defined in 
+		the module XML::LibXML::SAX::Parser. As it is not a stream based parser, it
                 parses documents into a DOM and traverses the DOM tree instead.</para>
 
                 <para>The API of this parser is exactly the same as any other Perl SAX2 parser. See XML::SAX::Intro for details.</para>
@@ -1075,15 +1239,15 @@ $parser-&gt;generate( $doc );</programlisting>
                 <para>This is NOT a streaming SAX parser. As I said above, this parser reads the entire document into a DOM and serialises it. Some people
                 couldn't read that in the paragraph above so I've added this warning.</para>
 
-                <para>If you want a streaming SAX parser look at the XML::LibXML::SAX man page</para>
+                <para>If you want a streaming SAX parser look at the <xref linkend="XML-LibXML-SAX"/> man page</para>
             </sect2>
         </sect1>
 
         <sect1>
             <title>Serialization</title>
 
-            <para>XML::LibXML provides some functions to serialize nodes and documents. The serialization functions are described on the XML::LibXML::Node
-            manpage or the XML::LibXML::Document manpage. XML::LibXML checks three global flags that alter the serialization process:</para>
+            <para>XML::LibXML provides some functions to serialize nodes and documents. The serialization functions are described on the <xref linkend="XML-LibXML-Node"/>
+            manpage or the <xref linkend="XML-LibXML-Document"/> manpage. XML::LibXML checks three global flags that alter the serialization process:</para>
 
             <itemizedlist>
                 <listitem>
@@ -1349,7 +1513,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
                         attempts to fetch non-local resources (such as
                         DTD or external entities) will fail (unless
                         custom callbacks are defined).  It may be
-                        necessary to use $parser->recover(1) for
+                        necessary to use $parser-&gt;recover(1) for
                         processing documents requiring such resources
                         while networking is off.
                         </para>
@@ -1376,7 +1540,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-SAX">
         <title>XML::LibXML direct SAX parser</title>
 
         <titleabbrev>XML::LibXML::SAX</titleabbrev>
@@ -1401,7 +1565,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-SAX-Builder">
         <title>Building DOM trees from SAX events.</title>
 
         <titleabbrev>XML::LibXML::SAX::Builder</titleabbrev>
@@ -1431,7 +1595,7 @@ my $doc = $builder-&gt;result();</programlisting>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-DOM">
         <title>XML::LibXML DOM Implementation</title>
 
         <titleabbrev>XML::LibXML::DOM</titleabbrev>
@@ -1485,35 +1649,12 @@ my $doc = $builder-&gt;result();</programlisting>
             <emphasis>only</emphasis>. They might disappear in one of
             the future versions of XML::LibXML, so a user is requested
             to switch over to the official functions.</para>
-
-            <para>More recent versions of perl (e.g. 5.6.1 or higher)
-            support special flags to distinguish between UTF-8 and so
-            called binary data. XML::LibXML provides for these
-            versions functionality to make efficient use of these
-            flags: If a document has set an encoding other than UTF-8
-            all strings that are not already in UTF-8 are implicitly
-            encoded from the document encoding to UTF-8. On output
-            these strings are commonly returned as UTF-8 unless a user
-            does request explicitly the original (aka. document)
-            encoding.</para>
-
-            <para>Older version of perl (such as 5.00503 or less) do
-            not support these flags. If XML::LibXML is build for these
-            versions, all strings have to get encoded to UTF-8 manually
-            before they are passed to any DOM functions.</para>
-
-            <para><emphasis>NOTE:</emphasis> XML::LibXML's magic
-            encoding may not work on all platforms. Some platforms
-            are known to have a broken iconv(), which is partly used
-            by libxml2. To test if your platform works correctly with
-            your language encoding, build a simple document in the
-            particular encoding and try to parse it with
-            XML::LibXML. If your document gets parsed with out causing
-            any segmentation faults, bus errors or whatever your OS
-            throws. An example for such a test can be found in test
-            19encoding.t of the distribution.</para>
-
-            <para><emphasis>Namespaces and XML::LibXML's DOM implementation</emphasis></para>
+	    <sect2>
+	      <title>Encodings and XML::LibXML's DOM implementation</title>
+	    <para>See the section on Encodings in the <emphasis>XML::LibXML</emphasis> manual page.</para>
+	    </sect2>
+	    <sect2>
+	      <title>Namespaces and XML::LibXML's DOM implementation</title>
 
             <para>XML::LibXML's DOM implementation is 
             limited by the DOM implementation of libxml2
@@ -1567,7 +1708,7 @@ my $doc = $builder-&gt;result();</programlisting>
             </para>
             <para>
              Namespace declarations are also created when
-             XML::LibXML::Document's
+             <xref linkend="XML-LibXML-Document"/>'s
              createElementNS() or createAttributeNS() function are used. If the
              a namespace is not declared on the documentElement, the
              namespace will be locally declared for the newly created
@@ -1577,17 +1718,17 @@ my $doc = $builder-&gt;result();</programlisting>
 	     to the attribute and later declared on the node the
              attribute is appended to (if required).</para>
             <para>The following example may explain this a bit:</para>
-            <programlisting> my $doc = XML::LibXML-&gt;createDocument;
- my $root = $doc-&gt;createElementNS( "", "foo" );
- $doc-&gt;setDocumentElement( $root );
+            <programlisting>my $doc = XML::LibXML-&gt;createDocument;
+my $root = $doc-&gt;createElementNS( "", "foo" );
+$doc-&gt;setDocumentElement( $root );
 
- my $attr = $doc-&gt;createAttributeNS( "bar", "bar:foo", "test" );
- $root-&gt;setAttributeNodeNS( $attr );               </programlisting>
+my $attr = $doc-&gt;createAttributeNS( "bar", "bar:foo", "test" );
+$root-&gt;setAttributeNodeNS( $attr );</programlisting>
 
             <para>This piece of code will result in the following document:</para>
 
-            <programlisting> &lt;?xml version="1.0"?&gt;
- &lt;foo xmlns:bar="bar" bar:foo="test"/&gt;</programlisting>
+            <programlisting>&lt;?xml version="1.0"?&gt;
+&lt;foo xmlns:bar="bar" bar:foo="test"/&gt;</programlisting>
 
             <para>The namespace is declared on the document element
               during the setAttributeNodeNS() call.
@@ -1604,10 +1745,11 @@ my $doc = $builder-&gt;result();</programlisting>
             aware functions instead of the simplified versions. For
             example you should <emphasis>never</emphasis> use
             setAttribute() but setAttributeNS().</para>
+	  </sect2>
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Document">
         <title>XML::LibXML DOM Document Class</title>
 
         <titleabbrev>XML::LibXML::Document</titleabbrev>
@@ -1622,7 +1764,7 @@ my $doc = $builder-&gt;result();</programlisting>
         <para>The Document Class is in most cases the result of a parsing process. But sometimes it is necessary to create a Document from scratch. The DOM
         Document Class provides functions that conform to the DOM Core naming style.</para>
 
-        <para>It inherits all functions from <function>XML::LibXML::Node</function> as specified in the DOM specification. This enables access to the nodes
+        <para>It inherits all functions from <xref linkend="XML-LibXML-Node"/> as specified in the DOM specification. This enables access to the nodes
         besides the root element on document level - a <function>DTD</function> for example. The support for these nodes is limited at the moment.</para>
 
         <para>While generally nodes are bound to a document in the DOM concept it is suggested that one should always create a node not bound to any document.
@@ -1643,7 +1785,6 @@ my $doc = $builder-&gt;result();</programlisting>
         <variablelist>
             <varlistentry>
                 <term>new</term>
-
                 <listitem>
                     <funcsynopsis>
                         <funcsynopsisinfo>$dom = XML::LibXML::Document-&gt;new( $version, $encoding );</funcsynopsisinfo>
@@ -1707,9 +1848,9 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$strEncoding = $doc-&gt;actualEncoding();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>returns the encoding in which the XML will be returned by $doc->toString().
+                    <para>returns the encoding in which the XML will be returned by $doc-&gt;toString().
                       This is usually the original encoding of the document as declared
-                      in the XML declaration and returned by $doc->encoding.
+                      in the XML declaration and returned by $doc-&gt;encoding.
                       If the original encoding is not known (e.g. if created in memory or parsed from a
                       XML without a declared encoding), 'UTF-8' is returned.
 		    </para>
@@ -1731,7 +1872,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                     <para>This method allows to change the declaration of
                       encoding in the XML declaration of the document.
 		      The value also affects the encoding in which the
-		      document is serialized to XML by $doc->toString().
+		      document is serialized to XML by $doc-&gt;toString().
 	              Use setEncoding() to remove the encoding declaration.
 		    </para>
                 </listitem>
@@ -1817,11 +1958,16 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                     </funcsynopsis>
 
                     <para><emphasis>toString</emphasis> is a DOM serializing function,
-                     so the DOM Tree can be serialized into a XML string, ready for output.</para>
+		    so the DOM Tree is serialized into a XML string, ready for output.</para>
                     <para>IMPORTANT: unlike toString for other nodes, on document nodes
 		      this function returns the XML as a byte string in the original encoding of the
-                      document (see the actualEncoding() method)!</para>
-
+                      document (see the actualEncoding() method)! This means you
+		      can simply do:
+		    </para>
+		    <programlisting>open OUT, $file;
+print OUT $doc-&gt;toString;</programlisting>
+                   <para>regardless of the actual encoding of the document.
+		   See the section on encodings in <xref linkend="XML-LibXML"/> for more details.</para>
                     <para>The optional <emphasis>$format</emphasis> parameter sets the indenting of the output. This parameter is expected to be an
                     <function>integer</function> value, that specifies that indentation should be used. The format parameter can have three different values if
                     it is used:</para>
@@ -1842,7 +1988,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
                 <listitem>
                     <para><funcsynopsis><funcsynopsisinfo>$c14nstr = $doc-&gt;toStringC14N($comment_flag,$xpath); </funcsynopsisinfo></funcsynopsis>
-	            See the documentation in XML::LibXML::Node.
+	            See the documentation in <xref linkend="XML-LibXML-Node"/>.
                     </para>
                 </listitem>
             </varlistentry>
@@ -1851,7 +1997,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
                 <listitem>
                     <para><funcsynopsis><funcsynopsisinfo>$ec14nstr = $doc-&gt;toStringEC14N($inclusive_prefix_list, $comment_flag,$xpath); </funcsynopsisinfo></funcsynopsis>
-	            See the documentation in XML::LibXML::Node.
+	            See the documentation in <xref linkend="XML-LibXML-Node"/>.
                    </para>
                 </listitem>
             </varlistentry>
@@ -1914,7 +2060,8 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$state = $doc-&gt;toFH($fh, $format);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function is similar to toString(), but it writes the document directly to a filehandle or a stream.</para>
+                    <para>This function is similar to toString(), but it writes the document directly to a filehandle or a stream. A byte stream in the document encoding is passed to the file handle. Do NOT apply any <literal>:encoding(...)</literal> or <literal>:utf8</literal> PerlIO layer to
+		    the filehandle! See the section on encodings in <xref linkend="XML-LibXML"/> for more details.</para>
 
                     <para>The format parameter has the same behaviour as in toString().</para>
                 </listitem>
@@ -1928,7 +2075,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$str = $document-&gt;toStringHTML();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>toStringHTML</emphasis> serialize the tree to a string as HTML. With this method indenting is automatic and managed by
+                    <para><emphasis>toStringHTML</emphasis> serialize the tree to a byte string in the document encoding as HTML. With this method indenting is automatic and managed by
                     libxml2 internally.</para>
                 </listitem>
             </varlistentry>
@@ -1955,7 +2102,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
 
                     <para>Returns either TRUE or FALSE depending on whether the DOM Tree is a valid Document or not.</para>
 
-                    <para>You may also pass in a XML::LibXML::Dtd object, to validate against an external DTD:</para>
+                    <para>You may also pass in a <xref linkend="XML-LibXML-Dtd"/> object, to validate against an external DTD:</para>
 
                     <programlisting> if (!$dom-&gt;is_valid($dtd)) {
      warn("document is not valid!");
@@ -2318,7 +2465,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>Implements the DOM Level 2 function</para>
 
-                    <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2332,7 +2479,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>Implements the DOM Level 2 function</para>
 
-                    <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2346,7 +2493,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>This allows the fetching of all nodes from a given document with the given Localname.</para>
 
-                    <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2400,7 +2547,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
       </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Node">
         <title>Abstract Base Class of XML::LibXML Nodes</title>
 
         <titleabbrev>XML::LibXML::Node</titleabbrev>
@@ -2535,13 +2682,13 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$type = $node-&gt;nodeType;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Return the node's type. The possible types are described in the libxml2 <emphasis>tree.h</emphasis> documentation. The return
-                    value of this function is a numeric value. Therefore it differs from the result of perl ref function.</para>
+                    <para>Return a numeric value representing the node type of this node.
+		    The module XML::LibXML by default exports constants
+		    for the node types (see the EXPORT section in the
+		    <xref linkend="XML-LibXML"/> manual page).</para>
                 </listitem>
             </varlistentry>
 	
-
-        
             <varlistentry>
                 <term>unbindNode</term>
 
@@ -2839,7 +2986,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>This function binds a node to another DOM. This method unbinds the node first, if it is already bound to another document.</para>
 
-                    <para>This function is the opposite calling of XML::LibXML::Document's adoptNode() function. Because of this it has the same limitations
+                    <para>This function is the opposite calling of <xref linkend="XML-LibXML-Document"/>'s adoptNode() function. Because of this it has the same limitations
                     with Entity References as adoptNode().</para>
                 </listitem>
             </varlistentry>
@@ -2895,7 +3042,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>@nodes = $node-&gt;findnodes( $xpath_expression );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
 
 	  <para><emphasis>NOTE ON NAMESPACES AND XPATH</emphasis>:</para>
 	  <para>A common mistake about
@@ -2922,7 +3069,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 	    <listitem>
 	      <para>
 		The recommended way is to use the
-		<function>XML::LibXML::XPathContext</function> module
+		<xref linkend="XML-LibXML-XPathContext"/> module
 		to define an explicit context
 		for XPath evaluation, in which a document independent
 		prefix-to-namespace mapping can be defined. For
@@ -2960,10 +3107,10 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para><emphasis>find</emphasis> evaluates the XPath 1.0 expression using the current node as the context of the expression, and returns the
                     result depending on what type of result the XPath expression had. For example, the XPath "1 * 3 + 52" results in a
-                    <function>XML::LibXML::Number</function> object being returned. Other expressions might return a <function>XML::LibXML::Boolean</function>
-                    object, or a <function>XML::LibXML::Literal</function> object (a string). Each of those objects uses Perl's overload feature to "do
+                    <olink target="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return a <olink target="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
+                    object, or a <olink target="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
                     the right thing" in different contexts.</para>
-	  <para>See also XML::LibXML::XPathContext-&gt;find.</para>
+	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;find.</para>
                 </listitem>
             </varlistentry>
         
@@ -2983,7 +3130,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para>That is, it returns the literal value of the results. This enables you to ensure that you get a string back from your search, allowing
                     certain shortcuts. This could be used as the equivalent of XSLT's &lt;xsl:value-of select="some_xpath"/&gt;.</para>
-	  <para>See also XML::LibXML::XPathContext-&gt;findvalue.</para>
+	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;findvalue.</para>
                 </listitem>
             </varlistentry>
         
@@ -2999,7 +3146,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para><emphasis>getChildnodes</emphasis> implements a more intuitive interface to the childnodes of the current node. It enables you to pass
                     all children directly to a <function>map</function> or <function>grep</function>. If this function is called in scalar context, a
-                    <function>XML::LibXML::NodeList</function> object will be returned.</para>
+                    <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object will be returned.</para>
                 </listitem>
             </varlistentry>
         
@@ -3013,7 +3160,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                         <funcsynopsisinfo>$xmlstring = $node-&gt;toString($format,$docencoding);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This method is similar to <function>XML::LibXML::Document::toString</function> but for a single node. It returns a string consisting of XML serialization of the given node and all its descendants. Unlike <function>XML::LibXML::Document::toString</function>, in this case the resulting string is by default a character string (UTF-8 encoded with UTF8 flag on). An optional flag $format controls indentation, as in <function>XML::LibXML::Document::toString</function>. If the second optional $docencoding flag is true, the result will be a byte string in the document encoding (see <function>XML::LibXML::Document::actualEncoding</function>).</para>
+                    <para>This method is similar to the method <function>toString</function> of a <xref linkend="XML-LibXML-Document"/> but for a single node. It returns a string consisting of XML serialization of the given node and all its descendants. Unlike <function>XML::LibXML::Document::toString</function>, in this case the resulting string is by default a character string (UTF-8 encoded with UTF8 flag on). An optional flag $format controls indentation, as in <function>XML::LibXML::Document::toString</function>. If the second optional $docencoding flag is true, the result will be a byte string in the document encoding (see <function>XML::LibXML::Document::actualEncoding</function>).</para>
                 </listitem>
             </varlistentry>
 
@@ -3165,7 +3312,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     handled while accessing the functions result.</para>
 
                     <para>If this function is called in array context the attribute nodes are returned as an array. In scalar context the function will return a
-                    <function>XML::LibXML::NamedNodeMap</function> object.</para>
+                    <olink target="XML::LibXML::NamedNodeMap">XML::LibXML::NamedNodeMap</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3287,7 +3434,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
       </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Element">
         <title>XML::LibXML Class for Element Nodes</title>
 
         <titleabbrev>XML::LibXML::Element</titleabbrev>
@@ -3300,7 +3447,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	<sect1>
 	  <title>Methods</title>
 	  <para>
-	    The class inherits from XML::LibXML::Node. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -3566,7 +3713,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	    A special <function>tagname</function> '*' can be used to match any tag name.
 	  </para>
 
-                    <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3584,7 +3731,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                	    A special <function>localname</function> '*' can be used to match any local name
 	            and <function>nsURI</function> '*' can be used to match any namespace URI.</para>
 
-                    <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3601,7 +3748,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>This function is not found in the DOM specification. It is a mix of getElementsByTagName and getElementsByTagNameNS. It will fetch all
                     tags matching the given local-name. This allows one to select tags with the same local name across namespace borders.</para>
 
-                    <para>In SCALAR context this function returns a <function>XML::LibXML::NodeList</function> object.</para>
+                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3809,7 +3956,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Text">
         <title>XML::LibXML Class for Text Nodes</title>
 
         <titleabbrev>XML::LibXML::Text</titleabbrev>
@@ -3828,7 +3975,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from XML::LibXML::Node. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4033,7 +4180,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Comment">
         <title>XML::LibXML Comment Class</title>
 
         <titleabbrev>XML::LibXML::Comment</titleabbrev>
@@ -4046,13 +4193,13 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Description</title>
 	
-        <para>This class provides all functions of <emphasis>XML::LibXML::Text</emphasis>, but for comment nodes. This can be done, since only the output of the
+        <para>This class provides all functions of <xref linkend="XML-LibXML-Text"/>, but for comment nodes. This can be done, since only the output of the
         node types is different, but not the data structure. :-)</para>
 	</sect1>
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from XML::LibXML::Node. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4078,7 +4225,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-CDATASection">
         <title>XML::LibXML Class for CDATA Sections</title>
 
         <titleabbrev>XML::LibXML::CDATASection</titleabbrev>
@@ -4090,12 +4237,12 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         </sect1>
 	<sect1>
 	  <title>Description</title>
-        <para>This class provides all functions of <emphasis>XML::LibXML::Text</emphasis>, but for CDATA nodes.</para>
+        <para>This class provides all functions of <xref linkend="XML-LibXML-Text"/>, but for CDATA nodes.</para>
 	</sect1>
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from XML::LibXML::Node. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4122,7 +4269,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Attr">
         <title>XML::LibXML Attribute Class</title>
 
         <titleabbrev>XML::LibXML::Attr</titleabbrev>
@@ -4140,7 +4287,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from XML::LibXML::Node. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4158,7 +4305,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>Class constructor. If you need to work with ISO encoded strings, you should <emphasis>always</emphasis> use the <function>createAttrbute</function>
-                    of <emphasis>XML::LibXML::Document</emphasis>.</para>
+                    of <xref linkend="XML-LibXML-Document"/>.</para>
                 </listitem>
             </varlistentry>
 
@@ -4289,7 +4436,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-DocumentFragment">
         <title>XML::LibXML's DOM L2 Document Fragment Implementation</title>
 
         <titleabbrev>XML::LibXML::DocumentFragment</titleabbrev>
@@ -4307,7 +4454,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Namespace">
         <title>XML::LibXML Namespace Implementation</title>
 
         <titleabbrev>XML::LibXML::Namespace</titleabbrev>
@@ -4323,7 +4470,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
         <para>Namespace nodes are returned by both $element-&gt;findnodes('namespace::foo') or by $node-&gt;getNamespaces().</para>
 
         <para>The namespace node API is not part of any current DOM API, and so it is quite minimal. It should be noted that namespace nodes are
-        <emphasis>not</emphasis> a sub class of XML::LibXML::Node, however Namespace nodes act a lot like attribute nodes, and similarly named methods will
+        <emphasis>not</emphasis> a sub class of <xref linkend="XML-LibXML-Node"/>, however Namespace nodes act a lot like attribute nodes, and similarly named methods will
         return what you would expect if you treated the namespace node as an attribute. Note that in order to fix several inconsistencies between the API and the documentation, the behavior of some functions have been changed in 1.64.</para>
 	</sect1>
         <sect1>
@@ -4338,7 +4485,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     </funcsynopsis>
 
                     <para>Creates a new Namespace node. Note that this is not a 'node' as an attribute or an element node. Therefore you can't do
-                    call all XML::LibXML::Node Functions. All functions available for this node are listed below.</para>
+                    call all <xref linkend="XML-LibXML-Node"/> Functions. All functions available for this node are listed below.</para>
 
                     <para>Optionally you can pass the prefix to the namespace constructor. If this second parameter is omitted you will create a so called
                     default namespace. Note, the newly created namespace is not bound to any document or node, therefore you should not expect it to be
@@ -4457,7 +4604,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-PI">
         <title>XML::LibXML Processing Instructions</title>
 
         <titleabbrev>XML::LibXML::PI</titleabbrev>
@@ -4471,7 +4618,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	  <title>Description</title>
 
         <para>Processing instructions are implemented with XML::LibXML with read and write access. The PI data is the PI without the PI target (as specified in
-        XML 1.0 [17]) as a string. This string can be accessed with getData as implemented in XML::LibXML::Node.</para>
+        XML 1.0 [17]) as a string. This string can be accessed with getData as implemented in <xref linkend="XML-LibXML-Node"/>.</para>
 
         <para>The write access is aware about the fact, that many processing instructions have attribute like data. Therefore setData() provides besides the DOM
         spec conform Interface to pass a set of named parameter. So the code segment</para>
@@ -4491,7 +4638,7 @@ $dom-&gt;appendChild( $pi );</programlisting>
 
         <para>will have the same result as above.</para>
 
-        <para>XML::LibXML::PI's implementation of setData() documented below differs a bit from the the standard version as available in XML::LibXML::Node():</para>
+        <para><xref linkend="XML-LibXML-PI"/>'s implementation of setData() documented below differs a bit from the the standard version as available in <xref linkend="XML-LibXML-Node"/>:</para>
         <variablelist>
             <varlistentry>
                 <term>setData</term>
@@ -4510,7 +4657,7 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Dtd">
         <title>XML::LibXML DTD Handling</title>
 
         <titleabbrev>XML::LibXML::Dtd</titleabbrev>
@@ -4525,7 +4672,7 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
 
         <para>No support is available as yet for parsing from a filehandle.</para>
 
-        <para>XML::LibXML::Dtd is a sub-class of Node, so all the methods available to nodes (particularly toString()) are available to Dtd objects.</para>
+        <para>XML::LibXML::Dtd is a sub-class of <xref linkend="XML-LibXML-Node"/>, so all the methods available to nodes (particularly toString()) are available to Dtd objects.</para>
 	</sect1>
         <sect1>
             <title>Methods</title>
@@ -4599,7 +4746,7 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-InputCallback">
         <title>XML::LibXML Class for Input Callbacks</title>
 
         <titleabbrev>XML::LibXML::InputCallback</titleabbrev>
@@ -4908,14 +5055,14 @@ $parser-&gt;parse_file( $some_xml_file );
         </sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-RelaxNG">
         <title>RelaxNG Schema Validation</title>
 
         <titleabbrev>XML::LibXML::RelaxNG</titleabbrev>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-$doc = XML::LibXML->new->parse_file($url);</programlisting>
+$doc = XML::LibXML-&gt;new-&gt;parse_file($url);</programlisting>
         </sect1>
         <sect1>
             <title>Description</title>
@@ -4944,7 +5091,7 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
 
                     <para>The string parameter will parse the schema from the given XML string.</para>
 
-                    <para>The DOM parameter allows to parse the schema from a pre-parsed XML::LibXML::Document.</para>
+                    <para>The DOM parameter allows to parse the schema from a pre-parsed <xref linkend="XML-LibXML-Document"/>.</para>
 
                     <para>Note that the constructor will die() if the schema does not meed the constraints of the RelaxNG specification.</para>
                 </listitem>
@@ -4968,14 +5115,14 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
 	</sect1>
     </chapter>
 
-    <chapter>
+    <chapter id="XML-LibXML-Schema">
         <title>XML Schema Validation</title>
 
         <titleabbrev>XML::LibXML::Schema</titleabbrev>
         <sect1>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
-$doc = XML::LibXML->new->parse_file($url);</programlisting>
+$doc = XML::LibXML-&gt;new-&gt;parse_file($url);</programlisting>
         </sect1>
         <sect1>
             <title>Description</title>
@@ -5015,7 +5162,7 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
                     </funcsynopsis>
 
                     <para>This function allows to validate a (parsed) document against the given XML Schema.
-                     The argument of this function should be a XML::LibXML::Document object.
+                     The argument of this function should be a <xref linkend="XML-LibXML-Document"/> object.
 	             If this function succeeds, it will return 0, otherwise it
                     will die() and report the errors found. Because of this validate() should be always evaluated.</para>
                 </listitem>
@@ -5023,7 +5170,7 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
         </variablelist>
 	</sect1>
     </chapter>
-  <chapter>
+  <chapter id="XML-LibXML-XPathContext">
     <title>XPath Evaluation</title>
     <titleabbrev>XML::LibXML::XPathContext</titleabbrev>
     <para>
@@ -5138,8 +5285,8 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      of findnodes: Boolean, Literal, Number, Node
 	      (e.g. Document, Element, etc.), or NodeList. For
 	      convenience, simple (non-blessed) array references
-	      containing only <literal>XML::LibXML::Node</literal> objects can be
-	      used instead of a <literal>XML::LibXML::NodeList</literal>.</para>
+	      containing only <xref linkend="XML-LibXML-Node"/> objects can be
+	      used instead of a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5184,9 +5331,9 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      object that can be a result of findnodes: Boolean,
 	      Literal, Number, Node (e.g. Document, Element, etc.), or
 	      NodeList. For convenience, simple (non-blessed) array
-	      references containing only <literal>XML::LibXML::Node</literal>
+	      references containing only <xref linkend="XML-LibXML-Node"/>
 	      objects can be used instead of a
-	      <literal>XML::LibXML::NodeList</literal>.</para>
+	      <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5221,7 +5368,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
           <funcsynopsis><funcsynopsisinfo>$nodelist = $xpc-&gt;findnodes($xpath, $context_node )</funcsynopsisinfo></funcsynopsis>
             <para>Performs the xpath statement on the current node and
 	      returns the result as an array. In scalar context
-	      returns a <literal>XML::LibXML::NodeList</literal> object. Optionally, a
+	      returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>
           </listitem>
@@ -5234,10 +5381,10 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      as the context of the expression, and returns the result
 	      depending on what type of result the XPath expression
 	      had. For example, the XPath <literal>1 * 3 +
-	      52</literal> results in a <literal>XML::LibXML::Number</literal> object
+	      52</literal> results in a <olink target="XML::LibXML::Number">XML::LibXML::Number</olink> object
 	      being returned. Other expressions might return a
-	      <literal>XML::LibXML::Boolean</literal> object, or a
-	      <literal>XML::LibXML::Literal</literal> object (a string). Each of those
+	      <olink target="XML::LibXML::Boolean">XML::LibXML::Boolean</olink> object, or a
+	      <olink target="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those
 	      objects uses Perl's overload feature to ``do the right
 	      thing'' in different contexts. Optionally, a node may be
 	      passed as a second argument to set the context node for
@@ -5352,13 +5499,13 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
       </para>
     </sect1>
   </chapter>
-  <chapter>
+  <chapter id="XML-LibXML-Reader">
     <title>XML::LibXML::Reader - interface to libxml2 pull parser</title>
     <titleabbrev>XML::LibXML::Reader</titleabbrev>
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML::Reader;</programlisting>
-      <programlisting>$reader = new XML::LibXML::Reader(location => "file.xml")
+      <programlisting>$reader = new XML::LibXML::Reader(location =&gt; "file.xml")
        or die "cannot read file.xml\n";
 while ($reader-&gt;read) {
   processNode($reader);
@@ -5374,7 +5521,7 @@ sub processNode {
 </programlisting>
       <para>or</para>
       <programlisting>
-  $reader = new XML::LibXML::Reader(location => "file.xml")
+  $reader = new XML::LibXML::Reader(location =&gt; "file.xml")
        or die "cannot read file.xml\n";
   $reader-&gt;preservePattern('//table/tr');
   $reader-&gt;finish;
@@ -5462,7 +5609,7 @@ sub processNode {
             <term>DOM</term>
             <listitem>
               <para>Use reader API to walk through a pre-parsed
-		XML::LibXML::Document.</para>
+		<xref linkend="XML-LibXML-Document"/>.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -5486,7 +5633,7 @@ sub processNode {
           <varlistentry>
             <term>RelaxNG</term>
             <listitem>
-              <para>can be used to pass either a XML::LibXML::RelaxNG
+              <para>can be used to pass either a <xref linkend="XML-LibXML-RelaxNG"/>
 		object or a filename or URL of a RelaxNG schema to the
 		constructor. The schema is then used to validate the
 		document as it is processed.</para>
@@ -5495,7 +5642,7 @@ sub processNode {
           <varlistentry>
             <term>Schema</term>
             <listitem>
-              <para>can be used to pass either a XML::LibXML::Schema
+              <para>can be used to pass either a <xref linkend="XML-LibXML-Schema"/>
 		object or a filename or URL of a W3C XSD schema to the
 		constructor. The schema is then used to validate the
 		document as it is processed.</para>
@@ -6131,3 +6278,5 @@ sub processNode {
     </sect1>
   </chapter>
 </book>
+
+
