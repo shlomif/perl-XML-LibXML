@@ -306,6 +306,9 @@ sub MY::manifypods {
 #    $str =~ s/^manifypods : pure_all (.*)$/manifypods : pure_all docs $1/m;
     $str .= <<EOF;
 
+docs-fast :
+\t\@$^X -Iblib/arch -Iblib/lib example/xmllibxmldocs.pl docs/libxml.dbk lib/XML/LibXML/
+
 docs : pure_all
 \t\@$^X -Iblib/arch -Iblib/lib example/xmllibxmldocs.pl docs/libxml.dbk lib/XML/LibXML/
 \t\@$^X -pi.old -e 's/a/a/' Makefile.PL
