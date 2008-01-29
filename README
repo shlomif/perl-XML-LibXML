@@ -21,6 +21,8 @@ the previous one. See XML::LibXML::InputCallback manual page for details.
 In 1.61 the XML::LibXML::XPathContext module, previously distributed
 separately, was merged in.
 
+In 1.66, an experimental support for Perl threads has been implemented.
+
 
 DEPENDENCIES
 ============
