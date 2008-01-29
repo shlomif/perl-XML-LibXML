@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 54 };
+BEGIN { plan tests => 65 };
 
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -141,4 +141,38 @@ ok($@);
 eval { $xc4->findvalue('last()') };
 ok($@);
 
+{
+ my $d = XML::LibXML->new()->parse_string(q~<x:a xmlns:x="http://x.com" xmlns:y="http://x1.com"><x1:a xmlns:x1="http://x1.com"/></x:a>~);
+ {
+   my $x = XML::LibXML::XPathContext->new;
 
+   # use the document's declaration
+   ok( $x->findvalue('count(/x:a/y:a)',$d->documentElement)==1 );
+
+   $x->registerNs('x', 'http://x1.com');
+   # x now maps to http://x1.com, so it won't match the top-level element
+   ok( $x->findvalue('count(/x:a)',$d->documentElement)==0 );
+
+   $x->registerNs('x1', 'http://x.com');
+   # x1 now maps to http://x.com
+   # x1:a will match the first element
+   ok( $x->findvalue('count(/x1:a)',$d->documentElement)==1 );
+   # but not the second 
+   ok( $x->findvalue('count(/x1:a/x1:a)',$d->documentElement)==0 );
+   # this will work, though
+   ok( $x->findvalue('count(/x1:a/x:a)',$d->documentElement)==1 );
+   # the same using y for http://x1.com
+   ok( $x->findvalue('count(/x1:a/y:a)',$d->documentElement)==1 );
+   $x->registerNs('y', 'http://x.com');
+   # y prefix remapped
+   ok( $x->findvalue('count(/x1:a/y:a)',$d->documentElement)==0 );
+   ok( $x->findvalue('count(/y:a/x:a)',$d->documentElement)==1 );
+   $x->registerNs('y', 'http://x1.com');
+   # y prefix remapped back
+   ok( $x->findvalue('count(/x1:a/y:a)',$d->documentElement)==1 );
+   $x->unregisterNs('x');
+   ok( $x->findvalue('count(/x:a)',$d->documentElement)==1 );
+   $x->unregisterNs('y');
+   ok( $x->findvalue('count(/x:a/y:a)',$d->documentElement)==1 );
+ }
+}
