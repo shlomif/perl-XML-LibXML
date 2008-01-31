@@ -10,7 +10,12 @@ use Config;
 use Symbol;
 use File::Spec;
 
-use v5.6.1; # refuse to compile on earlier
+BEGIN {
+  if ($] < 5.006_001) {
+    warn "\nSorry, at least Perl 5.6.1 is required for this module!\n\n";
+    exit;
+  }
+}
 
 $|=0;
 my %config;
