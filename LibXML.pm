@@ -14,6 +14,7 @@ use XML::LibXML::Common qw(:encoding :libxml);
 use constant XML_XMLNS_NS => 'http://www.w3.org/2000/xmlns/';
 use constant XML_XML_NS => 'http://www.w3.org/XML/1998/namespace';
 
+use XML::LibXML::Error;
 use XML::LibXML::NodeList;
 use XML::LibXML::XPathContext;
 use IO::Handle; # for FH reads called as methods
@@ -496,13 +497,11 @@ sub parse_string {
     if ( defined $self->{SAX} ) {
         my $string = shift;
         $self->{SAX_ELSTACK} = [];
-        
         eval { $result = $self->_parse_sax_string($string); };
-
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err;
+	    chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -513,7 +512,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err;
+	    chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -540,7 +539,7 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err;
+	    chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -550,7 +549,7 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err;
+	    chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -578,7 +577,7 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err;
+	    chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -588,7 +587,7 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err;
+	    chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -638,7 +637,7 @@ sub parse_xml_chunk {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
-        chomp $err;
+        chomp $err unless ref $err;
         croak $err;
     }
 
@@ -655,7 +654,7 @@ sub parse_balanced_chunk {
     my $err = $@;
     $self->_cleanup_callbacks();
     if ( $err ) {
-        chomp $err;
+        chomp $err unless ref $err;
         croak $err;
     }
     return $rv
@@ -680,7 +679,7 @@ sub processXIncludes {
     }
 
     if ( $err ) {
-        chomp $err;
+        chomp $err unless ref $err;
         croak $err;
     }
     return $rv;
@@ -701,7 +700,7 @@ sub process_xincludes {
     my $err = $@;
     $self->_cleanup_callbacks();
     if ( $err ) {
-        chomp $err;
+        chomp $err unless ref $err;
         croak $@;
     }
     return $rv;
@@ -745,7 +744,7 @@ sub parse_html_string {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
-      chomp $err;
+      chomp $err unless ref $err;
       $self->_cleanup_callbacks();
       croak $err;
     }
@@ -769,7 +768,7 @@ sub parse_html_file {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
-      chomp $err;
+      chomp $err unless ref $err;
       $self->_cleanup_callbacks();
       croak $err;
     }
@@ -793,7 +792,7 @@ sub parse_html_fh {
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
-      chomp $err;
+      chomp $err unless ref $err;
       $self->_cleanup_callbacks();
       croak $err;
     }
@@ -837,7 +836,7 @@ sub push {
     my $err = $@;
     $self->_cleanup_callbacks();
     if ( $err ) {
-        chomp $err;
+        chomp $err unless ref $err;
         croak $err;
     }
 }
@@ -882,7 +881,7 @@ sub finish_push {
     delete $self->{CONTEXT};
     my $err = $@;
     if ( $err ) {
-        chomp $err;
+        chomp $err unless ref $err;
         croak( $err );
     }
     return $retval;

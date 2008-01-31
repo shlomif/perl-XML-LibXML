@@ -741,10 +741,12 @@ EOXML
     eval { $parser->parse_string( $badxml ); };
     # correct line number may or may not be present
     # depending on libxml2 version
+    print $@;
     ok( $@ =~ /^:[03]:/ );
 
     $parser->line_numbers(1);
     eval { $parser->parse_string( $badxml ); };
+    print $@;
     ok( $@ =~ /^:3:/ );
 
     # switch off validation for the following tests

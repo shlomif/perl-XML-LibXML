@@ -361,7 +361,9 @@ use XML::LibXML::Common qw(:libxml);
         }
         {
 	    $parser2->recover(1);
-	    local $SIG{'__WARN__'} = sub { }; 
+	    local $SIG{'__WARN__'} = sub { 
+   	       print "warning caught: @_\n";
+	    }; 
             my $doc2 = $parser2->parse_string($string4);
 #            my @as   = $doc2->getElementsByTagName( "C:A" );
 #            ok( scalar( @as ), 3);
