@@ -75,7 +75,7 @@ sub {
 
 ########### Error Handling ###########
 {
-  my $xml = '<a>Text</b>';
+  my $xml = '<foo><bar/><a>Text</b></foo>';
 
   my $handler = SAXErrorTester->new;
 
@@ -201,6 +201,11 @@ sub fatal_error {
     $_[0]->{fatal_called} = 1;
 }
 
+sub start_element {
+    # test if we can do other stuff 
+    XML::LibXML->new->parse_string("<foo/>");
+    return;
+}
 sub new {
     bless {}, shift;
 }

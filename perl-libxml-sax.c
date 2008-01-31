@@ -26,6 +26,19 @@ extern "C" {
 }
 #endif
 
+
+/* 
+   we must call CLEAR_SERROR_HANDLER upon each excurse from 
+   perl
+*/
+#define WITH_SERRORS
+
+#ifdef WITH_SERRORS
+#define CLEAR_SERROR_HANDLER /*xmlSetStructuredErrorFunc(NULL,NULL);*/
+#else
+#define CLEAR_SERROR_HANDLER
+#endif
+
 #define NSDELIM ':'
 /* #define NSDEFAULTURI "http://www.w3.org/XML/1998/namespace" */ 
 #define NSDEFAULTURI "http://www.w3.org/2000/xmlns/"
@@ -123,6 +136,7 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser, SV * saved_error )
     SV ** th;
     dTHX;
 
+    CLEAR_SERROR_HANDLER
     vec = (PmmSAXVector*) xmlMalloc( sizeof(PmmSAXVector) );
 
     vec->ns_stack_root = xmlNewDoc(NULL);
@@ -232,6 +246,7 @@ PSaxStartPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
     }
     FREETMPS ;
     LEAVE ;
+    CLEAR_SERROR_HANDLER
 }
 
 void
@@ -277,6 +292,7 @@ PSaxEndPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
     
     FREETMPS ;
     LEAVE ;
+    CLEAR_SERROR_HANDLER
 }
 
 void 
@@ -677,6 +693,7 @@ PSaxStartDocument(void * ctx)
         PUTBACK;
         
         call_method( "xml_decl", G_SCALAR | G_EVAL | G_DISCARD );
+	CLEAR_SERROR_HANDLER
         sv_2mortal(rv);
         if (SvTRUE(ERRSV)) {
             STRLEN n_a;
@@ -686,7 +703,7 @@ PSaxStartDocument(void * ctx)
         FREETMPS ;
         LEAVE ;
     }
-
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -714,7 +731,7 @@ PSaxEndDocument(void * ctx)
     
     FREETMPS ;
     LEAVE ;
-
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -764,8 +781,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     
     FREETMPS ;
     LEAVE ;
-
-
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -804,7 +820,7 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     LEAVE ;
 
     PmmNarrowNsStack(sax, handler);
-
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -853,7 +869,7 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
         LEAVE ;
 
     }
-
+    CLEAR_SERROR_HANDLER;
     return 1;
 }
 
@@ -894,7 +910,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
         FREETMPS ;
         LEAVE ;
     }
-
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -959,7 +975,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         LEAVE ;
 
     }
-
+    CLEAR_SERROR_HANDLER
     return 1;
 
 }
@@ -1001,6 +1017,7 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
         FREETMPS ;
         LEAVE ;
     }
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -1054,6 +1071,7 @@ void PSaxExternalSubset (void * ctx,
         FREETMPS ;
         LEAVE ;
     }
+    CLEAR_SERROR_HANDLER
     return;
 }
 
@@ -1160,7 +1178,7 @@ PmmSaxWarning(void * ctx, const char * msg, ...)
     
     FREETMPS ;
     LEAVE ;
-
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -1173,6 +1191,7 @@ PmmSaxError(void * ctx, const char * msg, ...)
 
     va_list args;
     SV * svMessage;
+
 #if LIBXML_VERSION > 20600
     xmlErrorPtr last_err = xmlCtxtGetLastError( ctxt );
 #endif    
@@ -1191,9 +1210,11 @@ PmmSaxError(void * ctx, const char * msg, ...)
     va_start(args, msg);
     sv_vsetpvfn(svMessage, msg, xmlStrlen((const xmlChar *)msg), &args, NULL, 0, NULL);
     va_end(args);
-
-    sv_catsv( sax->saved_error, svMessage );
-
+    if (SvOK(sax->saved_error)) {
+      sv_catsv( sax->saved_error, svMessage );
+    } else {
+      sv_setsv( sax->saved_error, svMessage );
+    }
     XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->col)));
@@ -1220,6 +1241,7 @@ PmmSaxError(void * ctx, const char * msg, ...)
     
     FREETMPS ;
     LEAVE ;
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 
@@ -1248,7 +1270,11 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     PUSHMARK(SP) ;
     XPUSHs(sax->parser);
 
-    sv_catsv( sax->saved_error, svMessage );
+    if (SvOK(sax->saved_error)) {
+      sv_catsv( sax->saved_error, svMessage );
+    } else {
+      sv_setsv( sax->saved_error, svMessage );
+    }
 
     XPUSHs(sv_2mortal(svMessage));
     XPUSHs(sv_2mortal(newSViv(ctxt->input->line)));
@@ -1263,6 +1289,7 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     
     FREETMPS ;
     LEAVE ;
+    CLEAR_SERROR_HANDLER
     return 1;
 }
 

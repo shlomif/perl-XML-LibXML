@@ -195,9 +195,13 @@ EOF
 {
   my $bad_xml = <<'EOF';
 <root>
+  <foo/>
   <x>
      foo
   </u>
+  <x>
+    foo
+  </x>
 </root>
 EOF
   my $reader = new XML::LibXML::Reader(
@@ -205,7 +209,10 @@ EOF
     URI => "mystring.xml"
    );
   eval { $reader->finish };
-  ok((defined $@ and $@ =~ /in mystring.xml at line 2:/), 'catchin error');
+  use Data::Dumper;
+  print Dumper($@);
+  print $@;
+  ok((defined $@ and $@ =~ /in mystring.xml at line 3:|mystring.xml:5:/), 'catchin error');
 }
 
 {
@@ -224,7 +231,8 @@ EOF
 	RelaxNG => $RNG,
        );
       eval { $reader->finish };
-      ok($@, "catch validation error for ".(ref($RNG) ? 'XML::LibXML::RelaxNG' : 'RelaxNG file'));
+      print $@;
+      ok($@, "catch validation error for a ".(ref($RNG) ? 'XML::LibXML::RelaxNG' : 'RelaxNG file'));
     }
 
   }
