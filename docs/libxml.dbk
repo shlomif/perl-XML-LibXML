@@ -4313,7 +4313,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     of <xref linkend="XML-LibXML-Document"/>.</para>
                 </listitem>
             </varlistentry>
-
+        
             <varlistentry>
                 <term>getValue</term>
 
@@ -4326,9 +4326,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <function>not specified</function>.</para>
                 </listitem>
             </varlistentry>
-        
-
-        
+                
             <varlistentry>
                 <term>value</term>
 
@@ -5577,6 +5575,7 @@ sub processNode {
   my $reader = XML::LibXML::Reader-&gt;new( location =&gt; "file.xml", ... );
   my $reader = XML::LibXML::Reader-&gt;new( string =&gt; $xml_string, ... );
   my $reader = XML::LibXML::Reader-&gt;new( IO =&gt; $file_handle, ... );
+  my $reader = XML::LibXML::Reader-&gt;new( FD =&gt; fileno(STDIN), ... );
   my $reader = XML::LibXML::Reader-&gt;new( DOM =&gt; $dom, ... );
 </programlisting>
       <para>where ... are (optional) reader options described below in Parser options.
