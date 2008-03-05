@@ -216,10 +216,10 @@ const char*
 PmmNodeTypeName( xmlNodePtr elem );
 
 xmlChar*
-PmmEncodeString( const char *encoding, const xmlChar *string );
+PmmEncodeString( const char *encoding, const xmlChar *string, STRLEN len );
 
 char*
-PmmDecodeString( const char *encoding, const xmlChar *string);
+PmmDecodeString( const char *encoding, const xmlChar *string, STRLEN* len);
 
 /* string manipulation will go elsewhere! */
 
