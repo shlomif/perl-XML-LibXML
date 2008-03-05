@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 139 };
+BEGIN { plan tests => 163 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -459,3 +459,26 @@ use XML::LibXML::Common qw(:libxml);
   ok($dom->getEncoding,undef);
   ok($dom->toString,$out);
 }
+
+if (eval { require Encode; }) {
+  for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
+    print "------------------\n";
+    print $enc,"\n";
+    my $xml = Encode::encode('UTF-16LE',qq{<?xml version="1.0" encoding="$enc"?>
+<test foo="bar"/>
+});
+    my $dom = XML::LibXML->new->parse_string($xml);
+    ok($dom->getEncoding,$enc);
+    ok($dom->actualEncoding,$enc);
+    ok($dom->getDocumentElement->getAttribute('foo'),'bar');
+    ok($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo')), 'bar');
+    ok($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo')), 'bar');
+    my $exp_enc = $enc eq 'UTF-16' ? 'UTF-16LE' : $enc;
+    ok($dom->getDocumentElement->getAttribute('foo',1), Encode::encode($exp_enc,'bar'));
+    ok($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo'),1), Encode::encode($exp_enc,'bar'));
+    ok($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo'),1), Encode::encode($exp_enc,'bar'));
+  }
+} else {
+  skip("Encoding related tests require Encode") for 1..24;
+}
+
