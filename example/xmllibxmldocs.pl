@@ -409,7 +409,7 @@ sub dump_pod {
             my ( $term ) = $node->findnodes( "term" );
             $self->{OFILE}->print( "=item " );
             if ( defined $term ) {
-                $self->{OFILE}->print( "B<".$term->string_value().">" );
+                $self->{OFILE}->print( "B<".$self->dump_pod($term).">" );
             }
             $self->{OFILE}->print( "\n\n" );
             my @nodes =$node->findnodes( "listitem" );
@@ -456,7 +456,8 @@ sub dump_pod {
             $self->{OFILE}->print( "L<<<<<< $str|$url >>>>>>" );
         } elsif(  $node->nodeName() eq "xref" ) {
 	    my $linkend = $node->getAttribute('linkend');
-	    my ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/title));
+	    my ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/titleabbrev));
+	    ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/titleabbrev)) unless $target;
 	    if ($target) {
 	      my $str = $target->string_value() ;
 	      $str =~ s/\n/ /g;
@@ -467,7 +468,7 @@ sub dump_pod {
 	    }
         } elsif(  $node->nodeName() eq "olink" ) {
             my $str = $node->string_value() ;
-	    my $url = $node->getAttribute('target');
+	    my $url = $node->getAttribute('targetdoc');
             $str =~ s/\n/ /g;
             $self->{OFILE}->print( "L<<<<<< $str|$url >>>>>>" );
         } else {
