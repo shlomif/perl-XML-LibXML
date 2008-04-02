@@ -460,6 +460,7 @@ use XML::LibXML::Common qw(:libxml);
   ok($dom->toString,$out);
 }
 
+# the following tests were added for #33810
 if (eval { require Encode; }) {
   for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
     print "------------------\n";
