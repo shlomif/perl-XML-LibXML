@@ -2470,7 +2470,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>Implements the DOM Level 2 function</para>
 
-                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2484,7 +2484,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>Implements the DOM Level 2 function</para>
 
-                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2498,7 +2498,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>This allows the fetching of all nodes from a given document with the given Localname.</para>
 
-                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -3047,7 +3047,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>@nodes = $node-&gt;findnodes( $xpath_expression );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
 
 	  <para><emphasis>NOTE ON NAMESPACES AND XPATH</emphasis>:</para>
 	  <para>A common mistake about
@@ -3112,8 +3112,8 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para><emphasis>find</emphasis> evaluates the XPath 1.0 expression using the current node as the context of the expression, and returns the
                     result depending on what type of result the XPath expression had. For example, the XPath "1 * 3 + 52" results in a
-                    <olink target="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return a <olink target="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
-                    object, or a <olink target="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
+                    <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return a <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
+                    object, or a <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
                     the right thing" in different contexts.</para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;find.</para>
                 </listitem>
@@ -3151,7 +3151,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para><emphasis>getChildnodes</emphasis> implements a more intuitive interface to the childnodes of the current node. It enables you to pass
                     all children directly to a <function>map</function> or <function>grep</function>. If this function is called in scalar context, a
-                    <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object will be returned.</para>
+                    <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object will be returned.</para>
                 </listitem>
             </varlistentry>
         
@@ -3317,7 +3317,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     handled while accessing the functions result.</para>
 
                     <para>If this function is called in array context the attribute nodes are returned as an array. In scalar context the function will return a
-                    <olink target="XML::LibXML::NamedNodeMap">XML::LibXML::NamedNodeMap</olink> object.</para>
+                    <olink targetdoc="XML::LibXML::NamedNodeMap">XML::LibXML::NamedNodeMap</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3718,7 +3718,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	    A special <function>tagname</function> '*' can be used to match any tag name.
 	  </para>
 
-                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3736,7 +3736,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                	    A special <function>localname</function> '*' can be used to match any local name
 	            and <function>nsURI</function> '*' can be used to match any namespace URI.</para>
 
-                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -3753,7 +3753,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>This function is not found in the DOM specification. It is a mix of getElementsByTagName and getElementsByTagNameNS. It will fetch all
                     tags matching the given local-name. This allows one to select tags with the same local name across namespace borders.</para>
 
-                    <para>In SCALAR context this function returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
         
@@ -5289,7 +5289,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      (e.g. Document, Element, etc.), or NodeList. For
 	      convenience, simple (non-blessed) array references
 	      containing only <xref linkend="XML-LibXML-Node"/> objects can be
-	      used instead of a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
+	      used instead of a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5336,7 +5336,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      NodeList. For convenience, simple (non-blessed) array
 	      references containing only <xref linkend="XML-LibXML-Node"/>
 	      objects can be used instead of a
-	      <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
+	      <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5371,7 +5371,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
           <funcsynopsis><funcsynopsisinfo>$nodelist = $xpc-&gt;findnodes($xpath, $context_node )</funcsynopsisinfo></funcsynopsis>
             <para>Performs the xpath statement on the current node and
 	      returns the result as an array. In scalar context
-	      returns a <olink target="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
+	      returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>
           </listitem>
@@ -5384,10 +5384,10 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      as the context of the expression, and returns the result
 	      depending on what type of result the XPath expression
 	      had. For example, the XPath <literal>1 * 3 +
-	      52</literal> results in a <olink target="XML::LibXML::Number">XML::LibXML::Number</olink> object
+	      52</literal> results in a <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object
 	      being returned. Other expressions might return a
-	      <olink target="XML::LibXML::Boolean">XML::LibXML::Boolean</olink> object, or a
-	      <olink target="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those
+	      <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink> object, or a
+	      <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those
 	      objects uses Perl's overload feature to ``do the right
 	      thing'' in different contexts. Optionally, a node may be
 	      passed as a second argument to set the context node for
