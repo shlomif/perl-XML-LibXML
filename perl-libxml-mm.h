@@ -73,9 +73,9 @@ typedef struct _ProxyNode ProxyNode;
 typedef ProxyNode* ProxyNodePtr;
 
 /* this my go only into the header used by the xs */
-#define SvPROXYNODE(x) ((ProxyNodePtr)SvIV(SvRV(x)))
-#define PmmPROXYNODE(x) ((ProxyNodePtr)x->_private)
-#define SvNAMESPACE(x) ((xmlNsPtr)SvIV(SvRV(x)))
+#define SvPROXYNODE(x) (INT2PTR(ProxyNodePtr,SvIV(SvRV(x))))
+#define PmmPROXYNODE(x) (INT2PTR(ProxyNodePtr,x->_private))
+#define SvNAMESPACE(x) (INT2PTR(xmlNsPtr,SvIV(SvRV(x))))
 
 #define PmmREFCNT(node)      node->count
 #define PmmREFCNT_inc(node)  node->count++
