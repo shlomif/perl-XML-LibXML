@@ -14,7 +14,7 @@ xmlErrorPtr                 O_OBJECT
 INPUT
 O_OBJECT
     if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
-            $var = ($type)SvIV((SV*)SvRV( $arg ));
+            $var = INT2PTR($type,SvIV((SV*)SvRV( $arg )));
     else{
             warn( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
             XSRETURN_UNDEF;
@@ -22,7 +22,7 @@ O_OBJECT
 
 O_DOC_OBJECT
     if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) ) {
-            $var = ($type)PmmSvNode($arg);
+            $var = INT2PTR($type,PmmSvNode($arg));
             if ( $var == NULL ) {
                croak( \"${Package}::$func_name() -- $var contains no data\" );
                XSRETURN_UNDEF;
@@ -35,7 +35,7 @@ O_DOC_OBJECT
 
 O_NODE_OBJECT
     if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) ) {
-            $var = ($type)PmmSvNode($arg);
+            $var = INT2PTR($type,PmmSvNode($arg));
             if ( $var == NULL ) {
                croak( \"${Package}::$func_name() -- $var contains no data\" );
                XSRETURN_UNDEF;

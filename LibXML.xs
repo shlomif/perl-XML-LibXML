@@ -1131,7 +1131,7 @@ LibXML_perldata_to_LibXMLdata(xmlXPathParserContextPtr ctxt,
         AV * array_result;
         xmlXPathObjectPtr ret;
 
-        ret = (xmlXPathObjectPtr) xmlXPathNewNodeSet((xmlNodePtr) NULL);
+        ret = (xmlXPathObjectPtr) xmlXPathNewNodeSet(INT2PTR(xmlNodePtr,NULL));
         array_result = (AV*)SvRV(perl_result);
         length = av_len(array_result);
         for( i = 0; i <= length ; i++ ) {
@@ -1139,7 +1139,7 @@ LibXML_perldata_to_LibXMLdata(xmlXPathParserContextPtr ctxt,
             if (pnode != NULL && sv_isobject(*pnode) &&
                 sv_derived_from(*pnode,"XML::LibXML::Node")) {
                 xmlXPathNodeSetAdd(ret->nodesetval, 
-                                   (xmlNodePtr)PmmSvNode(*pnode));
+                                   INT2PTR(xmlNodePtr,PmmSvNode(*pnode)));
                 if(ctxt) {
                     LibXML_XPathContext_pool(ctxt->context,
                                              PmmSvNode(*pnode), *pnode);
@@ -1156,8 +1156,8 @@ LibXML_perldata_to_LibXMLdata(xmlXPathParserContextPtr ctxt,
                 xmlNodePtr tmp_node;
                 xmlXPathObjectPtr ret;
 
-                ret =  (xmlXPathObjectPtr)xmlXPathNewNodeSet(NULL);
-                tmp_node = (xmlNodePtr)PmmSvNode(perl_result);
+                ret =  INT2PTR(xmlXPathObjectPtr,xmlXPathNewNodeSet(NULL));
+                tmp_node = INT2PTR(xmlNodePtr,PmmSvNode(perl_result));
                 xmlXPathNodeSetAdd(ret->nodesetval,tmp_node);
                 if(ctxt) {
                     LibXML_XPathContext_pool(ctxt->context, PmmSvNode(perl_result), 
@@ -1380,7 +1380,7 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
                     for( j = 0 ; j < len; j++){
                         tnode = nodelist->nodeTab[j];
                         if( tnode != NULL && tnode->doc != NULL) {
-                            owner = PmmOWNERPO(PmmNewNode((xmlNodePtr) tnode->doc));
+                            owner = PmmOWNERPO(PmmNewNode(INT2PTR(xmlNodePtr,tnode->doc)));
                         } else {
                             owner = NULL;
                         }
@@ -1692,7 +1692,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
                               ( !xmlDoValidityCheckingDefaultValue
                                 || ( valid || ( real_doc->intSubset == NULL
                                                 && real_doc->extSubset == NULL )))))) {
-                RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+                RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
             }
@@ -1849,7 +1849,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                               ( !xmlDoValidityCheckingDefaultValue
                                 || ( valid || ( real_doc->intSubset == NULL
                                                 && real_doc->extSubset == NULL ))))) {
-                RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+                RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
             }
@@ -2000,7 +2000,7 @@ _parse_file(self, filename_sv)
                               ( !xmlDoValidityCheckingDefaultValue
                                 || ( valid || ( real_doc->intSubset == NULL
                                                 && real_doc->extSubset == NULL ))))) {
-                RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+                RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
             }
@@ -2111,7 +2111,7 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
 
             /* This HTML memory parser doesn't use a ctxt; there is no "well-formed"
              * distinction, and if it manages to parse the HTML, it returns non-null. */
-            RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+            RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
         }
 
         LibXML_cleanup_parser();
@@ -2168,7 +2168,7 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
                 if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
 	    }
-            RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+            RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
 
         }
         CLEANUP_ERROR_HANDLER;
@@ -2264,7 +2264,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
 
-	    RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+	    RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
         }
 
         LibXML_cleanup_parser();
@@ -2570,7 +2570,7 @@ _end_push(self, pctxt, restore)
 
         if ( real_doc != NULL ) {
             if ( restore || well_formed ) {
-                RETVAL = LibXML_NodeToSv( real_obj, (xmlNodePtr) real_doc );
+                RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
                 real_doc = NULL;
@@ -2765,7 +2765,7 @@ _toString(self, format=0)
         if ( internalFlag && SvTRUE(internalFlag) ) {
             intSubset = xmlGetIntSubset( self );
             if ( intSubset )
-                xmlUnlinkNode( (xmlNodePtr)intSubset );
+                xmlUnlinkNode( INT2PTR(xmlNodePtr,intSubset) );
         }
 
         /* INIT_ERROR_HANDLER; */
@@ -2784,10 +2784,10 @@ _toString(self, format=0)
 
         if ( intSubset != NULL ) {
             if (self->children == NULL) {
-                xmlAddChild((xmlNodePtr) self, (xmlNodePtr) intSubset);
+                xmlAddChild(INT2PTR(xmlNodePtr,self), INT2PTR(xmlNodePtr,intSubset));
             }
             else {
-                xmlAddPrevSibling(self->children, (xmlNodePtr) intSubset);
+                xmlAddPrevSibling(self->children, INT2PTR(xmlNodePtr,intSubset));
             }
         }
 
@@ -2831,7 +2831,7 @@ toFH( self, filehandler, format=0 )
         if ( internalFlag && SvTRUE(internalFlag) ) {
             intSubset = xmlGetIntSubset( self );
             if ( intSubset )
-                xmlUnlinkNode( (xmlNodePtr)intSubset );
+                xmlUnlinkNode( INT2PTR(xmlNodePtr,intSubset) );
         }
 
         xmlRegisterDefaultOutputCallbacks();
@@ -2985,7 +2985,7 @@ createDocument( CLASS, version="1.0", encoding=NULL )
         if (encoding && *encoding != 0) {
             doc->encoding = (const xmlChar*)xmlStrdup((const xmlChar*)encoding);
         }
-        RETVAL = PmmNodeToSv((xmlNodePtr)doc,NULL);
+        RETVAL = PmmNodeToSv(INT2PTR(xmlNodePtr,doc),NULL);
     OUTPUT:
         RETVAL
 
