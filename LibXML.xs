@@ -4483,6 +4483,8 @@ _getChildrenByTagNameNS( self, namespaceURI, node_name )
         if ( wantarray == G_SCALAR ) {
             XPUSHs(sv_2mortal(newSViv(len)) );
         }
+        xmlFree(name);
+        if (nsURI) xmlFree(nsURI);
 
 SV*
 firstChild( self )
