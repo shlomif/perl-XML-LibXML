@@ -272,6 +272,10 @@ Or get libxml2 from
   http://xmlsoft.org/
 If you install via RPMs, make sure you also install the -devel
 RPMs, as this is where the headers (.h files) are.
+
+Also, you may try to run perl Makefile.PL with the DEBUG=1 parameter
+to see the exact reason why the detection of libxml2 installation
+failed or why Makefile.PL was not able to compile a test program.
 DEATH
 exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
 }
