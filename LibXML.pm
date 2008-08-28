@@ -1616,6 +1616,29 @@ sub new {
 1;
 
 #-------------------------------------------------------------------------#
+# XML::LibXML::Pattern Interface                                          #
+#-------------------------------------------------------------------------#
+
+package XML::LibXML::Pattern;
+
+sub new {
+  my $class = shift;
+  my ($pattern,$ns_map)=@_;
+  my $self = undef;
+  
+  if (ref($ns_map) eq 'HASH') {
+    # translate prefix=>URL hash to a (URL,prefix) list
+    $self = $class->_compilePattern($pattern,[reverse %$ns_map]);
+  } else {
+    $self = $class->_compilePattern($pattern);
+  }
+  return $self;
+}
+
+1;
+
+
+#-------------------------------------------------------------------------#
 # XML::LibXML::InputCallback Interface                                    #
 #-------------------------------------------------------------------------#
 package XML::LibXML::InputCallback;

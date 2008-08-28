@@ -218,5 +218,14 @@ sub preservePattern {
   }
 }
 
+sub nodePath {
+  my $reader=shift;
+  my $path = $reader->_nodePath;
+  $path=~s/\[\d+\]//g; # make /foo[1]/bar[1] just /foo/bar, since
+                       # sibling count in the buffered fragment is
+                       # basically random and generally misleading
+  return $path;
+}
+
 1;
 __END__

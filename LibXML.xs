@@ -40,6 +40,10 @@ extern "C" {
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
 
+#ifdef LIBXML_PATTERN_ENABLED
+#include <libxml/pattern.h>
+#endif
+
 #if LIBXML_VERSION >= 20510
 #define HAVE_SCHEMAS
 #include <libxml/relaxng.h>
@@ -7120,7 +7124,7 @@ validate( self, doc )
                                   (xmlRelaxNGValidityErrorFunc)LibXML_error_handler_ctx,
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
-#endif
+#endif /* WITH_SERRORS */
 	/* ** test only **
           xmlRelaxNGSetValidErrors( vctxt,
                                     (xmlRelaxNGValidityErrorFunc)fprintf,
@@ -8358,6 +8362,28 @@ nextElement(reader, name = NULL, nsURI = NULL)
 	RETVAL
 
 int
+nextPatternMatch(reader, compiled)
+	xmlTextReaderPtr reader
+	xmlPatternPtr compiled
+    PREINIT:
+	PREINIT_SAVED_ERROR
+	xmlNodePtr node = NULL;
+    CODE:
+        if ( compiled == NULL )
+	   croak("Usage: $reader->nextPatternMatch( a-XML::LibXML::Pattern-object )");
+	do {
+	  RETVAL = xmlTextReaderRead(reader);
+          node = xmlTextReaderCurrentNode(reader);	  
+	  if (node && xmlPatternMatch(compiled, node)) {
+	    break;
+	  } 
+	} while (RETVAL == 1);
+        CLEANUP_ERROR_HANDLER;
+	REPORT_ERROR(0);
+    OUTPUT:
+	RETVAL
+
+int
 skipSiblings(reader)
 	xmlTextReaderPtr reader
     PREINIT:
@@ -8492,6 +8518,47 @@ standalone(reader)
 	RETVAL = xmlTextReaderStandalone(reader);
     OUTPUT:
 	RETVAL
+
+SV *
+_nodePath(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	xmlNodePtr node = NULL;
+        xmlChar * path = NULL;
+    CODE:
+        node = xmlTextReaderCurrentNode(reader);
+        if ( node ==NULL ) {
+          XSRETURN_UNDEF;
+	}
+	path = xmlGetNodePath( node );
+        if ( path == NULL ) {
+          XSRETURN_UNDEF;
+        }
+        RETVAL = C2Sv(path,NULL);
+	xmlFree(path);
+    OUTPUT:
+        RETVAL
+
+#ifdef LIBXML_PATTERN_ENABLED
+
+int
+matchesPattern(reader, compiled)
+	xmlTextReaderPtr reader
+        xmlPatternPtr compiled
+    PREINIT:
+	xmlNodePtr node = NULL;
+    CODE:
+        if ( compiled == NULL )
+	   XSRETURN_UNDEF;
+        node = xmlTextReaderCurrentNode(reader);
+        if ( node ==NULL ) {
+          XSRETURN_UNDEF;
+	}
+	RETVAL = xmlPatternMatch(compiled, node);
+    OUTPUT:
+        RETVAL
+
+#endif /* LIBXML_PATTERN_ENABLED */
 
 SV *
 copyCurrentNode(reader,expand = 0)
@@ -8678,7 +8745,7 @@ _setXSD(reader,xsd_doc)
     OUTPUT:
 	RETVAL
 
-#endif
+#endif /* HAVE_SCHEMAS */
 
 void
 _DESTROY(reader)
@@ -8803,3 +8870,60 @@ str3( self )
 
 
 #endif /* WITH_SERRORS */
+
+
+#ifdef LIBXML_PATTERN_ENABLED
+
+MODULE = XML::LibXML       PACKAGE = XML::LibXML::Pattern
+
+xmlPatternPtr
+_compilePattern(CLASS, ppattern, ns_map=NULL)
+	const char* CLASS
+        SV * ppattern
+        AV * ns_map 
+    PREINIT:
+        xmlChar * pattern = Sv2C(ppattern, NULL);
+        xmlChar** namespaces = NULL;
+	SV** aux;
+        int last,i;
+    CODE:
+        if ( pattern == NULL )
+	   XSRETURN_UNDEF;
+        if (ns_map) {
+          last = av_len(ns_map);
+          New(0,namespaces, last+2, xmlChar*);
+          for( i = 0; i <= last ; i++ ) {
+              aux = av_fetch(ns_map,i,0);
+	      namespaces[i]=(xmlChar*) SvPV_nolen(*aux);
+          }
+	  namespaces[i]=0;
+	}
+	RETVAL = xmlPatterncompile(pattern, NULL, 0, (const xmlChar **) namespaces);
+        Safefree(namespaces);
+        xmlFree( pattern );
+        if ( RETVAL == NULL ) {
+	  croak("Compilation of pattern failed");
+	}
+    OUTPUT:
+	RETVAL
+
+int
+matchesNode(self, node)
+        xmlPatternPtr self
+	xmlNodePtr node
+    CODE:
+        if ( node ==NULL ) {
+          XSRETURN_UNDEF;
+	}
+	RETVAL = xmlPatternMatch(self, node);
+    OUTPUT:
+        RETVAL
+
+void
+DESTROY( self )
+        xmlPatternPtr self
+    CODE:
+        xs_warn( "DESTROY PATTERN OBJECT" );
+   	xmlFreePattern(self);
+
+#endif /* LIBXML_PATTERN_ENABLED */
