@@ -2,6 +2,7 @@ TYPEMAP
 const char *                T_PV
 xmlParserCtxtPtr            O_PARSER_OBJECT
 xmlRelaxNGPtr               O_OBJECT
+xmlPatternPtr               O_PATTERN_OBJECT
 xmlSchemaPtr                O_OBJECT
 xmlNodeSetPtr               O_OBJECT
 perlxmlParserObjectPtr      O_OBJECT
@@ -59,6 +60,13 @@ O_PARSER_OBJECT
             XSRETURN_UNDEF;
     }
 
+O_PATTERN_OBJECT
+    if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) && sv_isa($arg,\"XML::LibXML::Pattern\"))
+            $var = INT2PTR($type,SvIV((SV*)SvRV( $arg )));
+    else{
+            warn( \"${Package}::$func_name() -- $var is not a XML::LibXML::Pattern\" );
+            XSRETURN_UNDEF;
+    }
 
 OUTPUT
 
@@ -67,6 +75,8 @@ OUTPUT
 O_OBJECT
         sv_setref_pv( $arg, (char *)CLASS, (void*)$var );
 
+O_PATTERN_OBJECT
+        sv_setref_pv( $arg, (char *)\"XML::LibXML::Pattern\", (void*)$var );
 
 O_PARSER_OBJECT
         $arg = PmmContextSv( $var );

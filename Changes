@@ -1,4 +1,9 @@
 Revision history for Perl extension XML::LibXML
+1.67pre
+   - added XML::LibXML::Pattern module and extended pattern support in Reader
+   - memory leak fixes
+   - documentation fixes
+
 1.66
    - Perl-thread support contributed by Tim Brody [rt.cpan.org #31945]
    - fix [rt.cpan.org #30610] possible segmentation fault when importing nodes from a document to an element created with XML::LibXML::Element->new

@@ -5508,7 +5508,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML::Reader;</programlisting>
-      <programlisting>$reader = new XML::LibXML::Reader(location =&gt; "file.xml")
+      <programlisting>my $reader = new XML::LibXML::Reader(location =&gt; "file.xml")
        or die "cannot read file.xml\n";
 while ($reader-&gt;read) {
   processNode($reader);
@@ -5798,6 +5798,18 @@ sub processNode {
           </listitem>
         </varlistentry>
         <varlistentry>
+          <term>nextPatternMatch (compiled_pattern)</term>
+          <listitem>
+            <para>Skip nodes following the current one in the document
+	      order until an element matching a given
+	      compiled pattern is reached. See
+              <xref linkend="XML-LibXML-Pattern"/> for information on 
+	      compiled patterns. See also the <literal>matchesPattern</literal>
+	      method.</para>
+            <para>Returns 1 if the element was found, 0 if there is no more nodes to read, or -1 in case of error.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
           <term>skipSiblings ()</term>
           <listitem>
             <para>Skip all nodes on the same or lower level until the
@@ -5924,6 +5936,29 @@ sub processNode {
 	      neither an element nor attribute.</para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>nodePath()</term>
+          <listitem>
+            <para>Returns a cannonical location path to the current element 
+	    from the root node to the current node. Namespaced
+	    elements are matched by '*', because there is no way to declare
+	    prefixes within XPath patterns. Unlike 
+	    <literal>XML::LibXML::Node::nodePath()</literal>, this function
+	    does not provide sibling counts (i.e. instead of e.g. '/a/b[1]' and '/a/b[2]'
+	    you get '/a/b' for both matches).
+	    </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>matchesPattern(compiled_pattern)</term>
+          <listitem>
+            <para>Returns a true value if the current
+	    node matches a compiled pattern.
+            See <xref linkend="XML-LibXML-Pattern"/> for information on 
+	    compiled patterns. See also the <literal>nextPatternMatch</literal>
+	    method.</para>
+          </listitem>
+        </varlistentry>	
       </variablelist>
     </sect1>
     <sect1>
@@ -6277,9 +6312,85 @@ sub processNode {
     </sect1>
     <sect1>
       <title>SEE ALSO</title>
+      <para><xref linkend="XML-LibXML-Pattern"/> for information about compiled patterns.</para>
       <para>http://xmlsoft.org/html/libxml-xmlreader.html</para>
       <para>http://dotgnu.org/pnetlib-doc/System/Xml/XmlTextReader.html</para>
     </sect1>
+  </chapter>
+  <chapter id="XML-LibXML-Pattern">
+    <title>XML::LibXML::Pattern - interface to libxml2 XPath patterns</title>
+    <titleabbrev>XML::LibXML::Pattern</titleabbrev>
+    <sect1>
+      <title>Synopsis</title>
+      <programlisting>use XML::LibXML;
+my $pattern = new XML::LibXML::Pattern('/x:html/x:body//x:div', { 'x' => 'http://www.w3.org/1999/xhtml' });
+# test a match on a XML::LibXML::Node $node
+
+if ($pattern->matchesNode($node)) { ... }
+
+# or on a XML::LibXML::Reader
+
+if ($reader->matchesPattern($pattern)) { ... }
+
+# or skip reading all nodes that do not match
+
+print $reader->nodePath while $reader->nextPatternMatch($pattern);
+</programlisting>
+    </sect1>
+    <sect1>
+      <title>Description</title>
+      <para>This is a perl interface to libxml2's pattern matching support
+	<emphasis>http://xmlsoft.org/html/libxml-pattern.html</emphasis>. 
+      This feature requires recent versions of libxml2.</para>
+      <para>Patterns are a small subset of XPath language, which is limitted
+      to (disjunctions of) location paths involving the child and descendant axes in abbreviated form
+      as described by the extended BNF given below:
+      </para>
+      <programlisting>Selector ::=     Path ( '|' Path )*
+Path     ::=     ('.//' | '//' | '/' )? Step ( '/' Step )*
+Step     ::=     '.' | NameTest
+NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
+      <para>For readability, whitespace may be used in selector XPath expressions even though not explicitly allowed by the grammar: whitespace may be freely added within patterns before or after any token, where</para>
+      <programlisting>token     ::=     '.' | '/' | '//' | '|' | NameTest</programlisting>
+      <para>Note that no predicates or attribute tests are allowed.</para>
+      <para>Patterns are particularly useful for stream parsing provided via the <literal>XML::LibXML::Reader</literal> interface.</para>
+      <variablelist>
+	<varlistentry>
+	  <term>new()</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$pattern = XML::LibXML::Pattern-&gt;new( pattern, { prefix => namespace_URI, ... });</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>The constructor of a pattern takes a pattern expression (as described
+	    by the BNF grammar above) and an optional HASH reference mapping
+	    prefixes to namespace URIs. The method returns a compiled pattern object.
+	    </para>
+	    <para>
+	    Note that if the document
+	    has a default namespace, it must still be given an prefix in order
+	    to be matched (as demanded by the XPath 1.0 specification). For example,
+	    to match an element <literal>&lt;a xmlns="http://foo.bar"&lt;/a></literal>, one
+	    should use a pattern like this:
+	    </para>
+	    <programlisting>$pattern = XML::LibXML::Pattern-&gt;new( 'foo:a', { foo => 'http://foo.bar' });</programlisting>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>matchesNode($node)</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$bool = $pattern->matchesNode($node);</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>Given a XML::LibXML::Node object, returns a true value if 
+	    the node matches the compiled pattern expression.</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </sect1>
+    <sect1>
+      <title>SEE ALSO</title>
+      <para><xref linkend="XML-LibXML-Reader"/> for other methods involving compiled patterns.</para>
+    </sect1>      
   </chapter>
   <chapter id="XML-LibXML-Error">
     <title>Structured Errors</title>
