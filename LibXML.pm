@@ -1626,6 +1626,11 @@ sub new {
   my ($pattern,$ns_map)=@_;
   my $self = undef;
   
+  unless (UNIVERSAL::can($class,'_compilePattern')) {
+    croak("Cannot create XML::LibXML::Pattern - ".
+	  "your libxml2 is compiled without pattern support!");
+  }
+
   if (ref($ns_map) eq 'HASH') {
     # translate prefix=>URL hash to a (URL,prefix) list
     $self = $class->_compilePattern($pattern,[reverse %$ns_map]);

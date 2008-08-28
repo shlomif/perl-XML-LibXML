@@ -1,14 +1,21 @@
 package XML::LibXML::Reader;
-use XML::LibXML;
 
+use XML::LibXML;
+use Carp;
 use strict;
 use warnings;
 
 use vars qw ($VERSION);
 $VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
 
-use Carp;
 use 5.008_000;
+
+BEGIN {
+  UNIVERSAL::can('XML::LibXML::Reader','_newForFile') or
+      croak("Cannot use XML::LibXML::Reader module - ".
+	    "your libxml2 is compiled without reader support!");
+}
+
 use base qw(Exporter);
 use constant {
     XML_READER_TYPE_NONE => 0,
