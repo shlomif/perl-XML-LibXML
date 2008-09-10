@@ -11,6 +11,7 @@ xmlNodePtr                  O_NODE_OBJECT
 xmlDtdPtr                   O_NODE_OBJECT
 xmlTextReaderPtr            O_OBJECT
 xmlErrorPtr                 O_OBJECT
+xmlXPathCompExprPtr         O_XPATH_OBJECT
 
 INPUT
 O_OBJECT
@@ -60,6 +61,14 @@ O_PARSER_OBJECT
             XSRETURN_UNDEF;
     }
 
+O_XPATH_OBJECT
+    if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) && sv_isa($arg,\"XML::LibXML::XPathExpression\"))
+            $var = INT2PTR($type,SvIV((SV*)SvRV( $arg )));
+    else{
+            warn( \"${Package}::$func_name() -- $var is not a XML::LibXML::XPathExpression\" );
+            XSRETURN_UNDEF;
+    }
+
 O_PATTERN_OBJECT
     if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) && sv_isa($arg,\"XML::LibXML::Pattern\"))
             $var = INT2PTR($type,SvIV((SV*)SvRV( $arg )));
@@ -77,6 +86,9 @@ O_OBJECT
 
 O_PATTERN_OBJECT
         sv_setref_pv( $arg, (char *)\"XML::LibXML::Pattern\", (void*)$var );
+
+O_XPATH_OBJECT
+        sv_setref_pv( $arg, (char *)\"XML::LibXML::XPathExpression\", (void*)$var );
 
 O_PARSER_OBJECT
         $arg = PmmContextSv( $var );

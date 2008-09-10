@@ -14,9 +14,18 @@ xmlXPathObjectPtr
 domXPathFind( xmlNodePtr refNode, xmlChar * xpathstring );
 
 xmlNodeSetPtr
+domXPathCompSelect( xmlNodePtr refNode, xmlXPathCompExprPtr comp );
+
+xmlXPathObjectPtr
+domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp );
+
+xmlNodeSetPtr
 domXPathSelectCtxt( xmlXPathContextPtr ctxt, xmlChar * xpathstring );
 
 xmlXPathObjectPtr
 domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * xpathstring );
+
+xmlXPathObjectPtr
+domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp );
 
 #endif

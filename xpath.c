@@ -6,6 +6,7 @@
 #include "EXTERN.h"
 
 #include "dom.h"
+#include "xpath.h"
 
 void
 perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
@@ -143,15 +144,26 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
 xmlXPathObjectPtr
 domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
     xmlXPathObjectPtr res = NULL;
+    xmlXPathCompExprPtr comp;
+    comp = xmlXPathCompile( path );
+    if ( comp == NULL ) {
+        return NULL;
+    }
+    res = domXPathCompFind(refNode,comp);
+    xmlXPathFreeCompExpr(comp);
+    return res;
+}
+
+xmlXPathObjectPtr
+domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
+    xmlXPathObjectPtr res = NULL;
   
-    if ( refNode != NULL && path != NULL ) {
+    if ( refNode != NULL && comp != NULL ) {
         xmlXPathContextPtr ctxt;
-        xmlXPathCompExprPtr comp;
 
         xmlDocPtr tdoc = NULL;
         xmlNodePtr froot = refNode;
 
-        comp = xmlXPathCompile( path );
         if ( comp == NULL ) {
             return NULL;
         }
@@ -199,8 +211,6 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
        
         res = xmlXPathCompiledEval(comp, ctxt);
 
-        xmlXPathFreeCompExpr(comp);
-
         if (ctxt->namespaces != NULL) {
             xmlFree( ctxt->namespaces );
         }
@@ -224,12 +234,36 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
     return res;
 }
 
+/* this function is not actually used: */
 xmlNodeSetPtr
 domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
   
     res = domXPathFind( refNode, path );
+    
+    if (res != NULL) {
+            /* here we have to transfer the result from the internal
+               structure to the return value */
+        	/* get the result from the query */
+        	/* we have to unbind the nodelist, so free object can 
+        	   not kill it */
+        rv = res->nodesetval;  
+        res->nodesetval = 0 ;
+    }
+
+    xmlXPathFreeObject(res);
+
+    return rv;
+}
+
+/* this function is not actually used: */
+xmlNodeSetPtr
+domXPathCompSelect( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
+    xmlNodeSetPtr rv = NULL;
+    xmlXPathObjectPtr res = NULL;
+  
+    res = domXPathCompFind( refNode, comp );
     
     if (res != NULL) {
             /* here we have to transfer the result from the internal
@@ -256,24 +290,32 @@ domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
 xmlXPathObjectPtr
 domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
     xmlXPathObjectPtr res = NULL;
-  
     if ( ctxt->node != NULL && path != NULL ) {
         xmlXPathCompExprPtr comp;
-
-        xmlDocPtr tdoc = NULL;
-        xmlNodePtr froot = ctxt->node;
-
         comp = xmlXPathCompile( path );
         if ( comp == NULL ) {
             return NULL;
         }
-        
+        res = domXPathCompFindCtxt(ctxt,comp);
+        xmlXPathFreeCompExpr(comp);
+    }
+    return res;
+}
+
+xmlXPathObjectPtr
+domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp ) {
+    xmlXPathObjectPtr res = NULL;
+    if ( comp != NULL && ctxt->node != NULL && comp != NULL ) {
+        xmlDocPtr tdoc = NULL;
+        xmlNodePtr froot = ctxt->node;
+
         if ( ctxt->node->doc == NULL ) {
             /* if one XPaths a node from a fragment, libxml2 will
                refuse the lookup. this is not very usefull for XML
                scripters. thus we need to create a temporary document
                to make libxml2 do it's job correctly.
              */
+
             tdoc = xmlNewDoc( NULL );
 
             /* find refnode's root node */
@@ -289,8 +331,6 @@ domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
         }
        
         res = xmlXPathCompiledEval(comp, ctxt);
-
-        xmlXPathFreeCompExpr(comp);
 
         if ( tdoc != NULL ) {
             /* after looking through a fragment, we need to drop the
