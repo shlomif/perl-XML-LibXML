@@ -1,6 +1,7 @@
 Revision history for Perl extension XML::LibXML
 1.67pre
    - added XML::LibXML::Pattern module and extended pattern support in Reader
+   - added XML::LibXML::XPathExpression module that can pre-compile an XPath expreession
    - memory leak fixes
    - documentation fixes
 
