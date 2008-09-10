@@ -3048,7 +3048,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
-
+          <para>The xpath expression can be passed either as a string or 
+	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+	  </para>
 	  <para><emphasis>NOTE ON NAMESPACES AND XPATH</emphasis>:</para>
 	  <para>A common mistake about
 	    XPath is to assume that node tests consisting of an
@@ -3115,6 +3117,9 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return a <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
                     object, or a <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
                     the right thing" in different contexts.</para>
+          <para>The xpath expression can be passed either as a string or 
+	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+	  </para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;find.</para>
                 </listitem>
             </varlistentry>
@@ -3136,6 +3141,9 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>That is, it returns the literal value of the results. This enables you to ensure that you get a string back from your search, allowing
                     certain shortcuts. This could be used as the equivalent of XSLT's &lt;xsl:value-of select="some_xpath"/&gt;.</para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;findvalue.</para>
+          <para>The xpath expression can be passed either as a string or 
+	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+	  </para>
                 </listitem>
             </varlistentry>
         
@@ -5374,6 +5382,9 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>
+          <para>The xpath expression can be passed either as a string or 
+	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+	  </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5392,6 +5403,9 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      thing'' in different contexts. Optionally, a node may be
 	      passed as a second argument to set the context node for
 	      the query.</para>
+          <para>The xpath expression can be passed either as a string or 
+	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+	  </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5407,6 +5421,9 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
             select=``some_xpath''/&gt;. Optionally, a node may be
             passed in the second argument to set the context node for
             the query.</para>
+          <para>The xpath expression can be passed either as a string or 
+	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+	  </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -6315,6 +6332,53 @@ sub processNode {
       <para><xref linkend="XML-LibXML-Pattern"/> for information about compiled patterns.</para>
       <para>http://xmlsoft.org/html/libxml-xmlreader.html</para>
       <para>http://dotgnu.org/pnetlib-doc/System/Xml/XmlTextReader.html</para>
+    </sect1>
+  </chapter>
+  <chapter id="XML-LibXML-XPathExpression">
+    <title>XML::LibXML::XPathExpression - interface to libxml2 pre-compiled XPath expressions</title>
+    <titleabbrev>XML::LibXML::XPathExpression</titleabbrev>
+    <sect1>
+      <title>Synopsis</title>
+      <programlisting>use XML::LibXML;
+my $compiled_xpath = new XML::LibXML::XPathExpression('//foo[@bar="baz"][position()&lt;4]');
+
+# interface from XML::LibXML::Node 
+
+my $result = $node->find($compiled_xpath);
+my @nodes = $node->findnodes($compiled_xpath);
+my $value = $node->findvalue($compiled_xpath);
+
+# interface from XML::LibXML::XPathContext
+
+my $result = $xpc->find($compiled_xpath,$node);
+my @nodes = $xpc->findnodes($compiled_xpath,$node);
+my $value = $xpc->findvalue($compiled_xpath,$node);
+</programlisting>
+    </sect1>
+    <sect1>
+      <title>Description</title>
+      <para>This is a perl interface to libxml2's pre-compiled XPath expressions. 
+      Pre-compiling an XPath expression can give in some performance
+      benefit if the same XPath query is evaluated many times. 
+      <function>XML::LibXML::XPathExpression</function> objects
+      can be passed to all <function>find...</function> 
+      functions <function>XML::LibXML</function>
+      that expect an XPath expression.
+      </para>
+      <variablelist>
+	<varlistentry>
+	  <term>new()</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$compiled = XML::LibXML::XPathExpression-&gt;new( xpath_string );</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>The constructor takes an XPath 1.0 expression as a string
+	    and returns an object representing the pre-compiled
+	    expressions (the actual data structure is internal to libxml2).
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
     </sect1>
   </chapter>
   <chapter id="XML-LibXML-Pattern">

@@ -5238,18 +5238,25 @@ _find( pnode, pxpath )
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
         STRLEN len = 0 ;
-        xmlChar * xpath = nodeSv2C(pxpath, node);
+        xmlChar * xpath = NULL;
+        xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
     INIT:
         if ( node == NULL ) {
             croak( "lost node" );
         }
-        if ( !(xpath && xmlStrlen(xpath)) ) {
-            xs_warn( "bad xpath\n" );
-            if ( xpath )
-                xmlFree(xpath);
-            croak( "empty XPath found" );
-            XSRETURN_UNDEF;
+        if (sv_isobject(pxpath) && sv_isa(pxpath,"XML::LibXML::XPathExpression")) {
+             comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( pxpath )));
+             if (!comp) XSRETURN_UNDEF;
+        } else {
+            xpath = nodeSv2C(pxpath, node);
+            if ( !(xpath && xmlStrlen(xpath)) ) {
+                xs_warn( "bad xpath\n" );
+                if ( xpath )
+                    xmlFree(xpath);
+                croak( "empty XPath found" );
+                XSRETURN_UNDEF;
+            }
         }
     PPCODE:
         if ( node->doc ) {
@@ -5260,9 +5267,12 @@ _find( pnode, pxpath )
         }
 
         INIT_ERROR_HANDLER;
-
-        found = domXPathFind( node, xpath );
-        xmlFree( xpath );
+        if (comp) {
+          found = domXPathCompFind( node, comp );
+        } else {
+          found = domXPathFind( node, xpath );
+          xmlFree( xpath );
+        }
         CLEANUP_ERROR_HANDLER;
         if (found) {
 	    REPORT_ERROR(1);
@@ -5352,18 +5362,25 @@ _findnodes( pnode, perl_xpath )
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
         STRLEN len = 0 ;
-        xmlChar * xpath = nodeSv2C(perl_xpath, node);
+        xmlChar * xpath = NULL ;
+        xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
     INIT:
         if ( node == NULL ) {
             croak( "lost node" );
         }
-        if ( !(xpath && xmlStrlen(xpath)) ) {
-            xs_warn( "bad xpath\n" );
-            if ( xpath )
-                xmlFree(xpath);
-            croak( "empty XPath found" );
-            XSRETURN_UNDEF;
+        if (sv_isobject(perl_xpath) && sv_isa(perl_xpath,"XML::LibXML::XPathExpression")) {
+             comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( perl_xpath )));
+             if (!comp) XSRETURN_UNDEF;
+        } else {
+            xpath = nodeSv2C(perl_xpath, node);
+            if ( !(xpath && xmlStrlen(xpath)) ) {
+                xs_warn( "bad xpath\n" );
+                if ( xpath )
+                    xmlFree(xpath);
+                croak( "empty XPath found" );
+                XSRETURN_UNDEF;
+            }
         }
     PPCODE:
         if ( node->doc ) {
@@ -5374,9 +5391,12 @@ _findnodes( pnode, perl_xpath )
         }
 
         INIT_ERROR_HANDLER;
-
-        nodelist = domXPathSelect( node, xpath );
-        xmlFree(xpath);
+        if (comp) {
+            nodelist = domXPathCompSelect( node, comp );
+        } else {
+            nodelist = domXPathSelect( node, xpath );
+            xmlFree(xpath);
+        }
         CLEANUP_ERROR_HANDLER;
 
         if ( nodelist ) {
@@ -7660,6 +7680,7 @@ _findnodes( pxpath_context, perl_xpath )
         SV * element = NULL ;
         STRLEN len = 0 ;
         xmlChar * xpath = NULL;
+        xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
     INIT:
         ctxt = INT2PTR(xmlXPathContextPtr,SvIV(SvRV(pxpath_context)));
@@ -7670,12 +7691,17 @@ _findnodes( pxpath_context, perl_xpath )
         if ( ctxt->node == NULL ) {
             croak("XPathContext: lost current node\n");
         }
-        xpath = nodeSv2C(perl_xpath, ctxt->node);
-        if ( !(xpath && xmlStrlen(xpath)) ) {
-            if ( xpath ) 
-                xmlFree(xpath);
-            croak("XPathContext: empty XPath found\n");
-            XSRETURN_UNDEF;
+        if (sv_isobject(perl_xpath) && sv_isa(perl_xpath,"XML::LibXML::XPathExpression")) {
+             comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( perl_xpath )));
+             if (!comp) XSRETURN_UNDEF;
+        } else {
+            xpath = nodeSv2C(perl_xpath, ctxt->node);
+            if ( !(xpath && xmlStrlen(xpath)) ) {
+                if ( xpath ) 
+                    xmlFree(xpath);
+                croak("XPathContext: empty XPath found\n");
+                XSRETURN_UNDEF;
+            }
         }
     PPCODE:
         if ( ctxt->node->doc ) {
@@ -7688,7 +7714,12 @@ _findnodes( pxpath_context, perl_xpath )
         INIT_ERROR_HANDLER;
 
         PUTBACK ;
-        found = domXPathFindCtxt( ctxt, xpath );
+        if (comp) {
+          found = domXPathCompFindCtxt( ctxt, comp );
+        } else {
+            found = domXPathFindCtxt( ctxt, xpath );
+            xmlFree(xpath);
+        }
         SPAGAIN ;
 
         if (found != NULL) {
@@ -7696,7 +7727,6 @@ _findnodes( pxpath_context, perl_xpath )
         } else {
           nodelist = NULL;
         }
-        xmlFree(xpath);
         CLEANUP_ERROR_HANDLER;
         if ( nodelist ) {
 	    REPORT_ERROR(1);
@@ -7757,6 +7787,7 @@ _find( pxpath_context, pxpath )
         xmlNodeSetPtr nodelist = NULL;
         STRLEN len = 0 ;
         xmlChar * xpath = NULL;
+        xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
     INIT:
         ctxt = INT2PTR(xmlXPathContextPtr,SvIV(SvRV(pxpath_context)));
@@ -7767,14 +7798,18 @@ _find( pxpath_context, pxpath )
         if ( ctxt->node == NULL ) {
             croak("XPathContext: lost current node\n");
         }
-        xpath = nodeSv2C(pxpath, ctxt->node);
-        if ( !(xpath && xmlStrlen(xpath)) ) {
-            if ( xpath ) 
-                xmlFree(xpath);
-            croak("XPathContext: empty XPath found\n");
-            XSRETURN_UNDEF;
+        if (sv_isobject(pxpath) && sv_isa(pxpath,"XML::LibXML::XPathExpression")) {
+             comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( pxpath )));
+             if (!comp) XSRETURN_UNDEF;
+        } else {
+            xpath = nodeSv2C(pxpath, ctxt->node);
+            if ( !(xpath && xmlStrlen(xpath)) ) {
+                if ( xpath ) 
+                    xmlFree(xpath);
+                croak("XPathContext: empty XPath found\n");
+                XSRETURN_UNDEF;
+            }
         }
-
     PPCODE:
         if ( ctxt->node->doc ) {
             domNodeNormalize( xmlDocGetRootElement( ctxt->node->doc ) );
@@ -7785,9 +7820,13 @@ _find( pxpath_context, pxpath )
 
         INIT_ERROR_HANDLER;
         PUTBACK ;
-        found = domXPathFindCtxt( ctxt, xpath );
+        if (comp) {
+          found = domXPathCompFindCtxt( ctxt, comp );
+        } else {
+            found = domXPathFindCtxt( ctxt, xpath );
+            xmlFree(xpath);
+        }
         SPAGAIN ;
-        xmlFree( xpath );
         CLEANUP_ERROR_HANDLER;
         if (found) {
 	    REPORT_ERROR(1);
@@ -8927,3 +8966,32 @@ DESTROY( self )
    	xmlFreePattern(self);
 
 #endif /* LIBXML_PATTERN_ENABLED */
+
+MODULE = XML::LibXML       PACKAGE = XML::LibXML::XPathExpression
+
+xmlXPathCompExprPtr
+new(CLASS, pxpath)
+	const char* CLASS
+        SV * pxpath
+    PREINIT:
+        xmlChar * xpath = Sv2C(pxpath, NULL);
+        PREINIT_SAVED_ERROR
+    CODE:
+        if ( pxpath == NULL )
+	   XSRETURN_UNDEF;
+	RETVAL = xmlXPathCompile( xpath );
+        xmlFree( xpath );
+        CLEANUP_ERROR_HANDLER;
+        REPORT_ERROR(0);
+        if ( RETVAL == NULL ) {
+	  croak("Compilation of XPath expression failed!");
+	}
+    OUTPUT:
+	RETVAL
+
+void
+DESTROY( self )
+        xmlXPathCompExprPtr self
+    CODE:
+        xs_warn( "DESTROY COMPILED XPATH OBJECT" );
+        xmlXPathFreeCompExpr(self);

@@ -1,7 +1,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 22 };
+BEGIN { plan tests => 39 };
 use XML::LibXML;
 
 my $xmlstring = <<EOSTR;
@@ -26,6 +26,16 @@ ok($doc);
     ok( scalar( @nodes ), 2 );
 
     ok( $doc->isSameNode($nodes[0]->ownerDocument) );
+
+    my $compiled = XML::LibXML::XPathExpression->new("/foo/bar");
+    for (1..3) {
+      @nodes = $doc->findnodes( $compiled );
+      ok( @nodes );
+      ok( scalar( @nodes ), 2 );
+    }
+
+    ok( $doc->isSameNode($nodes[0]->ownerDocument) );
+
     my $n = $doc->createElement( "foobar" );
 
     my $p = $nodes[1]->parentNode;
@@ -44,17 +54,34 @@ ok($doc);
 
     ok( $doc->isSameNode($$result[0]->ownerDocument) );
 
+    $result = $doc->find( XML::LibXML::XPathExpression->new("/foo/bar") );
+    ok( $result );
+    ok( $result->isa( "XML::LibXML::NodeList" ) );
+    ok( $result->size, 2 );
+
+    ok( $doc->isSameNode($$result[0]->ownerDocument) );
+
     $result = $doc->find( "string(/foo/bar)" );
     ok( $result );
     ok( $result->isa( "XML::LibXML::Literal" ) );
     ok( $result->string_value =~ /test 1/ );
 
-    $result = $doc->find( "count(/foo/bar)" );
+    $result = $doc->find( "string(/foo/bar)" );
+    ok( $result );
+    ok( $result->isa( "XML::LibXML::Literal" ) );
+    ok( $result->string_value =~ /test 1/ );
+
+    $result = $doc->find( XML::LibXML::XPathExpression->new("count(/foo/bar)") );
     ok( $result );
     ok( $result->isa( "XML::LibXML::Number" ) );
     ok( $result->value, 2 );
 
     $result = $doc->find( "contains(/foo/bar[1], 'test 1')" );
+    ok( $result );
+    ok( $result->isa( "XML::LibXML::Boolean" ) );
+    ok( $result->string_value, "true" );
+
+    $result = $doc->find( XML::LibXML::XPathExpression->new("contains(/foo/bar[1], 'test 1')") );
     ok( $result );
     ok( $result->isa( "XML::LibXML::Boolean" ) );
     ok( $result->string_value, "true" );

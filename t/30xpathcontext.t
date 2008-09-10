@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 65 };
+BEGIN { plan tests => 76 };
 
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -9,24 +9,33 @@ my $doc = XML::LibXML->new->parse_string(<<'XML');
 XML
 
 # test findnodes() in list context
-my @nodes = XML::LibXML::XPathContext->new($doc)->findnodes('/*');
-ok(@nodes == 1);
-ok($nodes[0]->nodeName eq 'foo');
-ok((XML::LibXML::XPathContext->new($nodes[0])->findnodes('bar'))[0]->nodeName
-   eq 'bar');
+my $xpath = '/*';
+for my $exp ($xpath, XML::LibXML::XPathExpression->new($xpath)) {
+  my @nodes = XML::LibXML::XPathContext->new($doc)->findnodes($exp);
+  ok(@nodes == 1);
+  ok($nodes[0]->nodeName eq 'foo');
+  ok((XML::LibXML::XPathContext->new($nodes[0])->findnodes('bar'))[0]->nodeName
+       eq 'bar');
+}
+
 
 # test findnodes() in scalar context
-my $nl = XML::LibXML::XPathContext->new($doc)->findnodes('/*');
-ok($nl->pop->nodeName eq 'foo');
-ok(!defined($nl->pop));
+for my $exp ($xpath, XML::LibXML::XPathExpression->new($xpath)) {
+  my $nl = XML::LibXML::XPathContext->new($doc)->findnodes($exp);
+  ok($nl->pop->nodeName eq 'foo');
+  ok(!defined($nl->pop));
+}
 
 # test findvalue()
 ok(XML::LibXML::XPathContext->new($doc)->findvalue('1+1') == 2);
+ok(XML::LibXML::XPathContext->new($doc)->findvalue(XML::LibXML::XPathExpression->new('1+1')) == 2);
 ok(XML::LibXML::XPathContext->new($doc)->findvalue('1=2') eq 'false');
+ok(XML::LibXML::XPathContext->new($doc)->findvalue(XML::LibXML::XPathExpression->new('1=2')) eq 'false');
 
 # test find()
-ok(XML::LibXML::XPathContext->new($doc)->find('/foo/bar')->pop->nodeName
-   eq 'bar');
+ok(XML::LibXML::XPathContext->new($doc)->find('/foo/bar')->pop->nodeName eq 'bar');
+ok(XML::LibXML::XPathContext->new($doc)->find(XML::LibXML::XPathExpression->new('/foo/bar'))->pop->nodeName eq 'bar');
+
 ok(XML::LibXML::XPathContext->new($doc)->find('1*3')->value == '3');
 ok(XML::LibXML::XPathContext->new($doc)->find('1=1')->to_literal eq 'true');
 
@@ -35,14 +44,20 @@ my $doc1 = XML::LibXML->new->parse_string(<<'XML');
 XML
 
 # test registerNs()
+my $compiled = XML::LibXML::XPathExpression->new('/xxx:foo');
 my $xc = XML::LibXML::XPathContext->new($doc1);
 $xc->registerNs('xxx', 'http://example.com/foobar');
 ok($xc->findnodes('/xxx:foo')->pop->nodeName eq 'foo');
+ok($xc->findnodes($compiled)->pop->nodeName eq 'foo');
 ok($xc->lookupNs('xxx') eq 'http://example.com/foobar');
 
 # test unregisterNs()
 $xc->unregisterNs('xxx');
 eval { $xc->findnodes('/xxx:foo') };
+ok($@);
+ok(!defined($xc->lookupNs('xxx')));
+
+eval { $xc->findnodes($compiled) };
 ok($@);
 ok(!defined($xc->lookupNs('xxx')));
 
