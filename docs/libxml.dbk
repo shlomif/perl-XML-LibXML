@@ -526,8 +526,8 @@ EOT</programlisting>
 	    <orderedlist>
 	      <listitem><para>Do NOT apply any encoding-related PerlIO layers
 	      (<literal>:utf8</literal> or <literal>:encoding(...)</literal>)
-	      to file handles that are an imput for the parses
-	      or an ouptut for a serializer of (full) XML documents.
+	      to file handles that are an input for the parses
+	      or an output for a serializer of (full) XML documents.
 	      This is because the conversion of the data to/from the internal character representation
 	      is provided by libxml2 itself which must be able to enforce the encoding
 	      specified by the <literal>&lt;?xml version="1.0" encoding="..."?&gt;</literal>
@@ -565,7 +565,7 @@ $xml_document = $doc->toString(); # returns a byte string
 		other node than the Document node and 
 		a byte string containing the apropriate
 		<programlisting>&lt;?xml version="1.0" encoding="..."?&gt;</programlisting>
-		declaration if appliled to a <xref linkend="XML-LibXML-Document"/>.
+		declaration if applied to a <xref linkend="XML-LibXML-Document"/>.
 		</para>
 	      </listitem>
 	      <listitem>
@@ -1707,7 +1707,7 @@ my $doc = $builder-&gt;result();</programlisting>
              In this respect,
 	     XML::LibXML DOM implementation differs from the DOM
              Level 2 specification according to which special
-              attributes for declaring the appropriate XML namespaces
+              attributes for declaring the apropriate XML namespaces
               should not be added when a node with a namespace prefix
               and namespace URI is created.
             </para>
