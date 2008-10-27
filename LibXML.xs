@@ -2872,10 +2872,10 @@ toFH( self, filehandler, format=0 )
 
         if ( intSubset != NULL ) {
             if (self->children == NULL) {
-                xmlAddChild((xmlNodePtr) self, (xmlNodePtr) intSubset);
+                xmlAddChild(INT2PTR(xmlNodePtr,self), INT2PTR(xmlNodePtr,intSubset));
             }
             else {
-                xmlAddPrevSibling(self->children, (xmlNodePtr) intSubset);
+                xmlAddPrevSibling(self->children, INT2PTR(xmlNodePtr,intSubset));
             }
         }
 
@@ -5367,6 +5367,8 @@ _findnodes( pnode, perl_xpath )
         PREINIT_SAVED_ERROR
     INIT:
         if ( node == NULL ) {
+            if ( xpath )
+                xmlFree(xpath);	
             croak( "lost node" );
         }
         if (sv_isobject(perl_xpath) && sv_isa(perl_xpath,"XML::LibXML::XPathExpression")) {
