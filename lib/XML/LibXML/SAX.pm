@@ -15,6 +15,10 @@ use base qw(XML::SAX::Base);
 use Carp;
 use IO::File;
 
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
 sub _parse_characterstream {
     my ( $self, $fh ) = @_;
     # this my catch the xml decl, so the parser won't get confused about

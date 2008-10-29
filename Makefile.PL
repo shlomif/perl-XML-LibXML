@@ -47,7 +47,7 @@ my %INFOS = (
 # -------------------------------------------------------------------------- #
 # read extra configurations from the commandline
 my %params;
-@params{qw(DEBUG DEFINE EXTRALIBDIR GDOME INC LIBS SKIP_SAX_INSTALL XMLPREFIX)}=();
+@params{qw(DEBUG DEFINE EXTRALIBDIR GDOME INC LIBS SKIP_SAX_INSTALL XMLPREFIX NO_THREADS)}=();
 
 @ARGV = grep {
   my ($key, $val) = split(/=/, $_, 2);
@@ -76,6 +76,11 @@ if ( $] >= 5.006 ) {
     warn "enable native perl UTF8\n";
     $config{DEFINE} .= " -DHAVE_UTF8";
 }
+if ( $] < 5.008 or $config{NO_THREADS} ) {
+  warn "disabling XML::LibXML support for Perl threads\n";
+  $config{DEFINE} .= " -DNO_XML_LIBXML_THREADS";
+}
+delete $config{NO_THREADS};
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #

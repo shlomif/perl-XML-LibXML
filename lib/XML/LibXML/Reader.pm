@@ -48,6 +48,8 @@ use constant {
 };
 use vars qw( @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
+sub CLONE_SKIP { 1 }
+
 BEGIN {
 
 %EXPORT_TAGS = (

@@ -11,6 +11,7 @@ xmlNodePtr                  O_NODE_OBJECT
 xmlDtdPtr                   O_NODE_OBJECT
 xmlTextReaderPtr            O_OBJECT
 xmlErrorPtr                 O_OBJECT
+xmlHashTablePtr             O_OBJECT
 xmlXPathCompExprPtr         O_XPATH_OBJECT
 
 INPUT

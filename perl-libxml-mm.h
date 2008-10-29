@@ -63,7 +63,6 @@ struct _ProxyNode {
     xmlNodePtr owner;
     int count;
     int encoding;
-    struct _ProxyNode * _registry;
 };
 
 /* helper type for the proxy structure */
@@ -85,6 +84,39 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmENCODING(node)    node->encoding
 #define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
 #define PmmDocEncoding(node) (node->charset)
+
+#ifndef NO_XML_LIBXML_THREADS
+#ifdef USE_ITHREADS
+#define XML_LIBXML_THREADS
+#endif
+#endif
+
+#ifdef XML_LIBXML_THREADS
+
+/* structure for storing thread-local refcount */
+struct _LocalProxyNode {
+	ProxyNodePtr proxy;
+	int count;
+};
+typedef struct _LocalProxyNode LocalProxyNode;
+typedef LocalProxyNode* LocalProxyNodePtr;
+
+#define PmmUSEREGISTRY		(PROXY_NODE_REGISTRY_MUTEX != NULL)
+#define PmmREGISTRY		(INT2PTR(xmlHashTablePtr,SvIV(SvRV(get_sv("XML::LibXML::__PROXY_NODE_REGISTRY",0)))))
+// #define PmmREGISTRY			(INT2PTR(xmlHashTablePtr,SvIV(SvRV(PROXY_NODE_REGISTRY))))
+
+void
+PmmCloneProxyNodes();
+int
+PmmProxyNodeRegistrySize();
+void
+PmmDumpRegistry(xmlHashTablePtr r);
+void
+PmmFreeHashTable(xmlHashTablePtr table);
+void
+PmmRegistryREFCNT_dec(ProxyNodePtr proxy);
+
+#endif
 
 ProxyNodePtr
 PmmNewNode(xmlNodePtr node);

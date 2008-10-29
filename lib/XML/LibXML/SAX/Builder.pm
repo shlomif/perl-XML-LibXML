@@ -7,6 +7,10 @@ use XML::NamespaceSupport;
 
 use vars qw ($VERSION);
 
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
 $VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
 
 sub new {

@@ -13,6 +13,10 @@ use XML::SAX::DocumentLocator;
 $VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
 @ISA = ('XML::SAX::Base');
 
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
 sub _parse_characterstream {
     my ($self, $fh, $options) = @_;
     die "parsing a characterstream is not supported at this time";
