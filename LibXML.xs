@@ -188,7 +188,7 @@ struct _xmlTextReader {
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
 
-ProxyNodePtr PROXY_NODE_REGISTRY = NULL;
+SV* PROXY_NODE_REGISTRY_MUTEX = NULL;
 
 /* ****************************************************************
  * Error handler
@@ -431,6 +431,8 @@ LibXML_report_error_ctx(SV * saved_error, int recover)
 }
 
 #ifdef HAVE_READER_SUPPORT
+
+#ifndef WITH_SERRORS
 static void
 LibXML_reader_error_handler(void * ctxt, 
 				const char * msg,  
@@ -476,6 +478,7 @@ LibXML_reader_error_handler(void * ctxt,
     }
   }
 }
+#endif /* !defined WITH_SERRORS */
 
 SV * 
 LibXML_get_reader_error_data(xmlTextReaderPtr reader)
@@ -486,27 +489,18 @@ LibXML_get_reader_error_data(xmlTextReaderPtr reader)
   return saved_error;
 }
 
+#ifndef WITH_SERRORS
 static void
 LibXML_report_reader_error(xmlTextReaderPtr reader)
 {
   SV * saved_error = NULL;
   xmlTextReaderErrorFunc f = NULL;
   xmlTextReaderGetErrorHandler(reader, &f, (void **) &saved_error);
-
-#ifdef WITH_SERRORS
-  if ( saved_error && SvOK( saved_error ) ) {
-    SV * error = saved_error;
-    warn("have some error in %d\n",error);
-    LibXML_report_error_ctx(sv_2mortal(error), 0);
-  } else {
-    warn("have no error in %d\n",saved_error);
-  }
-#else
   if ( saved_error && SvOK( saved_error) && 0 < SvCUR( saved_error ) ) {
     croak("%s", SvPV_nolen(saved_error));
   }
-#endif
 }
+#endif /* !defined WITH_SERRORS */
 
 #endif /* HAVE_READER_SUPPORT */
 
@@ -1540,26 +1534,29 @@ void
 _CLONE( class )
         char * class
     CODE:
-        PmmCloneProxyNodes();
+#ifdef XML_LIBXML_THREADS
+     if( PmmUSEREGISTRY )
+       PmmCloneProxyNodes();
+#endif
 
 int
 _leaked_nodes()
     CODE:
-        RETVAL = PmmProxyNodeRegistrySize();
+     RETVAL = 0;
+#ifdef XML_LIBXML_THREADS
+     if( PmmUSEREGISTRY )
+       RETVAL = PmmProxyNodeRegistrySize();
+#endif
     OUTPUT:
         RETVAL
 
-#### The following function is called by XML::LibXSLT 
-#### It passes the other library the pointer to our internal proxy_node registry
-#### so that nodes created there get properly registered before they are disposed
-#### by our DESTROY
-SV*
-__proxy_registry()
-    CODE:
-        RETVAL = NEWSV(0,0);
-	sv_setref_pv( RETVAL, NULL, (void*) &PROXY_NODE_REGISTRY );	       
-    OUTPUT:
-        RETVAL
+void
+_dump_registry()
+	PPCODE:
+#ifdef XML_LIBXML_THREADS
+		if( PmmUSEREGISTRY )
+			PmmDumpRegistry(PmmREGISTRY);
+#endif
 
 const char *
 LIBXML_DOTTED_VERSION()
@@ -1587,6 +1584,40 @@ HAVE_STRUCT_ERRORS()
     OUTPUT:
         RETVAL
 
+int
+HAVE_SCHEMAS()
+    CODE:
+#ifdef HAVE_SCHEMAS
+        RETVAL = 1;
+#else
+        RETVAL = 0;
+#endif
+    OUTPUT:
+        RETVAL
+
+int
+HAVE_READER()
+    CODE:
+#ifdef HAVE_READER_SUPPORT
+        RETVAL = 1;
+#else
+        RETVAL = 0;
+#endif
+    OUTPUT:
+        RETVAL
+
+int
+HAVE_THREAD_SUPPORT()
+    CODE:
+#ifdef XML_LIBXML_THREADS
+        RETVAL = (PmmUSEREGISTRY ? 1 : 0);
+#else
+        RETVAL = 0;
+#endif
+    OUTPUT:
+        RETVAL
+
+
 const char *
 LIBXML_RUNTIME_VERSION()
     CODE:
@@ -1598,6 +1629,32 @@ void
 END()
     CODE:
         xmlCleanupParser();
+
+int
+INIT_THREAD_SUPPORT()
+    CODE:
+#ifdef XML_LIBXML_THREADS
+      SV *threads = get_sv("threads::threads", 0); // no create
+      if( threads && SvOK(threads) && SvTRUE(threads) ) {
+        PROXY_NODE_REGISTRY_MUTEX = get_sv("XML::LibXML::__PROXY_NODE_REGISTRY_MUTEX",0);
+	RETVAL = 1;
+      } else {
+	croak("XML::LibXML ':threads_shared' can only be used after 'use threads';");
+      }
+#else
+        RETVAL = 0;
+#endif
+    OUTPUT:
+        RETVAL
+
+void
+DISABLE_THREAD_SUPPORT()
+    CODE:
+#ifdef XML_LIBXML_THREADS
+        PROXY_NODE_REGISTRY_MUTEX = NULL;
+#else
+        croak("XML::LibXML compiled without threads!");
+#endif
 
 SV*
 _parse_string(self, string, dir = &PL_sv_undef)
@@ -1686,7 +1743,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
             }
 
             if ( directory == NULL ) {
-                SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
+                SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             } else {
                 real_doc->URL = xmlStrdup((const xmlChar*)directory);
@@ -1843,7 +1900,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
         if ( real_doc != NULL ) {
 
             if ( directory == NULL ) {
-                SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
+                SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             } else {
                 real_doc->URL = xmlStrdup((const xmlChar*)directory);
@@ -2109,7 +2166,7 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
    	    if (URL) {
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
             } else {
-                SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
+                SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
 
@@ -2191,7 +2248,6 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
     PREINIT:
         HV * real_obj;
         htmlDocPtr real_doc;
-        int well_formed;
         int recover = 0;
         char * URL = NULL;
         PREINIT_SAVED_ERROR
@@ -2264,7 +2320,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
 	    if (URL) {
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
 	    } else {
-                SV * newURI = sv_2mortal(newSVpvf("unknown-%12.12d", (void*)real_doc));
+                SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
 
@@ -2734,6 +2790,23 @@ _default_catalog( self, catalog )
         RETVAL = 0;
     OUTPUT:
         RETVAL
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::HashTable
+
+xmlHashTablePtr
+new(CLASS)
+        const char * CLASS
+    CODE:
+		RETVAL = xmlHashCreate(8);
+    OUTPUT:
+        RETVAL
+
+void
+DESTROY( table )
+        xmlHashTablePtr table
+    CODE:
+        xs_warn("DESTROY XMLHASHTABLE\n");
+		PmmFreeHashTable(table);
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::ParserContext
 
@@ -4037,8 +4110,17 @@ void
 DESTROY( node )
         SV * node
     CODE:
-        xs_warn("DESTROY PERL NODE\n");
+#ifdef XML_LIBXML_THREADS
+	if( PmmUSEREGISTRY ) {
+	  SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
+	  PmmRegistryREFCNT_dec(SvPROXYNODE(node));
+        }
+#endif
         PmmREFCNT_dec(SvPROXYNODE(node));
+#ifdef XML_LIBXML_THREADS
+	if( PmmUSEREGISTRY )
+	  SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
+#endif
 
 SV*
 nodeName( self )
@@ -5367,9 +5449,9 @@ _findnodes( pnode, perl_xpath )
         PREINIT_SAVED_ERROR
     INIT:
         if ( node == NULL ) {
-            if ( xpath )
-                xmlFree(xpath);	
-            croak( "lost node" );
+	  if ( xpath )
+	    xmlFree(xpath);
+	  croak( "lost node" );
         }
         if (sv_isobject(perl_xpath) && sv_isa(perl_xpath,"XML::LibXML::XPathExpression")) {
              comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( perl_xpath )));
@@ -5537,7 +5619,7 @@ new(CLASS, name )
         char * name
     PREINIT:
         xmlNodePtr newNode;
-        ProxyNodePtr docfrag;
+        ProxyNodePtr docfrag = NULL;
     CODE:
         docfrag = PmmNewFragment(NULL);
         newNode = xmlNewNode( NULL, (const xmlChar*)name );
@@ -6956,13 +7038,6 @@ publicId( self )
 	}
     OUTPUT:
         RETVAL
-
-void
-DESTROY( node )
-        SV * node
-    CODE:
-        xs_warn("DESTROY DTD NODE\n");
-        PmmREFCNT_dec(SvPROXYNODE(node));
 
 SV *
 parse_string(CLASS, str, ...)

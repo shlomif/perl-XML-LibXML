@@ -9,6 +9,10 @@ use vars qw ($VERSION);
 
 $VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
 
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
 warn("This class (", __PACKAGE__, ") is deprecated!");
 
 sub new {

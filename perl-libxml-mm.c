@@ -87,34 +87,125 @@ PmmNodeTypeName( xmlNodePtr elem ){
 }
 
 /*
+ * free a hash table
+ */
+void
+PmmFreeHashTable(xmlHashTablePtr table)
+{
+	if( xmlHashSize(table) > 0 ) {
+		warn("PmmFreeHashTable: not empty\n");
+		/* PmmDumpRegistry(table); */
+	}
+	/*	warn("Freeing table %p with %d elements in\n", table, xmlHashSize(table)); */
+	xmlHashFree(table, NULL);
+}
+
+#ifdef XML_LIBXML_THREADS
+
+/*
  * registry of all current proxy nodes
  *
  * other classes like XML::LibXSLT must get a pointer
  * to this registry via XML::LibXML::__proxy_registry
  *
  */
-extern ProxyNodePtr PROXY_NODE_REGISTRY;
+extern SV* PROXY_NODE_REGISTRY_MUTEX;
+
+/* Utility method used by PmmDumpRegistry */
+void PmmRegistryDumpHashScanner(void * payload, void * data, xmlChar * name)
+{
+	LocalProxyNodePtr lp = (LocalProxyNodePtr) payload;
+	ProxyNodePtr node = (ProxyNodePtr) lp->proxy;
+	const char * CLASS = PmmNodeTypeName( PmmNODE(node) );
+	warn("%s=%p with %d references (%d perl)\n",CLASS,node,PmmREFCNT(node),lp->count);
+}
+
+/*
+ * dump the current thread's node registry to STDERR
+ */
+void
+PmmDumpRegistry(xmlHashTablePtr r)
+{
+	if( r )
+	{
+		SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
+		warn("%d total nodes\n", xmlHashSize(r));
+		xmlHashScan(r, PmmRegistryDumpHashScanner, NULL);
+		SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
+	}
+}
 
 /*
  * returns the address of the proxy registry
  */
-ProxyNodePtr*
+xmlHashTablePtr*
 PmmProxyNodeRegistryPtr(ProxyNodePtr proxy)
 {
-    return &PROXY_NODE_REGISTRY;
+	croak("PmmProxyNodeRegistryPtr: TODO!\n");
+	return NULL;
+	/*   return &PmmREGISTRY; */
 }
 
+/*
+ * efficiently generate a string representation of the given pointer
+ */
+xmlChar *
+PmmRegistryName(void * ptr)
+{
+	unsigned long int v = (unsigned long int) ptr;
+	int HASH_NAME_SIZE = sizeof(void *) + ceil(sizeof(void *)/8);
+	xmlChar * name;
+	int i;
+
+	name = (xmlChar *) safemalloc(HASH_NAME_SIZE+1);
+
+	for(i = 0; i < HASH_NAME_SIZE; ++i)
+	{
+		name[i] = (xmlChar) (128 | v);
+		v >>= 7;
+	}
+	name[HASH_NAME_SIZE] = '\0';
+
+	return name;
+}
+
+/*
+ * allocate and return a new LocalProxyNode structure
+ */
+LocalProxyNodePtr
+PmmNewLocalProxyNode(ProxyNodePtr proxy)
+{
+	LocalProxyNodePtr lp;
+    Newc(0, lp, 1, LocalProxyNode, LocalProxyNode);
+	lp->proxy = proxy;
+	lp->count = 0;
+	return lp;
+}
 
 /*
  * @proxy: proxy node to register
  *
  * adds a proxy node to the proxy node registry
  */
-void
+LocalProxyNodePtr
 PmmRegisterProxyNode(ProxyNodePtr proxy)
 {
-    proxy->_registry = PROXY_NODE_REGISTRY;
-    PROXY_NODE_REGISTRY = proxy;
+	xmlChar * name = PmmRegistryName( proxy );
+	LocalProxyNodePtr lp = PmmNewLocalProxyNode( proxy );
+        /* warn("LibXML registers proxy node with %p\n",PmmREGISTRY); */
+	SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
+	if( xmlHashAddEntry(PmmREGISTRY, name, lp) )
+		croak("PmmRegisterProxyNode: error adding node to hash, hash size is %d\n",xmlHashSize(PmmREGISTRY));
+	SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
+	Safefree(name);
+	return lp;
+}
+
+/* utility method for PmmUnregisterProxyNode */
+static inline void
+PmmRegistryHashDeallocator(void *payload, xmlChar *name)
+{
+	Safefree((LocalProxyNodePtr) payload);
 }
 
 /*
@@ -125,23 +216,65 @@ PmmRegisterProxyNode(ProxyNodePtr proxy)
 void
 PmmUnregisterProxyNode(ProxyNodePtr proxy)
 {
-    ProxyNodePtr cur = PROXY_NODE_REGISTRY;
-    if( PROXY_NODE_REGISTRY == proxy ) {
-        PROXY_NODE_REGISTRY = proxy->_registry;
-    }
-    else if (cur) {
-        while(cur->_registry != NULL)
-        {
-            if( cur->_registry == proxy )
-            {
-                cur->_registry = proxy->_registry;
-                break;
-            }
-            cur = cur->_registry;
-        }
-    } else {
-      warn("XML::LibXML: unregistering node, while no nodes have been registered?\n");
-    }
+	xmlChar * name = PmmRegistryName( proxy );
+        /* warn("LibXML unregistering proxy node with %p\n",PmmREGISTRY); */
+	SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
+	if( xmlHashRemoveEntry(PmmREGISTRY, name, PmmRegistryHashDeallocator) )
+            croak("PmmUnregisterProxyNode: error removing node from hash\n");
+	Safefree(name);
+	SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
+}
+
+/*
+ * lookup a LocalProxyNode in the registry
+ */
+LocalProxyNodePtr
+PmmRegistryLookup(ProxyNodePtr proxy)
+{
+	xmlChar * name = PmmRegistryName( proxy );
+	LocalProxyNodePtr lp = xmlHashLookup(PmmREGISTRY, name);
+	Safefree(name);
+	return lp;
+}
+
+/*
+ * increment the local refcount for proxy
+ */
+void
+PmmRegistryREFCNT_inc(ProxyNodePtr proxy)
+{
+  /* warn("Registry inc\n"); */
+	LocalProxyNodePtr lp = PmmRegistryLookup( proxy );
+	if( lp )
+		lp->count++;
+	else
+		PmmRegisterProxyNode( proxy )->count++;
+}
+
+/*
+ * decrement the local refcount for proxy and remove the local pointer if zero
+ */
+void
+PmmRegistryREFCNT_dec(ProxyNodePtr proxy)
+{
+  /* warn("Registry dec\n"); */
+	LocalProxyNodePtr lp = PmmRegistryLookup(proxy);
+	if( lp && --(lp->count) == 0 )
+		PmmUnregisterProxyNode(proxy);
+}
+
+/*
+ * internal, used by PmmCloneProxyNodes
+ */
+void *
+PmmRegistryHashCopier(void *payload, xmlChar *name)
+{
+	ProxyNodePtr proxy = ((LocalProxyNodePtr) payload)->proxy;
+	LocalProxyNodePtr lp;
+	Newc(0, lp, 1, LocalProxyNode, LocalProxyNode);
+	memcpy(lp, payload, sizeof(LocalProxyNode));
+	PmmREFCNT_inc(proxy);
+	return lp;
 }
 
 /*
@@ -150,12 +283,12 @@ PmmUnregisterProxyNode(ProxyNodePtr proxy)
 void
 PmmCloneProxyNodes()
 {
-    ProxyNodePtr cur = PROXY_NODE_REGISTRY;
-    while(cur != NULL)
-    {
-        PmmREFCNT_inc(cur);
-        cur = cur->_registry;
-    }
+	SV *sv_reg = get_sv("XML::LibXML::__PROXY_NODE_REGISTRY",0);
+	xmlHashTablePtr reg_copy;
+	SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
+	reg_copy = xmlHashCopy(PmmREGISTRY, PmmRegistryHashCopier);
+	SvIV_set(SvRV(sv_reg), PTR2IV(reg_copy));
+	SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
 }
 
 /*
@@ -164,15 +297,10 @@ PmmCloneProxyNodes()
 int
 PmmProxyNodeRegistrySize()
 {
-    int i = 0;
-    ProxyNodePtr cur = PROXY_NODE_REGISTRY;
-    while(cur != NULL)
-    {
-        ++i;
-        cur = cur->_registry;
-    }
-    return i;
+	return xmlHashSize(PmmREGISTRY);
 }
+
+#endif /* end of XML_LIBXML_THREADS */
 
 /* creates a new proxy node from a given node. this function is aware
  * about the fact that a node may already has a proxy structure.
@@ -188,16 +316,13 @@ PmmNewNode(xmlNodePtr node)
     }
 
     if ( node->_private == NULL ) {
-        /* proxy = (ProxyNodePtr)malloc(sizeof(struct _ProxyNode));  */
-        Newc(0, proxy, 1, ProxyNode, ProxyNode);
+	proxy = (ProxyNodePtr)xmlMalloc(sizeof(struct _ProxyNode));
         if (proxy != NULL) {
             proxy->node  = node;
             proxy->owner   = NULL;
             proxy->count   = 0;
             proxy->encoding= 0;
-            proxy->_registry = NULL;
             node->_private = (void*) proxy;
-            PmmRegisterProxyNode(proxy);
         }
     }
     else {
@@ -290,7 +415,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
         retval = PmmREFCNT(node)--;
 	/* fprintf(stderr, "REFCNT on 0x%08.8X decremented to %d\n", node, PmmREFCNT(node)); */
         if ( PmmREFCNT(node) < 0 )
-            warn( "PmmREFCNT_dec: REFCNT decremented below 0!" );
+            warn( "PmmREFCNT_dec: REFCNT decremented below 0 for %p!", node );
         if ( PmmREFCNT(node) <= 0 ) {
             xs_warn( "PmmREFCNT_dec: NODE DELETION\n" );
 
@@ -325,9 +450,10 @@ PmmREFCNT_dec( ProxyNodePtr node )
                 
                 PmmFreeNode( libnode );
             }
-            PmmUnregisterProxyNode(node);
-            Safefree( node );
-            /* free( node ); */
+			else {
+				xs_warn( "PmmREFCNT_dec:   NO OWNER\n" );
+			}
+            xmlFree( node );
         }
     }
     else {
@@ -357,6 +483,10 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
     const char * CLASS = "XML::LibXML::Node";
 
     if ( node != NULL ) {
+#ifdef XML_LIBXML_THREADS
+      if( PmmUSEREGISTRY )
+		SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
+#endif
         /* find out about the class */
         CLASS = PmmNodeTypeName( node );
         xs_warn("PmmNodeToSv: return new perl node of class:\n");
@@ -386,6 +516,10 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 
         retval = NEWSV(0,0);
         sv_setref_pv( retval, CLASS, (void*)dfProxy );
+#ifdef XML_LIBXML_THREADS
+	if( PmmUSEREGISTRY )
+	    PmmRegistryREFCNT_inc(dfProxy);
+#endif
         PmmREFCNT_inc(dfProxy); 
         /* fprintf(stderr, "REFCNT incremented on node: 0x%08.8X\n", dfProxy); */
 
@@ -400,6 +534,10 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
         default:
             break;
         }
+#ifdef XML_LIBXML_THREADS
+      if( PmmUSEREGISTRY )
+		SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
+#endif
     }
     else {
         xs_warn( "PmmNodeToSv: no node found!\n" );
@@ -705,7 +843,7 @@ PmmContextREFCNT_dec( ProxyNodePtr node )
     int retval = 0;
     if ( node != NULL ) {
         retval = PmmREFCNT(node)--;
-	/* fprintf(stderr, "REFCNT on context 0x%08.8X decremented to %d\n", node, PmmREFCNT(node)); */
+	/* fprintf(stderr, "REFCNT on context %p decremented to %d\n", node, PmmREFCNT(node)); */
         if ( PmmREFCNT(node) <= 0 ) {
             xs_warn( "PmmContextREFCNT_dec: NODE DELETION\n" );
             libnode = (xmlParserCtxtPtr)PmmNODE( node );

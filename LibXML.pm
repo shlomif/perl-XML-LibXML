@@ -26,6 +26,8 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(DynaLoader Exporter);
 
+use vars qw($__PROXY_NODE_REGISTRY $__threads_shared $__PROXY_NODE_REGISTRY_MUTEX);
+
 #-------------------------------------------------------------------------#
 # export information                                                      #
 #-------------------------------------------------------------------------#
@@ -108,6 +110,14 @@ $ReadCB  = undef;
 $OpenCB  = undef;
 $CloseCB = undef;
 
+# if ($threads::threads) {
+#   our $__THREADS_TID = 0;
+#   eval q{
+#     use threads::shared;
+#     our $__PROXY_NODE_REGISTRY_MUTEX :shared = 0;
+#   };
+#   die $@ if $@;
+# }
 #-------------------------------------------------------------------------#
 # bootstrapping                                                           #
 #-------------------------------------------------------------------------#
@@ -115,6 +125,35 @@ bootstrap XML::LibXML $VERSION;
 undef &AUTOLOAD;
 
 } # BEGIN
+
+sub import {
+  my $package=shift;
+  if (grep /^:threads_shared$/, @_) {
+    if (INIT_THREAD_SUPPORT()) {
+      eval q{
+        use threads::shared;
+        share($__PROXY_NODE_REGISTRY_MUTEX);
+      };
+      if ($@) { # something went wrong
+	DISABLE_THREAD_SUPPORT(); # leave the library in a usable state
+	die $@; # and die
+      }
+      $__PROXY_NODE_REGISTRY = XML::LibXML::HashTable->new();
+      $__threads_shared=1;
+    } else {
+      croak("XML::LibXML or Perl compiled without ithread support!");
+    }
+  }
+  __PACKAGE__->export_to_level(1,$package,grep !/^:threads(_shared)?$/,@_);
+}
+
+sub threads_shared_enabled {
+  return $__threads_shared ? 1 : 0;
+}
+
+# if ($threads::threads) {
+#   our $__PROXY_NODE_REGISTRY = XML::LibXML::HashTable->new();
+# }
 
 #-------------------------------------------------------------------------#
 # test exact version (up to patch-level)                                  #
@@ -158,7 +197,20 @@ sub new {
 
 # threads doc says CLONE's API may change in future, which would break
 # an XS method prototype
-sub CLONE { XML::LibXML::_CLONE( $_[0] ) }
+sub CLONE {
+  if ($XML::LibXML::__threads_shared) {
+    XML::LibXML::_CLONE( $_[0] );
+  }
+}
+
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
+sub __proxy_registry {
+  my ($class)=caller;
+  die "This version of $class uses API of XML::LibXML 1.66 which is not compatible with XML::LibXML $VERSION. Please upgrade $class!\n";
+}
 
 #-------------------------------------------------------------------------#
 # DOM Level 2 document constructor                                        #
@@ -894,6 +946,10 @@ sub finish_push {
 #-------------------------------------------------------------------------#
 package XML::LibXML::Node;
 
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
 sub isSupported {
     my $self    = shift;
     my $feature = shift;
@@ -1376,6 +1432,8 @@ package XML::LibXML::Dtd;
 use vars qw( @ISA );
 @ISA = ('XML::LibXML::Node');
 
+# at least DESTROY and CLONE_SKIP must be inherited
+
 1;
 
 #-------------------------------------------------------------------------#
@@ -1407,6 +1465,8 @@ sub setData {
 # XML::LibXML::Namespace Interface                                        #
 #-------------------------------------------------------------------------#
 package XML::LibXML::Namespace;
+
+sub CLONE_SKIP { 1 }
 
 # this is infact not a node!
 sub prefix { return "xmlns"; }
@@ -1447,6 +1507,10 @@ sub isSameNode {
 package XML::LibXML::NamedNodeMap;
 
 use XML::LibXML::Common qw(:libxml);
+
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
 
 sub new {
     my $class = shift;
@@ -1546,6 +1610,10 @@ package XML::LibXML::_SAXParser;
 
 use XML::SAX::Exception;
 
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
+
 # these functions will use SAX exceptions as soon i know how things really work
 sub warning {
     my ( $parser, $message, $line, $col ) = @_;
@@ -1576,6 +1644,8 @@ sub fatal_error {
 
 package XML::LibXML::RelaxNG;
 
+sub CLONE_SKIP { 1 }
+
 sub new {
     my $class = shift;
     my %args = @_;
@@ -1597,6 +1667,8 @@ sub new {
 1;
 
 package XML::LibXML::Schema;
+
+sub CLONE_SKIP { 1 }
 
 sub new {
     my $class = shift;
@@ -1620,6 +1692,8 @@ sub new {
 #-------------------------------------------------------------------------#
 
 package XML::LibXML::Pattern;
+
+sub CLONE_SKIP { 1 }
 
 sub new {
   my $class = shift;
@@ -1648,6 +1722,8 @@ sub new {
 
 package XML::LibXML::XPathExpression;
 
+sub CLONE_SKIP { 1 }
+
 1;
 
 
@@ -1658,10 +1734,15 @@ package XML::LibXML::InputCallback;
 
 use vars qw($_CUR_CB @_GLOBAL_CALLBACKS @_CB_STACK);
 
-$_CUR_CB = undef;
+BEGIN {
+  $_CUR_CB = undef;
+  @_GLOBAL_CALLBACKS = ();
+  @_CB_STACK = ();
+}
 
-@_GLOBAL_CALLBACKS = ();
-@_CB_STACK = ();
+sub CLONE_SKIP {
+  return $XML::LibXML::__threads_shared ? 0 : 1;
+}
 
 #-------------------------------------------------------------------------#
 # global callbacks                                                        #

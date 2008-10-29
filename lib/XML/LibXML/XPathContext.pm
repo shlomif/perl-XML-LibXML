@@ -15,6 +15,8 @@ $VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
 # when passing parameters to extension functions (default: no)
 $USE_LIBXML_DATA_TYPES = 0;
 
+sub CLONE_SKIP { 1 }
+
 sub findnodes {
     my ($self, $xpath, $node) = @_;
 
