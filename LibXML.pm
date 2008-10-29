@@ -128,20 +128,25 @@ undef &AUTOLOAD;
 
 sub import {
   my $package=shift;
+  $__threads_shared=0 if not defined $__threads_shared;
   if (grep /^:threads_shared$/, @_) {
-    if (INIT_THREAD_SUPPORT()) {
-      eval q{
-        use threads::shared;
-        share($__PROXY_NODE_REGISTRY_MUTEX);
-      };
-      if ($@) { # something went wrong
-	DISABLE_THREAD_SUPPORT(); # leave the library in a usable state
-	die $@; # and die
+    if (!defined($__threads_shared)) {
+      if (INIT_THREAD_SUPPORT()) {
+	eval q{
+          use threads::shared;
+          share($__PROXY_NODE_REGISTRY_MUTEX);
+        };
+	if ($@) { # something went wrong
+	  DISABLE_THREAD_SUPPORT(); # leave the library in a usable state
+	  die $@; # and die
+	}
+	$__PROXY_NODE_REGISTRY = XML::LibXML::HashTable->new();
+	$__threads_shared=1;
+      } else {
+	croak("XML::LibXML or Perl compiled without ithread support!");
       }
-      $__PROXY_NODE_REGISTRY = XML::LibXML::HashTable->new();
-      $__threads_shared=1;
-    } else {
-      croak("XML::LibXML or Perl compiled without ithread support!");
+    } elsif (!$__threads_shared) {
+      croak("XML::LibXML already loaded without thread support. Too late to enable thread support!");
     }
   }
   __PACKAGE__->export_to_level(1,$package,grep !/^:threads(_shared)?$/,@_);
