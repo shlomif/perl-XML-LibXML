@@ -218,15 +218,15 @@ PSaxStartPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
 
     param = newHV();
 
-    hv_store(param, "NamespaceURI", 12,
+    (void) hv_store(param, "NamespaceURI", 12,
              _C2Sv(uri, NULL), NsURIHash);
 
     if ( prefix != NULL ) {
-        hv_store(param, "Prefix", 6,
+        (void) hv_store(param, "Prefix", 6,
                  _C2Sv(prefix, NULL), PrefixHash);
     }
     else {
-        hv_store(param, "Prefix", 6,
+        (void) hv_store(param, "Prefix", 6,
                  _C2Sv((const xmlChar*)"", NULL), PrefixHash);
     }
 
@@ -262,15 +262,15 @@ PSaxEndPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
     ENTER;
     SAVETMPS;
     param = newHV();
-    hv_store(param, "NamespaceURI", 12,
+    (void) hv_store(param, "NamespaceURI", 12,
              _C2Sv(uri, NULL), NsURIHash);
 
     if ( prefix != NULL ) {
-        hv_store(param, "Prefix", 6,
+        (void) hv_store(param, "Prefix", 6,
                  _C2Sv(prefix, NULL), PrefixHash);
     }
     else {
-        hv_store(param, "Prefix", 6,
+        (void) hv_store(param, "Prefix", 6,
                  _C2Sv((const xmlChar *)"", NULL), PrefixHash);
     }
 
@@ -398,7 +398,7 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name )
     xmlNsPtr ns = NULL;
 
     if ( name != NULL && xmlStrlen( name )  ) {
-        hv_store(retval, "Name", 4,
+        (void) hv_store(retval, "Name", 4,
                  _C2Sv(name, NULL), NameHash);
 
         localname = xmlSplitQName(NULL, name, &prefix);
@@ -407,26 +407,26 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name )
         if (prefix != NULL) xmlFree(prefix);
 
         if ( ns != NULL ) {
-            hv_store(retval, "NamespaceURI", 12,
+            (void) hv_store(retval, "NamespaceURI", 12,
                      _C2Sv(ns->href, NULL), NsURIHash);
             if ( ns->prefix ) {
-                hv_store(retval, "Prefix", 6,
+                (void) hv_store(retval, "Prefix", 6,
                          _C2Sv(ns->prefix, NULL), PrefixHash);
             }
             else {
-                hv_store(retval, "Prefix", 6,
+                (void) hv_store(retval, "Prefix", 6,
                          _C2Sv((const xmlChar *)"",NULL), PrefixHash);
             }
 
-            hv_store(retval, "LocalName", 9,
+            (void) hv_store(retval, "LocalName", 9,
                      _C2Sv(sax->ns_stack->name, NULL), LocalNameHash);
         }
         else {
-            hv_store(retval, "NamespaceURI", 12,
+            (void) hv_store(retval, "NamespaceURI", 12,
                      _C2Sv((const xmlChar *)"",NULL), NsURIHash);
-            hv_store(retval, "Prefix", 6,
+            (void) hv_store(retval, "Prefix", 6,
                      _C2Sv((const xmlChar *)"",NULL), PrefixHash);
-            hv_store(retval, "LocalName", 9,
+            (void) hv_store(retval, "LocalName", 9,
                      _C2Sv(name, NULL), LocalNameHash);
         }
     }
@@ -487,10 +487,10 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
             if ( name != NULL && xmlStrlen( name ) ) {
                 localname = xmlSplitQName(NULL, name, &prefix);
 
-                hv_store(atV, "Name", 4,
+                (void) hv_store(atV, "Name", 4,
                          _C2Sv(name, NULL), NameHash);
                 if ( value != NULL ) {
-                    hv_store(atV, "Value", 5,
+                    (void) hv_store(atV, "Value", 5,
                              _C2Sv(value, NULL), ValueHash);
                 }
 
@@ -499,14 +499,14 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                     PmmAddNamespace( sax, NULL, value, handler);  
                     /* nsURI = (const xmlChar*)NSDEFAULTURI; */
                     nsURI = NULL;
-                    hv_store(atV, "Name", 4,
+                    (void) hv_store(atV, "Name", 4,
                              _C2Sv(name, NULL), NameHash);
 
-                    hv_store(atV, "Prefix", 6,
+                    (void) hv_store(atV, "Prefix", 6,
                              _C2Sv((const xmlChar *)"", NULL), PrefixHash);
-                    hv_store(atV, "LocalName", 9,
+                    (void) hv_store(atV, "LocalName", 9,
                              _C2Sv(name,NULL), LocalNameHash);
-                    hv_store(atV, "NamespaceURI", 12,
+                    (void) hv_store(atV, "NamespaceURI", 12,
                              _C2Sv((const xmlChar *)"", NULL), NsURIHash);
                     
                 }
@@ -518,11 +518,11 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
 
                     nsURI = (const xmlChar*)NSDEFAULTURI;
          
-                    hv_store(atV, "Prefix", 6,
+                    (void) hv_store(atV, "Prefix", 6,
                              _C2Sv(prefix, NULL), PrefixHash);
-                    hv_store(atV, "LocalName", 9,
+                    (void) hv_store(atV, "LocalName", 9,
                              _C2Sv(localname, NULL), LocalNameHash);
-                    hv_store(atV, "NamespaceURI", 12,
+                    (void) hv_store(atV, "NamespaceURI", 12,
                              _C2Sv((const xmlChar *)NSDEFAULTURI,NULL),
                              NsURIHash);
                 }
@@ -530,20 +530,20 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                           && (ns = PmmGetNsMapping( sax->ns_stack, prefix ) ) ) {
                     nsURI = ns->href;
 
-                    hv_store(atV, "NamespaceURI", 12,
+                    (void) hv_store(atV, "NamespaceURI", 12,
                              _C2Sv(ns->href, NULL), NsURIHash);
-                    hv_store(atV, "Prefix", 6,
+                    (void) hv_store(atV, "Prefix", 6,
                              _C2Sv(ns->prefix, NULL), PrefixHash);
-                    hv_store(atV, "LocalName", 9,
+                    (void) hv_store(atV, "LocalName", 9,
                              _C2Sv(localname, NULL), LocalNameHash);
                 }
                 else {
                     nsURI = NULL;
-                    hv_store(atV, "NamespaceURI", 12,
+                    (void) hv_store(atV, "NamespaceURI", 12,
                              _C2Sv((const xmlChar *)"", NULL), NsURIHash);
-                    hv_store(atV, "Prefix", 6,
+                    (void) hv_store(atV, "Prefix", 6,
                              _C2Sv((const xmlChar *)"", NULL), PrefixHash);
-                    hv_store(atV, "LocalName", 9,
+                    (void) hv_store(atV, "LocalName", 9,
                              _C2Sv(name, NULL), LocalNameHash);
                 }
 
@@ -552,7 +552,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
 
                 len = xmlStrlen( keyname );
                 PERL_HASH( atnameHash, (const char *)keyname, len );
-                hv_store(retval,
+                (void) hv_store(retval,
                          (const char *)keyname,
                          len,
                          newRV_noinc((SV*)atV),
@@ -583,7 +583,7 @@ PmmGenCharDataSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * data, int len )
     HV * retval = newHV();
 
     if ( data != NULL && xmlStrlen( data ) ) {
-        hv_store(retval, "Data", 4,
+        (void) hv_store(retval, "Data", 4,
                  _C2Sv_len(data, len), DataHash);
     }
 
@@ -598,15 +598,15 @@ PmmGenPISV( pTHX_ PmmSAXVectorPtr sax,
     HV * retval = newHV();
 
     if ( target != NULL && xmlStrlen( target ) ) {
-        hv_store(retval, "Target", 6,
+        (void) hv_store(retval, "Target", 6,
                  _C2Sv(target, NULL), TargetHash);
 
         if ( data != NULL && xmlStrlen( data ) ) {
-            hv_store(retval, "Data", 4,
+            (void) hv_store(retval, "Data", 4,
                      _C2Sv(data, NULL), DataHash);
         }
         else {
-            hv_store(retval, "Data", 4,
+            (void) hv_store(retval, "Data", 4,
                      _C2Sv((const xmlChar *)"", NULL), DataHash);
         }
     }
@@ -622,15 +622,15 @@ PmmGenDTDSV( pTHX_ PmmSAXVectorPtr sax,
 {
     HV * retval = newHV();
     if ( name != NULL && xmlStrlen( name ) ) {
-      hv_store(retval, "Name", 4,
+      (void) hv_store(retval, "Name", 4,
 	       _C2Sv(name, NULL), NameHash);
     }
     if ( publicId != NULL && xmlStrlen( publicId ) ) {
-      hv_store(retval, "PublicId", 8,
+      (void) hv_store(retval, "PublicId", 8,
 	       _C2Sv(publicId, NULL), PublicIdHash);
     }
     if ( systemId != NULL && xmlStrlen( systemId ) ) {
-      hv_store(retval, "SystemId", 8,
+      (void) hv_store(retval, "SystemId", 8,
 	       _C2Sv(systemId, NULL), SystemIdHash);
     }
     return retval;
@@ -674,16 +674,16 @@ PSaxStartDocument(void * ctx)
 
         empty = newHV();
         if ( ctxt->version != NULL ) {
-            hv_store(empty, "Version", 7,
+            (void) hv_store(empty, "Version", 7,
                      _C2Sv(ctxt->version, NULL), VersionHash);
         }
         else {
-            hv_store(empty, "Version", 7,
+            (void) hv_store(empty, "Version", 7,
                      _C2Sv((const xmlChar *)"1.0", NULL), VersionHash);
         }
         
         if ( ctxt->input->encoding != NULL ) {
-            hv_store(empty, "Encoding", 8,
+            (void) hv_store(empty, "Encoding", 8,
                      _C2Sv(ctxt->input->encoding, NULL), EncodingHash);
         }
 
@@ -758,7 +758,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     element  = PmmGenElementSV(aTHX_ sax, name);
 
     arv = newRV_noinc((SV*)attrhash);
-    hv_store( element,
+    (void) hv_store( element,
               "Attributes",
               10,
               arv,
