@@ -26,7 +26,7 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(DynaLoader Exporter);
 
-use vars qw($__PROXY_NODE_REGISTRY $__threads_shared $__compiled $__PROXY_NODE_REGISTRY_MUTEX);
+use vars qw($__PROXY_NODE_REGISTRY $__threads_shared $__PROXY_NODE_REGISTRY_MUTEX);
 
 #-------------------------------------------------------------------------#
 # export information                                                      #
@@ -148,7 +148,7 @@ sub import {
     } elsif (!$__threads_shared) {
       croak("XML::LibXML already loaded without thread support. Too late to enable thread support!");
     }
-  } elsif ($__compiled) {
+  } elsif (exists $INC{'XML/LibXML.pm'}) {
     $__threads_shared=0 if not defined $__threads_shared;
   }
   __PACKAGE__->export_to_level(1,$package,grep !/^:threads(_shared)?$/,@_);
@@ -1896,7 +1896,6 @@ sub cleanup_callbacks {
     $self->lib_cleanup_callbacks();
 }
 
-$XML::LibXML::__compiled=1; # let this be the last line in XML::LibXML
 
 1;
 
