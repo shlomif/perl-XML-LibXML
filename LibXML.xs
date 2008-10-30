@@ -261,7 +261,7 @@ LibXML_struct_error_callback(SV * saved_error, SV * libErr )
     SPAGAIN;
 
     if ( SvTRUE(ERRSV) ) {
-      POPs;
+      (void) POPs;
       croak( "DIE: %s", SvPV_nolen(ERRSV) );
     } else {
       sv_setsv(saved_error, POPs);
@@ -565,8 +565,8 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
     }
 
     if (SvTRUE(ERRSV)) {
+       (void) POPs;
        croak("read on filehandle failed: %s", SvPV_nolen(ERRSV));
-       POPs ;
     }
 
     read_results = POPs;
@@ -626,8 +626,8 @@ LibXML_input_match(char const * filename)
         }
 
         if (SvTRUE(ERRSV)) {
+            (void) POPs;
             croak("input match callback died: %s", SvPV_nolen(ERRSV));
-            POPs ;
         }
 
         res = POPs;
@@ -670,8 +670,8 @@ LibXML_input_open(char const * filename)
     }
 
     if (SvTRUE(ERRSV)) {
+        (void) POPs;
         croak("input callback died: %s", SvPV_nolen(ERRSV));
-        POPs ;
     }
 
     results = POPs;
@@ -720,8 +720,8 @@ LibXML_input_read(void * context, char * buffer, int len)
         }
 
         if (SvTRUE(ERRSV)) {
+            (void) POPs;
             croak("read callback died: %s", SvPV_nolen(ERRSV));
-            POPs ;
         }
 
         output = POPp;
@@ -865,8 +865,8 @@ LibXML_load_external_entity(
         }
 
         if (SvTRUE(ERRSV)) {
+            (void) POPs;
             croak("external entity callback died: %s", SvPV_nolen(ERRSV));
-            POPs ;
         }
 
         results = POPs;
@@ -1288,7 +1288,7 @@ LibXML_generic_variable_lookup(void* varLookupData,
     LibXML_restore_context(ctxt, copy);
 
     if (SvTRUE(ERRSV)) {
-        POPs;
+        (void) POPs;
         croak("XPathContext: error coming back from variable lookup function. %s", SvPV_nolen(ERRSV));
     } 
     if (count != 1) croak("XPathContext: variable lookup function returned none or more than one argument!");
@@ -1438,7 +1438,7 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
     LibXML_restore_context(ctxt->context, copy);
     
     if (SvTRUE(ERRSV)) {
-        POPs;
+        (void) POPs;
         croak("XPathContext: error coming back from perl-dispatcher in pm file. %s", SvPV_nolen(ERRSV));
     } 
 
@@ -1532,7 +1532,6 @@ BOOT:
 
 void
 _CLONE( class )
-        char * class
     CODE:
 #ifdef XML_LIBXML_THREADS
      if( PmmUSEREGISTRY )
@@ -2679,8 +2678,7 @@ _end_sax_push(self, pctxt)
         REPORT_ERROR(0);
 
 SV*
-import_GDOME( dummy, sv_gdome, deep=1 )
-        SV * dummy
+import_GDOME( CLASS, sv_gdome, deep=1 )
         SV * sv_gdome
         int deep
     PREINIT:
@@ -2723,8 +2721,7 @@ import_GDOME( dummy, sv_gdome, deep=1 )
 
 
 SV*
-export_GDOME( dummy, sv_libxml, deep=1 )
-        SV * dummy
+export_GDOME( CLASS, sv_libxml, deep=1 )
         SV * sv_libxml
         int deep
     PREINIT:
@@ -2754,7 +2751,6 @@ export_GDOME( dummy, sv_libxml, deep=1 )
 
 int
 load_catalog( self, filename )
-        SV * self
         SV * filename
     PREINIT:
         const char * fn = (const char *) Sv2C(filename, NULL);
@@ -2775,7 +2771,6 @@ load_catalog( self, filename )
 
 int
 _default_catalog( self, catalog )
-        SV * self
         SV * catalog
     PREINIT:
 #ifdef LIBXML_CATALOG_ENABLED
@@ -3010,6 +3005,7 @@ toStringHTML(self)
         STRLEN len = 0;
         PREINIT_SAVED_ERROR
     CODE:
+        PERL_UNUSED_VAR(ix);
         xs_warn( "use no formated toString!" );
         INIT_ERROR_HANDLER;
         htmlDocDumpMemory(self, &result, (int*)&len);
@@ -3033,6 +3029,7 @@ URI( self )
     ALIAS:
         XML::LibXML::Document::documentURI = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = (const char*)xmlStrdup(self->URL );
     OUTPUT:
         RETVAL
@@ -3050,7 +3047,6 @@ setBaseURI( self, new_URI )
 
 SV*
 createDocument( CLASS, version="1.0", encoding=NULL )
-        char * CLASS
         char * version
         char * encoding
     ALIAS:
@@ -3058,6 +3054,7 @@ createDocument( CLASS, version="1.0", encoding=NULL )
     PREINIT:
         xmlDocPtr doc=NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         doc = xmlNewDoc((const xmlChar*)version);
         if (encoding && *encoding != 0) {
             doc->encoding = (const xmlChar*)xmlStrdup((const xmlChar*)encoding);
@@ -3607,6 +3604,7 @@ createProcessingInstruction(self, name, value=&PL_sv_undef)
         xmlNodePtr newNode = NULL;
         ProxyNodePtr docfrag = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         n = nodeSv2C(name, (xmlNodePtr)self);
         if ( !n ) {
             XSRETURN_UNDEF;
@@ -3671,6 +3669,7 @@ documentElement( self )
     PREINIT:
         xmlNodePtr elem;
     CODE:
+        PERL_UNUSED_VAR(ix);
         elem = xmlDocGetRootElement( self );
         if ( elem ) {
             RETVAL = PmmNodeToSv(elem, PmmPROXYNODE(self));
@@ -3875,6 +3874,7 @@ encoding( self )
         XML::LibXML::Document::getEncoding    = 1
         XML::LibXML::Document::xmlEncoding    = 2
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = (char *) self->encoding;
     OUTPUT:
         RETVAL
@@ -3909,6 +3909,7 @@ standalone( self )
     ALIAS:
         XML::LibXML::Document::xmlStandalone    = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = self->standalone;
     OUTPUT:
         RETVAL
@@ -3935,6 +3936,7 @@ version( self )
         XML::LibXML::Document::getVersion = 1
         XML::LibXML::Document::xmlVersion = 2
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = (char *) self->version;
     OUTPUT:
         RETVAL
@@ -4069,6 +4071,7 @@ getElementById( self, id )
         xmlNodePtr elem;
         xmlAttrPtr attr;
     CODE:
+        PERL_UNUSED_VAR(ix);
         if ( id != NULL ) {
             attr = xmlGetID(self, (xmlChar *) id);
             if (attr == NULL)
@@ -4131,6 +4134,7 @@ nodeName( self )
     PREINIT:
         xmlChar * name = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         name =  (xmlChar*)domName( self );
         if ( name != NULL ) {
             RETVAL = C2Sv(name,NULL);
@@ -4150,6 +4154,7 @@ localname( self )
         XML::LibXML::Attr::name         = 2
         XML::LibXML::Node::localName    = 3
     CODE:
+        PERL_UNUSED_VAR(ix);
         if (    self->type == XML_ELEMENT_NODE
              || self->type == XML_ATTRIBUTE_NODE
              || self->type == XML_ELEMENT_DECL
@@ -4168,6 +4173,7 @@ prefix( self )
     ALIAS:
         XML::LibXML::Node::getPrefix = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         if( self->ns != NULL
             && self->ns->prefix != NULL ) {
             RETVAL = C2Sv(self->ns->prefix, NULL);
@@ -4186,6 +4192,7 @@ namespaceURI( self )
     PREINIT:
         xmlChar * nsURI;
     CODE:
+        PERL_UNUSED_VAR(ix);
         if ( self->ns != NULL
              && self->ns->href != NULL ) {
             nsURI =  xmlStrdup(self->ns->href);
@@ -4370,6 +4377,7 @@ setNodeName( self , value )
         xmlChar* localname;
         xmlChar* prefix;
     CODE:
+        PERL_UNUSED_VAR(ix);
         string = nodeSv2C( value , self );
         if ( !LibXML_test_node_name( string ) ) {
             xmlFree(string);
@@ -4429,6 +4437,7 @@ nodeValue( self, useDomEncoding = &PL_sv_undef )
     PREINIT:
         xmlChar * content = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         content = domGetNodeValue( self );
 
         if ( content != NULL ) {
@@ -4452,6 +4461,7 @@ nodeType( self )
     ALIAS:
         XML::LibXML::Node::getType = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = self->type;
     OUTPUT:
         RETVAL
@@ -4464,6 +4474,7 @@ parentNode( self )
         XML::LibXML::Node::getParentNode   = 2
         XML::LibXML::Attr::getOwnerElement = 3
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv( self->parent,
                               PmmOWNERPO( PmmPROXYNODE(self) ) );
     OUTPUT:
@@ -4475,6 +4486,7 @@ nextSibling( self )
     ALIAS:
         getNextSibling = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv( self->next,
                               PmmOWNERPO(PmmPROXYNODE(self)) );
     OUTPUT:
@@ -4486,6 +4498,7 @@ previousSibling( self )
     ALIAS:
         getPreviousSibling = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv( self->prev,
                               PmmOWNERPO( PmmPROXYNODE(self) ) );
     OUTPUT:
@@ -4502,6 +4515,7 @@ _childNodes( self )
         int len = 0;
         int wantarray = GIMME_V;
     PPCODE:
+        PERL_UNUSED_VAR(ix);
         if ( self->type != XML_ATTRIBUTE_NODE ) {
             cld = self->children;
             xs_warn("childnodes start");
@@ -4578,6 +4592,7 @@ firstChild( self )
     ALIAS:
         getFirstChild = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv( self->children,
                               PmmOWNERPO( PmmPROXYNODE(self) ) );
     OUTPUT:
@@ -4589,6 +4604,7 @@ lastChild( self )
     ALIAS:
         getLastChild = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv( self->last,
                               PmmOWNERPO( PmmPROXYNODE(self) ) );
     OUTPUT:
@@ -4606,6 +4622,7 @@ _attributes( self )
         int len=0;
         int wantarray = GIMME_V;
     PPCODE:
+        PERL_UNUSED_VAR(ix);
         if ( self->type != XML_ATTRIBUTE_NODE ) {
             attr      = self->properties;
             while ( attr != NULL ) {
@@ -4682,6 +4699,7 @@ ownerDocument( self )
     ALIAS:
         XML::LibXML::Node::getOwnerDocument = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         xs_warn( "GET OWNERDOC\n" );
         if( self != NULL
             && self->doc != NULL ){
@@ -4700,6 +4718,7 @@ ownerNode( self )
         XML::LibXML::Node::getOwner = 1
         XML::LibXML::Node::getOwnerElement = 2
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv(PmmNODE(PmmOWNERPO(PmmPROXYNODE(self))), NULL);
     OUTPUT:
         RETVAL
@@ -4924,6 +4943,7 @@ unbindNode( self )
     PREINIT:
         ProxyNodePtr docfrag     = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         if ( self->type != XML_DOCUMENT_NODE
              || self->type != XML_DOCUMENT_FRAG_NODE ) {
             xmlUnlinkNode( self );
@@ -5059,6 +5079,7 @@ isSameNode( self, oNode )
     ALIAS:
         XML::LibXML::Node::isEqual = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = ( self == oNode ) ? 1 : 0;
     OUTPUT:
         RETVAL
@@ -5100,6 +5121,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
+        PERL_UNUSED_VAR(ix);
         internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
 
         if ( internalFlag ) {
@@ -5287,6 +5309,7 @@ string_value ( self, useDomEncoding = &PL_sv_undef )
     PREINIT:
          xmlChar * string = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         /* we can't just return a string, because of UTF8! */
         string = xmlXPathCastNodeToString(self);
         if ( SvTRUE(useDomEncoding) ) {
@@ -5536,6 +5559,7 @@ getNamespaces( pnode )
         SV* element = &PL_sv_undef;
         const char * class = "XML::LibXML::Namespace";
     INIT:
+        PERL_UNUSED_VAR(ix);
         node = PmmSvNode(pnode);
         if ( node == NULL ) {
             croak( "lost node" );
@@ -5568,6 +5592,7 @@ getNamespace( node )
         xmlNsPtr newns = NULL;
         const char * class = "XML::LibXML::Namespace";
     CODE:
+        PERL_UNUSED_VAR(ix);
         ns = node->ns;
         if ( ns != NULL ) {
             newns = xmlCopyNamespace(ns);
@@ -5615,7 +5640,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Element
 
 SV*
 new(CLASS, name )
-        char * CLASS
         char * name
     PREINIT:
         xmlNodePtr newNode;
@@ -6260,6 +6284,7 @@ appendText( self, string )
     PREINIT:
         xmlChar * content = NULL;
     INIT:
+        PERL_UNUSED_VAR(ix);
         content = nodeSv2C( string, self );
         if ( content == NULL ) {
             XSRETURN_UNDEF;
@@ -6322,6 +6347,7 @@ addNewChild( self, namespaceURI, nodename )
         xmlNodePtr prev = NULL;
         xmlNsPtr ns = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         name = nodeSv2C(nodename, self);
         if ( name &&  xmlStrlen( name ) == 0 ) {
             xmlFree(name);
@@ -6379,7 +6405,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Text
 
 SV *
 new( CLASS, content )
-        const char * CLASS
         SV * content
     PREINIT:
         xmlChar * data;
@@ -6443,6 +6468,7 @@ setData( self, value )
     PREINIT:
         xmlChar * encstr = NULL;
     CODE:
+        PERL_UNUSED_VAR(ix);
         encstr = nodeSv2C(value,self);
         domSetNodeValue( self, encstr );
         xmlFree(encstr);
@@ -6627,7 +6653,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Comment
 
 SV *
 new( CLASS, content )
-        const char * CLASS
         SV * content
     PREINIT:
         xmlChar * encstring;
@@ -6652,7 +6677,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::CDATASection
 
 SV *
 new( CLASS , content )
-        const char * CLASS
         SV * content
     PREINIT:
         xmlChar * encstring;
@@ -6677,7 +6701,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::DocumentFragment
 
 SV*
 new( CLASS )
-        char * CLASS
     PREINIT:
         xmlNodePtr real_doc=NULL;
     CODE:
@@ -6690,7 +6713,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Attr
 
 SV*
 new( CLASS, pname, pvalue )
-        char * CLASS
         SV * pname
         SV * pvalue
     PREINIT:
@@ -6711,8 +6733,7 @@ new( CLASS, pname, pvalue )
 
 
 SV*
-parentElement( attrnode )
-        SV * attrnode
+parentElement( self )
     ALIAS:
         XML::LibXML::Attr::getParentNode = 1
         XML::LibXML::Attr::getNextSibling = 2
@@ -6724,6 +6745,7 @@ parentElement( attrnode )
          * not part of the main tree
          */
 
+        PERL_UNUSED_VAR(ix);
         XSRETURN_UNDEF;
     OUTPUT:
         RETVAL
@@ -6775,6 +6797,7 @@ toString(self , format=0, useDomEncoding = &PL_sv_undef )
            XML::LibXML::Node::toString causes segmentation fault inside
            libxml2
 	 */
+        PERL_UNUSED_VAR(ix);
         buffer = xmlBufferCreate();
         xmlBufferAdd(buffer, BAD_CAST " ", 1);
         if ((node->ns != NULL) && (node->ns->prefix != NULL)) {
@@ -6923,6 +6946,7 @@ nodeType(self)
     PREINIT:
         xmlNsPtr ns = INT2PTR(xmlNsPtr,SvIV(SvRV(self)));
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = ns->type;
     OUTPUT:
         RETVAL
@@ -6941,6 +6965,7 @@ declaredURI(self)
         xmlNsPtr ns = INT2PTR(xmlNsPtr,SvIV(SvRV(self)));
         xmlChar * href;
     CODE:
+        PERL_UNUSED_VAR(ix);
         href = xmlStrdup(ns->href);
         RETVAL = C2Sv(href, NULL);
         xmlFree(href);
@@ -6957,6 +6982,7 @@ declaredPrefix(self)
         xmlNsPtr ns = INT2PTR(xmlNsPtr,SvIV(SvRV(self)));
         xmlChar * prefix;
     CODE:
+        PERL_UNUSED_VAR(ix);
         prefix = xmlStrdup(ns->prefix);
         RETVAL = C2Sv(prefix, NULL);
         xmlFree(prefix);
@@ -6987,7 +7013,6 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Dtd
 
 SV *
 new(CLASS, external, system)
-        char * CLASS
         char * external
         char * system
     ALIAS:
@@ -6996,6 +7021,7 @@ new(CLASS, external, system)
         xmlDtdPtr dtd = NULL;
         PREINIT_SAVED_ERROR
     CODE:
+        PERL_UNUSED_VAR(ix);
         INIT_ERROR_HANDLER;
         dtd = xmlParseDTD((const xmlChar*)external, (const xmlChar*)system);
         if ( dtd == NULL ) {
@@ -7017,6 +7043,7 @@ systemId( self )
     ALIAS:
         getSystemId = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
 	if ( self->SystemID == NULL ) {
             XSRETURN_UNDEF;
 	} else {
@@ -7031,6 +7058,7 @@ publicId( self )
     ALIAS:
         getPublicId = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
 	if ( self->ExternalID == NULL ) {
             XSRETURN_UNDEF;
 	} else {
@@ -7041,7 +7069,6 @@ publicId( self )
 
 SV *
 parse_string(CLASS, str, ...)
-        char * CLASS
         char * str
     PREINIT:
         xmlDtdPtr res;
@@ -7105,7 +7132,6 @@ DESTROY( self )
 
 xmlRelaxNGPtr
 parse_location( self, url )
-        SV * self
         char * url
     PREINIT:
         const char * CLASS = "XML::LibXML::RelaxNG";
@@ -7135,7 +7161,6 @@ parse_location( self, url )
 
 xmlRelaxNGPtr
 parse_buffer( self, perlstring )
-        SV * self
         SV * perlstring
     PREINIT:
         const char * CLASS = "XML::LibXML::RelaxNG";
@@ -7172,7 +7197,6 @@ parse_buffer( self, perlstring )
 
 xmlRelaxNGPtr
 parse_document( self, doc )
-        SV * self
         xmlDocPtr doc
     PREINIT:
         const char * CLASS = "XML::LibXML::RelaxNG";
@@ -7254,7 +7278,6 @@ DESTROY( self )
 
 xmlSchemaPtr
 parse_location( self, url )
-        SV * self
         char * url
     PREINIT:
         const char * CLASS = "XML::LibXML::Schema";
@@ -7286,7 +7309,6 @@ parse_location( self, url )
 
 xmlSchemaPtr
 parse_buffer( self, perlstring )
-        SV * self
         SV * perlstring
     PREINIT:
         const char * CLASS = "XML::LibXML::Schema";
@@ -7708,10 +7730,10 @@ registerFunctionNS( pxpath_context, name, uri, func)
             strkey = SvPV(key, len);
             /* warn("Trying to store function '%s' in %d\n", strkey, pfdr); */
             if (SvOK(func)) {
-                hv_store((HV *)SvRV(pfdr),strkey, len, newSVsv(func), 0);
+                (void) hv_store((HV *)SvRV(pfdr),strkey, len, newSVsv(func), 0);
             } else {
                 /* unregister */
-                hv_delete((HV *)SvRV(pfdr),strkey, len, G_DISCARD);
+                (void) hv_delete((HV *)SvRV(pfdr),strkey, len, G_DISCARD);
             }
             SvREFCNT_dec(key);
         } else {
@@ -7991,14 +8013,12 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::InputCallback
 
 void
 lib_cleanup_callbacks( self )
-        SV * self
     CODE:
         xmlCleanupInputCallbacks();
         xmlRegisterDefaultInputCallbacks();
 
 void
 lib_init_callbacks( self )
-        SV * self
     CODE:
         xmlRegisterDefaultInputCallbacks(); /* important */
         xmlRegisterInputCallbacks((xmlInputMatchCallback) LibXML_input_match,
@@ -8994,7 +9014,6 @@ MODULE = XML::LibXML       PACKAGE = XML::LibXML::Pattern
 
 xmlPatternPtr
 _compilePattern(CLASS, ppattern, ns_map=NULL)
-	const char* CLASS
         SV * ppattern
         AV * ns_map 
     PREINIT:
@@ -9048,7 +9067,6 @@ MODULE = XML::LibXML       PACKAGE = XML::LibXML::XPathExpression
 
 xmlXPathCompExprPtr
 new(CLASS, pxpath)
-	const char* CLASS
         SV * pxpath
     PREINIT:
         xmlChar * xpath = Sv2C(pxpath, NULL);
