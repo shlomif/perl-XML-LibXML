@@ -1638,7 +1638,7 @@ INIT_THREAD_SUPPORT()
         PROXY_NODE_REGISTRY_MUTEX = get_sv("XML::LibXML::__PROXY_NODE_REGISTRY_MUTEX",0);
 	RETVAL = 1;
       } else {
-	croak("XML::LibXML ':threads_shared' can only be used after 'use threads';");
+	croak("XML::LibXML ':threads_shared' can only be used after 'use threads'");
       }
 #else
         RETVAL = 0;
