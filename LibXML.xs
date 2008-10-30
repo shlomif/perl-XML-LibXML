@@ -8869,8 +8869,8 @@ _DESTROY(reader)
     PREINIT:
         xmlDocPtr doc;
         SV * perl_doc;
-	SV * error_sv = NULL;
-	xmlTextReaderErrorFunc f = NULL;
+	/* SV * error_sv = NULL;
+           xmlTextReaderErrorFunc f = NULL; */
     CODE:
 	doc = xmlTextReaderCurrentDoc(reader);
         if (doc) {

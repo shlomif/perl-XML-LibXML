@@ -128,7 +128,6 @@ undef &AUTOLOAD;
 
 sub import {
   my $package=shift;
-  $__threads_shared=0 if not defined $__threads_shared;
   if (grep /^:threads_shared$/, @_) {
     if (!defined($__threads_shared)) {
       if (INIT_THREAD_SUPPORT()) {
@@ -148,6 +147,8 @@ sub import {
     } elsif (!$__threads_shared) {
       croak("XML::LibXML already loaded without thread support. Too late to enable thread support!");
     }
+  } else {
+    $__threads_shared=0 if not defined $__threads_shared;
   }
   __PACKAGE__->export_to_level(1,$package,grep !/^:threads(_shared)?$/,@_);
 }
@@ -681,8 +682,8 @@ sub parse_xml_chunk {
             # will be terminated. in case of a SAX filter the parsing is not
             # finished at that state. therefore we must not reset the parsing
             unless ( $self->{IS_FILTER} ) {
-                $result = $self->{HANDLER}->end_document();
-            }
+	      $result = $self->{HANDLER}->end_document();
+	    }
         };
     }
     else {
