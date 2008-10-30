@@ -510,7 +510,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
                 }
             }
             else {
-                xs_warn("PmmNodeToSv:   proxy creation failed!\n");
+                croak("XML::LibXML: failed to create a proxy node (out of memory?)\n");
             }
         }
 
