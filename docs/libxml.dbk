@@ -5220,7 +5220,8 @@ $doc = XML::LibXML-&gt;new-&gt;parse_file($url);</programlisting>
             <title>Description</title>
 
         <para>The XML::LibXML::Schema class is a tiny frontend to libxml2's XML Schema implementation. Currently it supports only schema parsing and
-        document validation.</para>
+        document validation. As of 2.6.32, libxml2 only supports decimal types up to 24 digits (the standard requires at least 18). 
+	</para>
 	</sect1>
         <sect1>
             <title>Methods</title>
