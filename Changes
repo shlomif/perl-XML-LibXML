@@ -4,6 +4,7 @@ Revision history for Perl extension XML::LibXML
    - added XML::LibXML::XPathExpression module that can pre-compile an XPath expreession
    - memory leak fixes
    - documentation fixes
+   - README - notes for building on Win32 (C.J. Madsen)
 
 1.66
    - Perl-thread support contributed by Tim Brody [rt.cpan.org #31945]
