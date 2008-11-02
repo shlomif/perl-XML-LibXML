@@ -88,7 +88,8 @@
 
         <sect1>
             <title>Installation</title>
-
+	    <para>(These instructions are for UNIX and GNU/Linux systems. For MSWin32,
+See Notes for Microsoft Windows below.)</para>
             <para>To install XML::LibXML just follow the standard installation routine for Perl modules:</para>
 
             <orderedlist>
@@ -178,8 +179,45 @@
                 <para>http://theoryx5.uwinnipeg.ca/ppmpackages/</para>
 
                 <para>Usually it takes a little time to build the package for the latest release.</para>
-            </sect2>
-
+		<para>If you want to build XML::LibXML on Windows from source, you can use
+		the following instructions contributed by Christopher J. Madsen:</para>
+ 
+		<para>These instructions assume that you already have your system set up to
+		compile modules that use C components.
+		</para>
+		First, get the libxml2 binaries from http://xmlsoft.org/sources/win32/
+		(currently also available at http://www.zlatkovic.com/pub/libxml/).
+		<para>
+		  You need:
+		</para>
+		<programlisting>  iconv-VERSION.win32.zip
+  libxml2-VERSION.win32.zip
+  zlib-VERSION.win32.zip</programlisting>
+  <para>Download the latest version of each. (Each package will probably have
+  a different version.) When you extract them, you'll get directories
+  named iconv-VERSION.win32, libxml2-VERSION.win32, and
+  zlib-VERSION.win32, each containing bin, lib, and include directories.</para>
+  <para>Combine all the bin, include, and lib directories under c:\Prog\LibXML.
+  (You can use any directory you prefer; just adjust the instructions
+  accordingly.)</para>
+  <para>Get the latest version of XML-LibXML-Common and XML-LibXML from CPAN.
+  Extract them.</para>
+  <para>Issue these commands in the XML-LibXML-Common-VERSION directory:</para>
+  <programlisting>  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
+  nmake
+  copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML\Common
+  nmake test
+  nmake install</programlisting>
+  <para>(Note: Some systems use dmake instead of nmake.)</para>
+  <para>By copying the libxml2 DLLs to the arch directory, you help avoid
+  conflicts with other programs you may have installed that use other
+  (possibly incompatible) versions of those DLLs.</para>
+  <para>Issue these commands in the XML-LibXML-VERSION directory:</para>
+  <programlisting>  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
+  nmake
+  nmake test
+  nmake install</programlisting>
+	    </sect2>
             <sect2>
                 <title>Notes for Mac OS X</title>
 
@@ -1054,9 +1092,9 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                                used to pass some options to the HTML
                                parser as a HASH reference. Possible
                                options are: Possible options are:
-                               encoding and URI for libxml2 &lt;
-                               2.6.27, and for later versions of
-                               libxml2 additionally: recover,
+                               encoding and URI, and with
+			       libxml2 &gt;	       
+                               2.6.27  additionally: recover,
                                suppress_errors, suppress_warnings,
                                pedantic_parser, no_blanks, and
                                no_network.
@@ -1076,9 +1114,8 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                                An optional second argument can be used
                                to pass some options to the HTML parser
                                as a HASH reference.  Possible options
-                               are: encoding and URI for libxml2 &lt;
-                               2.6.27, and for later versions of
-                               libxml2 additionally: recover,
+                               are: encoding and URI, and with libxml2 &gt;
+                               2.6.27 additionally: recover,
                                suppress_errors, suppress_warnings,
                                pedantic_parser, no_blanks, and
                                no_network. Note: encoding option may
@@ -1099,7 +1136,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             <para>Similar to parse_string() but parses HTML (strict) strings.</para>
                             <para>An optional second argument can be used to pass some options to the
                                HTML parser as a HASH reference. Possible options are:
-		               encoding and URI for libxml2 &lt; 2.6.27, and for later versions of libxml2 additionally:
+		               encoding and URI, and with libxml2 &gt; 2.6.27 additionally:
                                recover, suppress_errors, suppress_warnings, pedantic_parser,
 		               no_blanks, and no_network.
 	                    </para>
@@ -3520,7 +3557,43 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         
-
+        <varlistentry>
+          <term>baseURI ()</term>
+          <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$strURI = $node-&gt;baseURI();</funcsynopsisinfo>
+                    </funcsynopsis>
+            <para>
+	    Searches for the base URL of the node. The method should work on both XML
+ and HTML documents even if base mechanisms for these are completely different.
+ It returns the base as defined in RFC 2396 sections
+ "5.1.1. Base URI within Document Content"
+ and
+ "5.1.2. Base URI from the Encapsulating Entity".
+ However it does not return the document base (5.1.3), use method <function>URI</function>
+	      of <function>XML::LibXML::Document</function> for this.
+	    </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>setBaseURI ($strURI)</term>
+          <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$node-&gt;setBaseURI($strURI);</funcsynopsisinfo>
+                    </funcsynopsis>
+            <para>This method only does something useful for an element node
+	    in a XML document.
+            It sets the xml:base attribute on the node to $strURI, which
+	    effectively sets the base URI of the node to the same value.
+	    </para>
+	    <para>
+	    Note: For HTML documents this behaves as if the document was XML
+	    which may not be desired, since it does not effectively
+	    set the base URI of the node. See RFC 2396 appendix D 
+	    for an example of how base URI can be specified in HTML.
+	    </para>
+          </listitem>
+        </varlistentry>
         
             <varlistentry>
                 <term>nodePath</term>
@@ -5759,8 +5832,7 @@ sub processNode {
 		strings or filehandles. This URI is used when resolving relative URIs to 
 		external DTD subset, external entities, or XInclude elements.
 		This URI is returned by the <function>URI</function> method
-		of the <function>XML::LibXML::Document</function> object
-		(note by the <function>baseURI</function> function of <function>XML::LibXML::Document</function>!)
+		of the <function>XML::LibXML::Document</function> object.
 		</para>
             </listitem>
           </varlistentry>
@@ -6314,34 +6386,9 @@ sub processNode {
         <varlistentry>
           <term>baseURI ()</term>
           <listitem>
-            <para>Searches for the base URL of the node. The method should work on both XML
- and HTML documents even if base mechanisms for these are completely different.
- It returns the base as defined in RFC 2396 sections
- "5.1.1. Base URI within Document Content"
- and
- "5.1.2. Base URI from the Encapsulating Entity".
- However it does not return the document base (5.1.3), use method <function>URI</function>
-	      of <function>XML::LibXML::Document</function> for this.
-	    </para>
-          </listitem>
+            <para>Returns the base URI of a given node.</para>
+          </listitem>	  
         </varlistentry>
-        <varlistentry>
-          <term>setBaseURI ($strURI)</term>
-          <listitem>
-            <para>This method only does something useful for an element node
-	    in a XML document.
-            It sets the xml:base attribute on the node to $strURI, which
-	    effectively sets the base URI of the node to the same value.
-	    </para>
-	    <para>
-	    Note: For HTML documents this behaves as if the document was XML
-	    which may not be desired, since it does not effectively
-	    set the base URI of the node. See RFC 2396 appendix D 
-	    for an example of how base URI can be specified in HTML.
-	    </para>
-          </listitem>
-        </varlistentry>
-
         <varlistentry>
           <term>isValid ()</term>
           <listitem>
