@@ -1910,6 +1910,38 @@ $root-&gt;setAttributeNodeNS( $attr );</programlisting>
                     <programlisting>my $document = XML::LibXML::Document-&gt;createDocument( "1.0", "UTF-8" );</programlisting>
                 </listitem>
             </varlistentry>
+            <varlistentry>
+                <term>URI</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$strURI = $doc-&gt;URI();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the URI (or filename) of the original document.
+		    For documents obtained by parsing a string of a FH
+		    without using the URI parsing argument of the corresponding <function>parse_*</function> function,
+		    the result is a generated string unknown-XYZ where XYZ is some number;
+		    for documents created with the constructor <function>new</function>,
+		    the URI is undefined.
+                    </para>
+		    <para>The value can be modified by calling <function>setURI</function>
+		    method on the document node.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>setURI</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$doc-&gt;setURI($strURI);</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Sets the URI of the document reported by the method URI
+		    (see also the URI argument to the various <function>parse_*</function> functions).
+		    </para>
+                </listitem>
+            </varlistentry>
 
             <varlistentry>
                 <term>encoding</term>
@@ -5724,7 +5756,12 @@ sub processNode {
             <term>URI</term>
             <listitem>
               <para>can be used to provide baseURI when parsing
-		strings or filehandles.</para>
+		strings or filehandles. This URI is used when resolving relative URIs to 
+		external DTD subset, external entities, or XInclude elements.
+		This URI is returned by the <function>URI</function> method
+		of the <function>XML::LibXML::Document</function> object
+		(note by the <function>baseURI</function> function of <function>XML::LibXML::Document</function>!)
+		</para>
             </listitem>
           </varlistentry>
           <varlistentry>
@@ -6277,10 +6314,34 @@ sub processNode {
         <varlistentry>
           <term>baseURI ()</term>
           <listitem>
-            <para>The base URI of the node. See the XML Base W3C
-	      specification.</para>
+            <para>Searches for the base URL of the node. The method should work on both XML
+ and HTML documents even if base mechanisms for these are completely different.
+ It returns the base as defined in RFC 2396 sections
+ "5.1.1. Base URI within Document Content"
+ and
+ "5.1.2. Base URI from the Encapsulating Entity".
+ However it does not return the document base (5.1.3), use method <function>URI</function>
+	      of <function>XML::LibXML::Document</function> for this.
+	    </para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>setBaseURI ($strURI)</term>
+          <listitem>
+            <para>This method only does something useful for an element node
+	    in a XML document.
+            It sets the xml:base attribute on the node to $strURI, which
+	    effectively sets the base URI of the node to the same value.
+	    </para>
+	    <para>
+	    Note: For HTML documents this behaves as if the document was XML
+	    which may not be desired, since it does not effectively
+	    set the base URI of the node. See RFC 2396 appendix D 
+	    for an example of how base URI can be specified in HTML.
+	    </para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry>
           <term>isValid ()</term>
           <listitem>

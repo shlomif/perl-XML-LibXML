@@ -9,10 +9,10 @@ use IO::File;
 
 BEGIN { use XML::LibXML;
     if ( XML::LibXML::LIBXML_VERSION >= 20600 ) {
-        plan tests => 478; 
+        plan tests => 496; 
     }
     else {
-        plan tests => 470;
+        plan tests => (496 - 8) ;
         print "# skip NS cleaning tests\n";
     }
 };
@@ -897,6 +897,50 @@ EOXML
         ok( $@);
 }
 
+{
+
+   my $parser = XML::LibXML->new();
+
+   my $doc = $parser->parse_string('<foo xml:base="foo.xml"/>',"bar.xml");
+   my $el = $doc->documentElement;
+   ok( $doc->URI, "bar.xml" );
+   ok( $doc->baseURI, "bar.xml" );
+   ok( $el->baseURI, "foo.xml" );
+
+   $doc->setURI( "baz.xml" );
+   ok( $doc->URI, "baz.xml" );
+   ok( $doc->baseURI, "baz.xml" );
+   ok( $el->baseURI, "foo.xml" );
+
+   $doc->setBaseURI( "bag.xml" );
+   ok( $doc->URI, "bag.xml" );
+   ok( $doc->baseURI, "bag.xml" );
+   ok( $el->baseURI, "foo.xml" );
+
+   $el->setBaseURI( "bam.xml" );
+   ok( $doc->URI, "bag.xml" );
+   ok( $doc->baseURI, "bag.xml" );
+   ok( $el->baseURI, "bam.xml" );
+
+}
+
+
+{
+
+   my $parser = XML::LibXML->new();
+
+   my $doc = $parser->parse_html_string('<html><head><base href="foo.html"></head><body></body></html>',{ URI => "bar.html" });
+   my $el = $doc->documentElement;
+   ok( $doc->URI, "bar.html" );
+   ok( $doc->baseURI, "foo.html" );
+   ok( $el->baseURI, "foo.html" );
+
+   $doc->setURI( "baz.html" );
+   ok( $doc->URI, "baz.html" );
+   ok( $doc->baseURI, "foo.html" );
+   ok( $el->baseURI, "foo.html" );
+
+}
 
 sub tsub {
     my $doc = shift;
