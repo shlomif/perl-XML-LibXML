@@ -4175,7 +4175,10 @@ prefix( self )
         XML::LibXML::Node::getPrefix = 1
     CODE:
         PERL_UNUSED_VAR(ix);
-        if( self->ns != NULL
+        if( ( self->type == XML_ELEMENT_NODE
+	    || self->type == XML_ATTRIBUTE_NODE 
+	    || self->type == XML_PI_NODE ) 
+            && self->ns != NULL
             && self->ns->prefix != NULL ) {
             RETVAL = C2Sv(self->ns->prefix, NULL);
         }
@@ -4194,8 +4197,9 @@ namespaceURI( self )
         xmlChar * nsURI;
     CODE:
         PERL_UNUSED_VAR(ix);
-        if ( (self->type == XML_ELEMENT_NODE ||
-	      self->type == XML_ATTRIBUTE_NODE) 
+        if ( ( self->type == XML_ELEMENT_NODE
+	    || self->type == XML_ATTRIBUTE_NODE 
+	    || self->type == XML_PI_NODE ) 
 	     && self->ns != NULL
              && self->ns->href != NULL ) {
             nsURI =  xmlStrdup(self->ns->href);
@@ -4269,105 +4273,6 @@ lookupNamespacePrefix( self, svuri )
     OUTPUT:
         RETVAL
 
-int
-setNamespaceDeclURI( self, svprefix, newURI )
-        xmlNodePtr self
-        SV * svprefix
-        SV * newURI
-    PREINIT:
-        xmlChar * prefix = NULL;
-        xmlChar * nsURI = NULL;
-        xmlNsPtr ns;
-    CODE:
-        prefix = nodeSv2C( svprefix , self );
-        nsURI = nodeSv2C( newURI , self );
-        /* null empty values */
-        if ( prefix && xmlStrlen(prefix) == 0) {
-            xmlFree( prefix );
-            prefix = NULL;
-        }
-        if ( nsURI && xmlStrlen(nsURI) == 0) {
-	     xmlFree( nsURI );
-	     nsURI = NULL;
-        }
-        RETVAL = 0;
-        ns = self->nsDef;
-        while ( ns ) {
-		if ((ns->prefix || ns->href ) &&
-		    ( xmlStrcmp( ns->prefix, prefix ) == 0 )) {
-			  if (ns->href) xmlFree((char*)ns->href);
-			  ns->href = nsURI;
-			  if ( nsURI == NULL ) {
-			      domRemoveNsRefs( self, ns );
-			  } else
-			      nsURI = NULL; /* do not free it */
-			  RETVAL = 1;
-			  break;
-		} else {
-		    ns = ns->next;
-		}
-	  }
-        if ( prefix ) xmlFree( prefix );
-        if ( nsURI ) xmlFree( nsURI );
-    OUTPUT:
-        RETVAL
-
-int
-setNamespaceDeclPrefix( self, svprefix, newPrefix )
-        xmlNodePtr self
-        SV * svprefix
-        SV * newPrefix
-    PREINIT:
-        xmlChar * prefix = NULL;
-        xmlChar * nsPrefix = NULL;
-        xmlNsPtr ns;
-    CODE:
-        prefix = nodeSv2C( svprefix , self );
-        nsPrefix = nodeSv2C( newPrefix , self );
-        /* null empty values */
-        if ( prefix != NULL && xmlStrlen(prefix) == 0) {
-            xmlFree( prefix );
-            prefix = NULL;
-        }
-        if ( nsPrefix != NULL && xmlStrlen(nsPrefix) == 0) {
-            xmlFree( nsPrefix );
-            nsPrefix = NULL;
-        }
-        if ( xmlStrcmp( prefix, nsPrefix ) == 0 ) {
-		RETVAL = 1;
-	  } else {
-		RETVAL = 0;
-		/* check that new prefix is not in scope */
-		ns = xmlSearchNs( self->doc, self, nsPrefix );
-		if ( ns != NULL ) {
-		    if (nsPrefix != NULL) xmlFree( nsPrefix );
-		    if (prefix != NULL) xmlFree( prefix );
-		    croak("setNamespaceDeclPrefix: prefix '%s' is in use", ns->prefix);
-		}
-		/* lookup the declaration */
-		ns = self->nsDef;
-		while ( ns != NULL ) {
-		    if ((ns->prefix != NULL || ns->href != NULL) &&
-			  xmlStrcmp( ns->prefix, prefix ) == 0 ) {
-			  if ( ns->href == NULL && nsPrefix != NULL ) {
-			      /* xmlns:foo="" - no go */
-			      if ( prefix != NULL) xmlFree(prefix);
-			      croak("setNamespaceDeclPrefix: cannot set non-empty prefix for empty namespace");
-			  }
-			  if ( ns->prefix != NULL ) xmlFree( (xmlChar*)ns->prefix );
-			  ns->prefix = nsPrefix;
-			  nsPrefix = NULL; /* do not free it */
-			  RETVAL = 1;
-			  break;
-		    } else {
-			  ns = ns->next;
-		    }
-		}
-	  }
-        if ( nsPrefix != NULL ) xmlFree(nsPrefix);
-        if ( prefix != NULL) xmlFree(prefix);
-    OUTPUT:
-        RETVAL
 
 void
 setNodeName( self , value )
@@ -4386,7 +4291,10 @@ setNodeName( self , value )
             xmlFree(string);
             croak( "bad name" );
         }
-        if( self->ns ){
+        if( ( self->type == XML_ELEMENT_NODE
+	    || self->type == XML_ATTRIBUTE_NODE 
+	    || self->type == XML_PI_NODE) 
+	    && self->ns ){
             localname = xmlSplitQName2(string, &prefix);
 	    if ( localname == NULL ) {
 	      localname = xmlStrdup( string );
@@ -4415,7 +4323,10 @@ setRawName( self, value )
             xmlFree(string);
             XSRETURN_UNDEF;
         }
-        if( self->ns ){
+        if( ( self->type == XML_ELEMENT_NODE
+	     || self->type == XML_ATTRIBUTE_NODE 
+	     || self->type == XML_PI_NODE)
+	    && self->ns ){
             localname = xmlSplitQName2(string, &prefix);
             xmlNodeSetName(self, localname );
             xmlFree(localname);
@@ -4627,7 +4538,7 @@ _attributes( self )
     PPCODE:
         PERL_UNUSED_VAR(ix);
         if ( self->type != XML_ATTRIBUTE_NODE ) {
-            attr      = self->properties;
+            attr = self->properties;
             while ( attr != NULL ) {
                 if ( wantarray != G_SCALAR ) {
                     element = PmmNodeToSv((xmlNodePtr)attr,
@@ -4637,9 +4548,9 @@ _attributes( self )
                 attr = attr->next;
                 len++;
             }
-
-            ns = self->nsDef;
-            while ( ns != NULL ) {
+	    if (self->type == XML_ELEMENT_NODE) {
+	      ns = self->nsDef;
+	      while ( ns != NULL ) {
                 const char * CLASS = "XML::LibXML::Namespace";
                 if ( wantarray != G_SCALAR ) {
                     /* namespace handling is kinda odd:
@@ -4664,7 +4575,8 @@ _attributes( self )
                 }
                 ns = ns->next;
                 len++;
-            }
+	      }
+	    }
         }
         if( wantarray == G_SCALAR ) {
             XPUSHs( sv_2mortal(newSViv(len)) );
@@ -5568,21 +5480,23 @@ getNamespaces( pnode )
             croak( "lost node" );
         }
     PPCODE:
-        ns = node->nsDef;
-        while ( ns != NULL ) {
-		if (ns->prefix != NULL || ns->href != NULL) {
-		    newns = xmlCopyNamespace(ns);
-		    if ( newns != NULL ) {
-			  element = NEWSV(0,0);
-			  element = sv_setref_pv( element,
-							  (const char *)class,
-							  (void*)newns
-				);
-			  XPUSHs( sv_2mortal(element) );
-		    }
-		}
+        if (node->type == XML_ELEMENT_NODE) {
+	  ns = node->nsDef;
+	  while ( ns != NULL ) {
+	    if (ns->prefix != NULL || ns->href != NULL) {
+	      newns = xmlCopyNamespace(ns);
+	      if ( newns != NULL ) {
+		element = NEWSV(0,0);
+		element = sv_setref_pv( element,
+					(const char *)class,
+					(void*)newns
+					);
+		XPUSHs( sv_2mortal(element) );
+	      }
+	    }
             ns = ns->next;
-        }
+	  }
+	}
 
 SV *
 getNamespace( node )
@@ -5596,22 +5510,28 @@ getNamespace( node )
         const char * class = "XML::LibXML::Namespace";
     CODE:
         PERL_UNUSED_VAR(ix);
-        ns = node->ns;
-        if ( ns != NULL ) {
+	if ( node->type == XML_ELEMENT_NODE
+	    || node->type == XML_ATTRIBUTE_NODE 
+	    || node->type == XML_PI_NODE ) {
+	  ns = node->ns;
+	  if ( ns != NULL ) {
             newns = xmlCopyNamespace(ns);
             if ( newns != NULL ) {
-                RETVAL = NEWSV(0,0);
-                RETVAL = sv_setref_pv( RETVAL,
-                                       (const char *)class,
-                                       (void*)newns
-                                      );
+	      RETVAL = NEWSV(0,0);
+	      RETVAL = sv_setref_pv( RETVAL,
+				     (const char *)class,
+				     (void*)newns
+				     );
             } else {
-                XSRETURN_UNDEF;
+	      XSRETURN_UNDEF;
 	    }
-        }
-        else {
+	  }
+	  else {
             XSRETURN_UNDEF;
-        }
+	  }
+	} else {
+          XSRETURN_UNDEF;
+	}
     OUTPUT:
         RETVAL
 
@@ -5722,6 +5642,107 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
         }
         if ( nsPrefix ) xmlFree(nsPrefix);
         if ( nsURI ) xmlFree(nsURI);
+    OUTPUT:
+        RETVAL
+
+int
+setNamespaceDeclURI( self, svprefix, newURI )
+        xmlNodePtr self
+        SV * svprefix
+        SV * newURI
+    PREINIT:
+        xmlChar * prefix = NULL;
+        xmlChar * nsURI = NULL;
+        xmlNsPtr ns;
+    CODE:
+	RETVAL = 0;
+	prefix = nodeSv2C( svprefix , self );
+	nsURI = nodeSv2C( newURI , self );
+	/* null empty values */
+	if ( prefix && xmlStrlen(prefix) == 0) {
+	  xmlFree( prefix );
+	  prefix = NULL;
+	}
+        if ( nsURI && xmlStrlen(nsURI) == 0) {
+	  xmlFree( nsURI );
+	  nsURI = NULL;
+	}
+        ns = self->nsDef;
+        while ( ns ) {
+	  if ((ns->prefix || ns->href ) &&
+	      ( xmlStrcmp( ns->prefix, prefix ) == 0 )) {
+	    if (ns->href) xmlFree((char*)ns->href);
+	    ns->href = nsURI;
+	    if ( nsURI == NULL ) {
+	      domRemoveNsRefs( self, ns );
+	    } else
+	      nsURI = NULL; /* do not free it */
+	    RETVAL = 1;
+	    break;
+	    } else {
+	    ns = ns->next;
+	  }
+	}
+        if ( prefix ) xmlFree( prefix );
+        if ( nsURI ) xmlFree( nsURI );
+    OUTPUT:
+        RETVAL
+
+int
+setNamespaceDeclPrefix( self, svprefix, newPrefix )
+        xmlNodePtr self
+        SV * svprefix
+        SV * newPrefix
+    PREINIT:
+        xmlChar * prefix = NULL;
+        xmlChar * nsPrefix = NULL;
+        xmlNsPtr ns;
+    CODE:
+	RETVAL = 0;
+	prefix = nodeSv2C( svprefix , self );
+	nsPrefix = nodeSv2C( newPrefix , self );
+	/* null empty values */
+	if ( prefix != NULL && xmlStrlen(prefix) == 0) {
+	  xmlFree( prefix );
+	  prefix = NULL;
+	}
+        if ( nsPrefix != NULL && xmlStrlen(nsPrefix) == 0) {
+	  xmlFree( nsPrefix );
+	  nsPrefix = NULL;
+	}
+        if ( xmlStrcmp( prefix, nsPrefix ) == 0 ) {
+	  RETVAL = 1;
+	} else {
+	  /* check that new prefix is not in scope */
+	  ns = xmlSearchNs( self->doc, self, nsPrefix );
+	  if ( ns != NULL ) {
+	    if (nsPrefix != NULL) xmlFree( nsPrefix );
+	    if (prefix != NULL) xmlFree( prefix );
+	    croak("setNamespaceDeclPrefix: prefix '%s' is in use", ns->prefix);
+	  }
+	  /* lookup the declaration */
+	  ns = self->nsDef;
+	  while ( ns != NULL ) {
+	    if ((ns->prefix != NULL || ns->href != NULL) &&
+		xmlStrcmp( ns->prefix, prefix ) == 0 ) {
+	      if ( ns->href == NULL && nsPrefix != NULL ) {
+		/* xmlns:foo="" - no go */
+		if ( prefix != NULL) xmlFree(prefix);
+		croak("setNamespaceDeclPrefix: cannot set non-empty prefix for empty namespace");
+	      }
+	      if ( ns->prefix != NULL )
+		xmlFree( (xmlChar*)ns->prefix );
+	      ns->prefix = nsPrefix;
+	      nsPrefix = NULL; /* do not free it */
+	      RETVAL = 1;
+	      break;
+	    } else {
+	      ns = ns->next;
+	    }
+	  }
+	}
+        if ( nsPrefix != NULL ) xmlFree(nsPrefix);
+        if ( prefix != NULL) xmlFree(prefix);
     OUTPUT:
         RETVAL
 
