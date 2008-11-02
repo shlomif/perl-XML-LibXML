@@ -4194,7 +4194,9 @@ namespaceURI( self )
         xmlChar * nsURI;
     CODE:
         PERL_UNUSED_VAR(ix);
-        if ( self->ns != NULL
+        if ( (self->type == XML_ELEMENT_NODE ||
+	      self->type == XML_ATTRIBUTE_NODE) 
+	     && self->ns != NULL
              && self->ns->href != NULL ) {
             nsURI =  xmlStrdup(self->ns->href);
             RETVAL = C2Sv( nsURI, NULL );
