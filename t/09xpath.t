@@ -110,6 +110,7 @@ ok($doc);
 }
 
 {
+  # from #39178
   my $p = XML::LibXML->new;
   my $doc = $p->parse_file("example/utf-16-2.xml");
   ok($doc);
