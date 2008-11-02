@@ -3035,7 +3035,7 @@ URI( self )
         RETVAL
 
 void
-setBaseURI( self, new_URI )
+setURI( self, new_URI )
         xmlDocPtr self
         char * new_URI
     CODE:
@@ -3043,7 +3043,6 @@ setBaseURI( self, new_URI )
             xmlFree((xmlChar*)self->URL );
             self->URL = xmlStrdup((const xmlChar*)new_URI);
         }
-
 
 SV*
 createDocument( CLASS, version="1.0", encoding=NULL )
