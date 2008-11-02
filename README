@@ -21,7 +21,8 @@ the previous one. See XML::LibXML::InputCallback manual page for details.
 In 1.61 the XML::LibXML::XPathContext module, previously distributed
 separately, was merged in.
 
-In 1.66, an experimental support for Perl threads has been implemented.
+An experimental support for Perl threads introduced in 1.66 has been replaced
+in 1.67.
 
 
 DEPENDENCIES
@@ -49,6 +50,29 @@ this, run the xmllint program on your system. xmllint is shipped with libxml2
 and therefore should be available. For building the module you will also need
 the header file for libxml2, which in binary (.rpm,.deb) etc. distributions
 usually dwell in a package named libxml2-devel or similar.
+
+
+INSTALLATION
+============
+
+(These instructions are for UNIX and GNU/Linux systems. For MSWin32, See Notes
+for Microsoft Windows below.)
+
+To install XML::LibXML just follow the standard installation routine for Perl
+modules:
+
+   1 perl Makefile.PL
+   2 make
+   3 make test
+   4 make install # as superuser
+
+Note that XML::LibXML is an XS based Perl extension and you need a C compiler
+to build it.
+
+Note also that you should rebuild XML::LibXML if you upgrade libxml2 in order
+to avoid problems with possible binary incompatibilities between releases of
+the library.
+
 
 Notes on libxml2 versions
 =========================
@@ -99,26 +123,6 @@ certain conditions. This is no reason to assume that it shall work without
 problems. If Makefile.PL marks a version of libxml2 as incompatible or broken
 it is done for a good reason.
 
-INSTALLATION
-============
-
-(These instructions are for UNIX and GNU/Linux systems. For MSWin32,
-See Notes for Microsoft Windows below.)
-
-To install XML::LibXML just follow the standard installation routine for Perl
-modules:
-
-   1 perl Makefile.PL
-   2 make
-   3 make test
-   4 make install # as superuser
-
-Note that XML::LibXML is an XS based Perl extension and you need a C compiler
-to build it.
-
-Note also that you should rebuild XML::LibXML if you upgrade libxml2 in order
-to avoid problems with possible binary incompatibilities between releases of
-the library.
 
 Notes for Microsoft Windows
 ===========================
@@ -129,53 +133,50 @@ http://theoryx5.uwinnipeg.ca/ppmpackages/
 
 Usually it takes a little time to build the package for the latest release.
 
-If you want to build XML::LibXML on Windows from source, you can use
-the following instructions contributed by Christopher J. Madsen:
- 
-These instructions assume that you already have your system set up to
-compile modules that use C components.
+If you want to build XML::LibXML on Windows from source, you can use the
+following instructions contributed by Christopher J. Madsen:
 
-First, get the libxml2 binaries from http://xmlsoft.org/sources/win32/
-(currently also available at http://www.zlatkovic.com/pub/libxml/).
+These instructions assume that you already have your system set up to compile
+modules that use C components.
 
 You need:
 
-  iconv-VERSION.win32.zip
-  libxml2-VERSION.win32.zip
-  zlib-VERSION.win32.zip
+>   iconv-VERSION.win32.zip
+>   libxml2-VERSION.win32.zip
+>   zlib-VERSION.win32.zip
 
-Download the latest version of each. (Each package will probably have
-a different version.) When you extract them, you'll get directories
-named iconv-VERSION.win32, libxml2-VERSION.win32, and
-zlib-VERSION.win32, each containing bin, lib, and include directories.
+Download the latest version of each. (Each package will probably have a
+different version.) When you extract them, you'll get directories named
+iconv-VERSION.win32, libxml2-VERSION.win32, and zlib-VERSION.win32, each
+containing bin, lib, and include directories.
 
-Combine all the bin, include, & lib directories under c:\Prog\LibXML.
-(You can use any directory you prefer; just adjust the instructions
-accordingly.)
+Combine all the bin, include, and lib directories under c:\Prog\LibXML. (You
+can use any directory you prefer; just adjust the instructions accordingly.)
 
-Get the latest version of XML-LibXML-Common and XML-LibXML from CPAN.
-Extract them.
+Get the latest version of XML-LibXML-Common and XML-LibXML from CPAN. Extract
+them.
 
 Issue these commands in the XML-LibXML-Common-VERSION directory:
 
-  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
-  nmake
-  copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML\Common
-  nmake test
-  nmake install
+>   perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
+>   nmake
+>   copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML\Common
+>   nmake test
+>   nmake install
 
 (Note: Some systems use dmake instead of nmake.)
 
-By copying the libxml2 DLLs to the arch directory, you help avoid
-conflicts with other programs you may have installed that use other
-(possibly incompatible) versions of those DLLs.
+By copying the libxml2 DLLs to the arch directory, you help avoid conflicts
+with other programs you may have installed that use other (possibly
+incompatible) versions of those DLLs.
 
 Issue these commands in the XML-LibXML-VERSION directory:
 
-  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
-  nmake
-  nmake test
-  nmake install
+>   perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
+>   nmake
+>   nmake test
+>   nmake install
+
 
 Notes for Mac OS X
 ==================
