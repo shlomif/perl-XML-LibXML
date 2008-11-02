@@ -2159,19 +2159,21 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
         real_doc = htmlReadDoc((xmlChar*)ptr, URL, encoding, options);
 #else
         real_doc = htmlParseDoc((xmlChar*)ptr, encoding);
-#endif
-        if ( real_doc != NULL ) {
+        if ( real_doc ) {
             if (real_doc->URL) xmlFree((xmlChar *)real_doc->URL);
    	    if (URL) {
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
-            } else {
-                SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
-                real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
-
+        }
+#endif
+        if ( real_doc ) {
+	   if (URL==NULL) {
+             SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
+             real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
+           }
             /* This HTML memory parser doesn't use a ctxt; there is no "well-formed"
              * distinction, and if it manages to parse the HTML, it returns non-null. */
-            RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
+           RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
         }
 
         LibXML_cleanup_parser();
