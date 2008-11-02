@@ -1,7 +1,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 39 };
+BEGIN { plan tests => 41 };
 use XML::LibXML;
 
 my $xmlstring = <<EOSTR;
@@ -107,4 +107,12 @@ ok($doc);
         $node->parentNode()->removeChild( $node );
     }
     ok(1);
+}
+
+{
+  my $p = XML::LibXML->new;
+  my $doc = $p->parse_file("example/utf-16-2.xml");
+  ok($doc);
+  my @nodes = $doc->findnodes("/cml/*");
+  ok (@nodes == 2);
 }
