@@ -40,8 +40,8 @@ sub set_document_locator {
 sub start_dtd {
   my ($self, $dtd) = @_;
   if (defined $dtd->{Name} and
-      (defined $dtd->{SystemID} or defined $dtd->{PublicID})) {
-    $self->{DOM}->createExternalSubset($dtd->{Name},$dtd->{PublicID},$dtd->{SystemID});
+      (defined $dtd->{SystemId} or defined $dtd->{PublicId})) {
+    $self->{DOM}->createExternalSubset($dtd->{Name},$dtd->{PublicId},$dtd->{SystemId});
   }
 }
 
