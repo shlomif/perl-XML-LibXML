@@ -1383,7 +1383,7 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
                             owner = NULL;
                         }
                         if (tnode->type == XML_NAMESPACE_DECL) {
-                            element = sv_newmortal();
+                            element = NEWSV(0,0);
                             cls = PmmNodeTypeName( tnode );
                             element = sv_setref_pv( element,
                                                     (const char *)cls,
@@ -2710,7 +2710,7 @@ import_GDOME( CLASS, sv_gdome, deep=1 )
     CODE:
         if ( node->type == XML_NAMESPACE_DECL ) {
             const char * CLASS = "XML::LibXML::Namespace";
-            RETVAL = sv_newmortal();
+            RETVAL = NEWSV(0,0);
             RETVAL = sv_setref_pv( RETVAL,
                                    CLASS,
                                    (void*)xmlCopyNamespace((xmlNsPtr)node) );
@@ -6917,10 +6917,10 @@ new(CLASS, namespaceURI, namespacePrefix=&PL_sv_undef)
         nsPrefix = Sv2C(namespacePrefix, NULL);
         ns = xmlNewNs(NULL, nsURI, nsPrefix);
         if ( ns ) {
-            RETVAL = sv_newmortal();
+            RETVAL = NEWSV(0,0);
             RETVAL = sv_setref_pv( RETVAL,
                                    CLASS,
-                                   (void*)ns);
+                                   (void*)ns);           
 	}
         xmlFree(nsURI);
         if ( nsPrefix )
