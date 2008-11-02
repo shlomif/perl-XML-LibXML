@@ -1714,9 +1714,9 @@ sub new {
 
   if (ref($ns_map) eq 'HASH') {
     # translate prefix=>URL hash to a (URL,prefix) list
-    $self = $class->_compilePattern($pattern,[reverse %$ns_map]);
+    $self = $class->_compilePattern($pattern,0,[reverse %$ns_map]);
   } else {
-    $self = $class->_compilePattern($pattern);
+    $self = $class->_compilePattern($pattern,0);
   }
   return $self;
 }
