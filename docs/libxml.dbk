@@ -6613,7 +6613,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	  <term>new()</term>
 	  <listitem>
 	    <funcsynopsis>
-	      <funcsynopsisinfo>$pattern = XML::LibXML::Pattern-&gt;new( pattern, { prefix => namespace_URI, ... });</funcsynopsisinfo>
+	      <funcsynopsisinfo>$pattern = XML::LibXML::Pattern-&gt;new( pattern, { prefix => namespace_URI, ... } );</funcsynopsisinfo>
 	    </funcsynopsis>
 	    <para>The constructor of a pattern takes a pattern expression (as described
 	    by the BNF grammar above) and an optional HASH reference mapping

@@ -9037,9 +9037,10 @@ str3( self )
 MODULE = XML::LibXML       PACKAGE = XML::LibXML::Pattern
 
 xmlPatternPtr
-_compilePattern(CLASS, ppattern, ns_map=NULL)
+_compilePattern(CLASS, ppattern, pattern_type, ns_map=NULL)
         SV * ppattern
         AV * ns_map 
+	int pattern_type
     PREINIT:
         xmlChar * pattern = Sv2C(ppattern, NULL);
         xmlChar** namespaces = NULL;
@@ -9057,7 +9058,7 @@ _compilePattern(CLASS, ppattern, ns_map=NULL)
           }
 	  namespaces[i]=0;
 	}
-	RETVAL = xmlPatterncompile(pattern, NULL, 0, (const xmlChar **) namespaces);
+	RETVAL = xmlPatterncompile(pattern, NULL, pattern_type, (const xmlChar **) namespaces);
         Safefree(namespaces);
         xmlFree( pattern );
         if ( RETVAL == NULL ) {
