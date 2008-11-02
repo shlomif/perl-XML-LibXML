@@ -4946,7 +4946,7 @@ unbindNode( self )
     CODE:
         PERL_UNUSED_VAR(ix);
         if ( self->type != XML_DOCUMENT_NODE
-             || self->type != XML_DOCUMENT_FRAG_NODE ) {
+             && self->type != XML_DOCUMENT_FRAG_NODE ) {
             xmlUnlinkNode( self );
             if ( self->type != XML_ATTRIBUTE_NODE ) {
                 docfrag = PmmNewFragment( self->doc );
