@@ -20,8 +20,30 @@
 #ifndef __LIBXML_DOM_H__
 #define __LIBXML_DOM_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include "ppport.h"
+
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlerror.h>
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/parserInternals.h>
+#include <libxml/xmlIO.h>
+#include <libxml/xpathInternals.h>
+#include <libxml/globals.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * part 0:

@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 163 };
+BEGIN { plan tests => 166 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -229,13 +229,21 @@ use XML::LibXML::Common qw(:libxml);
     ok($node->isSameNode($tn));
 
     my $node2 = $doc->createElement( "bar" );
-    
-    $doc->appendChild($node2);
+    { my $warn;
+      eval {
+	local $SIG{__WARN__} = sub { $warn = 1 };
+	ok( !defined($doc->appendChild($node2)) );
+      };
+      ok($@ or $warn);
+    }
     my @cn = $doc->childNodes;
     ok( scalar(@cn) , 1);
     ok($cn[0]->isSameNode($node));
 
-    $doc->insertBefore($node2, $node);
+    eval {
+      $doc->insertBefore($node2, $node);
+    };
+    ok ($@);
     @cn = $doc->childNodes;
     ok( scalar(@cn) , 1);
     ok($cn[0]->isSameNode($node));
