@@ -299,11 +299,12 @@ sub dump_pod {
         my ( $title ) = $chap->getChildrenByTagName( "title" );
         my ( $ttlabbr ) = $chap->getChildrenByTagName( "titleabbrev" );
         my $str =  $ttlabbr->string_value() . " - ".$title->string_value();
-        $self->{OFILE}->print(  "=head1 NAME\n\n$str\n\n" );
+	$str=~s/^\s+|\s+$//g;
+        $self->{OFILE}->print(  "=head1 NAME\n\n$str\n" );
 	my ($synopsis) = $chap->findnodes( "sect1[title='Synopsis']" );
         my @funcs = $chap->findnodes( ".//funcsynopsis" );
 	if ($synopsis or scalar @funcs) {
-            $self->{OFILE}->print( "=head1 SYNOPSIS\n\n" )
+            $self->{OFILE}->print( "\n=head1 SYNOPSIS\n\n" )
 	}
 	if ($synopsis) {
 	  $self->dump_pod( $synopsis );
@@ -326,6 +327,7 @@ sub dump_pod {
 	     /^(?:itemizedlist|orderedlist|variablelist|programlisting|funcsynopsis)/)
 	    ? 1 : 0;
 	my $str = $node->data();
+	$str=~s/(^|\n)[ \t]+($|\n)/$1$2/g;
 	if ($str=~/\S/) {
 	  my $string = $str;
 	  my $space_before = ($string =~ s/^\s+//g) ? $prev_inline : 0;
@@ -422,6 +424,7 @@ sub dump_pod {
             my $str = $node->string_value();
 	    $str =~ s/^\s+|\s+$//g;
             $str =~ s/\n/\n  /g;
+	    $str=~s/(^|\n)[ \t]+($|\n)/$1$2/g;
             $self->{OFILE}->print( "\n\n" );
             $self->{OFILE}->print( "  ". $str );
             $self->{OFILE}->print( "\n\n" );
@@ -453,7 +456,11 @@ sub dump_pod {
             my $str = $node->string_value() ;
 	    my $url = $node->getAttribute('url');
             $str =~ s/\n/ /g;
-            $self->{OFILE}->print( "L<<<<<< $str|$url >>>>>>" );
+	    if ($str eq $url) {
+	      $self->{OFILE}->print( "L<<<<<< $url >>>>>>" );
+	    } else {
+	      $self->{OFILE}->print( "$str (L<<<<<< $url >>>>>>)" );
+	    }
         } elsif(  $node->nodeName() eq "xref" ) {
 	    my $linkend = $node->getAttribute('linkend');
 	    my ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/titleabbrev));
@@ -461,7 +468,7 @@ sub dump_pod {
 	    if ($target) {
 	      my $str = $target->string_value() ;
 	      $str =~ s/\n/ /g;
-	      $self->{OFILE}->print( "L<<<<<< $str|$str >>>>>>" );
+	      $self->{OFILE}->print( "L<<<<<< $str >>>>>>" );
 	    } else {
 	      warn "WARNING: Didn't find any section with id='$linkend'\n";
 	      $self->{OFILE}->print( "$linkend" );
@@ -473,7 +480,11 @@ sub dump_pod {
 	      warn $node->toString(1),"\n";
 	    }
             $str =~ s/\n/ /g;
-            $self->{OFILE}->print( "L<<<<<< $str|$url >>>>>>" );
+	    if ($str eq $url) {
+	      $self->{OFILE}->print( "L<<<<<< $url >>>>>>" );
+	    } else {
+	      $self->{OFILE}->print( "$str (L<<<<<< $url >>>>>>)" );
+	    }
         } else {
 	  print STDERR "Ignoring ",$node->nodeName(),"\n";
 	  $self->dump_pod($node);
