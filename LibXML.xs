@@ -3660,6 +3660,8 @@ _setDocumentElement( self , proxy )
             if ( elem->_private != NULL ) {
                 PmmFixOwner( SvPROXYNODE(proxy), PmmPROXYNODE(self));
             }
+        } else {
+            croak("setDocumentElement: ELEMENT node required");
         }
 
 SV *
@@ -4658,22 +4660,15 @@ insertBefore( self, nNode, ref )
     INIT:
         oNode = PmmSvNode(ref);
     CODE:
-        if ( self->type    == XML_DOCUMENT_NODE
-             && nNode->type == XML_ELEMENT_NODE ) {
-            xs_warn( "NOT_SUPPORTED_ERR\n" );
-            XSRETURN_UNDEF;
+        rNode = domInsertBefore( self, nNode, oNode );
+        if ( rNode != NULL ) {
+            RETVAL = PmmNodeToSv( rNode,
+                                  PmmOWNERPO(PmmPROXYNODE(self)) );
+            PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
+                        PmmOWNERPO(PmmPROXYNODE(self)) );
         }
         else {
-            rNode = domInsertBefore( self, nNode, oNode );
-            if ( rNode != NULL ) {
-                RETVAL = PmmNodeToSv( rNode,
-                                      PmmOWNERPO(PmmPROXYNODE(self)) );
-                PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
-                            PmmOWNERPO(PmmPROXYNODE(self)) );
-            }
-            else {
                  XSRETURN_UNDEF;
-            }
         }
     OUTPUT:
         RETVAL
@@ -4688,22 +4683,15 @@ insertAfter( self, nNode, ref )
     INIT:
         oNode = PmmSvNode(ref);
     CODE:
-        if ( self->type    == XML_DOCUMENT_NODE
-             && nNode->type == XML_ELEMENT_NODE ) {
-            xs_warn( "NOT_SUPPORTED_ERR\n" );
-            XSRETURN_UNDEF;
-        }
-        else {
-            rNode = domInsertAfter( self, nNode, oNode );
-            if ( rNode != NULL ) {
-                RETVAL = PmmNodeToSv( rNode,
-                                      PmmOWNERPO(PmmPROXYNODE(self)) );
+        rNode = domInsertAfter( self, nNode, oNode );
+        if ( rNode != NULL ) {
+            RETVAL = PmmNodeToSv( rNode,
+                                  PmmOWNERPO(PmmPROXYNODE(self)) );
                 PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
                             PmmOWNERPO(PmmPROXYNODE(self)) );
-            }
-            else {
-                XSRETURN_UNDEF;
-            }
+        }
+        else {
+            XSRETURN_UNDEF;
         }
     OUTPUT:
         RETVAL
@@ -4720,9 +4708,16 @@ replaceChild( self, nNode, oNode )
        if ( self->type == XML_DOCUMENT_NODE ) {
                 switch ( nNode->type ) {
                 case XML_ELEMENT_NODE:
+                    warn("replaceChild with an element on a document node not supported yet!");
+                    XSRETURN_UNDEF;
+                    break;
                 case XML_DOCUMENT_FRAG_NODE:
+                    warn("replaceChild with a document fragment node on a document node not supported yet!");
+                    XSRETURN_UNDEF;
+                    break;
                 case XML_TEXT_NODE:
                 case XML_CDATA_SECTION_NODE:
+                    warn("replaceChild with a text node not supported on a document node!");
                     XSRETURN_UNDEF;
                     break;
                 default:
@@ -4881,9 +4876,16 @@ appendChild( self, nNode )
              */
             switch ( nNode->type ) {
             case XML_ELEMENT_NODE:
+                warn("Appending an element to a document node not supported yet!");
+                XSRETURN_UNDEF;
+                break;
             case XML_DOCUMENT_FRAG_NODE:
+                warn("Appending a document fragment node to a document node not supported yet!");
+                XSRETURN_UNDEF;
+                break;
             case XML_TEXT_NODE:
             case XML_CDATA_SECTION_NODE:
+                warn("Appending text node not supported on a document node yet!");
                 XSRETURN_UNDEF;
                 break;
             default:
@@ -4941,6 +4943,7 @@ addSibling( self, nNode )
         xmlNodePtr ret = NULL;
     CODE:
         if ( nNode->type == XML_DOCUMENT_FRAG_NODE ) {
+            croak("Adding document fragments with addSibling not yet supported!");
             XSRETURN_UNDEF;
         }
 
