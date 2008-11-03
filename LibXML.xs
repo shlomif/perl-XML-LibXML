@@ -7886,7 +7886,11 @@ _findnodes( pxpath_context, perl_xpath )
                         if (tnode->doc) {
                             owner = PmmOWNERPO(PmmNewNode((xmlNodePtr) tnode->doc));
                         } else {
-                            owner = NULL; /* self contained node */
+                            /* we try to find a known node on the ancestor axis */
+                            xmlNodePtr n = tnode;
+                            while (n && n->_private == NULL) n = n->parent;
+                            if (n) owner = PmmOWNERPO(((ProxyNodePtr)n->_private)); 
+                            else owner = NULL; /* self contained node */
                         }
                         element = PmmNodeToSv(tnode, owner);
                     }
@@ -7998,7 +8002,11 @@ _find( pxpath_context, pxpath )
                                     if (tnode->doc) {
                                         owner = PmmOWNERPO(PmmNewNode((xmlNodePtr) tnode->doc));
                                     } else {
-                                        owner = NULL; /* self contained node */
+                                        /* we try to find a known node on the ancestor axis */
+                                        xmlNodePtr n = tnode;
+                                        while (n && n->_private == NULL) n = n->parent;
+                                        if (n) owner = PmmOWNERPO(((ProxyNodePtr)n->_private)); 
+                                        else owner = NULL;  /* self contained node */
                                     }
                                     element = PmmNodeToSv(tnode, owner);
                                 }

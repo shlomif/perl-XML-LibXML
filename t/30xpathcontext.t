@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 76 };
+BEGIN { plan tests => 79 };
 
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -190,4 +190,26 @@ ok($@);
    $x->unregisterNs('y');
    ok( $x->findvalue('count(/x:a/y:a)',$d->documentElement)==1 );
  }
+}
+
+{
+  # 37332
+
+  my $frag = XML::LibXML::DocumentFragment->new;
+  my $foo = XML::LibXML::Element->new('foo');
+  my $xpc = XML::LibXML::XPathContext->new;
+  $frag->appendChild($foo);
+  $foo->appendTextChild('bar', 'quux');
+  {
+    my @n = $xpc->findnodes('./foo', $frag);
+    ok ( @n == 1 );
+  }
+  {
+    my @n = $xpc->findnodes('./foo/bar', $frag);
+    ok ( @n == 1 );
+  }
+  {
+    my @n = $xpc->findnodes('./bar', $foo);
+    ok ( @n == 1 );
+  }
 }
