@@ -2300,7 +2300,7 @@ print OUT $doc-&gt;toString;</programlisting>
                     </funcsynopsis>
 
                     <para>This function enables you to set the root element for a document. The function supports the import of a node from a different document
-                    tree.</para>
+                    tree, but does not support a document fragment as $root.</para>
                 </listitem>
             </varlistentry>
 
