@@ -2803,7 +2803,7 @@ DESTROY( table )
         xmlHashTablePtr table
     CODE:
         xs_warn("DESTROY XMLHASHTABLE\n");
-		PmmFreeHashTable(table);
+	PmmFreeHashTable(table);
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML::ParserContext
 

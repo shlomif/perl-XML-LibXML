@@ -112,11 +112,12 @@ PmmProxyNodeRegistrySize();
 void
 PmmDumpRegistry(xmlHashTablePtr r);
 void
-PmmFreeHashTable(xmlHashTablePtr table);
-void
 PmmRegistryREFCNT_dec(ProxyNodePtr proxy);
 
 #endif
+
+void
+PmmFreeHashTable(xmlHashTablePtr table);
 
 ProxyNodePtr
 PmmNewNode(xmlNodePtr node);
