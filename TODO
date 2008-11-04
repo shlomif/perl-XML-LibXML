@@ -1,1 +1,0 @@
-- use structured error API so that at least RelaxNG and Schema validators report line numbers on error

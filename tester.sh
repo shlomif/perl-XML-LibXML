@@ -2,6 +2,7 @@
 make
 
 MEMORY_TEST=1 \
+THREAD_TEST=1 \
 PERL_DL_NONLAZY=1 \
 /usr/bin/perl \
                  -Iblib/arch \
