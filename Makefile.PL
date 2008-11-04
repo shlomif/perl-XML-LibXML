@@ -5,10 +5,6 @@
 # This file is required to generate a localized Makefile
 # -------------------------------------------------------------------------- #
 
-use ExtUtils::MakeMaker;
-use Config;
-use Symbol;
-use File::Spec;
 
 BEGIN {
   if ($] < 5.006_001) {
@@ -16,6 +12,11 @@ BEGIN {
     exit;
   }
 }
+
+use ExtUtils::MakeMaker;
+use Config;
+use Symbol;
+use File::Spec;
 
 $|=0;
 my %config;
@@ -125,6 +126,8 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,24,1], # all tests pass
                      [2,6,25,0], # broken XPath
                      [2,6,31,1], # tested, works ok
+                     [2,7,0,0], # broken release
+                     [2,7,2,1], # tested, ok
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
