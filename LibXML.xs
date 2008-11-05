@@ -78,72 +78,6 @@ typedef enum {
     XML_TEXTREADER_VALIDATE_XSD = 4
 } xmlTextReaderValidate;
 
-struct _xmlTextReader {
-    int				mode;	/* the parsing mode */
-    xmlDocPtr			doc;    /* when walking an existing doc */
-    xmlTextReaderValidate       validate;/* is there any validation */
-    int				allocs;	/* what structure were deallocated */
-    xmlTextReaderState		state;
-    xmlParserCtxtPtr		ctxt;	/* the parser context */
-    xmlSAXHandlerPtr		sax;	/* the parser SAX callbacks */
-    xmlParserInputBufferPtr	input;	/* the input */
-    startElementSAXFunc		startElement;/* initial SAX callbacks */
-    endElementSAXFunc		endElement;  /* idem */
-    startElementNsSAX2Func	startElementNs;/* idem */
-    endElementNsSAX2Func	endElementNs;  /* idem */
-    charactersSAXFunc		characters;
-    cdataBlockSAXFunc		cdataBlock;
-    unsigned int 		base;	/* base of the segment in the input */
-    unsigned int 		cur;	/* current position in the input */
-    xmlNodePtr			node;	/* current node */
-    xmlNodePtr			curnode;/* current attribute node */
-    int				depth;  /* depth of the current node */
-    xmlNodePtr			faketext;/* fake xmlNs chld */
-    int				preserve;/* preserve the resulting document */
-    xmlBufferPtr		buffer; /* used to return const xmlChar * */
-    xmlDictPtr			dict;	/* the context dictionnary */
-
-    /* entity stack when traversing entities content */
-    xmlNodePtr         ent;          /* Current Entity Ref Node */
-    int                entNr;        /* Depth of the entities stack */
-    int                entMax;       /* Max depth of the entities stack */
-    xmlNodePtr        *entTab;       /* array of entities */
-
-    /* error handling */
-    xmlTextReaderErrorFunc errorFunc;    /* callback function */
-    void                  *errorFuncArg; /* callback function user argument */
-
-#ifdef LIBXML_SCHEMAS_ENABLED
-    /* Handling of RelaxNG validation */
-    xmlRelaxNGPtr          rngSchemas;	/* The Relax NG schemas */
-    xmlRelaxNGValidCtxtPtr rngValidCtxt;/* The Relax NG validation context */
-    int                    rngValidErrors;/* The number of errors detected */
-    xmlNodePtr             rngFullNode;	/* the node if RNG not progressive */
-    /* Handling of Schemas validation */
-    xmlSchemaPtr          xsdSchemas;	/* The Schemas schemas */
-    xmlSchemaValidCtxtPtr xsdValidCtxt;/* The Schemas validation context */
-    int                   xsdPreserveCtxt; /* 1 if the context was provided by the user */
-    int                   xsdValidErrors;/* The number of errors detected */
-    xmlSchemaSAXPlugPtr   xsdPlug;	/* the schemas plug in SAX pipeline */
-#endif
-#ifdef LIBXML_XINCLUDE_ENABLED
-    /* Handling of XInclude processing */
-    int                xinclude;	/* is xinclude asked for */
-    const xmlChar *    xinclude_name;	/* the xinclude name from dict */
-    xmlXIncludeCtxtPtr xincctxt;	/* the xinclude context */
-    int                in_xinclude;	/* counts for xinclude */
-#endif
-#ifdef LIBXML_PATTERN_ENABLED
-    int                patternNr;       /* number of preserve patterns */
-    int                patternMax;      /* max preserve patterns */
-    void*     *patternTab;      /* array of preserve patterns */
-#endif
-    int                preserves;	/* level of preserves */
-    int                parserFlags;	/* the set of options set */
-    /* Structured error handling */
-    xmlStructuredErrorFunc sErrorFunc;  /* callback function */
-};
-
 
 /* GDOME support
  * libgdome installs only the core functions to the system.
@@ -2284,6 +2218,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
 #else /* LIBXML_VERSION >= 20627 */
         {
             int read_length;
+            int well_formed;
             char buffer[1024];
             htmlParserCtxtPtr ctxt;
 
