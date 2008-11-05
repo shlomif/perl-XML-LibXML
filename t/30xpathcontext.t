@@ -192,7 +192,7 @@ ok($@);
  }
 }
 
-{
+if (XML::LibXML::LIBXML_VERSION >= 20617) {
   # 37332
 
   my $frag = XML::LibXML::DocumentFragment->new;
@@ -212,4 +212,6 @@ ok($@);
     my @n = $xpc->findnodes('./bar', $foo);
     ok ( @n == 1 );
   }
+} else {
+  skip('xpath does not work on nodes without a document in libxml2 < 2.6.17') for 1..3;
 }

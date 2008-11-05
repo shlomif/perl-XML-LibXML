@@ -305,7 +305,7 @@ EOF
     # fixed values are defined
     ok ($root->getAttribute('fixed'),'foo');
     skip (
-	XML::LibXML::LIBXML_VERSION >= 20627 ? 0 : 'skipping for libxml2 <= 2.6.27',
+	XML::LibXML::LIBXML_VERSION >= 20627 ? 0 : 'skipping for libxml2 < 2.6.27',
 	$root->getAttributeNS($ns,'ns_fixed'),'ns_foo');
     ok ($root->getAttribute('a:ns_fixed'),'ns_foo');
 
