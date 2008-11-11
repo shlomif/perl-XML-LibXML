@@ -5187,9 +5187,10 @@ to_number ( self )
 
 
 void
-_find( pnode, pxpath )
+_find( pnode, pxpath, to_bool )
         SV* pnode
         SV * pxpath
+	int to_bool
     PREINIT:
         xmlNodePtr node = PmmSvNode(pnode);
         ProxyNodePtr owner = NULL;
@@ -5226,9 +5227,9 @@ _find( pnode, pxpath )
 
         INIT_ERROR_HANDLER;
         if (comp) {
-          found = domXPathCompFind( node, comp );
+          found = domXPathCompFind( node, comp, to_bool );
         } else {
-          found = domXPathFind( node, xpath );
+          found = domXPathFind( node, xpath, to_bool );
           xmlFree( xpath );
         }
         CLEANUP_ERROR_HANDLER;
@@ -5352,9 +5353,9 @@ _findnodes( pnode, perl_xpath )
 
         INIT_ERROR_HANDLER;
         if (comp) {
-            nodelist = domXPathCompSelect( node, comp );
+	    nodelist = domXPathCompSelect( node, comp );
         } else {
-            nodelist = domXPathSelect( node, xpath );
+	    nodelist = domXPathSelect( node, xpath );
             xmlFree(xpath);
         }
         CLEANUP_ERROR_HANDLER;
@@ -7776,10 +7777,10 @@ _findnodes( pxpath_context, perl_xpath )
 
         PUTBACK ;
         if (comp) {
-          found = domXPathCompFindCtxt( ctxt, comp );
+          found = domXPathCompFindCtxt( ctxt, comp, 0 );
         } else {
-            found = domXPathFindCtxt( ctxt, xpath );
-            xmlFree(xpath);
+	  found = domXPathFindCtxt( ctxt, xpath, 0 );
+	  xmlFree(xpath);
         }
         SPAGAIN ;
 
@@ -7842,9 +7843,10 @@ _findnodes( pxpath_context, perl_xpath )
         }
 
 void
-_find( pxpath_context, pxpath )
+_find( pxpath_context, pxpath, to_bool )
         SV * pxpath_context
         SV * pxpath
+        int to_bool
     PREINIT:
         xmlXPathContextPtr ctxt = NULL;
         ProxyNodePtr owner = NULL;
@@ -7886,10 +7888,10 @@ _find( pxpath_context, pxpath )
         INIT_ERROR_HANDLER;
         PUTBACK ;
         if (comp) {
-          found = domXPathCompFindCtxt( ctxt, comp );
+          found = domXPathCompFindCtxt( ctxt, comp, to_bool );
         } else {
-            found = domXPathFindCtxt( ctxt, xpath );
-            xmlFree(xpath);
+	  found = domXPathFindCtxt( ctxt, xpath, to_bool );
+	  xmlFree(xpath);
         }
         SPAGAIN ;
         CLEANUP_ERROR_HANDLER;

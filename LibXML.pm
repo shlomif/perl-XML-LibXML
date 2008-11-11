@@ -989,21 +989,31 @@ sub findnodes {
     }
 }
 
+sub exists {
+    my ($node, $xpath) = @_;
+    my (undef, $value) = $node->_find($xpath,1);
+    return $value;
+}
+
 sub findvalue {
     my ($node, $xpath) = @_;
     my $res;
-    eval {
-        $res = $node->find($xpath);
-    };
-    if  ( $@ ) {
-        die $@;
-    }
+    $res = $node->find($xpath);
     return $res->to_literal->value;
+}
+
+sub findbool {
+    my ($node, $xpath) = @_;
+    my ($type, @params) = $node->_find($xpath,1);
+    if ($type) {
+        return $type->new(@params);
+    }
+    return undef;
 }
 
 sub find {
     my ($node, $xpath) = @_;
-    my ($type, @params) = $node->_find($xpath);
+    my ($type, @params) = $node->_find($xpath,0);
     if ($type) {
         return $type->new(@params);
     }

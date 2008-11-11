@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 79 };
+BEGIN { plan tests => 82 };
 
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -50,6 +50,9 @@ $xc->registerNs('xxx', 'http://example.com/foobar');
 ok($xc->findnodes('/xxx:foo')->pop->nodeName eq 'foo');
 ok($xc->findnodes($compiled)->pop->nodeName eq 'foo');
 ok($xc->lookupNs('xxx') eq 'http://example.com/foobar');
+ok($xc->exists('//xxx:bar/@a'));
+ok($xc->exists('//xxx:bar/@b'),0);
+ok($xc->exists('xxx:bar',$doc1->getDocumentElement));
 
 # test unregisterNs()
 $xc->unregisterNs('xxx');

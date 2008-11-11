@@ -20,7 +20,7 @@ sub CLONE_SKIP { 1 }
 sub findnodes {
     my ($self, $xpath, $node) = @_;
 
-    my @nodes = $self->_guarded_find_call('_findnodes', $xpath, $node);
+    my @nodes = $self->_guarded_find_call('_findnodes', $node, $xpath);
 
     if (wantarray) {
         return @nodes;
@@ -33,12 +33,18 @@ sub findnodes {
 sub find {
     my ($self, $xpath, $node) = @_;
 
-    my ($type, @params) = $self->_guarded_find_call('_find', $xpath, $node);
+    my ($type, @params) = $self->_guarded_find_call('_find', $node, $xpath,0);
 
     if ($type) {
         return $type->new(@params);
     }
     return undef;
+}
+
+sub exists {
+    my ($self, $xpath, $node) = @_;
+    my (undef, $value) = $self->_guarded_find_call('_find', $node, $xpath,1);
+    return $value;
 }
 
 sub findvalue {
@@ -47,7 +53,7 @@ sub findvalue {
 }
 
 sub _guarded_find_call {
-    my ($self, $method, $xpath, $node) = @_;
+    my ($self, $method, $node)=(shift,shift,shift);
 
     my $prev_node;
     if (ref($node)) {
@@ -56,7 +62,7 @@ sub _guarded_find_call {
     }
     my @ret;
     eval {
-        @ret = $self->$method($xpath);
+        @ret = $self->$method(@_);
     };
     $self->_free_node_pool;
     $self->setContextNode($prev_node) if ref($node);
