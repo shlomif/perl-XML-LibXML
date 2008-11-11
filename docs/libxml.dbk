@@ -3302,7 +3302,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 		    <para>This method behaves like <emphasis>findnodes</emphasis>, except
 		    that it only returns a boolean value (1 if the expression matches a node, 0 otherwise)
 		    and may be faster than <emphasis>findnodes</emphasis>, because
-		    the XPath evaluation may stop early on the first match.
+		    the XPath evaluation may stop early on the first match (this is true for libxml2 >= 2.6.27).
 		    </para><para>For XPath expressions that do not return node-set,
 		    the method returns true if the returned value is a non-zero number or a non-empty string.</para>
 		</listitem>
@@ -5631,7 +5631,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	    <para>This method behaves like <emphasis>findnodes</emphasis>, except
 	    that it only returns a boolean value (1 if the expression matches a node, 0 otherwise)
 	    and may be faster than <emphasis>findnodes</emphasis>, because
-	    the XPath evaluation may stop early on the first match.
+	    the XPath evaluation may stop early on the first match (this is true for libxml2 >= 2.6.27).
 	    </para><para>For XPath expressions that do not return node-set,
 	    the method returns true if the returned value is a non-zero number or a non-empty string.</para>
 	  </listitem>
