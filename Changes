@@ -1,6 +1,10 @@
 Revision history for Perl extension XML::LibXML
-1.68pre
+1.69
+   - fix incorrect output of getAttributeNS and possibly other methods on UTF-8
+   - added $node_or_xpc->exists($xpath) method
+   - remove accidental debug output from XML::LibXML::SAX::Builder
 
+1.68
    - compilation problem fixes
 
 1.67

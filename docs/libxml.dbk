@@ -3184,8 +3184,6 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                 </listitem>
             </varlistentry>
         
-
-        
             <varlistentry>
                 <term>findnodes</term>
 
@@ -3294,7 +3292,21 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                 </listitem>
             </varlistentry>
         
+            <varlistentry>
+                <term>exists</term>
 
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$bool = $node-&gt;exists( $xpath_expression );</funcsynopsisinfo>
+                    </funcsynopsis>
+		    <para>This method behaves like <emphasis>findnodes</emphasis>, except
+		    that it only returns a boolean value (1 if the expression matches a node, 0 otherwise)
+		    and may be faster than <emphasis>findnodes</emphasis>, because
+		    the XPath evaluation may stop early on the first match.
+		    </para><para>For XPath expressions that do not return node-set,
+		    the method returns true if the returned value is a non-zero number or a non-empty string.</para>
+		</listitem>
+	    </varlistentry>
         
             <varlistentry>
                 <term>childNodes</term>
@@ -5597,7 +5609,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
           <listitem><funcsynopsis><funcsynopsisinfo>$value = $xpc-&gt;findvalue($xpath )</funcsynopsisinfo></funcsynopsis>
           <funcsynopsis><funcsynopsisinfo>$value = $xpc-&gt;findvalue($xpath, $context_node )</funcsynopsisinfo></funcsynopsis>
             <para>Is exactly equivalent to:</para>
-	    <programlisting>$node-&gt;find( $xpath )-&gt;to_literal;</programlisting>
+	    <programlisting>$xpc-&gt;find( $xpath, $context_node )-&gt;to_literal;</programlisting>
             <para>That is, it returns the literal value of the
             results. This enables you to ensure that you get a string
             back from your search, allowing certain shortcuts. This
@@ -5610,6 +5622,20 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	  </para>
           </listitem>
         </varlistentry>
+	<varlistentry>
+	  <term>exists</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$bool = $xpc-&gt;exists( $xpath_expression, $context_node );</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>This method behaves like <emphasis>findnodes</emphasis>, except
+	    that it only returns a boolean value (1 if the expression matches a node, 0 otherwise)
+	    and may be faster than <emphasis>findnodes</emphasis>, because
+	    the XPath evaluation may stop early on the first match.
+	    </para><para>For XPath expressions that do not return node-set,
+	    the method returns true if the returned value is a non-zero number or a non-empty string.</para>
+	  </listitem>
+	</varlistentry>
         <varlistentry>
           <term>setContextNode</term>
           <listitem><funcsynopsis><funcsynopsisinfo>$xpc-&gt;setContextNode($node)</funcsynopsisinfo></funcsynopsis>
