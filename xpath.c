@@ -142,20 +142,20 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
  **/
 
 xmlXPathObjectPtr
-domXPathFind( xmlNodePtr refNode, xmlChar * path ) {
+domXPathFind( xmlNodePtr refNode, xmlChar * path, int to_bool ) {
     xmlXPathObjectPtr res = NULL;
     xmlXPathCompExprPtr comp;
     comp = xmlXPathCompile( path );
     if ( comp == NULL ) {
         return NULL;
     }
-    res = domXPathCompFind(refNode,comp);
+    res = domXPathCompFind(refNode,comp,to_bool);
     xmlXPathFreeCompExpr(comp);
     return res;
 }
 
 xmlXPathObjectPtr
-domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
+domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
     xmlXPathObjectPtr res = NULL;
   
     if ( refNode != NULL && comp != NULL ) {
@@ -208,9 +208,12 @@ domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
         xmlXPathRegisterFunc(ctxt,
                              (const xmlChar *) "document",
                              perlDocumentFunction);
-       
-        res = xmlXPathCompiledEval(comp, ctxt);
-
+	if (to_bool) {
+	  int val = xmlXPathCompiledEvalToBoolean(comp, ctxt);
+	  res = xmlXPathNewBoolean(val);
+	} else {
+	  res = xmlXPathCompiledEval(comp, ctxt);
+	}
         if (ctxt->namespaces != NULL) {
             xmlFree( ctxt->namespaces );
         }
@@ -240,7 +243,7 @@ domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
   
-    res = domXPathFind( refNode, path );
+    res = domXPathFind( refNode, path, 0 );
     
     if (res != NULL) {
             /* here we have to transfer the result from the internal
@@ -263,7 +266,7 @@ domXPathCompSelect( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
   
-    res = domXPathCompFind( refNode, comp );
+    res = domXPathCompFind( refNode, comp, 0 );
     
     if (res != NULL) {
             /* here we have to transfer the result from the internal
@@ -288,7 +291,7 @@ domXPathCompSelect( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
  **/
 
 xmlXPathObjectPtr
-domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
+domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path, int to_bool ) {
     xmlXPathObjectPtr res = NULL;
     if ( ctxt->node != NULL && path != NULL ) {
         xmlXPathCompExprPtr comp;
@@ -296,14 +299,14 @@ domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
         if ( comp == NULL ) {
             return NULL;
         }
-        res = domXPathCompFindCtxt(ctxt,comp);
+        res = domXPathCompFindCtxt(ctxt,comp,to_bool);
         xmlXPathFreeCompExpr(comp);
     }
     return res;
 }
 
 xmlXPathObjectPtr
-domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp ) {
+domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_bool ) {
     xmlXPathObjectPtr res = NULL;
     if ( comp != NULL && ctxt->node != NULL && comp != NULL ) {
         xmlDocPtr tdoc = NULL;
@@ -329,9 +332,12 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp ) {
 
             ctxt->node->doc = tdoc;
         }
-       
-        res = xmlXPathCompiledEval(comp, ctxt);
-
+	if (to_bool) {
+	  int val = xmlXPathCompiledEvalToBoolean(comp, ctxt);
+	  res = xmlXPathNewBoolean(val);
+	} else {
+	  res = xmlXPathCompiledEval(comp, ctxt);
+	}
         if ( tdoc != NULL ) {
             /* after looking through a fragment, we need to drop the
                fake document again */
@@ -353,7 +359,7 @@ domXPathSelectCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
   
-    res = domXPathFindCtxt( ctxt, path );
+    res = domXPathFindCtxt( ctxt, path, 0 );
     
     if (res != NULL) {
             /* here we have to transfer the result from the internal
