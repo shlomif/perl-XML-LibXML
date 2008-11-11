@@ -6,7 +6,7 @@ use XML::LibXML::Number;
 use strict;
 
 use vars qw ($VERSION);
-$VERSION = "1.66"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.69"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use overload 
 		'""' => \&value,
