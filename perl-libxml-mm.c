@@ -1017,7 +1017,8 @@ PmmFastDecodeString( int charset,
     }
 
     if ( charset == XML_CHAR_ENCODING_UTF8 ) {
-        return xmlStrdup( string );
+        retval = xmlStrdup( string );
+        *len = xmlStrlen(retval);
     }
     else if ( charset == XML_CHAR_ENCODING_ERROR ){
         coder = xmlFindCharEncodingHandler( (const char *) encoding );

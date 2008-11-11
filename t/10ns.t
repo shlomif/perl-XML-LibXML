@@ -1,6 +1,6 @@
 # -*- cperl -*-
 use Test;
-BEGIN { plan tests=>124; }
+BEGIN { plan tests=>129; }
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -138,6 +138,17 @@ print "# 7. namespaced attributes\n";
 <test xmlns:xxx="http://example.com"/>
 EOF
   my $root = $doc->getDocumentElement();
+  # namespaced attributes
+  $root->setAttribute('xxx:attr', 'value');
+  ok ( $root->getAttributeNode('xxx:attr') );
+  ok ( $root->getAttribute('xxx:attr'), 'value' );
+  print $root->toString(1),"\n";
+  ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+  ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+  ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+
+  #change encoding to UTF-8 and retest
+  $doc->setEncoding('UTF-8');
   # namespaced attributes
   $root->setAttribute('xxx:attr', 'value');
   ok ( $root->getAttributeNode('xxx:attr') );
