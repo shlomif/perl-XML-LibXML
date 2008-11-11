@@ -1,7 +1,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 58 };
+BEGIN { plan tests => 57 };
 use XML::LibXML;
 
 my $xmlstring = <<EOSTR;
