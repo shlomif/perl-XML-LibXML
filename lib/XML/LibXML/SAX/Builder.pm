@@ -50,7 +50,6 @@ sub end_dtd {
 
 sub start_document {
     my ($self, $doc) = @_;
-    print "start document called\n";
     $self->{DOM} = XML::LibXML::Document->createDocument();
 
     if ( defined $self->{Encoding} ) {
@@ -78,7 +77,6 @@ sub xml_decl {
 
 sub end_document {
     my ($self, $doc) = @_;
-    print "end_document called\n";
     my $d = $self->done();
     return $d;
 }
