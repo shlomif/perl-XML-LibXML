@@ -209,8 +209,17 @@ domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
                              (const xmlChar *) "document",
                              perlDocumentFunction);
 	if (to_bool) {
+#if LIBXML_VERSION >= 20627
 	  int val = xmlXPathCompiledEvalToBoolean(comp, ctxt);
 	  res = xmlXPathNewBoolean(val);
+#else
+	  res = xmlXPathCompiledEval(comp, ctxt);
+	  if (res!=NULL) {
+	    int val = xmlXPathCastToBoolean(res);
+            xmlXPathFreeObject(res);
+	    res = xmlXPathNewBoolean(val);
+	  }
+#endif
 	} else {
 	  res = xmlXPathCompiledEval(comp, ctxt);
 	}
@@ -333,8 +342,17 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_
             ctxt->node->doc = tdoc;
         }
 	if (to_bool) {
+#if LIBXML_VERSION >= 20627
 	  int val = xmlXPathCompiledEvalToBoolean(comp, ctxt);
 	  res = xmlXPathNewBoolean(val);
+#else
+	  res = xmlXPathCompiledEval(comp, ctxt);
+	  if (res!=NULL) {
+	    int val = xmlXPathCastToBoolean(res);
+            xmlXPathFreeObject(res);
+	    res = xmlXPathNewBoolean(val);
+	  }
+#endif
 	} else {
 	  res = xmlXPathCompiledEval(comp, ctxt);
 	}
