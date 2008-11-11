@@ -1,7 +1,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 52 };
+BEGIN { plan tests => 58 };
 use XML::LibXML;
 
 my $xmlstring = <<EOSTR;
@@ -91,6 +91,11 @@ ok($doc);
 
     ok( $doc->exists("/foo/bar[2]") );
     ok( $doc->exists("/foo/bar[3]"), 0 );
+    ok( $doc->exists("-7.2"),1 );
+    ok( $doc->exists("0"),0 );
+    ok( $doc->exists("'foo'"),1 );
+    ok( $doc->exists("''"),0 );
+    ok( $doc->exists("'0'"),1 );
 
     my ($node) = $doc->findnodes("/foo/bar[1]" );
     ok( $node );
