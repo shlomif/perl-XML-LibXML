@@ -378,7 +378,7 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
            cur->parent = p;
        }
        
-       if (c1 && 2 && c1!=leader) {
+       if (c1 && c2 && c1!=leader) {
            if ( leader ) {
                leader->next = c1;
                c1->prev = leader;
@@ -728,6 +728,8 @@ domRemoveChild( xmlNodePtr self, xmlNodePtr old ) {
 
 xmlNodePtr
 domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
+    xmlNodePtr fragment = NULL;
+    xmlNodePtr fragment_next = NULL;    
     if ( self== NULL )
         return NULL;
 
@@ -765,11 +767,21 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
     else if ( new->type == XML_DOCUMENT_FRAG_NODE 
               && new->children == NULL ) {
         /* want to replace with an empty fragment, then remove ... */
+        fragment = new->children;
+        fragment_next = old->next;
         domRemoveChild( self, old );
     }
     else {
         domAddNodeToList(new, old->prev, old->next );
         old->parent = old->next = old->prev = NULL;    
+    }
+    if ( fragment ) {
+        while ( fragment && fragment != fragment_next ) {
+            domReconcileNs(fragment);
+            fragment = fragment->next;
+        }
+    } else if ( new->type != XML_ENTITY_REF_NODE ) {
+                domReconcileNs(new);
     }
 
     return old;
