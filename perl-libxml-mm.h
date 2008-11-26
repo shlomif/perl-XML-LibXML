@@ -103,7 +103,7 @@ typedef LocalProxyNode* LocalProxyNodePtr;
 
 #define PmmUSEREGISTRY		(PROXY_NODE_REGISTRY_MUTEX != NULL)
 #define PmmREGISTRY		(INT2PTR(xmlHashTablePtr,SvIV(SvRV(get_sv("XML::LibXML::__PROXY_NODE_REGISTRY",0)))))
-// #define PmmREGISTRY			(INT2PTR(xmlHashTablePtr,SvIV(SvRV(PROXY_NODE_REGISTRY))))
+/* #define PmmREGISTRY			(INT2PTR(xmlHashTablePtr,SvIV(SvRV(PROXY_NODE_REGISTRY)))) */
 
 void
 PmmCloneProxyNodes();
