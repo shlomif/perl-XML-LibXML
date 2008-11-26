@@ -1567,7 +1567,7 @@ int
 INIT_THREAD_SUPPORT()
     CODE:
 #ifdef XML_LIBXML_THREADS
-      SV *threads = get_sv("threads::threads", 0); // no create
+      SV *threads = get_sv("threads::threads", 0); /* no create */
       if( threads && SvOK(threads) && SvTRUE(threads) ) {
         PROXY_NODE_REGISTRY_MUTEX = get_sv("XML::LibXML::__PROXY_NODE_REGISTRY_MUTEX",0);
 	RETVAL = 1;
@@ -8084,7 +8084,7 @@ baseURI(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstBaseUri(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8111,7 +8111,7 @@ encoding(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstEncoding(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8122,7 +8122,7 @@ localName(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstLocalName(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8133,7 +8133,7 @@ name(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstName(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8144,7 +8144,7 @@ namespaceURI(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstNamespaceUri(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8155,7 +8155,7 @@ prefix(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstPrefix(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8166,7 +8166,7 @@ value(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstValue(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8177,7 +8177,7 @@ xmlLang(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstXmlLang(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8189,7 +8189,7 @@ xmlVersion(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstXmlVersion(reader);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
     OUTPUT:
 	RETVAL
 
@@ -8211,7 +8211,7 @@ getAttribute(reader, name)
 	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttribute(reader, (xmlChar*) name);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8224,7 +8224,7 @@ getAttributeNo(reader, no)
 	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttributeNo(reader, no);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8239,7 +8239,7 @@ getAttributeNs(reader, localName, namespaceURI)
     CODE:
 	result = xmlTextReaderGetAttributeNs(reader,  (xmlChar*) localName, 
 					     (xmlChar*) namespaceURI);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8285,6 +8285,33 @@ hasValue(reader)
     OUTPUT:
 	RETVAL
 
+SV*
+getAttributeHash(reader)
+	xmlTextReaderPtr reader
+    PREINIT:
+	HV* hv;
+	SV* sv;
+	const xmlChar* name;
+	PREINIT_SAVED_ERROR
+    CODE:
+	INIT_ERROR_HANDLER;
+	hv=newHV();
+	if (xmlTextReaderHasAttributes(reader) && xmlTextReaderMoveToFirstAttribute(reader)==1) {
+	  do {
+	    name = xmlTextReaderConstName(reader);
+	    sv=C2Sv((xmlTextReaderConstValue(reader)),NULL);
+	    if (sv && hv_store(hv, (const char*) name, xmlStrlen(name), sv, 0)==NULL) {
+	      SvREFCNT_dec(sv);  /* free if not needed by hv_stores */
+	    }
+	  } while (xmlTextReaderMoveToNextAttribute(reader)==1);
+	  xmlTextReaderMoveToElement(reader);
+	}
+        RETVAL=newRV_noinc((SV*)hv);
+        CLEANUP_ERROR_HANDLER;
+	REPORT_ERROR(0);
+    OUTPUT:
+	RETVAL
+
 int
 isDefault(reader)
 	xmlTextReaderPtr reader
@@ -8325,7 +8352,7 @@ lookupNamespace(reader, prefix)
 	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderLookupNamespace(reader, (xmlChar*) prefix);
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8575,7 +8602,7 @@ readInnerXml(reader)
         CLEANUP_ERROR_HANDLER;
 	REPORT_ERROR(0);
         if (!result) XSRETURN_UNDEF;
-	RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	RETVAL = C2Sv(result, NULL);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8593,7 +8620,7 @@ readOuterXml(reader)
 	CLEANUP_ERROR_HANDLER;
 	REPORT_ERROR(0);
         if (result) {
-	  RETVAL = C2Sv(result, xmlTextReaderConstEncoding(reader));
+	  RETVAL = C2Sv(result, NULL);
 	  xmlFree(result);
 	} else {
            XSRETURN_UNDEF;
@@ -8854,6 +8881,7 @@ _setXSD(reader,xsd_doc)
 	RETVAL
 
 #endif /* HAVE_SCHEMAS */
+
 
 void
 _DESTROY(reader)
