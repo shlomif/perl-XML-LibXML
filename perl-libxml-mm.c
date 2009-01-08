@@ -202,7 +202,9 @@ PmmRegisterProxyNode(ProxyNodePtr proxy)
 }
 
 /* utility method for PmmUnregisterProxyNode */
-static inline void
+/* PP: originally this was static inline void, but on AIX the compiler
+   did not chew it, so I'm removing the inline */
+static void
 PmmRegistryHashDeallocator(void *payload, xmlChar *name)
 {
 	Safefree((LocalProxyNodePtr) payload);
