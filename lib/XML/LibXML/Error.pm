@@ -84,7 +84,7 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 
     sub _callback_error {
       #print "CALLBACK\n";
-      my ($xE,$prev) = shift;
+      my ($xE,$prev) = @_;
       my $terr;
       $terr=XML::LibXML::Error->new($xE);
       unless ( defined $terr->{file} and length $terr->{file} ) {
