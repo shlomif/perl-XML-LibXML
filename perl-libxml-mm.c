@@ -149,11 +149,12 @@ PmmProxyNodeRegistryPtr(ProxyNodePtr proxy)
 /*
  * efficiently generate a string representation of the given pointer
  */
+#define _PMM_HASH_NAME_SIZE(n) n+(n>>3)+(n%8>0 ? 1 : 0)
 xmlChar *
 PmmRegistryName(void * ptr)
 {
 	unsigned long int v = (unsigned long int) ptr;
-	int HASH_NAME_SIZE = sizeof(void *) + ceil(sizeof(void *)/8);
+	int HASH_NAME_SIZE = _PMM_HASH_NAME_SIZE(sizeof(void*));
 	xmlChar * name;
 	int i;
 

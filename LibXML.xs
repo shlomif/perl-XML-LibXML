@@ -4,6 +4,11 @@
 extern "C" {
 #endif
 
+#if defined(_MSC_VER)
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
+#endif
+
 /* perl stuff */
 #include "EXTERN.h"
 #include "perl.h"
@@ -14,7 +19,7 @@ extern "C" {
 #include <fcntl.h>
 
 #ifndef WIN32
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 /* libxml2 configuration properties */
@@ -1307,9 +1312,9 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
                     const char * cls = "XML::LibXML::Node";
                     xmlNodePtr tnode;
                     SV * element;
+                    int l = nodelist->nodeNr;
 
-                    len = nodelist->nodeNr;
-                    for( j = 0 ; j < len; j++){
+                    for( j = 0 ; j < l; j++){
                         tnode = nodelist->nodeTab[j];
                         if( tnode != NULL && tnode->doc != NULL) {
                             owner = PmmOWNERPO(PmmNewNode(INT2PTR(xmlNodePtr,tnode->doc)));
@@ -5196,7 +5201,6 @@ _find( pnode, pxpath, to_bool )
         ProxyNodePtr owner = NULL;
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
-        STRLEN len = 0 ;
         xmlChar * xpath = NULL;
         xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
@@ -5247,10 +5251,10 @@ _find( pnode, pxpath, to_bool )
                             const char * cls = "XML::LibXML::Node";
                             xmlNodePtr tnode;
                             SV * element;
+                            int l = nodelist->nodeNr;
 
                             owner = PmmOWNERPO(SvPROXYNODE(pnode));
-                            len = nodelist->nodeNr;
-                            for( i=0 ; i < len; i++){
+                            for( i=0 ; i < l; i++){
                                 /* we have to create a new instance of an
                                  * objectptr. and then
                                  * place the current node into the new
@@ -5320,7 +5324,6 @@ _findnodes( pnode, perl_xpath )
         ProxyNodePtr owner = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
-        STRLEN len = 0 ;
         xmlChar * xpath = NULL ;
         xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
@@ -5364,10 +5367,11 @@ _findnodes( pnode, perl_xpath )
 	    REPORT_ERROR(1);
             if ( nodelist->nodeNr > 0 ) {
                 int i;
+                int len = nodelist->nodeNr;
                 const char * cls = "XML::LibXML::Node";
                 xmlNodePtr tnode;
                 owner = PmmOWNERPO(SvPROXYNODE(pnode));
-                len = nodelist->nodeNr;
+
                 for(i=0 ; i < len; i++){
                     /* we have to create a new instance of an objectptr.
                      * and then place the current node into the new object.
@@ -7740,7 +7744,6 @@ _findnodes( pxpath_context, perl_xpath )
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
         SV * element = NULL ;
-        STRLEN len = 0 ;
         xmlChar * xpath = NULL;
         xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
@@ -7796,8 +7799,8 @@ _findnodes( pxpath_context, perl_xpath )
                 int i;
                 const char * cls = "XML::LibXML::Node";
                 xmlNodePtr tnode;
-                len = nodelist->nodeNr;
-                for( i = 0  ; i < len; i++){
+                int l = nodelist->nodeNr;
+                for( i = 0  ; i < l; i++){
                     /* we have to create a new instance of an objectptr. 
                      * and then place the current node into the new object. 
                      * afterwards we can push the object to the array!
@@ -7852,7 +7855,6 @@ _find( pxpath_context, pxpath, to_bool )
         ProxyNodePtr owner = NULL;
         xmlXPathObjectPtr found = NULL;
         xmlNodeSetPtr nodelist = NULL;
-        STRLEN len = 0 ;
         xmlChar * xpath = NULL;
         xmlXPathCompExprPtr comp = NULL;
         PREINIT_SAVED_ERROR
@@ -7909,9 +7911,9 @@ _find( pxpath_context, pxpath, to_bool )
                             const char * cls = "XML::LibXML::Node";
                             xmlNodePtr tnode;
                             SV * element;
-                        
-                            len = nodelist->nodeNr;
-                            for( i = 0 ; i < len; i++){
+                            int l = nodelist->nodeNr;
+
+                            for( i = 0 ; i < l; i++){
                                 /* we have to create a new instance of an
                                  * objectptr. and then
                                  * place the current node into the new
@@ -8881,7 +8883,6 @@ _setXSD(reader,xsd_doc)
 	RETVAL
 
 #endif /* HAVE_SCHEMAS */
-
 
 void
 _DESTROY(reader)
