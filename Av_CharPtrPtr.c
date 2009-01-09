@@ -11,6 +11,11 @@ extern "C" {
 }
 #endif
 
+#if defined(_MSC_VER)
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
+#endif
+
 
 /* Used by the INPUT typemap for char**.
  * Will convert a Perl AV* (containing strings) to a C char**.
