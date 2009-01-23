@@ -338,8 +338,7 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_
                 froot = froot->parent;
             }
             xmlAddChild((xmlNodePtr)tdoc, froot);
-
-            ctxt->node->doc = tdoc;
+	    ctxt->node->doc = tdoc;
         }
 	if (to_bool) {
 #if LIBXML_VERSION >= 20627
@@ -364,8 +363,9 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_
             froot->parent  = NULL;
             tdoc->children = NULL;
             tdoc->last     = NULL;
-            ctxt->node->doc = NULL;
-
+	    if (ctxt->node) {
+	      ctxt->node->doc = NULL;
+	    }
             xmlFreeDoc( tdoc );
         }
     }
