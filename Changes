@@ -1,4 +1,13 @@
 Revision history for Perl extension XML::LibXML
+1.69_1
+   - merge with XML::LibXML::Common
+   - fix compilation on Windows with mingw or msvc
+   - fix a bug in structured errors preventing the previous errors from being reported
+   - fix compilation bugs
+   - fix encoding problem in reader
+   - added getAttributeHash to the reader interface
+   - fix segfaults: reconcileNs in domReplaceChild, findnodes with a doc fragment (S. Rezic)
+
 1.69
    - fix incorrect output of getAttributeNS and possibly other methods on UTF-8
    - added $node_or_xpc->exists($xpath) method
