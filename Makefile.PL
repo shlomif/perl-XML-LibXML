@@ -47,7 +47,7 @@ my %INFOS = (
 # -------------------------------------------------------------------------- #
 # read extra configurations from the commandline
 my %params;
-@params{qw(DEBUG DEFINE EXTRALIBDIR GDOME INC LIBS SKIP_SAX_INSTALL XMLPREFIX NO_THREADS)}=();
+@params{qw(FORCE DEBUG DEFINE EXTRALIBDIR GDOME INC LIBS SKIP_SAX_INSTALL XMLPREFIX NO_THREADS)}=();
 
 @ARGV = grep {
   my ($key, $val) = split(/=/, $_, 2);
@@ -62,6 +62,9 @@ delete $config{EXTRALIBDIR};
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
+# force unsupported version
+my $FORCE = delete $config{FORCE};
+
 # switch Debugging messages on
 my $DEBUG = delete $config{DEBUG};
 
@@ -125,7 +128,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,24,1], # all tests pass
                      [2,6,25,0], # broken XPath
                      [2,6,32,1], # tested, works ok
-                     [2,7,0,0], # broken release
+                     [2,7,1,0], # broken release, broken utf-16
                      [2,7,2,1], # tested, ok
                     );
     my $xml2cfg = "xml2-config";
@@ -146,15 +149,15 @@ unless ( $is_Win32 ) { # cannot get config in W32
         };
 
         if ( $@ ) {
-            if ( $@ =~ /^VERSION/ ) {
+            if ( $@ =~ /^VERSION|^FORCED/ ) {
                 print STDERR "The installed version of libxml2 not compatible with XML::LibXML.\n\n".
-                    "You may continue at your own risk, but:\n\n".
+                    "You may continue at your own risk using 'perl Makefile.PL FORCE=1', but:\n\n".
                     "  - don't expect XML::LibXML to build or work correctly!\n".
                     "  - don't report errors!\n".
                     "  - don't send patches!\n\n".
                     "Check the README file for more information on versions\n".
                     "that are tested with XML::LibXML\n\n"; 
-		exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
+		exit 0 unless $FORCE; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
             }
             if ( $@ =~ /^UNTESTED (\S*)/ ) {
 	      warn "Note: libxml2 $1 was not tested with this XML::LibXML version.\n"
@@ -634,13 +637,18 @@ sub try_libconfig {
             last if $point <= $_->[2];
             $state = undef;
         }
-        if ( defined $state and $state == 0 ) {
-            print "failed\n";
-            die "VERSION $ver\n";
-        }
 
         $config->{LIBS} = backtick("$cfgscript --libs");
         $config->{INC}  = backtick("$cfgscript --cflags");
+
+        if ( defined $state and $state == 0 ) {
+            print "failed\n";
+	    if ($FORCE) {
+	      die "FORCED $ver\n";
+	    } else {
+	      die "VERSION $ver\n";
+	    }
+        }
 
         unless ( defined $state ) {
             print "untested\n";
