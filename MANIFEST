@@ -53,6 +53,7 @@ lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/CDATASection.pod
 lib/XML/LibXML/Comment.pod
 lib/XML/LibXML/Common.pm
+lib/XML/LibXML/Common.pod
 lib/XML/LibXML/DocumentFragment.pod
 lib/XML/LibXML/Document.pod
 lib/XML/LibXML/DOM.pod
