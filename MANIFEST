@@ -52,6 +52,7 @@ lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/CDATASection.pod
 lib/XML/LibXML/Comment.pod
+lib/XML/LibXML/Common.pm
 lib/XML/LibXML/DocumentFragment.pod
 lib/XML/LibXML/Document.pod
 lib/XML/LibXML/DOM.pod
@@ -145,6 +146,7 @@ t/31xpc_functions.t
 t/32xpc_variables.t
 t/40reader.t
 t/41xinclude.t
+t/42common.t
 t/60struct_error.t
 t/61error.t
 t/80registryleak.t

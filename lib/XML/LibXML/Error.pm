@@ -1,10 +1,12 @@
 package XML::LibXML::Error;
 
 use strict;
-use vars qw($AUTOLOAD @error_domains);
+use vars qw($AUTOLOAD @error_domains $VERSION);
 use Carp;
 use overload
   '""' => \&as_string;
+
+$VERSION = "1.69"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant XML_ERR_NONE	     => 0;
 use constant XML_ERR_WARNING	     => 1; # A simple warning

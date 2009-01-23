@@ -9023,6 +9023,7 @@ _compilePattern(CLASS, ppattern, pattern_type, ns_map=NULL)
         xmlChar** namespaces = NULL;
 	SV** aux;
         int last,i;
+	PREINIT_SAVED_ERROR
     CODE:
         if ( pattern == NULL )
 	   XSRETURN_UNDEF;
@@ -9035,9 +9036,12 @@ _compilePattern(CLASS, ppattern, pattern_type, ns_map=NULL)
           }
 	  namespaces[i]=0;
 	}
+	INIT_ERROR_HANDLER;
 	RETVAL = xmlPatterncompile(pattern, NULL, pattern_type, (const xmlChar **) namespaces);
         Safefree(namespaces);
         xmlFree( pattern );
+        CLEANUP_ERROR_HANDLER;
+        REPORT_ERROR(0);
         if ( RETVAL == NULL ) {
 	  croak("Compilation of pattern failed");
 	}
@@ -9076,6 +9080,7 @@ new(CLASS, pxpath)
     CODE:
         if ( pxpath == NULL )
 	   XSRETURN_UNDEF;
+	INIT_ERROR_HANDLER;
 	RETVAL = xmlXPathCompile( xpath );
         xmlFree( xpath );
         CLEANUP_ERROR_HANDLER;
@@ -9092,3 +9097,175 @@ DESTROY( self )
     CODE:
         xs_warn( "DESTROY COMPILED XPATH OBJECT" );
         xmlXPathFreeCompExpr(self);
+
+MODULE = XML::LibXML         PACKAGE = XML::LibXML::Common
+
+PROTOTYPES: DISABLE
+
+SV*
+encodeToUTF8( encoding, string )
+        const char * encoding
+        SV * string
+    PREINIT:
+        xmlChar * realstring = NULL;
+        xmlChar * tstr = NULL;
+        xmlCharEncoding enc = 0;
+        STRLEN len = 0;
+        xmlBufferPtr in = NULL, out = NULL;
+        xmlCharEncodingHandlerPtr coder = NULL;
+	PREINIT_SAVED_ERROR
+    CODE:
+        realstring = (xmlChar*) SvPV(string, len);
+        if ( realstring != NULL ) {
+            /* warn("encode %s", realstring ); */
+#ifdef HAVE_UTF8
+            if ( !DO_UTF8(string) && encoding != NULL ) {
+#else 
+            if ( encoding != NULL ) {
+#endif
+                enc = xmlParseCharEncoding( encoding );
+    
+                if ( enc == 0 ) {
+                    /* this happens if the encoding is "" or NULL */
+                    enc = XML_CHAR_ENCODING_UTF8;
+                }
+
+                if ( enc == XML_CHAR_ENCODING_UTF8 ) {
+                    /* copy the string */
+                    /* warn( "simply copy the string" ); */
+                    tstr = xmlStrndup( realstring, len );
+                }
+                else {
+                    INIT_ERROR_HANDLER;                
+                    if ( enc > 1 ) {
+                        coder= xmlGetCharEncodingHandler( enc );
+                    }
+                    else if ( enc == XML_CHAR_ENCODING_ERROR ){
+                        coder =xmlFindCharEncodingHandler( encoding );
+                    }
+                    else {
+                        croak("no encoder found\n");
+                    }
+                    if ( coder == NULL ) {  
+                        croak( "cannot encode string" );
+                    }
+                    in    = xmlBufferCreateStatic((void*)realstring, len );
+                    out   = xmlBufferCreate();
+                    if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
+                        tstr = xmlStrdup( out->content );
+                    }
+        
+                    xmlBufferFree( in );
+                    xmlBufferFree( out );
+                    xmlCharEncCloseFunc( coder );
+
+                    CLEANUP_ERROR_HANDLER;
+                    REPORT_ERROR(0);
+                }
+            }
+            else {
+                tstr = xmlStrndup( realstring, len );
+            }
+
+            if ( !tstr ) {
+                croak( "return value missing!" );
+            }
+
+            len = xmlStrlen( tstr ); 
+            RETVAL = newSVpvn( (const char *)tstr, len );
+#ifdef HAVE_UTF8
+            SvUTF8_on(RETVAL);
+#endif  
+            xmlFree(tstr);
+        }
+        else {
+            XSRETURN_UNDEF;
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+decodeFromUTF8( encoding, string ) 
+        const char * encoding
+        SV* string
+    PREINIT:
+        xmlChar * tstr = NULL;
+        xmlChar * realstring = NULL;
+        xmlCharEncoding enc = 0;
+        STRLEN len = 0;
+        xmlBufferPtr in = NULL, out = NULL;
+        xmlCharEncodingHandlerPtr coder = NULL;
+	PREINIT_SAVED_ERROR
+    CODE: 
+#ifdef HAVE_UTF8
+        if ( !SvUTF8(string) ) {
+            croak("string is not utf8!!");
+        }
+        else {
+#endif
+            realstring = (xmlChar*) SvPV(string, len);
+            if ( realstring != NULL ) {
+                /* warn("decode %s", realstring ); */
+                enc = xmlParseCharEncoding( encoding );
+                if ( enc == 0 ) {
+                    /* this happens if the encoding is "" or NULL */
+                    enc = XML_CHAR_ENCODING_UTF8;
+                }
+
+                if ( enc == XML_CHAR_ENCODING_UTF8 ) {
+                    /* copy the string */
+                    /* warn( "simply copy the string" ); */
+                    tstr = xmlStrdup( realstring );
+                    len = xmlStrlen( tstr );
+                }
+                else {
+                    INIT_ERROR_HANDLER;                
+                    if ( enc > 1 ) {
+                        coder= xmlGetCharEncodingHandler( enc );
+                    }
+                    else if ( enc == XML_CHAR_ENCODING_ERROR ){
+                        coder = xmlFindCharEncodingHandler( encoding );
+                    }
+                    else {
+                        croak("no encoder found\n");
+                    }
+
+                    if ( coder == NULL ) {  
+                        croak( "cannot encode string" );
+                    }
+
+                    in    = xmlBufferCreate();
+                    out   = xmlBufferCreate();
+                    xmlBufferCCat( in, (char*) realstring );
+                    if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
+                        len  = xmlBufferLength( out );
+                        tstr = xmlCharStrndup( (char*) xmlBufferContent( out ), len );
+                    }
+        
+                    xmlBufferFree( in );
+                    xmlBufferFree( out );
+                    xmlCharEncCloseFunc( coder );
+                    CLEANUP_ERROR_HANDLER;
+                    REPORT_ERROR(0);
+                    if ( !tstr ) {
+                        croak( "return value missing!" );
+                    }
+                }
+
+                RETVAL = newSVpvn( (const char *)tstr, len );
+                xmlFree( tstr );
+#ifdef HAVE_UTF8
+                if ( enc == XML_CHAR_ENCODING_UTF8 ) {
+                    SvUTF8_on(RETVAL);
+                }
+#endif  
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
+#ifdef HAVE_UTF8
+        }
+#endif
+    OUTPUT:
+        RETVAL
+
