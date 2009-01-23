@@ -9,8 +9,6 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             );
 use Carp;
 
-use XML::LibXML::Common qw(:encoding :libxml);
-
 use constant XML_XMLNS_NS => 'http://www.w3.org/2000/xmlns/';
 use constant XML_XML_NS => 'http://www.w3.org/XML/1998/namespace';
 
@@ -86,7 +84,7 @@ use vars qw($__PROXY_NODE_REGISTRY $__threads_shared $__PROXY_NODE_REGISTRY_MUTE
                                )],
 		ns => [qw(
 		           XML_XMLNS_NS
-		           XML_XML_NS		    
+		           XML_XML_NS
 		 )],
                );
 
@@ -124,7 +122,36 @@ $CloseCB = undef;
 bootstrap XML::LibXML $VERSION;
 undef &AUTOLOAD;
 
+*encodeToUTF8 = \&XML::LibXML::Common::encodeToUTF8;
+*decodeFromUTF8 = \&XML::LibXML::Common::decodeFromUTF8;
+
 } # BEGIN
+
+
+#-------------------------------------------------------------------------#
+# libxml2 node names (see also XML::LibXML::Common                        #
+#-------------------------------------------------------------------------#
+use constant XML_ELEMENT_NODE            => 1;
+use constant XML_ATTRIBUTE_NODE          => 2;
+use constant XML_TEXT_NODE               => 3;
+use constant XML_CDATA_SECTION_NODE      => 4;
+use constant XML_ENTITY_REF_NODE         => 5;
+use constant XML_ENTITY_NODE             => 6;
+use constant XML_PI_NODE                 => 7;
+use constant XML_COMMENT_NODE            => 8;
+use constant XML_DOCUMENT_NODE           => 9;
+use constant XML_DOCUMENT_TYPE_NODE      => 10;
+use constant XML_DOCUMENT_FRAG_NODE      => 11;
+use constant XML_NOTATION_NODE           => 12;
+use constant XML_HTML_DOCUMENT_NODE      => 13;
+use constant XML_DTD_NODE                => 14;
+use constant XML_ELEMENT_DECL            => 15;
+use constant XML_ATTRIBUTE_DECL          => 16;
+use constant XML_ENTITY_DECL             => 17;
+use constant XML_NAMESPACE_DECL          => 18;
+use constant XML_XINCLUDE_START          => 19;
+use constant XML_XINCLUDE_END            => 20;
+
 
 sub import {
   my $package=shift;
@@ -1523,7 +1550,7 @@ sub isSameNode {
 #-------------------------------------------------------------------------#
 package XML::LibXML::NamedNodeMap;
 
-use XML::LibXML::Common qw(:libxml);
+use XML::LibXML qw(:libxml);
 
 sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;

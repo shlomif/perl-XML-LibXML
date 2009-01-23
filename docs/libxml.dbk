@@ -830,7 +830,7 @@ XML_XINCLUDE_END            =&gt; 20</programlisting>
 	    <varlistentry>
 	      <term><literal>:encoding</literal></term>
 	      <listitem>
-		<para>Exports two encoding conversion functions from the (separate) module XML::LibXML::Common.</para>
+		<para>Exports two encoding conversion functions from XML::LibXML::Common.</para>
 		<programlisting>
 encodeToUTF8()
 decodeFromUTF8()
@@ -838,7 +838,7 @@ decodeFromUTF8()
 	      </listitem>
 	    </varlistentry>
 	    <varlistentry>
-	      <term><literal>:libxml</literal></term>
+	      <term><literal>:ns</literal></term>
 	      <listitem>
 		<para>Exports two convenience constants: the implicit namespace of the
 		reserved <literal>xml:</literal> prefix,
@@ -6908,6 +6908,111 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
        Currently libxml2 uses over 480 different error codes.
        See also XML::LibXML::Error.
     </para>
+  </chapter>
+  <chapter id="XML-LibXML-Common">
+    <title>Constants and Character Encoding Routines</title>
+    <titleabbrev>XML::LibXML::Common</titleabbrev> 
+    <sect1>
+      <title>Synopsis</title>
+      <programlisting>use XML::LibXML::Common;</programlisting>
+    </sect1>
+    <sect1>
+      <title>Description</title>
+      <para>
+	XML::LibXML::Common defines constants for all node types
+	and provides interface to libxml2 charset conversion
+	functions.	
+      </para>
+      <para>Since XML::LibXML use their own node type definitions,
+      one may want to use XML::LibXML::Common in its compatibility
+      mode:
+      </para>
+      <sect2>
+	<title>Exporter TAGS</title>
+	<programlisting>use XML::LibXML::Common qw(:libxml);</programlisting>
+	<para><literal>:libxml</literal> tag will use the XML::LibXML Compatibility mode, which defines the
+	old 'XML_' node-type definitions.</para>
+	<programlisting>use XML::LibXML::Common qw(:gdome);</programlisting>
+	<para><literal>:gdome</literal> tag will use the XML::GDOME Compatibility mode, which defines the
+	old 'GDOME_' node-type definitions.</para>
+	<programlisting>use XML::LibXML::Common qw(:w3c);</programlisting>
+	<para>This uses the nodetype definition names as specified for DOM.</para>
+	<programlisting>use XML::LibXML::Common qw(:encoding);</programlisting>
+	<para>
+	  This tag can be used to export only the charset encoding functions of XML::LibXML::Common.
+	</para>
+      </sect2>
+      <sect2>
+	<title>Exports</title>
+	<para>
+	  By default the W3 definitions as defined in the DOM specifications and
+	  the encoding functions are exported by XML::LibXML::Common.
+	</para>
+      </sect2>
+      <sect2>
+	<title>Encoding functions</title>
+	<para>
+	  To encode or decode a string to or from UTF-8, XML::LibXML::Common exports
+	  two functions, which provide interfact to the encoding support in <literal>libxml2</literal>. 
+	  Which encodings are supported by these functions depends
+	  on how <literal>libxml2</literal> was compiled.  UTF-16 is
+	  always supported and on most installations, ISO encodings are
+	  supported as well.
+	</para>
+	<para>
+	  This interface was useful for older versions of Perl.
+	  Since Perl >= 5.8 provides similar funcions via the <literal>Encode</literal> module,
+	  it is probably a good idea to use those instead.
+	</para>
+	<variablelist>
+	  <varlistentry>
+	    <term>encodeToUTF8</term>
+	    <listitem>
+	      <funcsynopsis>
+		<funcsynopsisinfo>$encodedstring = encodeToUTF8( $name_of_encoding, $sting_to_encode );</funcsynopsisinfo>
+	      </funcsynopsis>
+	      <para>The function will convert a byte string from the specified encoding to an UTF-8 encoded character string.</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>decodeToUTF8</term>
+	    <listitem>
+	      <funcsynopsis>
+		<funcsynopsisinfo>$decodedstring = decodeFromUTF8($name_of_encoding, $string_to_decode );</funcsynopsisinfo>
+	      </funcsynopsis>
+	      <para>
+		This function converts an UTF-8 encoded character string to a specified
+		encoding. Note that the conversion can raise an error if the
+		given string contains characters that cannot be represented in the target encoding.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+	<para>Both these functions report their errors on the standard
+	error. If an error occours the function will croak(). To catch
+	the error information it is required to call the encoding
+	function from within an eval block in order to prevent the
+	entire script from being stopped on encoding error.</para>
+      </sect2>
+      <sect2>
+	<title>A note on history</title>
+	<para>
+	Before XML::LibXML 1.70, this class was available as a
+	separate CPAN distribution, intended to provide functionality
+	shared between XML::LibXML, XML::GDOME, and possibly other
+	modules. Since there seems to be no progress in this
+	direction, we decided to merge XML::LibXML::Common 0.13 and
+	XML::LibXML 1.70 to one CPAN distribution.
+	</para>
+	<para>The merge also naturally eliminates a practical and
+	urgent problem experienced by many XML::LibXML users on certain
+	platforms, namely misterious misbehavior of XML::LibXML
+	occurring if the installed (often pre-packaged) version of
+	XML::LibXML::Common was compiled against an older version of
+	libxml2 than XML::LibXML.
+      </para>
+      </sect2>
+    </sect1>
   </chapter>
 </book>
 
