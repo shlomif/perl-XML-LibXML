@@ -27,7 +27,7 @@ use IO::Handle; # for FH reads called as methods
 
 BEGIN {
 
-$VERSION = "1.69_1"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.69_2"; # VERSION TEMPLATE: DO NOT CHANGE
 require Exporter;
 require DynaLoader;
 @ISA = qw(DynaLoader Exporter);
