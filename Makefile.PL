@@ -4,6 +4,13 @@
 # Makefile.PL for XML::LibXML.
 # This file is required to generate a localized Makefile
 # -------------------------------------------------------------------------- #
+#
+#
+# This is free software, you may use it and distribute it under the same terms as
+# Perl itself.
+#
+# Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+#
 
 
 BEGIN {
@@ -28,7 +35,7 @@ my %config;
 my %INFOS = (
     'NAME'	=> 'XML::LibXML',
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
-    'AUTHOR'    => 'Christian Glahn',
+    'AUTHOR'    => 'Petr Pajas',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'PREREQ_PM' => {
 		    'XML::SAX' => '0.11',

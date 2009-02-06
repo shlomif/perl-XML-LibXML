@@ -1,7 +1,12 @@
 /**
  * perl-libxml-sax.c
  * $Id$
- */
+ *
+ * This is free software, you may use it and distribute it under the same terms as
+ * Perl itself.
+ *
+ * Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+*/
 
 #ifdef __cplusplus
 extern "C" {
