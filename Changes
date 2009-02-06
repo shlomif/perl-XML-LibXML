@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 1.69_1
+   - provide context and more accurate column number in
+     structured errors
+   - clarify license and copyright
+   - support for Win32+mingw+ActiveState
+
+1.69_1
    - merge with XML::LibXML::Common
    - fix compilation on Windows with mingw or msvc
    - fix a bug in structured errors preventing the previous errors from being reported
