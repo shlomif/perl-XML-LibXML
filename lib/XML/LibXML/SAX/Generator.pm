@@ -1,4 +1,11 @@
-# $Id$
+# $Id: Generator.pm 772 2009-01-23 21:42:09Z pajas 
+#
+# This is free software, you may use it and distribute it under the same terms as
+# Perl itself.
+#
+# Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+#
+#
 
 package XML::LibXML::SAX::Generator;
 

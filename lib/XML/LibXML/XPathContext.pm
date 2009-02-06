@@ -1,4 +1,11 @@
 # $Id: XPathContext.pm 422 2002-11-08 17:10:30Z phish $
+#
+# This is free software, you may use it and distribute it under the same terms as
+# Perl itself.
+#
+# Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+#
+#
 
 package XML::LibXML::XPathContext;
 

@@ -1,3 +1,11 @@
+# $Id: Reader.pm,v 1.1.2.1 2004/04/20 20:09:48 pajas Exp $
+#
+# This is free software, you may use it and distribute it under the same terms as
+# Perl itself.
+#
+# Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+#
+#
 package XML::LibXML::Reader;
 
 use XML::LibXML;

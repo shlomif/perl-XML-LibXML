@@ -132,7 +132,7 @@ sub set_general_info {
         if ( defined $node_h ) {
             $infostr .= $node_h->string_value();
         }
-        $infostr .= ", All rights reserved.\n\n=cut\n"
+        $infostr .= ".\n\n=cut\n"
     }
 
     $self->{infoblock} = $infostr;

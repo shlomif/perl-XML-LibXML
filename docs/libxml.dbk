@@ -343,7 +343,7 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
 
         <para>This is free software, you may use it and distribute it under the same terms as Perl itself.</para>
 
-        <para>Copyright 2001-2003 AxKit.com Ltd, All rights reserved.</para>
+        <para>Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas</para>
 
         <sect1>
             <title>Disclaimer</title>
@@ -6707,7 +6707,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	methods such as as $@-&#62;field() (where field is the field
 	name). XML::LibXML::Error objects have the following fields:
 	domain, code, level, file, line, nodename, message, str1, str2,
-	str3, int1, int2, and _prev (some of them may be undefined).
+	str3, num1, num2, and _prev (some of them may be undefined).
       </para>
       <variablelist>
 	<varlistentry>
@@ -6869,21 +6869,22 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
-	  <term>int1</term>
+	  <term>num1</term>
 	  <listitem>
 	    <funcsynopsis>
-	      <funcsynopsisinfo>$error_int1 = $@->int1();</funcsynopsisinfo>
+	      <funcsynopsisinfo>$error_num1 = $@->num1();</funcsynopsisinfo>
 	    </funcsynopsis>
 	    <para>Error specific. Extra numeric information.</para>
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
-	  <term>int2</term>
+	  <term>num2</term>
 	  <listitem>
 	    <funcsynopsis>
-	      <funcsynopsisinfo>$error_int2 = $@->int2();</funcsynopsisinfo>
+	      <funcsynopsisinfo>$error_num2 = $@->num2();</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>Error specific. Extra numeric information.</para>
+	    <para>In recent libxml2 versions, this
+	    value contains a column number of the error or 0 if N/A.</para>
 	  </listitem>
 	</varlistentry>
 	<varlistentry>

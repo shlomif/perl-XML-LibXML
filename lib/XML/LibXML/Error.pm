@@ -1,3 +1,11 @@
+# $Id: Error.pm,v 1.1.2.1 2004/04/20 20:09:48 pajas Exp $
+#
+# This is free software, you may use it and distribute it under the same terms as
+# Perl itself.
+#
+# Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+#
+#
 package XML::LibXML::Error;
 
 use strict;
@@ -130,12 +138,16 @@ sub AUTOLOAD {
   return undef unless ref($self);
   my $sub = $AUTOLOAD;
   $sub =~ s/.*:://;
-  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|num[123]|num[12])$/) {
+  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|str[123]|num[12])$/) {
     return $self->{$sub};
   } else {
     croak("Unknown error field $sub");
   }
 }
+
+# backward compatibility
+sub int1 { $_[0]->num1 }
+sub int2 { $_[0]->num2 }
 
 sub DESTROY {}
 

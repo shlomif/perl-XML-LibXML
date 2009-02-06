@@ -1,4 +1,10 @@
-/* $Id$ */
+/* $Id$
+ *
+ * This is free software, you may use it and distribute it under the same terms as
+ * Perl itself.
+ *
+ * Copyright 2001-2003 AxKit.com Ltd., 2002-2006 Christian Glahn, 2006-2009 Petr Pajas
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -4853,12 +4859,32 @@ addChild( self, nNode )
         xmlNodePtr retval = NULL;
         ProxyNodePtr proxy;
     CODE:
+        switch ( nNode->type ) {
+        case XML_DOCUMENT_FRAG_NODE:
+            croak("Adding document fragments with addChild not supported!");
+            XSRETURN_UNDEF;
+        case XML_DOCUMENT_NODE :
+        case XML_HTML_DOCUMENT_NODE :
+        case XML_DOCB_DOCUMENT_NODE :
+            croak("addChild: HIERARCHY_REQUEST_ERR\n");
+            XSRETURN_UNDEF;
+        case XML_NOTATION_NODE :
+        case XML_NAMESPACE_DECL :
+        case XML_DTD_NODE :
+        case XML_DOCUMENT_TYPE_NODE :
+        case XML_ENTITY_DECL :
+        case XML_ELEMENT_DECL :
+        case XML_ATTRIBUTE_DECL :
+            croak("addChild: unsupported node type!");
+            XSRETURN_UNDEF;
+        }
+
         xmlUnlinkNode(nNode);
         proxy = PmmPROXYNODE(nNode);
         retval = xmlAddChild( self, nNode );
 
         if ( retval == NULL ) {
-            croak( "ERROR!\n" );
+            croak( "Error: addChild failed (check node types)!\n" );
         }
 
         if ( retval != nNode ) {
@@ -8944,6 +8970,8 @@ line( self )
 int
 num1( self )
         xmlErrorPtr self
+    ALIAS:
+        int1 = 1
     CODE:
         RETVAL = self->int1;
     OUTPUT:
@@ -8952,6 +8980,8 @@ num1( self )
 int
 num2( self )
         xmlErrorPtr self
+    ALIAS:
+        int2 = 1
     CODE:
         RETVAL = self->int2;
     OUTPUT:
