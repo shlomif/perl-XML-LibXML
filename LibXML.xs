@@ -4877,6 +4877,8 @@ addChild( self, nNode )
         case XML_ATTRIBUTE_DECL :
             croak("addChild: unsupported node type!");
             XSRETURN_UNDEF;
+	default:
+	  break;
         }
 
         xmlUnlinkNode(nNode);
@@ -8973,6 +8975,7 @@ num1( self )
     ALIAS:
         int1 = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = self->int1;
     OUTPUT:
         RETVAL
@@ -8983,6 +8986,7 @@ num2( self )
     ALIAS:
         int2 = 1
     CODE:
+        PERL_UNUSED_VAR(ix);
         RETVAL = self->int2;
     OUTPUT:
         RETVAL
@@ -9035,6 +9039,58 @@ str3( self )
     OUTPUT:
         RETVAL
 
+void
+context_and_column( self )
+        xmlErrorPtr self
+   PREINIT:
+        xmlParserInputPtr input;
+	const xmlChar *cur, *base;
+	unsigned int n, col;	/* GCC warns if signed, because compared with sizeof() */
+	xmlChar  content[81]; /* space for 80 chars + line terminator */
+	xmlChar *ctnt;
+	int domain;
+        xmlParserCtxtPtr ctxt = NULL;
+   PPCODE:
+	domain = self->domain;
+	if ((domain == XML_FROM_PARSER) || (domain == XML_FROM_HTML) ||
+	    (domain == XML_FROM_DTD) || (domain == XML_FROM_NAMESPACE) ||
+	    (domain == XML_FROM_IO) || (domain == XML_FROM_VALID)) {
+	  ctxt = (xmlParserCtxtPtr) self->ctxt;
+	}
+       if (ctxt == NULL) XSRETURN_EMPTY;
+       input = ctxt->input;
+       if ((input != NULL) && (input->filename == NULL) &&
+            (ctxt->inputNr > 1)) {
+            input = ctxt->inputTab[ctxt->inputNr - 2];
+        }
+        if (input == NULL) XSRETURN_EMPTY;
+	cur = input->cur;
+	base = input->base;
+	/* skip backwards over any end-of-lines */
+	while ((cur > base) && ((*(cur) == '\n') || (*(cur) == '\r'))) {
+	  cur--;
+	}
+        n = 0;
+        /* search backwards for beginning-of-line (to max buff size) */
+        while ((n++ < (sizeof(content)-1)) && (cur > base) && 
+	       (*(cur) != '\n') && (*(cur) != '\r'))
+	  cur--;
+	if ((*(cur) == '\n') || (*(cur) == '\r')) cur++;
+	/* calculate the error position in terms of the current position */
+	col = input->cur - cur;
+	/* search forward for end-of-line (to max buff size) */
+	n = 0;
+	ctnt = content;
+	/* copy selected text to our buffer */
+	while ((*cur != 0) && (*(cur) != '\n') && 
+	       (*(cur) != '\r') && (n < sizeof(content)-1)) {
+	  *ctnt++ = *cur++;
+	  n++;
+	}
+	*ctnt = 0;
+        EXTEND(SP,2);
+        PUSHs(sv_2mortal(C2Sv(content, NULL)));
+        PUSHs(sv_2mortal(newSViv(col)));
 
 #endif /* WITH_SERRORS */
 
