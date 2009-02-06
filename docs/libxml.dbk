@@ -6888,6 +6888,31 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
+	  <term>context</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$string = $@->context();</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>For parsing errors, this field contains
+	    about 80 characters of the XML near the place
+	    where the error occurred. The field
+	    <function>$@->column()</function>
+	    contains the corresponding offset.
+	    Where N/A, the field is undefined.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>column</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$offset = $@->column();</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>See <function>$@->column()</function> above.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
 	  <term>_prev</term>
 	  <listitem>
 	    <funcsynopsis>

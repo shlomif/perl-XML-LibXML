@@ -157,7 +157,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
 
         if ( $@ ) {
             if ( $@ =~ /^VERSION|^FORCED/ ) {
-                print STDERR "The installed version of libxml2 not compatible with XML::LibXML.\n\n".
+                print STDERR "The installed version of libxml2 not compatible with XML::LibXML (and probably buggy)!\n\n".
                     "You may continue at your own risk using 'perl Makefile.PL FORCE=1', but:\n\n".
                     "  - don't expect XML::LibXML to build or work correctly!\n".
                     "  - don't report errors!\n".

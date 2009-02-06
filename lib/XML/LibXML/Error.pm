@@ -59,6 +59,7 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
     my ($class,$xE) = @_;
     my $terr;
     if (ref($xE)) {
+      my ($context,$column) = $xE->context_and_column();
       $terr =bless {
 	domain  => $xE->domain(),
 	level   => $xE->level(),
@@ -71,6 +72,11 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 	str3    => $xE->str3(),
 	num1    => $xE->num1(),
 	num2    => $xE->num2(),
+	(defined($context) ?
+	   (
+	     context => $context,
+	     column => $column,
+	    ) : ()),
       }, $class;
     } else {
       # !!!! problem : got a flat error
@@ -138,7 +144,7 @@ sub AUTOLOAD {
   return undef unless ref($self);
   my $sub = $AUTOLOAD;
   $sub =~ s/.*:://;
-  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|str[123]|num[12])$/) {
+  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|column|context|str[123]|num[12])$/) {
     return $self->{$sub};
   } else {
     croak("Unknown error field $sub");
@@ -191,9 +197,15 @@ sub as_string {
     chomp($str);
     $msg.=" ".$str."\n";
     if (($self->{domain} == XML_ERR_FROM_XPATH) and
-        defined($self->{str1})) {
-        $msg.=$self->{str1}."\n";
-        $msg.=(" " x $self->{num1})."^\n";
+	  defined($self->{str1})) {
+      $msg.=$self->{str1}."\n";
+      $msg.=(" " x $self->{num1})."^\n";
+    } elsif (defined $self->{context}) {
+      my $context = $self->{context};
+      $msg.=$context."\n";
+      $context = substr($context,0,$self->{column});
+      $context=~s/[^\t]/ /g;
+      $msg.=$context."^\n";
     }
     return $msg;
 }
