@@ -1,6 +1,6 @@
 use Test;
 
-BEGIN { plan tests => 53 }
+BEGIN { plan tests => 55 }
 
 use XML::LibXML;
 use XML::LibXML::SAX;
@@ -107,6 +107,35 @@ sub {
   $builder->end_element({Name=>'foo'});
   $parser->end_document();
   ok($builder->result()->documentElement->toString(), '<foo>'.$chunk.$chunk.'</foo>');
+}
+
+
+######## TEST error exceptions ############## 
+{
+
+  package MySAXHandler;
+  use strict;
+  use warnings;
+  use base 'XML::SAX::Base';
+  use Carp;
+  sub start_element {
+    my( $self, $elm) = @_;
+    if ( $elm->{LocalName} eq 'TVChannel' ) {
+      die bless({ Message => "My exception"},"MySAXException");
+    }
+  }
+}
+{
+  use strict;
+  use warnings;
+  my $parser = XML::LibXML::SAX->new( Handler => MySAXHandler->new( )) ;
+  eval { $parser->parse_string( <<'EOF' ) };
+<TVChannel TVChannelID="71" TVChannelName="ARD">
+        <Moin>Moin</Moin>
+</TVChannel>
+EOF
+  ok(ref($@), 'MySAXException');
+  ok(ref($@) && $@->{Message}, "My exception");
 }
 ########### Helper class #############
 
