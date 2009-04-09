@@ -416,9 +416,9 @@ int
 domIsParent( xmlNodePtr cur, xmlNodePtr ref ) {
     xmlNodePtr helper = NULL;
 
-    if ( cur == NULL
-         || ref == NULL
-         || cur->doc != ref->doc
+    if ( cur == NULL || ref == NULL) return 0;
+    if (ref==cur) return 1;
+    if ( cur->doc != ref->doc
          || ref->children == NULL
          || cur->parent == (xmlNodePtr)cur->doc
          || cur->parent == NULL ) {
