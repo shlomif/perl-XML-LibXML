@@ -207,7 +207,7 @@ LibXML_struct_error_callback(SV * saved_error, SV * libErr )
 
     if ( SvTRUE(ERRSV) ) {
       (void) POPs;
-      croak( "DIE: %s", SvPV_nolen(ERRSV) );
+      croak(Nullch);
     } else {
       sv_setsv(saved_error, POPs);
     }
@@ -511,7 +511,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
 
     if (SvTRUE(ERRSV)) {
        (void) POPs;
-       croak("read on filehandle failed: %s", SvPV_nolen(ERRSV));
+       croak(Nullch);
     }
 
     read_results = POPs;
@@ -572,7 +572,7 @@ LibXML_input_match(char const * filename)
 
         if (SvTRUE(ERRSV)) {
             (void) POPs;
-            croak("input match callback died: %s", SvPV_nolen(ERRSV));
+            croak(Nullch);
         }
 
         res = POPs;
@@ -616,7 +616,7 @@ LibXML_input_open(char const * filename)
 
     if (SvTRUE(ERRSV)) {
         (void) POPs;
-        croak("input callback died: %s", SvPV_nolen(ERRSV));
+        croak(Nullch);
     }
 
     results = POPs;
@@ -666,7 +666,7 @@ LibXML_input_read(void * context, char * buffer, int len)
 
         if (SvTRUE(ERRSV)) {
             (void) POPs;
-            croak("read callback died: %s", SvPV_nolen(ERRSV));
+            croak(Nullch);
         }
 
         output = POPp;
@@ -712,7 +712,7 @@ LibXML_input_close(void * context)
         SvREFCNT_dec(ctxt);
 
         if (SvTRUE(ERRSV)) {
-            croak("close callback died: %s", SvPV_nolen(ERRSV));
+            croak(Nullch);
         }
 
         FREETMPS;
@@ -744,7 +744,7 @@ LibXML_output_write_handler(void * ioref, char * buffer, int len)
         call_pv("XML::LibXML::__write", G_SCALAR | G_EVAL | G_DISCARD );
 
         if (SvTRUE(ERRSV)) {
-            croak("write method call died: %s", SvPV_nolen(ERRSV));
+            croak(Nullch);
         }
 
         FREETMPS;
@@ -811,7 +811,7 @@ LibXML_load_external_entity(
 
         if (SvTRUE(ERRSV)) {
             (void) POPs;
-            croak("external entity callback died: %s", SvPV_nolen(ERRSV));
+            croak(Nullch);
         }
 
         results = POPs;
@@ -1234,7 +1234,7 @@ LibXML_generic_variable_lookup(void* varLookupData,
 
     if (SvTRUE(ERRSV)) {
         (void) POPs;
-        croak("XPathContext: error coming back from variable lookup function. %s", SvPV_nolen(ERRSV));
+        croak(Nullch);
     } 
     if (count != 1) croak("XPathContext: variable lookup function returned none or more than one argument!");
 
@@ -1384,7 +1384,7 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
     
     if (SvTRUE(ERRSV)) {
         (void) POPs;
-        croak("XPathContext: error coming back from perl-dispatcher in pm file. %s", SvPV_nolen(ERRSV));
+        croak(Nullch);
     } 
 
     if (count != 1) croak("XPathContext: perl-dispatcher in pm file returned none or more than one argument!");

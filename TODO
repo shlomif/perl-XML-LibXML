@@ -1,0 +1,1 @@
+- add a flag to disable touching the I/O callbacks (as requested by thread users on xml@gnome.org)
