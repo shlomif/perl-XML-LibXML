@@ -1,1 +1,6 @@
-- add a flag to disable touching the I/O callbacks (as requested by thread users on xml@gnome.org)
+- add a flag to disable touching the I/O callbacks (as requested by
+  thread users on xml@gnome.org)
+
+- clear psvi before validation or keep track of whether a document has been validated or not
+
+- apply user-data patch (changes the proxy node data structure)

@@ -413,25 +413,25 @@ domAddNodeToList(xmlNodePtr cur, xmlNodePtr leader, xmlNodePtr followup)
  * function returns 1 (TRUE), otherwise 0 (FALSE).
  **/
 int
-domIsParent( xmlNodePtr cur, xmlNodePtr ref ) {
+domIsParent( xmlNodePtr cur, xmlNodePtr refNode ) {
     xmlNodePtr helper = NULL;
 
-    if ( cur == NULL || ref == NULL) return 0;
-    if (ref==cur) return 1;
-    if ( cur->doc != ref->doc
-         || ref->children == NULL
+    if ( cur == NULL || refNode == NULL) return 0;
+    if (refNode==cur) return 1;
+    if ( cur->doc != refNode->doc
+         || refNode->children == NULL
          || cur->parent == (xmlNodePtr)cur->doc
          || cur->parent == NULL ) {
         return 0;
     }
 
-    if( ref->type == XML_DOCUMENT_NODE ) {
+    if( refNode->type == XML_DOCUMENT_NODE ) {
         return 1;
     }
 
     helper= cur;
     while ( helper && (xmlDocPtr) helper != cur->doc ) {
-        if( helper == ref ) {
+        if( helper == refNode ) {
             return 1;
         }
         helper = helper->parent;
@@ -441,13 +441,13 @@ domIsParent( xmlNodePtr cur, xmlNodePtr ref ) {
 }
 
 int
-domTestHierarchy(xmlNodePtr cur, xmlNodePtr ref) 
+domTestHierarchy(xmlNodePtr cur, xmlNodePtr refNode) 
 {
-    if ( !ref || !cur || cur->type == XML_ATTRIBUTE_NODE ) {
+    if ( !refNode || !cur || cur->type == XML_ATTRIBUTE_NODE ) {
         return 0;
     }
 
-    switch ( ref->type ){
+    switch ( refNode->type ){
     case XML_ATTRIBUTE_NODE:
     case XML_DOCUMENT_NODE:
         return 0;
@@ -456,7 +456,7 @@ domTestHierarchy(xmlNodePtr cur, xmlNodePtr ref)
         break;
     }
     
-    if ( domIsParent( cur, ref ) ) {
+    if ( domIsParent( cur, refNode ) ) {
         return 0;
     }
 
@@ -464,10 +464,10 @@ domTestHierarchy(xmlNodePtr cur, xmlNodePtr ref)
 }
 
 int
-domTestDocument(xmlNodePtr cur, xmlNodePtr ref)
+domTestDocument(xmlNodePtr cur, xmlNodePtr refNode)
 {
     if ( cur->type == XML_DOCUMENT_NODE ) {
-        switch ( ref->type ) {
+        switch ( refNode->type ) {
         case XML_ATTRIBUTE_NODE:
         case XML_ELEMENT_NODE:
         case XML_ENTITY_NODE:
