@@ -100,43 +100,6 @@ $EXPORT_TAGS{all}=\@EXPORT_OK;
 }
 
 {
-  my %flags = (
-    recover => 1,		 # recover on errors
-    expand_entities => 2,	 # substitute entities
-    load_ext_dtd => 4,		 # load the external subset
-    complete_attributes => 8,	 # default DTD attributes
-    validation => 16,		 # validate with the DTD
-    suppress_errors => 32,	 # suppress error reports
-    suppress_warnings => 64,	 # suppress warning reports
-    pedantic_parser => 128,	 # pedantic error reporting
-    no_blanks => 256,		 # remove blank nodes
-    expand_xinclude => 1024,	 # Implement XInclude substitition
-    xinclude => 1024,		 # ... alias
-    no_network => 2048,		 # Forbid network access
-    clean_namespaces => 8192,    # remove redundant namespaces declarations
-    no_cdata => 16384,		 # merge CDATA as text nodes
-    no_xinclude_nodes => 32768,	 # do not generate XINCLUDE START/END nodes
-  );
-  sub _parser_options {
-    my ($opts) = @_;
-
-    # currently dictionaries break XML::LibXML memory management
-    my $no_dict = 4096;
-    my $flags = $no_dict;     # safety precaution
-
-    my ($key, $value);
-    while (($key,$value) = each %$opts) {
-      my $f = $flags{ $key };
-      if (defined $f) {
-	if ($value) {
-	  $flags |= $f
-	} else {
-	  $flags &= ~$f;
-	}
-      }
-    }
-    return $flags;
-  }
   my %props = (
     load_ext_dtd => 1,		 # load the external subset
     complete_attributes => 2,	 # default DTD attributes
@@ -166,7 +129,7 @@ $EXPORT_TAGS{all}=\@EXPORT_OK;
     my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
     my $encoding = $args{encoding};
     my $URI = $args{URI};
-    my $options = _parser_options(\%args);
+    my $options = XML::LibXML->_parser_options(\%args);
 
     my $self = undef;
     if ( defined $args{location} ) {

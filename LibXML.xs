@@ -19,6 +19,8 @@ extern "C" {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#define NEED_newRV_noinc_GLOBAL
+#define NEED_sv_2pv_flags
 #include "ppport.h"
 #include "Av_CharPtrPtr.h"  /* XS_*_charPtrPtr() */
 
@@ -116,7 +118,7 @@ typedef enum {
 
 
 #define TEST_PERL_FLAG(flag) \
-    SvTRUE(perl_get_sv(flag, FALSE)) ? 1 : 0
+    SvTRUE(get_sv(flag, FALSE)) ? 1 : 0
 
 #ifdef HAVE_READER_SUPPORT
 #define LIBXML_READER_TEST_ELEMENT(reader,name,nsURI) \
@@ -842,10 +844,11 @@ LibXML_load_external_entity(
  * **************************************************************** */
 
 HV*
-LibXML_init_parser( SV * self ) {
+LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
     /* we fetch all switches and callbacks from the hash */
     HV* real_obj = NULL;
     SV** item    = NULL;
+    int parserOptions = XML_PARSE_NODICT;
 
     /* A NOTE ABOUT xmlInitParser();                     */
     /* xmlInitParser() should be used only at startup and*/
@@ -864,83 +867,26 @@ LibXML_init_parser( SV * self ) {
         /* first fetch the values from the hash */
         real_obj = (HV *)SvRV(self);
 
-        item = hv_fetch( real_obj, "XML_LIBXML_KEEP_BLANKS", 22, 0 );
-        if ( item != NULL ) {
-            if ( SvTRUE(*item) )
-                xmlKeepBlanksDefault(1);
-            else {
-                xmlKeepBlanksDefault(0);
-            }
-        }
-        else {
-            /* keep blanks on default */
-            xmlKeepBlanksDefault(1);
-        }
+        item = hv_fetch( real_obj, "XML_LIBXML_PARSER_OPTIONS", 25, 0 );
+        if (item != NULL && SvOK(*item)) parserOptions = sv_2iv(*item);
 
-        item = hv_fetch( real_obj, "XML_LIBXML_PEDANTIC", 19, 0 );
-        if ( item != NULL && SvTRUE(*item) ) {
-#ifdef LIBXML_THREAD_ENABLED
-#if LIBXML_VERSION != 20507
-            xmlThrDefPedanticParserDefaultValue( 1 );
-#endif
-#endif
-            xmlPedanticParserDefaultValue = 1;
+        /* compatibility with old implementation:
+           absence of XML_PARSE_DTDLOAD (load_ext_dtd) implies absence of
+           all DTD related flags
+         */
+        if ((parserOptions & XML_PARSE_DTDLOAD) == 0) {
+            parserOptions &= ~(XML_PARSE_DTDVALID | XML_PARSE_DTDATTR | XML_PARSE_NOENT );
         }
-        else {
-#ifdef LIBXML_THREAD_ENABLED
-#if LIBXML_VERSION != 20507
-            xmlThrDefPedanticParserDefaultValue( 0 );
-#endif
-#endif
-            xmlPedanticParserDefaultValue = 0;
-        }
+        if (ctxt) xmlCtxtUseOptions(ctxt, parserOptions ); /* Note: sets ctxt->linenumbers = 1 */
 
         item =  hv_fetch( real_obj, "XML_LIBXML_LINENUMBERS", 22, 0 );
         if ( item != NULL && SvTRUE(*item) ) {
-            xmlLineNumbersDefault( 1 );
+            if (ctxt) ctxt->linenumbers = 1;
+            else xmlLineNumbersDefault( 1 );
         }
         else {
-            xmlLineNumbersDefault( 0 );
-        }
-
-        item = hv_fetch( real_obj, "XML_LIBXML_EXT_DTD", 18, 0 );
-        if ( item != NULL && SvTRUE(*item) ) {
-            xmlLoadExtDtdDefaultValue |= 1;
-
-            item = hv_fetch( real_obj, "XML_LIBXML_VALIDATION", 21, 0 );
-            if ( item != NULL && SvTRUE(*item) ) {
-                xmlDoValidityCheckingDefaultValue = 1;
-                xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
-            }
-            else {
-                xmlDoValidityCheckingDefaultValue = 0;
-            }
-            item = hv_fetch( real_obj, "XML_LIBXML_COMPLETE_ATTR", 24, 0 );
-            if (item != NULL && SvTRUE(*item)) {
-                xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
-            }
-            else {
-                xmlLoadExtDtdDefaultValue ^= XML_COMPLETE_ATTRS;
-            }
-
-            item = hv_fetch( real_obj, "XML_LIBXML_EXPAND_ENTITIES", 26, 0 );
-            if ( item != NULL ) {
-                if ( SvTRUE(*item) ) {
-                    xmlSubstituteEntitiesDefaultValue = 1;
-                    xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
-                }
-                else {
-                    xmlSubstituteEntitiesDefaultValue = 0;
-                }
-            }
-            else {
-                xmlSubstituteEntitiesDefaultValue = 1;
-                xmlLoadExtDtdDefaultValue |= XML_DETECT_IDS;
-            }
-        }
-        else {
-            /* xmlLoadExtDtdDefaultValue ^= 1;*/
-            xmlLoadExtDtdDefaultValue = 0;
+            if (ctxt) ctxt->linenumbers = 0;
+            else xmlLineNumbersDefault( 0 );
         }
 
         item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
@@ -949,8 +895,7 @@ LibXML_init_parser( SV * self ) {
             xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
         }
         else {
-	    item = hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
-            if (item != NULL && SvTRUE(*item)) {
+            if (parserOptions & XML_PARSE_NONET) {
                 LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
                 xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
             }
@@ -1630,9 +1575,6 @@ _parse_string(self, string, dir = &PL_sv_undef)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
-
         {
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
@@ -1641,6 +1583,9 @@ _parse_string(self, string, dir = &PL_sv_undef)
                 croak("Could not create memory parser context!\n");
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self, ctxt); 
+            recover = LibXML_get_recover(real_obj);
+
 
             if ( directory != NULL ) {
                 ctxt->directory = directory;
@@ -1659,16 +1604,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
             xs_warn( "context initialized\n" );
 
             {
-#if LIBXML_VERSION > 20600
-                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NSCLEAN;
-                }
-                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NONET;
-                }
-#endif
+                /* TODO: make this into a macro: */
                 xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
             }
@@ -1728,8 +1664,6 @@ _parse_sax_string(self, string)
     CODE:
         RETVAL = 0;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
 
         {
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
@@ -1739,9 +1673,11 @@ _parse_sax_string(self, string)
                 croak("Could not create memory parser context!\n");
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self, ctxt); 
+            recover = LibXML_get_recover(real_obj);
+
             PmmSAXInitContext( ctxt, self, saved_error );
             xs_warn( "context initialized \n");
-
             {
                 RETVAL = xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
@@ -1781,8 +1717,6 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
 
         {
             int read_length;
@@ -1802,6 +1736,8 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                 croak("Could not create xml push parser context!\n");
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self, ctxt);
+            recover = LibXML_get_recover(real_obj);
 #if LIBXML_VERSION > 20600
 	    /* dictionaries not support yet */
 	    ctxt->dictNames = 0;
@@ -1813,16 +1749,6 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             xs_warn( "context initialized \n");
             {
                 int ret;
-#if LIBXML_VERSION > 20600
-                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NSCLEAN;
-                }
-                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NONET;
-                }
-#endif
                 while ((read_length = LibXML_read_perl(fh, buffer, 1024))) {
                     ret = xmlParseChunk(ctxt, buffer, read_length, 0);
                     if ( ret != 0 ) {
@@ -1886,9 +1812,6 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
         }
     CODE:
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
-
         {
             int read_length;
             char buffer[1024];
@@ -1909,6 +1832,8 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
                 croak("Could not create xml push parser context!\n");
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self, ctxt);
+            recover = LibXML_get_recover(real_obj);
 
             if ( directory != NULL ) {
                 ctxt->directory = directory;
@@ -1961,8 +1886,6 @@ _parse_file(self, filename_sv)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
 
         {
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
@@ -1973,21 +1896,13 @@ _parse_file(self, filename_sv)
                       filename, strerror(errno));
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self, ctxt);
+            recover = LibXML_get_recover(real_obj);
 
             ctxt->_private = (void*)self;
             xs_warn( "context initialized \n");
 
             {
-#if LIBXML_VERSION > 20600
-                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NSCLEAN;
-                }
-                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NONET;
-                }
-#endif
                 xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
             }
@@ -2035,8 +1950,6 @@ _parse_sax_file(self, filename_sv)
         }
     CODE:
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
 
         {
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
@@ -2047,6 +1960,8 @@ _parse_sax_file(self, filename_sv)
                       filename, strerror(errno));
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self, ctxt);
+            recover = LibXML_get_recover(real_obj);
 
             ctxt->sax = PSaxGetHandler();
             PmmSAXInitContext( ctxt, self, saved_error );
@@ -2094,7 +2009,7 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
         if (encoding == NULL && SvUTF8( string )) {
 	  encoding = "UTF-8";
         }
@@ -2157,7 +2072,7 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
         recover = LibXML_get_recover(real_obj);
 #if LIBXML_VERSION >= 20627
         if (recover) options |= HTML_PARSE_RECOVER;
@@ -2215,7 +2130,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
         recover = LibXML_get_recover(real_obj);
 #if LIBXML_VERSION >= 20627
         if (recover) options |= HTML_PARSE_RECOVER;
@@ -2303,7 +2218,7 @@ _parse_xml_chunk(self, svchunk, enc = &PL_sv_undef)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
 
         chunk = Sv2C(svchunk, (const xmlChar*)encoding);
 
@@ -2380,8 +2295,6 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
         }
     CODE:
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
 
         chunk = Sv2C(svchunk, (const xmlChar*)encoding);
 
@@ -2393,6 +2306,8 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
                 croak("Could not create memory parser context!\n");
             }
             xs_warn( "context created\n");
+            real_obj = LibXML_init_parser(self,ctxt);
+            recover = LibXML_get_recover(real_obj);
 
             PmmSAXInitContext( ctxt, self, saved_error );
             handler = PSaxGetHandler();
@@ -2439,7 +2354,7 @@ _processXIncludes(self, doc, options=0)
     CODE:
         RETVAL = 0;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
         recover = LibXML_get_recover(real_obj);
 
         RETVAL = xmlXIncludeProcessFlags(real_doc,options);
@@ -2469,23 +2384,11 @@ _start_push(self, with_sax=0)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
-        recover = LibXML_get_recover(real_obj);
 
         /* create empty context */
         ctxt = xmlCreatePushParserCtxt( NULL, NULL, NULL, 0, NULL );
-#if LIBXML_VERSION > 20600
-        {
-                SV** item =  hv_fetch( real_obj, "XML_LIBXML_NSCLEAN", 18, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NSCLEAN;
-                }
-                item =  hv_fetch( real_obj, "XML_LIBXML_NONET", 16, 0 );
-                if ( item != NULL && SvTRUE(*item) ) {
-                    ctxt->options |= XML_PARSE_NONET;
-                }
-        }
-#endif
+        real_obj = LibXML_init_parser(self,ctxt);
+        recover = LibXML_get_recover(real_obj);
         if ( with_sax == 1 ) {
 	    PmmSAXInitContext( ctxt, self, saved_error );
         }
@@ -2527,7 +2430,7 @@ _push(self, pctxt, data)
     CODE:
         RETVAL = 0;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
         recover = LibXML_get_recover(real_obj);
 
         xmlParseChunk(ctxt, (const char *)chunk, len, 0);
@@ -2564,7 +2467,7 @@ _end_push(self, pctxt, restore)
     CODE:
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
 
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         xs_warn( "Finished with push parser\n" );
@@ -2610,7 +2513,7 @@ _end_sax_push(self, pctxt)
         }
     CODE:
         INIT_ERROR_HANDLER;
-        real_obj = LibXML_init_parser(self);
+        real_obj = LibXML_init_parser(self,NULL);
 
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         xs_warn( "Finished with SAX push parser\n" );
@@ -2776,12 +2679,12 @@ _toString(self, format=0)
         /* PREINIT_SAVED_ERROR */
     CODE:
         RETVAL = &PL_sv_undef;
-        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
 
-        internalFlag = perl_get_sv("XML::LibXML::skipDTD", 0);
+        internalFlag = get_sv("XML::LibXML::skipDTD", 0);
         if ( internalFlag && SvTRUE(internalFlag) ) {
             intSubset = xmlGetIntSubset( self );
             if ( intSubset )
@@ -2842,12 +2745,12 @@ toFH( self, filehandler, format=0 )
         int t_indent_var = xmlIndentTreeOutput;
         PREINIT_SAVED_ERROR
     CODE:
-        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
 
-        internalFlag = perl_get_sv("XML::LibXML::skipDTD", 0);
+        internalFlag = get_sv("XML::LibXML::skipDTD", 0);
         if ( internalFlag && SvTRUE(internalFlag) ) {
             intSubset = xmlGetIntSubset( self );
             if ( intSubset )
@@ -2912,7 +2815,7 @@ toFile( self, filename, format=0 )
         int oldTagFlag = xmlSaveNoEmptyTags;
         PREINIT_SAVED_ERROR
     CODE:
-        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
         if( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
@@ -4597,14 +4500,14 @@ normalize( self )
 
 
 SV*
-insertBefore( self, nNode, ref )
+insertBefore( self, nNode, refNode )
         xmlNodePtr self
         xmlNodePtr nNode
-        SV * ref
+        SV * refNode
     PREINIT:
         xmlNodePtr oNode=NULL, rNode;
     INIT:
-        oNode = PmmSvNode(ref);
+        oNode = PmmSvNode(refNode);
     CODE:
         rNode = domInsertBefore( self, nNode, oNode );
         if ( rNode != NULL ) {
@@ -4620,14 +4523,14 @@ insertBefore( self, nNode, ref )
         RETVAL
 
 SV*
-insertAfter( self, nNode, ref )
+insertAfter( self, nNode, refNode )
         xmlNodePtr self
         xmlNodePtr nNode
-        SV* ref
+        SV* refNode
     PREINIT:
         xmlNodePtr oNode = NULL, rNode;
     INIT:
-        oNode = PmmSvNode(ref);
+        oNode = PmmSvNode(refNode);
     CODE:
         rNode = domInsertAfter( self, nNode, oNode );
         if ( rNode != NULL ) {
@@ -5008,7 +4911,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         int oldTagFlag = xmlSaveNoEmptyTags;
     CODE:
         PERL_UNUSED_VAR(ix);
-        internalFlag = perl_get_sv("XML::LibXML::setTagCompression", 0);
+        internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
 
         if ( internalFlag ) {
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
@@ -6985,12 +6888,12 @@ declaredPrefix(self)
         RETVAL
 
 int
-_isEqual(self, ref)
+_isEqual(self, ref_node)
        SV * self
-       SV * ref
+       SV * ref_node
     PREINIT:
        xmlNsPtr ns = INT2PTR(xmlNsPtr,SvIV(SvRV(self)));
-       xmlNsPtr ons = INT2PTR(xmlNsPtr,SvIV(SvRV(ref)));
+       xmlNsPtr ons = INT2PTR(xmlNsPtr,SvIV(SvRV(ref_node)));
     CODE:
        RETVAL = 0;
        if ( ns == ons ) {

@@ -26,6 +26,7 @@ extern "C" {
 #include "perl-libxml-mm.h"
 
 #include "XSUB.h"
+#include "ppport.h"
 #include <libxml/tree.h>
 
 #ifdef XML_LIBXML_GDOME_SUPPORT
