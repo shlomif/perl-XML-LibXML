@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
-1.69_1
+1.70 pre
+   - added XML::LibXML->load_xml and XML::LibXML->load_html with
+     uniform and cleaner API than the old parse_* family
+   - cleanup code dealing with parsing flags
+   - fix bogus validation results if revalidating a modified document
+
+1.69_2
    - provide context and more accurate column number in
      structured errors
    - clarify license and copyright
