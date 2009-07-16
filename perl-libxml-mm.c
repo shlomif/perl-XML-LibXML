@@ -328,12 +328,24 @@ PmmNewNode(xmlNodePtr node)
     }
 
     if ( node->_private == NULL ) {
-	proxy = (ProxyNodePtr)xmlMalloc(sizeof(struct _ProxyNode));
+        switch ( node->type ) {
+        case XML_DOCUMENT_NODE:
+        case XML_HTML_DOCUMENT_NODE:
+        case XML_DOCB_DOCUMENT_NODE:
+            proxy = (ProxyNodePtr)xmlMalloc(sizeof(struct _DocProxyNode));
+            if (proxy != NULL) {
+                ((DocProxyNodePtr)proxy)->psvi_status = Pmm_NO_PSVI;
+                SetPmmENCODING(proxy, XML_CHAR_ENCODING_NONE);
+            }
+            break;
+        default:
+            proxy = (ProxyNodePtr)xmlMalloc(sizeof(struct _ProxyNode));
+            break;
+        }
         if (proxy != NULL) {
             proxy->node  = node;
             proxy->owner   = NULL;
             proxy->count   = 0;
-            proxy->encoding= 0;
             node->_private = (void*) proxy;
         }
     }
@@ -540,7 +552,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
         case XML_HTML_DOCUMENT_NODE:
         case XML_DOCB_DOCUMENT_NODE:
             if ( ((xmlDocPtr)node)->encoding != NULL ) {
-                dfProxy->encoding = (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding );
+                SetPmmENCODING(dfProxy, (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding ));
             }
             break;
         default:
@@ -558,32 +570,6 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
     return retval;
 }
 
-/* This is a little helper, that allows us to set the encoding attr. 
- * after broken transformations 
- * 
- * PP: This function is not used!
- */
-void
-PmmFixProxyEncoding( ProxyNodePtr dfProxy ) 
-{
-    xmlNodePtr node = PmmNODE( dfProxy );
-    
-    if ( node != NULL ) {
-        switch ( node->type ) {
-        case XML_DOCUMENT_NODE:
-        case XML_HTML_DOCUMENT_NODE:
-        case XML_DOCB_DOCUMENT_NODE:
-            if ( ((xmlDocPtr)node)->encoding != NULL ) {
-                dfProxy->encoding = (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding );
-            }
-            break;
-        default:
-            dfProxy->encoding = 1;
-            break;
-        }
-    }
-
-}
 
 xmlNodePtr
 PmmCloneNode( xmlNodePtr node, int recursive )
@@ -1172,7 +1158,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
                values set by XML::LibXSLT */
 
             if ( PmmNodeEncoding(real_doc) == XML_CHAR_ENCODING_NONE ) {
-                PmmNodeEncoding(real_doc) = XML_CHAR_ENCODING_UTF8;
+                SetPmmNodeEncoding(real_doc, XML_CHAR_ENCODING_UTF8);
             }
 
             decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc),
@@ -1227,7 +1213,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                         /* The following statement is to handle bad
                            values set by XML::LibXSLT */
                         if ( PmmNodeEncoding(real_dom) == XML_CHAR_ENCODING_NONE ) {
-                            PmmNodeEncoding(real_dom) = XML_CHAR_ENCODING_UTF8;
+                            SetPmmNodeEncoding(real_dom, XML_CHAR_ENCODING_UTF8);
                         }
                         /* the following allocates a new string (by xmlStrdup if no conversion is done) */
                         string= PmmFastEncodeString( PmmNodeEncoding(real_dom),

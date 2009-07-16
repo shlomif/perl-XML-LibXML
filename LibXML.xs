@@ -3744,16 +3744,15 @@ setEncoding( self, encoding = NULL )
         if (encoding!=NULL && strlen(encoding)) {
 	  self->encoding = xmlStrdup( (const xmlChar *)encoding );
 	  charset = (int)xmlParseCharEncoding( (const char*)self->encoding );
-	  if ( charset > 0 ) {
-            ((ProxyNodePtr)self->_private)->encoding = charset;
-	  }
-	  else {
-            ((ProxyNodePtr)self->_private)->encoding = XML_CHAR_ENCODING_ERROR;
+	  if ( charset <= 0 ) {
+            charset = XML_CHAR_ENCODING_ERROR;
 	  }
 	} else {
 	  self->encoding=NULL;
-	  ((ProxyNodePtr)self->_private)->encoding = XML_CHAR_ENCODING_UTF8;
+          charset = XML_CHAR_ENCODING_UTF8;
 	}
+        SetPmmNodeEncoding(self, charset);
+
 
 int
 standalone( self )
@@ -3842,6 +3841,8 @@ is_valid(self, ...)
         cvp.vstateNr = 0;
         cvp.vstateTab = NULL;
 
+        PmmClearPSVI(self);
+        PmmInvalidatePSVI(self);
         if (items > 1) {
             dtd_sv = ST(1);
             if ( sv_isobject(dtd_sv) && (SvTYPE(SvRV(dtd_sv)) == SVt_PVMG) ) {
@@ -3878,6 +3879,9 @@ validate(self, ...)
         cvp.nodeTab = NULL;
         cvp.vstateNr = 0;
         cvp.vstateTab = NULL;
+
+        PmmClearPSVI(self);
+        PmmInvalidatePSVI(self);
 
         if (items > 1) {
             dtd_sv = ST(1);
@@ -4851,7 +4855,7 @@ cloneNode( self, deep=0 )
             doc = self->doc;
 
             if ( doc != NULL ) {
-                xmlSetTreeDoc(ret, doc);
+                xmlSetTreeDoc(ret, doc); /* setting to self, no need to clear psvi */
             }
 
             docfrag = PmmNewFragment( doc );
@@ -5420,7 +5424,7 @@ nodePath( self )
         if ( path == NULL ) {
             croak( "cannot calculate path for the given node" );
         }
-        RETVAL = nodeC2Sv( path, self );
+        RETVAL = C2Sv( path, NULL );
         xmlFree(path);
     OUTPUT:
         RETVAL
@@ -5712,10 +5716,10 @@ hasAttributeNS( self, namespaceURI, attr_name )
         RETVAL
 
 SV*
-_getAttribute( self, attr_name, doc_enc = 0 )
+_getAttribute( self, attr_name, useDomEncoding = 0 )
         xmlNodePtr self
         SV * attr_name
-        int doc_enc
+        int useDomEncoding
     PREINIT:
         xmlChar * name;
         xmlChar * prefix    = NULL;
@@ -5744,7 +5748,7 @@ _getAttribute( self, attr_name, doc_enc = 0 )
         }
         xmlFree(name);
         if ( ret ) {
-            if ( doc_enc == 1 ) {
+            if ( useDomEncoding ) {
                 RETVAL = nodeC2Sv(ret, self);
             }
             else {
@@ -5904,10 +5908,11 @@ setAttributeNode( self, attr_node )
         RETVAL
 
 SV *
-_getAttributeNS( self, namespaceURI, attr_name )
+_getAttributeNS( self, namespaceURI, attr_name, useDomEncoding = 0 )
         xmlNodePtr self
         SV * namespaceURI
         SV * attr_name
+        int useDomEncoding
     PREINIT:
         xmlChar * name;
         xmlChar * nsURI;
@@ -5931,7 +5936,11 @@ _getAttributeNS( self, namespaceURI, attr_name )
             xmlFree( nsURI );
         }
         if ( ret ) {
-            RETVAL = nodeC2Sv( ret, self );
+            if (useDomEncoding) {
+                RETVAL = nodeC2Sv( ret, self );
+            } else {
+                RETVAL = C2Sv( ret, NULL );
+            }
             xmlFree( ret );
         }
         else {
@@ -7131,6 +7140,10 @@ validate( self, doc )
     CODE:
         INIT_ERROR_HANDLER;
 
+        if (doc) {
+            PmmClearPSVI(doc);
+            PmmInvalidatePSVI(doc);
+        }
         vctxt  = xmlRelaxNGNewValidCtxt( self );
         if ( vctxt == NULL ) {
             CLEANUP_ERROR_HANDLER;
@@ -7253,6 +7266,10 @@ validate( self, doc )
     CODE:
         INIT_ERROR_HANDLER;
 
+        if (doc) {
+            PmmClearPSVI(doc);
+            PmmInvalidatePSVI(doc);
+        }
         vctxt  = xmlSchemaNewValidCtxt( self );
         if ( vctxt == NULL ) {
             CLEANUP_ERROR_HANDLER;
@@ -8660,6 +8677,8 @@ copyCurrentNode(reader,expand = 0)
 	  /* will be decremented in Reader destructor */
 	  PmmREFCNT_inc(SvPROXYNODE(perl_doc));
 	}
+        if (xmlTextReaderGetParserProp(reader,XML_PARSER_VALIDATE))
+            PmmInvalidatePSVI(doc); /* the document may have psvi info */
 
         copy = PmmCloneNode( node, expand );
         if ( copy == NULL ) {
@@ -8694,10 +8713,14 @@ document(reader)
 	doc = xmlTextReaderCurrentDoc(reader);
         if (!doc) XSRETURN_UNDEF;
         RETVAL = PmmNodeToSv((xmlNodePtr)doc, NULL);
+        /* FIXME: taint the document with PmmInvalidatePSVI if the reader did validation */
         if ( PmmREFCNT(SvPROXYNODE(RETVAL))==1 ) {
 	  /* will be decremented in Reader destructor */
 	  PmmREFCNT_inc(SvPROXYNODE(RETVAL));
 	}
+        if (xmlTextReaderGetParserProp(reader,XML_PARSER_VALIDATE))
+            PmmInvalidatePSVI(doc); /* the document may have psvi info */
+
     OUTPUT:
         RETVAL
 

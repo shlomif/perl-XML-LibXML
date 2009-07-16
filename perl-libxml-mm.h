@@ -62,14 +62,26 @@ struct _ProxyNode {
     xmlNodePtr node;
     xmlNodePtr owner;
     int count;
-    int encoding;
 };
 
+struct _DocProxyNode {
+    xmlNodePtr node;
+    xmlNodePtr owner;
+    int count;
+    int encoding; /* only used for proxies of xmlDocPtr */
+    int psvi_status; /* three-state flag for a document */
+};
+
+#define Pmm_NO_PSVI 0
+#define Pmm_PSVI_TAINTED 1
+
 /* helper type for the proxy structure */
+typedef struct _DocProxyNode DocProxyNode;
 typedef struct _ProxyNode ProxyNode;
 
 /* pointer to the proxy structure */
 typedef ProxyNode* ProxyNodePtr;
+typedef DocProxyNode* DocProxyNodePtr;
 
 /* this my go only into the header used by the xs */
 #define SvPROXYNODE(x) (INT2PTR(ProxyNodePtr,SvIV(SvRV(x))))
@@ -81,9 +93,21 @@ typedef ProxyNode* ProxyNodePtr;
 #define PmmNODE(xnode)       xnode->node
 #define PmmOWNER(node)       node->owner
 #define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
-#define PmmENCODING(node)    node->encoding
-#define PmmNodeEncoding(node) ((ProxyNodePtr)(node->_private))->encoding
-#define PmmDocEncoding(node) (node->charset)
+
+#define PmmENCODING(node)    ((DocProxyNodePtr)(node))->encoding
+#define PmmNodeEncoding(node) ((DocProxyNodePtr)(node->_private))->encoding
+
+#define SetPmmENCODING(node,code) PmmENCODING(node)=(code)
+#define SetPmmNodeEncoding(node,code) PmmNodeEncoding(node)=(code)
+
+#define PmmInvalidatePSVI(node) if (node->_private) ((DocProxyNodePtr)(node->_private))->psvi_status = Pmm_PSVI_TAINTED;
+
+#if LIBXML_VERSION >= 20621
+
+#define PmmClearPSVI(node) if (node && node->doc && node->doc->_private && \
+                               ((DocProxyNodePtr)(node->doc->_private))->psvi_status == Pmm_PSVI_TAINTED) \
+   domClearPSVI((xmlNodePtr) node)
+#endif
 
 #ifndef NO_XML_LIBXML_THREADS
 #ifdef USE_ITHREADS

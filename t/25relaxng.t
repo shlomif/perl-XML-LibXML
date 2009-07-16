@@ -11,7 +11,7 @@ BEGIN {
     use XML::LibXML;
 
     if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-        plan tests => 8;
+        plan tests => 13;
     }
     else {
         plan tests => 0;
@@ -27,7 +27,7 @@ my $file         = "test/relaxng/schema.rng";
 my $badfile      = "test/relaxng/badschema.rng";
 my $validfile    = "test/relaxng/demo.xml";
 my $invalidfile  = "test/relaxng/invaliddemo.xml";
-
+my $demo4        = "test/relaxng/demo4.rng";
 
 print "# 1 parse schema from a file\n";
 {
@@ -79,5 +79,39 @@ print "# 4 validate a document\n";
     eval { $valid = $rngschema->validate( $doc ); };
     ok ( $@ );
 }
+
+print "# 5 re-validate a modified document\n";
+{
+  my $rng = XML::LibXML::RelaxNG->new(location => $demo4);
+  my $seed_xml = <<'EOXML';
+<?xml version="1.0" encoding="UTF-8"?>
+<root/>
+EOXML
+
+  my $doc = $xmlparser->parse_string($seed_xml);
+  my $rootElem = $doc->documentElement;
+  my $bogusElem = $doc->createElement('bogus-element');
+
+  eval{$rng->validate($doc);};
+  ok ($@);
+
+  $rootElem->setAttribute('name', 'rootElem');
+  eval{ $rng->validate($doc); };
+  ok (!$@);
+
+  $rootElem->appendChild($bogusElem);
+  eval{$rng->validate($doc);};
+  ok ($@);
+
+  $bogusElem->unlinkNode();
+  eval{$rng->validate($doc);};
+  ok (!$@);
+
+  $rootElem->removeAttribute('name');
+  eval{$rng->validate($doc);};
+  ok ($@);
+
+}
+
 
 } # Version >= 20510 test 

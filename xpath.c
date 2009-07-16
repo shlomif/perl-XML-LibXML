@@ -192,8 +192,9 @@ domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
                 froot = froot->parent;
             }
             xmlAddChild((xmlNodePtr)tdoc, froot);
-
-            refNode->doc = tdoc;
+            xmlSetTreeDoc(froot, tdoc); /* probably no need to clean psvi */
+	    froot->doc = tdoc;
+            /* refNode->doc = tdoc; */
         }
 
         /* prepare the xpath context */
@@ -240,7 +241,7 @@ domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
         if ( tdoc != NULL ) {
             /* after looking through a fragment, we need to drop the
                fake document again */
-            xmlSetTreeDoc(froot, NULL);
+            xmlSetTreeDoc(froot, NULL); /* probably no need to clean psvi */
 	    froot->doc = NULL;
 	    froot->parent = NULL;
             tdoc->children = NULL;
@@ -346,7 +347,9 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_
                 froot = froot->parent;
             }
             xmlAddChild((xmlNodePtr)tdoc, froot);
-	    ctxt->node->doc = tdoc;
+	    xmlSetTreeDoc(froot,tdoc);  /* probably no need to clean psvi */
+            froot->doc = tdoc;
+	    /* ctxt->node->doc = tdoc; */
         }
 	if (to_bool) {
 #if LIBXML_VERSION >= 20627
@@ -366,7 +369,7 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_
         if ( tdoc != NULL ) {
             /* after looking through a fragment, we need to drop the
                fake document again */
-	    xmlSetTreeDoc(froot,NULL);
+	    xmlSetTreeDoc(froot,NULL); /* probably no need to clean psvi */
             froot->doc = NULL;
             froot->parent  = NULL;
             tdoc->children = NULL;

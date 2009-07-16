@@ -11,7 +11,7 @@
 package XML::LibXML;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
+use vars qw($VERSION $ABI_VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
             $MatchCB $ReadCB $OpenCB $CloseCB 
             );
@@ -26,13 +26,30 @@ use XML::LibXML::XPathContext;
 use IO::Handle; # for FH reads called as methods
 
 BEGIN {
-
-$VERSION = "1.69_2"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.70"; # VERSION TEMPLATE: DO NOT CHANGE
+$ABI_VERSION = 2;
 require Exporter;
 require DynaLoader;
 @ISA = qw(DynaLoader Exporter);
 
 use vars qw($__PROXY_NODE_REGISTRY $__threads_shared $__PROXY_NODE_REGISTRY_MUTEX $__loaded);
+
+sub VERSION {
+  my $class = shift;
+  my ($caller) = caller;
+  my $req_abi = $ABI_VERSION;
+  if (UNIVERSAL::can($caller,'REQUIRE_XML_LIBXML_ABI_VERSION')) {
+    $req_abi = $caller->REQUIRE_XML_LIBXML_ABI_VERSION();
+  } elsif ($caller eq 'XML::LibXSLT') {
+    # XML::LibXSLT without REQUIRE_XML_LIBXML_ABI_VERSION is an old and incompatible version
+    $req_abi = 1;
+  }
+  unless ($req_abi == $ABI_VERSION) {
+    my $ver = @_ ? ' '.$_[0] : '';
+    die ("This version of $caller requires XML::LibXML$ver (ABI $req_abi), which is incompatible with currently installed XML::LibXML $VERSION (ABI $ABI_VERSION). Please upgrade $caller, XML::LibXML, or both!");
+  }
+  return $class->UNIVERSAL::VERSION(@_)
+}
 
 #-------------------------------------------------------------------------#
 # export information                                                      #
