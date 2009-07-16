@@ -129,6 +129,7 @@ $EXPORT_TAGS{all}=\@EXPORT_OK;
     my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
     my $encoding = $args{encoding};
     my $URI = $args{URI};
+    $URI="$URI" if defined $URI; # stringify in case it is an URI object
     my $options = XML::LibXML->_parser_options(\%args);
 
     my $self = undef;

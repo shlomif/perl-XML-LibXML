@@ -273,10 +273,12 @@ sub _parser_options {
 
   # currently dictionaries break XML::LibXML memory management
 
-  my $flags = XML_LIBXML_PARSE_DEFAULTS;		# safety precaution
+  my $flags;
 
   if (ref($self)) {
-    $flags |= ($self->{XML_LIBXML_PARSER_OPTIONS}||0);
+    $flags = ($self->{XML_LIBXML_PARSER_OPTIONS}||0);
+  } else {
+    $flags = XML_LIBXML_PARSE_DEFAULTS;		# safety precaution
   }
 
   my ($key, $value);
@@ -288,7 +290,12 @@ sub _parser_options {
       } else {
 	$flags &= ~$f;
       }
+    } elsif ($key eq 'set_parser_flags') { # this can be used to pass flags XML::LibXML does not yet know about
+      $flags |= $value;
+    } elsif ($key eq 'unset_parser_flags') {
+      $flags &= ~$value;
     }
+
   }
   return $flags;
 }
@@ -313,12 +320,15 @@ my %compatibility_flags = (
 
 sub new {
     my $class = shift;
-    my %self;
+    my $self = bless {
+      XML_LIBXML_PARSER_OPTIONS => XML_LIBXML_PARSE_DEFAULTS,
+    }, $class;
     if (@_) {
-      my %opts = (load_ext_dtd => 1); # defaults
+      my %opts = ();
       if (ref($_[0]) eq 'HASH') {
-	%opts = %{(shift)};
+	%opts = %{$_[0]};
       } else {
+	# old interface
 	my %args = @_;
 	%opts=(
 	  map {
@@ -329,30 +339,39 @@ sub new {
       # parser flags
       $opts{no_blanks} = !$opts{keep_blanks} if exists($opts{keep_blanks}) and !exists($opts{no_blanks});
 
-      $self{XML_LIBXML_RECOVER} = delete $opts{recover};
-      $self{XML_LIBXML_LINENUMBERS} = delete $opts{line_numbers};
-      $self{XML_LIBXML_BASE_URI} = delete $opts{base_uri};
-      $self{XML_LIBXML_GDOME} = delete $opts{gdome};
+      $self->{XML_LIBXML_RECOVER} = delete $opts{recover};
+      $self->{XML_LIBXML_LINENUMBERS} = delete $opts{line_numbers};
+      $self->{XML_LIBXML_BASE_URI} = delete($opts{base_uri}) || delete($opts{URI});
+      $self->{XML_LIBXML_GDOME} = delete $opts{gdome};
 
       $class->load_catalog(delete($opts{catalog})) if $opts{catalog};
 
-      $self{XML_LIBXML_PARSER_OPTIONS} = XML::LibXML->_parser_options(\%opts);
+      $self->{XML_LIBXML_PARSER_OPTIONS} = XML::LibXML->_parser_options(\%opts);
 
       # store remaining unknown options directly in $self
       for (keys %opts) {
-	$self{$_}=$opts{$_} unless exists $PARSER_FLAGS{$_};
+	$self->{$_}=$opts{$_} unless exists $PARSER_FLAGS{$_};
       }
-    } else {
-      $self{XML_LIBXML_PARSER_OPTIONS} = XML_LIBXML_PARSE_DEFAULTS;
     }
 
-    my $self = bless \%self, $class;
-    if ( defined $self{Handler} ) {
-      $self->set_handler( $self{Handler} );
+    if ( defined $self->{Handler} ) {
+      $self->set_handler( $self->{Handler} );
     }
 
     $self->{_State_} = 0;
     return $self;
+}
+
+sub _clone {
+  my ($self)=@_;
+  my $new = ref($self)->new({
+      recover => $self->{XML_LIBXML_RECOVER},
+      line_nubers => $self->{XML_LIBXML_LINENUMBERS},
+      base_uri => $self->{XML_LIBXML_BASE_URI},
+      gdome => $self->{XML_LIBXML_GDOME},
+      set_parser_flags => $self->{XML_LIBXML_PARSER_OPTIONS},
+    });
+  return $new;
 }
 
 #-------------------------------------------------------------------------#
@@ -677,8 +696,60 @@ sub __write {
     }
 }
 
+sub load_xml {
+  my ($class_or_self) = shift;
+  my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+  my $URI = delete($args{URI});
+  $URI = "$URI"  if defined $URI; # stringify in case it is an URI object
+  my $parser;
+  if (ref($class_or_self)) {
+    $parser = $class_or_self->_clone();
+    $parser->{XML_LIBXML_PARSER_OPTIONS} = $parser->_parser_options(\%args);
+  } else {
+    $parser = $class_or_self->new(\%args);
+  }
+  my $dom;
+  if ( defined $args{location} ) {
+    $dom = $parser->parse_file( "$args{location}" );
+  }
+  elsif ( defined $args{string} ) {
+    $dom = $parser->parse_string( $args{string}, $URI );
+  }
+  elsif ( defined $args{IO} ) {
+    $dom = $parser->parse_fh( $args{IO}, $URI );
+  }
+  else {
+    croak("XML::LibXML->load: specify location, string, or IO");
+  }
+  return $dom;
+}
 
-
+sub load_html {
+  my ($class_or_self) = shift;
+  my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+  my $URI = delete($args{URI});
+  $URI = "$URI"  if defined $URI; # stringify in case it is an URI object
+  my $parser;
+  if (ref($class_or_self)) {
+    $parser = $class_or_self->_clone();
+  } else {
+    $parser = $class_or_self->new();
+  }
+  my $dom;
+  if ( defined $args{location} ) {
+    $dom = $parser->parse_html_file( "$args{location}", \%args );
+  }
+  elsif ( defined $args{string} ) {
+    $dom = $parser->parse_html_string( $args{string}, \%args );
+  }
+  elsif ( defined $args{IO} ) {
+    $dom = $parser->parse_html_fh( $args{IO}, \%args );
+  }
+  else {
+    croak("XML::LibXML->load: specify location, string, or IO");
+  }
+  return $dom;
+}
 
 #-------------------------------------------------------------------------#
 # parsing functions                                                       #
