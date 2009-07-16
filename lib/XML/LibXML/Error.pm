@@ -14,7 +14,7 @@ use Carp;
 use overload
   '""' => \&as_string;
 
-$VERSION = "1.69_2"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.70"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant XML_ERR_NONE	     => 0;
 use constant XML_ERR_WARNING	     => 1; # A simple warning

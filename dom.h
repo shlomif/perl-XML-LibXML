@@ -212,9 +212,6 @@ domGetNodeValue( xmlNodePtr self );
 void
 domSetNodeValue( xmlNodePtr self, xmlChar* value );
 
-void
-domSetParentNode( xmlNodePtr self, xmlNodePtr newParent );
-
 xmlNodePtr
 domReplaceNode( xmlNodePtr old, xmlNodePtr new );
 

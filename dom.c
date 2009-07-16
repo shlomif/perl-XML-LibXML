@@ -7,7 +7,7 @@
 */
 
 #include "dom.h"
-
+#include "perl-libxml-mm.h"
 
 /* #define warn(string) fprintf(stderr, string) */
 
@@ -16,6 +16,48 @@
 #else
 #define xs_warn(string)
 #endif
+
+#if LIBXML_VERSION >= 20621
+void
+domClearPSVIInList(xmlNodePtr list);
+
+void
+domClearPSVI(xmlNodePtr tree) {
+    xmlAttrPtr prop;
+
+    if (tree == NULL)
+        return;
+    if (tree->type == XML_ELEMENT_NODE) {
+        tree->psvi = NULL;
+        prop = tree->properties;
+        while (prop != NULL) {
+            if (tree->type == XML_ATTRIBUTE_NODE)
+                ((xmlAttrPtr) prop)->psvi = NULL;
+            domClearPSVIInList(prop->children);
+            prop = prop->next;
+        }
+    } else if (tree->type == XML_DOCUMENT_NODE) {
+        ((xmlDocPtr) tree)->psvi = NULL;
+    }
+    if (tree->children != NULL)
+        domClearPSVIInList(tree->children);
+}
+
+void
+domClearPSVIInList(xmlNodePtr list) {
+    xmlNodePtr cur;
+
+    if (list == NULL)
+        return;
+    cur = list;
+    while (cur != NULL) {
+        domClearPSVI(cur);
+        cur = cur->next;
+    }
+}
+#endif
+
+
 
 /**
  * Name: domReconcileNs
@@ -538,6 +580,8 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move, int reconcileNS ) {
 
     /* tell all children about the new boss */ 
     if ( node && node->doc != doc ) {
+        printf("node type: %d\n",return_node->type);
+        PmmClearPSVI(return_node); /* if the old document contained psvi, clear it now */
         xmlSetTreeDoc(return_node, doc);
     }
 
@@ -1002,20 +1046,6 @@ domSetNodeValue( xmlNodePtr n , xmlChar* val ){
     }
 }
 
-
-void
-domSetParentNode( xmlNodePtr self, xmlNodePtr p ) {
-    /* never set the parent to a node in the own subtree */ 
-    if( self && !domIsParent(self, p)) {
-        if( self->parent != p ){
-            xmlUnlinkNode( self );
-            self->parent = p;
-            if( p->doc != self->doc ) {
-                self->doc = p->doc;
-            }
-        }
-    }
-}
 
 xmlNodeSetPtr
 domGetElementsByTagName( xmlNodePtr n, xmlChar* name ){
