@@ -580,8 +580,9 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move, int reconcileNS ) {
 
     /* tell all children about the new boss */ 
     if ( node && node->doc != doc ) {
-        printf("node type: %d\n",return_node->type);
-        PmmClearPSVI(return_node); /* if the old document contained psvi, clear it now */
+        /* if the source document contained psvi, mark the current document as psvi tainted */
+        if (PmmIsPSVITainted(node->doc))
+            PmmInvalidatePSVI(doc);
         xmlSetTreeDoc(return_node, doc);
     }
 
