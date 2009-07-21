@@ -11,8 +11,16 @@ package XML::LibXML::Error;
 use strict;
 use vars qw($AUTOLOAD @error_domains $VERSION);
 use Carp;
-use overload
-  '""' => \&as_string;
+use overload 
+  '""' => \&as_string,
+  'eq' => sub {
+    ("$_[0]" eq "$_[1]")
+  },
+  'cmp' => sub {
+    ("$_[0]" cmp "$_[1]")
+  },
+  fallback => 1;
+
 
 $VERSION = "1.70"; # VERSION TEMPLATE: DO NOT CHANGE
 
