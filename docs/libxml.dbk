@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- -*- nxml-mode -*- -->
 <book lang="en-us">
     <title>XML::LibXML</title>
 
@@ -389,7 +391,7 @@ EOT</programlisting>
                     <term><xref linkend="XML-LibXML-Parser"/></term>
 
                     <listitem>
-                        <para>Parsing XML Files with XML::LibXML</para>
+                        <para>Parsing XML files with XML::LibXML</para>
                     </listitem>
                 </varlistentry>
 
@@ -397,7 +399,7 @@ EOT</programlisting>
                     <term><xref linkend="XML-LibXML-DOM"/></term>
 
                     <listitem>
-                        <para>XML::LibXML DOM Implementation</para>
+                        <para>XML::LibXML Document Object Model (DOM) Implementation</para>
                     </listitem>
                 </varlistentry>
 
@@ -418,90 +420,10 @@ EOT</programlisting>
                 </varlistentry>
 
                 <varlistentry>
-                    <term><xref linkend="XML-LibXML-Document"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML DOM Document Class</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-Node"/></term>
-
-                    <listitem>
-                        <para>Abstract Base Class of XML::LibXML Nodes</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-Element"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Class for Element Nodes</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-Text"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Class for Text Nodes</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-Comment"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Comment Nodes</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-CDATASection"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Class for CDATA Sections</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-Attr"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Attribute Class</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-DocumentFragment"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML's DOM L2 Document Fragment Implementation</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-Namespace"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Namespace Implementation</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term><xref linkend="XML-LibXML-PI"/></term>
-
-                    <listitem>
-                        <para>XML::LibXML Processing Instructions</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
                     <term><xref linkend="XML-LibXML-Dtd"/></term>
 
                     <listitem>
-                        <para>XML::LibXML DTD Support</para>
+                        <para>XML::LibXML frontend for DTD validation</para>
                     </listitem>
                 </varlistentry>
 
@@ -526,6 +448,97 @@ EOT</programlisting>
                     <listitem>
                         <para>API for evaluating XPath expressions with enhanced support
 			for the evaluation context</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-InputCallback"/></term>
+
+                    <listitem>
+                        <para>Implementing custom URI Resolver and input callbacks</para>
+                    </listitem>
+                </varlistentry>
+	    </variablelist>
+            <para>The nodes in the Document Object Model (DOM) are represented by the following classes
+	    (most of which "inherit" from <xref linkend="XML-LibXML-Node"/>):</para>
+	    <variablelist>
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Document"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML class for DOM document nodes</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Node"/></term>
+
+                    <listitem>
+                        <para>Abstract base class for XML::LibXML DOM nodes</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Element"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML class for DOM element nodes</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Text"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML class for DOM text nodes</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Comment"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML class for comment DOM nodes</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-CDATASection"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML class for DOM CDATA sections</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Attr"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML DOM attribute class</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-DocumentFragment"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML's DOM L2 Document Fragment implementation</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Namespace"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML DOM namespace nodes</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-PI"/></term>
+
+                    <listitem>
+                        <para>XML::LibXML DOM processing instruction nodes</para>
                     </listitem>
                 </varlistentry>
 
