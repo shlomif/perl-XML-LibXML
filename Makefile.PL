@@ -358,6 +358,7 @@ docs-fast :
 \t\@$^X -Iblib/arch -Iblib/lib example/xmllibxmldocs.pl docs/libxml.dbk lib/XML/LibXML/
 
 docs : pure_all
+\t\@$^X -pi~ -e 's{<edition>[0-9.]*</edition>}{<edition>'"$VERSION"'</edition>}' docs/libxml.dbk
 \t\@$^X -Iblib/arch -Iblib/lib example/xmllibxmldocs.pl docs/libxml.dbk lib/XML/LibXML/
 \t\@$^X -pi.old -e 's/a/a/' Makefile.PL
 \t\@echo "==> YOU MUST NOW RE-RUN $^X Makefile.PL <=="
@@ -402,7 +403,7 @@ sub MY::postamble {
 version:
 	@version=`grep '\# VERSION TEMPLATE' $(VERSION_FROM)`; \
 	echo "New version line: $$version"; \
-	perl -pi~ -e '$$_=q('"$$version"')."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM)
+	perl -pi~ -e '$$_=q('"$$version"')."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM);
 
 MAKE_FRAG
 }
