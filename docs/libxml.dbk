@@ -5818,7 +5818,7 @@ sub processNode {
   my $reader = XML::LibXML::Reader-&gt;new( FD =&gt; fileno(STDIN), ... );
   my $reader = XML::LibXML::Reader-&gt;new( DOM =&gt; $dom, ... );
 </programlisting>
-      <para>where ... are (optional) reader options described below in Parser options.
+      <para>where ... are (optional) reader options described below in <xref linkend="parsing-options"/>.
 	The constructor recognizes the following XML sources:</para>
       <sect2>
         <title>Source specification</title>
@@ -5858,7 +5858,7 @@ sub processNode {
           </varlistentry>
         </variablelist>
       </sect2>
-      <sect2>
+      <sect2 id="parsing-options">
         <title>Parsing options</title>
         <variablelist>
           <varlistentry>
