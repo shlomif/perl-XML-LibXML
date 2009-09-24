@@ -289,6 +289,7 @@ my %OUR_FLAGS = (
   URI => 'XML_LIBXML_BASE_URI',
   base_uri => 'XML_LIBXML_BASE_URI',
   gdome => 'XML_LIBXML_GDOME',
+  ext_ent_handler => 'ext_ent_handler',
 );
 
 sub _parser_options {
@@ -571,6 +572,19 @@ sub set_option {
     return $self->__parser_option($flag,$value) if $flag;
     warn "XML::LibXML::get_option: unknown parser option $name\n";
     return undef;
+}
+sub set_options {
+  my $self=shift;
+  my $opts;
+  if (@_==1 and ref($_[0]) eq 'HASH') {
+    $opts = $_[0];
+  } elsif (@_ % 2 == 0) {
+    $opts={@_};
+  } else {
+    croak("Odd number of elements passed to set_options");
+  }
+  $self->set_option($_=>$opts->{$_}) foreach keys %$opts;
+  return;
 }
 
 sub validation {

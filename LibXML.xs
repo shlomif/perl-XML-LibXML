@@ -791,7 +791,7 @@ LibXML_load_external_entity(
     real_obj = (HV *)SvRV(self);
     func = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
 
-    if (func) {
+    if (func != NULL  && SvTRUE(*func)) {
         dTHX;
         dSP;
 
