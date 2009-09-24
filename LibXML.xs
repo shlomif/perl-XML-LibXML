@@ -3334,6 +3334,7 @@ createAttribute( self, pname, pvalue=&PL_sv_undef )
         xmlChar * name = NULL;
         xmlChar * value = NULL;
         xmlAttrPtr newAttr = NULL;
+        xmlChar * buffer = NULL;
     CODE:
         name = nodeSv2C( pname , (xmlNodePtr) self );
         if ( !LibXML_test_node_name( name ) ) {
@@ -3342,10 +3343,13 @@ createAttribute( self, pname, pvalue=&PL_sv_undef )
         }
 
         value = nodeSv2C( pvalue , (xmlNodePtr) self );
-        newAttr = xmlNewDocProp( self, name, value );
+        /* unlike xmlSetProp, xmlNewDocProp does not encode entities in value */
+        buffer = xmlEncodeEntitiesReentrant(self, value);
+        newAttr = xmlNewDocProp( self, name, buffer );
         RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, PmmPROXYNODE(self));
 
         xmlFree(name);
+        xmlFree(buffer);
         if ( value ) {
             xmlFree(value);
         }
@@ -3431,9 +3435,13 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
             }
         }
         else {
-            newAttr = xmlNewDocProp( self, name, value );
+            xmlChar *buffer;
+            /* unlike xmlSetProp, xmlNewDocProp does not encode entities in value */
+            buffer = xmlEncodeEntitiesReentrant(self, value);
+            newAttr = xmlNewDocProp( self, name, buffer );
             RETVAL = PmmNodeToSv((xmlNodePtr)newAttr,PmmPROXYNODE(self));
             xmlFree(name);
+            xmlFree(buffer);
             if ( value ) {
                 xmlFree(value);
             }

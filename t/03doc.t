@@ -12,7 +12,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 166 };
+BEGIN { plan tests => 168 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -157,8 +157,17 @@ use XML::LibXML::Common qw(:libxml);
         }
 
     }
-
-
+    {
+      my $elem = $doc->createElement('foo');
+      my $attr = $doc->createAttribute(attr => 'e & f');
+      $elem->addChild($attr);
+      ok ($elem->toString() eq '<foo attr="e &amp; f"/>');
+      $elem->removeAttribute('attr');
+      $attr = $doc->createAttributeNS(undef,'attr2' => 'a & b');
+      $elem->addChild($attr);
+      print $elem->toString(),"\n";
+      ok ($elem->toString() eq '<foo attr2="a &amp; b"/>');
+    }
     {
         eval {
             my $attr = $doc->createAttributeNS("http://kungfoo", "kung:foo","bar");
