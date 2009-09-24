@@ -13,7 +13,7 @@ package XML::LibXML;
 use strict;
 use vars qw($VERSION $ABI_VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
-            $MatchCB $ReadCB $OpenCB $CloseCB 
+            $MatchCB $ReadCB $OpenCB $CloseCB %PARSER_FLAGS
             );
 use Carp;
 
@@ -258,12 +258,10 @@ use constant {
 
 use constant XML_LIBXML_PARSE_DEFAULTS => ( XML_PARSE_NODICT | XML_PARSE_HUGE | XML_PARSE_DTDLOAD );
 
-# currently this is only used in the XInlcude processor
-# but in the future, all parsing functions should turn to
-# the new libxml2 parsing API internally and this will
-# become handy
+# this hash is made global so that applications can add names for new
+# libxml2 parser flags as temporary workaround
 
-my %PARSER_FLAGS = (
+%PARSER_FLAGS = (
   recover		 => XML_PARSE_RECOVER,
   expand_entities	 => XML_PARSE_NOENT,
   load_ext_dtd	         => XML_PARSE_DTDLOAD,
@@ -283,6 +281,14 @@ my %PARSER_FLAGS = (
   no_base_fix		 => XML_PARSE_NOBASEFIX,
   huge		         => XML_PARSE_HUGE,
   oldsax		 => XML_PARSE_OLDSAX,
+);
+
+my %OUR_FLAGS = (
+  recover => 'XML_LIBXML_RECOVER',
+  line_numbers => 'XML_LIBXML_LINENUMBERS',
+  URI => 'XML_LIBXML_BASE_URI',
+  base_uri => 'XML_LIBXML_BASE_URI',
+  gdome => 'XML_LIBXML_GDOME',
 );
 
 sub _parser_options {
@@ -338,7 +344,6 @@ my %compatibility_flags = (
 sub new {
     my $class = shift;
     my $self = bless {
-      XML_LIBXML_PARSER_OPTIONS => XML_LIBXML_PARSE_DEFAULTS,
     }, $class;
     if (@_) {
       my %opts = ();
@@ -356,11 +361,9 @@ sub new {
       # parser flags
       $opts{no_blanks} = !$opts{keep_blanks} if exists($opts{keep_blanks}) and !exists($opts{no_blanks});
 
-      $self->{XML_LIBXML_RECOVER} = delete $opts{recover};
-      $self->{XML_LIBXML_LINENUMBERS} = delete $opts{line_numbers};
-      $self->{XML_LIBXML_BASE_URI} = delete($opts{base_uri}) || delete($opts{URI});
-      $self->{XML_LIBXML_GDOME} = delete $opts{gdome};
-
+      for (keys %OUR_FLAGS) {
+	$self->{$OUR_FLAGS{$_}} = delete $opts{$_};
+      }
       $class->load_catalog(delete($opts{catalog})) if $opts{catalog};
 
       $self->{XML_LIBXML_PARSER_OPTIONS} = XML::LibXML->_parser_options(\%opts);
@@ -369,8 +372,9 @@ sub new {
       for (keys %opts) {
 	$self->{$_}=$opts{$_} unless exists $PARSER_FLAGS{$_};
       }
+    } else {
+      $self->{XML_LIBXML_PARSER_OPTIONS} = XML_LIBXML_PARSE_DEFAULTS;
     }
-
     if ( defined $self->{Handler} ) {
       $self->set_handler( $self->{Handler} );
     }
@@ -529,7 +533,7 @@ sub callbacks {
 }
 
 #-------------------------------------------------------------------------#
-# member variable manipulation                                            #
+# internal member variable manipulation                                   #
 #-------------------------------------------------------------------------#
 sub __parser_option {
   my ($self, $opt) = @_;
@@ -544,6 +548,29 @@ sub __parser_option {
   } else {
     return ($self->{XML_LIBXML_PARSER_OPTIONS} & $opt) ? 1 : 0;
   }
+}
+
+sub option_exists {
+    my ($self,$name)=@_;
+    return ($PARSER_FLAGS{$name} || $OUR_FLAGS{$name}) ? 1 : 0;
+}
+sub get_option {
+    my ($self,$name)=@_;
+    my $flag = $OUR_FLAGS{$name};
+    return $self->{$flag} if $flag;
+    $flag = $PARSER_FLAGS{$name};
+    return $self->__parser_option($flag) if $flag;
+    warn "XML::LibXML::get_option: unknown parser option $name\n";
+    return undef;
+}
+sub set_option {
+    my ($self,$name,$value)=@_;
+    my $flag = $OUR_FLAGS{$name};
+    return ($self->{$flag}=$value) if $flag;
+    $flag = $PARSER_FLAGS{$name};
+    return $self->__parser_option($flag,$value) if $flag;
+    warn "XML::LibXML::get_option: unknown parser option $name\n";
+    return undef;
 }
 
 sub validation {
@@ -564,7 +591,7 @@ sub recover_silently {
     my $self = shift;
     my $arg = shift;
     (($arg == 1) ? $self->recover(2) : $self->recover($arg)) if defined($arg);
-    return ($self->recover() == 2) ? 1 : 0;
+    return (($self->recover()||0) == 2) ? 1 : 0;
 }
 
 sub expand_entities {

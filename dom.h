@@ -275,4 +275,7 @@ domRemoveNsRefs(xmlNodePtr tree, xmlNsPtr ns);
 void
 domAttrSerializeContent(xmlBufferPtr buffer, xmlAttrPtr attr);
 
+void
+domClearPSVI(xmlNodePtr tree);
+
 #endif

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- -*- nxml-mode -*- -->
+<!-- -*- nxml -*- -->
 <book lang="en-us">
     <title>XML::LibXML</title>
 
@@ -22,13 +22,19 @@
         </authorgroup>
 
 
-        <edition></edition>
-
+        <edition>1.70</edition>
         <copyright>
             <year>2001-2007</year>
-
-            <holder>AxKit.com Ltd; 2002-2006 Christian Glahn; 2006-2008 Petr Pajas</holder>
+            <holder>AxKit.com Ltd</holder>
         </copyright>
+	<copyright>
+	  <year>2002-2006</year>
+	  <holder>Christian Glahn</holder>
+	</copyright>
+	<copyright>
+	  <year>2006-2009</year>
+	  <holder>Petr Pajas</holder>
+	</copyright>
     </bookinfo>
 
     <chapter id="README">
@@ -67,16 +73,13 @@
 
             <itemizedlist>
                 <listitem>
-                    <para>XML::LibXML::Common - general functions used by various XML::LibXML modules</para>
+                    <para>XML::SAX - base class for SAX parsers</para>
                 </listitem>
 
                 <listitem>
-                    <para>XML::SAX - DOM building support from SAX</para>
+                    <para>XML::NamespaceSupport - namespace support for SAX parsers</para>
                 </listitem>
 
-                <listitem>
-                    <para>XML::NamespaceSupport - DOM building support from SAX</para>
-                </listitem>
             </itemizedlist>
 
             <para>These packages are required. If one is missing some tests will fail.</para>
@@ -127,8 +130,8 @@ See Notes for Microsoft Windows below.)</para>
                   update of the pre-built packages is required.</para>
 
                 <para>Although libxml2 claims binary compatibility between
-                 its patch levels, it is a good idea to recompile XML::LibXML and
-                 XML::LibXML::Common and run its tests after an upgrade of libxml2.
+		its patch levels, it is a good idea to recompile XML::LibXML
+		and run its tests after an upgrade of libxml2.
 	        </para>
 
 	<para>If your libxml2 installation is not within your $PATH,
@@ -187,8 +190,10 @@ See Notes for Microsoft Windows below.)</para>
 		<para>These instructions assume that you already have your system set up to
 		compile modules that use C components.
 		</para>
+		<para>
 		First, get the libxml2 binaries from http://xmlsoft.org/sources/win32/
 		(currently also available at http://www.zlatkovic.com/pub/libxml/).
+		</para>
 		<para>
 		  You need:
 		</para>
@@ -202,12 +207,12 @@ See Notes for Microsoft Windows below.)</para>
   <para>Combine all the bin, include, and lib directories under c:\Prog\LibXML.
   (You can use any directory you prefer; just adjust the instructions
   accordingly.)</para>
-  <para>Get the latest version of XML-LibXML-Common and XML-LibXML from CPAN.
+  <para>Get the latest version of XML-LibXML from CPAN.
   Extract them.</para>
   <para>Issue these commands in the XML-LibXML-Common-VERSION directory:</para>
   <programlisting>  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
   nmake
-  copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML\Common
+  copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML
   nmake test
   nmake install</programlisting>
   <para>(Note: Some systems use dmake instead of nmake.)</para>
@@ -456,6 +461,13 @@ EOT</programlisting>
 
                     <listitem>
                         <para>Implementing custom URI Resolver and input callbacks</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><xref linkend="XML-LibXML-Common"/></term>
+                    <listitem>
+                        <para>Common functions for XML::LibXML related Classes</para>
                     </listitem>
                 </varlistentry>
 	    </variablelist>
@@ -816,8 +828,7 @@ easily lead to a crash.</para>
 	    <varlistentry>
 	      <term><literal>:libxml</literal></term>
 	      <listitem>
-		<para>Exports integer constants for DOM node types (defined in a separately distributed
-		XML::LibXML::Common module).</para>
+		<para>Exports integer constants for DOM node types.</para>
 		<programlisting>XML_ELEMENT_NODE            =&gt; 1
 XML_ATTRIBUTE_NODE          =&gt; 2
 XML_TEXT_NODE               =&gt; 3
@@ -880,17 +891,20 @@ XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
                 </varlistentry>
 
                 <varlistentry>
-                    <term><olink targetdoc="XML::LibXML::Common">XML::LibXML::Common</olink></term>
-                    <listitem>
-                        <para>Common functions for XML::LibXML related Classes</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
                     <term><olink targetdoc="XML::LibXML::Iterator">XML::LibXML::Iterator</olink></term>
 
                     <listitem>
                         <para>XML::LibXML Implementation of the DOM Traversal Specification</para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term><olink targetdoc="XML::CompactTree::XS">XML::CompactTree::XS</olink></term>
+
+                    <listitem>
+                        <para>Uses XML::LibXML::Reader to very efficiently to parse XML document
+			or element into native Perl data structures, which are less flexible but
+			significantly faster to process then DOM.</para>
                     </listitem>
                 </varlistentry>
 
@@ -1016,13 +1030,23 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
 
                         <listitem>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$parser = XML::LibXML-&gt;new();</funcsynopsisinfo>
+                                <funcsynopsisinfo>$parser = XML::LibXML-&gt;new();
+$parser = XML::LibXML-&gt;new(option=>value, ...);
+$parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>There is nothing much to say about the constructor. It simply creates a new parser instance.</para>
-
-                            <para>Although libxml2 uses mainly global flags to alter the behaviour of the parser, each XML::LibXML parser instance has its own
-                            flags or callbacks and does not interfere with other instances.</para>
+                            <para>Create a new XML and HTML parser instance.
+			      Each parser instance holds default
+			      values for various parser options.
+			      Optionally, 
+			      one can pass a hash reference or 
+			      a list of option => value pairs to
+			      set a different default set of options.
+			      Unless specified otherwise, the options
+			      <literal>load_ext_dtd</literal> and
+			      <literal>huge</literal> are set to 1.
+			      See <xref linkend="parser-options"/> for a list of libxml2 parser's options.
+			    </para>
                         </listitem>
                     </varlistentry>
                 </variablelist>
@@ -1103,14 +1127,8 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             </para>
                             <para>An optional second argument can be
                                used to pass some options to the HTML
-                               parser as a HASH reference. Possible
-                               options are: Possible options are:
-                               encoding and URI, and with
-			       libxml2 &gt;	       
-                               2.6.27  additionally: recover,
-                               suppress_errors, suppress_warnings,
-                               pedantic_parser, no_blanks, and
-                               no_network.
+                               parser as a HASH reference. 
+			       See options labeled with HTML in <xref linkend="parser-options"/>.
 	                    </para>
                         </listitem>
                     </varlistentry>
@@ -1126,12 +1144,11 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             <para>
                                An optional second argument can be used
                                to pass some options to the HTML parser
-                               as a HASH reference.  Possible options
-                               are: encoding and URI, and with libxml2 &gt;
-                               2.6.27 additionally: recover,
-                               suppress_errors, suppress_warnings,
-                               pedantic_parser, no_blanks, and
-                               no_network. Note: encoding option may
+                               as a HASH reference.
+			       See options labeled with HTML in <xref linkend="parser-options"/>.
+			    </para>
+			    <para>
+			       Note: encoding option may
                                not work correctly with this function
                                in libxml2 &lt; 2.6.27 if the HTML file
                                declares charset using a META tag.
@@ -1148,10 +1165,8 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                             </funcsynopsis>
                             <para>Similar to parse_string() but parses HTML (strict) strings.</para>
                             <para>An optional second argument can be used to pass some options to the
-                               HTML parser as a HASH reference. Possible options are:
-		               encoding and URI, and with libxml2 &gt; 2.6.27 additionally:
-                               recover, suppress_errors, suppress_warnings, pedantic_parser,
-		               no_blanks, and no_network.
+                               HTML parser as a HASH reference.
+			       See options labeled with HTML in <xref linkend="parser-options"/>.
 	                    </para>
                         </listitem>
                     </varlistentry>
@@ -1348,9 +1363,21 @@ print $doc-&gt;toString(); # returns "&lt;foo&gt;bar&lt;/foo&gt;"</programlistin
             </sect2>
 
             <sect2>
+                <title>Pull Parser (Reader)</title>
+                <para>XML::LibXML also provides a pull-parser interface similar to the XmlReader interface in .NET.
+		This interface is almost streaming, and is usually faster and simpler to use than SAX.
+		See <xref linkend="XML-LibXML-Reader"/>.</para>
+	    </sect2>
+
+            <sect2>
+                <title>Direct SAX Parser</title>
+                <para>XML::LibXML provides a direct SAX parser in the <xref linkend="XML-LibXML-SAX"/> module.</para>
+	    </sect2>
+
+            <sect2>
                 <title>DOM based SAX Parser</title>
 
-                <para>XML::LibXML provides a DOM based SAX parser. The SAX parser is defined in 
+                <para>XML::LibXML also provides a DOM based SAX parser. The SAX parser is defined in 
 		the module XML::LibXML::SAX::Parser. As it is not a stream based parser, it
                 parses documents into a DOM and traverses the DOM tree instead.</para>
 
@@ -1368,9 +1395,7 @@ $parser-&gt;generate( $doc );</programlisting>
                 <para><emphasis>WARNING</emphasis></para>
 
                 <para>This is NOT a streaming SAX parser. As I said above, this parser reads the entire document into a DOM and serialises it. Some people
-                couldn't read that in the paragraph above so I've added this warning.</para>
-
-                <para>If you want a streaming SAX parser look at the <xref linkend="XML-LibXML-SAX"/> man page</para>
+                couldn't read that in the paragraph above so I've added this warning. If you want a streaming SAX parser look at the <xref linkend="XML-LibXML-SAX"/> man page</para>
             </sect2>
         </sect1>
 
@@ -1410,266 +1435,383 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             the empty tag <emphasis>foo</emphasis> will be rendered as <emphasis>&lt;foo&gt;&lt;/foo&gt;</emphasis> rather than <emphasis>&lt;foo/&gt;</emphasis>.</para>
         </sect1>
 
-        <sect1>
+        <sect1 id="parser-options">
             <title>Parser Options</title>
 
-            <para>LibXML options are global (unfortunately this is a limitation of the underlying implementation, not this interface). They can either be set
-            using $parser-&gt;option(...), or XML::LibXML-&gt;option(...), both are treated in the same manner. Note that even two parser processes will share
-            some of the same options, so be careful out there!</para>
-
-            <para>Every option returns the previous value, and can be called without parameters to get the current value.</para>
+	    <para>Handling of libxml2 parser options has been unified and improved in XML::LibXML 1.70.
+	      You can now set default options for a particular parser instance by
+	      passing them to the constructor as <literal>XML::LibXML->new({name=>value, ...})</literal> 
+	      or <literal>XML::LibXML->new(name=>value,...)</literal>.
+	      The options can be queried and changed using the following methods (pre-1.70 interfaces such as <function>$parser->load_ext_dtd(0)</function> also exist, see below):
+	    </para>
 
             <variablelist>
-                <varlistentry>
-                    <term>validation</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;validation(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Turn validation on (or off). Defaults to off.</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>recover</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;recover(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Turn the parsers recover mode on (or off). Defaults to off.</para>
-
-                        <para>This allows one to parse broken XML data into memory. This switch will only work with XML data rather than HTML data. Also the
-                        validation will be switched off automatically.</para>
-
-                        <para>The recover mode helps to recover documents that are almost well-formed very efficiently. That is for example a document that
-                        forgets to close the document tag (or any other tag inside the document). The recover mode of XML::LibXML has problems restoring
-                        documents that are more like well balanced chunks.</para>
-
-                        <para>XML::LibXML will only parse until the first fatal error occurs, reporting recoverable parsing errors as warnings. To suppress
-                        these warnings use $parser-&gt;recover_silently(1); or, equivalently, $parser-&gt;recover(2).</para>
-                    </listitem>
-                </varlistentry>
-
+              <varlistentry>
+                <term>option_exists</term>
+                <listitem>
+                  <funcsynopsis>
+                    <funcsynopsisinfo>$parser-&gt;option_exists($name);</funcsynopsisinfo>
+                  </funcsynopsis>
+                  <para>Returns 1 if the current XML::LibXML version supports
+		    the option <literal>$name</literal>, otherwise returns 0 (note that this does not necessarily mean that the option is supported
+		    by the underlying libxml2 library).</para>
+                </listitem>
+	      </varlistentry>
+	      <varlistentry>
+                <term>get_option</term>
+                <listitem>
+                  <funcsynopsis>
+                    <funcsynopsisinfo>$parser-&gt;get_option($name);</funcsynopsisinfo>
+                  </funcsynopsis>
+                  <para>Returns the current value of the parser option <literal>$name</literal>.</para>
+                </listitem>
+              </varlistentry>
+	      <varlistentry>
+                <term>set_option</term>
+                <listitem>
+                  <funcsynopsis>
+                    <funcsynopsisinfo>$parser-&gt;set_option($name,$value);</funcsynopsisinfo>
+                  </funcsynopsis>
+                  <para>Sets option <literal>$name</literal> to value <literal>$value</literal>.</para>
+                </listitem>
+              </varlistentry>
+	    </variablelist>
+	    <para>
+	      IMPORTANT NOTE: This documentation reflects the parser flags available in libxml2 2.7.3.
+	      Some options have no effect if an older version of libxml2 is used.
+	    </para>
+	    <para>Each of the flags listed below is labeled labeled</para>
+	    <variablelist>
+	      <varlistentry>
+		<term>/parser/</term>
+		<listitem>
+		  <para>if it can be used with a <function>XML::LibXML</function>
+		  parser object (i.e. passed to <function>XML::LibXML->new</function>, <function>XML::LibXML->set_option</function>, etc.)
+		  </para>
+		</listitem>
+	      </varlistentry>
+	      <varlistentry>
+		<term>/html/</term>
+		<listitem>
+		  <para>if it can be used passed to the <function>parse_html_*</function> methods</para>
+		</listitem>
+	      </varlistentry>
+	      <varlistentry>
+		<term>/reader/</term>
+		<listitem>
+		  <para>if it can be used with the <function>XML::LibXML::Reader</function>.</para>
+		</listitem>
+	      </varlistentry>
+	    </variablelist>
+	    <para>
+	      Unless specified otherwise, the default for boolean valued options is 0 (false).
+	    </para>
+	      <para>The available options are:</para>
+	    <variablelist>
+          <varlistentry>
+            <term>URI</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>In case of parsing strings or file handles, XML::LibXML doesn't know about the base uri of the document. To make relative
+                references such as XIncludes work, one has to set a base URI, that is then used for the parsed document.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>line_numbers</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>If this option is activated, libxml2 will store the line number of each element node in the parsed document. 
+		The line number can be obtained using the <function>line_number()</function> method
+		of the <function>XML::LibXML::Node</function> class (for non-element nodes
+		this may report the line number of the containing element). 
+		The line numbers are also used for reporting positions of validation errors.
+	      </para>
+	      <para>IMPORTANT:
+		Due to limitations in the libxml2 library line numbers greater than
+		65535 will be returned as 65535. Unfortunatelly, this is a long and sad story, please see
+		<ulink url="http://bugzilla.gnome.org/show_bug.cgi?id=325533">http://bugzilla.gnome.org/show_bug.cgi?id=325533</ulink> for more details.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>encoding</term>
+            <listitem>
+	      <para>/html/</para>
+              <para>character encoding of the input</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>recover</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>recover from errors; possible values are 0, 1, and 2</para>
+              <para>
+		A true value turns on recovery mode which
+		allows one to parse broken XML or HTML data.
+		The recovery mode allows the parser to return
+		the successfully parsed portion of the input document. 
+		This is useful for almost well-formed documents, where for example 
+		a closing tag is missing somewhere. Still, 
+		XML::LibXML will only parse until the first fatal (non-recoverable) error occurs,
+		reporting recoverable parsing errors as warnings. To suppress
+                even these warnings, use recover=>2.</para>
+	      <para>Note that validation is switched off automatically in recovery mode.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>expand_entities</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>substitute entities; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>load_ext_dtd</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>load the external DTD subset while parsing; possible values are 0 and 1. Unless specified, 
+		XML::LibXML sets this option to 1.</para>
+              <para>This flag is also required for DTD Validation, to provide complete attribute,
+                and to expand entities, regardless if the document has an internal subset.
+                Thus switching off external DTD loading, will disable entity expansion,
+                validation, and complete attributes on internal subsets as well.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>complete_attributes</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>create default DTD attributes; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>validation</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>validate with the DTD; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>suppress_errors</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>suppress error reports; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>suppress_warnings</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>suppress warning reports; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>pedantic_parser</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>pedantic error reporting; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>no_blanks</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>remove blank nodes; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>expand_xinclude or xinclude</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>Implement XInclude substitution; possible values are 0 and 1</para>
+              <para>Expands XIinclude tags immediately while parsing the document. 
+		Note that the parser will use the URI resolvers installed
+		via <function>XML::LibXML::InputCallback</function> to parse the included document (if any).</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>no_xinclude_nodes</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>do not generate XINCLUDE START/END nodes; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>no_network</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>Forbid network access; possible values are 0 and 1</para>
+              <para>If set to true, all
+                attempts to fetch non-local resources (such as
+                DTD or external entities) will fail (unless
+                custom callbacks are defined).</para>
+	      <para>It may be
+                necessary to use the flag <literal>recover</literal> for
+                processing documents requiring such resources
+                while networking is off.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>clean_namespaces</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>remove redundant namespaces declarations during parsing; possible values are 0 and 1.
+	      </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>no_cdata</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>merge CDATA as text nodes; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>no_basefix</term>
+            <listitem>
+	      <para>/parser, reader/</para>
+              <para>not fixup XINCLUDE xml#base URIS; possible values are 0 and 1</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>huge</term>
+            <listitem>
+	      <para>/parser, html, reader/</para>
+              <para>relax any hardcoded limit from the parser; possible values are 0 and 1. Unless specified, 
+		XML::LibXML sets this option to 1.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>gdome</term>
+            <listitem>
+	      <para>/parser/</para>
+              <para>THIS OPTION IS EXPERIMENTAL!</para>
+              <para>Although quite powerful, XML:LibXML's DOM implementation is incomplete with respect to
+		the DOM level 2 or level 3 specifications.
+                XML::GDOME is based on libxml2 as well and and provides a rather complete DOM implementation by wrapping libgdome.
+		This flag allows you to make
+                use of XML::LibXML's full parser options and XML::GDOME's DOM implementation at the same time.</para>
+              <para>To make use of this function, one has to install libgdome and configure XML::LibXML to use this library.
+		For this you need to rebuild XML::LibXML!</para>
+	      <para>Note: this feature was not seriously tested in recent XML::LibXML releases.</para> 
+            </listitem>
+	  </varlistentry>
+	</variablelist>
+	    <para>For compatibility with XML::LibXML versions prior to 1.70,
+	      the following methods are also supported for querying and setting the corresponding parser options
+	      (if called without arguments, the methods return
+	      the current value of the corresponding parser options; with an argument sets the option to a given value):
+	    </para>
+	    <programlisting>$parser->validation();
+$parser->recover();
+$parser->pedantic_parser();
+$parser->line_numbers();
+$parser->load_ext_dtd();
+$parser->complete_attributes();
+$parser->expand_xinclude();
+$parser->gdome_dom();
+$parser->clean_namespaces();
+$parser->no_network();</programlisting>
+	    <para>The following obsolete methods trigger parser options in some
+	      special way:</para>
+	    <variablelist>
                 <varlistentry>
                     <term>recover_silently</term>
-
                     <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;recover_silently(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Turns the parser warnings off (or on). Defaults to on.</para>
-
-                        <para>This allows to switch off warnings printed to STDERR when parsing documents with recover(1).</para>
-
-                        <para>Please note that calling recover_silently(0) also turns the parser recover mode off and calling recover_silently(1) automatically
-                        activates the parser recover mode.</para>
+                        <programlisting>
+                            $parser-&gt;recover_silently(1);;
+                        </programlisting>
+                        <para>If called without an argument,
+			  returns true if the current value of the <literal>recover</literal> parser
+			  option is 2 and returns false otherwise.
+			  With a true argument sets the <literal>recover</literal> parser option to 2;
+			  with a false argument sets the <literal>recover</literal> parser option to 0.
+			</para>
                     </listitem>
                 </varlistentry>
-
                 <varlistentry>
                     <term>expand_entities</term>
-
                     <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;expand_entities(0);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Turn entity expansion on or off, enabled by default. If entity expansion is off, any external parsed entities in the document are
-                        left as entities. Probably not very useful for most purposes.</para>
+                        <programlisting>
+                            $parser-&gt;expand_entities(0);
+                        </programlisting>
+                        <para>Get/set the <literal>expand_entities</literal> option.
+			  If called with a true argument, also turns
+			  the <literal>load_ext_dtd</literal> option to 1.
+			</para>
                     </listitem>
                 </varlistentry>
-
                 <varlistentry>
                     <term>keep_blanks</term>
-
                     <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;keep_blanks(0);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Allows you to turn off XML::LibXML's default behaviour of maintaining white-space in the document.</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>pedantic_parser</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;pedantic_parser(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>You can make XML::LibXML more pedantic if you want to.</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>line_numbers</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;line_numbers(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>If this option is activated XML::LibXML will store the line number of a node. This gives more information where a validation error
-                        occurred. It could be also used to find out about the position of a node after parsing (see also XML::LibXML::Node::line_number()). 
+                        <programlisting>
+                            $parser-&gt;keep_blanks(0);
+                        </programlisting>
+                        <para>This is actually an oposite of the <literal>no_blanks</literal> parser option.
+			  If used without an argument retrieves negated value of <literal>no_blanks</literal>.
+			  If used with an argument sets <literal>no_blanks</literal> to the oposite value.
 			</para>
-			<para>IMPORTANT:
-			  Due to limitations in the libxml2 library line numbers greater than
-			  65535 will be returned as 65535. Please see
-			  <ulink url="http://bugzilla.gnome.org/show_bug.cgi?id=325533">http://bugzilla.gnome.org/show_bug.cgi?id=325533</ulink> for more details.
-                        </para>
-                        <para>By default line numbering is switched off (0).</para>
                     </listitem>
                 </varlistentry>
-
-                <varlistentry>
-                    <term>load_ext_dtd</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;load_ext_dtd(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Load external DTD subsets while parsing.</para>
-                        <para>This flag is also required for DTD Validation, to provide complete attribute,
-                              and to expand entities, regardless if the document has an internal subset.
-                              Thus switching off external DTD loading, will disable entity expansion,
-                              validation, and complete attributes on internal subsets as well.</para>
-                        <para>If you leave this parser flag untouched, everything will work,
-                              because the default is 1 (activated)</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>complete_attributes</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;complete_attributes(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Complete the elements attributes lists with the ones defaulted from the DTDs. By default, this option is enabled.</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>expand_xinclude</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;expand_xinclude(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Expands XIinclude tags immediately while parsing the document. This flag assures that the parser callbacks are used while parsing
-                        the included document.</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>load_catalog</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;load_catalog( $catalog_file );</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Will use $catalog_file as a catalog during all parsing processes. Using a catalog will significantly speed up parsing processes if
-                        many external resources are loaded into the parsed documents (such as DTDs or XIncludes).</para>
-
-                        <para>Note that catalogs will not be available if an external entity handler was specified. At the current state it is not possible to
-                        make use of both types of resolving systems at the same time.</para>
-                    </listitem>
-                </varlistentry>
-
                 <varlistentry>
                     <term>base_uri</term>
 
                     <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;base_uri( $your_base_uri );</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>In case of parsing strings or file handles, XML::LibXML doesn't know about the base uri of the document. To make relative
-                        references such as XIncludes work, one has to set a separate base URI, that is then used for the parsed documents.</para>
+                        <programlisting>
+                            $parser-&gt;base_uri( $your_base_uri );
+                        </programlisting>
+                        <para>Get/set the <literal>URI</literal> option.</para>
                     </listitem>
                 </varlistentry>
-
-                <varlistentry>
-                    <term>gdome_dom</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;gdome_dom(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>THIS FLAG IS EXPERIMENTAL!</para>
-
-                        <para>Although quite powerful XML:LibXML's DOM implementation is limited if one needs or wants full DOM level 2 or level 3 support.
-                        XML::GDOME is based on libxml2 as well but provides a rather complete DOM implementation by wrapping libgdome. This allows you to make
-                        use of XML::LibXML's full parser options and XML::GDOME's DOM implementation at the same time.</para>
-
-                        <para>To make use of this function, one has to install libgdome and configure XML::LibXML to use this library. For this you need to
-                        rebuild XML::LibXML!</para>
-                    </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                    <term>clean_namespaces</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;clean_namespaces( 1 );</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>libxml2 2.6.0 and later allows to strip redundant namespace declarations from the DOM tree. To do this, one has to set
-                        clean_namespaces() to 1 (TRUE). By default no namespace cleanup is done.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>no_network</term>
-
-                    <listitem>
-                        <funcsynopsis>
-                            <funcsynopsisinfo>$parser-&gt;no_network(1);</funcsynopsisinfo>
-                        </funcsynopsis>
-
-                        <para>Turn networking support on or off,
-                        enabled by default.  If networking is off, all
-                        attempts to fetch non-local resources (such as
-                        DTD or external entities) will fail (unless
-                        custom callbacks are defined).  It may be
-                        necessary to use $parser-&gt;recover(1) for
-                        processing documents requiring such resources
-                        while networking is off.
-                        </para>
-                    </listitem>
-                </varlistentry>
-
             </variablelist>
         </sect1>
-
         <sect1>
+            <title>XML Catalogs</title>
+	    <para><literal>libxml2</literal> supports XML catalogs.
+		Catalogs are used to
+		map remote resources to their local copies.
+		Using catalogs can speed up parsing processes if
+                many external resources from remote addresses
+		are loaded into the parsed documents (such as DTDs or XIncludes).
+	      </para>
+	      <para>
+		Note that libxml2 has a global pool of loaded catalogs,
+		so if you apply the method <literal>load_catalog</literal> 
+		to one parser instance, all parser instances will start using the catalog
+		(in addition to other previously loaded catalogs).
+	      </para>
+	      <para>Note also that catalogs are not used
+                when a custom external entity handler is specified. At the
+                current state it is not possible to make use of both
+                types of resolving systems at the same time.</para>
+		<variablelist>
+              <varlistentry>
+                <term>load_catalog</term>
+                <listitem>
+                  <funcsynopsis>
+                    <funcsynopsisinfo>$parser-&gt;load_catalog( $catalog_file );</funcsynopsisinfo>
+                  </funcsynopsis>
+		  <para>Loads the XML catalog file $catalog_file.</para>
+		</listitem>
+	      </varlistentry>
+		</variablelist>
+	      </sect1>
+              <sect1>
             <title>Error Reporting</title>
 
             <para>XML::LibXML throws exceptions during parsing, validation or XPath processing (and some other occasions). These errors can be caught by using
-            <emphasis>eval</emphasis> blocks. The error then will be stored in <emphasis>$@</emphasis>.
-	    There are two implementations: the old one throws $@ which is a flat string,
+            <emphasis>eval</emphasis> blocks. The error is stored in <emphasis>$@</emphasis>.
+	    There are two implementations: the old one throws $@ which is just a message string,
 	    in the new one $@ is an object from the class XML::LibXML::Error;
 	    this class overrides the operator "" so that when printed,
 	    the object flattens to the usual error message.
 	    </para>
 
-            <para>XML::LibXML throws errors as they occurs and does not wait if a user test
-            for them. This is a very common misunderstanding in the use of XML::LibXML. If the eval is omitted, XML::LibXML will always halt your script by
+            <para>XML::LibXML throws errors as they occur. This is a very common misunderstanding in the use of XML::LibXML. If the eval is omitted, XML::LibXML will always halt your script by
             "croaking" (see Carp man page for details).</para>
 
-            <para>Also note that an increasing number of functions throw errors if bad data is passed. If you cannot assure valid data passed to XML::LibXML you should eval
+            <para>Also note that an increasing number of functions throw errors if bad data is passed as arguments. If you cannot assure valid data passed to XML::LibXML you should eval
             these functions.</para>
 
             <para>Note: since version 1.59, get_last_error() is no longer available in XML::LibXML for thread-safety reasons.</para>
@@ -5818,7 +5960,8 @@ sub processNode {
   my $reader = XML::LibXML::Reader-&gt;new( FD =&gt; fileno(STDIN), ... );
   my $reader = XML::LibXML::Reader-&gt;new( DOM =&gt; $dom, ... );
 </programlisting>
-      <para>where ... are (optional) reader options described below in <xref linkend="parsing-options"/>.
+      <para>where ... are (optional) reader options described below in <xref linkend="reader-parsing-options"/>
+	or various parser options described in <xref linkend="XML-LibXML-Parser"/>.
 	The constructor recognizes the following XML sources:</para>
       <sect2>
         <title>Source specification</title>
@@ -5858,28 +6001,17 @@ sub processNode {
           </varlistentry>
         </variablelist>
       </sect2>
-      <sect2 id="parsing-options">
-        <title>Parsing options</title>
+      <sect2 id="reader-parsing-options">
+        <title>Reader options</title>
         <variablelist>
           <varlistentry>
-            <term>URI</term>
-            <listitem>
-              <para>can be used to provide baseURI when parsing
-		strings or filehandles. This URI is used when resolving relative URIs to 
-		external DTD subset, external entities, or XInclude elements.
-		This URI is returned by the <function>URI</function> method
-		of the <function>XML::LibXML::Document</function> object.
-		</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>encoding</term>
+            <term>encoding => $encoding</term>
             <listitem>
               <para>override document encoding.</para>
             </listitem>
           </varlistentry>
           <varlistentry>
-            <term>RelaxNG</term>
+            <term>RelaxNG => $rng_schema</term>
             <listitem>
               <para>can be used to pass either a <xref linkend="XML-LibXML-RelaxNG"/>
 		object or a filename or URL of a RelaxNG schema to the
@@ -5888,7 +6020,7 @@ sub processNode {
             </listitem>
           </varlistentry>
           <varlistentry>
-            <term>Schema</term>
+            <term>Schema => $xsd_schema</term>
             <listitem>
               <para>can be used to pass either a <xref linkend="XML-LibXML-Schema"/>
 		object or a filename or URL of a W3C XSD schema to the
@@ -5896,91 +6028,17 @@ sub processNode {
 		document as it is processed.</para>
             </listitem>
           </varlistentry>
-          <varlistentry>
-            <term>recover</term>
+	  <varlistentry>
+            <term>...</term>
             <listitem>
-              <para>recover on errors (0 or 1)</para>
+              <para>the reader further supports various
+	      parser options described in 
+	      <xref linkend="XML-LibXML-Parser"/> (specificly those
+	      labeled by /reader/).
+	      </para>
             </listitem>
           </varlistentry>
-          <varlistentry>
-            <term>expand_entities</term>
-            <listitem>
-              <para>substitute entities (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>load_ext_dtd</term>
-            <listitem>
-              <para>load the external subset (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>complete_attributes</term>
-            <listitem>
-              <para>default DTD attributes (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>validation</term>
-            <listitem>
-              <para>validate with the DTD (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>suppress_errors</term>
-            <listitem>
-              <para>suppress error reports (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>suppress_warnings</term>
-            <listitem>
-              <para>suppress warning reports (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>pedantic_parser</term>
-            <listitem>
-              <para>pedantic error reporting (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>no_blanks</term>
-            <listitem>
-              <para>remove blank nodes (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>expand_xinclude</term>
-            <listitem>
-              <para>Implement XInclude substitution (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>no_network</term>
-            <listitem>
-              <para>Forbid network access (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>clean_namespaces</term>
-            <listitem>
-              <para>remove redundant namespaces declarations (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>no_cdata</term>
-            <listitem>
-              <para>merge CDATA as text nodes (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term>no_xinclude_nodes</term>
-            <listitem>
-              <para>do not generate XINCLUDE START/END nodes (0 or 1)</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
+	</variablelist>
       </sect2>
     </sect1>
     <sect1>
@@ -6507,25 +6565,24 @@ sub processNode {
       <para>The reader interface provides the following constants for
 	node types (the constant symbols are exported by default or if
 	tag <literal>:types</literal> is used).</para>
-      <programlisting>
-  XML_READER_TYPE_NONE                    =&gt; 0
-  XML_READER_TYPE_ELEMENT                 =&gt; 1
-  XML_READER_TYPE_ATTRIBUTE               =&gt; 2
-  XML_READER_TYPE_TEXT                    =&gt; 3
-  XML_READER_TYPE_CDATA                   =&gt; 4
-  XML_READER_TYPE_ENTITY_REFERENCE        =&gt; 5
-  XML_READER_TYPE_ENTITY                  =&gt; 6
-  XML_READER_TYPE_PROCESSING_INSTRUCTION  =&gt; 7
-  XML_READER_TYPE_COMMENT                 =&gt; 8
-  XML_READER_TYPE_DOCUMENT                =&gt; 9
-  XML_READER_TYPE_DOCUMENT_TYPE           =&gt; 10
-  XML_READER_TYPE_DOCUMENT_FRAGMENT       =&gt; 11
-  XML_READER_TYPE_NOTATION                =&gt; 12
-  XML_READER_TYPE_WHITESPACE              =&gt; 13
-  XML_READER_TYPE_SIGNIFICANT_WHITESPACE  =&gt; 14
-  XML_READER_TYPE_END_ELEMENT             =&gt; 15
-  XML_READER_TYPE_END_ENTITY              =&gt; 16
-  XML_READER_TYPE_XML_DECLARATION         =&gt; 17
+      <programlisting>XML_READER_TYPE_NONE                    =&gt; 0
+XML_READER_TYPE_ELEMENT                 =&gt; 1
+XML_READER_TYPE_ATTRIBUTE               =&gt; 2
+XML_READER_TYPE_TEXT                    =&gt; 3
+XML_READER_TYPE_CDATA                   =&gt; 4
+XML_READER_TYPE_ENTITY_REFERENCE        =&gt; 5
+XML_READER_TYPE_ENTITY                  =&gt; 6
+XML_READER_TYPE_PROCESSING_INSTRUCTION  =&gt; 7
+XML_READER_TYPE_COMMENT                 =&gt; 8
+XML_READER_TYPE_DOCUMENT                =&gt; 9
+XML_READER_TYPE_DOCUMENT_TYPE           =&gt; 10
+XML_READER_TYPE_DOCUMENT_FRAGMENT       =&gt; 11
+XML_READER_TYPE_NOTATION                =&gt; 12
+XML_READER_TYPE_WHITESPACE              =&gt; 13
+XML_READER_TYPE_SIGNIFICANT_WHITESPACE  =&gt; 14
+XML_READER_TYPE_END_ELEMENT             =&gt; 15
+XML_READER_TYPE_END_ENTITY              =&gt; 16
+XML_READER_TYPE_XML_DECLARATION         =&gt; 17
 </programlisting>
     </sect1>
     <sect1>
@@ -6533,31 +6590,25 @@ sub processNode {
       <para>The following constants represent the values returned by
 	<literal>readState()</literal>. They are exported by default,
 	or if tag <literal>:states</literal> is used:</para>
-      <programlisting>
-  XML_READER_NONE      =&gt; -1
-  XML_READER_START     =&gt;  0
-  XML_READER_ELEMENT   =&gt;  1
-  XML_READER_END       =&gt;  2
-  XML_READER_EMPTY     =&gt;  3
-  XML_READER_BACKTRACK =&gt;  4
-  XML_READER_DONE      =&gt;  5
-  XML_READER_ERROR     =&gt;  6
+      <programlisting>XML_READER_NONE      =&gt; -1
+XML_READER_START     =&gt;  0
+XML_READER_ELEMENT   =&gt;  1
+XML_READER_END       =&gt;  2
+XML_READER_EMPTY     =&gt;  3
+XML_READER_BACKTRACK =&gt;  4
+XML_READER_DONE      =&gt;  5
+XML_READER_ERROR     =&gt;  6
 </programlisting>
-    </sect1>
-    <sect1>
-      <title>VERSION</title>
-      <para>0.02</para>
-    </sect1>
-    <sect1>
-      <title>AUTHORS</title>
-      <para>Heiko Klein, &lt;H.Klein@gmx.net&lt;gt&gt; and Petr Pajas,
-	&lt;pajas@matfyz.cz&lt;gt&gt;</para>
     </sect1>
     <sect1>
       <title>SEE ALSO</title>
       <para><xref linkend="XML-LibXML-Pattern"/> for information about compiled patterns.</para>
       <para>http://xmlsoft.org/html/libxml-xmlreader.html</para>
       <para>http://dotgnu.org/pnetlib-doc/System/Xml/XmlTextReader.html</para>
+    </sect1>
+    <sect1>
+      <title>ORIGINAL IMPLEMENTATION</title>
+      <para>Heiko Klein, &lt;H.Klein@gmx.net&lt;gt&gt; and Petr Pajas</para>
     </sect1>
   </chapter>
   <chapter id="XML-LibXML-XPathExpression">

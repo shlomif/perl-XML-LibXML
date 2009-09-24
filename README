@@ -37,9 +37,8 @@ Without libxml2 installed this module will neither build nor run.
 
 Also XML::LibXML requires the following packages:
 
-   o XML::LibXML::Common - general functions used by various XML::LibXML modules
-   o XML::SAX - DOM building support from SAX
-   o XML::NamespaceSupport - DOM building support from SAX
+   o XML::SAX - base class for SAX parsers
+   o XML::NamespaceSupport - namespace support for SAX parsers
 
 These packages are required. If one is missing some tests will fail.
 
@@ -82,8 +81,8 @@ at least 2.6.21 is required for XML::LibXML::Reader. For some older OS versions
 this means that an update of the pre-built packages is required.
 
 Although libxml2 claims binary compatibility between its patch levels, it is a
-good idea to recompile XML::LibXML and XML::LibXML::Common and run its tests
-after an upgrade of libxml2.
+good idea to recompile XML::LibXML and run its tests after an upgrade of
+libxml2.
 
 If your libxml2 installation is not within your $PATH, you can pass the
 XMLPREFIX=$YOURLIBXMLPREFIX parameter to Makefile.PL determining the correct
@@ -139,6 +138,9 @@ following instructions contributed by Christopher J. Madsen:
 These instructions assume that you already have your system set up to compile
 modules that use C components.
 
+First, get the libxml2 binaries from http://xmlsoft.org/sources/win32/
+(currently also available at http://www.zlatkovic.com/pub/libxml/).
+
 You need:
 
 >   iconv-VERSION.win32.zip
@@ -153,14 +155,13 @@ containing bin, lib, and include directories.
 Combine all the bin, include, and lib directories under c:\Prog\LibXML. (You
 can use any directory you prefer; just adjust the instructions accordingly.)
 
-Get the latest version of XML-LibXML-Common and XML-LibXML from CPAN. Extract
-them.
+Get the latest version of XML-LibXML from CPAN. Extract them.
 
 Issue these commands in the XML-LibXML-Common-VERSION directory:
 
 >   perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
 >   nmake
->   copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML\Common
+>   copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML
 >   nmake test
 >   nmake install
 

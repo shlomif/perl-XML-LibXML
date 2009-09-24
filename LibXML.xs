@@ -209,7 +209,7 @@ LibXML_struct_error_callback(SV * saved_error, SV * libErr )
 
     if ( SvTRUE(ERRSV) ) {
       (void) POPs;
-      croak(Nullch);
+      croak_obj;
     } else {
       sv_setsv(saved_error, POPs);
     }
@@ -513,7 +513,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
 
     if (SvTRUE(ERRSV)) {
        (void) POPs;
-       croak(Nullch);
+       croak_obj;
     }
 
     read_results = POPs;
@@ -574,7 +574,7 @@ LibXML_input_match(char const * filename)
 
         if (SvTRUE(ERRSV)) {
             (void) POPs;
-            croak(Nullch);
+            croak_obj;
         }
 
         res = POPs;
@@ -618,7 +618,7 @@ LibXML_input_open(char const * filename)
 
     if (SvTRUE(ERRSV)) {
         (void) POPs;
-        croak(Nullch);
+        croak_obj;
     }
 
     results = POPs;
@@ -668,7 +668,7 @@ LibXML_input_read(void * context, char * buffer, int len)
 
         if (SvTRUE(ERRSV)) {
             (void) POPs;
-            croak(Nullch);
+            croak_obj;
         }
 
         output = POPp;
@@ -714,7 +714,7 @@ LibXML_input_close(void * context)
         SvREFCNT_dec(ctxt);
 
         if (SvTRUE(ERRSV)) {
-            croak(Nullch);
+            croak_obj;
         }
 
         FREETMPS;
@@ -746,7 +746,7 @@ LibXML_output_write_handler(void * ioref, char * buffer, int len)
         call_pv("XML::LibXML::__write", G_SCALAR | G_EVAL | G_DISCARD );
 
         if (SvTRUE(ERRSV)) {
-            croak(Nullch);
+            croak_obj;
         }
 
         FREETMPS;
@@ -813,7 +813,7 @@ LibXML_load_external_entity(
 
         if (SvTRUE(ERRSV)) {
             (void) POPs;
-            croak(Nullch);
+            croak_obj;
         }
 
         results = POPs;
@@ -1179,7 +1179,7 @@ LibXML_generic_variable_lookup(void* varLookupData,
 
     if (SvTRUE(ERRSV)) {
         (void) POPs;
-        croak(Nullch);
+        croak_obj;
     } 
     if (count != 1) croak("XPathContext: variable lookup function returned none or more than one argument!");
 
@@ -1329,7 +1329,7 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
     
     if (SvTRUE(ERRSV)) {
         (void) POPs;
-        croak(Nullch);
+        croak_obj;
     } 
 
     if (count != 1) croak("XPathContext: perl-dispatcher in pm file returned none or more than one argument!");
