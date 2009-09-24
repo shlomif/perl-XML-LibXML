@@ -1900,8 +1900,8 @@ _parse_file(self, filename_sv)
             recover = LibXML_get_recover(real_obj);
 
             ctxt->_private = (void*)self;
-            xs_warn( "context initialized \n");
 
+            xs_warn( "context initialized\n" );
             {
                 xmlParseDocument(ctxt);
                 xs_warn( "document parsed \n");
