@@ -16,6 +16,17 @@ extern "C" {
 }
 #endif
 
+
+/*
+ * auxiliary macro to serve as an croak(NULL)
+ * unlike croak(NULL), this version does not produce
+ * a warning (see the perlapi for the meaning of croak(NULL))
+ *
+ */
+
+#define croak_obj Perl_croak(aTHX_ NULL)
+
+
 /* has to be called in BOOT sequence */
 void
 PmmSAXInitialize(pTHX);
