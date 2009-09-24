@@ -9127,6 +9127,11 @@ encodeToUTF8( encoding, string )
         xmlCharEncodingHandlerPtr coder = NULL;
 	PREINIT_SAVED_ERROR
     CODE:
+        if (!SvOK(string)) {
+            XSRETURN_UNDEF;
+        } else if (!SvCUR(string)) {
+            XSRETURN_PV("");
+        }
         realstring = (xmlChar*) SvPV(string, len);
         if ( realstring != NULL ) {
             /* warn("encode %s", realstring ); */
@@ -9210,10 +9215,13 @@ decodeFromUTF8( encoding, string )
 	PREINIT_SAVED_ERROR
     CODE: 
 #ifdef HAVE_UTF8
-        if ( !SvUTF8(string) ) {
+        if ( !SvOK(string) ) {
+            XSRETURN_UNDEF;
+        } else if (!SvCUR(string)) {
+            XSRETURN_PV("");
+        } else if ( !SvUTF8(string) ) {
             croak("string is not utf8!!");
-        }
-        else {
+        } else {
 #endif
             realstring = (xmlChar*) SvPV(string, len);
             if ( realstring != NULL ) {

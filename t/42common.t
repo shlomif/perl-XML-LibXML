@@ -1,7 +1,7 @@
 #########################
 
 use Test;
-BEGIN { plan tests => 8 };
+BEGIN { plan tests => 12 };
 use XML::LibXML::Common qw( :libxml :encoding );
 
 use constant TEST_STRING_GER => "Hänsel und Gretel";
@@ -46,6 +46,15 @@ eval {
     my $str = encodeToUTF8( "foo" , TEST_STRING_GER2 );
 };
 ok( length( $@ ) );
+
+ok((eval { encodeToUTF8( 'UTF-16' , '' ) eq '' ? 1 : 0 }) ==1);
+print $@ if $@;
+ok(eval { defined(encodeToUTF8( 'UTF-16' , undef )) ? 0 : 1 }==1);
+
+ok(eval { decodeFromUTF8( 'UTF-16' , '' ) eq '' ? 1 : 0 }==1);
+print $@ if $@;
+ok(eval { defined(decodeFromUTF8( 'UTF-16' , undef )) ? 0 : 1 }==1);
+print $@ if $@;
 
 # here should be a test to test badly encoded strings. but for some
 # reasons i am unable to create an apropriate test :(
