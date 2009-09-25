@@ -1403,11 +1403,11 @@ my $doc = $parser-&gt;parse_chunk("", 1); # terminate the parsing</programlistin
 
                 <variablelist>
                     <varlistentry>
-                        <term>start_push</term>
+                        <term>init_push</term>
 
                         <listitem>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$parser-&gt;start_push();</funcsynopsisinfo>
+                                <funcsynopsisinfo>$parser-&gt;init_push();</funcsynopsisinfo>
                             </funcsynopsis>
 
                             <para>Initializes the push parser.</para>
@@ -1422,7 +1422,7 @@ my $doc = $parser-&gt;parse_chunk("", 1); # terminate the parsing</programlistin
                                 <funcsynopsisinfo>$parser-&gt;push(@data);</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>This function pushes the data stored inside the array to libxml2's parser. Each entry in @data must be a normal scalar!</para>
+                            <para>This function pushes the data stored inside the array to libxml2's parser. Each entry in @data must be a normal scalar! This method can be called repeatedly.</para>
                         </listitem>
                     </varlistentry>
 

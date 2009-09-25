@@ -11,7 +11,7 @@
 
 use Test;
 
-BEGIN { plan tests => 137 };
+BEGIN { plan tests => 138 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -448,6 +448,16 @@ print "# 7. importing and adopting\n";
    my $schema = $doc->createElement('sphinx:schema');
    eval { $schema->appendChild( $schema ) };
    ok($@, qr/HIERARCHY_REQUEST_ERR/);   	
+}
+
+{
+   my $doc = XML::LibXML::Document->new('1.0', 'UTF-8');
+   my $attr = $doc->createAttribute('test','bar');
+   my $ent = $doc->createEntityReference('foo');
+   my $text = $doc->createTextNode('baz');
+   $attr->appendChild($ent);
+   $attr->appendChild($text);
+   ok($attr->toString() eq ' test="bar&foo;baz"');
 }
 
 { 

@@ -485,8 +485,19 @@ domIsParent( xmlNodePtr cur, xmlNodePtr refNode ) {
 int
 domTestHierarchy(xmlNodePtr cur, xmlNodePtr refNode) 
 {
-    if ( !refNode || !cur || cur->type == XML_ATTRIBUTE_NODE ) {
+    if ( !refNode || !cur ) {
         return 0;
+    }
+    if (cur->type == XML_ATTRIBUTE_NODE) {
+      switch ( refNode->type ){
+      case XML_TEXT_NODE:
+      case XML_ENTITY_REF_NODE:
+        return 1;
+        break;
+      default:
+        return 0;
+        break;
+      }
     }
 
     switch ( refNode->type ){
