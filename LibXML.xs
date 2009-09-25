@@ -2013,9 +2013,10 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
         if (encoding == NULL && SvUTF8( string )) {
 	  encoding = "UTF-8";
         }
-        recover = LibXML_get_recover(real_obj);
+        if (options & HTML_PARSE_RECOVER) {
+          recover = ((options & HTML_PARSE_NOERROR) ? 2 : 1);
+        }
 #if LIBXML_VERSION >= 20627
-        if (recover) options |= HTML_PARSE_RECOVER;
         real_doc = htmlReadDoc((xmlChar*)ptr, URL, encoding, options);
 #else
         real_doc = htmlParseDoc((xmlChar*)ptr, encoding);
@@ -2073,9 +2074,10 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
         real_obj = LibXML_init_parser(self,NULL);
-        recover = LibXML_get_recover(real_obj);
+        if (options & HTML_PARSE_RECOVER) {
+          recover = ((options & HTML_PARSE_NOERROR) ? 2 : 1);
+        }
 #if LIBXML_VERSION >= 20627
-        if (recover) options |= HTML_PARSE_RECOVER;
         real_doc = htmlReadFile((const char *)filename, 
 				encoding,
 				options);
@@ -2131,9 +2133,10 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
         real_obj = LibXML_init_parser(self,NULL);
-        recover = LibXML_get_recover(real_obj);
+        if (options & HTML_PARSE_RECOVER) {
+          recover = ((options & HTML_PARSE_NOERROR) ? 2 : 1);
+        }
 #if LIBXML_VERSION >= 20627
-        if (recover) options |= HTML_PARSE_RECOVER;
 
         real_doc = htmlReadIO((xmlInputReadCallback) LibXML_read_perl,
                               NULL,
