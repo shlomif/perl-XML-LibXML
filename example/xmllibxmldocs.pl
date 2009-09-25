@@ -432,9 +432,11 @@ sub dump_pod {
             $self->{OFILE}->print( "  ". $str );
             $self->{OFILE}->print( "\n\n" );
         }
-        elsif ( $node->nodeName() eq "funcsynopsis" ) {
-            $self->dump_pod($node);
-            $self->{OFILE}->print( "\n" );
+	elsif ( $node->nodeName() eq "funcsynopsis") {
+            if (($node->getAttribute('role')||'') ne 'synopsis') {
+              $self->dump_pod($node);
+              $self->{OFILE}->print( "\n" );
+            }
         }
         elsif(  $node->nodeName() eq "funcsynopsisinfo" ) {
             my $str = $node->string_value() ;
