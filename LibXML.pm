@@ -1222,8 +1222,8 @@ sub finish_push {
     else {
         eval { $retval = $self->_end_push( $self->{CONTEXT}, $restore ); };
     }
-    delete $self->{CONTEXT};
     my $err = $@;
+    delete $self->{CONTEXT};
     if ( $err ) {
         chomp $err unless ref $err;
         croak( $err );
