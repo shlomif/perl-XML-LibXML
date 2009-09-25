@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 38 }
+BEGIN { plan tests => 41 }
 use XML::LibXML;
 use IO::File;
 ok(1);
@@ -208,4 +208,36 @@ print "parse example/enc2_latin2.html...\n";
     ok( $htmldoc && $htmldoc->getDocumentElement );
     ok($htmldoc->findvalue('//p/text()'), $utf_str);
   }
+}
+
+
+{
+  # 44715
+
+  my $html = <<'EOF';
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Test &amp; Test some more</title>
+</head>
+<body>
+<p>Meet you at the caf&eacute;?</p>
+<p>How about <a href="http://example.com?mode=cafe&id=1&ref=foo">this one</a>?
+</p>
+<input class="wibble" id="foo" value="working" />
+</body>
+</html>
+EOF
+  my $parser = XML::LibXML->new;
+  eval {
+    $doc = $parser->parse_html_string(
+      $html => { recover => 1, suppress_errors => 1 }
+     );
+  };
+  ok(!$@);
+  ok($doc);
+  my $root = $doc && $doc->documentElement;
+  my $val = $root && $root->findvalue('//input[@id="foo"]/@value');
+  ok($val eq 'working');
 }
