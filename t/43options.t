@@ -3,7 +3,7 @@
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 288}
+BEGIN { plan tests => 289}
 
 use XML::LibXML;
 
@@ -48,7 +48,7 @@ no_network
 {
   my $p = XML::LibXML->new();
   for (@all) {
-    my $ret = /^(?:load_ext_dtd|huge)$/ ? 1 : 0;
+    my $ret = /^(?:load_ext_dtd|expand_entities|huge)$/ ? 1 : 0;
     ok(($p->get_option($_)||0) == $ret);
   }
   ok(! $p->option_exists('foo'));
@@ -81,10 +81,12 @@ no_network
   ok( $p->recover_silently(1) == 1 );
   ok( $p->get_option('recover') == 2 );
 
-  ok( $p->expand_entities() == 0 );
+  ok( $p->expand_entities() == 1 );
   ok( $p->load_ext_dtd() == 1 );
   $p->load_ext_dtd(0);
   ok( $p->load_ext_dtd() == 0 );
+  $p->expand_entities(0);
+  ok( $p->expand_entities() == 0 );
   $p->expand_entities(1);
   ok( $p->expand_entities() == 1 );
 }

@@ -371,9 +371,7 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
             <title>Synopsis</title>
 
             <programlisting>use XML::LibXML;
-my $parser = XML::LibXML-&gt;new();
-
-my $doc = $parser-&gt;parse_string(&lt;&lt;'EOT');
+my $dom = XML::LibXML-&gt;load_xml(string => &lt;&lt;'EOT');
 &lt;some-xml/&gt;
 EOT</programlisting>
         </sect1>
@@ -596,10 +594,9 @@ EOT</programlisting>
 	      specified by the <literal>&lt;?xml version="1.0" encoding="..."?&gt;</literal>
 	      declaration. Here is an example to follow:
 	      <programlisting>use XML::LibXML;
-my $parser = XML::LibXML-&gt;new;
 open my $fh, "file.xml";
 binmode $fh; # drop all PerlIO layers possibly created by a <literal>use open</literal> pragma
-$doc = $parser-&gt;parse_fh($fh);
+$doc = XML::LibXML-&gt;load_xml(IO => $fh);
 open my $out, "out.xml";
 binmode $fh; # as above
 $doc-&gt;toFh($fh);
@@ -683,8 +680,7 @@ use XML::LibXML qw(:threads_shared);</programlisting>
 	    and any thread spawn from there.
 	    For example, in
 	  </para>
-	  <programlisting>my $parser = XML::LibXML->new();
-my $doc = $parser->parse_file($filename);
+	  <programlisting>my $doc = XML::LibXML->load_xml(location => $filename);
 my $thr = threads->new(sub{
   # code working with $doc
   1;
@@ -714,8 +710,7 @@ $thr->join;
 	   in the thread that modifies and
 	   the thread that reads:
 	 </para>
-	  <programlisting>my $parser = XML::LibXML->new();
-my $doc = $parser->parse_file($filename);
+	  <programlisting>my $doc = XML::LibXML->load_xml(location => $filename);
 my $mutex : shared;
 my $thr = threads->new(sub{
    lock $mutex;
@@ -981,8 +976,25 @@ XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
         <sect1>
             <title>Synopsis</title>
 
-            <programlisting>use XML::LibXML;
-my $parser = XML::LibXML-&gt;new();
+            <programlisting>use XML::LibXML 1.70;
+<!--
+my $dom = XML::LibXML-&gt;load_xml(
+ location => $file_or_url,
+ # or string => $xml_string,
+ # or IO => $perl_file_handle,
+ # ...parser options...
+);
+
+my $html_dom = XML::LibXML-&gt;load_html(
+ location => $file_or_url,
+ # or string => $html_string,
+ # or IO => $perl_file_handle,
+ # ...parser options...
+);
+
+my $parser = XML::LibXML-&gt;new(
+  # ... parser options ...
+);
 
 my $doc = $parser-&gt;parse_string(&lt;&lt;'EOT');
 &lt;some-xml/&gt;
@@ -991,7 +1003,8 @@ my $fdoc = $parser-&gt;parse_file( $xmlfile );
 
 my $fhdoc = $parser-&gt;parse_fh( $xmlstream );
 
-my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
+my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );
+--></programlisting>
         </sect1>
 
         <sect1>
@@ -1018,7 +1031,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                 </listitem>
             </itemizedlist>
 
-            <sect2>
+	    <sect2>
                 <title>Creating a Parser Instance</title>
 
                 <para>XML::LibXML provides an OO interface to the libxml2 parser functions. Thus you have to create a parser instance before you can parse any
@@ -1029,8 +1042,12 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );</programlisting>
                         <term>new</term>
 
                         <listitem>
+			    <funcsynopsis role="synopsis">
+			       <funcsynopsisinfo># Parser constructor</funcsynopsisinfo>
+			    </funcsynopsis>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$parser = XML::LibXML-&gt;new();
+                                <funcsynopsisinfo>
+$parser = XML::LibXML-&gt;new();
 $parser = XML::LibXML-&gt;new(option=>value, ...);
 $parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
                             </funcsynopsis>
@@ -1068,9 +1085,169 @@ $parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
 
                 <variablelist>
                     <varlistentry>
+                        <term>load_xml</term>
+                        <listitem>
+			  <funcsynopsis role="synopsis">
+			       <funcsynopsisinfo>
+# Parsing XML</funcsynopsisinfo>
+			  </funcsynopsis>
+			  <funcsynopsis>
+                          <funcsynopsisinfo>
+$dom = XML::LibXML-&gt;load_xml(
+    location => $file_or_url
+    # parser options ...
+  );
+$dom = XML::LibXML-&gt;load_xml(
+    string => $xml_string
+    # parser options ...
+  );
+$dom = XML::LibXML-&gt;load_xml({
+    IO => $perl_file_handle
+    # parser options ...
+  );
+$dom = $parser-&gt;load_xml(...);
+			  </funcsynopsisinfo>
+			  </funcsynopsis>
+			  <para>This function is available since XML::LibXML 1.70. It provides easy to use interface to the XML parser that parses
+			  given file (or URL), string, or input stream
+			  to a DOM tree. The arguments
+			  can be passed in a HASH reference
+			  or as name => value pairs.
+			  The function can be called 
+			  as a class method or an object method.
+			  In both cases it internally creates a new
+			  parser instance passing
+			  the specified parser options;
+			  if called as an object method,
+			  it clones the original parser (preserving
+			  its settings) and additionally applies
+			  the specified options to the new parser.
+			  See the constructor <function>new</function>
+			  and <xref linkend="parser-options"/> 
+			  for more information.
+			  </para>
+			  </listitem>
+		    </varlistentry>
+                    <varlistentry>
+                        <term>load_xml</term>
+                        <listitem>
+			    <funcsynopsis role="synopsis">
+			       <funcsynopsisinfo># Parsing HTML</funcsynopsisinfo>
+			    </funcsynopsis>
+			  <funcsynopsis>
+                          <funcsynopsisinfo>
+$dom = XML::LibXML-&gt;load_html(...);
+$dom = $parser-&gt;load_html(...);
+			  </funcsynopsisinfo>
+			  </funcsynopsis>
+			  <para>This function is available since XML::LibXML 1.70. It has the same usage as <function>load_xml</function>,
+			  providing interface to the HTML parser.
+			  See <function>load_xml</function> for more information.
+			  </para>
+			</listitem>
+		    </varlistentry>
+
+                <para>Parsing HTML may cause problems, especially if
+                the ampersand ('&amp;') is used. This is a common
+                problem if HTML code is parsed that contains links to
+                CGI-scripts. Such links cause the parser to throw
+                errors. In such cases libxml2 still parses the entire
+                document as there was no error, but the error causes
+                XML::LibXML to stop the parsing process. However, the
+                document is not lost. Such HTML documents should be
+                parsed using the <emphasis>recover</emphasis> flag. By
+                default recovering is deactivated.</para>
+
+                <para>The functions described above are implemented to
+                parse well formed documents. In some cases a program
+                gets well balanced XML instead of well formed
+                documents (e.g. a XML fragment from a Database). With
+                XML::LibXML it is not required to wrap such fragments
+                in the code, because XML::LibXML is capable even to
+                parse well balanced XML fragments.</para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>parse_balanced_chunk</term>
+                        <listitem>
+			    <funcsynopsis role="synopsis">
+			       <funcsynopsisinfo># Parsing well-balanced XML chunks
+			       </funcsynopsisinfo>
+			    </funcsynopsis>
+                            <funcsynopsis>
+                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_balanced_chunk( $wbxmlstring );</funcsynopsisinfo>
+                            </funcsynopsis>
+
+                            <para>This function parses a well balanced XML string into a <xref linkend="XML-LibXML-DocumentFragment"/>.</para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>parse_xml_chunk</term>
+
+                        <listitem>
+                            <funcsynopsis>
+                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_xml_chunk( $wbxmlstring );</funcsynopsisinfo>
+                            </funcsynopsis>
+
+                            <para>This is the old name of parse_balanced_chunk(). Because it may causes confusion with the push parser interface, this function
+                            should not be used anymore.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+
+                <para>By default XML::LibXML does not process XInclude tags within a XML Document (see options section below). XML::LibXML allows to post
+                process a document to expand XInclude tags.</para>
+
+                <variablelist>
+                    <varlistentry>
+                        <term>process_xincludes</term>
+                        <listitem>
+			  <funcsynopsis role="synopsis">
+			    <funcsynopsisinfo>
+# Processing XInclude
+</funcsynopsisinfo>
+			  </funcsynopsis>
+                            <funcsynopsis>
+                                <funcsynopsisinfo>$parser-&gt;process_xincludes( $doc );</funcsynopsisinfo>
+                            </funcsynopsis>
+
+                            <para>After a document is parsed into a DOM structure, you may want to expand the documents XInclude tags. This function processes
+                            the given document structure and expands all XInclude tags (or throws an error) by using the flags and callbacks of the given parser
+                            instance.</para>
+
+                            <para>Note that the resulting Tree contains some extra nodes (of type XML_XINCLUDE_START and XML_XINCLUDE_END) after successfully
+                            processing the document. These nodes indicate where data was included into the original tree. if the document is serialized, these
+                            extra nodes will not show up.</para>
+
+                            <para>Remember: A Document with processed XIncludes differs from the original document after serialization, because the original
+                            XInclude tags will not get restored!</para>
+
+                            <para>If the parser flag "expand_xincludes" is set to 1, you need not to post process the parsed document.</para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>processXIncludes</term>
+
+                        <listitem>
+                            <funcsynopsis>
+                                <funcsynopsisinfo>$parser-&gt;processXIncludes( $doc );</funcsynopsisinfo>
+                            </funcsynopsis>
+
+                            <para>This is an alias to process_xincludes, but through a JAVA like function name.</para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
                         <term>parse_file</term>
 
                         <listitem>
+			    <funcsynopsis role="synopsis">
+			       <funcsynopsisinfo>
+# Old-style parser interfaces
+			       </funcsynopsisinfo>
+			    </funcsynopsis>
                             <funcsynopsis>
                                 <funcsynopsisinfo>$doc = $parser-&gt;parse_file( $xmlfilename );</funcsynopsisinfo>
                             </funcsynopsis>
@@ -1173,90 +1350,7 @@ $parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
                     </varlistentry>
                 </variablelist>
 
-                <para>Parsing HTML may cause problems, especially if
-                the ampersand ('&amp;') is used. This is a common
-                problem if HTML code is parsed that contains links to
-                CGI-scripts. Such links cause the parser to throw
-                errors. In such cases libxml2 still parses the entire
-                document as there was no error, but the error causes
-                XML::LibXML to stop the parsing process. However, the
-                document is not lost. Such HTML documents should be
-                parsed using the <emphasis>recover</emphasis> flag. By
-                default recovering is deactivated.</para>
 
-                <para>The functions described above are implemented to
-                parse well formed documents. In some cases a program
-                gets well balanced XML instead of well formed
-                documents (e.g. a XML fragment from a Database). With
-                XML::LibXML it is not required to wrap such fragments
-                in the code, because XML::LibXML is capable even to
-                parse well balanced XML fragments.</para>
-
-                <variablelist>
-                    <varlistentry>
-                        <term>parse_balanced_chunk</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_balanced_chunk( $wbxmlstring );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>This function parses a well balanced XML string into a <xref linkend="XML-LibXML-DocumentFragment"/>.</para>
-                        </listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term>parse_xml_chunk</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_xml_chunk( $wbxmlstring );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>This is the old name of parse_balanced_chunk(). Because it may causes confusion with the push parser interface, this function
-                            should not be used anymore.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-
-                <para>By default XML::LibXML does not process XInclude tags within a XML Document (see options section below). XML::LibXML allows to post
-                process a document to expand XInclude tags.</para>
-
-                <variablelist>
-                    <varlistentry>
-                        <term>process_xincludes</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$parser-&gt;process_xincludes( $doc );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>After a document is parsed into a DOM structure, you may want to expand the documents XInclude tags. This function processes
-                            the given document structure and expands all XInclude tags (or throws an error) by using the flags and callbacks of the given parser
-                            instance.</para>
-
-                            <para>Note that the resulting Tree contains some extra nodes (of type XML_XINCLUDE_START and XML_XINCLUDE_END) after successfully
-                            processing the document. These nodes indicate where data was included into the original tree. if the document is serialized, these
-                            extra nodes will not show up.</para>
-
-                            <para>Remember: A Document with processed XIncludes differs from the original document after serialization, because the original
-                            XInclude tags will not get restored!</para>
-
-                            <para>If the parser flag "expand_xincludes" is set to 1, you need not to post process the parsed document.</para>
-                        </listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term>processXIncludes</term>
-
-                        <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$parser-&gt;processXIncludes( $doc );</funcsynopsisinfo>
-                            </funcsynopsis>
-
-                            <para>This is an alias to process_xincludes, but through a JAVA like function name.</para>
-                        </listitem>
-                    </varlistentry>
                 </variablelist>
             </sect2>
 
@@ -1283,6 +1377,11 @@ $parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
                         <term>parse_chunk</term>
 
                         <listitem>
+			  <funcsynopsis role="synopsis">
+			    <funcsynopsisinfo>
+# Push parser
+			    </funcsynopsisinfo>
+			  </funcsynopsis>
                             <funcsynopsis>
                                 <funcsynopsisinfo>$parser-&gt;parse_chunk($string, $terminate);</funcsynopsisinfo>
                             </funcsynopsis>
@@ -1450,6 +1549,11 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
               <varlistentry>
                 <term>option_exists</term>
                 <listitem>
+		  <funcsynopsis role="synopsis">
+		    <funcsynopsisinfo>
+# Set/query parser options
+                    </funcsynopsisinfo>
+		  </funcsynopsis>
                   <funcsynopsis>
                     <funcsynopsisinfo>$parser-&gt;option_exists($name);</funcsynopsisinfo>
                   </funcsynopsis>
@@ -1845,6 +1949,11 @@ $parser->no_network();</programlisting>
               <varlistentry>
                 <term>load_catalog</term>
                 <listitem>
+		  <funcsynopsis role="synopsis">
+		    <funcsynopsisinfo>
+# XML catalogs
+                    </funcsynopsisinfo>
+		  </funcsynopsis>
                   <funcsynopsis>
                     <funcsynopsisinfo>$parser-&gt;load_catalog( $catalog_file );</funcsynopsisinfo>
                   </funcsynopsis>
