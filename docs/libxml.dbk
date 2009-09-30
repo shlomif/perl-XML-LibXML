@@ -1175,10 +1175,10 @@ $dom = $parser-&gt;load_html(...);
 			       </funcsynopsisinfo>
 			    </funcsynopsis>
                             <funcsynopsis>
-                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_balanced_chunk( $wbxmlstring );</funcsynopsisinfo>
+                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_balanced_chunk( $wbxmlstring, $encoding );</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>This function parses a well balanced XML string into a <xref linkend="XML-LibXML-DocumentFragment"/>.</para>
+                            <para>This function parses a well balanced XML string into a <xref linkend="XML-LibXML-DocumentFragment"/>. The first arguments contains the input string, the optional second argument can be used to specify character encoding of the input (UTF-8 is assumed by default).</para>
                         </listitem>
                     </varlistentry>
 
@@ -1186,10 +1186,6 @@ $dom = $parser-&gt;load_html(...);
                         <term>parse_xml_chunk</term>
 
                         <listitem>
-                            <funcsynopsis>
-                                <funcsynopsisinfo>$fragment = $parser-&gt;parse_xml_chunk( $wbxmlstring );</funcsynopsisinfo>
-                            </funcsynopsis>
-
                             <para>This is the old name of parse_balanced_chunk(). Because it may causes confusion with the push parser interface, this function
                             should not be used anymore.</para>
                         </listitem>
