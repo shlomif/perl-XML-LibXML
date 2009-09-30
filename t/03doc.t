@@ -482,7 +482,7 @@ if (eval { require Encode; }) {
   for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
     print "------------------\n";
     print $enc,"\n";
-    my $xml = Encode::encode('UTF-16LE',qq{<?xml version="1.0" encoding="$enc"?>
+    my $xml = Encode::encode($enc,qq{<?xml version="1.0" encoding="$enc"?>
 <test foo="bar"/>
 });
     my $dom = XML::LibXML->new->parse_string($xml);
