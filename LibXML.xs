@@ -4971,18 +4971,19 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
 
 
 SV *
-_toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list=NULL)
+_toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list=NULL, xpath_context)
         xmlNodePtr self
         int comments
         SV * xpath
         int exclusive
         char** inc_prefix_list
+        SV * xpath_context
 
     PREINIT:
         xmlChar *result               = NULL;
         xmlChar *nodepath             = NULL;
         xmlXPathContextPtr child_ctxt = NULL;
-        xmlXPathObjectPtr child_xpath = NULL;
+        xmlXPathObjectPtr xpath_res = NULL;
         xmlNodeSetPtr nodelist        = NULL;
         xmlNodePtr refNode            = NULL;
         PREINIT_SAVED_ERROR
@@ -5014,7 +5015,7 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
             if (comments)
 	      nodepath = xmlStrdup( (const xmlChar *) "(. | .//node() | .//@* | .//namespace::*)" );
             else
-                nodepath = xmlStrdup( (const xmlChar *) "(. | .//node() | .//@* | .//namespace::*)[not(self::comment())]" );
+              nodepath = xmlStrdup( (const xmlChar *) "(. | .//node() | .//@* | .//namespace::*)[not(self::comment())]" );
         }
 
         if ( nodepath != NULL ) {
@@ -5023,8 +5024,15 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
                  || self->type == XML_DOCB_DOCUMENT_NODE ) {
                 refNode = xmlDocGetRootElement( self->doc );
             }
-
-            child_ctxt = xmlXPathNewContext(self->doc);
+	    if (SvOK(xpath_context)) {
+	      child_ctxt = INT2PTR(xmlXPathContextPtr,SvIV(SvRV(xpath_context)));
+	      if ( child_ctxt == NULL ) {
+		croak("XPathContext: missing xpath context\n");
+	      }
+	    } else {
+	      xpath_context = NULL;
+	      child_ctxt = xmlXPathNewContext(self->doc);
+	    }
             if (!child_ctxt) {
                 if ( nodepath != NULL ) {
                     xmlFree( nodepath );
@@ -5033,40 +5041,25 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
             }
 
             child_ctxt->node = self;
-            /* get the namespace information */
-            if (self->type == XML_DOCUMENT_NODE) {
-                child_ctxt->namespaces = xmlGetNsList( self->doc,
-                                                       xmlDocGetRootElement( self->doc ) );
-            }
-            else {
-                child_ctxt->namespaces = xmlGetNsList(self->doc, self);
-            }
-            child_ctxt->nsNr = 0;
-            if (child_ctxt->namespaces != NULL) {
-                while (child_ctxt->namespaces[child_ctxt->nsNr] != NULL)
-                child_ctxt->nsNr++;
-            }
+	    LibXML_configure_namespaces(child_ctxt);
 
-            child_xpath = xmlXPathEval(nodepath, child_ctxt);
-            if (child_xpath == NULL) {
-                if (child_ctxt->namespaces != NULL) {
-                    xmlFree( child_ctxt->namespaces );
-                }
-                xmlXPathFreeContext(child_ctxt);
-                if ( nodepath != NULL ) {
-                    xmlFree( nodepath );
-                }
+            xpath_res = xmlXPathEval(nodepath, child_ctxt);
+	    if (child_ctxt->namespaces != NULL) {
+	      xmlFree( child_ctxt->namespaces );
+	      child_ctxt->namespaces = NULL;
+	    }
+	    if (!xpath_context) xmlXPathFreeContext(child_ctxt);
+	    if ( nodepath != NULL ) {
+	      xmlFree( nodepath );
+	    }
+
+            if (xpath_res == NULL) {
                 croak("2 Failed to compile xpath expression");
             }
 
-            nodelist = child_xpath->nodesetval;
+            nodelist = xpath_res->nodesetval;
             if ( nodelist == NULL ) {
-                xmlFree( nodepath );
-                xmlXPathFreeObject(child_xpath);
-                if (child_ctxt->namespaces != NULL) {
-                    xmlFree( child_ctxt->namespaces );
-                }
-                xmlXPathFreeContext(child_ctxt);
+                xmlXPathFreeObject(xpath_res);
                 croak( "cannot canonize empty nodeset!" );
             }
         }
@@ -5079,18 +5072,7 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
                               comments,
                               &result );
 
-        if ( child_xpath ) {
-            xmlXPathFreeObject(child_xpath);
-        }
-        if ( child_ctxt ) {
-            if (child_ctxt->namespaces != NULL) {
-                xmlFree( child_ctxt->namespaces );
-            }
-            xmlXPathFreeContext(child_ctxt);
-        }
-        if ( nodepath != NULL ) {
-            xmlFree( nodepath );
-        }
+        if ( xpath_res ) xmlXPathFreeObject(xpath_res);
         CLEANUP_ERROR_HANDLER;
         REPORT_ERROR(0);
 

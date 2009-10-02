@@ -1311,21 +1311,33 @@ sub setOwnerDocument {
 }
 
 sub toStringC14N {
-    my ($self, $comments, $xpath) = (shift, shift, shift);
+    my ($self, $comments, $xpath, $xpc) = @_;
     return $self->_toStringC14N( $comments || 0,
 				 (defined $xpath ? $xpath : undef),
 				 0,
-				 undef );
+				 undef,
+				 (defined $xpc ? $xpc : undef)
+				);
 }
 sub toStringEC14N {
-    my ($self, $comments, $xpath, $inc_prefix_list) = @_;
+    my ($self, $comments, $xpath, $xpc, $inc_prefix_list) = @_;
+    unless (UNIVERSAL::isa($xpc,'XML::LibXML::XPathContext')) {
+      if ($inc_prefix_list) {
+	croak("toStringEC14N: 3rd argument is not an XML::LibXML::XPathContext");
+      } else {
+	$inc_prefix_list=$xpc;
+	$xpc=undef;
+      }
+    }
     if (defined($inc_prefix_list) and !UNIVERSAL::isa($inc_prefix_list,'ARRAY')) {
       croak("toStringEC14N: inclusive_prefix_list must be undefined or ARRAY");
     }
     return $self->_toStringC14N( $comments || 0,
 				 (defined $xpath ? $xpath : undef),
 				 1,
-				 (defined $inc_prefix_list ? $inc_prefix_list : undef));
+				 (defined $inc_prefix_list ? $inc_prefix_list : undef),
+				 (defined $xpc ? $xpc : undef)
+				);
 }
 
 *serialize_c14n = \&toStringC14N;
