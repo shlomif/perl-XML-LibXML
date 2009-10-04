@@ -1252,7 +1252,13 @@ sub getChildNodes { my $self = shift; return $self->childNodes(); }
 
 sub childNodes {
     my $self = shift;
-    my @children = $self->_childNodes();
+    my @children = $self->_childNodes(0);
+    return wantarray ? @children : XML::LibXML::NodeList->new_from_ref(\@children , 1);
+}
+
+sub nonBlankChildNodes {
+    my $self = shift;
+    my @children = $self->_childNodes(1);
     return wantarray ? @children : XML::LibXML::NodeList->new_from_ref(\@children , 1);
 }
 

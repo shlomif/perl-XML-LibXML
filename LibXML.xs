@@ -4266,6 +4266,21 @@ nextSibling( self )
         RETVAL
 
 SV*
+nextNonBlankSibling( self )
+        xmlNodePtr self
+    PREINIT:
+        xmlNodePtr next;
+    CODE:
+        next = self->next;
+        while (next != NULL && xmlIsBlankNode(next))
+          next = next->next;
+        RETVAL = PmmNodeToSv( next,
+                              PmmOWNERPO(PmmPROXYNODE(self)) );
+    OUTPUT:
+        RETVAL
+
+
+SV*
 previousSibling( self )
         xmlNodePtr self
     ALIAS:
@@ -4277,9 +4292,25 @@ previousSibling( self )
     OUTPUT:
         RETVAL
 
-void
-_childNodes( self )
+SV*
+previousNonBlankSibling( self )
         xmlNodePtr self
+    PREINIT:
+        xmlNodePtr prev;
+    CODE:
+        prev = self->prev;
+        while (prev != NULL && xmlIsBlankNode(prev))
+          prev = prev->prev;
+        RETVAL = PmmNodeToSv( prev,
+                              PmmOWNERPO(PmmPROXYNODE(self)) );
+    OUTPUT:
+        RETVAL
+
+
+void
+_childNodes( self, only_nonblank = 0 )
+        xmlNodePtr self
+        int only_nonblank
     ALIAS:
         XML::LibXML::Node::getChildnodes = 1
     PREINIT:
@@ -4293,12 +4324,14 @@ _childNodes( self )
             cld = self->children;
             xs_warn("childnodes start");
             while ( cld ) {
-                if( wantarray != G_SCALAR ) {
-                    element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
-                    XPUSHs(sv_2mortal(element));
+	        if ( !(only_nonblank && xmlIsBlankNode(cld)) ) {
+                  if( wantarray != G_SCALAR ) {
+                      element = PmmNodeToSv(cld, PmmOWNERPO(PmmPROXYNODE(self)) );
+                      XPUSHs(sv_2mortal(element));
+                  }
+                  len++;
                 }
                 cld = cld->next;
-                len++;
             }
         }
         if ( wantarray == G_SCALAR ) {
@@ -4367,6 +4400,20 @@ firstChild( self )
     CODE:
         PERL_UNUSED_VAR(ix);
         RETVAL = PmmNodeToSv( self->children,
+                              PmmOWNERPO( PmmPROXYNODE(self) ) );
+    OUTPUT:
+        RETVAL
+
+SV*
+firstNonBlankChild( self )
+        xmlNodePtr self
+    PREINIT:
+	xmlNodePtr child;
+    CODE:
+	child = self->children;
+        while (child !=NULL && xmlIsBlankNode(child))
+	  child = child->next;
+        RETVAL = PmmNodeToSv( child,
                               PmmOWNERPO( PmmPROXYNODE(self) ) );
     OUTPUT:
         RETVAL
