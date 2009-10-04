@@ -1625,6 +1625,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
+		real_doc=NULL;
             }
         }
 
@@ -1774,6 +1775,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
+		real_doc=NULL;
             }
         }
 
@@ -1913,6 +1915,7 @@ _parse_file(self, filename_sv)
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
+		real_doc=NULL;
             }
         }
 
