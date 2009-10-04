@@ -9,7 +9,7 @@
 package XML::LibXML::Error;
 
 use strict;
-use vars qw($AUTOLOAD @error_domains $VERSION);
+use vars qw($AUTOLOAD @error_domains $VERSION $WARNINGS);
 use Carp;
 use overload 
   '""' => \&as_string,
@@ -21,7 +21,7 @@ use overload
   },
   fallback => 1;
 
-
+$WARNINGS = 0; # 0: supress, 1: report via warn, 2: report via die
 $VERSION = "1.70"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant XML_ERR_NONE	     => 0;
@@ -111,6 +111,10 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
       my ($xE,$prev) = @_;
       my $terr;
       $terr=XML::LibXML::Error->new($xE);
+      if ($terr->{level} == XML_ERR_WARNING and $WARNINGS!=2) {
+	warn $terr if $WARNINGS;
+	return $prev;
+      }
       #unless ( defined $terr->{file} and length $terr->{file} ) {
 	# this would make it easier to recognize parsed strings
 	# but it breaks old implementations
