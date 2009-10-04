@@ -246,7 +246,7 @@ GDOME
 # -------------------------------------------------------------------------- #
 # fix the ld flags
 # -------------------------------------------------------------------------- #
-if ($config{LIBS} !~ /\-lxml2\b/) {
+if ($config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
     # in this case we are not able to run xml2-config. therefore we need to
     # expand the libz as well.
   if ($is_Win32) {
@@ -256,7 +256,7 @@ if ($config{LIBS} !~ /\-lxml2\b/) {
       $config{LIBS} .= ' -llibxml2 -lzlib';
     }
   } else {
-    $config{LIBS} .= ' -lxml2 -lz';
+    $config{LIBS} .= ' -lxml2 -lz -lm';
   }
 }
 
@@ -279,12 +279,6 @@ if ($config{LIBS} !~ /\-lz\b/ and !($is_win32 && $config{LIBS} !~ /\-lzlib\b/)) 
     $config{LIBS} .= ' -lz';
   }
 }
-
-if ($config{LIBS} !~ /\-lm\b/) {
-    # math support is important, but is not available separately in W32
-    $config{LIBS} .= $is_Win32 ? '' :' -lm';
-}
-# -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
 # MacOS X Compiler switches have to go here
