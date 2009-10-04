@@ -3348,6 +3348,18 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>Returns the next sibling if any .</para>
                 </listitem>
             </varlistentry>
+
+            <varlistentry>
+                <term>nextNonBlankSibling</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$nextnode = $node-&gt;nextNonBlankSibling();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the next non-blank sibling if any (a node is blank if it is a Text or CDATA node consisting of whitespace only). This method is not defined by DOM.</para>
+                </listitem>
+            </varlistentry>
         
 
         
@@ -3360,6 +3372,18 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para>Analogous to <emphasis>getNextSibling</emphasis> the function returns the previous sibling if any.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>previousNonBlankSibling</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$prevnode = $node-&gt;previousNonBlankSibling();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the previous non-blank sibling if any (a node is blank if it is a Text or CDATA node consisting of whitespace only). This method is not defined by DOM.</para>
                 </listitem>
             </varlistentry>
         
@@ -3621,16 +3645,28 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>@childnodes = $node-&gt;childNodes;</funcsynopsisinfo>
+                        <funcsynopsisinfo>@childnodes = $node-&gt;childNodes();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>getChildnodes</emphasis> implements a more intuitive interface to the childnodes of the current node. It enables you to pass
+                    <para><emphasis>childNodes</emphasis> implements a more intuitive interface to the childnodes of the current node. It enables you to pass
                     all children directly to a <function>map</function> or <function>grep</function>. If this function is called in scalar context, a
                     <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object will be returned.</para>
                 </listitem>
             </varlistentry>
         
+            <varlistentry>
+                <term>nonBlankChildNodes</term>
 
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>@childnodes = $node-&gt;nonBlankChildNodes();</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>This is like <emphasis>childNodes</emphasis>,
+		      but returns only non-blank nodes
+		      (where a node is blank if it is a Text or CDATA node consisting of whitespace only). This method is not defined by DOM.</para>
+                </listitem>
+            </varlistentry>
         
             <varlistentry>
                 <term>toString</term>
