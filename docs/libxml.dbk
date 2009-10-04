@@ -6901,7 +6901,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	      <funcsynopsisinfo>$bool = $pattern->matchesNode($node);</funcsynopsisinfo>
 	    </funcsynopsis>
 	    <para>Given a XML::LibXML::Node object, returns a true value if 
-	    the node matches the compiled pattern expression.</para>
+	    the node is matched by the compiled pattern expression.</para>
 	  </listitem>
 	</varlistentry>
       </variablelist>
@@ -6910,6 +6910,54 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
       <title>SEE ALSO</title>
       <para><xref linkend="XML-LibXML-Reader"/> for other methods involving compiled patterns.</para>
     </sect1>      
+  </chapter>
+  <chapter id="XML-LibXML-RegExp">
+    <title>XML::LibXML::RegExp - interface to libxml2 regular expressions</title>
+    <titleabbrev>XML::LibXML::RegExp</titleabbrev>
+    <sect1>
+      <title>Synopsis</title>
+      <programlisting>use XML::LibXML;
+my $compiled_re = new XML::LibXML::RegExp('[0-9]{5}(-[0-9]{4})?');
+if ($compiled_re->isDeterministic()) { ... }
+if ($compiled_re->matches($string)) { ... }
+</programlisting>
+    </sect1>
+    <sect1>
+      <title>Description</title>
+      <para>This is a perl interface to libxml2's implementation of regular expressions, which are used e.g. for validation of XML Schema simple types (pattern facet).</para>
+      <variablelist>
+	<varlistentry>
+	  <term>new()</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$compiled_re = XML::LibXML::RegExp-&gt;new( $regexp_str );</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>The constructor takes a string containing a regular expression 
+	    and returns a compiled regexp object.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>matches($string)</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$bool = $compiled_re->matches($string);</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>Given a string value, returns a true value if 
+	    the value is matched by the compiled regular expression.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>isDeterministic()</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$bool = $compiled_re->isDeterministic();</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>Returns a true value if the regular expression is deterministic; returns false otherwise. (See the definition of determinism in the <ulink url="http://www.w3.org/TR/REC-xml/#determinism">XML spec</ulink>)</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </sect1>
   </chapter>
   <chapter id="XML-LibXML-Error">
     <title>Structured Errors</title>

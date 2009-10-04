@@ -111,11 +111,11 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
       my ($xE,$prev) = @_;
       my $terr;
       $terr=XML::LibXML::Error->new($xE);
-      unless ( defined $terr->{file} and length $terr->{file} ) {
+      #unless ( defined $terr->{file} and length $terr->{file} ) {
 	# this would make it easier to recognize parsed strings
 	# but it breaks old implementations
 	# [CG] $terr->{file} = 'string()';
-      }
+      #}
       #warn "Saving the error ",$terr->dump;
       $terr->{_prev} = ref($prev) ? $prev :
 	defined($prev) && length($prev) ? XML::LibXML::Error->new($prev) : undef;
@@ -139,8 +139,6 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
       my ($saved_error) = @_;
       #print "CALLBACK ERROR: $saved_error\n";
       if ( defined $saved_error ) {
-	use Data::Dumper;
-	# print "reporting error ",Dumper($saved_error);
 	die $saved_error;
       }
     }

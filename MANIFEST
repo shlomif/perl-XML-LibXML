@@ -74,6 +74,7 @@ lib/XML/LibXML/Pattern.pod
 lib/XML/LibXML/PI.pod
 lib/XML/LibXML/Reader.pm
 lib/XML/LibXML/Reader.pod
+lib/XML/LibXML/RegExp.pod
 lib/XML/LibXML/RelaxNG.pod
 lib/XML/LibXML/SAX/Builder.pm
 lib/XML/LibXML/SAX/Builder.pod
@@ -103,16 +104,19 @@ test/relaxng/demo.rng
 test/relaxng/demo.xml
 test/relaxng/demo2.rng
 test/relaxng/demo3.rng
+test/relaxng/demo4.rng
 test/relaxng/invaliddemo.xml
 test/relaxng/schema.rng
 test/schema/badschema.xsd
 test/schema/demo.xml
 test/schema/invaliddemo.xml
 test/schema/schema.xsd
+testschema.xsd
 test/textReader/countries.xml
 test/xinclude/entity.txt
 test/xinclude/test.xml
 test/xinclude/xinclude.xml
+TODO
 typemap
 t/01basic.t
 t/02parse.t
@@ -148,6 +152,9 @@ t/32xpc_variables.t
 t/40reader.t
 t/41xinclude.t
 t/42common.t
+t/43options.t
+t/44extent.t
+t/45regex.t
 t/60struct_error.t
 t/61error.t
 t/80registryleak.t
