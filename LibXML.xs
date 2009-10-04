@@ -57,6 +57,10 @@ extern "C" {
 #include <libxml/pattern.h>
 #endif
 
+#ifdef LIBXML_REGEXP_ENABLED
+#include <libxml/xmlregexp.h>
+#endif
+
 #if LIBXML_VERSION >= 20510
 #define HAVE_SCHEMAS
 #include <libxml/relaxng.h>
@@ -9073,6 +9077,61 @@ DESTROY( self )
    	xmlFreePattern(self);
 
 #endif /* LIBXML_PATTERN_ENABLED */
+
+#ifdef LIBXML_REGEXP_ENABLED
+
+MODULE = XML::LibXML       PACKAGE = XML::LibXML::RegExp
+
+xmlRegexpPtr
+_compile(CLASS, pregexp)
+        SV * pregexp
+    PREINIT:
+        xmlChar * regexp = Sv2C(pregexp, NULL);
+	PREINIT_SAVED_ERROR
+    CODE:
+        if ( regexp == NULL )
+	   XSRETURN_UNDEF;
+	INIT_ERROR_HANDLER;
+	RETVAL = xmlRegexpCompile(regexp);
+        xmlFree( regexp );
+        CLEANUP_ERROR_HANDLER;
+        REPORT_ERROR(0);
+        if ( RETVAL == NULL ) {
+	  croak("Compilation of regexp failed");
+	}
+    OUTPUT:
+	RETVAL
+
+int
+matches(self, pvalue)
+        xmlRegexpPtr self
+	SV* pvalue
+    CODE:
+        xmlChar * value = Sv2C(pvalue, NULL);
+        if ( value == NULL )
+	   XSRETURN_UNDEF;
+	RETVAL = xmlRegexpExec(self,value);
+        xmlFree( value );
+    OUTPUT:
+        RETVAL
+
+int
+isDeterministic(self)
+        xmlRegexpPtr self
+    CODE:
+	RETVAL = xmlRegexpIsDeterminist(self);
+    OUTPUT:
+        RETVAL
+
+void
+DESTROY( self )
+        xmlRegexpPtr self
+    CODE:
+        xs_warn( "DESTROY REGEXP OBJECT" );
+   	xmlRegFreeRegexp(self);
+
+#endif /* LIBXML_REGEXP_ENABLED */
+
 
 MODULE = XML::LibXML       PACKAGE = XML::LibXML::XPathExpression
 

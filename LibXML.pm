@@ -1619,14 +1619,16 @@ sub getChildrenByTagName {
 
 sub getChildrenByLocalName {
     my ( $node, $name ) = @_;
-    my @nodes;
-    if ($name eq '*') {
-      @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() }
-	$node->childNodes();
-    } else {
-      @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() and
-		      $_->localName eq $name } $node->childNodes();
-    }
+    # my @nodes;
+    # if ($name eq '*') {
+    #   @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() }
+    # 	$node->childNodes();
+    # } else {
+    #   @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() and
+    # 		      $_->localName eq $name } $node->childNodes();
+    # }
+    # return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
+    my @nodes = $node->_getChildrenByTagNameNS('*',$name);
     return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
 }
 
@@ -2026,6 +2028,26 @@ sub new {
     $self = $class->_compilePattern($pattern,0);
   }
   return $self;
+}
+
+1;
+
+#-------------------------------------------------------------------------#
+# XML::LibXML::RegExp Interface                                          #
+#-------------------------------------------------------------------------#
+
+package XML::LibXML::RegExp;
+
+sub CLONE_SKIP { 1 }
+
+sub new {
+  my $class = shift;
+  my ($regexp)=@_;
+  unless (UNIVERSAL::can($class,'_compile')) {
+    croak("Cannot create XML::LibXML::RegExp - ".
+	  "your libxml2 is compiled without regexp support!");
+  }
+  return $class->_compile($regexp);
 }
 
 1;
