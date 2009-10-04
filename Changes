@@ -1,9 +1,21 @@
 Revision history for Perl extension XML::LibXML
+
 1.70 pre
+   - various fixes and improvements in the documentation
+   - added (convenient yet non-standard) methods nonBlankChildNodes,
+     firstNonBlankChild, nextNonBlankSibling, prevNonBlankSibling
+     that skip empty or whitespace-only Text and CDATA nodes
+   - exposed and documented external entity handler
+   - XPathContext can now be passed to toStringC14N and toStringEC14N
+     (e.g. to provide NS mapping for the XPath expression)
+   - avoid using libxml2's globals (Nick Wellnhofer)
+   - added interface to libxml2's regexp implementation: XML::LibXML::RegExp
    - added XML::LibXML->load_xml and XML::LibXML->load_html with
      uniform and cleaner API than the old parse_* family
    - cleanup code dealing with parsing flags
    - fix bogus validation results if revalidating a modified document
+   - added 'eq' and 'cmp' overloading on XML::LibXML::Error and set fallback to 1
+   - lots of bugs fixed
 
 1.69_2
    - provide context and more accurate column number in
