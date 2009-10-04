@@ -865,8 +865,9 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
     /* calling xmlInitParser() here is definitly wrong!  */
     /* xmlInitParser(); */ 
 
+#ifndef WITH_SERRORS
     xmlGetWarningsDefaultValue = 0;
-
+#endif
     if ( self != NULL ) {
         /* first fetch the values from the hash */
         real_obj = (HV *)SvRV(self);
@@ -886,11 +887,9 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
         item =  hv_fetch( real_obj, "XML_LIBXML_LINENUMBERS", 22, 0 );
         if ( item != NULL && SvTRUE(*item) ) {
             if (ctxt) ctxt->linenumbers = 1;
-            else xmlLineNumbersDefault( 1 );
         }
         else {
             if (ctxt) ctxt->linenumbers = 0;
-            else xmlLineNumbersDefault( 0 );
         }
 
         item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
@@ -912,14 +911,9 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
 
 void
 LibXML_cleanup_parser() {
-    xmlSubstituteEntitiesDefaultValue = 1;
-    xmlKeepBlanksDefaultValue = 1;
+#ifndef WITH_SERRORS
     xmlGetWarningsDefaultValue = 0;
-    xmlLoadExtDtdDefaultValue = 5;
-    xmlPedanticParserDefaultValue = 0;
-    xmlLineNumbersDefault( 0 );
-    xmlDoValidityCheckingDefaultValue = 0;
-
+#endif
     if (LibXML_old_ext_ent_loader != NULL ) {
         xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_old_ext_ent_loader );
     }
@@ -1408,17 +1402,9 @@ BOOT:
     LIBXML_TEST_VERSION
     xmlInitParser();
     PmmSAXInitialize(aTHX);
-
-    xmlSetGenericErrorFunc( NULL ,
-                           (xmlGenericErrorFunc)LibXML_error_handler_ctx);
-    xmlDoValidityCheckingDefaultValue = 0;
-    xmlSubstituteEntitiesDefaultValue = 1;
+#ifndef WITH_SERRORS
     xmlGetWarningsDefaultValue = 0;
-    xmlKeepBlanksDefaultValue = 1;
-    xmlLoadExtDtdDefaultValue = 5;
-    xmlPedanticParserDefaultValue = 0;
-    xmlLineNumbersDefault(0);
-    xmlSetGenericErrorFunc(NULL, NULL);
+#endif
 #ifdef LIBXML_CATALOG_ENABLED
     /* xmlCatalogSetDebug(10); */
     xmlInitializeCatalog(); /* use catalog data */
@@ -1561,6 +1547,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
         HV * real_obj;
         int well_formed;
         int valid;
+        int validate;
         xmlDocPtr real_doc;
         int recover = 0;
 	PREINIT_SAVED_ERROR
@@ -1583,7 +1570,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
             if (ctxt == NULL) {
 	        CLEANUP_ERROR_HANDLER;
-                REPORT_ERROR(recover ? recover : 1);
+                REPORT_ERROR(1);
                 croak("Could not create memory parser context!\n");
             }
             xs_warn( "context created\n");
@@ -1607,15 +1594,13 @@ _parse_string(self, string, dir = &PL_sv_undef)
 
             xs_warn( "context initialized\n" );
 
-            {
-                /* TODO: make this into a macro: */
-                xmlParseDocument(ctxt);
-                xs_warn( "document parsed \n");
-            }
+            xmlParseDocument(ctxt);
+            xs_warn( "document parsed \n");
 
             ctxt->directory = NULL;
             well_formed = ctxt->wellFormed;
             valid = ctxt->valid;
+            validate = ctxt->validate;
             real_doc = ctxt->myDoc;
             ctxt->myDoc = NULL;
             xmlFreeParserCtxt(ctxt);
@@ -1634,7 +1619,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
             }
             if ( ! LibXML_will_die_ctx(saved_error, recover) &&
 		 (recover || ( well_formed &&
-                              ( !xmlDoValidityCheckingDefaultValue
+                              ( !validate
                                 || ( valid || ( real_doc->intSubset == NULL
                                                 && real_doc->extSubset == NULL )))))) {
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
@@ -1708,6 +1693,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
         HV * real_obj;
         int well_formed;
         int valid;
+        int validate;
         xmlDocPtr real_doc;
         int recover = 0;
         PREINIT_SAVED_ERROR
@@ -1736,7 +1722,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             ctxt = xmlCreatePushParserCtxt(NULL, NULL, buffer, read_length, NULL);
             if (ctxt == NULL) {
                 CLEANUP_ERROR_HANDLER;
-                REPORT_ERROR(recover ? recover : 1);
+                REPORT_ERROR(1);
                 croak("Could not create xml push parser context!\n");
             }
             xs_warn( "context created\n");
@@ -1766,6 +1752,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             ctxt->directory = NULL;
             well_formed = ctxt->wellFormed;
             valid = ctxt->valid;
+            validate = ctxt->validate;
             real_doc = ctxt->myDoc;
             ctxt->myDoc = NULL;
             xmlFreeParserCtxt(ctxt);
@@ -1781,7 +1768,7 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
             }
 
             if ( recover || ( well_formed &&
-                              ( !xmlDoValidityCheckingDefaultValue
+                              ( !validate
                                 || ( valid || ( real_doc->intSubset == NULL
                                                 && real_doc->extSubset == NULL ))))) {
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
@@ -1878,6 +1865,7 @@ _parse_file(self, filename_sv)
         HV * real_obj;
         int well_formed;
         int valid;
+        int validate;
         xmlDocPtr real_doc;
         int recover = 0;
         PREINIT_SAVED_ERROR
@@ -1895,7 +1883,7 @@ _parse_file(self, filename_sv)
             xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
             if (ctxt == NULL) {
                 CLEANUP_ERROR_HANDLER;
-                REPORT_ERROR(recover ? recover : 1);
+                REPORT_ERROR(1);
                 croak("Could not create file parser context for file \"%s\": %s\n",
                       filename, strerror(errno));
             }
@@ -1906,22 +1894,20 @@ _parse_file(self, filename_sv)
             ctxt->_private = (void*)self;
 
             xs_warn( "context initialized\n" );
-            {
-                xmlParseDocument(ctxt);
-                xs_warn( "document parsed \n");
-            }
+            xmlParseDocument(ctxt);
+            xs_warn( "document parsed \n");
 
             well_formed = ctxt->wellFormed;
             valid = ctxt->valid;
+            validate = ctxt->validate;
             real_doc = ctxt->myDoc;
             ctxt->myDoc = NULL;
             xmlFreeParserCtxt(ctxt);
         }
 
         if ( real_doc != NULL ) {
-
             if ( recover || ( well_formed &&
-                              ( !xmlDoValidityCheckingDefaultValue
+                              ( !validate
                                 || ( valid || ( real_doc->intSubset == NULL
                                                 && real_doc->extSubset == NULL ))))) {
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );

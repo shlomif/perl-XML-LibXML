@@ -139,7 +139,7 @@ EOX
 <n2:pdu xmlns:n1="http://example.com"
            xmlns:n2="http://foo.example"
            xml:lang="fr"
-           xml:space="retain">
+           xml:space="preserve">
   <n1:elem2 xmlns:n1="http://example.net" xml:lang="en">
      <n3:stuff xmlns:n3="ftp://example.org"/>
   </n1:elem2>

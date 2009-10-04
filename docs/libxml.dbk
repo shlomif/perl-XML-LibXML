@@ -7001,6 +7001,23 @@ if ($compiled_re->matches($string)) { ... }
       </para>
       <variablelist>
 	<varlistentry>
+	  <term>$XML::LibXML::Error::WARNINGS</term>
+	  <listitem>
+	    <funcsynopsis>
+	      <funcsynopsisinfo>$XML::LibXML::Error::WARNINGS=1;</funcsynopsisinfo>
+	    </funcsynopsis>
+	    <para>Traditionally, XML::LibXML was supressing parser
+	      warnings by setting libxml2's global variable
+	      xmlGetWarningsDefaultValue to 0. Since 
+	      1.70 we do not change libxml2's global
+	      variables anymore; for backward compatibility,
+	      XML::LibXML suppresses warnings.
+	      This variable can be set to 1
+	      to enable reporting of these warnings via
+	      Perl <literal>warn</literal>
+	      and to 2 to report hem via <literal>die</literal>.
+	    </para>
+	  </listitem>
 	  <term>as_string</term>
 	  <listitem>
 	    <funcsynopsis>
