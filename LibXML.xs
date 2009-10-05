@@ -108,6 +108,13 @@ typedef enum {
 
 #endif
 
+
+#if LIBXML_VERSION < 20621
+/* HTML_PARSE_RECOVER was added in libxml2 2.6.21 */
+#  define HTML_PARSE_RECOVER XML_PARSE_RECOVER
+#endif
+
+
 /* XML::LibXML stuff */
 #include "perl-libxml-mm.h"
 #include "perl-libxml-sax.h"
@@ -9142,8 +9149,9 @@ int
 matches(self, pvalue)
         xmlRegexpPtr self
 	SV* pvalue
-    CODE:
+    PREINIT:
         xmlChar * value = Sv2C(pvalue, NULL);
+    CODE:
         if ( value == NULL )
 	   XSRETURN_UNDEF;
 	RETVAL = xmlRegexpExec(self,value);
