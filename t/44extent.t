@@ -51,6 +51,7 @@ ok( $doc->toString() eq $xml_out2 );
 $parser->set_option( ext_ent_handler=>sub{ '' } );
 $parser->set_options({
   expand_entities => 0,
+  recover => 2,
 });
 $doc = $parser->parse_string($xml);
 ok( $doc->toString() eq $xml );
