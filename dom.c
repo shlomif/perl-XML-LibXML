@@ -17,7 +17,6 @@
 #define xs_warn(string)
 #endif
 
-#if LIBXML_VERSION >= 20621
 void
 domClearPSVIInList(xmlNodePtr list);
 
@@ -55,9 +54,6 @@ domClearPSVIInList(xmlNodePtr list) {
         cur = cur->next;
     }
 }
-#endif
-
-
 
 /**
  * Name: domReconcileNs
