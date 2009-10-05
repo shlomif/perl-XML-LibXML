@@ -111,7 +111,6 @@ test/schema/badschema.xsd
 test/schema/demo.xml
 test/schema/invaliddemo.xml
 test/schema/schema.xsd
-testschema.xsd
 test/textReader/countries.xml
 test/xinclude/entity.txt
 test/xinclude/test.xml
