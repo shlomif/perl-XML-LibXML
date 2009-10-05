@@ -7,7 +7,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use Test;
-BEGIN { plan tests => 8 };
+BEGIN { plan tests => 7 };
 
 use warnings;
 use strict;
@@ -48,15 +48,12 @@ $parser->set_option( ext_ent_handler => sub { return '<!-- -->' } );
 $doc = $parser->parse_string($xml);
 ok( $doc->toString() eq $xml_out2 );
 
-my $called = 0;
-$parser->set_option( ext_ent_handler=>sub{ $called++ } );
+$parser->set_option( ext_ent_handler=>sub{ '' } );
 $parser->set_options({
   expand_entities => 0,
-  recover => 2,
 });
 $doc = $parser->parse_string($xml);
 ok( $doc->toString() eq $xml );
-ok( $called == 0 );
 
 foreach my $el ($doc->findnodes('/root/*')) {
   ok ($el->hasChildNodes);
