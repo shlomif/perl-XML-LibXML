@@ -156,12 +156,9 @@ typedef DocProxyNode* DocProxyNodePtr;
 #define PmmInvalidatePSVI(doc) if (doc && doc->_private) ((DocProxyNodePtr)(doc->_private))->psvi_status = Pmm_PSVI_TAINTED;
 #define PmmIsPSVITainted(doc) (doc && doc->_private && (((DocProxyNodePtr)(doc->_private))->psvi_status == Pmm_PSVI_TAINTED))
 
-#if LIBXML_VERSION >= 20621
-
 #define PmmClearPSVI(node) if (node && node->doc && node->doc->_private && \
                                ((DocProxyNodePtr)(node->doc->_private))->psvi_status == Pmm_PSVI_TAINTED) \
    domClearPSVI((xmlNodePtr) node)
-#endif
 
 #ifndef NO_XML_LIBXML_THREADS
 #ifdef USE_ITHREADS
