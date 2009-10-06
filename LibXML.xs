@@ -1775,10 +1775,11 @@ _parse_fh(self, fh, dir = &PL_sv_undef)
                 real_doc->URL = xmlStrdup((const xmlChar*)directory);
             }
 
-            if ( recover || ( well_formed &&
+            if ( ! LibXML_will_die_ctx(saved_error, recover) &&
+		 (recover || ( well_formed &&
                               ( !validate
                                 || ( valid || ( real_doc->intSubset == NULL
-                                                && real_doc->extSubset == NULL ))))) {
+                                                && real_doc->extSubset == NULL )))))) {
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
@@ -1915,10 +1916,11 @@ _parse_file(self, filename_sv)
         }
 
         if ( real_doc != NULL ) {
-            if ( recover || ( well_formed &&
+            if ( ! LibXML_will_die_ctx(saved_error, recover) &&
+		 (recover || ( well_formed &&
                               ( !validate
                                 || ( valid || ( real_doc->intSubset == NULL
-                                                && real_doc->extSubset == NULL ))))) {
+                                                && real_doc->extSubset == NULL )))))) {
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);

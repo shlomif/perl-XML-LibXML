@@ -14,6 +14,10 @@ use strict;
 use XML::LibXML;
 $|=1;
 
+if (20627 > XML::LibXML::LIBXML_VERSION) {
+    skip("skipping for libxml2 < 2.6.27") for 1..7;
+} else {
+
 my $parser = XML::LibXML->new({
   expand_entities => 1,
   ext_ent_handler => \&handler,
@@ -67,3 +71,4 @@ foreach my $el ($doc->findnodes('/root/*')) {
 # its man page ( perldoc Test::More ) for help writing this test script.
 
 
+}
