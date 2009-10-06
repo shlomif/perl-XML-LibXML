@@ -1692,7 +1692,9 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 	      <para>/parser/</para>
 	      <para>Provide a custom external entity handler
 	      to be used when expand_entities is set to 1.
-	      Possible value is a subroutine reference.</para>
+	      Possible value is a subroutine reference.
+	      </para>
+	      <para>This feature does not work properly in libxml2 &lt; 2.6.27!</para>
 	      <para>The subroutine provided is called whenever
 	      the parser needs to retrieve the content of an external entity.
 	      It is called with two arguments: the system ID (URI) and the public ID.
