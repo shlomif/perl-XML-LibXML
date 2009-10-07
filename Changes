@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-1.70 pre
+1.70
    - various fixes and improvements in the documentation
    - added (convenient yet non-standard) methods nonBlankChildNodes,
      firstNonBlankChild, nextNonBlankSibling, prevNonBlankSibling
