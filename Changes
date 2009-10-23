@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+1.71pre
+   - turn XML_LIBXML_PARSE_DEFAULTS constant to $XML::LibXML::XML_LIBXML_PARSE_DEFAULTS
+
 1.70
    - various fixes and improvements in the documentation
    - added (convenient yet non-standard) methods nonBlankChildNodes,
