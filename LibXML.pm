@@ -14,6 +14,7 @@ use strict;
 use vars qw($VERSION $ABI_VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
             $MatchCB $ReadCB $OpenCB $CloseCB %PARSER_FLAGS
+	    $XML_LIBXML_PARSE_DEFAULTS
             );
 use Carp;
 
@@ -256,7 +257,7 @@ use constant {
   XML_PARSE_OLDSAX	  => 1048576,  # parse using SAX2 interface from before 2.7.0
 };
 
-use constant XML_LIBXML_PARSE_DEFAULTS => ( XML_PARSE_NODICT | XML_PARSE_HUGE | XML_PARSE_DTDLOAD | XML_PARSE_NOENT );
+$XML_LIBXML_PARSE_DEFAULTS = ( XML_PARSE_NODICT | XML_PARSE_HUGE | XML_PARSE_DTDLOAD | XML_PARSE_NOENT );
 
 # this hash is made global so that applications can add names for new
 # libxml2 parser flags as temporary workaround
@@ -302,7 +303,7 @@ sub _parser_options {
   if (ref($self)) {
     $flags = ($self->{XML_LIBXML_PARSER_OPTIONS}||0);
   } else {
-    $flags = XML_LIBXML_PARSE_DEFAULTS;		# safety precaution
+    $flags = $XML_LIBXML_PARSE_DEFAULTS;		# safety precaution
   }
 
   my ($key, $value);
@@ -374,7 +375,7 @@ sub new {
 	$self->{$_}=$opts{$_} unless exists $PARSER_FLAGS{$_};
       }
     } else {
-      $self->{XML_LIBXML_PARSER_OPTIONS} = XML_LIBXML_PARSE_DEFAULTS;
+      $self->{XML_LIBXML_PARSER_OPTIONS} = $XML_LIBXML_PARSE_DEFAULTS;
     }
     if ( defined $self->{Handler} ) {
       $self->set_handler( $self->{Handler} );
