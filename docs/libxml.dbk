@@ -1129,7 +1129,7 @@ $dom = $parser-&gt;load_xml(...);
 			  </listitem>
 		    </varlistentry>
                     <varlistentry>
-                        <term>load_xml</term>
+                        <term>load_html</term>
                         <listitem>
 			    <funcsynopsis role="synopsis">
 			       <funcsynopsisinfo># Parsing HTML</funcsynopsisinfo>
