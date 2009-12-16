@@ -189,10 +189,4 @@ Equivalent to perl's unshift function.
 Given a nodelist, prepends the list of nodes in $nodelist to the front of
 the current list.
 
-=head2 iterator()
-
-Will return a new nodelist iterator for the current nodelist. A
-nodelist iterator is usefull if more complex nodelist processing is
-needed.
-
 =cut
