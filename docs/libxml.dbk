@@ -1999,10 +1999,6 @@ $parser->no_network();</programlisting>
 
             <para>Additionally to the generic functions, which are only able to process entire documents, XML::LibXML::SAX provides <emphasis>parse_chunk()</emphasis>.
             This method generates SAX events from well balanced data such as is often provided by databases.</para>
-
-            <para><emphasis>NOTE:</emphasis> At the moment XML::LibXML provides only an incomplete interface to libxml2's native SAX implementation. The
-            current implementation is not tested in production environment. It may causes significant memory problems or shows wrong behaviour. If you run into
-            specific problems using this part of XML::LibXML, let me know.</para>
         </sect1>
     </chapter>
 
