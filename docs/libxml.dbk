@@ -594,14 +594,17 @@ EOT</programlisting>
 	      specified by the <literal>&lt;?xml version="1.0" encoding="..."?&gt;</literal>
 	      declaration. Here is an example to follow:
 	      <programlisting>use XML::LibXML;
+# load
 open my $fh, "file.xml";
 binmode $fh; # drop all PerlIO layers possibly created by a <literal>use open</literal> pragma
 $doc = XML::LibXML-&gt;load_xml(IO => $fh);
+
+# save
 open my $out, "out.xml";
-binmode $fh; # as above
-$doc-&gt;toFh($fh);
+binmode $out; # as above
+$doc-&gt;toFh($out);
 # or
-print $fh $doc-&gt;toString();</programlisting>
+print $out $doc-&gt;toString();</programlisting>
 	      </para>
 	      </listitem>
 	      <listitem>
