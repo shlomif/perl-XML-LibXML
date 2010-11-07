@@ -40,6 +40,7 @@ my %INFOS = (
     'PREREQ_PM' => {
 		    'XML::SAX' => '0.11',
 		    'XML::NamespaceSupport' => '1.07',
+                    'ExtUtils::MakeMaker' => '6.56'
                    },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
             );
