@@ -22,8 +22,10 @@ Revision history for Perl extension XML::LibXML
       errors.
         -- Applied by SHLOMIF.
         -- Thanks to Aaron Crane.
-
-
+    - Apply 0005-XML-LibXML-Error-avoid-malformed-UTF-8-warnings.patch
+      from https://rt.cpan.org/Public/Bug/Display.html?id=68575
+        -- Applied by SHLOMIF.
+        -- Thanks to Aaron Crane.
 
 1.70
    - various fixes and improvements in the documentation
