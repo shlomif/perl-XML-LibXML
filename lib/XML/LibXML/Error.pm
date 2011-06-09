@@ -9,7 +9,7 @@
 package XML::LibXML::Error;
 
 use strict;
-use vars qw($AUTOLOAD @error_domains $VERSION $WARNINGS);
+use vars qw(@error_domains $VERSION $WARNINGS);
 use Carp;
 use overload 
   '""' => \&as_string,
@@ -60,6 +60,13 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 		  "Schemas datatype", "Schemas parser", "Schemas validity", 
 		  "Relax-NG parser", "Relax-NG validity",
 		  "Catalog", "C14N", "XSLT", "validity");
+
+for my $field (qw<code _prev level file line nodename message column context
+                  str1 str2 str3 num1 num2>) {
+    my $method = sub { $_[0]{$field} };
+    no strict 'refs';
+    *$field = $method;
+}
 
 { 
 
@@ -149,23 +156,9 @@ use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
 }
 
 
-sub AUTOLOAD {
-  my $self=shift;
-  return undef unless ref($self);
-  my $sub = $AUTOLOAD;
-  $sub =~ s/.*:://;
-  if ($sub=~/^(?:code|_prev|level|file|line|nodename|message|column|context|str[123]|num[12])$/) {
-    return $self->{$sub};
-  } else {
-    croak("Unknown error field $sub");
-  }
-}
-
 # backward compatibility
 sub int1 { $_[0]->num1 }
 sub int2 { $_[0]->num2 }
-
-sub DESTROY {}
 
 sub domain {
     my ($self)=@_;
