@@ -26,6 +26,13 @@ Revision history for Perl extension XML::LibXML
       from https://rt.cpan.org/Public/Bug/Display.html?id=68575
         -- Applied by SHLOMIF.
         -- Thanks to Aaron Crane.
+    - In replaceDataString - use 
+    http://perldoc.perl.org/functions/quotemeta.html instead of a long (and
+    incomplete) list of characters to escape.
+        -- With test.
+        -- Fixing https://rt.cpan.org/Ticket/Display.html?id=68564
+        -- Thanks to Daniel Perrett .
+
 
 1.70
    - various fixes and improvements in the documentation
