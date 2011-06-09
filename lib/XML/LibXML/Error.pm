@@ -52,14 +52,21 @@ use constant XML_ERR_FROM_RELAXNGV   => 19; # The Relax-NG validator module
 use constant XML_ERR_FROM_CATALOG    => 20; # The Catalog module
 use constant XML_ERR_FROM_C14N	     => 21; # The Canonicalization module
 use constant XML_ERR_FROM_XSLT	     => 22; # The XSLT engine from libxslt
-use constant XML_ERR_FROM_VALID	     => 23; # The validaton module
+use constant XML_ERR_FROM_VALID	     => 23; # The DTD validation module with valid context
+use constant XML_ERR_FROM_CHECK	     => 24; # The error-checking module
+use constant XML_ERR_FROM_WRITER     => 25; # The xmlwriter module
+use constant XML_ERR_FROM_MODULE     => 26; # The dynamically-loaded module module
+use constant XML_ERR_FROM_I18N	     => 27; # The module handling character conversion
+use constant XML_ERR_FROM_SCHEMATRONV=> 28; # The Schematron validator module
 
 @error_domains = ("", "parser", "tree", "namespace", "validity",
 		  "HTML parser", "memory", "output", "I/O", "ftp",
 		  "http", "XInclude", "XPath", "xpointer", "regexp",
 		  "Schemas datatype", "Schemas parser", "Schemas validity", 
 		  "Relax-NG parser", "Relax-NG validity",
-		  "Catalog", "C14N", "XSLT", "validity");
+		  "Catalog", "C14N", "XSLT", "validity", "error-checking",
+		  "xmlwriter", "dynamic loading", "i18n",
+		  "Schematron validity");
 
 for my $field (qw<code _prev level file line nodename message column context
                   str1 str2 str3 num1 num2>) {

@@ -17,6 +17,12 @@ Revision history for Perl extension XML::LibXML
       unknown domains.
         -- Applied by SHLOMIF.
         -- Thanks to Aaron Crane.
+    - Apply 0004-XML-LibXML-Error-add-domains-from-newer-libxml2.patch
+      from https://rt.cpan.org/Public/Bug/Display.html?id=68575 - add more
+      errors.
+        -- Applied by SHLOMIF.
+        -- Thanks to Aaron Crane.
+
 
 
 1.70
