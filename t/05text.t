@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 33 };
+BEGIN { plan tests => 36 };
 use XML::LibXML;
 
 my $doc = XML::LibXML::Document->new();
@@ -91,6 +91,21 @@ my $doc = XML::LibXML::Document->new();
     $textnode->setData( "h.thrt");
     $textnode->replaceDataString( "h.t", 'new', 1 );   
     ok( $textnode->nodeValue(), 'newhrt' );
+
+    # check if deleteDataString does not delete dots.
+    $textnode->setData( 'hitpit' );
+    $textnode->deleteDataString( 'h.t' );   
+    ok( $textnode->nodeValue(), 'hitpit' );
+
+    # check if deleteDataString works
+    $textnode->setData( 'hitpithit' );
+    $textnode->deleteDataString( 'hit' );   
+    ok( $textnode->nodeValue(), 'pithit' );
+
+    # check if deleteDataString all works
+    $textnode->setData( 'hitpithit' );
+    $textnode->deleteDataString( 'hit', 1 );   
+    ok( $textnode->nodeValue(), 'pit' );
 
     # check if entities don't get translated
     $textnode->setData(q(foo&amp;bar));
