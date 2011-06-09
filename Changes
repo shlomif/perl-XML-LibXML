@@ -30,6 +30,8 @@ Revision history for Perl extension XML::LibXML
     http://perldoc.perl.org/functions/quotemeta.html instead of a long (and
     incomplete) list of characters to escape.
         -- With test.
+        -- also fix deleteDataString by making it use replaceDataString
+        for help.
         -- Fixing https://rt.cpan.org/Ticket/Display.html?id=68564
         -- Thanks to Daniel Perrett .
 

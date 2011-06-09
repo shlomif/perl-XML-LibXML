@@ -1667,18 +1667,9 @@ use vars qw(@ISA);
 sub attributes { return undef; }
 
 sub deleteDataString {
-    my $node = shift;
-    my $string = shift;
-    my $all    = shift;
-    my $data = $node->nodeValue();
-    $string =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\\$1/g;
-    if ( $all ) {
-        $data =~ s/$string//g;
-    }
-    else {
-        $data =~ s/$string//;
-    }
-    $node->setData( $data );
+    my ($node, $string, $all) = @_;
+
+    return $node->replaceDataString($string, '', $all);
 }
 
 sub replaceDataString {
