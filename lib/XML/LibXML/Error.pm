@@ -163,7 +163,10 @@ sub int2 { $_[0]->num2 }
 sub domain {
     my ($self)=@_;
     return undef unless ref($self);
-    return $error_domains[$self->{domain}];
+    my $domain = $self->{domain};
+    # Newer versions of libxml2 might yield errors in domains that aren't
+    # listed above.  Invent something reasonable in that case.
+    return $domain < @error_domains ? $error_domains[$domain] : "domain_$domain";
 }
 
 sub as_string {
@@ -195,7 +198,7 @@ sub as_string {
         $where.=": element ".$self->{nodename};
     }
     $msg.=$where.": " if $where ne "";
-    $msg.=$error_domains[$self->{domain}]." ".$level." :";
+    $msg.=$self->domain." ".$level." :";
     my $str=$self->{message}||"";
     chomp($str);
     $msg.=" ".$str."\n";

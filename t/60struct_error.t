@@ -5,7 +5,7 @@ use Test;
 BEGIN { 
     use XML::LibXML;
     if ( XML::LibXML::HAVE_STRUCT_ERRORS() ) {
-        plan tests => 6;
+        plan tests => 8;
     } else {
         plan tests => 1;
     }
@@ -37,4 +37,16 @@ if (XML::LibXML::HAVE_STRUCT_ERRORS() ) {
     fail() for 1..3;
   }
 
+  my $fake_err = XML::LibXML::Error->new('fake error');
+  my $domain_num = @XML::LibXML::Error::error_domains;      # too big
+  $fake_err->{domain} = $domain_num;                        # white-box test
+  ok($fake_err->domain, "domain_$domain_num",
+     '$err->domain is reasonable on unknown domain');
+  {
+      my $warnings = 0;
+      local $SIG{__WARN__} = sub { $warnings++; warn "@_\n" };
+      my $s = $fake_err->as_string;
+      ok($warnings, 0,
+         'no warnings when stringifying unknown-domain error');
+  }
 } # HAVE_STRUCT_ERRORS

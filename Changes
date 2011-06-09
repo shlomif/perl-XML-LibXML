@@ -12,6 +12,12 @@ Revision history for Perl extension XML::LibXML
       AUTOLOAD completely.
         -- Applied by SHLOMIF.
         -- Thanks to Aaron Crane.
+    - Apply 0003-XML-LibXML-Error-make-domain-work-for-unknown-domain.patch
+      from https://rt.cpan.org/Public/Bug/Display.html?id=68575 - handle
+      unknown domains.
+        -- Applied by SHLOMIF.
+        -- Thanks to Aaron Crane.
+
 
 1.70
    - various fixes and improvements in the documentation
