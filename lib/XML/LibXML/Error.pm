@@ -214,6 +214,12 @@ sub as_string {
       $msg.=$self->{str1}."\n";
       $msg.=(" " x $self->{num1})."^\n";
     } elsif (defined $self->{context}) {
+      # If the error relates to character-encoding problems in the context,
+      # then doing textual operations on it will spew warnings that
+      # XML::LibXML can do nothing to fix.  So just disable all such
+      # warnings.  This has the pleasing benefit of making the test suite
+      # run warning-free.
+      no warnings 'utf8';
       my $context = $self->{context};
       $msg.=$context."\n";
       $context = substr($context,0,$self->{column});
