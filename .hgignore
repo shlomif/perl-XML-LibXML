@@ -1,0 +1,10 @@
+Av_CharPtrPtr.o
+blib
+LibXML.bs
+LibXML.c
+LibXML.o
+Makefile
+dom.o
+perl-libxml-mm.o
+perl-libxml-sax.o
+xpath.o
