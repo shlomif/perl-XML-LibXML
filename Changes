@@ -2,6 +2,12 @@ Revision history for Perl extension XML::LibXML
 
 1.71pre
    - turn XML_LIBXML_PARSE_DEFAULTS constant to $XML::LibXML::XML_LIBXML_PARSE_DEFAULTS
+   - Apply 0001-XML-LibXML-Error-no-need-to-AUTOLOAD-domain.patch from
+     https://rt.cpan.org/Public/Bug/Display.html?id=68575 - no need to AUTLOAD
+     'domain' because a method like that exists.
+        -- Applied by SHLOMIF.
+        -- Thanks to Aaron Crane.
+
 
 1.70
    - various fixes and improvements in the documentation

@@ -154,7 +154,7 @@ sub AUTOLOAD {
   return undef unless ref($self);
   my $sub = $AUTOLOAD;
   $sub =~ s/.*:://;
-  if ($sub=~/^(?:code|_prev|level|file|line|domain|nodename|message|column|context|str[123]|num[12])$/) {
+  if ($sub=~/^(?:code|_prev|level|file|line|nodename|message|column|context|str[123]|num[12])$/) {
     return $self->{$sub};
   } else {
     croak("Unknown error field $sub");
