@@ -1682,10 +1682,11 @@ sub deleteDataString {
 }
 
 sub replaceDataString {
-    my ( $node, $left, $right,$all ) = @_;
+    my ( $node, $left_proto, $right,$all ) = @_;
 
-    #ashure we exchange the strings and not expressions!
-    $left  =~ s/([\\\*\+\^\{\}\&\?\[\]\(\)\$\%\@])/\\$1/g;
+    # Assure we exchange the strings and not expressions!
+    my $left = quotemeta($left_proto);
+
     my $datastr = $node->nodeValue();
     if ( $all ) {
         $datastr =~ s/$left/$right/g;

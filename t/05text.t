@@ -5,7 +5,7 @@
 
 use Test;
 
-BEGIN { plan tests => 32 };
+BEGIN { plan tests => 33 };
 use XML::LibXML;
 
 my $doc = XML::LibXML::Document->new();
@@ -86,6 +86,11 @@ my $doc = XML::LibXML::Document->new();
     $textnode->setData( "te?st" );
     $textnode->replaceDataString( "e?s", 'ne\w' );   
     ok( $textnode->nodeValue(), 'tne\wt' );
+
+    # check if "." is encoded properly 
+    $textnode->setData( "h.thrt");
+    $textnode->replaceDataString( "h.t", 'new', 1 );   
+    ok( $textnode->nodeValue(), 'newhrt' );
 
     # check if entities don't get translated
     $textnode->setData(q(foo&amp;bar));
