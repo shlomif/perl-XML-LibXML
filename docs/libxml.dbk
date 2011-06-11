@@ -595,16 +595,16 @@ EOT</programlisting>
 	      declaration. Here is an example to follow:
 	      <programlisting>use XML::LibXML;
 # load
-open my $fh, "file.xml";
+open my $fh, '&lt;', 'file.xml';
 binmode $fh; # drop all PerlIO layers possibly created by a <literal>use open</literal> pragma
 $doc = XML::LibXML-&gt;load_xml(IO => $fh);
 
 # save
-open my $out, "out.xml";
+open my $out, '&gt;', 'out.xml';
 binmode $out; # as above
 $doc-&gt;toFh($out);
 # or
-print $out $doc-&gt;toString();</programlisting>
+print {$out} $doc-&gt;toString();</programlisting>
 	      </para>
 	      </listitem>
 	      <listitem>
@@ -2433,8 +2433,8 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                       document (see the actualEncoding() method)! This means you
 		      can simply do:
 		    </para>
-		    <programlisting>open OUT, $file;
-print OUT $doc-&gt;toString;</programlisting>
+            <programlisting>open my $out_fh, '&gt;', $file;
+print {$out_fh} $doc-&gt;toString;</programlisting>
                    <para>regardless of the actual encoding of the document.
 		   See the section on encodings in <xref linkend="XML-LibXML"/> for more details.</para>
                     <para>The optional <emphasis>$format</emphasis> parameter sets the indenting of the output. This parameter is expected to be an
