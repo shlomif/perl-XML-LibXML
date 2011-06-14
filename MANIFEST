@@ -99,6 +99,7 @@ perl-libxml-sax.c
 perl-libxml-sax.h
 ppport.h
 README
+scripts/bump-version-number.pl
 test/relaxng/badschema.rng
 test/relaxng/demo.rng
 test/relaxng/demo.xml
