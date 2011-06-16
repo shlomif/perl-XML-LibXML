@@ -154,6 +154,7 @@ t/42common.t
 t/43options.t
 t/44extent.t
 t/45regex.t
+t/46err_column.t
 t/60struct_error.t
 t/61error.t
 t/80registryleak.t

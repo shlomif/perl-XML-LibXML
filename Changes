@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+    - Calculating $err->column() properly, so it won't be maxed out at
+    80:
+        - https://rt.cpan.org/Public/Bug/Display.html?id=66642
+        - the context still maxes at 80 (to avoid wasting RAM) but we
+        still continue past that to get the accurate verdict.
+
 1.72            Thu Jun 16 19:26:13 IDT 2011
     - Removed a stray file from the MANIFEST
         - http://rt.cpan.org/Ticket/Display.html?id=68865

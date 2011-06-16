@@ -9012,7 +9012,7 @@ context_and_column( self )
         xmlErrorPtr self
    PREINIT:
         xmlParserInputPtr input;
-	const xmlChar *cur, *base;
+	const xmlChar *cur, *base, *col_cur;
 	unsigned int n, col;	/* GCC warns if signed, because compared with sizeof() */
 	xmlChar  content[81]; /* space for 80 chars + line terminator */
 	xmlChar *ctnt;
@@ -9043,9 +9043,15 @@ context_and_column( self )
         while ((n++ < (sizeof(content)-1)) && (cur > base) && 
 	       (*(cur) != '\n') && (*(cur) != '\r'))
 	  cur--;
+	/* search backwards for beginning-of-line for calculating the
+	 * column. */
+	col_cur = cur;
+	while ((col_cur > base) && (*(col_cur) != '\n') && (*(col_cur) != '\r'))
+	  col_cur--;
 	if ((*(cur) == '\n') || (*(cur) == '\r')) cur++;
+	if ((*(col_cur) == '\n') || (*(col_cur) == '\r')) col_cur++;
 	/* calculate the error position in terms of the current position */
-	col = input->cur - cur;
+	col = input->cur - col_cur;
 	/* search forward for end-of-line (to max buff size) */
 	n = 0;
 	ctnt = content;
