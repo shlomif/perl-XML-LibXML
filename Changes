@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.72            Thu Jun 16 19:26:13 IDT 2011
     - Removed a stray file from the MANIFEST
         - http://rt.cpan.org/Ticket/Display.html?id=68865
         - Warned on "kit not complete".
