@@ -1,20 +1,26 @@
-use Test;
-BEGIN { plan tests => 3}
-END { ok(0) unless $loaded }
+use strict;
+use warnings;
+
+use Test::More tests => 3;
+
 use XML::LibXML;
 
-$loaded = 1;
-ok(1);
+# TEST
+ok(1, 'Loaded fine');
 
 my $p = XML::LibXML->new();
-ok($p);
+# TEST
+ok ($p, 'Can initialize a new XML::LibXML instance');
 
-ok(XML::LibXML::LIBXML_VERSION, XML::LibXML::LIBXML_RUNTIME_VERSION);
-
-warn "\n\nCompiled against libxml2 version: ",XML::LibXML::LIBXML_VERSION,
-     "\nRunning libxml2 version:          ",XML::LibXML::LIBXML_RUNTIME_VERSION,
-     "\n\n";
-
-if (XML::LibXML::LIBXML_VERSION != XML::LibXML::LIBXML_RUNTIME_VERSION) {
-   warn "DO NOT REPORT THIS FAILURE: Your setup of library paths is incorrect!\n\n";
+# TEST
+if (!is (
+    XML::LibXML::LIBXML_VERSION, XML::LibXML::LIBXML_RUNTIME_VERSION,
+    'LIBXML__VERSION == LIBXML_RUNTIME_VERSION',
+))
+{
+   diag("DO NOT REPORT THIS FAILURE: Your setup of library paths is incorrect!");
 }
+
+diag( "\n\nCompiled against libxml2 version: ",XML::LibXML::LIBXML_VERSION,
+     "\nRunning libxml2 version:          ",XML::LibXML::LIBXML_RUNTIME_VERSION,
+     "\n\n");
