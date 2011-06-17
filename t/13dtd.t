@@ -7,15 +7,26 @@ BEGIN { plan tests => 19 }
 use XML::LibXML;
 ok(1);
 
-my $dtdstr;
+sub _slurp
 {
-    local $/; local *DTD;
-    open(DTD, 'example/test.dtd') || die $!;
-    $dtdstr = <DTD>;
-    $dtdstr =~ s/\r//g;
-    $dtdstr =~ s/[\r\n]*$//;
-    close DTD;
+    my $filename = shift;
+
+    open my $in, "<", $filename
+        or die "Cannot open '$filename' for slurping - $!";
+
+    local $/;
+    my $contents = <$in>;
+
+    close($in);
+
+    return $contents;
 }
+
+my $dtdstr = _slurp('example/test.dtd');
+
+$dtdstr =~ s/\r//g;
+$dtdstr =~ s/[\r\n]*$//;
+
 ok($dtdstr);
 
 {
