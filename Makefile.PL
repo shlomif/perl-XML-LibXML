@@ -42,9 +42,13 @@ my %INFOS = (
     'AUTHOR'    => 'Petr Pajas',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'PREREQ_PM' => {
-        'XML::SAX' => '0.11',
+        'ExtUtils::MakeMaker' => '6.56',
+        'strict' => 0,
+        'Test::More' => 0,
+        'vars' => 0,
+        'warnings' => 0,
         'XML::NamespaceSupport' => '1.07',
-        'ExtUtils::MakeMaker' => '6.56'
+        'XML::SAX' => '0.11',
     },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
             );
