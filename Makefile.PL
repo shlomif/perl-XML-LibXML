@@ -520,7 +520,6 @@ sub backtick {
 
 sub try_link0 {
     my ($src, $opt) = @_;
-    my $cfile = gensym();
     # local $config{LIBS};
     # $config{LIBS} .= $opt;
     unless (mkdir(".testlink", 0777)) {
@@ -528,8 +527,10 @@ sub try_link0 {
         mkdir(".testlink", 0777) || die "Cannot create .testlink dir: $!";
     }
     chdir(".testlink");
-    open($cfile, ">Conftest.xs") || die "Cannot write to file Conftest.xs: $!";
-print $cfile <<EOT;
+    {
+        open(my $cfile, '>', 'Conftest.xs') 
+            or die "Cannot write to file Conftest.xs: $!";
+        print {$cfile} <<EOT;
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -541,17 +542,20 @@ extern "C" {
 #endif
 
 EOT
-    print $cfile $src;
-    print $cfile <<EOT;
+        print {$cfile} $src;
+        print {$cfile} <<EOT;
 
 MODULE = Conftest          PACKAGE = Conftest
 
 PROTOTYPES: DISABLE
 
 EOT
-    close($cfile);
-    open($cfile, ">Conftest.pm") || die "Cannot write to file Conftest.pm: $!";
-    print $cfile <<'EOT';
+        close($cfile);
+    }
+    {
+        open(my $cfile, '>', 'Conftest.pm') 
+            or die "Cannot write to file Conftest.pm: $!";
+        print {$cfile} <<'EOT';
 package Conftest;
 $VERSION = 1.0;
 require DynaLoader;
@@ -559,9 +563,12 @@ require DynaLoader;
 bootstrap Conftest $VERSION;
 1;
 EOT
-    close($cfile);
-    open($cfile, ">Makefile.PL") || die "Cannot write to file Makefile.PL: $!";
-    print $cfile <<'EOT';
+        close($cfile);
+    }
+    {
+        open (my $cfile, '>', 'Makefile.PL') 
+            or die "Cannot write to file Makefile.PL: $!";
+        print {$cfile} <<'EOT';
 use ExtUtils::MakeMaker;
 my %config;
 while($_ = shift @ARGV) {
@@ -571,15 +578,21 @@ while($_ = shift @ARGV) {
 }
 WriteMakefile(NAME => "Conftest", VERSION_FROM => "Conftest.pm", %config);
 EOT
-    close($cfile);
-    open($cfile, ">test.pl") || die "Cannot write to file test.pl: $!";
-    print $cfile <<EOT;
+        close($cfile);
+    }
+    {
+        open(my $cfile, ">test.pl") 
+            or die "Cannot write to file test.pl: $!";
+        print {$cfile} <<EOT;
 use Test; BEGIN { plan tests => 1; } END { ok(\$loaded) }
 use Conftest; \$loaded++;
 EOT
-    close($cfile);
+        close($cfile);
+    }
     my $quote = $is_Win32 ? '"' : "'";
-    xsystem("$^X Makefile.PL " . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config));
+    xsystem("$^X Makefile.PL "
+        . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config)
+    );
 
     my $def_opt = defined($opt) ? $opt : '';
     # I am not shure if OTHERLDFLAGS is really required - at least the
