@@ -51,6 +51,32 @@ my %INFOS = (
         'XML::SAX' => '0.11',
     },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
+    META_MERGE =>
+    {
+        resources =>
+        {
+            repository => 'https://bitbucket.org/shlomif/perl-xml-libxml',
+            homepage => 'https://bitbucket.org/shlomif/perl-xml-libxml',
+        },
+        keywords =>
+        [
+            "dom",
+            "html",
+            "libxml",
+            "object oriented",
+            "oop",
+            "parse",
+            "parser",
+            "parsing",
+            "pullparser",
+            "sax",
+            "sgml",
+            "xml",
+            "xpath",
+            "XPath",
+            "xs",
+        ],
+    },
             );
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #

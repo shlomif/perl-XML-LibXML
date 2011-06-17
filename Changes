@@ -8,6 +8,11 @@ Revision history for Perl extension XML::LibXML
         - Thanks to SCOP.
     - Update the repository in the documentation to point to the 
     bitbucket.org one.
+    - Revamped Makefile.PL:
+        - Got rid of "\t" characters.
+        - Add "use strict" and "use warnings".
+        - Add resources and keywords to the META_MERGE.
+        - Other changes.
 
 1.72            Thu Jun 16 19:26:13 IDT 2011
     - Removed a stray file from the MANIFEST
