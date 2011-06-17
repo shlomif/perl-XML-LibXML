@@ -267,14 +267,12 @@ Versions >= 1.59 are provisionally maintained by Petr Pajas
 PATCHES AND DEVELOPER VERSION
 =============================
 
-As XML::LibXML is open source software help and patches are appreciated. If you
-find a bug in the current release, make sure this bug still exists in the
+As XML::LibXML is open source software, help and patches are appreciated. If
+you find a bug in the current release, make sure this bug still exists in the
 developer version of XML::LibXML. This version can be downloaded from its
-Subversion repository, e.g. via
+Mercurial repository. For more information about that, see:
 
-svn co svn://axkit.org/XML-LibXML/trunk
-
-Note that this account does not allow direct commits.
+http://bitbucket.org/shlomif/perl-xml-libxml
 
 Please consider all regression tests as correct. If any test fails it is most
 certainly related to a bug.

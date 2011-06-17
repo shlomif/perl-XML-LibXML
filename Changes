@@ -6,6 +6,8 @@ Revision history for Perl extension XML::LibXML
         - the context still maxes at 80 (to avoid wasting RAM) but we
         still continue past that to get the accurate verdict.
         - Thanks to SCOP.
+    - Update the repository in the documentation to point to the 
+    bitbucket.org one.
 
 1.72            Thu Jun 16 19:26:13 IDT 2011
     - Removed a stray file from the MANIFEST
