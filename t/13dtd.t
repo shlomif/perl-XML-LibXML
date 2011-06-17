@@ -2,10 +2,12 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 19 }
+use Test::More tests => 18;
+
 use XML::LibXML;
-ok(1);
+
+# TEST
+ok(1, "Loaded");
 
 sub _slurp
 {
@@ -27,90 +29,96 @@ my $dtdstr = _slurp('example/test.dtd');
 $dtdstr =~ s/\r//g;
 $dtdstr =~ s/[\r\n]*$//;
 
-ok($dtdstr);
+# TEST
+ok($dtdstr, "DTD String read");
 
 {
     # parse a DTD from a SYSTEM ID
     my $dtd = XML::LibXML::Dtd->new('ignore', 'example/test.dtd');
-    ok($dtd);
+    # TEST
+    ok ($dtd, 'XML::LibXML::Dtd successful.');
     my $newstr = $dtd->toString();
     $newstr =~ s/\r//g;
     $newstr =~ s/^.*?\n//;
     $newstr =~ s/\n^.*\Z//m;
-    ok($newstr, $dtdstr);
+    # TEST
+    is ($newstr, $dtdstr, 'DTD String same as new string.');
 }
 
 {
     # parse a DTD from a string
     my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
-    ok($dtd);
-}
-
-{
-# parse a DTD with a different encoding
-# my $dtd = XML::LibXML::Dtd->parse_string($dtdstr, "ISO-8859-1");
-# ok($dtd);
-1;
+    # TEST
+    ok ($dtd, '->parse_string');
 }
 
 {
     # validate with the DTD
     my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
-    ok($dtd);
+    # TEST
+    ok ($dtd, '->parse_string 2');
     my $xml = XML::LibXML->new->parse_file('example/article.xml');
-    ok($xml);
-    ok($xml->is_valid($dtd));
-    eval { $xml->validate($dtd) }; # throws exception
-    ok( !$@ );
+    # TEST
+    ok ($xml, 'parse the article.xml file');
+    # TEST
+    ok ($xml->is_valid($dtd), 'valid XML file');
+    eval { $xml->validate($dtd) };
+    # TEST
+    ok ( !$@, 'Validates');
 }
 
 {
     # validate a bad document
     my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
-    ok($dtd);
+    # TEST
+    ok ($dtd, '->parse_string 3');
     my $xml = XML::LibXML->new->parse_file('example/article_bad.xml');
-    ok(!$xml->is_valid($dtd));
+    # TEST
+    ok(!$xml->is_valid($dtd), 'invalid XML');
     eval {
         $xml->validate($dtd);
     };
-    print $@, "\n";
-    ok($@);
+    # TEST
+    ok ($@, '->validate throws an exception');
 
     my $parser = XML::LibXML->new();
-    ok($parser->validation(1));
+    # TEST
+    ok ($parser->validation(1), '->validation returns 1');
     # this one is OK as it's well formed (no DTD)
 
     eval{
         $parser->parse_file('example/article_bad.xml');
     };
-    ok($@);
+    # TEST
+    ok ($@, 'Threw an exception');
     eval {
         $parser->parse_file('example/article_internal_bad.xml');
     };
-    print $@, "\n";
-    ok($@);
+    # TEST
+    ok ($@, 'Throw an exception 2');
 }
 
 # this test fails under XML-LibXML-1.00 with a segfault because the
 # underlying DTD element in the C libxml library was freed twice
 
-my $parser = XML::LibXML->new();
-my $doc = $parser->parse_file('example/dtd.xml');
-my @a = $doc->getChildnodes;
-ok(scalar(@a),2);
-undef @a;
-undef $doc;
+{
+    my $parser = XML::LibXML->new();
+    my $doc = $parser->parse_file('example/dtd.xml');
+    my @a = $doc->getChildnodes;
+    # TEST
+    is (scalar(@a), 2, "Two child nodes");
+}
  
-ok(1);
-
 ##
 # Tests for ticket 2021
 {
     my $dtd = XML::LibXML::Dtd->new("","");
-    ok( $dtd, undef );
+    # TEST
+    ok (!defined($dtd), "XML::LibXML::Dtd not defined." );
 }
 
 {
     my $dtd = XML::LibXML::Dtd->new('', 'example/test.dtd');
-    ok($dtd);
+    # TEST
+    ok ($dtd, "XML::LibXML::Dtd->new working correctly");
 }
