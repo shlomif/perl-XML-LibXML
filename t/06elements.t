@@ -218,6 +218,8 @@ print "# 4. Text Append and Normalization\n";
     my $t2 = $doc->createTextNode( "bar2" );
     my $t3 = $doc->createTextNode( "bar3" );
     my $e  = $doc->createElement("foo");
+    my $e2 = $doc->createElement("bar");
+    $e->appendChild( $e2 );
     $e->appendChild( $t1 );
     $e->appendChild( $t2 );
     $e->appendChild( $t3 );
@@ -226,12 +228,12 @@ print "# 4. Text Append and Normalization\n";
 
     # this is the correct behaviour for DOM. the nodes are still
     # refered
-    ok( scalar( @cn ), 3 );
+    ok( scalar( @cn ), 4 );
     
     $e->normalize;
     
     @cn = $e->childNodes;
-    ok( scalar( @cn ), 1 );
+    ok( scalar( @cn ), 2 );
 
     ok(not defined $t2->parentNode);
     ok(not defined $t3->parentNode);

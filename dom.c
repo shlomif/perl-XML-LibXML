@@ -1227,9 +1227,6 @@ domNodeNormalize( xmlNodePtr node );
 int
 domNodeNormalizeList( xmlNodePtr nodelist )
 {
-    if ( nodelist == NULL ) 
-        return(0);
-
     while ( nodelist ){
         if ( domNodeNormalize( nodelist ) == 0 )
             return(0);
