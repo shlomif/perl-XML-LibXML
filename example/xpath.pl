@@ -4,6 +4,9 @@
 
 use XML::LibXML;
 
+use strict;
+use warnings;
+
 my $parser = XML::LibXML->new();
 my $xpath = shift @ARGV;
 
