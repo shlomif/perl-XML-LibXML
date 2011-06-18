@@ -3,12 +3,13 @@
 use strict;
 use warnings;
 
-use Test;
+# Should be 76
+use Test::More tests => 73;
 
-BEGIN { plan tests => 77 }
+# TEST:$num_parsings=4;
+
 use XML::LibXML;
 use IO::File;
-ok(1);
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -24,7 +25,8 @@ ok(1);
 EOF
 
         my $icb    = XML::LibXML::InputCallback->new();
-        ok($icb);
+        # TEST
+        ok($icb, 'XML::LibXML::InputCallback was initialized');
 
         $icb->register_callbacks( [ \&match_file, \&open_file, 
                                     \&read_file, \&close_file ] );
@@ -41,8 +43,13 @@ EOF
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
 
-        ok($doc);
-        ok($doc->string_value(), "\ntest\n..\nbar..\nbarbar\n");
+        # TEST
+        ok ($doc, 'parse_string() returns a doc.');
+        # TEST
+        is ($doc->string_value(), 
+            "\ntest\n..\nbar..\nbarbar\n",
+            '->string_value()',
+        );
 }
 
 {
@@ -68,16 +75,19 @@ EOF
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
 
-        ok($doc);
-        ok($doc->string_value(), "\ntest\nbar..\nbar..\n");
-        print $doc->serialize();
+        # TEST
+        is ($doc->string_value(), "\ntest\nbar..\nbar..\n",
+            'string_value returns fine',);
 
         $icb->unregister_callbacks( [ \&match_hash2, \&open_hash, 
                                       \&read_hash, \&close_hash] );
         $doc = $parser->parse_string($string);
 
-        ok($doc);
-        ok($doc->string_value(), "\ntest\n..\n\n         \n   \n");
+        # TEST
+        is($doc->string_value(), 
+           "\ntest\n..\n\n         \n   \n",
+           'string_value() after unregister callbacks', 
+        );
 }
 
 {
@@ -96,7 +106,8 @@ EOF
 
 
         my $icb = XML::LibXML::InputCallback->new();
-        ok($icb);
+        # TEST
+        ok ($icb, 'XML::LibXML::InputCallback was initialized (No. 2)');
 
         my $open_xml2 = sub {
                 my $uri = shift;
@@ -105,7 +116,8 @@ EOF
                 $parser->input_callbacks($icb);
 
                 my $dom = $parser->parse_string($string2);
-                ok($dom);
+                # TEST
+                ok ($dom, 'parse_string() inside open_xml2');
         
                 return $dom;
         };
@@ -128,8 +140,9 @@ EOF
 
         my $doc = $parser->parse_string($string);
 
-        ok($doc);
-        ok($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n");
+        # TEST
+        is ($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n",
+            'string_value()',);
 }
 
 
@@ -142,8 +155,9 @@ EOF
 sub match_file {
         my $uri = shift;
         if ( $uri =~ /^\/example\// ){
-                ok(1);
-                return 1;
+            # TEST*$num_parsings
+            ok(1, 'match_file()');
+            return 1;
         }
         return 0;        
 }
@@ -151,7 +165,8 @@ sub match_file {
 sub open_file {
         my $uri = shift;
 
-        ok( open (my $file, '<', ".$uri"));
+        # TEST*$num_parsings
+        ok( open (my $file, '<', ".$uri"), 'open file');
 
         return $file;
 }
@@ -161,16 +176,19 @@ sub read_file {
         my $buflen = shift;
         my $rv   = undef;
 
-        ok(1);
+        # TEST*8
+        ok(1, 'read_file()');
         
         my $n = $h->read( $rv , $buflen );
 
         return $rv;
 }
 
+
 sub close_file {
         my $h   = shift;
-        ok(1);
+        # TEST*$num_parsings
+        ok(1, 'close_file()');
         $h->close();
         return 1;
 }
@@ -180,18 +198,23 @@ sub close_file {
 # --------------------------------------------------------------------- #
 sub match_hash {
         my $uri = shift;
+
         if ( $uri =~ /^\/libxml\// ){
-                ok(1);
-                return 1;
+            # TEST
+            ok(1, 'URI starts with "/libxml"');
+            return 1;
         }
+        return;
 }
 
 sub open_hash {
         my $uri = shift;
         my $hash = { line => 0,
                      lines => [ "<foo>", "bar", "<xsl/>", "..", "</foo>" ],
-                   };                
-        ok(1);
+                   };
+
+        # TEST*$num_parsings
+        ok (1, 'open_hash()');
 
         return $hash;
 }
@@ -206,14 +229,17 @@ sub read_hash {
 
         $rv = "" unless defined $rv;
 
-        ok(1);
+        # TEST*24
+        ok(1, 'read_hash()',);
         return $rv;
 }
 
 sub close_hash {
         my $h   = shift;
         undef $h;
-        ok(1);
+
+        # TEST*$num_parsings
+        ok(1, 'close_hash()');
 }
 
 # --------------------------------------------------------------------- #
@@ -222,8 +248,10 @@ sub close_hash {
 sub match_hash2 {
         my $uri = shift;
         if ( $uri =~ /^\/example\// ){
-                ok(1);
-                return 1;
+
+            # TEST*3
+            ok(1, 'URI starts with "/example"');
+            return 1;
         }
 }
 
@@ -233,15 +261,17 @@ sub match_hash2 {
 sub match_xml {
         my $uri = shift;
         if ( $uri =~ /^\/xmldom\// ){
-                ok(1);
-                return 1;
+            # TEST*2
+            ok(1, 'URI starts with /xmldom in match_xml');
+            return 1;
         }
 }
 
 sub open_xml {
         my $uri = shift;
         my $dom = XML::LibXML->new->parse_string(q{<?xml version="1.0"?><foo><tmp/>barbar</foo>});
-        ok($dom);
+        # TEST
+        ok ($dom, 'open_xml() : parse_string() successful.', );
 
         return $dom;
 }
@@ -254,12 +284,17 @@ sub read_xml {
         my $rv = $tmp ? $dom->toString : "";
         $tmp->unbindNode if($tmp);
 
-        ok(1);
+        # TEST*$num_parsings
+        ok (1, 'read_xml()',);
         return $rv;
 }
 
 sub close_xml {
         my $dom   = shift;
         undef $dom;
-        ok(1);
+
+        # TEST*2
+        ok(1, 'close_xml()');
+
+        return 1;
 }
