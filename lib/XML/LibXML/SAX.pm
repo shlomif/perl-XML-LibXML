@@ -12,7 +12,7 @@ package XML::LibXML::SAX;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = "1.72"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.73"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use XML::LibXML;
 use XML::SAX::Base;

@@ -13,7 +13,7 @@ package XML::LibXML::ErrNo;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = "1.72"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.73"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant ERR_OK                               => 0;
 use constant ERR_INTERNAL_ERROR                   => 1;

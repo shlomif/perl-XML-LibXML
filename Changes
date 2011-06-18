@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.73            Sat Jun 18 10:53:44 IDT 2011
     - Calculating $err->column() properly, so it won't be maxed out at
     80:
         - https://rt.cpan.org/Public/Bug/Display.html?id=66642
