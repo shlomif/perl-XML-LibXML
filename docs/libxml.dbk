@@ -601,7 +601,7 @@ $doc = XML::LibXML-&gt;load_xml(IO => $fh);
 # save
 open my $out, '&gt;', 'out.xml';
 binmode $out; # as above
-$doc-&gt;toFh($out);
+$doc-&gt;toFH($out);
 # or
 print {$out} $doc-&gt;toString();</programlisting>
 	      </para>
@@ -634,7 +634,7 @@ $xml_document = $doc->toString(); # returns a byte string
 		<para>DOM methods also accept binary strings in the original encoding of the
 		document to which the node belongs (UTF-8 is assumed if the node is not
 		attached to any document). Exploiting this feature is NOT RECOMMENDED
-		since it is considered a bad practice.
+		since it is considered bad practice.
 		</para>
 		<programlisting><![CDATA[
 my $doc = XML::LibXML:Document->new('1.0','iso-8859-2');
@@ -696,14 +696,14 @@ $thr->join;
 	 </para>
 	 <para>
 	   Without using mutex locks, 
-	   oaralel threads may read the same document
+	   parallel threads may read the same document
 	   (i.e. any node that belongs to the document),
 	   parse files, and modify different documents.
 	 </para>
 	 <para>
 	   However, if there is a chance that
 	   some of the threads will attempt to modify a document 
-	   ( or even create
+	   (or even create
 	   new nodes based on that document,
 	   e.g. with <literal>$doc->createElement</literal>)
 	   that other threads may be reading at the same time,
@@ -1148,6 +1148,7 @@ $dom = $parser-&gt;load_html(...);
 			  </para>
 			</listitem>
 		    </varlistentry>
+                </variablelist>
 
                 <para>Parsing HTML may cause problems, especially if
                 the ampersand ('&amp;') is used. This is a common
@@ -1346,9 +1347,6 @@ $dom = $parser-&gt;load_html(...);
 	                    </para>
                         </listitem>
                     </varlistentry>
-                </variablelist>
-
-
                 </variablelist>
             </sect2>
 
@@ -1592,7 +1590,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 	      IMPORTANT NOTE: This documentation reflects the parser flags available in libxml2 2.7.3.
 	      Some options have no effect if an older version of libxml2 is used.
 	    </para>
-	    <para>Each of the flags listed below is labeled labeled</para>
+	    <para>Each of the flags listed below is labeled</para>
 	    <variablelist>
 	      <varlistentry>
 		<term>/parser/</term>
@@ -1680,11 +1678,10 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 	      when substitution of an external entity is disabled, the
 	      entity will be represented in the document tree by a XML_ENTITY_REF_NODE node
 	      whose subtree will be the content obtained by parsing the external resource;
-	      Although this is level 
-	      of nesting is visible from the DOM
+	      Although this nesting is visible from the DOM
 	      it is transparent to XPath data model, so it is possible to
 	      match nodes in an unexpanded entity by the same XPath expression 
-	      as if the entity was expanded. See also ext_ent_handler.
+	      as if the entity were expanded. See also ext_ent_handler.
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -1847,7 +1844,7 @@ $parser->input_callbacks($c);
             <listitem>
 	      <para>/parser/</para>
               <para>THIS OPTION IS EXPERIMENTAL!</para>
-              <para>Although quite powerful, XML:LibXML's DOM implementation is incomplete with respect to
+              <para>Although quite powerful, XML::LibXML's DOM implementation is incomplete with respect to
 		the DOM level 2 or level 3 specifications.
                 XML::GDOME is based on libxml2 as well and and provides a rather complete DOM implementation by wrapping libgdome.
 		This flag allows you to make
@@ -2702,7 +2699,7 @@ print {$out_fh} $doc-&gt;toString;</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$cdata = $dom-&gt;create( $cdata_content );</funcsynopsisinfo>
+                        <funcsynopsisinfo>$cdata = $dom-&gt;createCDATASection( $cdata_content );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Similar to createTextNode and createComment, this function creates a CDataSection bound to the current DOM.</para>
@@ -4127,7 +4124,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$avalue = $node-&gt;setAttributeNS( $nsURI, $aname );</funcsynopsisinfo>
+                        <funcsynopsisinfo>$avalue = $node-&gt;getAttributeNS( $nsURI, $aname );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>Retrieves an attribute value by local name and namespace URI.</para>
@@ -4344,7 +4341,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 
                     <para><emphasis>Note that appendWellBalancedChunk() is only left for compatibility reasons</emphasis>. Implicitly it uses</para>
 
-                    <programlisting> my $fragment = $parser-&gt;parse_xml_chunk( $chunk );
+                    <programlisting> my $fragment = $parser-&gt;parse_balanced_chunk( $chunk );
  $node-&gt;appendChild( $fragment );</programlisting>
 
                     <para>This form is more explicit and makes it easier to control the flow of a script.</para>
@@ -4546,7 +4543,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
         <sect1>
             <title>Description</title>
 
-        <para>Unlike the DOM specification, XML::LibXML implements the text node as the base class of all character data node. Therefor there exists no
+        <para>Unlike the DOM specification, XML::LibXML implements the text node as the base class of all character data node. Therefore there exists no
         CharacterData class. This allows one to apply methods of text nodes also to Comments and CDATA-sections.</para>
 	</sect1>
         <sect1>
@@ -4835,7 +4832,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node = XML::LibXML::CDATASection( $content );</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node = XML::LibXML::CDATASection-&gt;new( $content );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>The constructor is the only provided function for this package. It is required, because <emphasis>libxml2</emphasis> treats the

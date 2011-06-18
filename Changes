@@ -32,6 +32,8 @@ Revision history for Perl extension XML::LibXML
         This change could break code for users that have subclassed
         XML::LibXML::InputCallback and overridden the init_callbacks method
         [/QUOTE]
+    - Documentation fixes patch from Daniel Fetter on:
+        - From https://github.com/frett/perl-libxml .
 
 
 1.72            Thu Jun 16 19:26:13 IDT 2011
