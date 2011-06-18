@@ -5545,10 +5545,10 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
                     </varlistentry>
 
                     <varlistentry>
-                        <term>init_callbacks()</term>
+                        <term>init_callbacks( $parser )</term>
 
                         <listitem>
-                            <para>Initializes the callback system before a parsing process.</para>
+                            <para>Initializes the callback system for the provided parser before starting a parsing process.</para>
                         </listitem>
                     </varlistentry>
 

@@ -724,29 +724,12 @@ sub _init_callbacks {
         $icb = $self->{XML_LIBXML_CALLBACK_STACK};
     }
 
-    my $mcb = $self->match_callback();
-    my $ocb = $self->open_callback();
-    my $rcb = $self->read_callback();
-    my $ccb = $self->close_callback();
-
-    if ( defined $mcb and defined $ocb and defined $rcb and defined $ccb ) {
-        $icb->register_callbacks( [$mcb, $ocb, $rcb, $ccb] );
-    }
-    $icb->init_callbacks();
+    $icb->init_callbacks($self);
 }
 
 sub _cleanup_callbacks {
     my $self = shift;
     $self->{XML_LIBXML_CALLBACK_STACK}->cleanup_callbacks();
-
-    my $mcb = $self->match_callback();
-    my $ocb = $self->open_callback();
-    my $rcb = $self->read_callback();
-    my $ccb = $self->close_callback();
-
-    if ( defined $mcb and defined $ocb and defined $rcb and defined $ccb ) {
-        $self->{XML_LIBXML_CALLBACK_STACK}->unregister_callbacks( [$mcb, $ocb, $rcb, $ccb] );
-    }
 }
 
 sub __read {
@@ -2074,12 +2057,14 @@ sub CLONE_SKIP { 1 }
 #-------------------------------------------------------------------------#
 package XML::LibXML::InputCallback;
 
-use vars qw($_CUR_CB @_GLOBAL_CALLBACKS @_CB_STACK);
+use vars qw($_CUR_CB @_GLOBAL_CALLBACKS @_CB_STACK $_CB_NESTED_DEPTH @_CB_NESTED_STACK);
 
 BEGIN {
   $_CUR_CB = undef;
   @_GLOBAL_CALLBACKS = ();
   @_CB_STACK = ();
+  $_CB_NESTED_DEPTH = 0;
+  @_CB_NESTED_STACK = ();
 }
 
 sub CLONE_SKIP {
@@ -2201,12 +2186,36 @@ sub unregister_callbacks {
 # make libxml2 use the callbacks 
 sub init_callbacks {
     my $self = shift;
+    my $parser = shift;
 
+    #initialize the libxml2 callbacks unless this is a nested callback
+    $self->lib_init_callbacks() unless($_CB_NESTED_DEPTH);
+
+    #store the callbacks for any outer executing parser instance
+    $_CB_NESTED_DEPTH++;
+    push @_CB_NESTED_STACK, [
+      $_CUR_CB,
+      [@_CB_STACK],
+      [@_GLOBAL_CALLBACKS],
+    ];
+
+    #initialize the callback variables for the current parser
     $_CUR_CB           = undef;
     @_CB_STACK         = ();
-
     @_GLOBAL_CALLBACKS = @{ $self->{_CALLBACKS} };
     
+    #attach parser specific callbacks
+    if($parser) {
+        my $mcb = $parser->match_callback();
+        my $ocb = $parser->open_callback();
+        my $rcb = $parser->read_callback();
+        my $ccb = $parser->close_callback();
+        if ( defined $mcb and defined $ocb and defined $rcb and defined $ccb ) {
+            unshift @_GLOBAL_CALLBACKS, [$mcb, $ocb, $rcb, $ccb];
+        }
+    }
+
+    #attach global callbacks
     if ( defined $XML::LibXML::match_cb and 
          defined $XML::LibXML::open_cb  and 
          defined $XML::LibXML::read_cb  and 
@@ -2216,19 +2225,21 @@ sub init_callbacks {
                                   $XML::LibXML::read_cb,
                                   $XML::LibXML::close_cb];
     }
-
-    $self->lib_init_callbacks();
 }
 
 # reset libxml2's callbacks
 sub cleanup_callbacks {
     my $self = shift;
-    
-    $_CUR_CB           = undef;
-    @_GLOBAL_CALLBACKS = ();
-    @_CB_STACK         = ();
 
-    $self->lib_cleanup_callbacks();
+    #restore the callbacks for the outer parser instance
+    $_CB_NESTED_DEPTH--;
+    my $saved          = pop @_CB_NESTED_STACK;
+    $_CUR_CB           = $saved->[0];
+    @_CB_STACK         = (@{$saved->[1]});
+    @_GLOBAL_CALLBACKS = (@{$saved->[2]});
+
+    #clean up the libxml2 callbacks unless there are still outer parsing instances
+    $self->lib_cleanup_callbacks() unless($_CB_NESTED_DEPTH);
 }
 
 $XML::LibXML::__loaded=1;
