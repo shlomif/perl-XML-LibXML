@@ -738,8 +738,15 @@ sub _init_callbacks {
 sub _cleanup_callbacks {
     my $self = shift;
     $self->{XML_LIBXML_CALLBACK_STACK}->cleanup_callbacks();
+
     my $mcb = $self->match_callback();
-    $self->{XML_LIBXML_CALLBACK_STACK}->unregister_callbacks( [$mcb] );
+    my $ocb = $self->open_callback();
+    my $rcb = $self->read_callback();
+    my $ccb = $self->close_callback();
+
+    if ( defined $mcb and defined $ocb and defined $rcb and defined $ccb ) {
+        $self->{XML_LIBXML_CALLBACK_STACK}->unregister_callbacks( [$mcb, $ocb, $rcb, $ccb] );
+    }
 }
 
 sub __read {
