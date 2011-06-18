@@ -1,6 +1,6 @@
 # $Id$
 use Test;
-BEGIN { plan tests => 50 }
+BEGIN { plan tests => 70 }
 END { ok(0) unless $loaded }
 use XML::LibXML;
 use IO::File;
@@ -60,9 +60,12 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+        my $doc2 = $parser->parse_string($string);
 
         ok($doc);
         ok($doc->string_value(), "\ntest\nbar..\nbar..\n");
+        ok($doc2);
+        ok($doc2->string_value(), "\ntest\nbar..\nbar..\n");
         print $doc->serialize();
 
         $icb->unregister_callbacks( [ \&match_hash2, \&open_hash, 
