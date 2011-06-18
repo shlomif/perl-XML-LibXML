@@ -20,6 +20,19 @@ Revision history for Perl extension XML::LibXML
     - Apply the patch from Daniel Fetter's InputCallbackFix branch.
         - a partial fix to https://rt.cpan.org/Public/Bug/Display.html?id=4263 .
         - Call two $parser->parse_string() in succession.
+    - Apply the NestedParsing patch.
+        - more of https://rt.cpan.org/Public/Bug/Display.html?id=4263
+        - Thanks to Daniel Frett for the patch.
+
+        [QUOTE]
+        Updated how legacy parser local callbacks are utilized by
+        init_callbacks so that the XML::LibXML::InputCallback object doesn't
+        have to be temporarily modified during the parsing process.
+    
+        This change could break code for users that have subclassed
+        XML::LibXML::InputCallback and overridden the init_callbacks method
+        [/QUOTE]
+
 
 1.72            Thu Jun 16 19:26:13 IDT 2011
     - Removed a stray file from the MANIFEST
