@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 use XML::LibXML;
 use IO::File;
 
@@ -14,7 +17,7 @@ $parser->close_callback( \&close_uri );
 $parser->expand_xinclude( 1 );
 
 # parse the file "text.xml" in the current directory
-$dom = $parser->parse_file("test.xml");
+my $dom = $parser->parse_file("test.xml");
 
 print $dom->toString() , "\n";
 
