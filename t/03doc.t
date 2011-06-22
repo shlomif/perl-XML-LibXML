@@ -133,7 +133,7 @@ sub _count_children_by_name_ns
 }
 
 {
-    print "# 1. Document Attributes\n";
+    # Document Attributes
 
     my $doc = XML::LibXML::Document->createDocument();
     # TEST
@@ -178,7 +178,7 @@ sub _count_children_by_name_ns
 }
 
 {
-    print "# 2. Creating Elements\n";
+    # 2. Creating Elements
     my $doc = XML::LibXML::Document->new();
     {
         my $node = $doc->createDocumentFragment();
@@ -192,7 +192,7 @@ sub _count_children_by_name_ns
     _check_created_element($doc, 'foo', 'foo', 'Simple Element');
     
     {
-        print "# document with encoding\n";
+        # document with encoding
         my $encdoc = XML::LibXML::Document->new( "1.0" );
         $encdoc->setEncoding( "iso-8859-1" );
 
@@ -201,7 +201,7 @@ sub _count_children_by_name_ns
             $encdoc, 'foo', 'foo', 'Encdoc Element creation'
         );
 
-        print "# SAX style document with encoding\n";
+        # SAX style document with encoding
         my $node_def = {
             Name => "object",
             LocalName => "object",
@@ -234,7 +234,7 @@ sub _count_children_by_name_ns
     }
 
     {
-        print "# bad element creation\n";
+        # bad element creation
         # TEST:$badnames_count=5;
         my @badnames = ( ";", "&", "<><", "/", "1A");
 
@@ -280,7 +280,7 @@ sub _count_children_by_name_ns
         is($node->toString, "<![CDATA[foo]]>", ' TODO : Add test name');
     }
 
-    print "# 2.1 Create Attributes\n";
+    # -> Create Attributes
     {
         my $attr = $doc->createAttribute("foo", "bar");
         # TEST
@@ -300,7 +300,7 @@ sub _count_children_by_name_ns
         is( $content->nodeType, XML_TEXT_NODE, ' TODO : Add test name' );
     }
     {
-        print "# bad attribute creation\n";
+        # bad attribute creation
         # TEST:$badnames_count=5;
         my @badnames = ( ";", "&", "<><", "/", "1A");
 
@@ -320,7 +320,6 @@ sub _count_children_by_name_ns
       $elem->removeAttribute('attr');
       $attr = $doc->createAttributeNS(undef,'attr2' => 'a & b');
       $elem->addChild($attr);
-      print $elem->toString(),"\n";
       # TEST
       ok ($elem->toString() eq '<foo attr2="a &amp; b"/>', ' TODO : Add test name');
     }
@@ -352,7 +351,7 @@ sub _count_children_by_name_ns
         is($attr->getValue, q(bar&amp;), ' TODO : Add test name' );
     }
     {
-        print "# bad attribute creation\n";
+        # bad attribute creation
         # TEST:$badnames_count=5;
         my @badnames = ( ";", "&", "<><", "/", "1A");
 
@@ -364,7 +363,7 @@ sub _count_children_by_name_ns
 
     }
 
-    print "# 2.2 Create PIs\n";
+    # -> Create PIs
     {
         my $pi = $doc->createProcessingInstruction( "foo", "bar" );
         # TEST
@@ -403,8 +402,8 @@ sub _count_children_by_name_ns
 }
 
 {
-    print "# 3.  Document Manipulation\n";
-    print "# 3.1 Document Elements\n"; 
+    # Document Manipulation
+    # -> Document Elements 
 
     my $doc = XML::LibXML::Document->new();
     my $node = $doc->createElement( "foo" );
@@ -465,7 +464,7 @@ sub _count_children_by_name_ns
     # TEST
     ok($node3, ' TODO : Add test name');
 
-    print "# 3.2 Processing Instructions\n"; 
+    # -> Processing Instructions
     {
         my $pi = $doc->createProcessingInstruction( "foo", "bar" );
         $doc->appendChild( $pi );
@@ -478,16 +477,11 @@ sub _count_children_by_name_ns
         $pi->setData( foo=>"foo" );
         # TEST
         is( $pi->textContent, 'foo="foo"', ' TODO : Add test name');
-        
     }
-
-    print "# 3.3 Comment Nodes\n"; 
-
-    print "# 3.4 DTDs\n";
 }
 
 {
-    print "# 4. Document Storing\n";
+    # Document Storing
     my $parser = XML::LibXML->new;
     my $doc = $parser->parse_string("<foo>bar</foo>");  
 
@@ -495,7 +489,8 @@ sub _count_children_by_name_ns
 
     ok( $doc, ' TODO : Add test name' );
 
-    print "# 4.1 to file handle\n";
+    # -> to file handle
+
     {
         require IO::File;
         my $fh = new IO::File;
@@ -518,7 +513,7 @@ sub _count_children_by_name_ns
         }
     }
 
-    print "# 4.2 to named file\n";
+    # -> to named file
     {
         $doc->toFile( "example/testrun.xml" );
         # TEST
@@ -536,7 +531,7 @@ sub _count_children_by_name_ns
         unlink "example/testrun.xml" ;        
     }
 
-    print "# 5 ELEMENT LIKE FUNCTIONS\n";
+    # ELEMENT LIKE FUNCTIONS
     {
         my $parser2 = XML::LibXML->new();
         my $string1 = "<A><A><B/></A><A><B/></A></A>";
@@ -639,8 +634,9 @@ sub _count_children_by_name_ns
         }
     }
 }
+
 {
-    print "# 5. Bug fixes (to be used with valgrind)\n";
+    # Bug fixes (to be used with valgrind)
     {  
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createPI(foo=>"bar");      # create a PI
@@ -715,8 +711,6 @@ SKIP:
     # The count.
     # TEST:$c=0;
     for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
-        print "------------------\n";
-        print $enc,"\n";
         my $xml = Encode::encode($enc,qq{<?xml version="1.0" encoding="$enc"?>
             <test foo="bar"/>
             });
