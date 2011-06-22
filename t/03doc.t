@@ -605,6 +605,7 @@ sub _count_children_by_name_ns
             _count_elements_by_name_ns($doc2, ["*", "A"], 4,
                 q{4 Elements of A of any namespace}
             );
+            # TEST
             _count_elements_by_name_ns($doc2, ['*', '*'], 5,
                 q{4 Elements of any namespace},
             );
@@ -704,37 +705,39 @@ sub _count_children_by_name_ns
 }
 
 # the following tests were added for #33810
-if (eval { require Encode; }) {
-  # TEST:$num_encs=3;
-  # The count.
-  # TEST:$c=0;
-  for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
-    print "------------------\n";
-    print $enc,"\n";
-    my $xml = Encode::encode($enc,qq{<?xml version="1.0" encoding="$enc"?>
-<test foo="bar"/>
-});
-    my $dom = XML::LibXML->new->parse_string($xml);
-    # TEST:$c++;
-    is($dom->getEncoding,$enc, ' TODO : Add test name');
-    # TEST:$c++;
-    is($dom->actualEncoding,$enc, ' TODO : Add test name');
-    # TEST:$c++;
-    is($dom->getDocumentElement->getAttribute('foo'),'bar', ' TODO : Add test name');
-    # TEST:$c++;
-    is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo')), 'bar', ' TODO : Add test name');
-    # TEST:$c++;
-    is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo')), 'bar', ' TODO : Add test name');
-    my $exp_enc = $enc eq 'UTF-16' ? 'UTF-16LE' : $enc;
-    # TEST:$c++;
-    is($dom->getDocumentElement->getAttribute('foo',1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
-    # TEST:$c++;
-    is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
-    # TEST:$c++;
-    is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+SKIP:
+{
+    if (! eval { require Encode; })
+    {
+        skip "Encoding related tests require Encode", (3*8);
+    }
+    # TEST:$num_encs=3;
+    # The count.
+    # TEST:$c=0;
+    for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
+        print "------------------\n";
+        print $enc,"\n";
+        my $xml = Encode::encode($enc,qq{<?xml version="1.0" encoding="$enc"?>
+            <test foo="bar"/>
+            });
+        my $dom = XML::LibXML->new->parse_string($xml);
+        # TEST:$c++;
+        is($dom->getEncoding,$enc, ' TODO : Add test name');
+        # TEST:$c++;
+        is($dom->actualEncoding,$enc, ' TODO : Add test name');
+        # TEST:$c++;
+        is($dom->getDocumentElement->getAttribute('foo'),'bar', ' TODO : Add test name');
+        # TEST:$c++;
+        is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo')), 'bar', ' TODO : Add test name');
+        # TEST:$c++;
+        is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo')), 'bar', ' TODO : Add test name');
+        my $exp_enc = $enc eq 'UTF-16' ? 'UTF-16LE' : $enc;
+        # TEST:$c++;
+        is($dom->getDocumentElement->getAttribute('foo',1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+        # TEST:$c++;
+        is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+        # TEST:$c++;
+        is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+    }
     # TEST*$num_encs*$c
-  }
-} else {
-  skip("Encoding related tests require Encode") for 1..24;
 }
-
