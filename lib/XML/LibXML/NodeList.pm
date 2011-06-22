@@ -8,7 +8,10 @@
 #
 
 package XML::LibXML::NodeList;
+
 use strict;
+use warnings;
+
 use XML::LibXML::Boolean;
 use XML::LibXML::Literal;
 use XML::LibXML::Number;
