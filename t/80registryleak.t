@@ -1,10 +1,10 @@
-use Test;
-BEGIN { plan tests => 3}
-END { ok(0) unless $loaded }
-use XML::LibXML;
 
-$loaded = 1;
-ok(1);
+use strict;
+use warnings;
+
+use Test;
+BEGIN { plan tests => 2; }
+use XML::LibXML;
 
 my $p = XML::LibXML->new();
 ok($p);

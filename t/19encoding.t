@@ -7,6 +7,9 @@
 # decodeFromUTF8() functions are supposed to be general, while all the 
 # magic code is only available for more recent perl version (5.6+)
 #
+use strict;
+use warnings;
+
 use Test;
 
 BEGIN {
@@ -89,7 +92,7 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "EUC-JP" ) {
 
     if ( $] >= 5.006 ) {
         my $dom_euc_jp = XML::LibXML::Document->new('1.0', 'EUC-JP');
-        $elemjp = $dom_euc_jp->createElement( $tstr_euc_jp );
+        my $elemjp = $dom_euc_jp->createElement( $tstr_euc_jp );
 
 
         ok( decodeFromUTF8( 'EUC-JP' , $elemjp->nodeName()),

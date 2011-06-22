@@ -4,8 +4,9 @@
 # Testcases for the RelaxNG interface
 #
 
-use Test;
 use strict;
+use warnings;
+use Test;
 
 BEGIN { 
     use XML::LibXML;

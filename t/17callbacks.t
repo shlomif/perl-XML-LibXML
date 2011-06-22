@@ -1,11 +1,12 @@
 # $Id$
+
+use strict;
+use warnings;
+
 use Test;
-BEGIN { plan tests => 43 }
-END { ok(0) unless $loaded }
+BEGIN { plan tests => 42 }
 use XML::LibXML;
 use IO::File;
-$loaded = 1;
-ok(1);
 
 
 my $using_globals = '';
@@ -22,7 +23,7 @@ my $using_globals = '';
 
     $parser->expand_xinclude( 1 );
 
-    $dom = $parser->parse_file("example/test.xml");
+    my $dom = $parser->parse_file("example/test.xml");
 
     ok($dom);
     # warn $dom->toString();
@@ -83,7 +84,7 @@ close F;
     # tests if callbacks are called correctly within DTDs
     my $parser2 = XML::LibXML->new();
     $parser2->expand_xinclude( 1 );
-    $dom = $parser2->parse_string($str);
+    my $dom = $parser2->parse_string($str);
     ok($dom);
 }
 
@@ -124,16 +125,16 @@ sub close1 {
 sub open1 {
     my $f = shift;
     # warn("open: $f\n");
-    $file = new IO::File;
-    if ( $file->open( "<$f" ) ){
-        # warn "open file";
+
+    if (open my $file, '<', $f)
+    {
         ok($using_globals, defined($XML::LibXML::open_cb));
+        return $file;
     }
-    else {
-        # warn "cannot open file";
-        $file = 0;
-    }   
-    return $file;
+    else
+    {
+        return 0;
+    }
 }
 
 sub read1 {
@@ -161,20 +162,23 @@ sub close2 {
 }
 
 sub open2 {
+    my ($fn) = @_;
     # warn("open2: $_[0]\n");
-    $file = new IO::File;
-    my $fn = $_[0];
-    $fn    =~ s/([^\d])(\.xml)$/${1}4$2/; # use a different file
-    if ( $file->open( "<$fn" ) ){
-        ok(1);
+
+    $fn =~ s/([^\d])(\.xml)$/${1}4$2/; # use a different file
+    my ($ret, $verdict);
+    if ($verdict = open (my $file, '<', $fn))
+    {
+        $ret = $file;
     }
-    else {
-        ok(0);
-        $file = 0;
-    }   
-    # warn("opened $file\n");
-   
-    return $file;
+    else
+    {
+        $ret = 0;
+    }
+ 
+    ok ($verdict);
+
+    return $ret;
 }
 
 sub read2 {

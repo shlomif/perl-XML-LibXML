@@ -1,4 +1,8 @@
 # -*- cperl -*-
+
+use strict;
+use warnings;
+
 use Test;
 BEGIN { plan tests => 32 };
 

@@ -1,6 +1,9 @@
 # $Id: 29_struct_errors.t,v 1.1.2.2 2006/06/22 14:34:47 pajas Exp $
 # First version of the new structured error test suite
 
+use strict;
+use warnings;
+
 use Test;
 BEGIN { 
     use XML::LibXML;
@@ -12,6 +15,7 @@ BEGIN {
 
 }
 
+my $loaded;
 eval {
   use XML::LibXML::Error;
   use XML::LibXML::ErrNo;

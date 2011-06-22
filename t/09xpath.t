@@ -1,5 +1,6 @@
 use Test;
 use strict;
+use warnings;
 
 BEGIN { plan tests => 57 };
 use XML::LibXML;
