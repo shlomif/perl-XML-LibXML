@@ -3,6 +3,9 @@
 ##
 # this test checks the DOM element and attribute interface of XML::LibXML
 
+use strict;
+use warnings;
+
 use Test;
 
 BEGIN { plan tests => 187 };

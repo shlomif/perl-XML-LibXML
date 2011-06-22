@@ -2,6 +2,9 @@
 
 use Test;
 
+use strict;
+use warnings;
+
 BEGIN { plan tests => 38 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);

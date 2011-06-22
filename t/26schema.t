@@ -4,8 +4,10 @@
 # Testcases for the XML Schema interface
 #
 
-use Test;
 use strict;
+use warnings;
+
+use Test;
 BEGIN { 
     use XML::LibXML;
 

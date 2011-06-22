@@ -1,16 +1,17 @@
+
+use strict;
+use warnings;
+
 use Test;
 BEGIN { use XML::LibXML;
         if ( XML::LibXML::HAVE_STRUCT_ERRORS() ) {
-            plan tests => 4;
+            plan tests => 3;
         }else{
-            plan tests => 2;
+            plan tests => 1;
         }
 }
-END { ok(0) unless $loaded }
 
 use XML::LibXML::Error;
-$loaded = 1;
-ok(1);
 
 my $p = XML::LibXML->new();
 

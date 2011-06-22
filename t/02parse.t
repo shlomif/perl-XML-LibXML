@@ -4,6 +4,9 @@
 # this test checks the parsing capabilities of XML::LibXML
 # it relies on the success of t/01basic.t
 
+use strict;
+use warnings;
+
 use Test;
 use IO::File;
 

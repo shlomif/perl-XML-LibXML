@@ -1,5 +1,8 @@
 #########################
 
+use strict;
+use warnings;
+
 use Test;
 BEGIN { plan tests => 12 };
 use XML::LibXML::Common qw( :libxml :encoding );

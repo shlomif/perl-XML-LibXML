@@ -1,4 +1,8 @@
 # -*- cperl -*-
+
+use strict;
+use warnings;
+
 use Test;
 use Config;
 use constant MAX_THREADS => 10;

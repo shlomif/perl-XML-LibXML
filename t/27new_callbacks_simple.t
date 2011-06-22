@@ -1,11 +1,14 @@
+
+use strict;
+use warnings;
+
 # $Id$
 use Test;
-BEGIN { plan tests => 21 }
-END { ok(0) unless $loaded }
+
+BEGIN { plan tests => 20 }
+
 use XML::LibXML;
 use IO::File;
-$loaded = 1;
-ok(1);
 
 # --------------------------------------------------------------------- #
 # simple test
@@ -57,15 +60,9 @@ sub match_file {
 
 sub open_file {
         my $uri = shift;
-        $file = new IO::File;
-
-        if ( $file->open( "< .$uri" ) ){
-                ok(1);
-        }
-        else {
-                # warn "cannot open file";
-                $file = 0;
-        }   
+        open my $file, '<', ".$uri"
+            or die "Cannot open '.$uri'";
+        ok(1);
         return $file;
 }
 

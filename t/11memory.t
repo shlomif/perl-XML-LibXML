@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 use Test;
 use constant PLAN => 26;
 use constant TIMES_THROUGH => $ENV{MEMORY_TIMES} || 100_000;

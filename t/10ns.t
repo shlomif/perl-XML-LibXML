@@ -1,4 +1,8 @@
 # -*- cperl -*-
+
+use strict;
+use warnings;
+
 use Test;
 BEGIN { plan tests=>129; }
 use XML::LibXML;
@@ -206,7 +210,8 @@ print "# 8. changing namespace declarations\n";
     ok ( $root->lookupNamespaceURI('zzz'), 'http://changed.com' );
     ok ( $root->setNamespaceDeclURI('zzz',undef ) ); 
     ok ( $root->lookupNamespaceURI('zzz'), undef );
-    $strnode = $root->toString();
+
+    my $strnode = $root->toString();
     ok ( $strnode !~ /xmlns:zzz/ );
 
     # changing the default namespace declaration
@@ -280,7 +285,7 @@ print "# 8. changing namespace declarations\n";
    ok ( $doc->findnodes('/document[@attr and foo]')->size(), 1 );
    ok ( $doc->findvalue('/document/@attr'), 'value' );
 
-    $xp = XML::LibXML::XPathContext->new($doc);
+    my $xp = XML::LibXML::XPathContext->new($doc);
     ok ( $xp->findnodes('/document/foo')->size(), 1 );
     ok ( $xp->findnodes('/document[foo]')->size(), 1 );
     ok ( $xp->findnodes('/document[*]')->size(), 1 );

@@ -1,3 +1,7 @@
+
+use strict;
+use warnings;
+
 use Test;
 BEGIN { plan tests => 41 }
 use XML::LibXML;
@@ -24,7 +28,7 @@ seek($fh, 0, 0);
 
 ok($string);
 
-$doc = $parser->parse_html_string($string);
+my $doc = $parser->parse_html_string($string);
 
 ok($doc);
 

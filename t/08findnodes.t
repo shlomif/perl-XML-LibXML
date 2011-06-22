@@ -1,9 +1,10 @@
+use strict;
+use warnings;
+
 use Test;
-BEGIN { plan tests => 46 };
-END {ok(0) unless $loaded;}
+BEGIN { plan tests => 45 };
+
 use XML::LibXML;
-$loaded = 1;
-ok($loaded);
 
 # to test if findnodes works.
 # i added findnodes to the node class, so a query can be started
@@ -13,11 +14,11 @@ my $file    = "example/dromeds.xml";
 
 # init the file parser
 my $parser = XML::LibXML->new();
-$dom    = $parser->parse_file( $file );
+my $dom    = $parser->parse_file( $file );
 
 if ( defined $dom ) {
     # get the root document
-    $elem   = $dom->getDocumentElement();
+    my $elem   = $dom->getDocumentElement();
   
     # first very simple path starting at root
     my @list   = $elem->findnodes( "species" );
@@ -65,7 +66,7 @@ for (0..3) {
     my @nds = $doc->findnodes("processing-instruction('xsl-stylesheet')");
 }
 
-$doc = $parser->parse_string(<<'EOT');
+my $doc = $parser->parse_string(<<'EOT');
 <a:foo xmlns:a="http://foo.com" xmlns:b="http://bar.com">
  <b:bar>
   <a:foo xmlns:a="http://other.com"/>
@@ -77,10 +78,10 @@ my $root = $doc->getDocumentElement;
 my @a = $root->findnodes('//a:foo');
 ok(@a, 1);
 
-@b = $root->findnodes('//b:bar');
+my @b = $root->findnodes('//b:bar');
 ok(@b, 1);
 
-@none = $root->findnodes('//b:foo');
+my @none = $root->findnodes('//b:foo');
 @none = (@none, $root->findnodes('//foo'));
 ok(@none, 0);
 
@@ -112,6 +113,7 @@ my @badxpath = (
                );
 
 foreach my $xp ( @badxpath ) {
+    my $res;
     eval { $res = $root->findnodes( $xp ); };
     ok($@);
     eval { $res = $root->find( $xp ); };
