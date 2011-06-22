@@ -54,6 +54,17 @@ sub _check_created_element
 }
 # TEST:$_check_created_element=$_check_element_node;
 
+sub _count_local_name
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    my ($doc, $name, $want_count, $blurb) = @_;
+    
+    my @elems = $doc->getElementsByLocalName( $name );
+
+    is (scalar(@elems), $want_count, $blurb);
+}
+
 {
     print "# 1. Document Attributes\n";
 
@@ -480,13 +491,11 @@ sub _check_created_element
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
 
-            @as   = $doc2->getElementsByLocalName( "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
+            _count_local_name($doc2, 'A', 3, q{3 A's});
 
-            @as   = $doc2->getElementsByLocalName( "*" );
             # TEST
-            is( scalar( @as ), 5, ' TODO : Add test name');
+            _count_local_name($doc2, '*', 5, q{5 Sub-elements});
         }
         {
             my $doc2 = $parser2->parse_string($string2);
@@ -499,9 +508,8 @@ sub _check_created_element
             @as   = $doc2->getElementsByTagNameNS( "*", "A" );
             # TEST
             is( scalar( @as ), 3, ' TODO : Add test name');
-            @as   = $doc2->getElementsByLocalName( "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
+            _count_local_name($doc2, 'A', 3, q{3 As});
         }
         {
             my $doc2 = $parser2->parse_string($string3);
@@ -510,9 +518,8 @@ sub _check_created_element
             my @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
             # TEST
             is( scalar( @as ), 3, ' TODO : Add test name');
-            @as   = $doc2->getElementsByLocalName( "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
+            _count_local_name($doc2, 'A', 3, q{3 As});
         }
         {
             $parser2->recover(1);
@@ -522,9 +529,8 @@ sub _check_created_element
             my $doc2 = $parser2->parse_string($string4);
 #            my @as   = $doc2->getElementsByTagName( "C:A" );
 #            ok( scalar( @as ), 3);
-            my @as   = $doc2->getElementsByLocalName( "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
+            _count_local_name( $doc2, 'A', 3, q{3 As});
         }
         {
             my $doc2 = $parser2->parse_string($string5);
