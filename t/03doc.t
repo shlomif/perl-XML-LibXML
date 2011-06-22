@@ -91,6 +91,14 @@ sub _count_children_by_local_name
     return _generic_count($doc, 'getChildrenByLocalName', [@_]);
 }
 
+sub _count_children_by_name
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my $doc = shift;
+
+    return _generic_count($doc, 'getChildrenByTagName', [@_]);
+}
+
 {
     print "# 1. Document Attributes\n";
 
@@ -567,18 +575,15 @@ sub _count_children_by_local_name
             is( scalar( @as ), 2, ' TODO : Add test name');
 
             my $A = $doc2->getDocumentElement;
-            @as   = $A->getChildrenByTagName( "A" );
             # TEST
-            is( scalar( @as ), 1, ' TODO : Add test name');
-            @as   = $A->getChildrenByTagName( "C:A" );
+            _count_children_by_name($A, 'A', 1, q{1 A});
             # TEST
-            is( scalar( @as ), 1, ' TODO : Add test name');
-            @as   = $A->getChildrenByTagName( "C:B" );
+            _count_children_by_name($A, 'C:A', 1, q{C:A});
             # TEST
-            is( scalar( @as ), 0, ' TODO : Add test name');
-            @as   = $A->getChildrenByTagName( "*" );
+            _count_children_by_name($A, 'C:B', 0, q{No C:B children});
             # TEST
-            is( scalar( @as ), 2, ' TODO : Add test name');
+            _count_children_by_name($A, "*", 2, q{2 Childern in $A in total});
+
             @as   = $A->getChildrenByTagNameNS( "*", "A" );
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
