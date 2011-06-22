@@ -293,16 +293,16 @@ sub is_empty_str
         is($pi->nodeType, XML_PI_NODE, ' TODO : Add test name');
         # TEST
         is($pi->nodeName, "foo", ' TODO : Add test name');
-	my $data = $pi->textContent;
-	# undef or "" depending on libxml2 version
+        my $data = $pi->textContent;
+        # undef or "" depending on libxml2 version
         # TEST
         ok( is_empty_str($data), ' TODO : Add test name' );
-	$data = $pi->getData;
+        $data = $pi->getData;
         # TEST
         ok( is_empty_str($data), ' TODO : Add test name' );
-	$pi->setData(q(bar&amp;));
-	# TEST
-	is( $pi->getData, q(bar&amp;), ' TODO : Add test name');
+        $pi->setData(q(bar&amp;));
+        # TEST
+        is( $pi->getData, q(bar&amp;), ' TODO : Add test name');
         # TEST
         is($pi->textContent, q(bar&amp;), ' TODO : Add test name');
     }
@@ -324,9 +324,9 @@ sub is_empty_str
     my $node2 = $doc->createElement( "bar" );
     { my $warn;
       eval {
-	local $SIG{__WARN__} = sub { $warn = 1 };
-	# TEST
-	ok( !defined($doc->appendChild($node2)), ' TODO : Add test name' );
+        local $SIG{__WARN__} = sub { $warn = 1 };
+        # TEST
+        ok( !defined($doc->appendChild($node2)), ' TODO : Add test name' );
       };
       # TEST
       ok(($@ or $warn), ' TODO : Add test name');
@@ -499,10 +499,10 @@ sub is_empty_str
             is( scalar( @as ), 3, ' TODO : Add test name');
         }
         {
-	    $parser2->recover(1);
-	    local $SIG{'__WARN__'} = sub { 
-   	       print "warning caught: @_\n";
-	    }; 
+            $parser2->recover(1);
+            local $SIG{'__WARN__'} = sub { 
+                  print "warning caught: @_\n";
+            }; 
             my $doc2 = $parser2->parse_string($string4);
 #            my @as   = $doc2->getElementsByTagName( "C:A" );
 #            ok( scalar( @as ), 3);
@@ -528,25 +528,25 @@ sub is_empty_str
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
 
-	    my $A = $doc2->getDocumentElement;
+            my $A = $doc2->getDocumentElement;
             @as   = $A->getChildrenByTagName( "A" );
-	    # TEST
-	    is( scalar( @as ), 1, ' TODO : Add test name');
+            # TEST
+            is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $A->getChildrenByTagName( "C:A" );
-	    # TEST
-	    is( scalar( @as ), 1, ' TODO : Add test name');
+            # TEST
+            is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $A->getChildrenByTagName( "C:B" );
-	    # TEST
-	    is( scalar( @as ), 0, ' TODO : Add test name');
+            # TEST
+            is( scalar( @as ), 0, ' TODO : Add test name');
             @as   = $A->getChildrenByTagName( "*" );
-	    # TEST
-	    is( scalar( @as ), 2, ' TODO : Add test name');
+            # TEST
+            is( scalar( @as ), 2, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "*", "A" );
-	    # TEST
-	    is( scalar( @as ), 2, ' TODO : Add test name');
+            # TEST
+            is( scalar( @as ), 2, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "xml://D", "*" );
-	    # TEST
-	    is( scalar( @as ), 1, ' TODO : Add test name');
+            # TEST
+            is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "*", "*" );
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
