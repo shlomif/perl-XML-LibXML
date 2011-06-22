@@ -110,12 +110,9 @@ sub _check_element_node
         $encdoc->setEncoding( "iso-8859-1" );
         {
             my $node = $encdoc->createElement( "foo" );
-            # TEST
-            ok($node, ' TODO : Add test name');
-            # TEST
-            is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name' );
-            # TEST
-            is($node->nodeName, "foo", ' TODO : Add test name' );
+
+            # TEST*$_check_element_node
+            _check_element_node($node, 'foo', 'Encodc Element creation');
         }
 
         print "# SAX style document with encoding\n";
