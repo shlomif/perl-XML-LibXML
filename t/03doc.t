@@ -54,6 +54,19 @@ sub _check_created_element
 }
 # TEST:$_check_created_element=$_check_element_node;
 
+sub _multi_arg_generic_count
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    my ($doc, $method, $params) = @_;
+    
+    my ($meth_params, $want_count, $blurb) = @$params;
+
+    my @elems = $doc->$method( @$meth_params );
+
+    return is (scalar(@elems), $want_count, $blurb);
+}
+
 sub _generic_count
 {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -62,9 +75,9 @@ sub _generic_count
     
     my ($name, $want_count, $blurb) = @$params;
 
-    my @elems = $doc->$method( $name );
-
-    return is (scalar(@elems), $want_count, $blurb);
+    return _multi_arg_generic_count(
+        $doc, $method, [[$name], $want_count, $blurb, ],
+    );
 }
 
 sub _count_local_name
@@ -97,6 +110,16 @@ sub _count_children_by_name
     my $doc = shift;
 
     return _generic_count($doc, 'getChildrenByTagName', [@_]);
+}
+
+sub _count_elements_by_name_ns
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($doc, $ns_and_name, $want_count, $blurb) = @_;
+
+    return _multi_arg_generic_count($doc, 'getElementsByTagNameNS',
+        [$ns_and_name, $want_count, $blurb]
+    );
 }
 
 {
@@ -518,9 +541,10 @@ sub _count_children_by_name
             # TEST
             _count_tag_name($doc2, '*', 5, q{5 elements of all names});
 
-            my @as   = $doc2->getElementsByTagNameNS( "*", "B" );
             # TEST
-            is( scalar( @as ), 2, ' TODO : Add test name');
+            _count_elements_by_name_ns($doc2, ['*', 'B'], 2,
+                '2 Bs of any namespace'
+            );
 
             # TEST
             _count_local_name($doc2, 'A', 3, q{3 A's});
@@ -532,20 +556,23 @@ sub _count_children_by_name
             my $doc2 = $parser2->parse_string($string2);
             # TEST
             _count_tag_name( $doc2, 'C:A', 3, q{C:A count});
-            my @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
-            @as   = $doc2->getElementsByTagNameNS( "*", "A" );
+            _count_elements_by_name_ns($doc2, [ "xml://D", "A" ], 3, 
+                q{3 elements of namespace xml://D and A},
+            );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
+            _count_elements_by_name_ns($doc2, ['*', 'A'], 3,
+                q{3 Elements A of any namespace}
+            );
             # TEST
             _count_local_name($doc2, 'A', 3, q{3 As});
         }
         {
             my $doc2 = $parser2->parse_string($string3);
-            my @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
+            _count_elements_by_name_ns($doc2, ["xml://D", "A"], 3,
+                q{3 Elements A of any namespace}
+            );
             # TEST
             _count_local_name($doc2, 'A', 3, q{3 As});
         }
@@ -564,15 +591,17 @@ sub _count_children_by_name
             _count_tag_name($doc2, 'C:A', 1, q{3 C:As});
             # TEST
             _count_tag_name($doc2, 'A', 3, q{3 As});
-            my @as   = $doc2->getElementsByTagNameNS( "*", "A" );
             # TEST
-            is( scalar( @as ), 4, ' TODO : Add test name');
-            @as   = $doc2->getElementsByTagNameNS( "*", "*" );
+            _count_elements_by_name_ns($doc2, ["*", "A"], 4,
+                q{4 Elements of A of any namespace}
+            );
+            _count_elements_by_name_ns($doc2, ['*', '*'], 5,
+                q{4 Elements of any namespace},
+            );
             # TEST
-            is( scalar( @as ), 5, ' TODO : Add test name');
-            @as   = $doc2->getElementsByTagNameNS( "xml://D", "*" );
-            # TEST
-            is( scalar( @as ), 2, ' TODO : Add test name');
+            _count_elements_by_name_ns( $doc2, ["xml://D", "*" ], 2,
+                q{2 elements of any name in D}
+            );
 
             my $A = $doc2->getDocumentElement;
             # TEST
@@ -584,7 +613,7 @@ sub _count_children_by_name
             # TEST
             _count_children_by_name($A, "*", 2, q{2 Childern in $A in total});
 
-            @as   = $A->getChildrenByTagNameNS( "*", "A" );
+            my @as   = $A->getChildrenByTagNameNS( "*", "A" );
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "xml://D", "*" );
