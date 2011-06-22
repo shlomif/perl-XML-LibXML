@@ -83,6 +83,14 @@ sub _count_tag_name
     return _generic_count($doc, 'getElementsByTagName', [@_]);
 }
 
+sub _count_children_by_local_name
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my $doc = shift;
+
+    return _generic_count($doc, 'getChildrenByLocalName', [@_]);
+}
+
 {
     print "# 1. Document Attributes\n";
 
@@ -580,9 +588,8 @@ sub _count_tag_name
             @as   = $A->getChildrenByTagNameNS( "*", "*" );
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
-            @as   = $A->getChildrenByLocalName( "A" );
             # TEST
-            is( scalar( @as ), 2, ' TODO : Add test name');
+            _count_children_by_local_name($A, 'A', 2, q{2 As});
         }
     }
 }
