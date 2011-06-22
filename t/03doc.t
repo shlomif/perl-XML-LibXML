@@ -122,6 +122,16 @@ sub _count_elements_by_name_ns
     );
 }
 
+sub _count_children_by_name_ns
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($doc, $ns_and_name, $want_count, $blurb) = @_;
+
+    return _multi_arg_generic_count($doc, 'getChildrenByTagNameNS',
+        [$ns_and_name, $want_count, $blurb]
+    );
+}
+
 {
     print "# 1. Document Attributes\n";
 
@@ -612,16 +622,17 @@ sub _count_elements_by_name_ns
             _count_children_by_name($A, 'C:B', 0, q{No C:B children});
             # TEST
             _count_children_by_name($A, "*", 2, q{2 Childern in $A in total});
-
-            my @as   = $A->getChildrenByTagNameNS( "*", "A" );
             # TEST
-            is( scalar( @as ), 2, ' TODO : Add test name');
-            @as   = $A->getChildrenByTagNameNS( "xml://D", "*" );
+            _count_children_by_name_ns($A, ['*', 'A'], 2, 
+                q{2 As of any namespace});
             # TEST
-            is( scalar( @as ), 1, ' TODO : Add test name');
-            @as   = $A->getChildrenByTagNameNS( "*", "*" );
+            _count_children_by_name_ns($A, [ "xml://D", "*" ], 1,
+                q{1 Child of D},
+            );
             # TEST
-            is( scalar( @as ), 2, ' TODO : Add test name');
+            _count_children_by_name_ns($A, [ "*", "*" ], 2,
+                q{2 Children in total},
+            );
             # TEST
             _count_children_by_local_name($A, 'A', 2, q{2 As});
         }
