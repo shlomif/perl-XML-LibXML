@@ -65,6 +65,17 @@ sub _count_local_name
     is (scalar(@elems), $want_count, $blurb);
 }
 
+sub _count_tag_name
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    my ($doc, $name, $want_count, $blurb) = @_;
+    
+    my @elems = $doc->getElementsByTagName( $name );
+
+    is (scalar(@elems), $want_count, $blurb);
+}
+
 {
     print "# 1. Document Attributes\n";
 
@@ -479,15 +490,12 @@ sub _count_local_name
         my $string5 = '<A xmlns:C="xml://D"><C:A>foo<A/>bar</C:A><A><C:B/>X</A>baz</A>';
         {
             my $doc2 = $parser2->parse_string($string1);
-            my @as   = $doc2->getElementsByTagName( "A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
-
-            @as   = $doc2->getElementsByTagName( "*" );
+            _count_tag_name($doc2, 'A', 3, q{3 As});
             # TEST
-            is( scalar( @as ), 5, ' TODO : Add test name');
+            _count_tag_name($doc2, '*', 5, q{5 elements of all names});
 
-            @as   = $doc2->getElementsByTagNameNS( "*", "B" );
+            my @as   = $doc2->getElementsByTagNameNS( "*", "B" );
             # TEST
             is( scalar( @as ), 2, ' TODO : Add test name');
 
@@ -499,10 +507,9 @@ sub _count_local_name
         }
         {
             my $doc2 = $parser2->parse_string($string2);
-            my @as   = $doc2->getElementsByTagName( "C:A" );
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
-            @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
+            _count_tag_name( $doc2, 'C:A', 3, q{C:A count});
+            my @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
             # TEST
             is( scalar( @as ), 3, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "*", "A" );
@@ -513,8 +520,6 @@ sub _count_local_name
         }
         {
             my $doc2 = $parser2->parse_string($string3);
-#            my @as   = $doc2->getElementsByTagName( "A" );
-#            ok( scalar( @as ), 3);
             my @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
             # TEST
             is( scalar( @as ), 3, ' TODO : Add test name');
@@ -527,20 +532,16 @@ sub _count_local_name
                   print "warning caught: @_\n";
             }; 
             my $doc2 = $parser2->parse_string($string4);
-#            my @as   = $doc2->getElementsByTagName( "C:A" );
-#            ok( scalar( @as ), 3);
             # TEST
             _count_local_name( $doc2, 'A', 3, q{3 As});
         }
         {
             my $doc2 = $parser2->parse_string($string5);
-            my @as   = $doc2->getElementsByTagName( "C:A" );
             # TEST
-            is( scalar( @as ), 1, ' TODO : Add test name');
-            @as   = $doc2->getElementsByTagName( "A" );
+            _count_tag_name($doc2, 'C:A', 1, q{3 C:As});
             # TEST
-            is( scalar( @as ), 3, ' TODO : Add test name');
-            @as   = $doc2->getElementsByTagNameNS( "*", "A" );
+            _count_tag_name($doc2, 'A', 3, q{3 As});
+            my @as   = $doc2->getElementsByTagNameNS( "*", "A" );
             # TEST
             is( scalar( @as ), 4, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "*", "*" );
