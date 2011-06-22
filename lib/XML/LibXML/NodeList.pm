@@ -141,7 +141,7 @@ detailed by the W3C DOM documentation of Node Lists.
 
 =head2 new()
 
-You will almost never have to create a new NodeSet object, as it is all
+You will almost never have to create a new NodeList object, as it is all
 done for you by XPath.
 
 =head2 get_nodelist()
@@ -164,7 +164,7 @@ Returns the node at $pos. The node position in XPath is based at 1, not 0.
 
 =head2 size()
 
-Returns the number of nodes in the NodeSet.
+Returns the number of nodes in the NodeList.
 
 =head2 pop()
 
@@ -187,7 +187,7 @@ Equivalent to perl's shift function.
 
 Equivalent to perl's unshift function.
 
-=head2 prepend($nodeset)
+=head2 prepend($nodelist)
 
 Given a nodelist, prepends the list of nodes in $nodelist to the front of
 the current list.
