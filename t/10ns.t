@@ -69,15 +69,15 @@ print "# 2.    multiple namespaces \n";
 print "# 3.   nested names \n";
 
 {
-    my $doc3 = $parser->parse_string( $xml3 );    
+    my $doc3 = $parser->parse_string( $xml3 );
     my $elem = $doc3->documentElement;
     my @cn = $elem->childNodes;
     my @xs = grep { $_->nodeType == XML_ELEMENT_NODE } @cn;
 
     my @x1 = $xs[1]->childNodes; my @x2 = $xs[2]->childNodes;
 
-    ok( $x1[1]->namespaceURI , "http://kungfoo" );    
-    ok( $x2[1]->namespaceURI , "http://foobar" );    
+    ok( $x1[1]->namespaceURI , "http://kungfoo" );
+    ok( $x2[1]->namespaceURI , "http://foobar" );
 
     # namespace scopeing
     ok( not defined $elem->lookupNamespacePrefix( "http://kungfoo" ) );
@@ -126,7 +126,7 @@ EOX
 print "# 6. lossless setting of namespaces with setAttribute\n";
 # reported by Kurt George Gjerde
 {
-    my $doc = XML::LibXML->createDocument; 
+    my $doc = XML::LibXML->createDocument;
     my $root = $doc->createElementNS('http://example.com', 'document');
     $root->setAttribute('xmlns:xxx', 'http://example.com');
     $root->setAttribute('xmlns:yyy', 'http://yonder.com');
@@ -167,7 +167,7 @@ print "# 8. changing namespace declarations\n";
 {
   my $xmlns = 'http://www.w3.org/2000/xmlns/';
 
-    my $doc = XML::LibXML->createDocument; 
+    my $doc = XML::LibXML->createDocument;
     my $root = $doc->createElementNS('http://example.com', 'document');
     $root->setAttributeNS($xmlns, 'xmlns:xxx', 'http://example.com');
     $root->setAttribute('xmlns:yyy', 'http://yonder.com');
@@ -208,26 +208,26 @@ print "# 8. changing namespace declarations\n";
     ok ( $root->setNamespaceDeclPrefix('yyy', 'zzz') );
     ok ( $root->lookupNamespaceURI('yyy'), undef );
     ok ( $root->lookupNamespaceURI('zzz'), 'http://changed.com' );
-    ok ( $root->setNamespaceDeclURI('zzz',undef ) ); 
+    ok ( $root->setNamespaceDeclURI('zzz',undef ) );
     ok ( $root->lookupNamespaceURI('zzz'), undef );
 
     my $strnode = $root->toString();
     ok ( $strnode !~ /xmlns:zzz/ );
 
     # changing the default namespace declaration
-    ok ( $root->setNamespaceDeclURI('','http://test') );	
+    ok ( $root->setNamespaceDeclURI('','http://test') );
     ok ( $root->lookupNamespaceURI(''), 'http://test' );
     ok ( $root->getNamespaceURI(), 'http://test' );
 
     # changing prefix of the default ns declaration
-    ok ( $root->setNamespaceDeclPrefix('','foo') );	
+    ok ( $root->setNamespaceDeclPrefix('','foo') );
     ok ( $root->lookupNamespaceURI(''), undef );
     ok ( $root->lookupNamespaceURI('foo'), 'http://test' );
     ok ( $root->getNamespaceURI(),  'http://test' );
     ok ( $root->prefix(),  'foo' );
 
     # turning a ns declaration to a default ns declaration
-    ok ( $root->setNamespaceDeclPrefix('foo','') );	
+    ok ( $root->setNamespaceDeclPrefix('foo','') );
     ok ( $root->lookupNamespaceURI('foo'), undef );
     ok ( $root->lookupNamespaceURI(''), 'http://test' );
     ok ( $root->lookupNamespaceURI(undef), 'http://test' );
@@ -253,7 +253,7 @@ print "# 8. changing namespace declarations\n";
 
     # removing other xmlns declarations
     $root->addNewChild('http://example.com', 'xxx:foo');
-    ok( $root->setNamespaceDeclURI('xxx',undef) );	
+    ok( $root->setNamespaceDeclURI('xxx',undef) );
     ok ( $root->lookupNamespaceURI('xxx'), undef );
     ok ( $root->getNamespaceURI(), undef );
     ok ( $root->firstChild->getNamespaceURI(), undef );
@@ -276,7 +276,7 @@ print "# 8. changing namespace declarations\n";
     ok ( $strnode !~ /xmlns=/ );
     ok ( $strnode !~ /xmlns:xxx=/ );
     ok ( $strnode =~ /<foo/ );
-    
+
     ok ( $root->setNamespaceDeclPrefix('xxx',undef) );
 
     ok ( $doc->findnodes('/document/foo')->size(), 1 );
@@ -301,15 +301,15 @@ print "# 9. namespace reconciliation\n";
 	my $doc = XML::LibXML->createDocument( 'http://default', 'root' );
 	my $root = $doc->documentElement;
 	$root->setNamespace( 'http://children', 'child', 0 );
-	
+
 	$root->appendChild( my $n = $doc->createElementNS( 'http://default', 'branch' ));
 	# appending an element in the same namespace will
 	# strip its declaration
 	ok( !defined($n->getAttribute( 'xmlns' )) );
-	
+
 	$n->appendChild( my $a = $doc->createElementNS( 'http://children', 'child:a' ));
 	$n->appendChild( my $b = $doc->createElementNS( 'http://children', 'child:b' ));
-	
+
 	$n->appendChild( my $c = $doc->createElementNS( 'http://children', 'child:c' ));
 	# appending $c strips the declaration
 	ok( !defined($c->getAttribute('xmlns:child')) );
@@ -357,27 +357,27 @@ print "# 9. namespace reconciliation\n";
 	$doc = XML::LibXML::Document->new;
 	$n = $doc->createElement( 'didl' );
 	$n->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
-	
+
 	$a = $doc->createElement( 'dc' );
 	$a->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
 	$a->setAttribute( "xsi:schemaLocation"=>"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives
 .org/OAI/2.0/oai_dc.xsd" );
-	
+
 	$n->appendChild( $a );
-	
+
 	# the declaration for xsi should be stripped
 	ok( !defined($a->getAttribute( 'xmlns:xsi' )) );
-	
+
 	$n->removeChild( $a );
-	
+
 	# should be a new declaration for xsi in $a
 	ok( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance' );
-	
+
 	$b = $doc->createElement( 'foo' );
 	$b->setAttribute( 'xsi:bar', 'bar' );
 	$n->appendChild( $b );
 	$n->removeChild( $b );
-	
+
 	# a prefix without a namespace can't be reliably compared,
 	# so $b doesn't acquire a declaration from $n!
 	ok( !defined($b->getAttribute( 'xmlns:xsi' )) );
