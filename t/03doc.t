@@ -154,27 +154,27 @@ sub _count_children_by_name_ns
 
     $doc->setEncoding( "iso-8859-1" );
     # TEST
-    is( $doc->encoding, "iso-8859-1", ' TODO : Add test name' );
+    is( $doc->encoding, "iso-8859-1", 'Encoding was set.' );
 
     $doc->setVersion(12.5);
     # TEST
-    is( $doc->version, "12.5", ' TODO : Add test name' );
+    is( $doc->version, "12.5", 'Version was set.' );
 
     $doc->setStandalone(1);
     # TEST
-    is( $doc->standalone, 1, ' TODO : Add test name' );
+    is( $doc->standalone, 1, 'Standalone was set.' );
 
     $doc->setBaseURI( "localhost/here.xml" );
     # TEST
-    is( $doc->URI, "localhost/here.xml", ' TODO : Add test name' );
+    is( $doc->URI, "localhost/here.xml", 'URI is set.' );
 
     my $doc2 = XML::LibXML::Document->createDocument("1.1", "iso-8859-2");
     # TEST
-    is( $doc2->encoding, "iso-8859-2", ' TODO : Add test name' );
+    is( $doc2->encoding, "iso-8859-2", 'doc2 encoding was set.' );
     # TEST
-    is( $doc2->version,  "1.1", ' TODO : Add test name' );
+    is( $doc2->version,  "1.1", 'doc2 version was set.' );
     # TEST
-    is( $doc2->standalone,  -1, ' TODO : Add test name' );
+    is( $doc2->standalone,  -1, 'doc2 standalone' );
 }
 
 {
@@ -692,12 +692,12 @@ sub _count_children_by_name_ns
 };
   my $dom = XML::LibXML->new->parse_string($xml);
   # TEST
-  is($dom->getEncoding,"UTF-8", ' TODO : Add test name');
+  is($dom->getEncoding, "UTF-8", ' TODO : Add test name');
   $dom->setEncoding();
   # TEST
-  is($dom->getEncoding,undef, ' TODO : Add test name');
+  is($dom->getEncoding, undef, ' TODO : Add test name');
   # TEST
-  is($dom->toString,$out, ' TODO : Add test name');
+  is($dom->toString, $out, ' TODO : Add test name');
 }
 
 # the following tests were added for #33810
