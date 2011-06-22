@@ -138,34 +138,35 @@ print "# 6. lossless setting of namespaces with setAttribute\n";
 
 print "# 7. namespaced attributes\n";
 {
-  my $doc = XML::LibXML->new->parse_string(<<'EOF');
+    my $doc = XML::LibXML->new->parse_string(<<'EOF');
 <test xmlns:xxx="http://example.com"/>
 EOF
-  my $root = $doc->getDocumentElement();
-  # namespaced attributes
-  $root->setAttribute('xxx:attr', 'value');
-  ok ( $root->getAttributeNode('xxx:attr') );
-  ok ( $root->getAttribute('xxx:attr'), 'value' );
-  print $root->toString(1),"\n";
-  ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-  ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-  ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+    my $root = $doc->getDocumentElement();
+    # namespaced attributes
+    $root->setAttribute('xxx:attr', 'value');
+    ok ( $root->getAttributeNode('xxx:attr') );
+    ok ( $root->getAttribute('xxx:attr'), 'value' );
+    print $root->toString(1),"\n";
+    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
 
-  #change encoding to UTF-8 and retest
-  $doc->setEncoding('UTF-8');
-  # namespaced attributes
-  $root->setAttribute('xxx:attr', 'value');
-  ok ( $root->getAttributeNode('xxx:attr') );
-  ok ( $root->getAttribute('xxx:attr'), 'value' );
-  print $root->toString(1),"\n";
-  ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-  ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-  ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+    #change encoding to UTF-8 and retest
+    $doc->setEncoding('UTF-8');
+    # namespaced attributes
+    $root->setAttribute('xxx:attr', 'value');
+    ok ( $root->getAttributeNode('xxx:attr') );
+    ok ( $root->getAttribute('xxx:attr'), 'value' );
+    print $root->toString(1),"\n";
+    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 
+        'http://example.com');
 }
 
 print "# 8. changing namespace declarations\n";
 {
-  my $xmlns = 'http://www.w3.org/2000/xmlns/';
+    my $xmlns = 'http://www.w3.org/2000/xmlns/';
 
     my $doc = XML::LibXML->createDocument;
     my $root = $doc->createElementNS('http://example.com', 'document');
@@ -247,9 +248,9 @@ print "# 8. changing namespace declarations\n";
     ok ( $root->getAttributeNode('xxx:attr') );
     ok ( $root->getAttribute('xxx:attr'), 'value' );
     print $root->toString(1),"\n";
-   ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-   ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-   ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
+    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
+    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
 
     # removing other xmlns declarations
     $root->addNewChild('http://example.com', 'xxx:foo');
@@ -264,11 +265,11 @@ print "# 8. changing namespace declarations\n";
     print $root->toString(1),"\n";
     # check namespaced attributes
     ok ( $root->getAttributeNode('xxx:attr'), undef );
-   ok ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef );
-   ok ( $root->getAttributeNode('attr') );
+    ok ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef );
+    ok ( $root->getAttributeNode('attr') );
     ok ( $root->getAttribute('attr'), 'value' );
-   ok ( $root->getAttributeNodeNS(undef,'attr') );
-   ok ( $root->getAttributeNS(undef,'attr'), 'value' );
+    ok ( $root->getAttributeNodeNS(undef,'attr') );
+    ok ( $root->getAttributeNS(undef,'attr'), 'value' );
     ok ( $root->getAttributeNode('attr')->getNamespaceURI(), undef);
 
 
@@ -282,133 +283,138 @@ print "# 8. changing namespace declarations\n";
     ok ( $doc->findnodes('/document/foo')->size(), 1 );
     ok ( $doc->findnodes('/document[foo]')->size(), 1 );
     ok ( $doc->findnodes('/document[*]')->size(), 1 );
-   ok ( $doc->findnodes('/document[@attr and foo]')->size(), 1 );
-   ok ( $doc->findvalue('/document/@attr'), 'value' );
+    ok ( $doc->findnodes('/document[@attr and foo]')->size(), 1 );
+    ok ( $doc->findvalue('/document/@attr'), 'value' );
 
     my $xp = XML::LibXML::XPathContext->new($doc);
     ok ( $xp->findnodes('/document/foo')->size(), 1 );
     ok ( $xp->findnodes('/document[foo]')->size(), 1 );
     ok ( $xp->findnodes('/document[*]')->size(), 1 );
 
-   ok ( $xp->findnodes('/document[@attr and foo]')->size(), 1 );
-   ok ( $xp->findvalue('/document/@attr'), 'value' );
+    ok ( $xp->findnodes('/document[@attr and foo]')->size(), 1 );
+    ok ( $xp->findvalue('/document/@attr'), 'value' );
 
     ok ( $root->firstChild->prefix(),  undef );
 }
 
 print "# 9. namespace reconciliation\n";
 {
-	my $doc = XML::LibXML->createDocument( 'http://default', 'root' );
-	my $root = $doc->documentElement;
-	$root->setNamespace( 'http://children', 'child', 0 );
+    my $doc = XML::LibXML->createDocument( 'http://default', 'root' );
+    my $root = $doc->documentElement;
+    $root->setNamespace( 'http://children', 'child', 0 );
 
-	$root->appendChild( my $n = $doc->createElementNS( 'http://default', 'branch' ));
-	# appending an element in the same namespace will
-	# strip its declaration
-	ok( !defined($n->getAttribute( 'xmlns' )) );
+    $root->appendChild( my $n = $doc->createElementNS( 'http://default', 'branch' ));
+    # appending an element in the same namespace will
+    # strip its declaration
+    ok( !defined($n->getAttribute( 'xmlns' )) );
 
-	$n->appendChild( my $a = $doc->createElementNS( 'http://children', 'child:a' ));
-	$n->appendChild( my $b = $doc->createElementNS( 'http://children', 'child:b' ));
+    $n->appendChild( my $a = $doc->createElementNS( 'http://children', 'child:a' ));
+    $n->appendChild( my $b = $doc->createElementNS( 'http://children', 'child:b' ));
 
-	$n->appendChild( my $c = $doc->createElementNS( 'http://children', 'child:c' ));
-	# appending $c strips the declaration
-	ok( !defined($c->getAttribute('xmlns:child')) );
+    $n->appendChild( my $c = $doc->createElementNS( 'http://children', 'child:c' ));
+    # appending $c strips the declaration
+    ok( !defined($c->getAttribute('xmlns:child')) );
 
-	# add another prefix for children
-	$c->setAttribute( 'xmlns:foo', 'http://children' );
-	ok( $c->getAttribute( 'xmlns:foo' ), 'http://children' );
+    # add another prefix for children
+    $c->setAttribute( 'xmlns:foo', 'http://children' );
+    ok( $c->getAttribute( 'xmlns:foo' ), 'http://children' );
 
-	$n->appendChild( my $d = $doc->createElementNS( 'http://other', 'branch' ));
-	# appending an element with a new default namespace
-	# will leave it declared
-	ok( $d->getAttribute( 'xmlns' ), 'http://other' );
+    $n->appendChild( my $d = $doc->createElementNS( 'http://other', 'branch' ));
+    # appending an element with a new default namespace
+    # will leave it declared
+    ok( $d->getAttribute( 'xmlns' ), 'http://other' );
 
-	my $doca = XML::LibXML->createDocument( 'http://default/', 'root' );
-	$doca->adoptNode( $a );
-	$doca->adoptNode( $b );
-	$doca->documentElement->appendChild( $a );
-	$doca->documentElement->appendChild( $b );
+    my $doca = XML::LibXML->createDocument( 'http://default/', 'root' );
+    $doca->adoptNode( $a );
+    $doca->adoptNode( $b );
+    $doca->documentElement->appendChild( $a );
+    $doca->documentElement->appendChild( $b );
 
-	# Because the child namespace isn't defined in $doca
-	# it should get declared on both child nodes $a and $b
-	ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
-	ok( $b->getAttribute( 'xmlns:child' ), 'http://children' );
+    # Because the child namespace isn't defined in $doca
+    # it should get declared on both child nodes $a and $b
+    ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
+    ok( $b->getAttribute( 'xmlns:child' ), 'http://children' );
 
-	$doca = XML::LibXML->createDocument( 'http://children', 'child:root' );
-	$doca->adoptNode( $a );
-	$doca->documentElement->appendChild( $a );
+    $doca = XML::LibXML->createDocument( 'http://children', 'child:root' );
+    $doca->adoptNode( $a );
+    $doca->documentElement->appendChild( $a );
 
-	# $doca declares the child namespace, so the declaration
-	# should now get stripped from $a
-	ok( !defined($a->getAttribute( 'xmlns:child' )) );
+    # $doca declares the child namespace, so the declaration
+    # should now get stripped from $a
+    ok( !defined($a->getAttribute( 'xmlns:child' )) );
 
-	$doca->documentElement->removeChild( $a );
+    $doca->documentElement->removeChild( $a );
 
-	# $a should now have its namespace re-declared
-	ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
+    # $a should now have its namespace re-declared
+    ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
 
-	$doca->documentElement->appendChild( $a );
+    $doca->documentElement->appendChild( $a );
 
-	# $doca declares the child namespace, so the declaration
-	# should now get stripped from $a
-	ok( !defined($a->getAttribute( 'xmlns:child' )) );
+    # $doca declares the child namespace, so the declaration
+    # should now get stripped from $a
+    ok( !defined($a->getAttribute( 'xmlns:child' )) );
 
 
-	$doc = XML::LibXML::Document->new;
-	$n = $doc->createElement( 'didl' );
-	$n->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
+    $doc = XML::LibXML::Document->new;
+    $n = $doc->createElement( 'didl' );
+    $n->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
 
-	$a = $doc->createElement( 'dc' );
-	$a->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
-	$a->setAttribute( "xsi:schemaLocation"=>"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives
+    $a = $doc->createElement( 'dc' );
+    $a->setAttribute( "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance" );
+    $a->setAttribute( "xsi:schemaLocation"=>"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives
 .org/OAI/2.0/oai_dc.xsd" );
 
-	$n->appendChild( $a );
+    $n->appendChild( $a );
 
-	# the declaration for xsi should be stripped
-	ok( !defined($a->getAttribute( 'xmlns:xsi' )) );
+    # the declaration for xsi should be stripped
+    ok( !defined($a->getAttribute( 'xmlns:xsi' )) );
 
-	$n->removeChild( $a );
+    $n->removeChild( $a );
 
-	# should be a new declaration for xsi in $a
-	ok( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance' );
+    # should be a new declaration for xsi in $a
+    ok( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance' );
 
-	$b = $doc->createElement( 'foo' );
-	$b->setAttribute( 'xsi:bar', 'bar' );
-	$n->appendChild( $b );
-	$n->removeChild( $b );
+    $b = $doc->createElement( 'foo' );
+    $b->setAttribute( 'xsi:bar', 'bar' );
+    $n->appendChild( $b );
+    $n->removeChild( $b );
 
-	# a prefix without a namespace can't be reliably compared,
-	# so $b doesn't acquire a declaration from $n!
-	ok( !defined($b->getAttribute( 'xmlns:xsi' )) );
+    # a prefix without a namespace can't be reliably compared,
+    # so $b doesn't acquire a declaration from $n!
+    ok( !defined($b->getAttribute( 'xmlns:xsi' )) );
 
-	# tests for reconciliation during setAttributeNodeNS
-	my $attr = $doca->createAttributeNS('http://children',
-					    'child:attr','value');
-	ok($attr);
-	my $child= $doca->documentElement->firstChild;
-	ok($child);
-	$child->setAttributeNodeNS($attr);
-	ok ( !defined($child->getAttribute( 'xmlns:child' )) );
+    # tests for reconciliation during setAttributeNodeNS
+    my $attr = $doca->createAttributeNS(
+        'http://children', 'child:attr','value'
+    );
+    ok($attr);
+    my $child= $doca->documentElement->firstChild;
+    ok($child);
+    $child->setAttributeNodeNS($attr);
+    ok ( !defined($child->getAttribute( 'xmlns:child' )) );
 
-	# due to libxml2 limitation, XML::LibXML declares the namespace
-	# on the root element
-	$attr = $doca->createAttributeNS('http://other','other:attr','value');
-	ok($attr);
-	$child->setAttributeNodeNS($attr);
-	#
-	ok ( !defined($child->getAttribute( 'xmlns:other' )) );
-	ok ( defined($doca->documentElement->getAttribute( 'xmlns:other' )) );
+    # due to libxml2 limitation, XML::LibXML declares the namespace
+    # on the root element
+    $attr = $doca->createAttributeNS('http://other','other:attr','value');
+    ok($attr);
+    $child->setAttributeNodeNS($attr);
+    #
+    ok ( !defined($child->getAttribute( 'xmlns:other' )) );
+    ok ( defined($doca->documentElement->getAttribute( 'xmlns:other' )) );
 }
 
 print "# 10. xml namespace\n";
 {
-  my $docOne = XML::LibXML->new->parse_string('<foo><inc xml:id="test"/></foo>');
-  my $docTwo = XML::LibXML->new->parse_string('<bar><urgh xml:id="foo"/></bar>');
+    my $docOne = XML::LibXML->new->parse_string(
+        '<foo><inc xml:id="test"/></foo>'
+    );
+    my $docTwo = XML::LibXML->new->parse_string(
+        '<bar><urgh xml:id="foo"/></bar>'
+    );
 
-  my $inc = $docOne->getElementById('test');
-  my $rep = $docTwo->getElementById('foo');
-  $inc->parentNode->replaceChild($rep, $inc);
-  ok($inc->getAttributeNS('http://www.w3.org/XML/1998/namespace','id'),'test');
-  ok($inc->isSameNode($docOne->getElementById('test')));
+    my $inc = $docOne->getElementById('test');
+    my $rep = $docTwo->getElementById('foo');
+    $inc->parentNode->replaceChild($rep, $inc);
+    ok($inc->getAttributeNS('http://www.w3.org/XML/1998/namespace','id'),'test');
+    ok($inc->isSameNode($docOne->getElementById('test')));
 }
