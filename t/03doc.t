@@ -41,6 +41,19 @@ sub _check_element_node
 
 # TEST:$_check_element_node=$c;
 
+sub _check_created_element
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($doc, $given_name, $name, $blurb) = @_;
+
+    return _check_element_node(
+        $doc->createElement($given_name),
+        $name,
+        $blurb
+    );
+}
+# TEST:$_check_created_element=$_check_element_node;
+
 {
     print "# 1. Document Attributes\n";
 
@@ -97,23 +110,18 @@ sub _check_element_node
         is($node->nodeType, XML_DOCUMENT_FRAG_NODE, ' TODO : Add test name');
     }
 
-    {
-        my $node = $doc->createElement( "foo" );
-
-        # TEST*$_check_element_node
-        _check_element_node($node, 'foo', 'Simple Element');
-    }
+    # TEST*$_check_created_element
+    _check_created_element($doc, 'foo', 'foo', 'Simple Element');
     
     {
         print "# document with encoding\n";
         my $encdoc = XML::LibXML::Document->new( "1.0" );
         $encdoc->setEncoding( "iso-8859-1" );
-        {
-            my $node = $encdoc->createElement( "foo" );
 
-            # TEST*$_check_element_node
-            _check_element_node($node, 'foo', 'Encodc Element creation');
-        }
+        # TEST*$_check_created_element
+        _check_created_element(
+            $encdoc, 'foo', 'foo', 'Encdoc Element creation'
+        );
 
         print "# SAX style document with encoding\n";
         my $node_def = {
@@ -122,15 +130,12 @@ sub _check_element_node
             Prefix => "",
             NamespaceURI => "",
                        };
-        {
-            my $node = $encdoc->createElement( $node_def->{Name} );
-            # TEST
-            ok($node, ' TODO : Add test name');
-            # TEST
-            is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name' );
-            # TEST
-            is($node->nodeName, "object", ' TODO : Add test name' );
-        }
+
+        # TEST*$_check_created_element
+        _check_created_element(
+            $encdoc, $node_def->{Name}, 'object',
+            'Encdoc element creation based on node_def->{name}',
+        );
     }
 
     {
