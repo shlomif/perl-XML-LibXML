@@ -3,8 +3,9 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests=>129; }
+# Should be 129.
+use Test::More tests => 129;
+
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -43,10 +44,13 @@ print "# 1.   single namespace \n";
 {
     my $doc1 = $parser->parse_string( $xml1 );
     my $elem = $doc1->documentElement;
-    ok($elem->lookupNamespaceURI( "b" ), "http://whatever" );
+    # TEST
+    is($elem->lookupNamespaceURI( "b" ), "http://whatever", ' TODO : Add test name' );
     my @cn = $elem->childNodes;
-    ok($cn[0]->lookupNamespaceURI( "b" ), "http://whatever" );
-    ok($cn[1]->namespaceURI, "http://whatever" );
+    # TEST
+    is($cn[0]->lookupNamespaceURI( "b" ), "http://whatever", ' TODO : Add test name' );
+    # TEST
+    is($cn[1]->namespaceURI, "http://whatever", ' TODO : Add test name' );
 }
 
 print "# 2.    multiple namespaces \n";
@@ -55,15 +59,23 @@ print "# 2.    multiple namespaces \n";
     my $doc2 = $parser->parse_string( $xml2 );
 
     my $elem = $doc2->documentElement;
-    ok($elem->lookupNamespaceURI( "b" ), "http://whatever");
-    ok($elem->lookupNamespaceURI( "c" ), "http://kungfoo");
+    # TEST
+    is($elem->lookupNamespaceURI( "b" ), "http://whatever", ' TODO : Add test name');
+    # TEST
+    is($elem->lookupNamespaceURI( "c" ), "http://kungfoo", ' TODO : Add test name');
     my @cn = $elem->childNodes;
 
-    ok($cn[0]->lookupNamespaceURI( "b" ), "http://whatever" );
-    ok($cn[0]->lookupNamespaceURI( "c" ), "http://kungfoo");
+    # TEST
 
-    ok($cn[1]->namespaceURI, "http://whatever" );
-    ok($cn[2]->namespaceURI, "http://kungfoo" );
+    is($cn[0]->lookupNamespaceURI( "b" ), "http://whatever", ' TODO : Add test name' );
+    # TEST
+    is($cn[0]->lookupNamespaceURI( "c" ), "http://kungfoo", ' TODO : Add test name');
+
+    # TEST
+
+    is($cn[1]->namespaceURI, "http://whatever", ' TODO : Add test name' );
+    # TEST
+    is($cn[2]->namespaceURI, "http://kungfoo", ' TODO : Add test name' );
 }
 
 print "# 3.   nested names \n";
@@ -76,12 +88,17 @@ print "# 3.   nested names \n";
 
     my @x1 = $xs[1]->childNodes; my @x2 = $xs[2]->childNodes;
 
-    ok( $x1[1]->namespaceURI , "http://kungfoo" );
-    ok( $x2[1]->namespaceURI , "http://foobar" );
+    # TEST
+
+    is( $x1[1]->namespaceURI , "http://kungfoo", ' TODO : Add test name' );
+    # TEST
+    is( $x2[1]->namespaceURI , "http://foobar", ' TODO : Add test name' );
 
     # namespace scopeing
-    ok( not defined $elem->lookupNamespacePrefix( "http://kungfoo" ) );
-    ok( not defined $elem->lookupNamespacePrefix( "http://foobar" ) );
+    # TEST
+    ok( !defined($elem->lookupNamespacePrefix( "http://kungfoo" )), ' TODO : Add test name' );
+    # TEST
+    ok( !defined($elem->lookupNamespacePrefix( "http://foobar" )), ' TODO : Add test name' );
 }
 
 print "# 4. post creation namespace setting\n";
@@ -94,9 +111,12 @@ print "# 4. post creation namespace setting\n";
 
     $e1->appendChild($e2);
     $e2->appendChild($e3);
-    ok( $e2->setNamespace("http://kungfoo", "bar") );
-    ok( $a->setNamespace("http://kungfoo", "bar") );
-    ok( $a->nodeName, "bar:kung" );
+    # TEST
+    ok( $e2->setNamespace("http://kungfoo", "bar"), ' TODO : Add test name' );
+    # TEST
+    ok( $a->setNamespace("http://kungfoo", "bar"), ' TODO : Add test name' );
+    # TEST
+    is( $a->nodeName, "bar:kung", ' TODO : Add test name' );
 }
 
 print "# 5. importing namespaces\n";
@@ -113,14 +133,20 @@ EOX
     my $c = $doca->importNode( $b );
 
     my @attra = $c->attributes;
-    ok( scalar(@attra), 1 );
-    ok( $attra[0]->nodeType, 18 );
+    # TEST
+    is( scalar(@attra), 1, ' TODO : Add test name' );
+    # TEST
+    is( $attra[0]->nodeType, 18, ' TODO : Add test name' );
     my $d = $doca->adoptNode($b);
 
-    ok( $d->isSameNode( $b ) );
+    # TEST
+
+    ok( $d->isSameNode( $b ), ' TODO : Add test name' );
     my @attrb = $d->attributes;
-    ok( scalar(@attrb), 1 );
-    ok( $attrb[0]->nodeType, 18 );
+    # TEST
+    is( scalar(@attrb), 1, ' TODO : Add test name' );
+    # TEST
+    is( $attrb[0]->nodeType, 18, ' TODO : Add test name' );
 }
 
 print "# 6. lossless setting of namespaces with setAttribute\n";
@@ -133,7 +159,8 @@ print "# 6. lossless setting of namespaces with setAttribute\n";
     $doc->setDocumentElement( $root );
 
     my $strnode = $root->toString();
-    ok ( $strnode =~ /xmlns:xxx/ and $strnode =~ /xmlns=/ );
+    # TEST
+    ok ( $strnode =~ /xmlns:xxx/ and $strnode =~ /xmlns=/, ' TODO : Add test name' );
 }
 
 print "# 7. namespaced attributes\n";
@@ -144,24 +171,34 @@ EOF
     my $root = $doc->getDocumentElement();
     # namespaced attributes
     $root->setAttribute('xxx:attr', 'value');
-    ok ( $root->getAttributeNode('xxx:attr') );
-    ok ( $root->getAttribute('xxx:attr'), 'value' );
+    # TEST
+    ok ( $root->getAttributeNode('xxx:attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xxx:attr'), 'value', ' TODO : Add test name' );
     print $root->toString(1),"\n";
-    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+    # TEST
+    ok ( $root->getAttributeNodeNS('http://example.com','attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNS('http://example.com','attr'), 'value', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com', ' TODO : Add test name');
 
     #change encoding to UTF-8 and retest
     $doc->setEncoding('UTF-8');
     # namespaced attributes
     $root->setAttribute('xxx:attr', 'value');
-    ok ( $root->getAttributeNode('xxx:attr') );
-    ok ( $root->getAttribute('xxx:attr'), 'value' );
+    # TEST
+    ok ( $root->getAttributeNode('xxx:attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xxx:attr'), 'value', ' TODO : Add test name' );
     print $root->toString(1),"\n";
-    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 
-        'http://example.com');
+    # TEST
+    ok ( $root->getAttributeNodeNS('http://example.com','attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNS('http://example.com','attr'), 'value', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 
+        'http://example.com', ' TODO : Add test name');
 }
 
 print "# 8. changing namespace declarations\n";
@@ -175,126 +212,207 @@ print "# 8. changing namespace declarations\n";
     $doc->setDocumentElement( $root );
 
     # can we get the namespaces ?
-    ok ( $root->getAttribute('xmlns:xxx'), 'http://example.com');
-    ok ( $root->getAttributeNS($xmlns,'xmlns'), 'http://example.com' );
-    ok ( $root->getAttribute('xmlns:yyy'), 'http://yonder.com');
-    ok ( $root->lookupNamespacePrefix('http://yonder.com'), 'yyy');
-    ok ( $root->lookupNamespaceURI('yyy'), 'http://yonder.com');
+    # TEST
+    is ( $root->getAttribute('xmlns:xxx'), 'http://example.com', ' TODO : Add test name');
+    # TEST
+    is ( $root->getAttributeNS($xmlns,'xmlns'), 'http://example.com', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xmlns:yyy'), 'http://yonder.com', ' TODO : Add test name');
+    # TEST
+    is ( $root->lookupNamespacePrefix('http://yonder.com'), 'yyy', ' TODO : Add test name');
+    # TEST
+    is ( $root->lookupNamespaceURI('yyy'), 'http://yonder.com', ' TODO : Add test name');
 
     # can we change the namespaces ?
-    ok ( $root->setAttribute('xmlns:yyy', 'http://newyonder.com') );
-    ok ( $root->getAttribute('xmlns:yyy'), 'http://newyonder.com');
-    ok ( $root->lookupNamespacePrefix('http://newyonder.com'), 'yyy');
-    ok ( $root->lookupNamespaceURI('yyy'), 'http://newyonder.com');
+    # TEST
+    ok ( $root->setAttribute('xmlns:yyy', 'http://newyonder.com'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xmlns:yyy'), 'http://newyonder.com', ' TODO : Add test name');
+    # TEST
+    is ( $root->lookupNamespacePrefix('http://newyonder.com'), 'yyy', ' TODO : Add test name');
+    # TEST
+    is ( $root->lookupNamespaceURI('yyy'), 'http://newyonder.com', ' TODO : Add test name');
 
     # can we change the default namespace ?
     $root->setAttribute('xmlns', 'http://other.com' );
-    ok ( $root->getAttribute('xmlns'), 'http://other.com' );
-    ok ( $root->lookupNamespacePrefix('http://other.com'), "" );
-    ok ( $root->lookupNamespaceURI(''), 'http://other.com' );
+    # TEST
+    is ( $root->getAttribute('xmlns'), 'http://other.com', ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespacePrefix('http://other.com'), "", ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI(''), 'http://other.com', ' TODO : Add test name' );
 
     # non-existent namespaces
-    ok ( $root->lookupNamespaceURI('foo'), undef );
-    ok ( $root->lookupNamespacePrefix('foo'), undef );
-    ok ( $root->getAttribute('xmlns:foo'), undef );
+    # TEST
+    is ( $root->lookupNamespaceURI('foo'), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespacePrefix('foo'), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xmlns:foo'), undef, ' TODO : Add test name' );
 
     # changing namespace declaration URI and prefix
-    ok ( $root->setNamespaceDeclURI('yyy', 'http://changed.com') );
-    ok ( $root->getAttribute('xmlns:yyy'), 'http://changed.com');
-    ok ( $root->lookupNamespaceURI('yyy'), 'http://changed.com');
+    # TEST
+    ok ( $root->setNamespaceDeclURI('yyy', 'http://changed.com'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xmlns:yyy'), 'http://changed.com', ' TODO : Add test name');
+    # TEST
+    is ( $root->lookupNamespaceURI('yyy'), 'http://changed.com', ' TODO : Add test name');
     eval { $root->setNamespaceDeclPrefix('yyy','xxx'); };
-    ok ( $@ );  # prefix occupied
+    # TEST
+    ok ( $@, ' TODO : Add test name' );  # prefix occupied
     eval { $root->setNamespaceDeclPrefix('yyy',''); };
-    ok ( $@ );  # prefix occupied
-    ok ( $root->setNamespaceDeclPrefix('yyy', 'zzz') );
-    ok ( $root->lookupNamespaceURI('yyy'), undef );
-    ok ( $root->lookupNamespaceURI('zzz'), 'http://changed.com' );
-    ok ( $root->setNamespaceDeclURI('zzz',undef ) );
-    ok ( $root->lookupNamespaceURI('zzz'), undef );
+    # TEST
+    ok ( $@, ' TODO : Add test name' );  # prefix occupied
+    # TEST
+    ok ( $root->setNamespaceDeclPrefix('yyy', 'zzz'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI('yyy'), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI('zzz'), 'http://changed.com', ' TODO : Add test name' );
+    # TEST
+    ok ( $root->setNamespaceDeclURI('zzz',undef ), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI('zzz'), undef, ' TODO : Add test name' );
 
     my $strnode = $root->toString();
-    ok ( $strnode !~ /xmlns:zzz/ );
+    # TEST
+    ok ( $strnode !~ /xmlns:zzz/, ' TODO : Add test name' );
 
     # changing the default namespace declaration
-    ok ( $root->setNamespaceDeclURI('','http://test') );
-    ok ( $root->lookupNamespaceURI(''), 'http://test' );
-    ok ( $root->getNamespaceURI(), 'http://test' );
+    # TEST
+    ok ( $root->setNamespaceDeclURI('','http://test'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI(''), 'http://test', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getNamespaceURI(), 'http://test', ' TODO : Add test name' );
 
     # changing prefix of the default ns declaration
-    ok ( $root->setNamespaceDeclPrefix('','foo') );
-    ok ( $root->lookupNamespaceURI(''), undef );
-    ok ( $root->lookupNamespaceURI('foo'), 'http://test' );
-    ok ( $root->getNamespaceURI(),  'http://test' );
-    ok ( $root->prefix(),  'foo' );
+    # TEST
+    ok ( $root->setNamespaceDeclPrefix('','foo'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI(''), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI('foo'), 'http://test', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getNamespaceURI(),  'http://test', ' TODO : Add test name' );
+    # TEST
+    is ( $root->prefix(),  'foo', ' TODO : Add test name' );
 
     # turning a ns declaration to a default ns declaration
-    ok ( $root->setNamespaceDeclPrefix('foo','') );
-    ok ( $root->lookupNamespaceURI('foo'), undef );
-    ok ( $root->lookupNamespaceURI(''), 'http://test' );
-    ok ( $root->lookupNamespaceURI(undef), 'http://test' );
-    ok ( $root->getNamespaceURI(),  'http://test' );
-    ok ( $root->prefix(),  undef );
+    # TEST
+    ok ( $root->setNamespaceDeclPrefix('foo',''), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI('foo'), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI(''), 'http://test', ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI(undef), 'http://test', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getNamespaceURI(),  'http://test', ' TODO : Add test name' );
+    # TEST
+    is ( $root->prefix(),  undef, ' TODO : Add test name' );
 
     # removing the default ns declaration
-    ok ( $root->setNamespaceDeclURI('',undef) );
-    ok ( $root->lookupNamespaceURI(''), undef );
-    ok ( $root->getNamespaceURI(), undef );
+    # TEST
+    ok ( $root->setNamespaceDeclURI('',undef), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI(''), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->getNamespaceURI(), undef, ' TODO : Add test name' );
 
     $strnode = $root->toString();
-    ok ( $strnode !~ /xmlns=/ );
+    # TEST
+    ok ( $strnode !~ /xmlns=/, ' TODO : Add test name' );
 
     # namespaced attributes
     $root->setAttribute('xxx:attr', 'value');
-    ok ( $root->getAttributeNode('xxx:attr') );
-    ok ( $root->getAttribute('xxx:attr'), 'value' );
+    # TEST
+    ok ( $root->getAttributeNode('xxx:attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('xxx:attr'), 'value', ' TODO : Add test name' );
     print $root->toString(1),"\n";
-    ok ( $root->getAttributeNodeNS('http://example.com','attr') );
-    ok ( $root->getAttributeNS('http://example.com','attr'), 'value' );
-    ok ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com');
+    # TEST
+    ok ( $root->getAttributeNodeNS('http://example.com','attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNS('http://example.com','attr'), 'value', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 'http://example.com', ' TODO : Add test name');
 
     # removing other xmlns declarations
     $root->addNewChild('http://example.com', 'xxx:foo');
-    ok( $root->setNamespaceDeclURI('xxx',undef) );
-    ok ( $root->lookupNamespaceURI('xxx'), undef );
-    ok ( $root->getNamespaceURI(), undef );
-    ok ( $root->firstChild->getNamespaceURI(), undef );
-    ok ( $root->prefix(),  undef );
-    ok ( $root->firstChild->prefix(),  undef );
+    # TEST
+    ok( $root->setNamespaceDeclURI('xxx',undef), ' TODO : Add test name' );
+    # TEST
+    is ( $root->lookupNamespaceURI('xxx'), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->getNamespaceURI(), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->firstChild->getNamespaceURI(), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->prefix(),  undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->firstChild->prefix(),  undef, ' TODO : Add test name' );
 
 
     print $root->toString(1),"\n";
     # check namespaced attributes
-    ok ( $root->getAttributeNode('xxx:attr'), undef );
-    ok ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef );
-    ok ( $root->getAttributeNode('attr') );
-    ok ( $root->getAttribute('attr'), 'value' );
-    ok ( $root->getAttributeNodeNS(undef,'attr') );
-    ok ( $root->getAttributeNS(undef,'attr'), 'value' );
-    ok ( $root->getAttributeNode('attr')->getNamespaceURI(), undef);
+    # TEST
+    is ( $root->getAttributeNode('xxx:attr'), undef, ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNodeNS('http://example.com', 'attr'), undef, ' TODO : Add test name' );
+    # TEST
+    ok ( $root->getAttributeNode('attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttribute('attr'), 'value', ' TODO : Add test name' );
+    # TEST
+    ok ( $root->getAttributeNodeNS(undef,'attr'), ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNS(undef,'attr'), 'value', ' TODO : Add test name' );
+    # TEST
+    is ( $root->getAttributeNode('attr')->getNamespaceURI(), undef, ' TODO : Add test name');
 
 
     $strnode = $root->toString();
-    ok ( $strnode !~ /xmlns=/ );
-    ok ( $strnode !~ /xmlns:xxx=/ );
-    ok ( $strnode =~ /<foo/ );
+    # TEST
+    ok ( $strnode !~ /xmlns=/, ' TODO : Add test name' );
+    # TEST
+    ok ( $strnode !~ /xmlns:xxx=/, ' TODO : Add test name' );
+    # TEST
+    ok ( $strnode =~ /<foo/, ' TODO : Add test name' );
 
-    ok ( $root->setNamespaceDeclPrefix('xxx',undef) );
+    # TEST
 
-    ok ( $doc->findnodes('/document/foo')->size(), 1 );
-    ok ( $doc->findnodes('/document[foo]')->size(), 1 );
-    ok ( $doc->findnodes('/document[*]')->size(), 1 );
-    ok ( $doc->findnodes('/document[@attr and foo]')->size(), 1 );
-    ok ( $doc->findvalue('/document/@attr'), 'value' );
+    ok ( $root->setNamespaceDeclPrefix('xxx',undef), ' TODO : Add test name' );
+
+    # TEST
+
+    is ( $doc->findnodes('/document/foo')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $doc->findnodes('/document[foo]')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $doc->findnodes('/document[*]')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $doc->findnodes('/document[@attr and foo]')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $doc->findvalue('/document/@attr'), 'value', ' TODO : Add test name' );
 
     my $xp = XML::LibXML::XPathContext->new($doc);
-    ok ( $xp->findnodes('/document/foo')->size(), 1 );
-    ok ( $xp->findnodes('/document[foo]')->size(), 1 );
-    ok ( $xp->findnodes('/document[*]')->size(), 1 );
+    # TEST
+    is ( $xp->findnodes('/document/foo')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $xp->findnodes('/document[foo]')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $xp->findnodes('/document[*]')->size(), 1, ' TODO : Add test name' );
 
-    ok ( $xp->findnodes('/document[@attr and foo]')->size(), 1 );
-    ok ( $xp->findvalue('/document/@attr'), 'value' );
+    # TEST
 
-    ok ( $root->firstChild->prefix(),  undef );
+    is ( $xp->findnodes('/document[@attr and foo]')->size(), 1, ' TODO : Add test name' );
+    # TEST
+    is ( $xp->findvalue('/document/@attr'), 'value', ' TODO : Add test name' );
+
+    # TEST
+
+    is ( $root->firstChild->prefix(),  undef, ' TODO : Add test name' );
 }
 
 print "# 9. namespace reconciliation\n";
@@ -306,23 +424,27 @@ print "# 9. namespace reconciliation\n";
     $root->appendChild( my $n = $doc->createElementNS( 'http://default', 'branch' ));
     # appending an element in the same namespace will
     # strip its declaration
-    ok( !defined($n->getAttribute( 'xmlns' )) );
+    # TEST
+    ok( !defined($n->getAttribute( 'xmlns' )), ' TODO : Add test name' );
 
     $n->appendChild( my $a = $doc->createElementNS( 'http://children', 'child:a' ));
     $n->appendChild( my $b = $doc->createElementNS( 'http://children', 'child:b' ));
 
     $n->appendChild( my $c = $doc->createElementNS( 'http://children', 'child:c' ));
     # appending $c strips the declaration
-    ok( !defined($c->getAttribute('xmlns:child')) );
+    # TEST
+    ok( !defined($c->getAttribute('xmlns:child')), ' TODO : Add test name' );
 
     # add another prefix for children
     $c->setAttribute( 'xmlns:foo', 'http://children' );
-    ok( $c->getAttribute( 'xmlns:foo' ), 'http://children' );
+    # TEST
+    is( $c->getAttribute( 'xmlns:foo' ), 'http://children', ' TODO : Add test name' );
 
     $n->appendChild( my $d = $doc->createElementNS( 'http://other', 'branch' ));
     # appending an element with a new default namespace
     # will leave it declared
-    ok( $d->getAttribute( 'xmlns' ), 'http://other' );
+    # TEST
+    is( $d->getAttribute( 'xmlns' ), 'http://other', ' TODO : Add test name' );
 
     my $doca = XML::LibXML->createDocument( 'http://default/', 'root' );
     $doca->adoptNode( $a );
@@ -332,8 +454,10 @@ print "# 9. namespace reconciliation\n";
 
     # Because the child namespace isn't defined in $doca
     # it should get declared on both child nodes $a and $b
-    ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
-    ok( $b->getAttribute( 'xmlns:child' ), 'http://children' );
+    # TEST
+    is( $a->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
+    # TEST
+    is( $b->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
 
     $doca = XML::LibXML->createDocument( 'http://children', 'child:root' );
     $doca->adoptNode( $a );
@@ -341,18 +465,21 @@ print "# 9. namespace reconciliation\n";
 
     # $doca declares the child namespace, so the declaration
     # should now get stripped from $a
-    ok( !defined($a->getAttribute( 'xmlns:child' )) );
+    # TEST
+    ok( !defined($a->getAttribute( 'xmlns:child' )), ' TODO : Add test name' );
 
     $doca->documentElement->removeChild( $a );
 
     # $a should now have its namespace re-declared
-    ok( $a->getAttribute( 'xmlns:child' ), 'http://children' );
+    # TEST
+    is( $a->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
 
     $doca->documentElement->appendChild( $a );
 
     # $doca declares the child namespace, so the declaration
     # should now get stripped from $a
-    ok( !defined($a->getAttribute( 'xmlns:child' )) );
+    # TEST
+    ok( !defined($a->getAttribute( 'xmlns:child' )), ' TODO : Add test name' );
 
 
     $doc = XML::LibXML::Document->new;
@@ -367,12 +494,14 @@ print "# 9. namespace reconciliation\n";
     $n->appendChild( $a );
 
     # the declaration for xsi should be stripped
-    ok( !defined($a->getAttribute( 'xmlns:xsi' )) );
+    # TEST
+    ok( !defined($a->getAttribute( 'xmlns:xsi' )), ' TODO : Add test name' );
 
     $n->removeChild( $a );
 
     # should be a new declaration for xsi in $a
-    ok( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance' );
+    # TEST
+    is( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance', ' TODO : Add test name' );
 
     $b = $doc->createElement( 'foo' );
     $b->setAttribute( 'xsi:bar', 'bar' );
@@ -381,26 +510,33 @@ print "# 9. namespace reconciliation\n";
 
     # a prefix without a namespace can't be reliably compared,
     # so $b doesn't acquire a declaration from $n!
-    ok( !defined($b->getAttribute( 'xmlns:xsi' )) );
+    # TEST
+    ok( !defined($b->getAttribute( 'xmlns:xsi' )), ' TODO : Add test name' );
 
     # tests for reconciliation during setAttributeNodeNS
     my $attr = $doca->createAttributeNS(
         'http://children', 'child:attr','value'
     );
-    ok($attr);
+    # TEST
+    ok($attr, ' TODO : Add test name');
     my $child= $doca->documentElement->firstChild;
-    ok($child);
+    # TEST
+    ok($child, ' TODO : Add test name');
     $child->setAttributeNodeNS($attr);
-    ok ( !defined($child->getAttribute( 'xmlns:child' )) );
+    # TEST
+    ok ( !defined($child->getAttribute( 'xmlns:child' )), ' TODO : Add test name' );
 
     # due to libxml2 limitation, XML::LibXML declares the namespace
     # on the root element
     $attr = $doca->createAttributeNS('http://other','other:attr','value');
-    ok($attr);
+    # TEST
+    ok($attr, ' TODO : Add test name');
     $child->setAttributeNodeNS($attr);
     #
-    ok ( !defined($child->getAttribute( 'xmlns:other' )) );
-    ok ( defined($doca->documentElement->getAttribute( 'xmlns:other' )) );
+    # TEST
+    ok ( !defined($child->getAttribute( 'xmlns:other' )), ' TODO : Add test name' );
+    # TEST
+    ok ( defined($doca->documentElement->getAttribute( 'xmlns:other' )), ' TODO : Add test name' );
 }
 
 print "# 10. xml namespace\n";
@@ -415,6 +551,8 @@ print "# 10. xml namespace\n";
     my $inc = $docOne->getElementById('test');
     my $rep = $docTwo->getElementById('foo');
     $inc->parentNode->replaceChild($rep, $inc);
-    ok($inc->getAttributeNS('http://www.w3.org/XML/1998/namespace','id'),'test');
-    ok($inc->isSameNode($docOne->getElementById('test')));
+    # TEST
+    is($inc->getAttributeNS('http://www.w3.org/XML/1998/namespace','id'),'test', ' TODO : Add test name');
+    # TEST
+    ok($inc->isSameNode($docOne->getElementById('test')), ' TODO : Add test name');
 }
