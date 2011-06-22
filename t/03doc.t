@@ -640,7 +640,7 @@ sub _count_children_by_name_ns
     }
 }
 {
-    print "# 5. Bug fixes (to be use with valgrind)\n";
+    print "# 5. Bug fixes (to be used with valgrind)\n";
     {  
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createPI(foo=>"bar");      # create a PI
