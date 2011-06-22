@@ -9,8 +9,10 @@
 
 # since all tests are run on a preparsed 
 
-use Test;
 use strict;
+use warnings;
+
+use Test;
 
 BEGIN { plan tests => 168 };
 use XML::LibXML;
