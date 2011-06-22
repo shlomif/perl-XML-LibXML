@@ -12,42 +12,61 @@
 use strict;
 use warnings;
 
-use Test;
+# Should be 168.
+use Test::More tests => 168;
 
-BEGIN { plan tests => 168 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
+
+sub is_empty_str 
+{
+    my $s = shift;
+    return (!defined($s) or (length($s) == 0));
+}
 
 {
     print "# 1. Document Attributes\n";
 
     my $doc = XML::LibXML::Document->createDocument();
-    ok($doc);
-    ok( not defined $doc->encoding); 
-    ok( $doc->version,  "1.0" );
-    ok( $doc->standalone, -1 );  # is the value we get for undefined,
+    # TEST
+    ok($doc, ' TODO : Add test name');
+    # TEST
+    ok( ! defined($doc->encoding), ' TODO : Add test name'); 
+    # TEST
+    is( $doc->version,  "1.0", ' TODO : Add test name' );
+    # TEST
+    is( $doc->standalone, -1, ' TODO : Add test name' );  # is the value we get for undefined,
                                  # actually the same as 0 but just not set.
-    ok( not defined $doc->URI);  # should be set by default.
-    ok( $doc->compression, -1 ); # -1 indicates NO compression at all!
+    # TEST
+    ok( !defined($doc->URI), ' TODO : Add test name');  # should be set by default.
+    # TEST
+    is( $doc->compression, -1, ' TODO : Add test name' ); # -1 indicates NO compression at all!
                                  # while 0 indicates just no zip compression 
                                  # (big difference huh?)
 
     $doc->setEncoding( "iso-8859-1" );
-    ok( $doc->encoding, "iso-8859-1" );
+    # TEST
+    is( $doc->encoding, "iso-8859-1", ' TODO : Add test name' );
 
     $doc->setVersion(12.5);
-    ok( $doc->version, "12.5" );
+    # TEST
+    is( $doc->version, "12.5", ' TODO : Add test name' );
 
     $doc->setStandalone(1);
-    ok( $doc->standalone, 1 );
+    # TEST
+    is( $doc->standalone, 1, ' TODO : Add test name' );
 
     $doc->setBaseURI( "localhost/here.xml" );
-    ok( $doc->URI, "localhost/here.xml" );
+    # TEST
+    is( $doc->URI, "localhost/here.xml", ' TODO : Add test name' );
 
     my $doc2 = XML::LibXML::Document->createDocument("1.1", "iso-8859-2");
-    ok( $doc2->encoding, "iso-8859-2" );
-    ok( $doc2->version,  "1.1" );
-    ok( $doc2->standalone,  -1 );
+    # TEST
+    is( $doc2->encoding, "iso-8859-2", ' TODO : Add test name' );
+    # TEST
+    is( $doc2->version,  "1.1", ' TODO : Add test name' );
+    # TEST
+    is( $doc2->standalone,  -1, ' TODO : Add test name' );
 }
 
 {
@@ -55,15 +74,20 @@ use XML::LibXML::Common qw(:libxml);
     my $doc = XML::LibXML::Document->new();
     {
         my $node = $doc->createDocumentFragment();
-        ok($node);
-        ok($node->nodeType, XML_DOCUMENT_FRAG_NODE);
+        # TEST
+        ok($node, ' TODO : Add test name');
+        # TEST
+        is($node->nodeType, XML_DOCUMENT_FRAG_NODE, ' TODO : Add test name');
     }
 
     {
         my $node = $doc->createElement( "foo" );
-        ok($node);
-        ok($node->nodeType, XML_ELEMENT_NODE );
-        ok($node->nodeName, "foo" );
+        # TEST
+        ok($node, ' TODO : Add test name');
+        # TEST
+        is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name' );
+        # TEST
+        is($node->nodeName, "foo", ' TODO : Add test name' );
     }
     
     {
@@ -72,9 +96,12 @@ use XML::LibXML::Common qw(:libxml);
         $encdoc->setEncoding( "iso-8859-1" );
         {
             my $node = $encdoc->createElement( "foo" );
-            ok($node);
-            ok($node->nodeType, XML_ELEMENT_NODE );
-            ok($node->nodeName, "foo" );
+            # TEST
+            ok($node, ' TODO : Add test name');
+            # TEST
+            is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name' );
+            # TEST
+            is($node->nodeName, "foo", ' TODO : Add test name' );
         }
 
         print "# SAX style document with encoding\n";
@@ -86,76 +113,107 @@ use XML::LibXML::Common qw(:libxml);
                        };
         {
             my $node = $encdoc->createElement( $node_def->{Name} );
-            ok($node);
-            ok($node->nodeType, XML_ELEMENT_NODE );
-            ok($node->nodeName, "object" );
+            # TEST
+            ok($node, ' TODO : Add test name');
+            # TEST
+            is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name' );
+            # TEST
+            is($node->nodeName, "object", ' TODO : Add test name' );
         }
     }
 
     {
         # namespaced element test
         my $node = $doc->createElementNS( "http://kungfoo", "foo:bar" );
-        ok($node);
-        ok($node->nodeType, XML_ELEMENT_NODE);
-        ok($node->nodeName, "foo:bar");
-        ok($node->prefix, "foo");
-        ok($node->localname, "bar");
-        ok($node->namespaceURI, "http://kungfoo");
+        # TEST
+        ok($node, ' TODO : Add test name');
+        # TEST
+        is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name');
+        # TEST
+        is($node->nodeName, "foo:bar", ' TODO : Add test name');
+        # TEST
+        is($node->prefix, "foo", ' TODO : Add test name');
+        # TEST
+        is($node->localname, "bar", ' TODO : Add test name');
+        # TEST
+        is($node->namespaceURI, "http://kungfoo", ' TODO : Add test name');
     }
 
     {
         print "# bad element creation\n";
+        # TEST:$badnames_count=5;
         my @badnames = ( ";", "&", "<><", "/", "1A");
 
         foreach my $name ( @badnames ) {
             my $node = eval {$doc->createElement( $name );};
-            ok( not defined $node );
+            # TEST*$badnames_count
+            ok( !(defined $node), ' TODO : Add test name' );
         }
 
     }
 
     {
         my $node = $doc->createTextNode( "foo" );
-        ok($node);
-        ok($node->nodeType, XML_TEXT_NODE );
-        ok($node->nodeValue, "foo" );
+        # TEST
+        ok($node, ' TODO : Add test name');
+        # TEST
+        is($node->nodeType, XML_TEXT_NODE, ' TODO : Add test name' );
+        # TEST
+        is($node->nodeValue, "foo", ' TODO : Add test name' );
     }
 
     {
         my $node = $doc->createComment( "foo" );
-        ok($node);
-        ok($node->nodeType, XML_COMMENT_NODE );
-        ok($node->nodeValue, "foo" );
-        ok($node->toString, "<!--foo-->");
+        # TEST
+        ok($node, ' TODO : Add test name');
+        # TEST
+        is($node->nodeType, XML_COMMENT_NODE, ' TODO : Add test name' );
+        # TEST
+        is($node->nodeValue, "foo", ' TODO : Add test name' );
+        # TEST
+        is($node->toString, "<!--foo-->", ' TODO : Add test name');
     }
 
     {
         my $node = $doc->createCDATASection( "foo" );
-        ok($node);
-        ok($node->nodeType, XML_CDATA_SECTION_NODE );
-        ok($node->nodeValue, "foo" );
-        ok($node->toString, "<![CDATA[foo]]>");
+        # TEST
+        ok($node, ' TODO : Add test name');
+        # TEST
+        is($node->nodeType, XML_CDATA_SECTION_NODE, ' TODO : Add test name' );
+        # TEST
+        is($node->nodeValue, "foo", ' TODO : Add test name' );
+        # TEST
+        is($node->toString, "<![CDATA[foo]]>", ' TODO : Add test name');
     }
 
     print "# 2.1 Create Attributes\n";
     {
         my $attr = $doc->createAttribute("foo", "bar");
-        ok($attr);
-        ok($attr->nodeType, XML_ATTRIBUTE_NODE );
-        ok($attr->name, "foo");
-        ok($attr->value, "bar" );
-        ok($attr->hasChildNodes, 0);
+        # TEST
+        ok($attr, ' TODO : Add test name');
+        # TEST
+        is($attr->nodeType, XML_ATTRIBUTE_NODE, ' TODO : Add test name' );
+        # TEST
+        is($attr->name, "foo", ' TODO : Add test name');
+        # TEST
+        is($attr->value, "bar", ' TODO : Add test name' );
+        # TEST
+        is($attr->hasChildNodes, 0, ' TODO : Add test name');
         my $content = $attr->firstChild;
-        ok( $content );
-        ok( $content->nodeType, XML_TEXT_NODE );
+        # TEST
+        ok( $content, ' TODO : Add test name' );
+        # TEST
+        is( $content->nodeType, XML_TEXT_NODE, ' TODO : Add test name' );
     }
     {
         print "# bad attribute creation\n";
+        # TEST:$badnames_count=5;
         my @badnames = ( ";", "&", "<><", "/", "1A");
 
         foreach my $name ( @badnames ) {
             my $node = eval {$doc->createAttribute( $name, "bar" );};
-            ok( not defined $node );
+            # TEST*$badnames_count
+            ok( !defined($node), ' TODO : Add test name' );
         }
 
     }
@@ -163,18 +221,21 @@ use XML::LibXML::Common qw(:libxml);
       my $elem = $doc->createElement('foo');
       my $attr = $doc->createAttribute(attr => 'e & f');
       $elem->addChild($attr);
-      ok ($elem->toString() eq '<foo attr="e &amp; f"/>');
+      # TEST
+      ok ($elem->toString() eq '<foo attr="e &amp; f"/>', ' TODO : Add test name');
       $elem->removeAttribute('attr');
       $attr = $doc->createAttributeNS(undef,'attr2' => 'a & b');
       $elem->addChild($attr);
       print $elem->toString(),"\n";
-      ok ($elem->toString() eq '<foo attr2="a &amp; b"/>');
+      # TEST
+      ok ($elem->toString() eq '<foo attr2="a &amp; b"/>', ' TODO : Add test name');
     }
     {
         eval {
             my $attr = $doc->createAttributeNS("http://kungfoo", "kung:foo","bar");
         };
-        ok($@);
+        # TEST
+        ok($@, ' TODO : Add test name');
 
         my $root = $doc->createElement( "foo" );
         $doc->setDocumentElement( $root );
@@ -183,21 +244,28 @@ use XML::LibXML::Common qw(:libxml);
         eval {
            $attr = $doc->createAttributeNS("http://kungfoo", "kung:foo","bar");
         };
-        ok($attr);
-        ok($attr->nodeName, "kung:foo");
-        ok($attr->name,"foo" );
-        ok($attr->value, "bar" );
+        # TEST
+        ok($attr, ' TODO : Add test name');
+        # TEST
+        is($attr->nodeName, "kung:foo", ' TODO : Add test name');
+        # TEST
+        is($attr->name,"foo", ' TODO : Add test name' );
+        # TEST
+        is($attr->value, "bar", ' TODO : Add test name' );
 
         $attr->setValue( q(bar&amp;) );
-        ok($attr->getValue, q(bar&amp;) );
+        # TEST
+        is($attr->getValue, q(bar&amp;), ' TODO : Add test name' );
     }
     {
         print "# bad attribute creation\n";
+        # TEST:$badnames_count=5;
         my @badnames = ( ";", "&", "<><", "/", "1A");
 
         foreach my $name ( @badnames ) {
             my $node = eval {$doc->createAttributeNS( undef, $name, "bar" );};
-            ok( not defined $node );
+            # TEST*$badnames_count
+            ok( (!defined $node), ' TODO : Add test name' );
         }
 
     }
@@ -205,26 +273,38 @@ use XML::LibXML::Common qw(:libxml);
     print "# 2.2 Create PIs\n";
     {
         my $pi = $doc->createProcessingInstruction( "foo", "bar" );
-        ok($pi);
-        ok($pi->nodeType, XML_PI_NODE);
-        ok($pi->nodeName, "foo");
-        ok($pi->textContent, "bar");
-        ok($pi->getData, "bar");
+        # TEST
+        ok($pi, ' TODO : Add test name');
+        # TEST
+        is($pi->nodeType, XML_PI_NODE, ' TODO : Add test name');
+        # TEST
+        is($pi->nodeName, "foo", ' TODO : Add test name');
+        # TEST
+        is($pi->textContent, "bar", ' TODO : Add test name');
+        # TEST
+        is($pi->getData, "bar", ' TODO : Add test name');
     }
 
     {
         my $pi = $doc->createProcessingInstruction( "foo" );
-        ok($pi);
-        ok($pi->nodeType, XML_PI_NODE);
-        ok($pi->nodeName, "foo");
+        # TEST
+        ok($pi, ' TODO : Add test name');
+        # TEST
+        is($pi->nodeType, XML_PI_NODE, ' TODO : Add test name');
+        # TEST
+        is($pi->nodeName, "foo", ' TODO : Add test name');
 	my $data = $pi->textContent;
 	# undef or "" depending on libxml2 version
-        ok( !defined $data or length($data)==0 );
+        # TEST
+        ok( is_empty_str($data), ' TODO : Add test name' );
 	$data = $pi->getData;
-        ok( !defined $data or length($data)==0 );
+        # TEST
+        ok( is_empty_str($data), ' TODO : Add test name' );
 	$pi->setData(q(bar&amp;));
-	ok( $pi->getData, q(bar&amp;));
-        ok($pi->textContent, q(bar&amp;));
+	# TEST
+	is( $pi->getData, q(bar&amp;), ' TODO : Add test name');
+        # TEST
+        is($pi->textContent, q(bar&amp;), ' TODO : Add test name');
     }
 }
 
@@ -236,57 +316,74 @@ use XML::LibXML::Common qw(:libxml);
     my $node = $doc->createElement( "foo" );
     $doc->setDocumentElement( $node );
     my $tn = $doc->documentElement;
-    ok($tn);
-    ok($node->isSameNode($tn));
+    # TEST
+    ok($tn, ' TODO : Add test name');
+    # TEST
+    ok($node->isSameNode($tn), ' TODO : Add test name');
 
     my $node2 = $doc->createElement( "bar" );
     { my $warn;
       eval {
 	local $SIG{__WARN__} = sub { $warn = 1 };
-	ok( !defined($doc->appendChild($node2)) );
+	# TEST
+	ok( !defined($doc->appendChild($node2)), ' TODO : Add test name' );
       };
-      ok($@ or $warn);
+      # TEST
+      ok(($@ or $warn), ' TODO : Add test name');
     }
     my @cn = $doc->childNodes;
-    ok( scalar(@cn) , 1);
-    ok($cn[0]->isSameNode($node));
+    # TEST
+    is( scalar(@cn) , 1, ' TODO : Add test name');
+    # TEST
+    ok($cn[0]->isSameNode($node), ' TODO : Add test name');
 
     eval {
       $doc->insertBefore($node2, $node);
     };
-    ok ($@);
+    # TEST
+    ok ($@, ' TODO : Add test name');
     @cn = $doc->childNodes;
-    ok( scalar(@cn) , 1);
-    ok($cn[0]->isSameNode($node));
+    # TEST
+    is( scalar(@cn) , 1, ' TODO : Add test name');
+    # TEST
+    ok($cn[0]->isSameNode($node), ' TODO : Add test name');
 
     $doc->removeChild($node);
     @cn = $doc->childNodes;
-    ok( scalar(@cn) , 0);
+    # TEST
+    is( scalar(@cn) , 0, ' TODO : Add test name');
 
     for ( 1..2 ) {
         my $nodeA = $doc->createElement( "x" );
         $doc->setDocumentElement( $nodeA );
     }
-    ok(1); # must not segfault here :)
+    # TEST
+    ok(1, ' TODO : Add test name'); # must not segfault here :)
 
     $doc->setDocumentElement( $node2 );
     @cn = $doc->childNodes;
-    ok( scalar(@cn) , 1);
-    ok($cn[0]->isSameNode($node2));
+    # TEST
+    is( scalar(@cn) , 1, ' TODO : Add test name');
+    # TEST
+    ok($cn[0]->isSameNode($node2), ' TODO : Add test name');
 
     my $node3 = $doc->createElementNS( "http://foo", "bar" );
-    ok($node3);
+    # TEST
+    ok($node3, ' TODO : Add test name');
 
     print "# 3.2 Processing Instructions\n"; 
     {
         my $pi = $doc->createProcessingInstruction( "foo", "bar" );
         $doc->appendChild( $pi );
         @cn = $doc->childNodes;
-        ok( $pi->isSameNode($cn[-1]) );
+        # TEST
+        ok( $pi->isSameNode($cn[-1]), ' TODO : Add test name' );
         $pi->setData( 'bar="foo"' );
-        ok( $pi->textContent, 'bar="foo"');
+        # TEST
+        is( $pi->textContent, 'bar="foo"', ' TODO : Add test name');
         $pi->setData( foo=>"foo" );
-        ok( $pi->textContent, 'foo="foo"');
+        # TEST
+        is( $pi->textContent, 'foo="foo"', ' TODO : Add test name');
         
     }
 
@@ -300,7 +397,9 @@ use XML::LibXML::Common qw(:libxml);
     my $parser = XML::LibXML->new;
     my $doc = $parser->parse_string("<foo>bar</foo>");  
 
-    ok( $doc );
+    # TEST
+
+    ok( $doc, ' TODO : Add test name' );
 
     print "# 4.1 to file handle\n";
     {
@@ -309,13 +408,18 @@ use XML::LibXML::Common qw(:libxml);
         if ( $fh->open( "> example/testrun.xml" ) ) {
             $doc->toFH( $fh );
             $fh->close;
-            ok(1);
+            # TEST
+            ok(1, ' TODO : Add test name');
             # now parse the file to check, if succeeded
             my $tdoc = $parser->parse_file( "example/testrun.xml" );
-            ok( $tdoc );
-            ok( $tdoc->documentElement );
-            ok( $tdoc->documentElement->nodeName, "foo" );
-            ok( $tdoc->documentElement->textContent, "bar" );
+            # TEST
+            ok( $tdoc, ' TODO : Add test name' );
+            # TEST
+            ok( $tdoc->documentElement, ' TODO : Add test name' );
+            # TEST
+            is( $tdoc->documentElement->nodeName, "foo", ' TODO : Add test name' );
+            # TEST
+            is( $tdoc->documentElement->textContent, "bar", ' TODO : Add test name' );
             unlink "example/testrun.xml" ;
         }
     }
@@ -323,13 +427,18 @@ use XML::LibXML::Common qw(:libxml);
     print "# 4.2 to named file\n";
     {
         $doc->toFile( "example/testrun.xml" );
-        ok(1);
+        # TEST
+        ok(1, ' TODO : Add test name');
         # now parse the file to check, if succeeded
         my $tdoc = $parser->parse_file( "example/testrun.xml" );
-        ok( $tdoc );
-        ok( $tdoc->documentElement );
-        ok( $tdoc->documentElement->nodeName, "foo" );
-        ok( $tdoc->documentElement->textContent, "bar" );
+        # TEST
+        ok( $tdoc, ' TODO : Add test name' );
+        # TEST
+        ok( $tdoc->documentElement, ' TODO : Add test name' );
+        # TEST
+        is( $tdoc->documentElement->nodeName, "foo", ' TODO : Add test name' );
+        # TEST
+        is( $tdoc->documentElement->textContent, "bar", ' TODO : Add test name' );
         unlink "example/testrun.xml" ;        
     }
 
@@ -344,39 +453,50 @@ use XML::LibXML::Common qw(:libxml);
         {
             my $doc2 = $parser2->parse_string($string1);
             my @as   = $doc2->getElementsByTagName( "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
 
             @as   = $doc2->getElementsByTagName( "*" );
-            ok( scalar( @as ), 5);
+            # TEST
+            is( scalar( @as ), 5, ' TODO : Add test name');
 
             @as   = $doc2->getElementsByTagNameNS( "*", "B" );
-            ok( scalar( @as ), 2);
+            # TEST
+            is( scalar( @as ), 2, ' TODO : Add test name');
 
             @as   = $doc2->getElementsByLocalName( "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
 
             @as   = $doc2->getElementsByLocalName( "*" );
-            ok( scalar( @as ), 5);
+            # TEST
+            is( scalar( @as ), 5, ' TODO : Add test name');
         }
         {
             my $doc2 = $parser2->parse_string($string2);
             my @as   = $doc2->getElementsByTagName( "C:A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "*", "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
             @as   = $doc2->getElementsByLocalName( "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
         }
         {
             my $doc2 = $parser2->parse_string($string3);
 #            my @as   = $doc2->getElementsByTagName( "A" );
 #            ok( scalar( @as ), 3);
             my @as   = $doc2->getElementsByTagNameNS( "xml://D", "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
             @as   = $doc2->getElementsByLocalName( "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
         }
         {
 	    $parser2->recover(1);
@@ -387,38 +507,52 @@ use XML::LibXML::Common qw(:libxml);
 #            my @as   = $doc2->getElementsByTagName( "C:A" );
 #            ok( scalar( @as ), 3);
             my @as   = $doc2->getElementsByLocalName( "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
         }
         {
             my $doc2 = $parser2->parse_string($string5);
             my @as   = $doc2->getElementsByTagName( "C:A" );
-            ok( scalar( @as ), 1);
+            # TEST
+            is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagName( "A" );
-            ok( scalar( @as ), 3);
+            # TEST
+            is( scalar( @as ), 3, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "*", "A" );
-            ok( scalar( @as ), 4);
+            # TEST
+            is( scalar( @as ), 4, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "*", "*" );
-            ok( scalar( @as ), 5);
+            # TEST
+            is( scalar( @as ), 5, ' TODO : Add test name');
             @as   = $doc2->getElementsByTagNameNS( "xml://D", "*" );
-            ok( scalar( @as ), 2);
+            # TEST
+            is( scalar( @as ), 2, ' TODO : Add test name');
 
 	    my $A = $doc2->getDocumentElement;
             @as   = $A->getChildrenByTagName( "A" );
-	    ok( scalar( @as ), 1);
+	    # TEST
+	    is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $A->getChildrenByTagName( "C:A" );
-	    ok( scalar( @as ), 1);
+	    # TEST
+	    is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $A->getChildrenByTagName( "C:B" );
-	    ok( scalar( @as ), 0);
+	    # TEST
+	    is( scalar( @as ), 0, ' TODO : Add test name');
             @as   = $A->getChildrenByTagName( "*" );
-	    ok( scalar( @as ), 2);
+	    # TEST
+	    is( scalar( @as ), 2, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "*", "A" );
-	    ok( scalar( @as ), 2);
+	    # TEST
+	    is( scalar( @as ), 2, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "xml://D", "*" );
-	    ok( scalar( @as ), 1);
+	    # TEST
+	    is( scalar( @as ), 1, ' TODO : Add test name');
             @as   = $A->getChildrenByTagNameNS( "*", "*" );
-            ok( scalar( @as ), 2);
+            # TEST
+            is( scalar( @as ), 2, ' TODO : Add test name');
             @as   = $A->getChildrenByLocalName( "A" );
-            ok( scalar( @as ), 2);
+            # TEST
+            is( scalar( @as ), 2, ' TODO : Add test name');
         }
     }
 }
@@ -429,28 +563,32 @@ use XML::LibXML::Common qw(:libxml);
        my $x=$doc->createPI(foo=>"bar");      # create a PI
        undef $doc;                            # should not free
        undef $x;                              # free the PI
-       ok(1);
+       # TEST
+       ok(1, ' TODO : Add test name');
     }
     {  
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createAttribute(foo=>"bar"); # create an attribute
        undef $doc;                            # should not free
        undef $x;                              # free the attribute
-       ok(1);
+       # TEST
+       ok(1, ' TODO : Add test name');
     }
     {  
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createAttributeNS(undef,foo=>"bar"); # create an attribute
        undef $doc;                            # should not free
        undef $x;                              # free the attribute
-       ok(1);
+       # TEST
+       ok(1, ' TODO : Add test name');
     }
     {  
        my $doc=XML::LibXML->new->parse_string('<foo xmlns:x="http://foo.bar"/>');
        my $x=$doc->createAttributeNS('http://foo.bar','x:foo'=>"bar"); # create an attribute
        undef $doc;                            # should not free
        undef $x;                              # free the attribute
-       ok(1);
+       # TEST
+       ok(1, ' TODO : Add test name');
     }
     {
       # rt.cpan.org #30610
@@ -460,7 +598,8 @@ use XML::LibXML::Common qw(:libxml);
       my $lom_doc=XML::LibXML->new->parse_string($xml);
       my $lom_root=$lom_doc->getDocumentElement();
       $object->appendChild( $lom_root );
-      ok(!defined($object->firstChild->ownerDocument));
+      # TEST
+      ok(!defined($object->firstChild->ownerDocument), ' TODO : Add test name');
     }   
 }
 
@@ -473,14 +612,20 @@ use XML::LibXML::Common qw(:libxml);
 <test/>
 };
   my $dom = XML::LibXML->new->parse_string($xml);
-  ok($dom->getEncoding,"UTF-8");
+  # TEST
+  is($dom->getEncoding,"UTF-8", ' TODO : Add test name');
   $dom->setEncoding();
-  ok($dom->getEncoding,undef);
-  ok($dom->toString,$out);
+  # TEST
+  is($dom->getEncoding,undef, ' TODO : Add test name');
+  # TEST
+  is($dom->toString,$out, ' TODO : Add test name');
 }
 
 # the following tests were added for #33810
 if (eval { require Encode; }) {
+  # TEST:$num_encs=3;
+  # The count.
+  # TEST:$c=0;
   for my $enc (qw(UTF-16 UTF-16LE UTF-16BE)) {
     print "------------------\n";
     print $enc,"\n";
@@ -488,15 +633,24 @@ if (eval { require Encode; }) {
 <test foo="bar"/>
 });
     my $dom = XML::LibXML->new->parse_string($xml);
-    ok($dom->getEncoding,$enc);
-    ok($dom->actualEncoding,$enc);
-    ok($dom->getDocumentElement->getAttribute('foo'),'bar');
-    ok($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo')), 'bar');
-    ok($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo')), 'bar');
+    # TEST:$c++;
+    is($dom->getEncoding,$enc, ' TODO : Add test name');
+    # TEST:$c++;
+    is($dom->actualEncoding,$enc, ' TODO : Add test name');
+    # TEST:$c++;
+    is($dom->getDocumentElement->getAttribute('foo'),'bar', ' TODO : Add test name');
+    # TEST:$c++;
+    is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo')), 'bar', ' TODO : Add test name');
+    # TEST:$c++;
+    is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo')), 'bar', ' TODO : Add test name');
     my $exp_enc = $enc eq 'UTF-16' ? 'UTF-16LE' : $enc;
-    ok($dom->getDocumentElement->getAttribute('foo',1), Encode::encode($exp_enc,'bar'));
-    ok($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo'),1), Encode::encode($exp_enc,'bar'));
-    ok($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo'),1), Encode::encode($exp_enc,'bar'));
+    # TEST:$c++;
+    is($dom->getDocumentElement->getAttribute('foo',1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+    # TEST:$c++;
+    is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+    # TEST:$c++;
+    is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
+    # TEST*$num_encs*$c
   }
 } else {
   skip("Encoding related tests require Encode") for 1..24;
