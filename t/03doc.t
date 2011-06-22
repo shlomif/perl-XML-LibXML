@@ -54,26 +54,33 @@ sub _check_created_element
 }
 # TEST:$_check_created_element=$_check_element_node;
 
-sub _count_local_name
+sub _generic_count
 {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    my ($doc, $name, $want_count, $blurb) = @_;
+    my ($doc, $method, $params) = @_;
     
-    my @elems = $doc->getElementsByLocalName( $name );
+    my ($name, $want_count, $blurb) = @$params;
 
-    is (scalar(@elems), $want_count, $blurb);
+    my @elems = $doc->$method( $name );
+
+    return is (scalar(@elems), $want_count, $blurb);
+}
+
+sub _count_local_name
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my $doc = shift;
+
+    return _generic_count($doc, 'getElementsByLocalName', [@_]);
 }
 
 sub _count_tag_name
 {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my $doc = shift;
 
-    my ($doc, $name, $want_count, $blurb) = @_;
-    
-    my @elems = $doc->getElementsByTagName( $name );
-
-    is (scalar(@elems), $want_count, $blurb);
+    return _generic_count($doc, 'getElementsByTagName', [@_]);
 }
 
 {
