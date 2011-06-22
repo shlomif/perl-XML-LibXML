@@ -24,6 +24,23 @@ sub is_empty_str
     return (!defined($s) or (length($s) == 0));
 }
 
+# TEST:$c=0;
+sub _check_element_node
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    my ($node, $name, $blurb) = @_;
+
+    # TEST:$c++;
+    ok($node, "$blurb - node was initialised");
+    # TEST:$c++;
+    is($node->nodeType, XML_ELEMENT_NODE, "$blurb - node is an element node");
+    # TEST:$c++;
+    is($node->nodeName, $name, "$blurb - node has the right name.");
+}
+
+# TEST:$_check_element_node=$c;
+
 {
     print "# 1. Document Attributes\n";
 
@@ -82,12 +99,9 @@ sub is_empty_str
 
     {
         my $node = $doc->createElement( "foo" );
-        # TEST
-        ok($node, ' TODO : Add test name');
-        # TEST
-        is($node->nodeType, XML_ELEMENT_NODE, ' TODO : Add test name' );
-        # TEST
-        is($node->nodeName, "foo", ' TODO : Add test name' );
+
+        # TEST*$_check_element_node
+        _check_element_node($node, 'foo', 'Simple Element');
     }
     
     {
