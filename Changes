@@ -6,6 +6,9 @@ Revision history for Perl extension XML::LibXML
     - Change NodeSet to NodeList in the documentation of
     lib/XML/LibXML/NodeList.pm .
         - Resolved https://rt.cpan.org/Ticket/Display.html?id=60998
+    - Makefile.PL: now saying we are trying to link against -lm, -lz 
+    and -lxml2 . Not only -lxml2:
+        - https://rt.cpan.org/Ticket/Display.html?id=51439
 
 1.73            Sat Jun 18 10:53:44 IDT 2011
     - Calculating $err->column() properly, so it won't be maxed out at
