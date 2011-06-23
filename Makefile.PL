@@ -344,22 +344,6 @@ exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
-# NOTE This should be removed for a release, we should test here, if we are
-# building from a SVN version
-if ( -d './svn' ) {
-    print <<EOT;
-If you are building XML::LibXML from SVN, you may wish to run
-
-  \$ make docs
-
-before doing anything else. This will re-build the documentation
-from the XML file in examples/libxml.xml. This is *not* necessary
-if you are building from a CPAN distribution.
-EOT
-}
-# -------------------------------------------------------------------------- #
-
-# -------------------------------------------------------------------------- #
 # _NOW_ write the Makefile
 
 my $ldflags = delete $config{LDFLAGS};
