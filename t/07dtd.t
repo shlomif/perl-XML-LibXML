@@ -27,7 +27,7 @@ my $htmlSystem = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
     is( $dtd->systemId, $htmlSystem, ' TODO : Add test name' );
     # TEST
     is( $dtd->getName, 'html', ' TODO : Add test name' );
-    
+
 }
 
 {
@@ -66,9 +66,9 @@ my $htmlSystem = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
     # TEST
     ok( !defined($dtd->parentNode), ' TODO : Add test name' );
     # TEST
-    ok( $dtd2->isSameNode( $doc->internalSubset ), ' TODO : Add test name' );    
+    ok( $dtd2->isSameNode( $doc->internalSubset ), ' TODO : Add test name' );
 
- 
+
     my $dtd3 = $doc->removeInternalSubset;
     # TEST
     ok( $dtd3->isSameNode($dtd2), ' TODO : Add test name' );
@@ -88,11 +88,11 @@ my $htmlSystem = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
     my $parser = XML::LibXML->new();
 
     my $doc = $parser->parse_file( "example/dtd.xml" );
-    
+
     # TEST
-    
+
     ok($doc, ' TODO : Add test name');
-    
+
     my $dtd = $doc->internalSubset;
     # TEST
     is( $dtd->getName, 'doc', ' TODO : Add test name' );
@@ -106,9 +106,9 @@ my $htmlSystem = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
     ok($entity, ' TODO : Add test name');
     # TEST
     is($entity->nodeType, XML_ENTITY_REF_NODE, ' TODO : Add test name' );
- 
+
     # TEST
- 
+
     ok( $entity->hasChildNodes, ' TODO : Add test name' );
     # TEST
     is( $entity->firstChild->nodeType, XML_ENTITY_DECL, ' TODO : Add test name' );
@@ -193,7 +193,7 @@ ok($doc, ' TODO : Add test name');
   my $dtd;
   {
     local $/;
-    open my $f, '<', $bad; 
+    open my $f, '<', $bad;
     $dtd = <$f>;
   }
   # TEST
@@ -204,7 +204,7 @@ ok($doc, ' TODO : Add test name');
 
   my $xml = "<!DOCTYPE test SYSTEM \"example/bad.dtd\">\n<test/>";
 
-  {	    
+  {
     my $parser = XML::LibXML->new;
     $parser->load_ext_dtd(0);
     $parser->validation(0);
