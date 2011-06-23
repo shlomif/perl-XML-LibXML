@@ -6101,14 +6101,14 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML::Reader;</programlisting>
-      <programlisting>my $reader = new XML::LibXML::Reader(location =&gt; "file.xml")
+      <programlisting>my $reader = XML::LibXML::Reader-&gt;(location =&gt; "file.xml")
        or die "cannot read file.xml\n";
 while ($reader-&gt;read) {
   processNode($reader);
 }</programlisting>
       <programlisting>
 sub processNode {
-    $reader = shift;
+    my $reader = shift;
     printf "%d %d %s %d\n", ($reader-&gt;depth,
                              $reader-&gt;nodeType,
                              $reader-&gt;name,
@@ -6117,7 +6117,7 @@ sub processNode {
 </programlisting>
       <para>or</para>
       <programlisting>
-  $reader = new XML::LibXML::Reader(location =&gt; "file.xml")
+  my $reader = XML::LibXML::Reader-&gt;(location =&gt; "file.xml")
        or die "cannot read file.xml\n";
   $reader-&gt;preservePattern('//table/tr');
   $reader-&gt;finish;
@@ -6828,7 +6828,7 @@ XML_READER_ERROR     =&gt;  6
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML;
-my $compiled_xpath = new XML::LibXML::XPathExpression('//foo[@bar="baz"][position()&lt;4]');
+my $compiled_xpath = XML::LibXML::XPathExpression-&gt;('//foo[@bar="baz"][position()&lt;4]');
 
 # interface from XML::LibXML::Node 
 
@@ -6875,7 +6875,7 @@ my $value = $xpc->findvalue($compiled_xpath,$node);
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML;
-my $pattern = new XML::LibXML::Pattern('/x:html/x:body//x:div', { 'x' => 'http://www.w3.org/1999/xhtml' });
+my $pattern = XML::LibXML::Pattern-&gt;new('/x:html/x:body//x:div', { 'x' => 'http://www.w3.org/1999/xhtml' });
 # test a match on a XML::LibXML::Node $node
 
 if ($pattern->matchesNode($node)) { ... }
@@ -6950,7 +6950,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML;
-my $compiled_re = new XML::LibXML::RegExp('[0-9]{5}(-[0-9]{4})?');
+my $compiled_re = XML::LibXML::RegExp-&gt;('[0-9]{5}(-[0-9]{4})?');
 if ($compiled_re->isDeterministic()) { ... }
 if ($compiled_re->matches($string)) { ... }
 </programlisting>
