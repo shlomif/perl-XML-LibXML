@@ -2,6 +2,10 @@ Revision history for Perl extension XML::LibXML
 
     - Correct some typos reported in 
         - https://rt.cpan.org/Ticket/Display.html?id=54390
+    - Fix the handling of XML::LibXML::InputCallbacks at load_xml().
+        - https://rt.cpan.org/Ticket/Display.html?id=58190
+        - The problem was that the input callbacks were not cloned in
+        _clone().
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
