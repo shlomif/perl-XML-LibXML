@@ -12,9 +12,11 @@ my $p = XML::LibXML->new();
 # TEST
 ok ($p, 'Can initialize a new XML::LibXML instance');
 
+my ($runtime_version) = (XML::LibXML::LIBXML_RUNTIME_VERSION() =~ /\A(\d+)/);
+
 # TEST
 if (!is (
-    XML::LibXML::LIBXML_VERSION, XML::LibXML::LIBXML_RUNTIME_VERSION,
+    XML::LibXML::LIBXML_VERSION, $runtime_version,
     'LIBXML__VERSION == LIBXML_RUNTIME_VERSION',
 ))
 {
@@ -22,5 +24,5 @@ if (!is (
 }
 
 diag( "\n\nCompiled against libxml2 version: ",XML::LibXML::LIBXML_VERSION,
-     "\nRunning libxml2 version:          ",XML::LibXML::LIBXML_RUNTIME_VERSION,
+     "\nRunning libxml2 version:          ",$runtime_version,
      "\n\n");
