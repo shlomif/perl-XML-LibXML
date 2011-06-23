@@ -328,7 +328,7 @@ if ($config{LIBS} !~ /\-lz\b/ and !($is_Win32 && $config{LIBS} !~ /\-lzlib\b/)) 
 # test if the libraries are really installed!
 unless (have_library("xml2") or have_library("libxml2")) {
     print STDERR <<DEATH;
-libxml2 not found
+libxml2, zlib, and/or the Math library (-lm) have not been found.
 Try setting LIBS and INC values on the command line
 Or get libxml2 from 
   http://xmlsoft.org/
