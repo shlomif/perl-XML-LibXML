@@ -394,6 +394,7 @@ sub _clone {
       gdome => $self->{XML_LIBXML_GDOME},
       set_parser_flags => $self->{XML_LIBXML_PARSER_OPTIONS},
     });
+  $new->input_callbacks($self->input_callbacks());
   return $new;
 }
 

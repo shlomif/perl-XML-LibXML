@@ -156,6 +156,7 @@ t/43options.t
 t/44extent.t
 t/45regex.t
 t/46err_column.t
+t/47load_xml_callbacks.t
 t/60struct_error.t
 t/61error.t
 t/80registryleak.t
