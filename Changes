@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+    - Correct some typos reported in 
+        - https://rt.cpan.org/Ticket/Display.html?id=54390
+
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
     - Add scripts/Test.pm-to-Test-More.pl to semi-automatically 

@@ -3155,7 +3155,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para>Unbinds the Node from its siblings and Parent, but not from the Document it belongs to. If the node is not inserted into the DOM
-                    afterwards it will be lost after the program terminated. From a low level view, the unbound node is stripped from the context it is and
+                    afterwards, it will be lost after the program terminates. From a low level view, the unbound node is stripped from the context it is and
                     inserted into a (hidden) document-fragment.</para>
                 </listitem>
             </varlistentry>
@@ -3229,7 +3229,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$childnode = $node-&gt;addChild( $chilnode );</funcsynopsisinfo>
+                        <funcsynopsisinfo>$childnode = $node-&gt;addChild( $childnode );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>As an alternative to appendChild() one can use the addChild() function. This function is a bit faster, because it avoids all DOM
@@ -3521,7 +3521,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>@nodes = $node-&gt;findnodes( $xpath_expression );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context, returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
           <para>The xpath expression can be passed either as a string or 
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
@@ -3849,7 +3849,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Because XML::LibXML does not implement namespace declarations and attributes the same way, it is required to test what kind of node is
                     handled while accessing the functions result.</para>
 
-                    <para>If this function is called in array context the attribute nodes are returned as an array. In scalar context the function will return a
+                    <para>If this function is called in array context the attribute nodes are returned as an array. In scalar context, the function will return a
                     <olink targetdoc="XML::LibXML::NamedNodeMap">XML::LibXML::NamedNodeMap</olink> object.</para>
                 </listitem>
             </varlistentry>
@@ -5940,7 +5940,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
           <funcsynopsis><funcsynopsisinfo>@nodes = $xpc-&gt;findnodes($xpath, $context_node )</funcsynopsisinfo></funcsynopsis>
           <funcsynopsis><funcsynopsisinfo>$nodelist = $xpc-&gt;findnodes($xpath, $context_node )</funcsynopsisinfo></funcsynopsis>
             <para>Performs the xpath statement on the current node and
-	      returns the result as an array. In scalar context
+	      returns the result as an array. In scalar context,
 	      returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>

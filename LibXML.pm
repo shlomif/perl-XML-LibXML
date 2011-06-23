@@ -1548,7 +1548,7 @@ sub setAttributeNS {
   }
   if (defined($nsURI) and $nsURI eq XML_XMLNS_NS) {
     if ($qname !~ /^xmlns(?::|$)/) {
-      croak("NAMESPACE ERROR: Namespace declartions must have the prefix 'xmlns'");
+      croak("NAMESPACE ERROR: Namespace declarations must have the prefix 'xmlns'");
     }
     $self->setAttribute($qname,$value); # see implementation above
     return;
