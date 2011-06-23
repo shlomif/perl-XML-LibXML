@@ -7,18 +7,8 @@
 use strict;
 use warnings;
 
-use Test;
+use Test::More tests => 531;
 use IO::File;
-
-BEGIN { use XML::LibXML;
-    if ( XML::LibXML::LIBXML_VERSION >= 20600 ) {
-        plan tests => 496; 
-    }
-    else {
-        plan tests => (496 - 8) ;
-        print "# skip NS cleaning tests\n";
-    }
-};
 
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
@@ -136,101 +126,106 @@ my $badfile2 = "does_not_exist.xml";
 
 my $parser = XML::LibXML->new();
 
-print "# 1 NON VALIDATING PARSER\n";
-print "# 1.1 WELL FORMED STRING PARSING\n";
-print "# 1.1.1 DEFAULT VALUES\n";
+# 1 NON VALIDATING PARSER
+# 1.1 WELL FORMED STRING PARSING
+# 1.1.1 DEFAULT VALUES
 
 {
     foreach my $str ( @goodWFStrings,@goodWFNSStrings,@goodWFDTDStrings ) {
         my $doc = $parser->parse_string($str);
-        ok($doc);
+        isa_ok($doc, 'XML::LibXML::Document');
     }
 }
 
 eval { my $fail = $parser->parse_string(undef); };
-ok($@);
+like($@, qr/^Empty String at/, "parses undef string with an error");
 
 foreach my $str ( @badWFStrings ) {
     eval { my $fail = $parser->parse_string($str); };
-    ok($@);
+
+    ok($@, "Error thrown passing '" . shorten_string($str)  . "'");
 }
 
 
-print "# 1.1.2 NO KEEP BLANKS\n";
+# 1.1.2 NO KEEP BLANKS
 
 $parser->keep_blanks(0);
 
 {
     foreach my $str ( @goodWFStrings,@goodWFNSStrings,@goodWFDTDStrings ) {
 	my $doc = $parser->parse_string($str);
-        ok($doc);
+        isa_ok($doc, 'XML::LibXML::Document');
     }
 }
 
 eval { my $fail = $parser->parse_string(undef); };
-ok($@);
+like($@, qr/^Empty String at/, "parses undef string with an error");
 
 foreach my $str ( @badWFStrings ) {
     eval { my $fail = $parser->parse_string($str); };
-    ok($@);
+
+    ok($@, "Error thrown passing '" . shorten_string($str)  . "'");
 }
 
 $parser->keep_blanks(1);
 
-print "# 1.1.3 EXPAND ENTITIES\n";
+# 1.1.3 EXPAND ENTITIES
 
 $parser->expand_entities(0);
 
 {
     foreach my $str ( @goodWFStrings,@goodWFNSStrings,@goodWFDTDStrings ) {
         my $doc = $parser->parse_string($str);
-        ok($doc);
+        isa_ok($doc, 'XML::LibXML::Document');
     }
 }
 
 eval { my $fail = $parser->parse_string(undef); };
-ok($@);
+like($@, qr/^Empty String at/, "parses undef string with an error");
 
 foreach my $str ( @badWFStrings ) {
-    eval { my $fail = $parser->parse_string($str); };  
-    ok($@);
+    eval { my $fail = $parser->parse_string($str); };
+
+    ok($@, "Error thrown passing '" . shorten_string($str)  . "'");
 }
 
 $parser->expand_entities(1);
 
-print "# 1.1.4 PEDANTIC\n";
+# 1.1.4 PEDANTIC
 
 $parser->pedantic_parser(1);
 
 {
     foreach my $str ( @goodWFStrings,@goodWFNSStrings,@goodWFDTDStrings ) {
         my $doc = $parser->parse_string($str);
-        ok($doc);
+	isa_ok($doc, 'XML::LibXML::Document');
     }
 }
 
 eval { my $fail = $parser->parse_string(undef); };
-ok($@);
+like($@, qr/^Empty String at/, "parses undef string with an error");
+
 
 foreach my $str ( @badWFStrings ) {
-    eval { my $fail = $parser->parse_string($str); };  
-    ok($@);
+    eval { my $fail = $parser->parse_string($str); };
+    ok($@, "Error thrown passing '" . shorten_string($str)  . "'");
 }
 
 $parser->pedantic_parser(0);
 
-print "# 1.2 PARSE A FILE\n";
+# 1.2 PARSE A FILE
 
 {
     my $doc = $parser->parse_file($goodfile);
-    ok($doc);
+    isa_ok($doc, 'XML::LibXML::Document');
 }
  
 eval {my $fail = $parser->parse_file($badfile1);};
-ok($@);
+like($@, qr/^$badfile1:3: parser error : Extra content at the end of the document/, "error parsing $badfile1");
+
 
 eval { $parser->parse_file($badfile2); };
-ok($@);
+like($@, qr/^Could not create file parser context for file "$badfile2": No such file or directory at/, "error parsing non-existant $badfile2");
 
 {
     my $str = "<a>    <b/> </a>";
@@ -239,47 +234,47 @@ ok($@);
     my $docA = $parser->parse_string($str);
     my $docB = $parser->parse_file("example/test3.xml");
     $XML::LibXML::skipXMLDeclaration = 1;
-    ok( $docA->toString, $tstr );
-    ok( $docB->toString, $tstr );
+    is( $docA->toString, $tstr, "xml string round trips as expected");
+    is( $docB->toString, $tstr, "test3.xml round trips as expected");
     $XML::LibXML::skipXMLDeclaration = 0;
 }
 
-print "# 1.3 PARSE A HANDLE\n";
+# 1.3 PARSE A HANDLE
 
 my $fh = IO::File->new($goodfile);
-ok($fh);
+isa_ok($fh, 'IO::File');
 
 my $doc = $parser->parse_fh($fh);
-ok($doc);
+isa_ok($doc, 'XML::LibXML::Document');
 
 $fh = IO::File->new($badfile1);
-ok($fh);
+isa_ok($fh, 'IO::File');
 
 eval { my $doc = $parser->parse_fh($fh); };
-ok($@);
+like($@, qr/^Entity: line 3: parser error : Extra content at the end of the document/, "error parsing bad file from file handle of $badfile1");
 
 $fh = IO::File->new($badfile2);
 
 eval { my $doc = $parser->parse_fh($fh); };
-ok($@);
+like($@, qr/^Can't use an undefined value as a symbol reference at/, "error parsing bad file from file handle of non-existant $badfile2");
 
 {
     $parser->expand_entities(1);
     my $doc = $parser->parse_file( "example/dtd.xml" );
     my @cn = $doc->documentElement->childNodes;
-    ok( scalar @cn, 1 );
-    
+    is( scalar @cn, 1, "1 child node" );
+
     $doc = $parser->parse_file( "example/complex/complex2.xml" );
     @cn = $doc->documentElement->childNodes;
-    ok( scalar @cn, 1 );
+    is( scalar @cn, 1, "1 child node" );
 
     $parser->expand_entities(0);
     $doc = $parser->parse_file( "example/dtd.xml" );
     @cn = $doc->documentElement->childNodes;
-    ok( scalar @cn, 3 );
+    is( scalar @cn, 3, "3 child nodes" );
 }
 
-print "# 1.4 x-include processing\n";
+# 1.4 x-include processing
 
 my $goodXInclude = q{
 <x>
@@ -300,55 +295,54 @@ my $badXInclude = q{
     $parser->base_uri( "example/" );
     $parser->keep_blanks(0);
     my $doc = $parser->parse_string( $goodXInclude );
-    ok($doc);
+    isa_ok($doc, 'XML::LibXML::Document');
 
     my $i;
     eval { $i = $parser->processXIncludes($doc); };
-    ok( $i );
+    is( $i, "1", "return value from processXIncludes == 1");
 
     $doc = $parser->parse_string( $badXInclude );
     $i= undef;
     eval { $i = $parser->processXIncludes($doc); };
-    ok($@);
-    
+    like($@, qr/$badfile1:3: parser error : Extra content at the end of the document/, "error parsing a bad include");
+
     # auto expand
     $parser->expand_xinclude(1);
     $doc = $parser->parse_string( $goodXInclude );
-    ok($doc);
+    isa_ok($doc, 'XML::LibXML::Document');
 
     $doc = undef;
     eval { $doc = $parser->parse_string( $badXInclude ); };
-    ok($@);
-    ok(!$doc);
+    like($@, qr/$badfile1:3: parser error : Extra content at the end of the document/, "error parsing $badfile1 in include");
+    is($doc, undef, "no doc returned");
 
     # some bad stuff 
     eval{ $parser->processXIncludes(undef); };
-    ok($@);
+    like($@, qr/^No document to process! at/, "Error parsing undef include");
+
     eval{ $parser->processXIncludes("blahblah"); };
-    ok($@);
+    like($@, qr/^No document to process! at/, "Error parsing bogus include");
 }
 
-print "# 2 PUSH PARSER\n";
+# 2 PUSH PARSER
 
 {
     my $pparser = XML::LibXML->new();
-    print "# 2.1 PARSING WELLFORMED DOCUMENTS\n";
+    # 2.1 PARSING WELLFORMED DOCUMENTS
     foreach my $key ( qw(single1 single2 single3 single4 single5 single6 
                          single7 single8 single9 multiple1 multiple2 multiple3
                          multiple4 multiple5 multiple6 multiple7 multiple8 
                          multiple9 multiple10 comment1 comment2 comment3
                          comment4 comment5 attr1 attr2 attr3
 			 ns1 ns2 ns3 ns4 ns5 ns6 dtd1 dtd2) ) {
-        print "# key is $key\n";
         foreach ( @{$goodPushWF{$key}} ) {
             $pparser->parse_chunk( $_ );
         }
 
         my $doc;
         eval {$doc = $pparser->parse_chunk("",1); };
-        print "# caught an error $@ \n" if $@; 
-        print "# document seems to be ok \n" if $doc;
-        ok($doc && !$@);      
+	is($@, '', "No error parsing $key");
+	isa_ok($doc, 'XML::LibXML::Document', "Document came back parsing chunk: ");
     }
 
     my @good_strings = ("<foo>", "bar", "</foo>" );
@@ -371,38 +365,39 @@ print "# 2 PUSH PARSER\n";
             $parser->parse_chunk( $_ );
         }
         my $doc = $parser->parse_chunk("",1);
-        ok($doc);
+        isa_ok($doc, 'XML::LibXML::Document');
     }
 
     {
-        print "# 2.2 PARSING BROKEN DOCUMENTS\n";
+        # 2.2 PARSING BROKEN DOCUMENTS
         my $doc;
         foreach my $key ( keys %bad_strings ) {
-            print "# $key\n";
             $doc = undef;
+	    my $bad_chunk;
             foreach ( @{$bad_strings{$key}} ) {
                eval { $parser->parse_chunk( $_ );};
                if ( $@ ) {
-                   # if we won't stop here, we will loose the error :|
+                   # if we won't stop here, we will lose the error :|
+		   $bad_chunk = $_;
                    last;
                }
             }
             if ( $@ ) {
-                ok(1);
+	        isnt($@, '', "Error found parsing chunk $bad_chunk");
 #                $parser->parse_chunk("",1); # will cause no harm anymore, but is still needed
                 next;
             }
-           
+
             eval {    
                 $doc = $parser->parse_chunk("",1);
             };
-            ok($@);
+            isnt($@, '', "Got an error parsing empty chunk after chunks for $key");
         }
 
     }
 
     {
-        print "# 2.3 RECOVERING PUSH PARSER\n";
+        # 2.3 RECOVERING PUSH PARSER
         $parser->init_push;
 
         foreach ( "<A>", "B" ) {
@@ -414,11 +409,11 @@ print "# 2 PUSH PARSER\n";
 	       local $SIG{'__WARN__'} = sub { };
 	       $doc = $parser->finish_push(1);
 	     };
-        ok( $doc );
+        isa_ok( $doc, 'XML::LibXML::Document' );
     }
 }
 
-print "# 3 SAX PARSER\n";
+# 3 SAX PARSER
 
 {
     my $handler = XML::LibXML::SAX::Builder->new();
@@ -427,39 +422,39 @@ print "# 3 SAX PARSER\n";
     my $string  = q{<bar foo="bar">foo</bar>};
 
     $doc = $generator->parse_string( $string );
-    ok( $doc );
+    isa_ok( $doc , 'XML::LibXML::Document');
 
-    print "# 3.1 GENERAL TESTS \n";
+    # 3.1 GENERAL TESTS
     foreach my $str ( @goodWFStrings ) {
         my $doc = $generator->parse_string( $str );
-        ok( $doc );
+        isa_ok( $doc , 'XML::LibXML::Document');
     }
 
-    print "# CDATA Sections\n";
+    # CDATA Sections
 
     $string = q{<foo><![CDATA[&foo<bar]]></foo>};
     $doc = $generator->parse_string( $string );
     my @cn = $doc->documentElement->childNodes();
-    ok( scalar @cn );
-    ok( $cn[0]->nodeType, XML_CDATA_SECTION_NODE );
-    ok( $cn[0]->textContent, "&foo<bar" );
-    ok( $cn[0]->toString, '<![CDATA[&foo<bar]]>');
+    is( scalar @cn, 1, "Child nodes - 1" );
+    is( $cn[0]->nodeType, XML_CDATA_SECTION_NODE );
+    is( $cn[0]->textContent, "&foo<bar" );
+    is( $cn[0]->toString, '<![CDATA[&foo<bar]]>');
 
-    print "# 3.2 NAMESPACE TESTS\n";
+    # 3.2 NAMESPACE TESTS
 
     my $i = 0;
     foreach my $str ( @goodWFNSStrings ) {
         my $doc = $generator->parse_string( $str );
-        ok( $doc );
+        isa_ok( $doc , 'XML::LibXML::Document');
 
         # skip the nested node tests until there is a xmlNormalizeNs().
         #ok(1),next if $i > 2;
 
-        ok( $doc->toString(), $str );
+        is( $doc->toString(), $str );
         $i++
     }
 
-    print "# DATA CONSISTENCE\n";    
+    # DATA CONSISTENCE
     # find out if namespaces are there
     my $string2 = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
 
@@ -467,13 +462,8 @@ print "# 3 SAX PARSER\n";
 
     my @attrs = $doc->documentElement->attributes;
 
-    ok( scalar @attrs );
-    if ( scalar @attrs ) {
-        ok( $attrs[0]->nodeType, XML_NAMESPACE_DECL );
-    }
-    else {
-        ok(0);
-    }
+    is(scalar @attrs , 1, "1 attribute");
+    is( $attrs[0]->nodeType, XML_NAMESPACE_DECL, "Node type: " . XML_NAMESPACE_DECL );
 
     my $root = $doc->documentElement;
 
@@ -483,25 +473,25 @@ print "# 3 SAX PARSER\n";
 
     my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
     # my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi xmlns:bar="http://foo.bar"/></foo>};
-    ok($root->toString, $vstring );
+    is($root->toString, $vstring );
 
-    print "# 3.3 INTERNAL SUBSETS\n";
+    # 3.3 INTERNAL SUBSETS
 
     foreach my $str ( @goodWFDTDStrings ) {
         my $doc = $generator->parse_string( $str );
-        ok( $doc );
+        isa_ok( $doc , 'XML::LibXML::Document');
     }
 
-    print "# 3.5 PARSE URI\n"; 
+    # 3.5 PARSE URI
     $doc = $generator->parse_uri( "example/test.xml" );
-    ok($doc);
+    isa_ok($doc, 'XML::LibXML::Document');
 
-    print "# 3.6 PARSE CHUNK\n";
+    # 3.6 PARSE CHUNK
 
         
 }
 
-print "# 4 SAXY PUSHER\n";
+# 4 SAXY PUSHER
 
 {
     my $handler = XML::LibXML::SAX::Builder->new();
@@ -510,7 +500,7 @@ print "# 4 SAXY PUSHER\n";
     $parser->set_handler( $handler );
     $parser->push( '<foo/>' );
     my $doc = $parser->finish_push;
-    ok($doc);
+    isa_ok($doc , 'XML::LibXML::Document');
 
     foreach my $key ( keys %goodPushWF ) {
         foreach ( @{$goodPushWF{$key}} ) {
@@ -519,11 +509,11 @@ print "# 4 SAXY PUSHER\n";
 
         my $doc;
         eval {$doc = $parser->finish_push; };
-        ok($doc);                    
+        isa_ok( $doc , 'XML::LibXML::Document');
     }
 }
 
-print "# 5 PARSE WELL BALANCED CHUNKS\n";
+# 5 PARSE WELL BALANCED CHUNKS
 {
     my $MAX_WF_C = 11;
     my $MAX_WB_C = 16;
@@ -573,53 +563,52 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
 
     my $pparser = XML::LibXML->new;
     
-    print "# 5.1 DOM CHUNK PARSER\n";
+    # 5.1 DOM CHUNK PARSER
 
     for ( 1..$MAX_WF_C ) {
         my $frag = $pparser->parse_xml_chunk($chunks{'wellformed'.$_});
-        ok($frag);
+        isa_ok($frag, 'XML::LibXML::DocumentFragment');
         if ( $frag->nodeType == XML_DOCUMENT_FRAG_NODE
              && $frag->hasChildNodes ) {
             if ( $frag->firstChild->isSameNode( $frag->lastChild ) ) {
-                print "# well formness test $_\n";
-                if ( $chunks{'wellformed'.$_} =~ /\<A\>\<\/A\>/ ) {
+                if ( $chunks{'wellformed' . $_} =~ /\<A\>\<\/A\>/ ) {
                     $_--; # because we cannot distinguish between <a/> and <a></a>
                 }
-  
-                ok($frag->toString,$chunks{'wellformed'.$_});                
+
+                is($frag->toString, $chunks{'wellformed' . $_}, $chunks{'wellformed' . $_} . " is well formed");
                 next;
             }
         }
-        ok(0);
+        fail("Unexpected fragment without child nodes");
     }
 
     for ( 1..$MAX_WB_C ) {
         my $frag = $pparser->parse_xml_chunk($chunks{'wellbalance'.$_});
-        ok($frag);
+        isa_ok($frag, 'XML::LibXML::DocumentFragment');
         if ( $frag->nodeType == XML_DOCUMENT_FRAG_NODE
              && $frag->hasChildNodes ) {
             if ( $chunks{'wellbalance'.$_} =~ /<A><\/A>/ ) {
                 $_--;
             }
-            ok($frag->toString,$chunks{'wellbalance'.$_});                
+            is($frag->toString, $chunks{'wellbalance'.$_}, $chunks{'wellbalance'.$_} . " is well balanced");
             next;
         }
-        ok(0);
+        fail("Can't test balancedness");
     }
 
     eval { my $fail = $pparser->parse_xml_chunk(undef); };
-    ok($@);
+    like($@, qr/^Empty String at/, "error parsing undef xml chunk");
 
     eval { my $fail = $pparser->parse_xml_chunk(""); };
-    ok($@);
+    like($@, qr/^Empty String at/, "error parsing empty xml chunk");
 
     foreach my $str ( @badWBStrings ) {
-        eval { my $fail = $pparser->parse_xml_chunk($str); };  
-        ok($@);
+        eval { my $fail = $pparser->parse_xml_chunk($str); };
+        isnt($@, '', "Error parsing xml chunk: '" . shorten_string($str) . "'");
     }
 
     {
-        print "# 5.1.1 Segmenation fault tests\n";
+        # 5.1.1 Segmenation fault tests
 
         my $sDoc   = '<C/><D/>';
         my $sChunk = '<A/><B/>';
@@ -632,11 +621,11 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
 
         $doc->appendChild( $chk );
 
-        ok( $doc->toString(), '<C/><D/><A/><B/>' );
+        is( $doc->toString(), '<C/><D/><A/><B/>', 'No segfault parsing string "<C/><D/><A/><B/>"');
     }
 
     {
-        print "# 5.1.2 Segmenation fault tests\n";
+        # 5.1.2 Segmenation fault tests
 
         my $sDoc   = '<C/><D/>';
         my $sChunk = '<A/><B/>';
@@ -649,11 +638,11 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
 
         $doc->insertAfter( $chk, $fc );
 
-        ok( $doc->toString(), '<C/><A/><B/><D/>' );
+        is( $doc->toString(), '<C/><A/><B/><D/>', 'No segfault parsing string "<C/><A/><B/><D/>"');
     }
 
     {
-        print "# 5.1.3 Segmenation fault tests\n";
+        # 5.1.3 Segmenation fault tests
 
         my $sDoc   = '<C/><D/>';
         my $sChunk = '<A/><B/>';
@@ -669,46 +658,46 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
         ok( $doc->toString(), '<A/><B/><C/><D/>' );
     }
 
-    ok(1);
+    pass("Made it to SAX test without seg fault");
 
-    print "# 5.2 SAX CHUNK PARSER\n";
+    # 5.2 SAX CHUNK PARSER
 
     my $handler = XML::LibXML::SAX::Builder->new();
     my $parser = XML::LibXML->new;
     $parser->set_handler( $handler );
     for ( 1..$MAX_WF_C ) {
         my $frag = $parser->parse_xml_chunk($chunks{'wellformed'.$_});
-        ok($frag);
+        isa_ok($frag, 'XML::LibXML::DocumentFragment');
         if ( $frag->nodeType == XML_DOCUMENT_FRAG_NODE
              && $frag->hasChildNodes ) {
             if ( $frag->firstChild->isSameNode( $frag->lastChild ) ) {
                 if ( $chunks{'wellformed'.$_} =~ /\<A\>\<\/A\>/ ) {
                     $_--;
                 }
-                ok($frag->toString,$chunks{'wellformed'.$_});                
+                is($frag->toString, $chunks{'wellformed'.$_}, $chunks{'wellformed'.$_} . ' is well formed');
                 next;
             }
         }
-        ok(0);
+        fail("Couldn't pass well formed test since frag was bad");
     }
 
     for ( 1..$MAX_WB_C ) {
         my $frag = $parser->parse_xml_chunk($chunks{'wellbalance'.$_});
-        ok($frag);
+        isa_ok($frag, 'XML::LibXML::DocumentFragment');
         if ( $frag->nodeType == XML_DOCUMENT_FRAG_NODE
              && $frag->hasChildNodes ) {
             if ( $chunks{'wellbalance'.$_} =~ /<A><\/A>/ ) {
                 $_--;
             }
-            ok($frag->toString,$chunks{'wellbalance'.$_});                
+            is($frag->toString, $chunks{'wellbalance'.$_}, $chunks{'wellbalance'.$_} . " is well balanced");
             next;
         }
-        ok(0);
+        fail("Couldn't pass well balanced test since frag was bad");
     }
 }
 
 {
-    print "# 6 VALIDATING PARSER\n";
+    # 6 VALIDATING PARSER
 
     my %badstrings = (
                     SIMPLE => '<?xml version="1.0"?>'."\n<A/>\n",
@@ -718,12 +707,12 @@ print "# 5 PARSE WELL BALANCED CHUNKS\n";
     $parser->validation(1);
     my $doc;
     eval { $doc = $parser->parse_string($badstrings{SIMPLE}); };
-    ok( $@ );
+    isnt($@, '', "Failed to parse SIMPLE bad string");
     my $ql;
 }
 
 {
-    print "# 7 LINE NUMBERS\n";
+    # 7 LINE NUMBERS
 
     my $goodxml = <<EOXML;
 <?xml version="1.0"?>
@@ -744,13 +733,11 @@ EOXML
     eval { $parser->parse_string( $badxml ); };
     # correct line number may or may not be present
     # depending on libxml2 version
-    print $@;
-    ok( $@ =~ /^:[03]:/ );
+    like($@,  qr/^:[03]:/, "line 03 found in error" );
 
     $parser->line_numbers(1);
     eval { $parser->parse_string( $badxml ); };
-    print $@;
-    ok( $@ =~ /^:3:/ );
+    like($@, qr/^:3:/, "line 3 found in error");
 
     # switch off validation for the following tests
     $parser->validation(0);
@@ -759,30 +746,27 @@ EOXML
     eval { $doc = $parser->parse_string( $goodxml ); };
 
     my $root = $doc->documentElement();
-    ok( $root->line_number(), 2);
+    is( $root->line_number(), 2, "line number is 2");
 
     my @kids = $root->childNodes();
-    ok( $kids[1]->line_number(),3 );
+    is( $kids[1]->line_number(),3, "line number is 3" );
 
     my $newkid = $root->appendChild( $doc->createElement( "bar" ) );
-    ok( $newkid->line_number(), 0 );
+    is( $newkid->line_number(), 0, "line number is 0");
 
     $parser->line_numbers(0);
     eval { $doc = $parser->parse_string( $goodxml ); };
 
     $root = $doc->documentElement();
-    ok( $root->line_number(), 0);
+    is( $root->line_number(), 0, "line number is 0");
 
     @kids = $root->childNodes();
-    ok( $kids[1]->line_number(), 0 );
-
-
+    is( $kids[1]->line_number(), 0, "line number is 0");
 }
 
-print "# " . XML::LibXML::LIBXML_VERSION . "\n";
-if ( XML::LibXML::LIBXML_VERSION >= 20600 )
-{
-    print "# 8 Clean Namespaces\n";
+SKIP: {
+    skip("LibXML version is below 20600", 8) unless ( XML::LibXML::LIBXML_VERSION >= 20600 );
+    # 8 Clean Namespaces
 
     my ( $xsDoc1, $xsDoc2 );
     $xsDoc1 = q{<A:B xmlns:A="http://D"><A:C xmlns:A="http://D"></A:C></A:B>};
@@ -794,22 +778,22 @@ if ( XML::LibXML::LIBXML_VERSION >= 20600 )
     my $fn1 = "example/xmlns/goodguy.xml";
     my $fn2 = "example/xmlns/badguy.xml";
 
-    ok( $parser->parse_string( $xsDoc1 )->documentElement->toString(),
+    is( $parser->parse_string( $xsDoc1 )->documentElement->toString(),
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
-    ok( $parser->parse_string( $xsDoc2 )->documentElement->toString(), 
+    is( $parser->parse_string( $xsDoc2 )->documentElement->toString(), 
         $xsDoc2 );
 
-    ok( $parser->parse_file( $fn1  )->documentElement->toString(), 
+    is( $parser->parse_file( $fn1  )->documentElement->toString(), 
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
-    ok( $parser->parse_file( $fn2 )->documentElement->toString() , 
+    is( $parser->parse_file( $fn2 )->documentElement->toString() , 
         $xsDoc2 );
     
     my $fh1 = IO::File->new($fn1);  
     my $fh2 = IO::File->new($fn2);  
 
-    ok( $parser->parse_fh( $fh1  )->documentElement->toString(), 
+    is( $parser->parse_fh( $fh1  )->documentElement->toString(), 
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
-    ok( $parser->parse_fh( $fh2 )->documentElement->toString() , 
+    is( $parser->parse_fh( $fh2 )->documentElement->toString() , 
         $xsDoc2 );
 
     my @xaDoc1 = ('<A:B xmlns:A="http://D">','<A:C xmlns:A="h','ttp://D"/>' ,'</A:B>');
@@ -821,7 +805,7 @@ if ( XML::LibXML::LIBXML_VERSION >= 20600 )
         $parser->parse_chunk( $_ );
     }
     $doc = $parser->parse_chunk( "", 1 );
-    ok( $doc->documentElement->toString(), 
+    is( $doc->documentElement->toString(), 
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
 
 
@@ -829,9 +813,9 @@ if ( XML::LibXML::LIBXML_VERSION >= 20600 )
         $parser->parse_chunk( $_ );
     }
     $doc = $parser->parse_chunk( "", 1 );
-    ok( $doc->documentElement->toString() , 
+    is( $doc->documentElement->toString() , 
         $xsDoc2 );
-}
+};
 
 
 ##
@@ -848,11 +832,11 @@ EOXML
 
         # first time it should work
         my $doc    = $parser->parse_string( $xmldoc );
-        ok( $doc->documentElement()->string_value(), " test " );
+        is( $doc->documentElement()->string_value(), " test " );
 
         # second time it must not fail.        
         my $doc2   = $parser->parse_string( $xmldoc );
-        ok( $doc2->documentElement()->string_value(), " test " );
+        is( $doc2->documentElement()->string_value(), " test " );
 }
 
 ##
@@ -872,7 +856,7 @@ EOXML
 
         # first time it should work
         my $doc    = $parser->parse_string( $xmldoc );
-        ok( $doc->documentElement()->string_value(), " test " );
+        is( $doc->documentElement()->string_value(), " test " );
 
         # lets see if load_ext_dtd(0) works
         $parser->load_ext_dtd(0);
@@ -880,7 +864,7 @@ EOXML
         eval {
            $doc2    = $parser->parse_string( $xmldoc );
         };
-        ok($@);
+        isnt($@, '', "error parsing $xmldoc");
 
         $parser->validation(1);
 
@@ -889,15 +873,15 @@ EOXML
         eval {
            $doc3 = $parser->parse_file( "example/article_external_bad.xml" );
         };
-        
-        ok( $doc3 );
+
+        isa_ok( $doc3, 'XML::LibXML::Document');
 
         $parser->load_ext_dtd(1);
         eval {
            $doc3 = $parser->parse_file( "example/article_external_bad.xml" );
         };
-        
-        ok( $@);
+
+        isnt($@, '', "error parsing example/article_external_bad.xml");
 }
 
 {
@@ -906,24 +890,24 @@ EOXML
 
    my $doc = $parser->parse_string('<foo xml:base="foo.xml"/>',"bar.xml");
    my $el = $doc->documentElement;
-   ok( $doc->URI, "bar.xml" );
-   ok( $doc->baseURI, "bar.xml" );
-   ok( $el->baseURI, "foo.xml" );
+   is( $doc->URI, "bar.xml" );
+   is( $doc->baseURI, "bar.xml" );
+   is( $el->baseURI, "foo.xml" );
 
    $doc->setURI( "baz.xml" );
-   ok( $doc->URI, "baz.xml" );
-   ok( $doc->baseURI, "baz.xml" );
-   ok( $el->baseURI, "foo.xml" );
+   is( $doc->URI, "baz.xml" );
+   is( $doc->baseURI, "baz.xml" );
+   is( $el->baseURI, "foo.xml" );
 
    $doc->setBaseURI( "bag.xml" );
-   ok( $doc->URI, "bag.xml" );
-   ok( $doc->baseURI, "bag.xml" );
-   ok( $el->baseURI, "foo.xml" );
+   is( $doc->URI, "bag.xml" );
+   is( $doc->baseURI, "bag.xml" );
+   is( $el->baseURI, "foo.xml" );
 
    $el->setBaseURI( "bam.xml" );
-   ok( $doc->URI, "bag.xml" );
-   ok( $doc->baseURI, "bag.xml" );
-   ok( $el->baseURI, "bam.xml" );
+   is( $doc->URI, "bag.xml" );
+   is( $doc->baseURI, "bag.xml" );
+   is( $el->baseURI, "bam.xml" );
 
 }
 
@@ -934,14 +918,14 @@ EOXML
 
    my $doc = $parser->parse_html_string('<html><head><base href="foo.html"></head><body></body></html>',{ URI => "bar.html" });
    my $el = $doc->documentElement;
-   ok( $doc->URI, "bar.html" );
-   ok( $doc->baseURI, "foo.html" );
-   ok( $el->baseURI, "foo.html" );
+   is( $doc->URI, "bar.html" );
+   is( $doc->baseURI, "foo.html" );
+   is( $el->baseURI, "foo.html" );
 
    $doc->setURI( "baz.html" );
-   ok( $doc->URI, "baz.html" );
-   ok( $doc->baseURI, "foo.html" );
-   ok( $el->baseURI, "foo.html" );
+   is( $doc->URI, "baz.html" );
+   is( $doc->baseURI, "foo.html" );
+   is( $el->baseURI, "foo.html" );
 
 }
 
@@ -966,4 +950,13 @@ sub tsub2 {
     my ($doc,$query)=($_[0],@{$_[1]});
 #    return [ $doc->findnodes($query) ];
     return [ $doc->findnodes(encodeToUTF8('iso-8859-1',$query)) ];
+}
+
+sub shorten_string { # Used for test naming.
+  my $string = shift;
+  return "'undef'" if(!defined $string);
+
+  $string =~ s/\n/\\n/msg;
+  return $string if(length($string) < 25);
+  return $string = substr($string, 0, 10) . "..." . substr($string, -10);
 }

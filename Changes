@@ -6,6 +6,10 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=58190
         - The problem was that the input callbacks were not cloned in
         _clone().
+    - Apply the patches from https://rt.cpan.org/Ticket/Display.html?id=56334
+        - Convert t/02parse.t to Test::More .
+        - Thanks to TODDR .
+        - Removed the diag() messages which were annoying.
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
