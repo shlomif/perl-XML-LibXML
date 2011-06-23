@@ -150,75 +150,73 @@ my $htmlSystem = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
 </test>
 EOF
 
-# TEST
-ok($doc->validate(), ' TODO : Add test name');
-
-# TEST
-ok($doc->is_valid(), ' TODO : Add test name');
-
-}
-
-{
-
-my $parser = XML::LibXML->new();
-$parser->validation(0);
-$parser->load_ext_dtd(0); # This should make libxml not try to get the DTD
-
-my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
-my $doc = eval {
-    $parser->parse_string($xml);
-};
-
-# TEST
-
-ok(!$@, ' TODO : Add test name');
-if ($@) {
-    warn "Parsing error: $@\n";
-}
-# TEST
-
-ok($doc, ' TODO : Add test name');
-
-}
-{
-  my $bad = 'example/bad.dtd';
-  # TEST
-  ok( -f $bad, ' TODO : Add test name' );
-  eval { XML::LibXML::Dtd->new("-//Foo//Test DTD 1.0//EN", 'example/bad.dtd') };
-  # TEST
-  ok ($@, ' TODO : Add test name');
-
-  undef $@;
-  my $dtd;
-  {
-    local $/;
-    open my $f, '<', $bad;
-    $dtd = <$f>;
-  }
-  # TEST
-  ok( length($dtd) > 5, ' TODO : Add test name' );
-  eval { XML::LibXML::Dtd->parse_string($dtd) };
-  # TEST
-  ok ($@, ' TODO : Add test name');
-
-  my $xml = "<!DOCTYPE test SYSTEM \"example/bad.dtd\">\n<test/>";
-
-  {
-    my $parser = XML::LibXML->new;
-    $parser->load_ext_dtd(0);
-    $parser->validation(0);
-    my $doc = $parser->parse_string($xml);
     # TEST
-    ok( $doc, ' TODO : Add test name' );
-  }
-  {
-    my $parser = XML::LibXML->new;
-    $parser->load_ext_dtd(1);
+    ok($doc->validate(), ' TODO : Add test name');
+
+    # TEST
+    ok($doc->is_valid(), ' TODO : Add test name');
+
+}
+
+{
+    my $parser = XML::LibXML->new();
     $parser->validation(0);
+    $parser->load_ext_dtd(0); # This should make libxml not try to get the DTD
+
+    my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
+    my $doc = eval {
+        $parser->parse_string($xml);
+    };
+
+    # TEST
+    ok(!$@, ' TODO : Add test name');
+    if ($@) {
+        warn "Parsing error: $@\n";
+    }
+
+    # TEST
+    ok($doc, ' TODO : Add test name');
+}
+
+{
+    my $bad = 'example/bad.dtd';
+    # TEST
+    ok( -f $bad, ' TODO : Add test name' );
+    eval { XML::LibXML::Dtd->new("-//Foo//Test DTD 1.0//EN", 'example/bad.dtd') };
+    # TEST
+    ok ($@, ' TODO : Add test name');
+
     undef $@;
-    eval { $parser->parse_string($xml) };
+    my $dtd;
+    {
+        local $/;
+        open my $f, '<', $bad;
+        $dtd = <$f>;
+    }
     # TEST
-    ok( $@, ' TODO : Add test name' );
-  }
+    ok( length($dtd) > 5, ' TODO : Add test name' );
+    eval { XML::LibXML::Dtd->parse_string($dtd) };
+    # TEST
+    ok ($@, ' TODO : Add test name');
+
+    my $xml = "<!DOCTYPE test SYSTEM \"example/bad.dtd\">\n<test/>";
+
+    {
+        my $parser = XML::LibXML->new;
+        $parser->load_ext_dtd(0);
+        $parser->validation(0);
+        my $doc = $parser->parse_string($xml);
+        # TEST
+        ok( $doc, ' TODO : Add test name' );
+    }
+    {
+        my $parser = XML::LibXML->new;
+        $parser->load_ext_dtd(1);
+        $parser->validation(0);
+        undef $@;
+        eval { $parser->parse_string($xml) };
+        # TEST
+        ok( $@, ' TODO : Add test name' );
+    }
 }
