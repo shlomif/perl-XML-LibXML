@@ -14,6 +14,11 @@ Revision history for Perl extension XML::LibXML
     - Documentation: moved away from Indirect-object-notation and added
     some missing "my"s:
         - http://www.modernperlbooks.com/mt/2009/08/the-problems-with-indirect-object-notation.html
+    - Fix failing t/01basic.t when compiling against libxml2 that comes from
+    git.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=54951
+        - Thanks to Evan Carroll ( http://www.evancarroll.com/ ) for the 
+        report.
 
 1.73            Sat Jun 18 10:53:44 IDT 2011
     - Calculating $err->column() properly, so it won't be maxed out at
