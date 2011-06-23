@@ -4788,7 +4788,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$node = XML::LibXML::Comment( $content );</funcsynopsisinfo>
+                        <funcsynopsisinfo>$node = XML::LibXML::Comment-&gt;new( $content );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>The constructor is the only provided function for this package. It is required, because <emphasis>libxml2</emphasis> treats text nodes

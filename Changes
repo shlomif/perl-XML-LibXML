@@ -9,6 +9,8 @@ Revision history for Perl extension XML::LibXML
     - Makefile.PL: now saying we are trying to link against -lm, -lz 
     and -lxml2 . Not only -lxml2:
         - https://rt.cpan.org/Ticket/Display.html?id=51439
+    - https://rt.cpan.org/Ticket/Display.html?id=61756
+        - << $node = XML::LibXML::Comment( $content ); >> is wrong.
 
 1.73            Sat Jun 18 10:53:44 IDT 2011
     - Calculating $err->column() properly, so it won't be maxed out at
