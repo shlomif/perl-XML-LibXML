@@ -419,6 +419,15 @@ version:
 	echo "New version line: $$version"; \
 	perl -pi~ -e '$$_=q('"$$version"')."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM);
 
+runtest: pure_all
+	perl -MFile::Spec -MTest::Run::CmdLine::Iface -e \
+        "local @INC = @INC;	unshift @INC, map { File::Spec->rel2abs(\$$_) } ('$(INST_LIB)', '$(INST_ARCHLIB)'); Test::Run::CmdLine::Iface->new({test_files => [glob(q{t/*.t})]})->run();"
+
+distruntest: distdir
+	cd $(DISTVNAME) && $(ABSPERLRUN) Makefile.PL
+	cd $(DISTVNAME) && $(MAKE) $(PASTHRU)
+	cd $(DISTVNAME) && $(MAKE) runtest $(PASTHRU)
+
 MAKE_FRAG
 }
 

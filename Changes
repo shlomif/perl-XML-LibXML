@@ -10,6 +10,9 @@ Revision history for Perl extension XML::LibXML
         - Convert t/02parse.t to Test::More .
         - Thanks to TODDR .
         - Removed the diag() messages which were annoying.
+    - Add 'make runtest' and 'make distruntest' targets to run the tests using 
+    Test::Run ( http://beta.metacpan.org/module/Test::Run ).
+        - Adds colours and stuff like that.
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
