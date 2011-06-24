@@ -447,28 +447,37 @@ EOF
     }
 
     # TEST:$xml=2;
+    {
+    my @names = ("nons", "ns");
     for my $xml ($xml_nons, $xml_ns) {
+        my $n = shift(@names);
         my $parser = new XML::LibXML;
         $parser->complete_attributes(1);
         $parser->expand_entities(1);
         my $doc = $parser->parse_string($dtd.$xml);
         # TEST*$xml
-        ok ($doc, ' TODO : Add test name');
+        ok ($doc, "Could parse document $n");
         my $root = $doc->getDocumentElement;
         {
             my $attr = $root->getAttributeNode('foo');
             # TEST*$xml
-            ok ($attr, ' TODO : Add test name');
+            ok ($attr, "Attribute foo exists for $n");
             # TEST*$xml
-            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            isa_ok ($attr, 'XML::LibXML::Attr', 
+                "Attribute is of type XML::LibXML::Attr - $n");
             # TEST*$xml
-            ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
+            ok ($root->isSameNode($attr->ownerElement), 
+                "attr owner element is root - $n");
             # TEST*$xml
-            is ($attr->value, '"barENT"', ' TODO : Add test name');
+            is ($attr->value, q{"barENT"}, 
+                "attr value is OK - $n");
             # TEST*$xml
-            is ($attr->serializeContent, '&quot;barENT&quot;', ' TODO : Add test name');
+            is ($attr->serializeContent, 
+                '&quot;barENT&quot;',
+                "serializeContent - $n");
             # TEST*$xml
-            is ($attr->toString, ' foo="&quot;barENT&quot;"', ' TODO : Add test name');
+            is ($attr->toString, ' foo="&quot;barENT&quot;"', 
+                "toString - $n");
         }
         # fixed values are defined
         # TEST*$xml
@@ -520,5 +529,6 @@ EOF
         ok (!defined $root->getAttributeNodeNS(undef,'name'), ' TODO : Add test name');
         # TEST*$xml
         ok (!defined $root->getAttributeNodeNS(undef,'baz'), ' TODO : Add test name');
+    }
     }
 }
