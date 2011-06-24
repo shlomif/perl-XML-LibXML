@@ -41,6 +41,7 @@ my %INFOS = (
     'VERSION_FROM' => 'LibXML.pm', # finds $VERSION
     'AUTHOR'    => 'Petr Pajas',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
+    'LICENSE' => 'perl',
     'PREREQ_PM' => {
         'ExtUtils::MakeMaker' => '6.56',
         'strict' => 0,

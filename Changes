@@ -13,6 +13,8 @@ Revision history for Perl extension XML::LibXML
     - Add 'make runtest' and 'make distruntest' targets to run the tests using 
     Test::Run ( http://beta.metacpan.org/module/Test::Run ).
         - Adds colours and stuff like that.
+    - Add << LICENSE => 'perl' >> to the Makefile.PL for a license
+    meta-data in the META.YML.
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
