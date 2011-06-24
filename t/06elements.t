@@ -24,7 +24,7 @@ my $attname3  = "C";
 # TEST:$badnames=4;
 my @badnames= ("1A", "<><", "&", "-:");
 
-print "# 1. bound node\n";
+# 1. bound node
 {
     my $doc = XML::LibXML::Document->new();
     my $elem = $doc->createElement( $foo );
@@ -97,7 +97,7 @@ print "# 1. bound node\n";
     }
 
 
-    print "# 1.1 Namespaced Attributes\n";
+    # 1.1 Namespaced Attributes
 
     $elem->setAttributeNS( $nsURI, $prefix . ":". $foo, $attvalue2 );
     # TEST
@@ -166,8 +166,6 @@ print "# 1. bound node\n";
     ok( !$elem->hasAttributeNS($nsURI.".x", $foo), ' TODO : Add test name' );
 
     # warn $elem->toString;
-    print "# set attribute ".$prefix . ":". $attname1."\n";
-
     $elem->setAttributeNS( $nsURI, $prefix . ":". $attname1, $attvalue2 );
     # warn $elem->toString;
 
@@ -191,7 +189,7 @@ print "# 1. bound node\n";
     }
 } 
 
-print "# 2. unbound node\n";
+# 2. unbound node
 {
     my $elem = XML::LibXML::Element->new($foo);
     # TEST
@@ -233,8 +231,8 @@ print "# 2. unbound node\n";
     # warn $elem->toString() , "\n";
 }
 
-print "# 3. Namespace handling\n";
-print "# 3.1 Namespace switching\n";
+# 3. Namespace handling
+# 3.1 Namespace switching
 {
     my $elem = XML::LibXML::Element->new($foo);
     # TEST
@@ -256,7 +254,7 @@ print "# 3.1 Namespace switching\n";
     # warn $elem->toString() , "\n";
 } 
 
-print "# 3.2 default Namespace and Attributes\n";
+# 3.2 default Namespace and Attributes
 {
     my $doc  = XML::LibXML::Document->new();
     my $elem = $doc->createElementNS( "foo", "root" );
@@ -281,7 +279,7 @@ print "# 3.2 default Namespace and Attributes\n";
     # warn $doc->toString;
 }
 
-print "# 4. Text Append and Normalization\n";
+# 4. Text Append and Normalization
 
 {
     my $doc = XML::LibXML::Document->new();
@@ -316,7 +314,7 @@ print "# 4. Text Append and Normalization\n";
 }
 
 
-print "# 5. XML::LibXML extensions\n";
+# 5. XML::LibXML extensions
 {
     my $plainstring = "foo";
     my $stdentstring= "$foo & this";
@@ -347,7 +345,7 @@ print "# 5. XML::LibXML extensions\n";
     ok( $cn[2]->hasChildNodes, ' TODO : Add test name');
 }
 
-print "# 6. XML::LibXML::Attr nodes\n";
+# 6. XML::LibXML::Attr nodes
 {
   my $dtd = <<'EOF';
 <!DOCTYPE root [
