@@ -1999,6 +1999,28 @@ $parser->no_network();</programlisting>
             <para>Additionally to the generic functions, which are only able to process entire documents, XML::LibXML::SAX provides <emphasis>parse_chunk()</emphasis>.
             This method generates SAX events from well balanced data such as is often provided by databases.</para>
         </sect1>
+
+        <sect1>
+            <title>Features</title>
+
+            <para><emphasis>NOTE:</emphasis> This feature is experimental. </para>
+
+            <para>You can enable character data joining which may yield a 
+            significant speed boost in your XML processing in lower markup
+            ratio situations by enabling the 
+            http://xmlns.perl.org/sax/join-character-data feature of this 
+            parser. This is done via the set_feature method like 
+            this: 
+            </para> 
+            
+            <programlisting>$p->set_feature('http://xmlns.perl.org/sax/join-character-data', 1); 
+            </programlisting>
+
+            <para>
+            You can also specify a 0 to disable. The default is to have
+            this feature disabled. 
+            </para>
+        </sect1>
     </chapter>
 
     <chapter id="XML-LibXML-SAX-Builder">

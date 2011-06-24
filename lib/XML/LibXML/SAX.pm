@@ -26,6 +26,18 @@ sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;
 }
 
+sub set_feature {
+	my ($self, $feat, $val) = @_;
+	
+	if ($feat eq 'http://xmlns.perl.org/sax/join-character-data') {
+		$self->{JOIN_CHARACTERS} = $val;
+		return 1;
+	}
+	
+	shift(@_);
+	return $self->SUPER::set_feature(@_);
+}
+
 sub _parse_characterstream {
     my ( $self, $fh ) = @_;
     # this my catch the xml decl, so the parser won't get confused about
@@ -35,6 +47,7 @@ sub _parse_characterstream {
 
 sub _parse_bytestream {
     my ( $self, $fh ) = @_;
+ 
     $self->{ParserOptions}{LibParser}      = XML::LibXML->new;
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_fh;
     $self->{ParserOptions}{ParseFuncParam} = $fh;
@@ -74,6 +87,12 @@ sub parse_chunk {
 sub _parse {
     my $self = shift;
     my $args = bless $self->{ParserOptions}, ref($self);
+    
+    if (defined($self->{JOIN_CHARACTERS})) {
+    	$args->{LibParser}->{JOIN_CHARACTERS} = $self->{JOIN_CHARACTERS};
+    } else {
+    	$args->{LibParser}->{JOIN_CHARACTERS} = 0;
+    }
 
     $args->{LibParser}->set_handler( $self );
     eval {
@@ -91,7 +110,6 @@ sub _parse {
     }
     return;
 }
-
 
 1;
 

@@ -56,9 +56,22 @@ typedef struct {
     xmlDocPtr ns_stack_root;
     SV * handler;
     SV * saved_error;
+    struct CBuffer *charbuf;
+    int joinchars;
 } PmmSAXVector;
 
 typedef PmmSAXVector* PmmSAXVectorPtr;
+
+struct CBufferChunk {
+	struct CBufferChunk *next;
+	xmlChar *data;
+	int len;
+};
+
+struct CBuffer {
+	struct CBufferChunk *head;
+	struct CBufferChunk *tail;
+};
 
 static U32 PrefixHash; /* pre-computed */
 static U32 NsURIHash;
@@ -115,7 +128,6 @@ _C2Sv_len( const xmlChar *string, int len )
     return retval;
 }
 
-
 void
 PmmSAXInitialize(pTHX)
 {
@@ -134,6 +146,137 @@ PmmSAXInitialize(pTHX)
 }
 
 xmlSAXHandlerPtr PSaxGetHandler();
+int PSaxCharactersFlush(void *, struct CBuffer *);
+
+
+/* Character buffering functions */
+
+struct CBufferChunk * CBufferChunkNew(void) {
+	struct CBufferChunk *newchunk = xmlMalloc(sizeof(struct CBufferChunk));
+	memset(newchunk, 0, sizeof(struct CBufferChunk));
+	return newchunk;
+}
+
+struct CBuffer * CBufferNew(void) {
+	struct CBuffer *new = xmlMalloc(sizeof(struct CBuffer));
+	struct CBufferChunk *newchunk = CBufferChunkNew();
+
+	memset(new, 0, sizeof(struct CBuffer));
+
+	new->head = newchunk;
+	new->tail = newchunk;
+
+	return new;
+}
+
+void CBufferPurge(struct CBuffer *buffer) {
+	struct CBufferChunk *p1;
+	struct CBufferChunk *p2;
+
+	if (buffer == NULL || buffer->head->data == NULL) {
+		return;
+	}
+
+	if (p1 = buffer->head) {
+
+		while(p1) {
+			p2 = p1->next;
+
+			if (p1->data) {
+				xmlFree(p1->data);
+			}
+
+			xmlFree(p1);
+
+			p1 = p2;
+		}
+	}
+
+	buffer->head = CBufferChunkNew();
+	buffer->tail = buffer->head;
+}
+
+void CBufferFree(struct CBuffer *buffer) {
+	struct CBufferChunk *p1;
+	struct CBufferChunk *p2;
+
+	if (buffer == NULL) {
+		return;
+	}
+
+	if (p1 = buffer->head) {
+
+		while(p1) {
+			p2 = p1->next;
+
+			if (p1->data) {
+				xmlFree(p1->data);
+			}
+
+			xmlFree(p1);
+
+			p1 = p2;
+		}
+	}
+
+	xmlFree(buffer);
+
+	return;
+}
+
+int CBufferLength(struct CBuffer *buffer) {
+	int length = 0;
+	struct CBufferChunk *cur;
+
+	for(cur = buffer->head; cur; cur = cur->next) {
+		length += cur->len;
+	}
+
+	return length;
+}
+
+void CBufferAppend(struct CBuffer *buffer, const xmlChar *newstring, int len) {
+	char *copy = xmlMalloc(len);
+
+	memcpy(copy, newstring, len);
+
+	buffer->tail->data = copy;
+	buffer->tail->len = len;
+	buffer->tail->next = CBufferChunkNew();
+	buffer->tail = buffer->tail->next;
+}
+
+xmlChar * CBufferCharacters(struct CBuffer *buffer) {
+	int length = CBufferLength(buffer);
+	xmlChar *new = xmlMalloc(length + 1);
+	char *p = new;
+	int copied = 0;
+	struct CBufferChunk *cur;
+
+	if (buffer->head->data == NULL) {
+		return NULL;
+	}
+
+	for(cur = buffer->head;cur;cur = cur->next) {
+		if (! cur->data) {
+			continue;
+		}
+
+		if ((copied = copied + cur->len) > length) {
+			fprintf(stderr, "string overflow\n");
+			abort();
+		}
+
+		memcpy(p, cur->data, cur->len);
+		p += cur->len;
+	}
+
+	new[length] = '\0';
+
+	return new;
+}
+
+/* end character buffering functions */
 
 
 void
@@ -141,6 +284,8 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser, SV * saved_error )
 {
     PmmSAXVectorPtr vec = NULL;
     SV ** th;
+    SV ** joinchars;
+
     dTHX;
 
     CLEAR_SERROR_HANDLER
@@ -164,7 +309,21 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser, SV * saved_error )
         vec->handler = SvREFCNT_inc(*th)  ;
     }
     else {
-        vec->handler = NULL  ;
+        vec->handler = NULL;
+    }
+
+    joinchars = hv_fetch((HV*)SvRV(parser), "JOIN_CHARACTERS", 15, 0);
+
+    if (joinchars != NULL) {
+    	vec->joinchars = (SvIV(*joinchars));
+    } else {
+    	vec->joinchars = 0;
+    }
+
+    if (vec->joinchars) {
+        vec->charbuf = CBufferNew();
+    } else {
+    	vec->charbuf = NULL;
     }
 
     if ( ctxt->sax ) {
@@ -185,6 +344,9 @@ PmmSAXCloseContext( xmlParserCtxtPtr ctxt )
         SvREFCNT_dec( vec->handler );
         vec->handler = NULL;
     }
+
+    CBufferFree(vec->charbuf);
+    vec->charbuf = NULL;
 
     xmlFree( ctxt->sax );
     ctxt->sax = NULL;
@@ -716,6 +878,11 @@ PSaxEndDocument(void * ctx)
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr  sax  = (PmmSAXVectorPtr)ctxt->_private;
 
+    if (sax->joinchars)
+    {
+        PSaxCharactersFlush(ctxt, sax->charbuf);
+    }
+
     dTHX;
     dSP;
 
@@ -748,6 +915,11 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     SV * handler          = sax->handler;
     SV * rv;
     SV * arv;
+
+    if (sax->joinchars)
+    {
+        PSaxCharactersFlush(ctxt, sax->charbuf);
+    }
 
     dSP;
     
@@ -795,6 +967,11 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     SV * rv;
     HV * element;
 
+    if (sax->joinchars)
+    {
+        PSaxCharactersFlush(ctxt, sax->charbuf);
+    }
+
     dSP;
 
     ENTER;
@@ -825,7 +1002,7 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
 }
 
 int
-PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
+PSaxCharactersDispatch(void *ctx, const xmlChar * ch, int len) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     dTHX;
@@ -862,14 +1039,44 @@ PSaxCharacters(void *ctx, const xmlChar * ch, int len) {
 
         if (SvTRUE(ERRSV)) {
             croak_obj;
-	}
-        
+        }
         FREETMPS ;
         LEAVE ;
 
     }
     CLEAR_SERROR_HANDLER;
     return 1;
+}
+
+int PSaxCharactersFlush (void *ctx, struct CBuffer *buffer) {
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
+    xmlChar *ch;
+    int len;
+
+    if (buffer->head->data == NULL) {
+        return 1;
+    }
+
+    ch = CBufferCharacters(sax->charbuf);
+    len = CBufferLength(sax->charbuf);
+
+    CBufferPurge(buffer);
+
+    return PSaxCharactersDispatch(ctx, ch, len);
+}
+
+int PSaxCharacters (void *ctx, const xmlChar * ch, int len) {
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
+
+    if (sax->joinchars) {
+        struct CBuffer *buffer = sax->charbuf;
+        CBufferAppend(buffer, ch, len);
+        return 1;
+    }
+
+    return PSaxCharactersDispatch(ctx, ch, len);
 }
 
 int
@@ -884,6 +1091,11 @@ PSaxComment(void *ctx, const xmlChar * ch) {
 
     if ( ch != NULL && handler != NULL ) {
         int len = xmlStrlen( ch );
+
+        if (sax->joinchars)
+        {
+            PSaxCharactersFlush(ctxt, sax->charbuf);
+        }
 
         dSP;
 
@@ -924,6 +1136,11 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     SV * rv = NULL;
 
     if ( ch != NULL && handler != NULL ) {
+
+        if (sax->joinchars)
+        {
+            PSaxCharactersFlush(ctxt, sax->charbuf);
+        }
 
         dSP;
 
@@ -987,6 +1204,11 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     SV * rv = NULL;
 
     if ( handler != NULL ) {
+        if (sax->joinchars)
+        {
+            PSaxCharactersFlush(ctxt, sax->charbuf);
+        }
+
         dSP;
     
         ENTER;
