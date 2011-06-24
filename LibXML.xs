@@ -6035,11 +6035,20 @@ _setAttributeNS( self, namespaceURI, attr_name, attr_value )
                  }
             }
             else if ( !ns->prefix ) {
-                if ( ns->next && ns->next->prefix ) {
-                    ns = ns->next;
+                if ( prefix && xmlStrlen( prefix ) ) {
+                    ns = xmlSearchNs(self->doc, self, prefix);
+
+                    if ( ns ) {
+                        if ( !xmlStrEqual(ns->href, nsURI) ) {
+                            ns = NULL;
+                        }
+                    }
+                    else {
+                        ns = xmlNewNs(self, nsURI , prefix );
+                    }
                 }
-                else if ( prefix && xmlStrlen( prefix ) ) {
-                    ns = xmlNewNs(self, nsURI , prefix );
+                else if ( ns->next && ns->next->prefix ) {
+                    ns = ns->next;
                 }
                 else {
                     ns = NULL;
