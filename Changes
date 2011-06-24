@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.75            Fri Jun 24 19:00:40 IDT 2011
     - Correct some typos reported in 
         - https://rt.cpan.org/Ticket/Display.html?id=54390
     - Fix the handling of XML::LibXML::InputCallbacks at load_xml().
