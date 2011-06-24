@@ -22,14 +22,26 @@ use Getopt::Long;
 use PPI;
 
 my $out_filename;
+my $inplace = '';
 if (!GetOptions(
     'o|output=s' => \$out_filename,
+    'inplace!' => \$inplace,
 ))
 {
     die "Cannot process arguments.";
 }
 
+if ($inplace && defined($out_filename))
+{
+    die 'Inplace is mutually exclusive with specifying an output file!';
+}
+
 my $filename = shift(@ARGV);
+
+if ($inplace)
+{
+    $out_filename = $filename;
+}
 
 my $doc = PPI::Document->new($filename);
 
@@ -107,6 +119,10 @@ foreach my $stmt (@{$statements})
     }
 }
 
+$doc->save($out_filename);
+
+=begin removed
+
 {
     my $out_fh;
     if (defined($out_filename))
@@ -123,6 +139,10 @@ foreach my $stmt (@{$statements})
 
     close ($out_fh)
 }
+
+=end removed
+
+=cut
 
 =head1 COPYRIGHT & LICENSE
 
