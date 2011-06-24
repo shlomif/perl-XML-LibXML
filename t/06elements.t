@@ -347,7 +347,7 @@ my @badnames= ("1A", "<><", "&", "-:");
 
 # 6. XML::LibXML::Attr nodes
 {
-  my $dtd = <<'EOF';
+    my $dtd = <<'EOF';
 <!DOCTYPE root [
 <!ELEMENT root EMPTY>
 <!ATTLIST root fixed CDATA  #FIXED "foo">
@@ -356,169 +356,169 @@ my @badnames= ("1A", "<><", "&", "-:");
 <!ENTITY ent "ENT">
 ]>
 EOF
-  my $ns = q(urn:xx);
-  my $xml_nons = qq(<root foo="&quot;bar&ent;&quot;" xmlns:a="$ns"/>);
-  my $xml_ns = qq(<root xmlns="$ns" xmlns:a="$ns" foo="&quot;bar&ent;&quot;"/>);
+    my $ns = q(urn:xx);
+    my $xml_nons = qq(<root foo="&quot;bar&ent;&quot;" xmlns:a="$ns"/>);
+    my $xml_ns = qq(<root xmlns="$ns" xmlns:a="$ns" foo="&quot;bar&ent;&quot;"/>);
 
-  # TEST:$xml=2;
-  for my $xml ($xml_nons, $xml_ns) {
-    my $parser = new XML::LibXML;
-    $parser->complete_attributes(0);
-    $parser->expand_entities(0);
-    my $doc = $parser->parse_string($dtd.$xml);
+    # TEST:$xml=2;
+    for my $xml ($xml_nons, $xml_ns) {
+        my $parser = new XML::LibXML;
+        $parser->complete_attributes(0);
+        $parser->expand_entities(0);
+        my $doc = $parser->parse_string($dtd.$xml);
 
-    # TEST*$xml
-
-    ok ($doc, ' TODO : Add test name');
-    my $root = $doc->getDocumentElement;
-    {
-      my $attr = $root->getAttributeNode('foo');
-      # TEST*$xml
-      ok ($attr, ' TODO : Add test name');
-      # TEST*$xml
-      is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
-      # TEST*$xml
-      ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->value, '"barENT"', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->serializeContent, '&quot;bar&ent;&quot;', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->toString, ' foo="&quot;bar&ent;&quot;"', ' TODO : Add test name');
-    }
-    {
-      my $attr = $root->getAttributeNodeNS(undef,'foo');
-      # TEST*$xml
-      ok ($attr, ' TODO : Add test name');
-      # TEST*$xml
-      is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
-      # TEST*$xml
-      ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->value, '"barENT"', ' TODO : Add test name');
-    }
-    # fixed values are defined
-    # TEST*$xml
-    is ($root->getAttribute('fixed'),'foo', ' TODO : Add test name');
-
-    SKIP:
-    {
-        if (XML::LibXML::LIBXML_VERSION() < 20627)
-        {
-            skip(1, 'skipping for libxml2 < 2.6.27');
-        }
         # TEST*$xml
-        is($root->getAttributeNS($ns,'ns_fixed'),'ns_foo', 'ns_fixed is ns_foo')
-    }
-	
-    # TEST*$xml
-    is ($root->getAttribute('a:ns_fixed'),'ns_foo', ' TODO : Add test name');
 
-    # TEST*$xml
+        ok ($doc, ' TODO : Add test name');
+        my $root = $doc->getDocumentElement;
+        {
+            my $attr = $root->getAttributeNode('foo');
+            # TEST*$xml
+            ok ($attr, ' TODO : Add test name');
+            # TEST*$xml
+            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            # TEST*$xml
+            ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->value, '"barENT"', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->serializeContent, '&quot;bar&ent;&quot;', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->toString, ' foo="&quot;bar&ent;&quot;"', ' TODO : Add test name');
+        }
+        {
+            my $attr = $root->getAttributeNodeNS(undef,'foo');
+            # TEST*$xml
+            ok ($attr, ' TODO : Add test name');
+            # TEST*$xml
+            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            # TEST*$xml
+            ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->value, '"barENT"', ' TODO : Add test name');
+        }
+        # fixed values are defined
+        # TEST*$xml
+        is ($root->getAttribute('fixed'),'foo', ' TODO : Add test name');
 
-    is ($root->hasAttribute('fixed'),0, ' TODO : Add test name');
-    # TEST*$xml
-    is ($root->hasAttributeNS($ns,'ns_fixed'),0, ' TODO : Add test name');
-    # TEST*$xml
-    is ($root->hasAttribute('a:ns_fixed'),0, ' TODO : Add test name');
+        SKIP:
+        {
+            if (XML::LibXML::LIBXML_VERSION() < 20627)
+            {
+                skip(1, 'skipping for libxml2 < 2.6.27');
+            }
+            # TEST*$xml
+            is($root->getAttributeNS($ns,'ns_fixed'),'ns_foo', 'ns_fixed is ns_foo')
+        }
+
+        # TEST*$xml
+        is ($root->getAttribute('a:ns_fixed'),'ns_foo', ' TODO : Add test name');
+
+        # TEST*$xml
+
+        is ($root->hasAttribute('fixed'),0, ' TODO : Add test name');
+        # TEST*$xml
+        is ($root->hasAttributeNS($ns,'ns_fixed'),0, ' TODO : Add test name');
+        # TEST*$xml
+        is ($root->hasAttribute('a:ns_fixed'),0, ' TODO : Add test name');
 
 
-    # but no attribute nodes correspond to them
-    # TEST*$xml
-    ok (!defined $root->getAttributeNode('a:ns_fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNode('fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNode('name'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNode('baz'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS($ns,'foo'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS($ns,'fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS($ns,'ns_fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS(undef,'fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS(undef,'name'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS(undef,'baz'), ' TODO : Add test name');
-  }
-
-  # TEST:$xml=2;
-  for my $xml ($xml_nons, $xml_ns) {
-    my $parser = new XML::LibXML;
-    $parser->complete_attributes(1);
-    $parser->expand_entities(1);
-    my $doc = $parser->parse_string($dtd.$xml);
-    # TEST*$xml
-    ok ($doc, ' TODO : Add test name');
-    my $root = $doc->getDocumentElement;
-    {
-      my $attr = $root->getAttributeNode('foo');
-      # TEST*$xml
-      ok ($attr, ' TODO : Add test name');
-      # TEST*$xml
-      is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
-      # TEST*$xml
-      ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->value, '"barENT"', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->serializeContent, '&quot;barENT&quot;', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->toString, ' foo="&quot;barENT&quot;"', ' TODO : Add test name');
-    }
-    # fixed values are defined
-    # TEST*$xml
-    is ($root->getAttribute('fixed'),'foo', ' TODO : Add test name');
-    # TEST*$xml
-    is ($root->getAttributeNS($ns,'ns_fixed'),'ns_foo', ' TODO : Add test name');
-    # TEST*$xml
-    is ($root->getAttribute('a:ns_fixed'),'ns_foo', ' TODO : Add test name');
-
-    # and attribute nodes are created
-    {
-      my $attr = $root->getAttributeNode('fixed');
-      # TEST*$xml
-      is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->value,'foo', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->toString, ' fixed="foo"', ' TODO : Add test name');
-    }
-    {
-      my $attr = $root->getAttributeNode('a:ns_fixed');
-      # TEST*$xml
-      is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->value,'ns_foo', ' TODO : Add test name');
-    }
-    {
-      my $attr = $root->getAttributeNodeNS($ns,'ns_fixed');
-      # TEST*$xml
-      is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->value,'ns_foo', ' TODO : Add test name');
-      # TEST*$xml
-      is ($attr->toString, ' a:ns_fixed="ns_foo"', ' TODO : Add test name');
+        # but no attribute nodes correspond to them
+        # TEST*$xml
+        ok (!defined $root->getAttributeNode('a:ns_fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNode('fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNode('name'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNode('baz'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS($ns,'foo'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS($ns,'fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS($ns,'ns_fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS(undef,'fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS(undef,'name'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS(undef,'baz'), ' TODO : Add test name');
     }
 
-    # TEST*$xml
+    # TEST:$xml=2;
+    for my $xml ($xml_nons, $xml_ns) {
+        my $parser = new XML::LibXML;
+        $parser->complete_attributes(1);
+        $parser->expand_entities(1);
+        my $doc = $parser->parse_string($dtd.$xml);
+        # TEST*$xml
+        ok ($doc, ' TODO : Add test name');
+        my $root = $doc->getDocumentElement;
+        {
+            my $attr = $root->getAttributeNode('foo');
+            # TEST*$xml
+            ok ($attr, ' TODO : Add test name');
+            # TEST*$xml
+            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            # TEST*$xml
+            ok ($root->isSameNode($attr->ownerElement), ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->value, '"barENT"', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->serializeContent, '&quot;barENT&quot;', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->toString, ' foo="&quot;barENT&quot;"', ' TODO : Add test name');
+        }
+        # fixed values are defined
+        # TEST*$xml
+        is ($root->getAttribute('fixed'),'foo', ' TODO : Add test name');
+        # TEST*$xml
+        is ($root->getAttributeNS($ns,'ns_fixed'),'ns_foo', ' TODO : Add test name');
+        # TEST*$xml
+        is ($root->getAttribute('a:ns_fixed'),'ns_foo', ' TODO : Add test name');
 
-    ok (!defined $root->getAttributeNode('ns_fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNode('name'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNode('baz'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS($ns,'foo'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS($ns,'fixed'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS(undef,'name'), ' TODO : Add test name');
-    # TEST*$xml
-    ok (!defined $root->getAttributeNodeNS(undef,'baz'), ' TODO : Add test name');
-  }
+        # and attribute nodes are created
+        {
+            my $attr = $root->getAttributeNode('fixed');
+            # TEST*$xml
+            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->value,'foo', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->toString, ' fixed="foo"', ' TODO : Add test name');
+        }
+        {
+            my $attr = $root->getAttributeNode('a:ns_fixed');
+            # TEST*$xml
+            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->value,'ns_foo', ' TODO : Add test name');
+        }
+        {
+            my $attr = $root->getAttributeNodeNS($ns,'ns_fixed');
+            # TEST*$xml
+            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->value,'ns_foo', ' TODO : Add test name');
+            # TEST*$xml
+            is ($attr->toString, ' a:ns_fixed="ns_foo"', ' TODO : Add test name');
+        }
+
+        # TEST*$xml
+
+        ok (!defined $root->getAttributeNode('ns_fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNode('name'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNode('baz'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS($ns,'foo'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS($ns,'fixed'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS(undef,'name'), ' TODO : Add test name');
+        # TEST*$xml
+        ok (!defined $root->getAttributeNodeNS(undef,'baz'), ' TODO : Add test name');
+    }
 }
