@@ -161,6 +161,7 @@ t/60struct_error.t
 t/61error.t
 t/80registryleak.t
 t/90threads.t
+t/pod.t
 xpath.c
 xpathcontext.h
 xpath.h

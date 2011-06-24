@@ -19,6 +19,7 @@ Revision history for Perl extension XML::LibXML
     SAX driver .
         - Apply a somewhat modified patch from:
             - https://rt.cpan.org/Ticket/Display.html?id=52368
+    - Add t/pod.t .
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
