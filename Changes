@@ -15,6 +15,10 @@ Revision history for Perl extension XML::LibXML
         - Adds colours and stuff like that.
     - Add << LICENSE => 'perl' >> to the Makefile.PL for a license
     meta-data in the META.YML.
+    - Feature implementation: joining congruent character data together in
+    SAX driver .
+        - Apply a somewhat modified patch from:
+            - https://rt.cpan.org/Ticket/Display.html?id=52368
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
