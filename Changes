@@ -20,6 +20,12 @@ Revision history for Perl extension XML::LibXML
         - Apply a somewhat modified patch from:
             - https://rt.cpan.org/Ticket/Display.html?id=52368
     - Add t/pod.t .
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=55000 :
+        - Apply modified patch in the bug report.
+        - << If an element contains both a default namespace declaration and a 
+        second namespace declaration, adding an attribute using the default 
+        namespace declaration will cause that attribute to have the other 
+        prefix. >>
 
 1.74            Thu Jun 23 16:20:42 IDT 2011
     - More work on the t/*.t test scripts.
