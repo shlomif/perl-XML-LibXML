@@ -282,6 +282,25 @@ my $open_hash_counter = Counter->new(
     }
 );
 
+my $match_hash_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $uri = shift;
+
+                if ( $uri =~ /^\/libxml\// ){
+                    $push_cb->({ verdict => 1, uri => $uri, });
+                    return 1;
+                }
+                else {
+                    return;
+                }
+            };
+        },
+    }
+);
+
 my $match_file_stacker = Stacker->new(
     {
         gen_cb => sub {
@@ -300,6 +319,7 @@ my $match_file_stacker = Stacker->new(
         },
     }
 );
+
 my $match_hash2_stacker = Stacker->new(
     {
         gen_cb => sub {
@@ -376,7 +396,7 @@ EOF
         $icb->register_callbacks( [ $match_file_stacker->cb, \&open_file, 
                                     \&read_file, \&close_file ] );
 
-        $icb->register_callbacks( [ \&match_hash, $open_hash_counter->cb,
+        $icb->register_callbacks( [ $match_hash_stacker->cb, $open_hash_counter->cb,
                                     \&read_hash, $close_hash_counter->cb ] );
 
         $icb->register_callbacks( [ $match_xml_stacker->cb, $open_xml_counter->cb,
@@ -387,6 +407,14 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string); # read_xml called here twice
+
+        # TEST
+        $match_hash_stacker->test(
+            [
+                { verdict => 1, uri => '/libxml/test2.xml',},
+            ],
+            'match_hash() for URLs.',
+        );
 
         # TEST
         $read_xml_stacker->test(
@@ -638,16 +666,6 @@ sub close_file {
 # --------------------------------------------------------------------- #
 # callback set 2 (perl hash reader)
 # --------------------------------------------------------------------- #
-sub match_hash {
-        my $uri = shift;
-
-        if ( $uri =~ /^\/libxml\// ){
-            # TEST
-            ok(1, 'URI starts with "/libxml"');
-            return 1;
-        }
-        return;
-}
 
 sub read_hash {
         my $h   = shift;
