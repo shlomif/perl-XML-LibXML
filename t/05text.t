@@ -157,7 +157,6 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::CDATASection->new("test");
 
     # TEST
-
     is( $node->string_value(), "test", ' TODO : Add test name' );
     # TEST
     is( $node->nodeName(), "#cdata-section", ' TODO : Add test name' );
@@ -169,7 +168,6 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::Comment->new("test");
 
     # TEST
-
     is( $node->string_value(), "test", ' TODO : Add test name' );
     # TEST
     is( $node->nodeName(), "#comment", ' TODO : Add test name' );
@@ -181,7 +179,6 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::Document->new();
 
     # TEST
-
     is( $node->nodeName(), "#document", ' TODO : Add test name' );
 }
 {
@@ -190,6 +187,5 @@ my $doc = XML::LibXML::Document->new();
     my $node = XML::LibXML::DocumentFragment->new();
 
     # TEST
-
     is( $node->nodeName(), "#document-fragment", ' TODO : Add test name' );
 }
