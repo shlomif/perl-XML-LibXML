@@ -3,6 +3,77 @@
 use strict;
 use warnings;
 
+package Counter;
+
+use Test::More;
+
+sub new
+{
+    my $class = shift;
+
+    my $self = bless {}, $class;
+
+    $self->_init(@_);
+
+    return $self;
+}
+
+sub _counter
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_counter} = shift;
+    }
+
+    return $self->{_counter};
+}
+
+sub _increment
+{
+    my $self = shift;
+
+    $self->_counter($self->_counter + 1);
+
+    return;
+}
+
+sub _reset
+{
+    my $self = shift;
+
+    $self->_counter(0);
+
+    return;
+}
+
+sub _init
+{
+    my $self = shift;
+
+    $self->_reset;
+
+    return;
+}
+
+sub test
+{
+    my ($self, $value, $blurb) = @_;
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    is ($self->_counter(), $value, $blurb);
+
+    $self->_reset;
+
+    return;
+}
+
+1;
+
+package main;
+
 # Should be 69
 use Test::More tests => 69;
 
@@ -11,7 +82,8 @@ use Test::More tests => 69;
 use XML::LibXML;
 use IO::File;
 
-my $close_xml_count;
+my $close_xml_counter = Counter->new;
+
 my $close_hash_count;
 my $open_xml_count;
 my (@match_file_urls, @match_xml_urls, @read_xml_rets, @match_hash2_urls);
@@ -40,7 +112,6 @@ EOF
         $icb->register_callbacks( [ \&match_hash, \&open_hash, 
                                     \&read_hash, \&close_hash ] );
 
-        $close_xml_count = 0;
         $close_hash_count = 0;
         $open_xml_count = 0;
         @match_xml_urls = ();
@@ -88,8 +159,7 @@ EOF
         is ($open_xml_count, 1, 'open_xml() : parse_string() successful.',); 
         $open_xml_count = 0;
         # TEST
-        is ($close_xml_count, 1, "close_xml() called once.");
-        $close_xml_count = 0;
+        $close_xml_counter->test(1, "close_xml() called once.");
         # TEST
         is ($close_hash_count, 1, "close_hash() called once.");
         $close_hash_count = 0;
@@ -213,7 +283,6 @@ EOF
                 return $dom;
         };
 
-        $close_xml_count = 0;
         @match_file_urls = ();
         @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
@@ -278,8 +347,7 @@ EOF
         @match_file_urls = ();
 
         # TEST
-        is ($close_xml_count, 1, "close_xml() called once.");
-        $close_xml_count = 0;
+        $close_xml_counter->test(1, "close_xml() called once.");
 
         # TEST
         is ($close_hash_count, 1, "close_hash() called once.");
@@ -447,7 +515,7 @@ sub close_xml {
         my $dom   = shift;
         undef $dom;
 
-        $close_xml_count++;
+        $close_xml_counter->_increment;
 
         return 1;
 }
