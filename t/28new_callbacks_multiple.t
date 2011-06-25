@@ -205,7 +205,7 @@ sub test
 package main;
 
 # Should be 68
-use Test::More tests => 68;
+use Test::More tests => 69;
 
 # TEST:$num_parsings=4;
 
@@ -282,8 +282,24 @@ my $open_hash_counter = Counter->new(
     }
 );
 
-my (@match_file_urls);
+my $match_file_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $uri = shift;
 
+                my $verdict = (( $uri =~ /^\/example\// ) ? 1 : 0);
+                if ($verdict)
+                {
+                    $push_cb->({ verdict => $verdict, uri => $uri, });
+                }
+
+                return $verdict;
+            };
+        },
+    }
+);
 my $match_hash2_stacker = Stacker->new(
     {
         gen_cb => sub {
@@ -357,8 +373,7 @@ EOF
         # TEST
         ok($icb, 'XML::LibXML::InputCallback was initialized');
 
-        @match_file_urls = ();
-        $icb->register_callbacks( [ \&match_file, \&open_file, 
+        $icb->register_callbacks( [ $match_file_stacker->cb, \&open_file, 
                                     \&read_file, \&close_file ] );
 
         $icb->register_callbacks( [ \&match_hash, $open_hash_counter->cb,
@@ -390,14 +405,12 @@ EOF
         );
 
         # TEST
-        is_deeply (
-            \@match_file_urls, 
+        $match_file_stacker->test(
             [
                 { verdict => 1, uri => '/example/test2.xml',},
             ],
             'match_file() for multiple_tests',
         );
-        @match_file_urls = ();
 
         # TEST
         $open_hash_counter->test(1, 'open_hash() : called 1 times');
@@ -428,8 +441,7 @@ EOF
 
         my $icb    = XML::LibXML::InputCallback->new();
 
-        @match_file_urls = ();
-        $icb->register_callbacks( [ \&match_file, \&open_file, 
+        $icb->register_callbacks( [ $match_file_stacker->cb, \&open_file, 
                                     \&read_file, \&close_file ] );
 
         $icb->register_callbacks( [ $match_hash2_stacker->cb, $open_hash_counter->cb,
@@ -451,13 +463,11 @@ EOF
         );
 
         # TEST
-        is_deeply (
-            \@match_file_urls, 
+        $match_file_stacker->test(
             [
             ],
             'match_file() input callbacks' ,
         );
-        @match_file_urls = ();
 
         # TEST
         is ($doc->string_value(), "\ntest\nbar..\nbar..\n",
@@ -479,6 +489,15 @@ EOF
             [
             ],
             'match_hash2() does not match after being unregistered.' ,
+        );
+
+        # TEST
+        $match_file_stacker->test(
+            [
+                { verdict => 1, uri => '/example/test2.xml',},
+                { verdict => 1, uri => '/example/test3.xml',},
+            ],
+            'match_file() input callbacks' ,
         );
 
 
@@ -521,7 +540,6 @@ EOF
                 return $dom;
         };
 
-        @match_file_urls = ();
         $icb->register_callbacks( [ $match_xml_stacker->cb, $open_xml2,
                                     $read_xml_stacker->cb, $close_xml_counter->cb ] );
 
@@ -531,8 +549,7 @@ EOF
         my $parser = XML::LibXML->new();
         $parser->expand_xinclude(1);
 
-        @match_file_urls = ();
-        $parser->match_callback( \&match_file );
+        $parser->match_callback( $match_file_stacker->cb );
         $parser->open_callback( \&open_file );
         $parser->read_callback( \&read_file );
         $parser->close_callback( \&close_file );
@@ -566,14 +583,12 @@ EOF
         );
 
         # TEST
-        is_deeply (
-            \@match_file_urls, 
+        $match_file_stacker->test(
             [
                 { verdict => 1, uri => '/example/test2.xml',},
             ],
             'match_file() for inner callback.',
         );
-        @match_file_urls = ();
 
         # TEST
         $open_hash_counter->test(1, 'open_hash() : called 1 times');
@@ -587,26 +602,6 @@ EOF
         # TEST
         is ($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n",
             'string_value()',);
-}
-
-
-# --------------------------------------------------------------------- #
-# CALLBACKS
-# --------------------------------------------------------------------- #
-# --------------------------------------------------------------------- #
-# callback set 1 (perl file reader)
-# --------------------------------------------------------------------- #
-sub match_file {
-    my $uri = shift;
-
-    my $verdict = (( $uri =~ /^\/example\// ) ? 1 : 0);
-
-    if ($verdict)
-    {
-        push @match_file_urls, { verdict => $verdict, uri => $uri };
-    }
-
-    return $verdict;
 }
 
 sub open_file {
