@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 76
-use Test::More tests => 73;
+# Should be 72
+use Test::More tests => 72;
 
 # TEST:$num_parsings=4;
 
@@ -13,6 +13,7 @@ use IO::File;
 
 my $close_xml_count;
 my $open_xml_count;
+my (@match_file_urls);
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -31,6 +32,7 @@ EOF
         # TEST
         ok($icb, 'XML::LibXML::InputCallback was initialized');
 
+        @match_file_urls = ();
         $icb->register_callbacks( [ \&match_file, \&open_file, 
                                     \&read_file, \&close_file ] );
 
@@ -47,6 +49,16 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_file_urls, 
+            [
+                { verdict => 1, uri => '/example/test2.xml',},
+            ],
+            'match_file() for multiple_tests',
+        );
+        @match_file_urls = ();
 
         # TEST
         is ($open_xml_count, 1, 'open_xml() : parse_string() successful.',); 
@@ -75,6 +87,7 @@ EOF
 
         my $icb    = XML::LibXML::InputCallback->new();
 
+        @match_file_urls = ();
         $icb->register_callbacks( [ \&match_file, \&open_file, 
                                     \&read_file, \&close_file ] );
 
@@ -86,6 +99,15 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_file_urls, 
+            [
+            ],
+            'match_file() input callbacks' ,
+        );
+        @match_file_urls = ();
 
         # TEST
         is ($doc->string_value(), "\ntest\nbar..\nbar..\n",
@@ -144,6 +166,7 @@ EOF
         my $parser = XML::LibXML->new();
         $parser->expand_xinclude(1);
 
+        @match_file_urls = ();
         $parser->match_callback( \&match_file );
         $parser->open_callback( \&open_file );
         $parser->read_callback( \&read_file );
@@ -152,6 +175,16 @@ EOF
         $parser->input_callbacks($icb);
 
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_file_urls, 
+            [
+                { verdict => 1, uri => '/example/test2.xml',},
+            ],
+            'match_file() for inner callback.',
+        );
+        @match_file_urls = ();
 
         # TEST
         is ($close_xml_count, 1, "close_xml() called once.");
@@ -170,13 +203,16 @@ EOF
 # callback set 1 (perl file reader)
 # --------------------------------------------------------------------- #
 sub match_file {
-        my $uri = shift;
-        if ( $uri =~ /^\/example\// ){
-            # TEST*$num_parsings
-            ok(1, 'match_file()');
-            return 1;
-        }
-        return 0;        
+    my $uri = shift;
+
+    my $verdict = (( $uri =~ /^\/example\// ) ? 1 : 0);
+
+    if ($verdict)
+    {
+        push @match_file_urls, { verdict => $verdict, uri => $uri };
+    }
+
+    return $verdict;
 }
 
 sub open_file {
