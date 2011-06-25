@@ -13,7 +13,7 @@ use IO::File;
 
 my $close_xml_count;
 my $open_xml_count;
-my (@match_file_urls, @match_xml_urls, @read_xml_rets);
+my (@match_file_urls, @match_xml_urls, @read_xml_rets, @match_hash2_urls);
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -113,6 +113,7 @@ EOF
         $icb->register_callbacks( [ \&match_file, \&open_file, 
                                     \&read_file, \&close_file ] );
 
+        @match_hash2_urls = ();
         $icb->register_callbacks( [ \&match_hash2, \&open_hash, 
                                     \&read_hash, \&close_hash ] );
 
@@ -121,6 +122,17 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_hash2_urls,
+            [
+                { verdict => 1, uri => '/example/test2.xml',},
+                { verdict => 1, uri => '/example/test3.xml',},
+            ],
+            'match_hash2() input callbacks' ,
+        );
+        @match_hash2_urls = ();
 
         # TEST
         is_deeply (
@@ -135,9 +147,20 @@ EOF
         is ($doc->string_value(), "\ntest\nbar..\nbar..\n",
             'string_value returns fine',);
 
+        @match_hash2_urls = ();
         $icb->unregister_callbacks( [ \&match_hash2, \&open_hash, 
                                       \&read_hash, \&close_hash] );
         $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_hash2_urls,
+            [
+            ],
+            'match_hash2() does not match after being unregistered.' ,
+        );
+        @match_hash2_urls = ();
+
 
         # TEST
         is($doc->string_value(), 
@@ -184,6 +207,7 @@ EOF
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
                                     \&read_xml, \&close_xml ] );
 
+        @match_hash2_urls = ();
         $icb->register_callbacks( [ \&match_hash2, \&open_hash,
                                     \&read_hash, \&close_hash ] );
 
@@ -199,6 +223,16 @@ EOF
         $parser->input_callbacks($icb);
 
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_hash2_urls,
+            [
+                { verdict => 1, uri => '/example/test2.xml',},
+            ],
+            'match_hash2() input callbacks' ,
+        );
+        @match_hash2_urls = ();
 
         # TEST
         is_deeply(
@@ -343,13 +377,14 @@ sub close_hash {
 # callback set 3 (perl hash reader)
 # --------------------------------------------------------------------- #
 sub match_hash2 {
-        my $uri = shift;
-        if ( $uri =~ /^\/example\// ){
-
-            # TEST*3
-            ok(1, 'URI starts with "/example"');
-            return 1;
-        }
+    my $uri = shift;
+    if ( $uri =~ /^\/example\// ){
+        push @match_hash2_urls, { verdict => 1, uri => $uri, };
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 # --------------------------------------------------------------------- #
