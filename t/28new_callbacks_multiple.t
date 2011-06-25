@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 70
-use Test::More tests => 70;
+# Should be 69
+use Test::More tests => 69;
 
 # TEST:$num_parsings=4;
 
@@ -12,6 +12,7 @@ use XML::LibXML;
 use IO::File;
 
 my $close_xml_count;
+my $close_hash_count;
 my $open_xml_count;
 my (@match_file_urls, @match_xml_urls, @read_xml_rets, @match_hash2_urls);
 
@@ -40,6 +41,7 @@ EOF
                                     \&read_hash, \&close_hash ] );
 
         $close_xml_count = 0;
+        $close_hash_count = 0;
         $open_xml_count = 0;
         @match_xml_urls = ();
         @read_xml_rets = ();
@@ -88,6 +90,9 @@ EOF
         # TEST
         is ($close_xml_count, 1, "close_xml() called once.");
         $close_xml_count = 0;
+        # TEST
+        is ($close_hash_count, 1, "close_hash() called once.");
+        $close_hash_count = 0;
 
         # TEST
         ok ($doc, 'parse_string() returns a doc.');
@@ -114,6 +119,7 @@ EOF
                                     \&read_file, \&close_file ] );
 
         @match_hash2_urls = ();
+        $close_hash_count = 0;
         $icb->register_callbacks( [ \&match_hash2, \&open_hash, 
                                     \&read_hash, \&close_hash ] );
 
@@ -146,6 +152,12 @@ EOF
         # TEST
         is ($doc->string_value(), "\ntest\nbar..\nbar..\n",
             'string_value returns fine',);
+
+        # TEST
+        is ($close_hash_count, 2, 
+            "close_hash() called twice on two xincludes."
+        );
+        $close_hash_count = 0;
 
         @match_hash2_urls = ();
         $icb->unregister_callbacks( [ \&match_hash2, \&open_hash, 
@@ -208,6 +220,7 @@ EOF
                                     \&read_xml, \&close_xml ] );
 
         @match_hash2_urls = ();
+        $close_hash_count = 0;
         $icb->register_callbacks( [ \&match_hash2, \&open_hash,
                                     \&read_hash, \&close_hash ] );
 
@@ -267,6 +280,10 @@ EOF
         # TEST
         is ($close_xml_count, 1, "close_xml() called once.");
         $close_xml_count = 0;
+
+        # TEST
+        is ($close_hash_count, 1, "close_hash() called once.");
+        $close_hash_count = 0;
 
         # TEST
         is ($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n",
@@ -369,8 +386,9 @@ sub close_hash {
         my $h   = shift;
         undef $h;
 
-        # TEST*$num_parsings
-        ok(1, 'close_hash()');
+        $close_hash_count++;
+
+        return 1;
 }
 
 # --------------------------------------------------------------------- #
