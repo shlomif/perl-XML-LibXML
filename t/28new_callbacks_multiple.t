@@ -76,7 +76,6 @@ package Counter;
 
 our @ISA = qw(Collector);
 
-use Test::More;
 sub _counter
 {
     my $self = shift;
@@ -122,7 +121,7 @@ sub test
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    is ($self->_counter(), $value, $blurb);
+    Test::More::is ($self->_counter(), $value, $blurb);
 
     $self->_reset;
 
@@ -134,8 +133,6 @@ sub test
 package Stacker;
 
 our @ISA = qw(Collector);
-
-use Test::More;
 
 sub _stack
 {
@@ -184,7 +181,7 @@ sub test
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    is_deeply ($self->_stack(), $value, $blurb);
+    Test::More::is_deeply ($self->_stack(), $value, $blurb);
 
     $self->_reset;
 
