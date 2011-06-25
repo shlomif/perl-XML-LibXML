@@ -30,6 +30,18 @@ sub _counter
     return $self->{_counter};
 }
 
+sub _callback
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_callback} = shift;
+    }
+
+    return $self->{_callback};
+}
+
 sub _increment
 {
     my $self = shift;
@@ -51,8 +63,17 @@ sub _reset
 sub _init
 {
     my $self = shift;
+    my $args = shift;
 
     $self->_reset;
+
+    $self->_callback(
+        $args->{gen_cb}->(
+            sub {
+                return $self->_increment();
+            },
+        ),
+    );
 
     return;
 }
@@ -70,6 +91,15 @@ sub test
     return;
 }
 
+sub cb
+{
+    my ($self) = @_;
+
+    return sub {
+        return $self->_callback()->();
+    };
+}
+
 1;
 
 package main;
@@ -82,7 +112,21 @@ use Test::More tests => 69;
 use XML::LibXML;
 use IO::File;
 
-my $close_xml_counter = Counter->new;
+my $close_xml_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my $dom   = shift;
+                undef $dom;
+
+                $inc_cb->();
+
+                return 1;
+            },
+        }
+    }
+);
 
 my $close_hash_count;
 my $open_xml_count;
@@ -117,7 +161,7 @@ EOF
         @match_xml_urls = ();
         @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, \&open_xml,
-                                    \&read_xml, \&close_xml ] );
+                                    \&read_xml, $close_xml_counter->cb] );
 
 
         my $parser = XML::LibXML->new();
@@ -286,7 +330,7 @@ EOF
         @match_file_urls = ();
         @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
-                                    \&read_xml, \&close_xml ] );
+                                    \&read_xml, $close_xml_counter->cb ] );
 
         @match_hash2_urls = ();
         $close_hash_count = 0;
@@ -511,11 +555,3 @@ sub read_xml {
         return $rv;
 }
 
-sub close_xml {
-        my $dom   = shift;
-        undef $dom;
-
-        $close_xml_counter->_increment;
-
-        return 1;
-}
