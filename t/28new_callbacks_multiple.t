@@ -148,7 +148,22 @@ my $open_xml_counter = Counter->new(
     }
 );
 
-my $close_hash_count;
+my $close_hash_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my $h   = shift;
+                undef $h;
+
+                $inc_cb->();
+
+                return 1;
+            },
+        }
+    }
+);
+
 my (@match_file_urls, @match_xml_urls, @read_xml_rets, @match_hash2_urls);
 
 # --------------------------------------------------------------------- #
@@ -173,9 +188,8 @@ EOF
                                     \&read_file, \&close_file ] );
 
         $icb->register_callbacks( [ \&match_hash, \&open_hash, 
-                                    \&read_hash, \&close_hash ] );
+                                    \&read_hash, $close_hash_counter->cb ] );
 
-        $close_hash_count = 0;
         @match_xml_urls = ();
         @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml_counter->cb,
@@ -222,8 +236,7 @@ EOF
         # TEST
         $close_xml_counter->test(1, "close_xml() called once.");
         # TEST
-        is ($close_hash_count, 1, "close_hash() called once.");
-        $close_hash_count = 0;
+        $close_hash_counter->test(1, "close_hash() called once.");
 
         # TEST
         ok ($doc, 'parse_string() returns a doc.');
@@ -250,9 +263,8 @@ EOF
                                     \&read_file, \&close_file ] );
 
         @match_hash2_urls = ();
-        $close_hash_count = 0;
         $icb->register_callbacks( [ \&match_hash2, \&open_hash, 
-                                    \&read_hash, \&close_hash ] );
+                                    \&read_hash, $close_hash_counter->cb() ] );
 
 
         my $parser = XML::LibXML->new();
@@ -285,14 +297,13 @@ EOF
             'string_value returns fine',);
 
         # TEST
-        is ($close_hash_count, 2, 
-            "close_hash() called twice on two xincludes."
+        $close_hash_counter->test(
+            2, "close_hash() called twice on two xincludes."
         );
-        $close_hash_count = 0;
 
         @match_hash2_urls = ();
         $icb->unregister_callbacks( [ \&match_hash2, \&open_hash, 
-                                      \&read_hash, \&close_hash] );
+                                      \&read_hash, $close_hash_counter->cb] );
         $doc = $parser->parse_string($string);
 
         # TEST
@@ -350,9 +361,8 @@ EOF
                                     \&read_xml, $close_xml_counter->cb ] );
 
         @match_hash2_urls = ();
-        $close_hash_count = 0;
         $icb->register_callbacks( [ \&match_hash2, \&open_hash,
-                                    \&read_hash, \&close_hash ] );
+                                    \&read_hash, $close_hash_counter->cb ] );
 
         my $parser = XML::LibXML->new();
         $parser->expand_xinclude(1);
@@ -411,8 +421,7 @@ EOF
         $close_xml_counter->test(1, "close_xml() called once.");
 
         # TEST
-        is ($close_hash_count, 1, "close_hash() called once.");
-        $close_hash_count = 0;
+        $close_hash_counter->test(1, "close_hash() called once.");
 
         # TEST
         is ($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n",
@@ -509,15 +518,6 @@ sub read_hash {
         # TEST*24
         ok(1, 'read_hash()',);
         return $rv;
-}
-
-sub close_hash {
-        my $h   = shift;
-        undef $h;
-
-        $close_hash_count++;
-
-        return 1;
 }
 
 # --------------------------------------------------------------------- #
