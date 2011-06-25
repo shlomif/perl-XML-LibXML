@@ -194,8 +194,6 @@ package main;
 # Should be 42
 use Test::More tests => 42;
 
-# TEST:$num_parsings=4;
-
 use XML::LibXML;
 use IO::File;
 
