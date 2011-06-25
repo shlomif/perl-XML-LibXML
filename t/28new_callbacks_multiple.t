@@ -204,8 +204,8 @@ sub test
 
 package main;
 
-# Should be 68
-use Test::More tests => 69;
+# Should be 73
+use Test::More tests => 73;
 
 # TEST:$num_parsings=4;
 
@@ -279,6 +279,25 @@ my $open_hash_counter = Counter->new(
                 return $hash;
             };
         }
+    }
+);
+
+my $open_file_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $uri = shift;
+
+                # TEST*$num_parsings
+                ok( open (my $file, '<', ".$uri"), 'open file');
+
+                $push_cb->($uri);
+
+                return $file;
+
+            };
+        },
     }
 );
 
@@ -393,7 +412,7 @@ EOF
         # TEST
         ok($icb, 'XML::LibXML::InputCallback was initialized');
 
-        $icb->register_callbacks( [ $match_file_stacker->cb, \&open_file, 
+        $icb->register_callbacks( [ $match_file_stacker->cb, $open_file_stacker->cb(),
                                     \&read_file, \&close_file ] );
 
         $icb->register_callbacks( [ $match_hash_stacker->cb, $open_hash_counter->cb,
@@ -407,6 +426,14 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string); # read_xml called here twice
+
+        # TEST
+        $open_file_stacker->test(
+            [
+                '/example/test2.xml',
+            ],
+            'open_file() for URLs.',
+        );
 
         # TEST
         $match_hash_stacker->test(
@@ -469,7 +496,7 @@ EOF
 
         my $icb    = XML::LibXML::InputCallback->new();
 
-        $icb->register_callbacks( [ $match_file_stacker->cb, \&open_file, 
+        $icb->register_callbacks( [ $match_file_stacker->cb, $open_file_stacker->cb(), 
                                     \&read_file, \&close_file ] );
 
         $icb->register_callbacks( [ $match_hash2_stacker->cb, $open_hash_counter->cb,
@@ -480,6 +507,13 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        $open_file_stacker->test(
+            [
+            ],
+            'open_file() for URLs.',
+        );
 
         # TEST
         $match_hash2_stacker->test(
@@ -511,6 +545,15 @@ EOF
         $icb->unregister_callbacks( [ $match_hash2_stacker->cb, \&open_hash, 
                                       \&read_hash, $close_hash_counter->cb] );
         $doc = $parser->parse_string($string);
+
+        # TEST
+        $open_file_stacker->test(
+            [
+                '/example/test2.xml',
+                '/example/test3.xml',
+            ],
+            'open_file() for URLs.',
+        );
 
         # TEST
         $match_hash2_stacker->test(
@@ -578,13 +621,21 @@ EOF
         $parser->expand_xinclude(1);
 
         $parser->match_callback( $match_file_stacker->cb );
-        $parser->open_callback( \&open_file );
+        $parser->open_callback( $open_file_stacker->cb() );
         $parser->read_callback( \&read_file );
         $parser->close_callback( \&close_file );
 
         $parser->input_callbacks($icb);
 
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        $open_file_stacker->test(
+            [
+                '/example/test2.xml',
+            ],
+            'open_file() for URLs.',
+        );
 
         # TEST
         $match_hash2_stacker->test(
@@ -630,15 +681,6 @@ EOF
         # TEST
         is ($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n",
             'string_value()',);
-}
-
-sub open_file {
-        my $uri = shift;
-
-        # TEST*$num_parsings
-        ok( open (my $file, '<', ".$uri"), 'open file');
-
-        return $file;
 }
 
 sub read_file {
