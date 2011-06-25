@@ -11,6 +11,8 @@ use Test::More tests => 73;
 use XML::LibXML;
 use IO::File;
 
+my $close_xml_count;
+
 # --------------------------------------------------------------------- #
 # multiple tests
 # --------------------------------------------------------------------- #
@@ -34,6 +36,7 @@ EOF
         $icb->register_callbacks( [ \&match_hash, \&open_hash, 
                                     \&read_hash, \&close_hash ] );
 
+        $close_xml_count = 0;
         $icb->register_callbacks( [ \&match_xml, \&open_xml,
                                     \&read_xml, \&close_xml ] );
 
@@ -42,6 +45,10 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is ($close_xml_count, 1, "close_xml() called once.");
+        $close_xml_count = 0;
 
         # TEST
         ok ($doc, 'parse_string() returns a doc.');
@@ -122,6 +129,7 @@ EOF
                 return $dom;
         };
 
+        $close_xml_count = 0;
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
                                     \&read_xml, \&close_xml ] );
 
@@ -139,6 +147,10 @@ EOF
         $parser->input_callbacks($icb);
 
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is ($close_xml_count, 1, "close_xml() called once.");
+        $close_xml_count = 0;
 
         # TEST
         is ($doc->string_value(), "\ntest\n..\n\nfoo..bar..bar\n\n",
@@ -293,8 +305,7 @@ sub close_xml {
         my $dom   = shift;
         undef $dom;
 
-        # TEST*2
-        ok(1, 'close_xml()');
+        $close_xml_count++;
 
         return 1;
 }
