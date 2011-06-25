@@ -204,13 +204,29 @@ sub test
 
 package main;
 
-# Should be 73
-use Test::More tests => 73;
+# Should be 72
+use Test::More tests => 72;
 
 # TEST:$num_parsings=4;
 
 use XML::LibXML;
 use IO::File;
+
+my $close_file_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my $h   = shift;
+
+                $inc_cb->();
+                $h->close();
+
+                return 1;
+            };
+        }
+    }
+);
 
 my $close_xml_counter = Counter->new(
     {
@@ -413,7 +429,7 @@ EOF
         ok($icb, 'XML::LibXML::InputCallback was initialized');
 
         $icb->register_callbacks( [ $match_file_stacker->cb, $open_file_stacker->cb(),
-                                    \&read_file, \&close_file ] );
+                                    \&read_file, $close_file_counter->cb(), ] );
 
         $icb->register_callbacks( [ $match_hash_stacker->cb, $open_hash_counter->cb,
                                     \&read_hash, $close_hash_counter->cb ] );
@@ -425,7 +441,10 @@ EOF
         my $parser = XML::LibXML->new();
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
-        my $doc = $parser->parse_string($string); # read_xml called here twice
+        my $doc = $parser->parse_string($string);
+
+        # TEST
+        $close_file_counter->test(1, 'close_file() called once.');
 
         # TEST
         $open_file_stacker->test(
@@ -497,7 +516,7 @@ EOF
         my $icb    = XML::LibXML::InputCallback->new();
 
         $icb->register_callbacks( [ $match_file_stacker->cb, $open_file_stacker->cb(), 
-                                    \&read_file, \&close_file ] );
+                                    \&read_file, $close_file_counter->cb(), ] );
 
         $icb->register_callbacks( [ $match_hash2_stacker->cb, $open_hash_counter->cb,
                                     \&read_hash, $close_hash_counter->cb() ] );
@@ -545,6 +564,9 @@ EOF
         $icb->unregister_callbacks( [ $match_hash2_stacker->cb, \&open_hash, 
                                       \&read_hash, $close_hash_counter->cb] );
         $doc = $parser->parse_string($string);
+
+        # TEST
+        $close_file_counter->test(2, 'close_file() called twice.');
 
         # TEST
         $open_file_stacker->test(
@@ -623,11 +645,14 @@ EOF
         $parser->match_callback( $match_file_stacker->cb );
         $parser->open_callback( $open_file_stacker->cb() );
         $parser->read_callback( \&read_file );
-        $parser->close_callback( \&close_file );
+        $parser->close_callback( $close_file_counter->cb() );
 
         $parser->input_callbacks($icb);
 
-        my $doc = $parser->parse_string($string);
+        my $doc = $parser->parse_string($string); 
+
+        # TEST
+        $close_file_counter->test(1, 'close_file() called once.');
 
         # TEST
         $open_file_stacker->test(
@@ -694,15 +719,6 @@ sub read_file {
         my $n = $h->read( $rv , $buflen );
 
         return $rv;
-}
-
-
-sub close_file {
-        my $h   = shift;
-        # TEST*$num_parsings
-        ok(1, 'close_file()');
-        $h->close();
-        return 1;
 }
 
 # --------------------------------------------------------------------- #
