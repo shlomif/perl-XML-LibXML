@@ -16,6 +16,20 @@ sub new
     return $self;
 }
 
+sub _init
+{
+    my $self = shift;
+    my $args = shift;
+
+    $self->_reset;
+
+    $self->_callback( $args->{gen_cb}->($self->_calc_op_callback()) );
+
+    $self->_init_returned_cb;
+
+    return;
+}
+
 sub _callback
 {
     my $self = shift;
@@ -94,24 +108,12 @@ sub _reset
     return;
 }
 
-sub _init
-{
+sub _calc_op_callback {
     my $self = shift;
-    my $args = shift;
 
-    $self->_reset;
-
-    $self->_callback(
-        $args->{gen_cb}->(
-            sub {
-                return $self->_increment();
-            },
-        ),
-    );
-
-    $self->_init_returned_cb;
-
-    return;
+    return sub {
+        return $self->_increment();
+    };
 }
 
 sub test
@@ -166,26 +168,14 @@ sub _reset
     return;
 }
 
-sub _init
-{
+sub _calc_op_callback {
     my $self = shift;
-    my $args = shift;
 
-    $self->_reset;
+    return sub {
+        my $item = shift;
 
-    $self->_callback(
-        $args->{gen_cb}->(
-            sub {
-                my $item = shift;
-
-                return $self->_push($item);
-            },
-        ),
-    );
-
-    $self->_init_returned_cb;
-
-    return;
+        return $self->_push($item);
+    };
 }
 
 sub test
