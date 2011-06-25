@@ -17,72 +17,72 @@ my $doc = XML::LibXML::Document->new();
     my $foo = "foobar";
     my $textnode = $doc->createTextNode($foo);
     # TEST
-    ok( $textnode, ' TODO : Add test name' );
+    ok( $textnode, 'creation 1');
     # TEST
-    is( $textnode->nodeName(), '#text', ' TODO : Add test name' );
+    is( $textnode->nodeName(), '#text',  'creation 2');
     # TEST
-    is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo,  'creation 3',);
 
     # 2. substring
     my $tnstr = $textnode->substringData( 1,2 );
     # TEST
-    is( $tnstr , "oo", ' TODO : Add test name' );
+    is( $tnstr , "oo", 'substring 1');
     # TEST
-    is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo,  'substring 2' );
 
     # 3. Expansion
     $textnode->appendData( $foo );
     # TEST
-    is( $textnode->nodeValue(), $foo . $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo . $foo, 'expansion 1');
 
     $textnode->insertData( 6, "FOO" );
     # TEST
-    is( $textnode->nodeValue(), $foo."FOO".$foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo."FOO".$foo, 'expansion 2' );
 
     $textnode->setData( $foo );
     $textnode->insertData( 6, "FOO" );
     # TEST
-    is( $textnode->nodeValue(), $foo."FOO", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo."FOO", 'expansion 3');
     $textnode->setData( $foo );
     $textnode->insertData( 3, "" );
     # TEST
-    is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo, 'Empty insertion does not change value');
 
-    # 4. Removement
+    # 4. Removal
     $textnode->deleteData( 1,2 );
     # TEST
-    is( $textnode->nodeValue(), "fbar", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "fbar", 'Removal 1');
     $textnode->setData( $foo );
     $textnode->deleteData( 1,10 );
     # TEST
-    is( $textnode->nodeValue(), "f", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "f", 'Removal 2');
     $textnode->setData( $foo );
     $textnode->deleteData( 10,1 );
     # TEST
-    is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo, 'Removal 3');
     $textnode->deleteData( 1,0 );
     # TEST
-    is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo, 'Removal 4');
     $textnode->deleteData( 0,0 );
     # TEST
-    is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
+    is( $textnode->nodeValue(), $foo, 'Removal 5');
     $textnode->deleteData( 0,2 );
     # TEST
-    is( $textnode->nodeValue(), "obar", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "obar", 'Removal 6');
 
     # 5. Replacement
     $textnode->setData( "test" );
     $textnode->replaceData( 1,2, "phish" );
     # TEST
-    is( $textnode->nodeValue(), "tphisht", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "tphisht", 'Replacement 1');
     $textnode->setData( "test" );
     $textnode->replaceData( 1,4, "phish" );
     # TEST
-    is( $textnode->nodeValue(), "tphish", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "tphish",  'Replacement 2');
     $textnode->setData( "test" );
     $textnode->replaceData( 1,0, "phish" );
     # TEST
-    is( $textnode->nodeValue(), "tphishest", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "tphishest",  'Replacement 3');
 
 
     # 6. XML::LibXML features
@@ -90,21 +90,23 @@ my $doc = XML::LibXML::Document->new();
 
     $textnode->replaceDataString( "es", "new" );   
     # TEST
-    is( $textnode->nodeValue(), "tnewt", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "tnewt", 'replaceDataString() 1');
 
     $textnode->replaceDataRegEx( 'n(.)w', '$1s' );
     # TEST
-    is( $textnode->nodeValue(), "test", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "test", 'replaceDataRegEx() 2');
 
     $textnode->setData( "blue phish, white phish, no phish" );
     $textnode->replaceDataRegEx( 'phish', 'test' );
     # TEST
-    is( $textnode->nodeValue(), "blue test, white phish, no phish", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "blue test, white phish, no phish", 
+        'replaceDataRegEx 3',);
 
     # replace them all!
     $textnode->replaceDataRegEx( 'phish', 'test', 'g' );
     # TEST
-    is( $textnode->nodeValue(), "blue test, white test, no test", ' TODO : Add test name' );
+    is( $textnode->nodeValue(), "blue test, white test, no test", 
+        'replaceDataRegEx g',);
 
     # check if special chars are encoded properly 
     $textnode->setData( "te?st" );
