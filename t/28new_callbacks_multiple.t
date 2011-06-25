@@ -128,8 +128,27 @@ my $close_xml_counter = Counter->new(
     }
 );
 
+my $open_xml_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            return sub {
+                my $uri = shift;
+                my $dom = XML::LibXML->new->parse_string(q{<?xml version="1.0"?><foo><tmp/>barbar</foo>});
+
+                if ($dom)
+                {
+                    $inc_cb->();
+                }
+
+                return $dom;
+            },
+        }
+    }
+);
+
 my $close_hash_count;
-my $open_xml_count;
 my (@match_file_urls, @match_xml_urls, @read_xml_rets, @match_hash2_urls);
 
 # --------------------------------------------------------------------- #
@@ -157,10 +176,9 @@ EOF
                                     \&read_hash, \&close_hash ] );
 
         $close_hash_count = 0;
-        $open_xml_count = 0;
         @match_xml_urls = ();
         @read_xml_rets = ();
-        $icb->register_callbacks( [ \&match_xml, \&open_xml,
+        $icb->register_callbacks( [ \&match_xml, $open_xml_counter->cb,
                                     \&read_xml, $close_xml_counter->cb] );
 
 
@@ -200,8 +218,7 @@ EOF
         @match_file_urls = ();
 
         # TEST
-        is ($open_xml_count, 1, 'open_xml() : parse_string() successful.',); 
-        $open_xml_count = 0;
+        $open_xml_counter->test(1, 'open_xml() : parse_string() successful.',); 
         # TEST
         $close_xml_counter->test(1, "close_xml() called once.");
         # TEST
@@ -529,18 +546,6 @@ sub match_xml {
     else {
         return 0;
     }
-}
-
-sub open_xml {
-        my $uri = shift;
-        my $dom = XML::LibXML->new->parse_string(q{<?xml version="1.0"?><foo><tmp/>barbar</foo>});
-
-        if ($dom)
-        {
-            $open_xml_count++;
-        }
-
-        return $dom;
 }
 
 sub read_xml {
