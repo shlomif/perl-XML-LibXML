@@ -13,7 +13,7 @@ use XML::LibXML;
 my $doc = XML::LibXML::Document->new();
 
 {
-    print "# 1. creation\n";
+    # 1. creation
     my $foo = "foobar";
     my $textnode = $doc->createTextNode($foo);
     # TEST
@@ -23,14 +23,14 @@ my $doc = XML::LibXML::Document->new();
     # TEST
     is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
 
-    print "# 2. substring\n";
+    # 2. substring
     my $tnstr = $textnode->substringData( 1,2 );
     # TEST
     is( $tnstr , "oo", ' TODO : Add test name' );
     # TEST
     is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
 
-    print "# 3. Expansion\n";
+    # 3. Expansion
     $textnode->appendData( $foo );
     # TEST
     is( $textnode->nodeValue(), $foo . $foo, ' TODO : Add test name' );
@@ -48,7 +48,7 @@ my $doc = XML::LibXML::Document->new();
     # TEST
     is( $textnode->nodeValue(), $foo, ' TODO : Add test name' );
 
-    print "# 4. Removement\n";
+    # 4. Removement
     $textnode->deleteData( 1,2 );
     # TEST
     is( $textnode->nodeValue(), "fbar", ' TODO : Add test name' );
@@ -70,7 +70,7 @@ my $doc = XML::LibXML::Document->new();
     # TEST
     is( $textnode->nodeValue(), "obar", ' TODO : Add test name' );
 
-    print "# 5. Replacement\n";
+    # 5. Replacement
     $textnode->setData( "test" );
     $textnode->replaceData( 1,2, "phish" );
     # TEST
@@ -85,7 +85,7 @@ my $doc = XML::LibXML::Document->new();
     is( $textnode->nodeValue(), "tphishest", ' TODO : Add test name' );
 
 
-    print "# 6. XML::LibXML features\n";
+    # 6. XML::LibXML features
     $textnode->setData( "test" );
 
     $textnode->replaceDataString( "es", "new" );   
@@ -143,7 +143,7 @@ my $doc = XML::LibXML::Document->new();
 }
 
 {
-    print "# standalone test\n";
+    # standalone test
     my $node = XML::LibXML::Text->new("foo");
     # TEST
     ok($node, ' TODO : Add test name');
@@ -152,7 +152,7 @@ my $doc = XML::LibXML::Document->new();
 }
 
 {
-    print "# CDATA node name test\n";
+    # CDATA node name test
 
     my $node = XML::LibXML::CDATASection->new("test");
 
@@ -163,7 +163,7 @@ my $doc = XML::LibXML::Document->new();
 }
 
 {
-    print "# Comment node name test\n";
+    # Comment node name test
 
     my $node = XML::LibXML::Comment->new("test");
 
@@ -174,7 +174,7 @@ my $doc = XML::LibXML::Document->new();
 }
 
 {
-    print "# Document node name test\n";
+    # Document node name test
 
     my $node = XML::LibXML::Document->new();
 
@@ -182,7 +182,7 @@ my $doc = XML::LibXML::Document->new();
     is( $node->nodeName(), "#document", ' TODO : Add test name' );
 }
 {
-    print "# Document fragment node name test\n";
+    # Document fragment node name test
 
     my $node = XML::LibXML::DocumentFragment->new();
 
