@@ -12,6 +12,7 @@ use XML::LibXML;
 use IO::File;
 
 my $close_xml_count;
+my $open_xml_count;
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -37,6 +38,7 @@ EOF
                                     \&read_hash, \&close_hash ] );
 
         $close_xml_count = 0;
+        $open_xml_count = 0;
         $icb->register_callbacks( [ \&match_xml, \&open_xml,
                                     \&read_xml, \&close_xml ] );
 
@@ -46,6 +48,9 @@ EOF
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
 
+        # TEST
+        is ($open_xml_count, 1, 'open_xml() : parse_string() successful.',); 
+        $open_xml_count = 0;
         # TEST
         is ($close_xml_count, 1, "close_xml() called once.");
         $close_xml_count = 0;
@@ -282,8 +287,11 @@ sub match_xml {
 sub open_xml {
         my $uri = shift;
         my $dom = XML::LibXML->new->parse_string(q{<?xml version="1.0"?><foo><tmp/>barbar</foo>});
-        # TEST
-        ok ($dom, 'open_xml() : parse_string() successful.', );
+
+        if ($dom)
+        {
+            $open_xml_count++;
+        }
 
         return $dom;
 }
