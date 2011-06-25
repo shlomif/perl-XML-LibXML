@@ -13,7 +13,7 @@ use IO::File;
 
 my $close_xml_count;
 my $open_xml_count;
-my (@match_file_urls);
+my (@match_file_urls, @match_xml_urls);
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -41,6 +41,7 @@ EOF
 
         $close_xml_count = 0;
         $open_xml_count = 0;
+        @match_xml_urls = ();
         $icb->register_callbacks( [ \&match_xml, \&open_xml,
                                     \&read_xml, \&close_xml ] );
 
@@ -49,6 +50,16 @@ EOF
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_xml_urls,
+            [
+                { verdict => 1, uri => '/xmldom/test2.xml', },
+            ],
+            'match_xml() one.',
+        );
+        @match_xml_urls = ();
 
         # TEST
         is_deeply (
@@ -157,6 +168,7 @@ EOF
         };
 
         $close_xml_count = 0;
+        @match_file_urls = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
                                     \&read_xml, \&close_xml ] );
 
@@ -175,6 +187,16 @@ EOF
         $parser->input_callbacks($icb);
 
         my $doc = $parser->parse_string($string);
+
+        # TEST
+        is_deeply (
+            \@match_xml_urls,
+            [
+                { verdict => 1, uri => '/xmldom/test2.xml', },
+            ],
+            'match_xml() No. 2.',
+        );
+        @match_xml_urls = ();
 
         # TEST
         is_deeply (
@@ -312,12 +334,14 @@ sub match_hash2 {
 # callback set 4 (perl xml reader)
 # --------------------------------------------------------------------- #
 sub match_xml {
-        my $uri = shift;
-        if ( $uri =~ /^\/xmldom\// ){
-            # TEST*2
-            ok(1, 'URI starts with /xmldom in match_xml');
-            return 1;
-        }
+    my $uri = shift;
+    if ( $uri =~ /^\/xmldom\// ){
+        push @match_xml_urls, { verdict => 1, uri => $uri, };
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub open_xml {
