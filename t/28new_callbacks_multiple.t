@@ -3,9 +3,7 @@
 use strict;
 use warnings;
 
-package Counter;
-
-use Test::More;
+package Collector;
 
 sub new
 {
@@ -16,18 +14,6 @@ sub new
     $self->_init(@_);
 
     return $self;
-}
-
-sub _counter
-{
-    my $self = shift;
-
-    if (@_)
-    {
-        $self->{_counter} = shift;
-    }
-
-    return $self->{_counter};
 }
 
 sub _callback
@@ -41,6 +27,54 @@ sub _callback
 
     return $self->{_callback};
 }
+
+sub _returned_cb
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_returned_cb} = shift;
+    }
+
+    return $self->{_returned_cb};
+}
+
+sub _init_returned_cb
+{
+    my $self = shift;
+
+    $self->_returned_cb(
+        sub {
+            return $self->_callback()->(@_);
+        }
+    );
+
+    return;
+}
+
+sub cb
+{
+    return shift->_returned_cb();
+}
+
+package Counter;
+
+our @ISA = qw(Collector);
+
+use Test::More;
+sub _counter
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_counter} = shift;
+    }
+
+    return $self->{_counter};
+}
+
 
 sub _increment
 {
@@ -75,6 +109,8 @@ sub _init
         ),
     );
 
+    $self->_init_returned_cb;
+
     return;
 }
 
@@ -91,31 +127,13 @@ sub test
     return;
 }
 
-sub cb
-{
-    my ($self) = @_;
-
-    return sub {
-        return $self->_callback()->(@_);
-    };
-}
-
 1;
 
 package Stacker;
 
+our @ISA = qw(Collector);
+
 use Test::More;
-
-sub new
-{
-    my $class = shift;
-
-    my $self = bless {}, $class;
-
-    $self->_init(@_);
-
-    return $self;
-}
 
 sub _stack
 {
@@ -127,18 +145,6 @@ sub _stack
     }
 
     return $self->{_stack};
-}
-
-sub _callback
-{
-    my $self = shift;
-
-    if (@_)
-    {
-        $self->{_callback} = shift;
-    }
-
-    return $self->{_callback};
 }
 
 sub _push
@@ -177,6 +183,8 @@ sub _init
         ),
     );
 
+    $self->_init_returned_cb;
+
     return;
 }
 
@@ -192,16 +200,6 @@ sub test
 
     return;
 }
-
-sub cb
-{
-    my ($self) = @_;
-
-    return sub {
-        return $self->_callback()->(@_);
-    };
-}
-
 1;
 
 package main;
@@ -284,7 +282,25 @@ my $open_hash_counter = Counter->new(
     }
 );
 
-my (@match_file_urls, @match_hash2_urls);
+my (@match_file_urls);
+
+my $match_hash2_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {        
+                my $uri = shift;
+                if ( $uri =~ /^\/example\// ){
+                    $push_cb->({ verdict => 1, uri => $uri, });
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            };
+        },
+    }
+);
 
 my $match_xml_stacker = Stacker->new(
     {
@@ -416,8 +432,7 @@ EOF
         $icb->register_callbacks( [ \&match_file, \&open_file, 
                                     \&read_file, \&close_file ] );
 
-        @match_hash2_urls = ();
-        $icb->register_callbacks( [ \&match_hash2, $open_hash_counter->cb,
+        $icb->register_callbacks( [ $match_hash2_stacker->cb, $open_hash_counter->cb,
                                     \&read_hash, $close_hash_counter->cb() ] );
 
 
@@ -427,15 +442,13 @@ EOF
         my $doc = $parser->parse_string($string);
 
         # TEST
-        is_deeply (
-            \@match_hash2_urls,
+        $match_hash2_stacker->test(
             [
                 { verdict => 1, uri => '/example/test2.xml',},
                 { verdict => 1, uri => '/example/test3.xml',},
             ],
             'match_hash2() input callbacks' ,
         );
-        @match_hash2_urls = ();
 
         # TEST
         is_deeply (
@@ -457,19 +470,16 @@ EOF
             2, "close_hash() called twice on two xincludes."
         );
 
-        @match_hash2_urls = ();
-        $icb->unregister_callbacks( [ \&match_hash2, \&open_hash, 
+        $icb->unregister_callbacks( [ $match_hash2_stacker->cb, \&open_hash, 
                                       \&read_hash, $close_hash_counter->cb] );
         $doc = $parser->parse_string($string);
 
         # TEST
-        is_deeply (
-            \@match_hash2_urls,
+        $match_hash2_stacker->test(
             [
             ],
             'match_hash2() does not match after being unregistered.' ,
         );
-        @match_hash2_urls = ();
 
 
         # TEST
@@ -515,8 +525,7 @@ EOF
         $icb->register_callbacks( [ $match_xml_stacker->cb, $open_xml2,
                                     $read_xml_stacker->cb, $close_xml_counter->cb ] );
 
-        @match_hash2_urls = ();
-        $icb->register_callbacks( [ \&match_hash2, $open_hash_counter->cb,
+        $icb->register_callbacks( [ $match_hash2_stacker->cb, $open_hash_counter->cb,
                                     \&read_hash, $close_hash_counter->cb ] );
 
         my $parser = XML::LibXML->new();
@@ -533,14 +542,12 @@ EOF
         my $doc = $parser->parse_string($string);
 
         # TEST
-        is_deeply (
-            \@match_hash2_urls,
+        $match_hash2_stacker->test(
             [
                 { verdict => 1, uri => '/example/test2.xml',},
             ],
             'match_hash2() input callbacks' ,
         );
-        @match_hash2_urls = ();
 
         # TEST
         $read_xml_stacker->test(
@@ -662,16 +669,3 @@ sub read_hash {
         return $rv;
 }
 
-# --------------------------------------------------------------------- #
-# callback set 3 (perl hash reader)
-# --------------------------------------------------------------------- #
-sub match_hash2 {
-    my $uri = shift;
-    if ( $uri =~ /^\/example\// ){
-        push @match_hash2_urls, { verdict => 1, uri => $uri, };
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
