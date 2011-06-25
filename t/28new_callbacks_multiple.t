@@ -284,7 +284,25 @@ my $open_hash_counter = Counter->new(
     }
 );
 
-my (@match_file_urls, @match_xml_urls, @match_hash2_urls);
+my (@match_file_urls, @match_hash2_urls);
+
+my $match_xml_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {        
+                my $uri = shift;
+                if ( $uri =~ /^\/xmldom\// ){
+                    $push_cb->({ verdict => 1, uri => $uri, });
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            };
+        },
+    }
+);
 
 my $read_xml_stacker = Stacker->new(
     {
@@ -330,8 +348,7 @@ EOF
         $icb->register_callbacks( [ \&match_hash, $open_hash_counter->cb,
                                     \&read_hash, $close_hash_counter->cb ] );
 
-        @match_xml_urls = ();
-        $icb->register_callbacks( [ \&match_xml, $open_xml_counter->cb,
+        $icb->register_callbacks( [ $match_xml_stacker->cb, $open_xml_counter->cb,
                                     $read_xml_stacker->cb, $close_xml_counter->cb] );
 
 
@@ -349,14 +366,12 @@ EOF
             'read_xml() for multiple callbacks',
         );
         # TEST
-        is_deeply (
-            \@match_xml_urls,
+        $match_xml_stacker->test(
             [
                 { verdict => 1, uri => '/xmldom/test2.xml', },
             ],
             'match_xml() one.',
         );
-        @match_xml_urls = ();
 
         # TEST
         is_deeply (
@@ -497,7 +512,7 @@ EOF
         };
 
         @match_file_urls = ();
-        $icb->register_callbacks( [ \&match_xml, $open_xml2,
+        $icb->register_callbacks( [ $match_xml_stacker->cb, $open_xml2,
                                     $read_xml_stacker->cb, $close_xml_counter->cb ] );
 
         @match_hash2_urls = ();
@@ -536,14 +551,12 @@ EOF
             'read_xml() No. 2',
         );
         # TEST
-        is_deeply (
-            \@match_xml_urls,
+        $match_xml_stacker->test(
             [
                 { verdict => 1, uri => '/xmldom/test2.xml', },
             ],
             'match_xml() No. 2.',
         );
-        @match_xml_urls = ();
 
         # TEST
         is_deeply (
@@ -656,20 +669,6 @@ sub match_hash2 {
     my $uri = shift;
     if ( $uri =~ /^\/example\// ){
         push @match_hash2_urls, { verdict => 1, uri => $uri, };
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-# --------------------------------------------------------------------- #
-# callback set 4 (perl xml reader)
-# --------------------------------------------------------------------- #
-sub match_xml {
-    my $uri = shift;
-    if ( $uri =~ /^\/xmldom\// ){
-        push @match_xml_urls, { verdict => 1, uri => $uri, };
         return 1;
     }
     else {
