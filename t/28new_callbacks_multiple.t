@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 72
-use Test::More tests => 72;
+# Should be 70
+use Test::More tests => 70;
 
 # TEST:$num_parsings=4;
 
@@ -13,7 +13,7 @@ use IO::File;
 
 my $close_xml_count;
 my $open_xml_count;
-my (@match_file_urls, @match_xml_urls);
+my (@match_file_urls, @match_xml_urls, @read_xml_rets);
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -42,6 +42,7 @@ EOF
         $close_xml_count = 0;
         $open_xml_count = 0;
         @match_xml_urls = ();
+        @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, \&open_xml,
                                     \&read_xml, \&close_xml ] );
 
@@ -49,8 +50,18 @@ EOF
         my $parser = XML::LibXML->new();
         $parser->expand_xinclude(1);
         $parser->input_callbacks($icb);
-        my $doc = $parser->parse_string($string);
+        my $doc = $parser->parse_string($string); # read_xml called here twice
 
+        # TEST
+        is_deeply(
+            \@read_xml_rets,
+            [
+                qq{<?xml version="1.0"?>\n<foo><tmp/>barbar</foo>\n},
+                '',
+            ],
+            'read_xml() for multiple callbacks',
+        );
+        @read_xml_rets = ();
         # TEST
         is_deeply (
             \@match_xml_urls,
@@ -169,6 +180,7 @@ EOF
 
         $close_xml_count = 0;
         @match_file_urls = ();
+        @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
                                     \&read_xml, \&close_xml ] );
 
@@ -188,6 +200,16 @@ EOF
 
         my $doc = $parser->parse_string($string);
 
+        # TEST
+        is_deeply(
+            \@read_xml_rets,
+            [
+                qq{<?xml version="1.0"?>\n<x xmlns:xinclude="http://www.w3.org/2001/XInclude">\n<tmp/><xml>foo..<foo xml:base="/example/test2.xml">bar<xsl/>..</foo>bar</xml>\n</x>\n},
+                '',
+            ],
+            'read_xml() No. 2',
+        );
+        @read_xml_rets = ();
         # TEST
         is_deeply (
             \@match_xml_urls,
@@ -364,8 +386,7 @@ sub read_xml {
         my $rv = $tmp ? $dom->toString : "";
         $tmp->unbindNode if($tmp);
 
-        # TEST*$num_parsings
-        ok (1, 'read_xml()',);
+        push @read_xml_rets, $rv;
         return $rv;
 }
 
