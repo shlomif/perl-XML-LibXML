@@ -96,7 +96,109 @@ sub cb
     my ($self) = @_;
 
     return sub {
-        return $self->_callback()->();
+        return $self->_callback()->(@_);
+    };
+}
+
+1;
+
+package Stacker;
+
+use Test::More;
+
+sub new
+{
+    my $class = shift;
+
+    my $self = bless {}, $class;
+
+    $self->_init(@_);
+
+    return $self;
+}
+
+sub _stack
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_stack} = shift;
+    }
+
+    return $self->{_stack};
+}
+
+sub _callback
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_callback} = shift;
+    }
+
+    return $self->{_callback};
+}
+
+sub _push
+{
+    my $self = shift;
+    my $item = shift;
+
+    push @{$self->_stack()}, $item;
+
+    return;
+}
+
+sub _reset
+{
+    my $self = shift;
+
+    $self->_stack([]);
+
+    return;
+}
+
+sub _init
+{
+    my $self = shift;
+    my $args = shift;
+
+    $self->_reset;
+
+    $self->_callback(
+        $args->{gen_cb}->(
+            sub {
+                my $item = shift;
+
+                return $self->_push($item);
+            },
+        ),
+    );
+
+    return;
+}
+
+sub test
+{
+    my ($self, $value, $blurb) = @_;
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    is_deeply ($self->_stack(), $value, $blurb);
+
+    $self->_reset;
+
+    return;
+}
+
+sub cb
+{
+    my ($self) = @_;
+
+    return sub {
+        return $self->_callback()->(@_);
     };
 }
 
@@ -123,7 +225,7 @@ my $close_xml_counter = Counter->new(
                 $inc_cb->();
 
                 return 1;
-            },
+            };
         }
     }
 );
@@ -143,8 +245,8 @@ my $open_xml_counter = Counter->new(
                 }
 
                 return $dom;
-            },
-        }
+            };
+        },
     }
 );
 
@@ -159,7 +261,7 @@ my $close_hash_counter = Counter->new(
                 $inc_cb->();
 
                 return 1;
-            },
+            };
         }
     }
 );
@@ -177,12 +279,32 @@ my $open_hash_counter = Counter->new(
                 $inc_cb->();
 
                 return $hash;
-            },
+            };
         }
     }
 );
 
-my (@match_file_urls, @match_xml_urls, @read_xml_rets, @match_hash2_urls);
+my (@match_file_urls, @match_xml_urls, @match_hash2_urls);
+
+my $read_xml_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {        
+                my $dom   = shift;
+                my $buflen = shift;
+
+                my $tmp = $dom->documentElement->findnodes('tmp')->shift;
+                my $rv = $tmp ? $dom->toString : "";
+                $tmp->unbindNode if($tmp);
+
+                $push_cb->($rv);
+
+                return $rv;
+            };
+        },
+    }
+);
 
 # --------------------------------------------------------------------- #
 # multiple tests
@@ -209,9 +331,8 @@ EOF
                                     \&read_hash, $close_hash_counter->cb ] );
 
         @match_xml_urls = ();
-        @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml_counter->cb,
-                                    \&read_xml, $close_xml_counter->cb] );
+                                    $read_xml_stacker->cb, $close_xml_counter->cb] );
 
 
         my $parser = XML::LibXML->new();
@@ -220,15 +341,13 @@ EOF
         my $doc = $parser->parse_string($string); # read_xml called here twice
 
         # TEST
-        is_deeply(
-            \@read_xml_rets,
+        $read_xml_stacker->test(
             [
                 qq{<?xml version="1.0"?>\n<foo><tmp/>barbar</foo>\n},
                 '',
             ],
             'read_xml() for multiple callbacks',
         );
-        @read_xml_rets = ();
         # TEST
         is_deeply (
             \@match_xml_urls,
@@ -378,9 +497,8 @@ EOF
         };
 
         @match_file_urls = ();
-        @read_xml_rets = ();
         $icb->register_callbacks( [ \&match_xml, $open_xml2,
-                                    \&read_xml, $close_xml_counter->cb ] );
+                                    $read_xml_stacker->cb, $close_xml_counter->cb ] );
 
         @match_hash2_urls = ();
         $icb->register_callbacks( [ \&match_hash2, $open_hash_counter->cb,
@@ -410,15 +528,13 @@ EOF
         @match_hash2_urls = ();
 
         # TEST
-        is_deeply(
-            \@read_xml_rets,
+        $read_xml_stacker->test(
             [
                 qq{<?xml version="1.0"?>\n<x xmlns:xinclude="http://www.w3.org/2001/XInclude">\n<tmp/><xml>foo..<foo xml:base="/example/test2.xml">bar<xsl/>..</foo>bar</xml>\n</x>\n},
                 '',
             ],
             'read_xml() No. 2',
         );
-        @read_xml_rets = ();
         # TEST
         is_deeply (
             \@match_xml_urls,
@@ -560,16 +676,3 @@ sub match_xml {
         return 0;
     }
 }
-
-sub read_xml {
-        my $dom   = shift;
-        my $buflen = shift;
-
-        my $tmp = $dom->documentElement->findnodes('tmp')->shift;
-        my $rv = $tmp ? $dom->toString : "";
-        $tmp->unbindNode if($tmp);
-
-        push @read_xml_rets, $rv;
-        return $rv;
-}
-
