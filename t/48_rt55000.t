@@ -15,7 +15,7 @@ See L<https://rt.cpan.org/Ticket/Display.html?id=55000> .
 
 =cut
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use XML::LibXML;
 
@@ -34,10 +34,12 @@ $root->setAttributeNS("uri", "prefix:attribute", "text");
 my $string = $doc->toString(1);
 
 # TEST
+unlike ($string, qr/[^\w:]attribute="text"/,
+    "Not placed as an unprefixed attribute");
 unlike ($string, qr/\bwrong:attribute="text"/, 
     "Not placed in the wrong namespace");
 
 # TEST
-like ($string, qr/\b(?:prefix:)?attribute="text"/, 
+like ($string, qr/\bprefix:attribute="text"/,
     "Placed in the right namespace");
 
