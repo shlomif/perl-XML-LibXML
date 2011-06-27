@@ -191,8 +191,8 @@ sub test
 
 package main;
 
-# Should be 42
-use Test::More tests => 42;
+# Should be 56
+use Test::More tests => 56;
 
 use XML::LibXML;
 use IO::File;
@@ -472,63 +472,78 @@ EOF
         $parser->input_callbacks($icb);
         my $doc = $parser->parse_string($string); # read_hash - 1,1,1,1,1
 
-        # TEST
-        $read_hash_counter->test(6, "read_hash() count for multiple tests");
+        # TEST:$c=0;
+        my $test_counters = sub {
+            # TEST:$c++;
+            $read_hash_counter->test(6, "read_hash() count for multiple tests");
 
-        # TEST
-        $read_file_counter->test(2, 'read_file() called twice.');
+            # TEST:$c++;
+            $read_file_counter->test(2, 'read_file() called twice.');
 
-        # TEST
-        $close_file_counter->test(1, 'close_file() called once.');
+            # TEST:$c++;
+            $close_file_counter->test(1, 'close_file() called once.');
 
-        # TEST
-        $open_file_stacker->test(
-            [
-                '/example/test2.xml',
-            ],
-            'open_file() for URLs.',
-        );
+            # TEST:$c++;
+            $open_file_stacker->test(
+                [
+                    '/example/test2.xml',
+                ],
+                'open_file() for URLs.',
+            );
 
-        # TEST
-        $match_hash_stacker->test(
-            [
-                { verdict => 1, uri => '/libxml/test2.xml',},
-            ],
-            'match_hash() for URLs.',
-        );
+            # TEST:$c++;
+            $match_hash_stacker->test(
+                [
+                    { verdict => 1, uri => '/libxml/test2.xml',},
+                ],
+                'match_hash() for URLs.',
+            );
 
-        # TEST
-        $read_xml_stacker->test(
-            [
-                qq{<?xml version="1.0"?>\n<foo><tmp/>barbar</foo>\n},
-                '',
-            ],
-            'read_xml() for multiple callbacks',
-        );
-        # TEST
-        $match_xml_stacker->test(
-            [
-                { verdict => 1, uri => '/xmldom/test2.xml', },
-            ],
-            'match_xml() one.',
-        );
+            # TEST:$c++;
+            $read_xml_stacker->test(
+                [
+                    qq{<?xml version="1.0"?>\n<foo><tmp/>barbar</foo>\n},
+                    '',
+                ],
+                'read_xml() for multiple callbacks',
+            );
+            # TEST:$c++;
+            $match_xml_stacker->test(
+                [
+                    { verdict => 1, uri => '/xmldom/test2.xml', },
+                ],
+                'match_xml() one.',
+            );
 
-        # TEST
-        $match_file_stacker->test(
-            [
-                { verdict => 1, uri => '/example/test2.xml',},
-            ],
-            'match_file() for multiple_tests',
-        );
+            # TEST:$c++;
+            $match_file_stacker->test(
+                [
+                    { verdict => 1, uri => '/example/test2.xml',},
+                ],
+                'match_file() for multiple_tests',
+            );
 
-        # TEST
-        $open_hash_counter->test(1, 'open_hash() : called 1 times');
-        # TEST
-        $open_xml_counter->test(1, 'open_xml() : parse_string() successful.',); 
-        # TEST
-        $close_xml_counter->test(1, "close_xml() called once.");
-        # TEST
-        $close_hash_counter->test(1, "close_hash() called once.");
+            # TEST:$c++;
+            $open_hash_counter->test(1, 'open_hash() : called 1 times');
+            # TEST:$c++;
+            $open_xml_counter->test(1, 'open_xml() : parse_string() successful.',); 
+            # TEST:$c++;
+            $close_xml_counter->test(1, "close_xml() called once.");
+            # TEST:$c++;
+            $close_hash_counter->test(1, "close_hash() called once.");
+        };
+
+        # TEST:$test_counters=$c;
+
+        # TEST*$test_counters
+        $test_counters->();
+
+        # This is a regression test for:
+        # https://rt.cpan.org/Ticket/Display.html?id=51086
+        my $doc2 = $parser->parse_string($string);
+
+        # TEST*$test_counters
+        $test_counters->();
 
         # TEST
         ok ($doc, 'parse_string() returns a doc.');
@@ -536,6 +551,14 @@ EOF
         is ($doc->string_value(), 
             "\ntest\n..\nbar..\nbarbar\n",
             '->string_value()',
+        );
+
+        # TEST
+        ok ($doc2, 'second parse_string() returns a doc.');
+        # TEST
+        is ($doc2->string_value(), 
+            "\ntest\n..\nbar..\nbarbar\n",
+            q{Second parse_string()'s ->string_value()},
         );
 }
 
