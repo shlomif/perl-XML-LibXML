@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+
+     - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
+     and Stacker class.
+        - After that, the regression test for was added:
+            - https://rt.cpan.org/Ticket/Display.html?id=51086
+        - Already fixed in the trunk.
+
 1.75            Fri Jun 24 19:00:40 IDT 2011
     - Correct some typos reported in 
         - https://rt.cpan.org/Ticket/Display.html?id=54390
