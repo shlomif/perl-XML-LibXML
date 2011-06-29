@@ -3,9 +3,11 @@ package TestHelpers;
 use strict;
 use warnings;
 
-our @EXPORT = (qw(slurp utf8_slurp));
+our @EXPORT = (qw(slurp utf8_slurp eq_or_diff));
 
 use base 'Exporter';
+
+use Test::More ();
 
 sub slurp
 {
@@ -39,5 +41,22 @@ sub utf8_slurp
     return $contents;
 }
 
+my $_eq_or_diff_ref;
+
+if (eval "require Test::Differences; 1;" && (!$@))
+{
+    $_eq_or_diff_ref = \&Test::Differences::eq_or_diff;
+}
+else
+{
+    $_eq_or_diff_ref = \&Test::More::is_deeply;
+}
+
+sub eq_or_diff
+{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    return $_eq_or_diff_ref->(@_);
+}
 
 1;

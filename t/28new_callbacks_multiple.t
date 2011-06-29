@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+
 package Collector;
 
 sub new
@@ -132,6 +134,8 @@ sub test
 
 package Stacker;
 
+use TestHelpers;
+
 our @ISA = qw(Collector);
 
 sub _stack
@@ -181,7 +185,7 @@ sub test
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    Test::More::is_deeply ($self->_stack(), $value, $blurb);
+    eq_or_diff ($self->_stack(), $value, $blurb);
 
     $self->_reset;
 
