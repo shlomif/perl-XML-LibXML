@@ -6,6 +6,10 @@
 
 use strict;
 use warnings;
+
+use lib './t/lib';
+use TestHelpers;
+
 use Test;
 
 BEGIN { 
@@ -41,16 +45,13 @@ print "# 1 parse schema from a file\n";
 
 print "# 2 parse schema from a string\n";
 {
-    open RNGFILE, "<$file";
-    my $string = join "", <RNGFILE>;
-    close RNGFILE;
+    my $string = slurp($file);
 
     my $rngschema = XML::LibXML::RelaxNG->new( string => $string );
     ok ( $rngschema );
 
-    open RNGFILE, "<$badfile";
-    $string = join "", <RNGFILE>;
-    close RNGFILE;
+    $string = slurp($badfile);
+
     eval { $rngschema = XML::LibXML::RelaxNG->new( string => $string ); };
     ok( $@ );
 }
