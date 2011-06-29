@@ -85,11 +85,10 @@ my $file = "test/textReader/countries.xml";
 }
 
 
-my $fd;
 # FD interface
 for my $how (qw(FD IO)) {
 #  my $fd;
-  open $fd, $file or die "cannot open $file: $!\n";
+  open my $fd, '<', $file or die "cannot open $file: $!\n";
   my $reader = new XML::LibXML::Reader($how => $fd, URI => $file);
   isa_ok($reader, "XML::LibXML::Reader");
   $reader->read;
@@ -103,7 +102,7 @@ for my $how (qw(FD IO)) {
 
 # scalar interface
 {
-  open my $fd, $file or die "cannot open $file: $!\n";
+  open my $fd, '<', $file or die "cannot open $file: $!\n";
   my $doc;
   {
     local $/;

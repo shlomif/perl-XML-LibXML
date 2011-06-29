@@ -16,7 +16,10 @@ my $parser = XML::LibXML->new();
     ok($doc);
 }
 
-my $fh = IO::File->new($html) || die "Can't open $html: $!";
+my $fh;
+
+open $fh, '<', $html
+    or die "Can't open '$html': $!";
 
 my $string;
 {
@@ -155,13 +158,15 @@ print "parse example/enc_latin2.html...\n";
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
   ok($htmldoc->URI, 'foo');
   
-  open $fh, $test_file;
+  open $fh, '<', $test_file
+    or die "Cannot open '$test_file' for reading - $!";
   $htmldoc = $parser->parse_html_fh( $fh );
   close $fh;
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
   
-  open $fh, $test_file;
+  open $fh, '<', $test_file
+    or die "Cannot open '$test_file' for reading - $!";
   $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'iso-8859-2',
 					    URI => 'foo',
 					  });
@@ -176,7 +181,8 @@ print "parse example/enc_latin2.html...\n";
     skip("skipping for libxml2 < 2.6.27") for 1..2;
   } else {
     # translate to UTF8 on perl-side
-    open $fh, '<:encoding(iso-8859-2)', $test_file;
+    open $fh, '<:encoding(iso-8859-2)', $test_file
+        or die "Cannot open '$test_file' for reading - $!";
     $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' });
     close $fh;
     ok( $htmldoc && $htmldoc->getDocumentElement );
@@ -196,7 +202,8 @@ print "parse example/enc2_latin2.html...\n";
   ok( $htmldoc && $htmldoc->getDocumentElement );
   ok($htmldoc->findvalue('//p/text()'), $utf_str);
 
-  open $fh, $test_file;
+  open $fh, '<', $test_file
+    or die "Cannot open '$test_file' for reading - $!";
   $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'iso-8859-2' });
   close $fh;
   ok( $htmldoc && $htmldoc->getDocumentElement );
@@ -206,7 +213,8 @@ print "parse example/enc2_latin2.html...\n";
     skip("skipping for Perl < 5.8") for 1..2;
   } else {
     # translate to UTF8 on perl-side
-    open $fh, '<:encoding(iso-8859-2)', $test_file;
+    open my $fh, '<:encoding(iso-8859-2)', $test_file
+        or die "Cannot open '$test_file' for reading - $!";
     $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' } );
     close $fh;
     ok( $htmldoc && $htmldoc->getDocumentElement );

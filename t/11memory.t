@@ -459,9 +459,9 @@ sub check_mem {
     # Log Memory Usage
     local $^W;
     my %mem;
-    if (open(FH, "/proc/self/status")) {
+    if (open(my $FH, '<', '/proc/self/status')) {
         my $units;
-        while (<FH>) {
+        while (<$FH>) {
             if (/^VmSize.*?(\d+)\W*(\w+)$/) {
                 $mem{Total} = $1;
                 $units = $2;
@@ -470,7 +470,7 @@ sub check_mem {
                 $mem{Resident} = $1;
             }
         }
-        close FH;
+        close ($FH);
 
         if ($LibXML::TOTALMEM != $mem{Total}) {
             warn("LEAK! : ", $mem{Total} - $LibXML::TOTALMEM, " $units\n") unless $initialise;

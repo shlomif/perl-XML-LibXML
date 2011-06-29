@@ -3,6 +3,9 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+use TestHelpers;
+
 use Test;
 BEGIN { plan tests => 42 }
 use XML::LibXML;
@@ -75,10 +78,8 @@ my $using_globals = '';
 }
 
 chdir("example/complex") || die "chdir: $!";
-open(F, "complex.xml") || die "Cannot open complex.xml: $!";
-local $/;
-my $str = <F>;
-close F;
+
+my $str = slurp('complex.xml');
 
 {
     # tests if callbacks are called correctly within DTDs
