@@ -6004,6 +6004,8 @@ _setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlNsPtr ns         = NULL;
         xmlChar * localname = NULL;
         xmlChar * prefix    = NULL;
+        xmlNsPtr * all_ns   = NULL;
+        int i;
     INIT:
         name  = nodeSv2C( attr_name, self );
 
@@ -6025,30 +6027,35 @@ _setAttributeNS( self, namespaceURI, attr_name, attr_value )
             xs_warn( "found uri" );
 
             ns = xmlSearchNsByHref( self->doc, self, nsURI );
+
+            /*
+             * check for any prefixed namespaces occluded by a default namespace
+             * because xmlSearchNsByHref will return default namespaces unless
+             * you are searching on an attribute node, which may not exist yet
+             */
+            if ( ns && !ns->prefix )
+            {
+                all_ns = xmlGetNsList(self->doc, self);
+                if ( all_ns )
+                {
+                    i = 0;
+                    ns = all_ns[i];
+                    while ( ns )
+                    {
+                        if ( ns->prefix && xmlStrEqual(ns->href, nsURI) )
+                        {
+                            break;
+                        }
+                        ns = all_ns[i++];
+                    }
+                    xmlFree(all_ns);
+                }
+            }
+
             if ( !ns ) {
                 /* create new ns */
-                 if ( prefix && xmlStrlen( prefix ) ) {
-                    ns = xmlNewNs(self, nsURI , prefix );
-                 }
-                 else {
-                    ns = NULL;
-                 }
-            }
-            else if ( !ns->prefix ) {
                 if ( prefix && xmlStrlen( prefix ) ) {
-                    ns = xmlSearchNs(self->doc, self, prefix);
-
-                    if ( ns ) {
-                        if ( !xmlStrEqual(ns->href, nsURI) ) {
-                            ns = NULL;
-                        }
-                    }
-                    else {
-                        ns = xmlNewNs(self, nsURI , prefix );
-                    }
-                }
-                else if ( ns->next && ns->next->prefix ) {
-                    ns = ns->next;
+                    ns = xmlNewNs(self, nsURI , prefix);
                 }
                 else {
                     ns = NULL;
