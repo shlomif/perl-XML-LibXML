@@ -57,6 +57,7 @@ example/xmllibxmldocs.pl
 example/xmlns/badguy.xml
 example/xmlns/goodguy.xml
 example/xpath.pl
+example/yahoo-finance-html-with-errors.html
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/CDATASection.pod
@@ -143,6 +144,7 @@ t/45regex.t
 t/46err_column.t
 t/47load_xml_callbacks.t
 t/48_rt55000.t
+t/49_load_html.t
 t/60struct_error.t
 t/61error.t
 t/80registryleak.t

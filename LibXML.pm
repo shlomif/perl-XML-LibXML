@@ -1045,7 +1045,7 @@ sub _html_options {
   #  return (undef,undef) unless ref $opts;
   my $flags = 0;
   $flags |=     1 if exists $opts->{recover} ? $opts->{recover} : $self->recover;
-  $flags |=    32 if $opts->{suppress_errors};
+  $flags |=    32 if exists $opts->{suppress_errors} ? $opts->{suppress_errors} : $self->get_option('suppress_errors');
   $flags |=    64 if $opts->{suppress_warnings};
   $flags |=   128 if exists $opts->{pedantic_parser} ? $opts->{pedantic_parser} : $self->pedantic_parser;
   $flags |=   256 if exists $opts->{no_blanks} ? $opts->{no_blanks} : !$self->keep_blanks;
