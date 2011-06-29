@@ -6,6 +6,8 @@ Revision history for Perl extension XML::LibXML
         - After that, the regression test for was added:
             - https://rt.cpan.org/Ticket/Display.html?id=51086
         - Already fixed in the trunk.
+    - Add the file HACKING.txt with style guidelines.
+
 
 1.75            Fri Jun 24 19:00:40 IDT 2011
     - Correct some typos reported in 
