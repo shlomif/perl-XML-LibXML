@@ -1,6 +1,9 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+use TestHelpers;
+
 use Test;
 use constant PLAN => 26;
 use constant TIMES_THROUGH => $ENV{MEMORY_TIMES} || 100_000;
@@ -134,15 +137,9 @@ use XML::LibXML::SAX::Builder;
 
         print("# DTD string parsing\n");
 
-        my $dtdstr;
-        {
-            local $/; local *DTD;
-            open(DTD, 'example/test.dtd') || die $!;
-            $dtdstr = <DTD>;
-            $dtdstr =~ s/\r//g;
-            $dtdstr =~ s/[\r\n]*$//;
-            close DTD;
-        }
+        my $dtdstr = slurp('example/test.dtd');
+        $dtdstr =~ s/\r//g;
+        $dtdstr =~ s/[\r\n]*$//;
 
         ok($dtdstr);
 
