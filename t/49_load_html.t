@@ -7,7 +7,7 @@ use Test::More tests => 1;
 
 use XML::LibXML;
 
-sub _slurp
+sub _utf8_slurp
 {
     my $filename = shift;
 
@@ -28,7 +28,7 @@ sub _slurp
 # https://rt.cpan.org/Ticket/Display.html?id=53270
 
 {
-    my $content = _slurp('example/yahoo-finance-html-with-errors.html');
+    my $content = _utf8_slurp('example/yahoo-finance-html-with-errors.html');
 
     my $parser = XML::LibXML->new;
 
