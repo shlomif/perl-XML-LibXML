@@ -30,7 +30,7 @@ use XML::LibXML;
     my $dom = $parser->load_html(string => $content);
 
     # TEST
-    is_deeply(
+    eq_or_diff(
         \@warnings,
         [],
         'suppress_errors worked.',
