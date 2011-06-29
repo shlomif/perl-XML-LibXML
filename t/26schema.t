@@ -7,21 +7,16 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { 
+use Test::More;
+
     use XML::LibXML;
 
-    if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-        plan tests => 6; 
-    }
-    else {
-        plan tests => 0;
-        print( "# Skip : No Schema Support compiled\n" );
-    }
-};
-
 if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-
+    plan tests => 6; 
+}
+else {
+    plan skip_all => 'No Schema Support compiled.';
+}
 
 my $xmlparser = XML::LibXML->new();
 
@@ -31,44 +26,60 @@ my $validfile    = "test/schema/demo.xml";
 my $invalidfile  = "test/schema/invaliddemo.xml";
 
 
-print "# 1 parse schema from a file\n";
+# 1 parse schema from a file
 {
     my $rngschema = XML::LibXML::Schema->new( location => $file );
-    ok ( $rngschema );
+    # TEST
+    ok ( $rngschema, 'Good XML::LibXML::Schema was initialised' );
     
     eval { $rngschema = XML::LibXML::Schema->new( location => $badfile ); };
-    ok( $@ );
+    # TEST
+    ok( $@, 'Bad XML::LibXML::Schema throws an exception.' );
 }
 
-print "# 2 parse schema from a string\n";
+sub _slurp
 {
-    open RNGFILE, "<$file";
-    my $string = join "", <RNGFILE>;
-    close RNGFILE;
+    my $filename = shift;
+
+    open my $in, '<', $filename
+        or die "Cannot open '$filename' for slurping - $!";
+
+    local $/;
+    my $contents = <$in>;
+
+    close($in);
+
+    return $contents;
+}
+
+# 2 parse schema from a string
+{
+    my $string = _slurp($file);
 
     my $rngschema = XML::LibXML::Schema->new( string => $string );
-    ok ( $rngschema );
+    # TEST
+    ok ( $rngschema, 'RNG Schema initialized from string.' );
 
-    open RNGFILE, "<$badfile";
-    $string = join "", <RNGFILE>;
-    close RNGFILE;
+    $string = _slurp($badfile);
     eval { $rngschema = XML::LibXML::Schema->new( string => $string ); };
-    ok( $@ );
+    # TEST
+    ok( $@, 'Bad string schema throws an excpetion.' );
 }
 
-print "# 3 validate a document\n";
+# 3 validate a document
 {
     my $doc       = $xmlparser->parse_file( $validfile );
     my $rngschema = XML::LibXML::Schema->new( location => $file );
 
     my $valid = 0;
     eval { $valid = $rngschema->validate( $doc ); };
-    ok( $valid, 0 );
+    # TEST
+    is( $valid, 0, 'validate() returns 0 to indicate validity of valid file.' );
 
     $doc       = $xmlparser->parse_file( $invalidfile );
     $valid     = 0;
     eval { $valid = $rngschema->validate( $doc ); };
-    ok ( $@ );
+    # TEST
+    ok ( $@, 'Invalid file throws an excpetion.');
 }
 
-}
