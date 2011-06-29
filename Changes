@@ -7,6 +7,11 @@ Revision history for Perl extension XML::LibXML
             - https://rt.cpan.org/Ticket/Display.html?id=51086
         - Already fixed in the trunk.
     - Add the file HACKING.txt with style guidelines.
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=53270 (with a test
+    in t/49_load_html.t ) - uncovered some more bugs in the process
+    documented in TODO.
+        - << suppress_errors option not honored by load_html() method if set in 
+        parser object >>
 
 
 1.75            Fri Jun 24 19:00:40 IDT 2011
