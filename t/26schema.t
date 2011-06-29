@@ -7,6 +7,9 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+use TestHelpers;
+
 use Test::More;
 
     use XML::LibXML;
@@ -37,30 +40,15 @@ my $invalidfile  = "test/schema/invaliddemo.xml";
     ok( $@, 'Bad XML::LibXML::Schema throws an exception.' );
 }
 
-sub _slurp
-{
-    my $filename = shift;
-
-    open my $in, '<', $filename
-        or die "Cannot open '$filename' for slurping - $!";
-
-    local $/;
-    my $contents = <$in>;
-
-    close($in);
-
-    return $contents;
-}
-
 # 2 parse schema from a string
 {
-    my $string = _slurp($file);
+    my $string = slurp($file);
 
     my $rngschema = XML::LibXML::Schema->new( string => $string );
     # TEST
     ok ( $rngschema, 'RNG Schema initialized from string.' );
 
-    $string = _slurp($badfile);
+    $string = slurp($badfile);
     eval { $rngschema = XML::LibXML::Schema->new( string => $string ); };
     # TEST
     ok( $@, 'Bad string schema throws an excpetion.' );

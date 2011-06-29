@@ -4,27 +4,15 @@ use warnings;
 
 use Test::More tests => 18;
 
+use lib './t/lib';
+use TestHelpers;
+
 use XML::LibXML;
 
 # TEST
 ok(1, "Loaded");
 
-sub _slurp
-{
-    my $filename = shift;
-
-    open my $in, "<", $filename
-        or die "Cannot open '$filename' for slurping - $!";
-
-    local $/;
-    my $contents = <$in>;
-
-    close($in);
-
-    return $contents;
-}
-
-my $dtdstr = _slurp('example/test.dtd');
+my $dtdstr = slurp('example/test.dtd');
 
 $dtdstr =~ s/\r//g;
 $dtdstr =~ s/[\r\n]*$//;
