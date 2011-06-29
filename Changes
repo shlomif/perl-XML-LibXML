@@ -12,6 +12,8 @@ Revision history for Perl extension XML::LibXML
     documented in TODO.
         - << suppress_errors option not honored by load_html() method if set in 
         parser object >>
+    - Created t/lib/TestHelpers.pm with slurp(), utf8_slurp() and, in the
+    future, some other routines.
 
 
 1.75            Fri Jun 24 19:00:40 IDT 2011

@@ -3,32 +3,18 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+use TestHelpers;
+
 use Test::More tests => 1;
 
 use XML::LibXML;
-
-sub _utf8_slurp
-{
-    my $filename = shift;
-
-    open my $in, '<', $filename
-        or die "Cannot open '$filename' for slurping - $!";
-
-    binmode $in, ':utf8';
-
-    local $/;
-    my $contents = <$in>;
-
-    close($in);
-
-    return $contents;
-}
 
 # This is a check for:
 # https://rt.cpan.org/Ticket/Display.html?id=53270
 
 {
-    my $content = _utf8_slurp('example/yahoo-finance-html-with-errors.html');
+    my $content = utf8_slurp('example/yahoo-finance-html-with-errors.html');
 
     my $parser = XML::LibXML->new;
 

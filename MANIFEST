@@ -149,6 +149,7 @@ t/60struct_error.t
 t/61error.t
 t/80registryleak.t
 t/90threads.t
+t/lib/TestHelpers.pm
 t/pod.t
 test/relaxng/badschema.rng
 test/relaxng/demo.rng
