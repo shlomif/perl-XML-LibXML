@@ -3,6 +3,9 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+use TestHelpers;
+
 use Test;
 use Config;
 use constant MAX_THREADS => 10;
@@ -275,9 +278,7 @@ ok(1);
 }
 
 my $bigfile = "docs/libxml.dbk";
-open my $fh, "<:utf8", $bigfile or die $!;
-$xml = join '', <$fh>;
-close $fh;
+$xml = utf8_slurp($bigfile);
 ok($xml);
 sub use_dom
 {
@@ -350,7 +351,8 @@ print "parse a big file using the same parser\n";
 for(1..MAX_THREADS)
 {
 	threads->new(sub {
-open my $fh, "<$bigfile";
+open my $fh, '<', $bigfile
+    or die "Cannot open '$bigfile'!";
 my $doc = $p->parse_fh($fh);
 close $fh;
 2;
