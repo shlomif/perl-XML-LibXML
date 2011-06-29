@@ -91,6 +91,7 @@ LibXML.pm
 LibXML.pod
 LibXML.xs
 LICENSE
+HACKING.txt
 Makefile.PL
 MANIFEST
 perl-libxml-mm.c
