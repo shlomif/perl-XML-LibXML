@@ -1,10 +1,13 @@
 # $Id$
 
+use strict;
+use warnings;
+
 # Should be 38.
 use Test::More tests => 38;
 
-use strict;
-use warnings;
+use lib './t/lib';
+use TestHelpers;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -188,12 +191,8 @@ EOF
     ok ($@, ' TODO : Add test name');
 
     undef $@;
-    my $dtd;
-    {
-        local $/;
-        open my $f, '<', $bad;
-        $dtd = <$f>;
-    }
+    my $dtd = slurp($bad);
+
     # TEST
     ok( length($dtd) > 5, ' TODO : Add test name' );
     eval { XML::LibXML::Dtd->parse_string($dtd) };

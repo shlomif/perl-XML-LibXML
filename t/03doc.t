@@ -18,6 +18,8 @@ use Test::More tests => 168;
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
+use IO::Handle;
+
 sub is_empty_str 
 {
     my $s = shift;
@@ -492,25 +494,24 @@ sub _count_children_by_name_ns
     # -> to file handle
 
     {
-        require IO::File;
-        my $fh = new IO::File;
-        if ( $fh->open( "> example/testrun.xml" ) ) {
-            $doc->toFH( $fh );
-            $fh->close;
-            # TEST
-            ok(1, ' TODO : Add test name');
-            # now parse the file to check, if succeeded
-            my $tdoc = $parser->parse_file( "example/testrun.xml" );
-            # TEST
-            ok( $tdoc, ' TODO : Add test name' );
-            # TEST
-            ok( $tdoc->documentElement, ' TODO : Add test name' );
-            # TEST
-            is( $tdoc->documentElement->nodeName, "foo", ' TODO : Add test name' );
-            # TEST
-            is( $tdoc->documentElement->textContent, "bar", ' TODO : Add test name' );
-            unlink "example/testrun.xml" ;
-        }
+        open my $fh, '>', 'example/testrun.xml'
+            or die "Cannot open example/testrun.xml for writing - $!.";
+
+        $doc->toFH( $fh );
+        $fh->close;
+        # TEST
+        ok(1, ' TODO : Add test name');
+        # now parse the file to check, if succeeded
+        my $tdoc = $parser->parse_file( "example/testrun.xml" );
+        # TEST
+        ok( $tdoc, ' TODO : Add test name' );
+        # TEST
+        ok( $tdoc->documentElement, ' TODO : Add test name' );
+        # TEST
+        is( $tdoc->documentElement->nodeName, "foo", ' TODO : Add test name' );
+        # TEST
+        is( $tdoc->documentElement->textContent, "bar", ' TODO : Add test name' );
+        unlink "example/testrun.xml" ;
     }
 
     # -> to named file
