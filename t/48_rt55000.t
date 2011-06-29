@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 =head1 DESCRIPTION
+
 If an element contains both a default namespace declaration and a second
 namespace declaration, adding an attribute using the default namespace
 declaration will cause that attribute to have the other prefix.
@@ -36,6 +37,7 @@ my $string = $doc->toString(1);
 # TEST
 unlike ($string, qr/[^\w:]attribute="text"/,
     "Not placed as an unprefixed attribute");
+# TEST
 unlike ($string, qr/\bwrong:attribute="text"/, 
     "Not placed in the wrong namespace");
 
