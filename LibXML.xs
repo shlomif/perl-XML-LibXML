@@ -5236,13 +5236,6 @@ _find( pnode, pxpath, to_bool )
             }
         }
     PPCODE:
-        if ( node->doc ) {
-            domNodeNormalize( xmlDocGetRootElement( node->doc ) );
-        }
-        else {
-            domNodeNormalize( PmmOWNER(SvPROXYNODE(pnode)) );
-        }
-
         INIT_ERROR_HANDLER;
         if (comp) {
           found = domXPathCompFind( node, comp, to_bool );
@@ -5361,13 +5354,6 @@ _findnodes( pnode, perl_xpath )
             }
         }
     PPCODE:
-        if ( node->doc ) {
-            domNodeNormalize( xmlDocGetRootElement(node->doc ) );
-        }
-        else {
-            domNodeNormalize( PmmOWNER(SvPROXYNODE(pnode)) );
-        }
-
         INIT_ERROR_HANDLER;
         if (comp) {
 	    nodelist = domXPathCompSelect( node, comp );
@@ -7812,13 +7798,6 @@ _findnodes( pxpath_context, perl_xpath )
             }
         }
     PPCODE:
-        if ( ctxt->node->doc ) {
-            domNodeNormalize( xmlDocGetRootElement(ctxt->node->doc) );
-        }
-        else {
-            domNodeNormalize( PmmOWNER(PmmNewNode(ctxt->node)) );
-        }
-
         INIT_ERROR_HANDLER;
 
         PUTBACK ;
@@ -7923,13 +7902,6 @@ _find( pxpath_context, pxpath, to_bool )
             }
         }
     PPCODE:
-        if ( ctxt->node->doc ) {
-            domNodeNormalize( xmlDocGetRootElement( ctxt->node->doc ) );
-        }
-        else {
-            domNodeNormalize( PmmOWNER(PmmNewNode(ctxt->node)) );
-        }
-
         INIT_ERROR_HANDLER;
         PUTBACK ;
         if (comp) {
