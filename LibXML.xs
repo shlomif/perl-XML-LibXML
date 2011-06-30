@@ -4593,13 +4593,11 @@ ownerNode( self )
         RETVAL
 
 
-int
+void
 normalize( self )
         xmlNodePtr self
     CODE:
-        RETVAL = domNodeNormalize( self );
-    OUTPUT:
-        RETVAL
+        domNodeNormalize( self );
 
 
 SV*

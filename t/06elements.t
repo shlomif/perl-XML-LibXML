@@ -7,7 +7,7 @@ use strict;
 use warnings;
 
 # Should be 187.
-use Test::More tests => 187;
+use Test::More tests => 191;
 
 use XML::LibXML;
 
@@ -280,7 +280,7 @@ my @badnames= ("1A", "<><", "&", "-:");
 }
 
 # 4. Text Append and Normalization
-
+# 4.1 Normalization on an Element node
 {
     my $doc = XML::LibXML::Document->new();
     my $t1 = $doc->createTextNode( "bar1" );
@@ -301,7 +301,41 @@ my @badnames= ("1A", "<><", "&", "-:");
     is( scalar( @cn ), 4, ' TODO : Add test name' );
     
     $e->normalize;
-    
+
+    @cn = $e->childNodes;
+    # TEST
+    is( scalar( @cn ), 2, ' TODO : Add test name' );
+
+    # TEST
+
+    ok(! defined $t2->parentNode, ' TODO : Add test name');
+    # TEST
+    ok(! defined $t3->parentNode, ' TODO : Add test name');
+}
+
+# 4.2 Normalization on a Document node
+{
+    my $doc = XML::LibXML::Document->new();
+    my $t1 = $doc->createTextNode( "bar1" );
+    my $t2 = $doc->createTextNode( "bar2" );
+    my $t3 = $doc->createTextNode( "bar3" );
+    my $e  = $doc->createElement("foo");
+    my $e2 = $doc->createElement("bar");
+    $doc->setDocumentElement($e);
+    $e->appendChild( $e2 );
+    $e->appendChild( $t1 );
+    $e->appendChild( $t2 );
+    $e->appendChild( $t3 );
+
+    my @cn = $e->childNodes;
+
+    # this is the correct behaviour for DOM. the nodes are still
+    # refered
+    # TEST
+    is( scalar( @cn ), 4, ' TODO : Add test name' );
+
+    $doc->normalize;
+
     @cn = $e->childNodes;
     # TEST
     is( scalar( @cn ), 2, ' TODO : Add test name' );
