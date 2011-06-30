@@ -1261,6 +1261,7 @@ domNodeNormalize( xmlNodePtr node )
     case XML_ELEMENT_NODE:
         domNodeNormalizeList( (xmlNodePtr) node->properties );
     case XML_ATTRIBUTE_NODE:
+    case XML_DOCUMENT_NODE:
         return( domNodeNormalizeList( node->children ) );
         break;
     default:
