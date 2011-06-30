@@ -1,10 +1,9 @@
-#########################
-
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 12 };
+# Should be 12.
+use Test::More tests => 12;
+
 use XML::LibXML::Common qw( :libxml :encoding );
 
 use constant TEST_STRING_GER => "Hänsel und Gretel";
@@ -12,52 +11,76 @@ use constant TEST_STRING_GER2 => "täst";
 use constant TEST_STRING_UTF => 'test';
 use constant TEST_STRING_JP  => 'À¸ÇþÀ¸ÊÆÀ¸Íñ';
 
-ok(1); # If we made it this far, we're ok.
+# TEST
+ok(1, 'Loading');
 
 #########################
 
-# ok( ELEMENT_NODE, 1 );
-ok( XML_ELEMENT_NODE, 1 );
+# TEST
+is (XML_ELEMENT_NODE, 1, 'XML_ELEMENT_NODE is 1.' );
 
 # encoding();
 
-ok( decodeFromUTF8('iso-8859-1',
-                   encodeToUTF8('iso-8859-1',
-                                TEST_STRING_GER2 ) ),
-    TEST_STRING_GER2 );
+# TEST
+is (decodeFromUTF8(
+        'iso-8859-1', encodeToUTF8('iso-8859-1', TEST_STRING_GER2 ) 
+    ), 
+    TEST_STRING_GER2,
+    'Roundup trip from UTF-8 to ISO-8859-1 and back.',
+);
+
+# TEST
+is ( decodeFromUTF8(
+        'UTF-8' , encodeToUTF8('UTF-8', TEST_STRING_UTF ) 
+    ),
+    TEST_STRING_UTF,
+    'Rountrip trip through UTF-8',
+);
 
 
-ok( decodeFromUTF8( 'UTF-8' ,
-                     encodeToUTF8('UTF-8', TEST_STRING_UTF ) ),
-    TEST_STRING_UTF );
+my $u16 =
+    decodeFromUTF8( 'UTF-16', encodeToUTF8('UTF-8', TEST_STRING_UTF ) )
+    ;
 
-
-my $u16 = decodeFromUTF8( 'UTF-16',
-                          encodeToUTF8('UTF-8', TEST_STRING_UTF ) );
-ok( length($u16), 2*length(TEST_STRING_UTF));
+# TEST
+is ( length($u16), 2*length(TEST_STRING_UTF), 
+    'UTF-16 String is twice as long.'
+);
 
 my $u16be = decodeFromUTF8( 'UTF-16BE',
                             encodeToUTF8('UTF-8', TEST_STRING_UTF ) );
-ok( length($u16be), 2*length(TEST_STRING_UTF));
+# TEST
+is ( length($u16be), 2*length(TEST_STRING_UTF),
+    'UTF-16BE String is twice as long.'
+);
 
 my $u16le = decodeFromUTF8( 'UTF-16LE', 
                             encodeToUTF8('UTF-8', TEST_STRING_UTF ) );
-ok( length($u16le), 2*length(TEST_STRING_UTF));
+# TEST
+is ( length($u16le), 2*length(TEST_STRING_UTF),
+    'UTF-16LE String is twice as long.'
+);
 
-#bad encoding name test.
+# Bad encoding name tests.
 eval {
     my $str = encodeToUTF8( "foo" , TEST_STRING_GER2 );
 };
-ok( length( $@ ) );
+# TEST
+ok( $@, 'Exception was thrown.' );
 
-ok((eval { encodeToUTF8( 'UTF-16' , '' ) eq '' ? 1 : 0 }) ==1);
-print $@ if $@;
-ok(eval { defined(encodeToUTF8( 'UTF-16' , undef )) ? 0 : 1 }==1);
+# TEST
+is (encodeToUTF8( 'UTF-16' , '' ), '', 'Encoding empty string to UTF-8');
 
-ok(eval { decodeFromUTF8( 'UTF-16' , '' ) eq '' ? 1 : 0 }==1);
-print $@ if $@;
-ok(eval { defined(decodeFromUTF8( 'UTF-16' , undef )) ? 0 : 1 }==1);
-print $@ if $@;
+# TEST
+ok (!defined(encodeToUTF8( 'UTF-16' , undef )), 
+    'encoding undef to UTF-8 is undefined'
+);
+
+# TEST
+is (decodeFromUTF8( 'UTF-16' , '' ), '', 'decodeFromUTF8 of empty string');
+
+# TEST
+ok (!defined(decodeFromUTF8( 'UTF-16' , undef )), 'decodeFromUTF8 of undef.');
 
 # here should be a test to test badly encoded strings. but for some
 # reasons i am unable to create an apropriate test :(
