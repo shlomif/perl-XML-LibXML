@@ -14,6 +14,9 @@ Revision history for Perl extension XML::LibXML
         parser object >>
     - Created t/lib/TestHelpers.pm with slurp(), utf8_slurp() and, in the
     future, some other routines.
+    - skipping for LIBXML_RUNTIME_VERSION() *less than* 2.7 instead of
+    *more than* in t/09xpath.t :
+        - https://rt.cpan.org/Ticket/Display.html?id=69205
 
 
 1.75            Fri Jun 24 19:00:40 IDT 2011
