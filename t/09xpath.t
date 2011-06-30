@@ -221,7 +221,7 @@ sub _utf16_content_test
 
     SKIP:
     {
-        if (! (20700 > XML::LibXML::LIBXML_RUNTIME_VERSION))
+        if (XML::LibXML::LIBXML_RUNTIME_VERSION() < 20700)
         {
             skip "UTF-16 and HTML broken in libxml2 < 2.7", 1;
         }
