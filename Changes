@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-
+1.76            Thu Jun 30 20:58:46 IDT 2011
      - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
      and Stacker class.
         - After that, the regression test for was added:
@@ -17,7 +17,7 @@ Revision history for Perl extension XML::LibXML
     - skipping for LIBXML_RUNTIME_VERSION() *less than* 2.7 instead of
     *more than* in t/09xpath.t :
         - https://rt.cpan.org/Ticket/Display.html?id=69205
-
+        - Thanks to DOUGW .
 
 1.75            Fri Jun 24 19:00:40 IDT 2011
     - Correct some typos reported in 
