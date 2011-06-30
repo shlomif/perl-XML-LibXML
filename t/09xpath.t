@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 # Should be 53
-use Test::More tests => 53;
+use Test::More tests => 54;
 
 use XML::LibXML;
 
@@ -211,6 +211,26 @@ EOSTR
     is (scalar(@nodes), 1, 'Found one p');
     # TEST
     _utf16_content_test(\@nodes, 'p content is fine.');
+}
+
+{
+    # from #69096
+    my $doc = XML::LibXML::Document->createDocument('1.0', 'utf-8');
+    my $root = $doc->createElement('root');
+    $doc->setDocumentElement($root);
+    my $e = $doc->createElement("child");
+    my $e2 = $doc->createElement("child");
+    my $t1 = $doc->createTextNode( "te" );
+    my $t2 = $doc->createTextNode( "st" );
+    $root->appendChild($e);
+    $root->appendChild($e2);
+    $e2->appendChild($t1);
+    $e2->appendChild($t2);
+
+    $doc->normalize();
+    my @cn = $doc->findnodes('//child[text()="test"]');
+    # TEST
+    is( scalar( @cn ), 1, 'xpath testing adjacent text nodes' );
 }
 
 sub _utf16_content_test
