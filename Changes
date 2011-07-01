@@ -5,6 +5,8 @@ Revision history for Perl extension XML::LibXML
     64-bit platforms.
         - should fix https://rt.cpan.org/Ticket/Display.html?id=57085
     - Change "a XML::LibXML::*" to "an XML::LibXML::*" in the documentation.
+    - Document XML::LibXML::NamedNodeMap :
+        - https://rt.cpan.org/Ticket/Display.html?id=57652 .
 
 1.76            Thu Jun 30 20:58:46 IDT 2011
      - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
