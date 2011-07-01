@@ -2,11 +2,12 @@
  
 use strict;
 use warnings;
+use utf8;
 
 use lib './t/lib';
 use TestHelpers;
 
-use Test::More tests => 1;
+use Test::More tests => 3;
 
 use XML::LibXML;
 
@@ -37,6 +38,42 @@ use XML::LibXML;
     );
 }
 
+{
+    # These are tests for https://rt.cpan.org/Ticket/Display.html?id=58024 :
+    # <<<
+    # In XML::LibXML, warnings are not suppressed when specifying the recover
+    # or recover_silently flags as per the following excerpt from the manpage:
+    # >>>
+
+    my $txt = <<'EOS';
+<div>
+<a href="milu?a=eins&b=zwei"> ampersand not URL-encoded </a>
+<!-- HTML parser error : htmlParseEntityRef: expecting ';' -->
+</div>
+EOS
+
+    {
+        my $buf = '';
+        open my $fh, '>', \$buf;
+        # redirect STDERR there
+        local *STDERR = $fh;
+
+        XML::LibXML->new(recover => 1)->load_html( string => $txt );
+        close($fh);
+
+        # TEST
+        like ($buf, qr/htmlParseEntityRef:/, 'warning emitted');
+    }
+    {
+        my $buf = '';
+        open my $fh, '>', \$buf;
+        local *STDERR = $fh;
+        XML::LibXML->new(recover => 2)->load_html( string => $txt );
+        close($fh);
+        # TEST
+        is ($buf, '', 'No warning emitted.');
+    }
+}
 
 =head1 COPYRIGHT & LICENSE
 

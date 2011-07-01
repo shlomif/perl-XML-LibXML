@@ -15,14 +15,9 @@
 use strict;
 use warnings;
 
-use vars qw/$DEVNULL $is_Win32 $extralibdir $skipsaxinstall/;
+require 5.008;
 
-BEGIN {
-  if ($] < 5.006_001) {
-    warn "\nSorry, at least Perl 5.6.1 is required for this module!\n\n";
-    exit;
-  }
-}
+use vars qw/$DEVNULL $is_Win32 $extralibdir $skipsaxinstall/;
 
 use ExtUtils::MakeMaker;
 use Config;

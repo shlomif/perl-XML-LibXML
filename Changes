@@ -13,7 +13,12 @@ Revision history for Perl extension XML::LibXML
     lib/XML/LibXML/NodeList.pm :
         - https://rt.cpan.org/Ticket/Display.html?id=57737
         - Thanks to MSCHWERN .
-    
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=58024 :
+        - <<< In XML::LibXML, warnings are not suppressed when specifying the 
+        recover() or recover_silently() flags as per the following excerpt from
+        the manpage: >>>
+        - Now XML-LibXML requires perl-5.8.x (to print to a buffer trick.).
+
 1.76            Thu Jun 30 20:58:46 IDT 2011
     - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
      and Stacker class.
