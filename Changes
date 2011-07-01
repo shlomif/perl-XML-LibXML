@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+    - Change the signature of XML::LibXML::Reader::byteConsumed to be
+    "long" instead of "int", so it can return values above 2**31 in
+    64-bit platforms.
+        - should fix https://rt.cpan.org/Ticket/Display.html?id=57085
+
 1.76            Thu Jun 30 20:58:46 IDT 2011
      - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
      and Stacker class.

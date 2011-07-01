@@ -8096,7 +8096,7 @@ baseURI(reader)
     OUTPUT:
 	RETVAL
 
-int
+long
 byteConsumed(reader)
 	xmlTextReaderPtr reader
     CODE:
