@@ -15,6 +15,7 @@ lib/XML/LibXML/Element.pod
 lib/XML/LibXML/ErrNo.pod
 lib/XML/LibXML/Error.pod
 lib/XML/LibXML/InputCallback.pod
+lib/XML/LibXML/NamedNodeMap.pod
 lib/XML/LibXML/Namespace.pod
 lib/XML/LibXML/Node.pod
 lib/XML/LibXML/Parser.pod

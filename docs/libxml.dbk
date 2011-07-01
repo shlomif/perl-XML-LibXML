@@ -7014,6 +7014,130 @@ if ($compiled_re->matches($string)) { ... }
       </variablelist>
     </sect1>
   </chapter>
+    <chapter id="XML-LibXML-NamedNodeMap">
+        <title>A map for named nodes</title>
+
+        <titleabbrev>XML::LibXML::NamedNodeMap</titleabbrev>
+        <sect1>
+            <title>Synopsis</title>
+            <programlisting>use XML::LibXML;
+my $map = XML::LibXML::NamedNodeMap->new(@nodes);
+
+my $nodes_list = $map->nodes();
+
+my $node_with_index_2 = $map->item(2);
+            </programlisting>
+        </sect1>
+        <sect1>
+            <title>Description</title>
+
+        <para>XML::LibXML::NamedNodeMap maps nodes' names to nodes.</para>
+	</sect1>
+        <sect1>
+            <title>Methods</title>
+
+        <variablelist>
+            <varlistentry>
+                <term>length</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>my $length = $map-&gt;length;</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the number of nodes in the map.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>nodes</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>my $nodes_ref = $node->nodes()</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns a reference to the list of nodes.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>item</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>my $node_2 = $map->item(2);</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the node with the index of the argument 
+                    (starting from 0)</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>getNamedItem</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>my $node = $map->getNamedItem('phone_number');</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Returns the node with the name.</para>
+
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>setNamedItem</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$map->setNamedItem($new_node)</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Sets the node with the same name as 
+                    <literal>$new_node</literal> to 
+                    <literal>$new_node</literal>.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>removeNamedItem</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$map->removeNamedItem($name)</funcsynopsisinfo>
+                    </funcsynopsis>
+
+                    <para>Remove the item with the name 
+                    <literal>$name</literal>.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>getNamedItemNS</term>
+
+                <para>
+                <emphasis>Not implemented yet.</emphasis>.
+                </para>
+            </varlistentry>
+            <varlistentry>
+                <term>setNamedItemNS</term>
+
+                <para>
+                <emphasis>Not implemented yet.</emphasis>.
+                </para>
+            </varlistentry>
+            <varlistentry>
+                <term>removeNamedItemNS</term>
+
+                <para>
+                <emphasis>Not implemented yet.</emphasis>.
+                </para>
+            </varlistentry>
+        </variablelist>
+      </sect1>
+    </chapter>
   <chapter id="XML-LibXML-Error">
     <title>Structured Errors</title>
     <titleabbrev>XML::LibXML::Error</titleabbrev>
