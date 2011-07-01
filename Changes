@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.77            Fri Jul  1 22:27:56 IDT 2011
     - Change the signature of XML::LibXML::Reader::byteConsumed to be
     "long" instead of "int", so it can return values above 2**31 in
     64-bit platforms.
