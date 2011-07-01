@@ -1051,6 +1051,15 @@ sub _html_options {
   my $flags = 0;
   $flags |=     1 if exists $opts->{recover} ? $opts->{recover} : $self->recover;
   $flags |=    32 if exists $opts->{suppress_errors} ? $opts->{suppress_errors} : $self->get_option('suppress_errors');
+  # This is to fix https://rt.cpan.org/Ticket/Display.html?id=58024 :
+  # <quote> 
+  # In XML::LibXML, warnings are not suppressed when specifying the recover
+  # or recover_silently flags as per the following excerpt from the manpage:
+  # </quote>
+  if ($self->recover_silently)
+  {
+      $flags |= 32;
+  }
   $flags |=    64 if $opts->{suppress_warnings};
   $flags |=   128 if exists $opts->{pedantic_parser} ? $opts->{pedantic_parser} : $self->pedantic_parser;
   $flags |=   256 if exists $opts->{no_blanks} ? $opts->{no_blanks} : !$self->keep_blanks;
