@@ -214,7 +214,7 @@ Additionally I received the following Note from Rozi Kovesdi:
 > libxml2:
 > 
 > must set SHLIB_PATH  to include  the path to  libxml2 shared library
->  
+> 
 > assuming that you used the default:
 > 
 > export  SHLIB=/usr/local/lib
@@ -223,10 +223,10 @@ Additionally I received the following Note from Rozi Kovesdi:
 > 
 > /usr/local/bin/xml2-config
 > /usr/local/bin/xslt-config
->  
+> 
 > they did not have +x after they were installed by 'make install'
 > and it took me a while to realize that this was my problem
->  
+> 
 > or one can use:
 > 
 > perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'

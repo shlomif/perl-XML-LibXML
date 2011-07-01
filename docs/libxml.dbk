@@ -186,7 +186,7 @@ See Notes for Microsoft Windows below.)</para>
                 <para>Usually it takes a little time to build the package for the latest release.</para>
 		<para>If you want to build XML::LibXML on Windows from source, you can use
 		the following instructions contributed by Christopher J. Madsen:</para>
- 
+
 		<para>These instructions assume that you already have your system set up to
 		compile modules that use C components.
 		</para>
@@ -264,7 +264,7 @@ Most importantly - before trying to install Perl modules that depend on
 libxml2:
 
 must set SHLIB_PATH  to include  the path to  libxml2 shared library
- 
+
 assuming that you used the default:
 
 export  SHLIB=/usr/local/lib
@@ -273,10 +273,10 @@ also, make sure that the config  files have execute permission:
 
 /usr/local/bin/xml2-config
 /usr/local/bin/xslt-config
- 
+
 they did not have +x after they were installed by 'make install'
 and it took me a while to realize that this was my problem
- 
+
 or one can use:
 
 perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
@@ -378,10 +378,10 @@ EOT</programlisting>
         <sect1>
             <title>Description</title>
 
-            <para>This module is an interface to libxml2, providing 
+            <para>This module is an interface to libxml2, providing
 	    XML and HTML parsers with DOM, SAX and XMLReader interfaces,
-	    a large subset of DOM Layer 3 interface and 
-	    a  XML::XPath-like interface to XPath API of libxml2. 
+	    a large subset of DOM Layer 3 interface and
+	    a  XML::XPath-like interface to XPath API of libxml2.
 	    The module is split into several packages which are not described in this section;
 	    unless stated otherwise, you only need to <literal>use XML::LibXML;</literal>
 	    in your programs.</para>
@@ -559,7 +559,7 @@ EOT</programlisting>
             character strings (internally encoded in UTF-8) and so
             called binary data and, accordingly, applies either
             character or byte semantics to them.  A scalar
-            representing a character string is distinguished from 
+            representing a character string is distinguished from
 	    a byte string by special flag (UTF8). Please refer to <emphasis>perlunicode</emphasis> for details.
 	    </para>
 	    <para>
@@ -568,7 +568,7 @@ EOT</programlisting>
 	      that the application using XML::LibXML can be completely
 	      ignorant about the encoding of the XML documents it works with.
 	      On the other hand, functions like <function>XML::LibXML::Document-&gt;setEncoding</function>
-	      give the user control over the document encoding. 
+	      give the user control over the document encoding.
 	    </para>
 	    <para>
 	      To ensure the aforementioned transparency and
@@ -580,7 +580,7 @@ EOT</programlisting>
 	      and saving) operate with binary data (in the original
 	      document encoding) obeying the encoding declaration of
 	      the XML documents.</para>
-	    <para>Below we summarize basic rules and principles 
+	    <para>Below we summarize basic rules and principles
 	    regarding encoding:
 	    </para>
 	    <orderedlist>
@@ -623,8 +623,8 @@ $xml_document = $doc->toString(); # returns a byte string
 		and <literal>$name</literal> and <literal>$text</literal>
 		contain character strings (UTF-8 encoded with UTF8 flag on).
 		Note that the method <function>toString</function>
-		returns XML as a character string if applied to 
-		other node than the Document node and 
+		returns XML as a character string if applied to
+		other node than the Document node and
 		a byte string containing the apropriate
 		<programlisting>&lt;?xml version="1.0" encoding="..."?&gt;</programlisting>
 		declaration if applied to a <xref linkend="XML-LibXML-Document"/>.
@@ -695,14 +695,14 @@ $thr->join;
 	   in the spawned thread as in the main thread.
 	 </para>
 	 <para>
-	   Without using mutex locks, 
+	   Without using mutex locks,
 	   parallel threads may read the same document
 	   (i.e. any node that belongs to the document),
 	   parse files, and modify different documents.
 	 </para>
 	 <para>
 	   However, if there is a chance that
-	   some of the threads will attempt to modify a document 
+	   some of the threads will attempt to modify a document
 	   (or even create
 	   new nodes based on that document,
 	   e.g. with <literal>$doc->createElement</literal>)
@@ -720,7 +720,7 @@ my $thr = threads->new(sub{
    # ...
   1;
 });
-{ 
+{
   lock $mutex;
   my $root = $doc->documentElement;
   say $root->name;
@@ -797,8 +797,8 @@ easily lead to a crash.</para>
                         "20602-CVS2032" for a CVS build of
                         libxml2.</para>
                         <para>XML::LibXML issues a warning if the version
-                         of libxml2 dynamically linked to it is less than the version of libxml2 
-                         which it was compiled against. 
+                         of libxml2 dynamically linked to it is less than the version of libxml2
+                         which it was compiled against.
                          </para>
                     </listitem>
                 </varlistentry>
@@ -818,7 +818,7 @@ easily lead to a crash.</para>
 	    <varlistentry>
 	      <term><literal>:all</literal></term>
 	      <listitem>
-		<para>Includes the tags <literal>:libxml</literal>, <literal>:encoding</literal>, and 
+		<para>Includes the tags <literal>:libxml</literal>, <literal>:encoding</literal>, and
 		<literal>:ns</literal> described below.</para>
 	      </listitem>
 	    </varlistentry>
@@ -1057,8 +1057,8 @@ $parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
                             <para>Create a new XML and HTML parser instance.
 			      Each parser instance holds default
 			      values for various parser options.
-			      Optionally, 
-			      one can pass a hash reference or 
+			      Optionally,
+			      one can pass a hash reference or
 			      a list of option => value pairs to
 			      set a different default set of options.
 			      Unless specified otherwise, the options
@@ -1115,7 +1115,7 @@ $dom = $parser-&gt;load_xml(...);
 			  to a DOM tree. The arguments
 			  can be passed in a HASH reference
 			  or as name => value pairs.
-			  The function can be called 
+			  The function can be called
 			  as a class method or an object method.
 			  In both cases it internally creates a new
 			  parser instance passing
@@ -1125,7 +1125,7 @@ $dom = $parser-&gt;load_xml(...);
 			  its settings) and additionally applies
 			  the specified options to the new parser.
 			  See the constructor <function>new</function>
-			  and <xref linkend="parser-options"/> 
+			  and <xref linkend="parser-options"/>
 			  for more information.
 			  </para>
 			  </listitem>
@@ -1304,7 +1304,7 @@ $dom = $parser-&gt;load_html(...);
                             </para>
                             <para>An optional second argument can be
                                used to pass some options to the HTML
-                               parser as a HASH reference. 
+                               parser as a HASH reference.
 			       See options labeled with HTML in <xref linkend="parser-options"/>.
 	                    </para>
                         </listitem>
@@ -1473,7 +1473,7 @@ print $doc-&gt;toString(); # returns "&lt;foo&gt;bar&lt;/foo&gt;"</programlistin
             <sect2>
                 <title>DOM based SAX Parser</title>
 
-                <para>XML::LibXML also provides a DOM based SAX parser. The SAX parser is defined in 
+                <para>XML::LibXML also provides a DOM based SAX parser. The SAX parser is defined in
 		the module XML::LibXML::SAX::Parser. As it is not a stream based parser, it
                 parses documents into a DOM and traverses the DOM tree instead.</para>
 
@@ -1536,7 +1536,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 
 	    <para>Handling of libxml2 parser options has been unified and improved in XML::LibXML 1.70.
 	      You can now set default options for a particular parser instance by
-	      passing them to the constructor as <literal>XML::LibXML->new({name=>value, ...})</literal> 
+	      passing them to the constructor as <literal>XML::LibXML->new({name=>value, ...})</literal>
 	      or <literal>XML::LibXML->new(name=>value,...)</literal>.
 	      The options can be queried and changed using the following methods (pre-1.70 interfaces such as <function>$parser->load_ext_dtd(0)</function> also exist, see below):
 	    </para>
@@ -1630,10 +1630,10 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
             <term>line_numbers</term>
             <listitem>
 	      <para>/parser, html, reader/</para>
-              <para>If this option is activated, libxml2 will store the line number of each element node in the parsed document. 
+              <para>If this option is activated, libxml2 will store the line number of each element node in the parsed document.
 		The line number can be obtained using the <function>line_number()</function> method
 		of the <function>XML::LibXML::Node</function> class (for non-element nodes
-		this may report the line number of the containing element). 
+		this may report the line number of the containing element).
 		The line numbers are also used for reporting positions of validation errors.
 	      </para>
 	      <para>IMPORTANT:
@@ -1659,9 +1659,9 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 		A true value turns on recovery mode which
 		allows one to parse broken XML or HTML data.
 		The recovery mode allows the parser to return
-		the successfully parsed portion of the input document. 
-		This is useful for almost well-formed documents, where for example 
-		a closing tag is missing somewhere. Still, 
+		the successfully parsed portion of the input document.
+		This is useful for almost well-formed documents, where for example
+		a closing tag is missing somewhere. Still,
 		XML::LibXML will only parse until the first fatal (non-recoverable) error occurs,
 		reporting recoverable parsing errors as warnings. To suppress
                 even these warnings, use recover=>2.</para>
@@ -1680,7 +1680,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 	      whose subtree will be the content obtained by parsing the external resource;
 	      Although this nesting is visible from the DOM
 	      it is transparent to XPath data model, so it is possible to
-	      match nodes in an unexpanded entity by the same XPath expression 
+	      match nodes in an unexpanded entity by the same XPath expression
 	      as if the entity were expanded. See also ext_ent_handler.
 	      </para>
 	    </listitem>
@@ -1713,7 +1713,7 @@ my $c = XML::LibXML::InputCallback->new();
 sub match {   # accept file:/ URIs except for XML catalogs in /etc/xml/
   my ($uri) = @_;
   return ($uri=~m{^file:/}
-          and $uri !~ m{^file:///etc/xml/}) 
+          and $uri !~ m{^file:///etc/xml/})
          ? 1 : 0;
 }
 $c->register_callbacks([ \&amp;match, sub{}, sub{}, sub{} ]);
@@ -1726,7 +1726,7 @@ $parser->input_callbacks($c);
             <term>load_ext_dtd</term>
             <listitem>
 	      <para>/parser, reader/</para>
-              <para>load the external DTD subset while parsing; possible values are 0 and 1. Unless specified, 
+              <para>load the external DTD subset while parsing; possible values are 0 and 1. Unless specified,
 		XML::LibXML sets this option to 1.</para>
               <para>This flag is also required for DTD Validation, to provide complete attribute,
                 and to expand entities, regardless if the document has an internal subset.
@@ -1781,7 +1781,7 @@ $parser->input_callbacks($c);
             <listitem>
 	      <para>/parser, reader/</para>
               <para>Implement XInclude substitution; possible values are 0 and 1</para>
-              <para>Expands XIinclude tags immediately while parsing the document. 
+              <para>Expands XIinclude tags immediately while parsing the document.
 		Note that the parser will use the URI resolvers installed
 		via <function>XML::LibXML::InputCallback</function> to parse the included document (if any).</para>
             </listitem>
@@ -1835,7 +1835,7 @@ $parser->input_callbacks($c);
             <term>huge</term>
             <listitem>
 	      <para>/parser, html, reader/</para>
-              <para>relax any hardcoded limit from the parser; possible values are 0 and 1. Unless specified, 
+              <para>relax any hardcoded limit from the parser; possible values are 0 and 1. Unless specified,
 		XML::LibXML sets this option to 1.</para>
             </listitem>
           </varlistentry>
@@ -1851,7 +1851,7 @@ $parser->input_callbacks($c);
                 use of XML::LibXML's full parser options and XML::GDOME's DOM implementation at the same time.</para>
               <para>To make use of this function, one has to install libgdome and configure XML::LibXML to use this library.
 		For this you need to rebuild XML::LibXML!</para>
-	      <para>Note: this feature was not seriously tested in recent XML::LibXML releases.</para> 
+	      <para>Note: this feature was not seriously tested in recent XML::LibXML releases.</para>
             </listitem>
 	  </varlistentry>
 	</variablelist>
@@ -1934,7 +1934,7 @@ $parser->no_network();</programlisting>
 	      </para>
 	      <para>
 		Note that libxml2 has a global pool of loaded catalogs,
-		so if you apply the method <literal>load_catalog</literal> 
+		so if you apply the method <literal>load_catalog</literal>
 		to one parser instance, all parser instances will start using the catalog
 		(in addition to other previously loaded catalogs).
 	      </para>
@@ -2005,20 +2005,20 @@ $parser->no_network();</programlisting>
 
             <para><emphasis>NOTE:</emphasis> This feature is experimental. </para>
 
-            <para>You can enable character data joining which may yield a 
+            <para>You can enable character data joining which may yield a
             significant speed boost in your XML processing in lower markup
-            ratio situations by enabling the 
-            http://xmlns.perl.org/sax/join-character-data feature of this 
-            parser. This is done via the set_feature method like 
-            this: 
-            </para> 
-            
-            <programlisting>$p->set_feature('http://xmlns.perl.org/sax/join-character-data', 1); 
+            ratio situations by enabling the
+            http://xmlns.perl.org/sax/join-character-data feature of this
+            parser. This is done via the set_feature method like
+            this:
+            </para>
+
+            <programlisting>$p->set_feature('http://xmlns.perl.org/sax/join-character-data', 1);
             </programlisting>
 
             <para>
             You can also specify a 0 to disable. The default is to have
-            this feature disabled. 
+            this feature disabled.
             </para>
         </sect1>
     </chapter>
@@ -2111,7 +2111,7 @@ my $doc = $builder-&gt;result();</programlisting>
 	    <sect2>
 	      <title>Namespaces and XML::LibXML's DOM implementation</title>
 
-            <para>XML::LibXML's DOM implementation is 
+            <para>XML::LibXML's DOM implementation is
             limited by the DOM implementation of libxml2
             which treats namespaces slightly differently than
             required by the DOM Level 2 specification.
@@ -2999,7 +2999,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 		    </para>
 		    <para>In versions 1.59 and earlier this method was
 		      called getElementsById() (plural) by
-		      mistake. Starting from 1.60 this name is 
+		      mistake. Starting from 1.60 this name is
 		      maintained as an alias only for backward compatibility.
 		    </para>
                 </listitem>
@@ -3069,12 +3069,12 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 	            </para>
                     <para>Since 1.62 this function also returns the correct
 	              DOM names for node types with constant names, namely:
-                      #text, #cdata-section, #comment, #document, 
+                      #text, #cdata-section, #comment, #document,
 	              #document-fragment.
 	            </para>
                 </listitem>
             </varlistentry>
-        
+
             <varlistentry>
                 <term>setNodeName</term>
 
@@ -3087,9 +3087,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     aware of namespaces.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>isSameNode</term>
 
@@ -3103,9 +3103,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     returned.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>isEqual</term>
 
@@ -3119,9 +3119,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para><emphasis>NOTE</emphasis> isEqual will change behaviour to follow the DOM specification</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>nodeValue</term>
 
@@ -3136,9 +3136,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     instead!</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>textContent</term>
 
@@ -3150,9 +3150,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>this function returns the content of all text nodes in the descendants of the given node as specified in DOM.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>nodeType</term>
 
@@ -3167,7 +3167,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 		    <xref linkend="XML-LibXML"/> manual page).</para>
                 </listitem>
             </varlistentry>
-	
+
             <varlistentry>
                 <term>unbindNode</term>
 
@@ -3181,9 +3181,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     inserted into a (hidden) document-fragment.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>removeChild</term>
 
@@ -3196,9 +3196,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <function>oldNode</function> is not a child of the given Node the function will fail.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>replaceChild</term>
 
@@ -3212,9 +3212,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     be imported first.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>replaceNode</term>
 
@@ -3227,9 +3227,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     found by any XPath function, should be replaced.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>appendChild</term>
 
@@ -3243,9 +3243,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     case, if the new node is not part of the document, the node will be imported first.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>addChild</term>
 
@@ -3278,9 +3278,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     the sense of being more error tolerant.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>addNewChild</term>
 
@@ -3301,9 +3301,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     this function is not part of the DOM specification and its use will limit your code to XML::LibXML.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>addSibling</term>
 
@@ -3315,9 +3315,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>addSibling() allows adding an additional node to the end of a nodelist, defined by the given node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>cloneNode</term>
 
@@ -3339,9 +3339,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                       was not copied for elements).</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>parentNode</term>
 
@@ -3353,9 +3353,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>Returns simply the Parent Node of the current node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>nextSibling</term>
 
@@ -3379,9 +3379,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>Returns the next non-blank sibling if any (a node is blank if it is a Text or CDATA node consisting of whitespace only). This method is not defined by DOM.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>previousSibling</term>
 
@@ -3405,9 +3405,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>Returns the previous non-blank sibling if any (a node is blank if it is a Text or CDATA node consisting of whitespace only). This method is not defined by DOM.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>hasChildNodes</term>
 
@@ -3419,9 +3419,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>If the current node has Childnodes this function returns TRUE (1), otherwise it returns FALSE (0, not undef).</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>firstChild</term>
 
@@ -3433,9 +3433,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>If a node has childnodes this function will return the first node in the childlist.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>lastChild</term>
 
@@ -3447,9 +3447,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>If the <function>$node</function> has childnodes this function returns the last child node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>ownerDocument</term>
 
@@ -3461,9 +3461,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>Through this function it is always possible to access the document the current node is bound to.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getOwner</term>
 
@@ -3476,9 +3476,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>setOwnerDocument</term>
 
@@ -3493,9 +3493,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     with Entity References as adoptNode().</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>insertBefore</term>
 
@@ -3517,9 +3517,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     ancestor of the new parent node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>insertAfter</term>
 
@@ -3534,7 +3534,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para>Note, that $refNode has to be passed explicitly even if it is undef.</para>
                 </listitem>
             </varlistentry>
-        
+
             <varlistentry>
                 <term>findnodes</term>
 
@@ -3544,7 +3544,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context, returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
-          <para>The xpath expression can be passed either as a string or 
+          <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
 	  <para><emphasis>NOTE ON NAMESPACES AND XPATH</emphasis>:</para>
@@ -3584,7 +3584,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	    </listitem>
 	    <listitem><para>
 		Another possibility is to use prefixes declared
-		in the queried document (if known). 
+		in the queried document (if known).
 		If the document declares a prefix for the
 		namespace in question (and the context node is in the
 		scope of the declaration),
@@ -3597,9 +3597,9 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 	  <para>See also XML::LibXML::XPathContext-&gt;findnodes.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>find</term>
 
@@ -3613,15 +3613,15 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return a <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
                     object, or a <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
                     the right thing" in different contexts.</para>
-          <para>The xpath expression can be passed either as a string or 
+          <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;find.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>findvalue</term>
 
@@ -3637,12 +3637,12 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>That is, it returns the literal value of the results. This enables you to ensure that you get a string back from your search, allowing
                     certain shortcuts. This could be used as the equivalent of XSLT's &lt;xsl:value-of select="some_xpath"/&gt;.</para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;findvalue.</para>
-          <para>The xpath expression can be passed either as a string or 
+          <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
                 </listitem>
             </varlistentry>
-        
+
             <varlistentry>
                 <term>exists</term>
 
@@ -3658,7 +3658,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 		    the method returns true if the returned value is a non-zero number or a non-empty string.</para>
 		</listitem>
 	    </varlistentry>
-        
+
             <varlistentry>
                 <term>childNodes</term>
 
@@ -3672,7 +3672,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object will be returned.</para>
                 </listitem>
             </varlistentry>
-        
+
             <varlistentry>
                 <term>nonBlankChildNodes</term>
 
@@ -3686,7 +3686,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 		      (where a node is blank if it is a Text or CDATA node consisting of whitespace only). This method is not defined by DOM.</para>
                 </listitem>
             </varlistentry>
-        
+
             <varlistentry>
                 <term>toString</term>
 
@@ -3743,8 +3743,8 @@ $c14nstring = $node-&gt;toStringC14N($with_comments, $xpath_expression , $xpath_
 		    <para>
 		      An optional parameter $xpath_context can be used
 		      to pass an <xref linkend="XML-LibXML-XPathContext"/> object defining
-		      the context for evaluation of $xpath_expression. 
-		      This is useful for mapping namespace prefixes used in the XPath expression 
+		      the context for evaluation of $xpath_expression.
+		      This is useful for mapping namespace prefixes used in the XPath expression
 		      to namespace URIs.
 		      Note, however, that
 		      $node will be used as the context node for the evaluation, not
@@ -3766,8 +3766,8 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     the XML-EXC-C14N Specification (see <ulink url="http://www.w3.org/TR/xml-exc-c14n">http://www.w3.org/TR/xml-exc-c14n</ulink>)
 	            for exclusive canonization of XML.</para>
 
-                    <para>The arguments $with_comments, $xpath_expression, $xpath_context are as in toStringC14N(). 
-		    An ARRAY reference can be passed as the last argument $inclusive_prefix_list, 
+                    <para>The arguments $with_comments, $xpath_expression, $xpath_context are as in toStringC14N().
+		    An ARRAY reference can be passed as the last argument $inclusive_prefix_list,
 		    listing namespace prefixes that are to be handled in the manner described by the Canonical XML Recommendation (i.e. preserved in the output even if the namespace is not used). C.f. the spec for details.
 	            </para>
                 </listitem>
@@ -3799,9 +3799,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>An alias for toStringEC14N().</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>localname</term>
 
@@ -3813,9 +3813,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Returns the local name of a tag. This is the part behind the colon.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>prefix</term>
 
@@ -3827,9 +3827,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Returns the prefix of a tag. This is the part before the colon.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>namespaceURI</term>
 
@@ -3841,9 +3841,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>returns the URI of the current namespace.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>hasAttributes</term>
 
@@ -3855,9 +3855,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>returns 1 (TRUE) if the current node has any attributes set, otherwise 0 (FALSE) is returned.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>attributes</term>
 
@@ -3875,9 +3875,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <olink targetdoc="XML::LibXML::NamedNodeMap">XML::LibXML::NamedNodeMap</olink> object.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>lookupNamespaceURI</term>
 
@@ -3889,9 +3889,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Find a namespace URI by its prefix starting at the current node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>lookupNamespacePrefix</term>
 
@@ -3906,8 +3906,8 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     have more than a single prefix defined for a namespace.</para>
                 </listitem>
             </varlistentry>
-        
-        
+
+
             <varlistentry>
                 <term>normalize</term>
 
@@ -3920,9 +3920,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     not free a node that is still referenced by the perl layer.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getNamespaces</term>
 
@@ -3937,9 +3937,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Although getNamespaces is available for all nodes, it only makes sense if used with element nodes.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>removeChildNodes</term>
 
@@ -3953,7 +3953,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     violations, if there are nodes still referred to from the Perl level.</para>
                 </listitem>
             </varlistentry>
-        
+
         <varlistentry>
           <term>baseURI ()</term>
           <listitem>
@@ -3986,12 +3986,12 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 	    <para>
 	    Note: For HTML documents this behaves as if the document was XML
 	    which may not be desired, since it does not effectively
-	    set the base URI of the node. See RFC 2396 appendix D 
+	    set the base URI of the node. See RFC 2396 appendix D
 	    for an example of how base URI can be specified in HTML.
 	    </para>
           </listitem>
         </varlistentry>
-        
+
             <varlistentry>
                 <term>nodePath</term>
 
@@ -4003,9 +4003,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>This function is not specified for any DOM level: It returns a canonical structure based XPath for a given node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>line_number</term>
 
@@ -4043,7 +4043,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 	<sect1>
 	  <title>Methods</title>
 	  <para>
-	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>.
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4063,9 +4063,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>This function creates a new node unbound to any DOM.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>setAttribute</term>
 
@@ -4077,9 +4077,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>This method sets or replaces the node's attribute <function>$aname</function> to the value <function>$avalue</function></para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>setAttributeNS</term>
 
@@ -4099,7 +4099,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     </para>
 	            <para>
                        If an attribute with the same local name and namespace URI already exists
-                       on the element, but its prefix differs from the prefix of <function>$aname</function>, 
+                       on the element, but its prefix differs from the prefix of <function>$aname</function>,
                        then this function is supposed to change the prefix (regardless
                        of namespace declarations and possible collisions).
                        However, the current implementation does rather the opposite.
@@ -4123,9 +4123,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     </para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getAttribute</term>
 
@@ -4138,9 +4138,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     returned.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getAttributeNS</term>
 
@@ -4152,9 +4152,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Retrieves an attribute value by local name and namespace URI.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getAttributeNode</term>
 
@@ -4166,9 +4166,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Retrieve an attribute node by name. If no attribute with a given name exists, <function>undef</function> is returned.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getAttributeNodeNS</term>
 
@@ -4180,9 +4180,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Retrieves an attribute node by local name and namespace URI. If no attribute with a given localname and namespace exists, <function>undef</function> is returned.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>removeAttribute</term>
 
@@ -4194,9 +4194,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>The method removes the attribute <function>$aname</function> from the node's attribute list, if the attribute can be found.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>removeAttributeNS</term>
 
@@ -4208,9 +4208,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Namespace version of <function>removeAttribute</function></para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>hasAttribute</term>
 
@@ -4223,9 +4223,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     return value is FALSE (0).</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>hasAttributeNS</term>
 
@@ -4237,9 +4237,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>namespace version of <function>hasAttribute</function></para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getChildrenByTagName</term>
 
@@ -4256,9 +4256,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getChildrenByTagNameNS</term>
 
@@ -4273,9 +4273,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getChildrenByLocalName</term>
 
@@ -4290,9 +4290,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>If this function is called in SCALAR context, it returns the number of elements found.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getElementsByTagName</term>
 
@@ -4312,9 +4312,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getElementsByTagNameNS</term>
 
@@ -4330,9 +4330,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getElementsByLocalName</term>
 
@@ -4347,9 +4347,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>appendWellBalancedChunk</term>
 
@@ -4369,9 +4369,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>This form is more explicit and makes it easier to control the flow of a script.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>appendText</term>
 
@@ -4383,9 +4383,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>alias for appendTextNode().</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>appendTextNode</term>
 
@@ -4397,9 +4397,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>This wrapper function lets you add a string directly to an element node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>appendTextChild</term>
 
@@ -4469,7 +4469,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     create multiple namespace declarations on a single
                     element.</para>
                     <para>The function fails if it is required to
-                      create a declaration associating the prefix 
+                      create a declaration associating the prefix
                       with the namespace URI but the element already
                       carries a declaration with the same prefix but
                       different namespace URI.
@@ -4500,7 +4500,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 	             the change.
            	  </para>
 	          <para>If the new URI is undef or empty, the nodes
-	             have no namespace and no prefix after the change. 
+	             have no namespace and no prefix after the change.
 	             Namespace declarations
 	             once nulled in this way do not
 	             further appear in the serialized output
@@ -4536,7 +4536,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                      namespace declaration determines their namespace
 	             change their prefix to the new value.
            	  </para>
-	          <para>If the new prefix is undef or empty, 
+	          <para>If the new prefix is undef or empty,
 	             the namespace declaration becomes
                      a declaration of a default namespace.
                      The corresponding nodes drop their namespace prefix
@@ -4571,7 +4571,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>.
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4592,9 +4592,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>The constructor of the class. It creates an unbound text node.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>data</term>
 
@@ -4616,9 +4616,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>will have the same result and are not different entities.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>setData($string)</term>
 
@@ -4631,9 +4631,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     "comment".</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>substringData($offset,$length)</term>
 
@@ -4649,9 +4649,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     If $length is out of range <function>substringData</function> will return the data starting at $offset instead of causing an error.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>appendData($string)</term>
 
@@ -4664,9 +4664,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <function>setData</function>.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>insertData($offset,$string)</term>
 
@@ -4682,9 +4682,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <function>appendData</function>.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>deleteData($offset, $length)</term>
 
@@ -4697,9 +4697,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     be removed from the string.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>deleteDataString($string, [$all])</term>
 
@@ -4717,9 +4717,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     from the node data.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>replaceData($offset, $length, $string)</term>
 
@@ -4731,9 +4731,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>The DOM style version to replace node data.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>replaceDataString($oldstring, $newstring, [$all])</term>
 
@@ -4748,9 +4748,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     the <emphasis>$all</emphasis> flag allows to replace all occurrences of <emphasis>$oldstring</emphasis>.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>replaceDataRegEx( $search_cond, $replace_cond, $reflags )</term>
 
@@ -4788,14 +4788,14 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
         </sect1>
         <sect1>
             <title>Description</title>
-	
+
         <para>This class provides all functions of <xref linkend="XML-LibXML-Text"/>, but for comment nodes. This can be done, since only the output of the
         node types is different, but not the data structure. :-)</para>
 	</sect1>
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>.
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4838,7 +4838,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>.
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4883,7 +4883,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
         <sect1>
             <title>Methods</title>
 	  <para>
-	    The class inherits from <xref linkend="XML-LibXML-Node"/>. 
+	    The class inherits from <xref linkend="XML-LibXML-Node"/>.
 	    The documentation for Inherited methods is not listed here.
 	  </para>
 	  <para>
@@ -4904,7 +4904,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     of <xref linkend="XML-LibXML-Document"/>.</para>
                 </listitem>
             </varlistentry>
-        
+
             <varlistentry>
                 <term>getValue</term>
 
@@ -4917,7 +4917,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <function>not specified</function>.</para>
                 </listitem>
             </varlistentry>
-                
+
             <varlistentry>
                 <term>value</term>
 
@@ -4929,9 +4929,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>Alias for <emphasis>getValue()</emphasis></para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>setValue</term>
 
@@ -4944,9 +4944,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     otherwise the encoding might be done incorrectly.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>getOwnerElement</term>
 
@@ -4959,9 +4959,9 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     implementation, the <emphasis>parentNode</emphasis> function will return undef, instead of the owner element.</para>
                 </listitem>
             </varlistentry>
-        
 
-        
+
+
             <varlistentry>
                 <term>setNamespace</term>
 
@@ -4971,24 +4971,24 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     </funcsynopsis>
 
                     <para>This function tries to bound the attribute to a given namespace.
-            If <function>$nsURI</function> is undefined or empty, 
+            If <function>$nsURI</function> is undefined or empty,
             the function discards any previous association of the attribute with a namespace.
 	    If the namespace was not previously declared in the context of the
-	    attribute, this function will fail. 
+	    attribute, this function will fail.
 	    In this case you may wish to call setNamespace() on the ownerElement.
 	    If the namespace URI is non-empty and
 	    declared in the context of the attribute, but only with a different
 	    (non-empty) prefix, then the attribute is still bound to the namespace
 	    but gets a different prefix than <function>$prefix</function>.
 	    The function also fails if the prefix is empty but the namespace URI
-	    is not (because unprefixed attributes should by definition belong to 
+	    is not (because unprefixed attributes should by definition belong to
 	    no namespace).
 	    This function returns 1 on success, 0 otherwise.
 	  </para>
                 </listitem>
             </varlistentry>
-        
-	
+
+
             <varlistentry>
                 <term>isId</term>
                 <listitem>
@@ -5353,11 +5353,11 @@ $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
             <title>Synopsis</title>
 
             <programlisting>my $input_callbacks = XML::LibXML::InputCallback-&gt;new();
-$input_callbacks-&gt;register_callbacks([ $match_cb1, $open_cb1, 
+$input_callbacks-&gt;register_callbacks([ $match_cb1, $open_cb1,
                                        $read_cb1, $close_cb1 ] );
-$input_callbacks-&gt;register_callbacks([ $match_cb2, $open_cb2, 
+$input_callbacks-&gt;register_callbacks([ $match_cb2, $open_cb2,
                                        $read_cb2, $close_cb2 ] );
-$input_callbacks-&gt;register_callbacks( [ $match_cb3, $open_cb3, 
+$input_callbacks-&gt;register_callbacks( [ $match_cb3, $open_cb3,
                                         $read_cb3, $close_cb3 ] );
 
 $parser-&gt;input_callbacks( $input_callbacks );
@@ -5429,11 +5429,11 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
                 <para>After object instantiation using the parameter-less constructor, you can register callback groups.</para>
 
                 <programlisting>my $input_callbacks = XML::LibXML::InputCallback-&gt;new();
-$input_callbacks-&gt;register_callbacks([ $match_cb1, $open_cb1, 
+$input_callbacks-&gt;register_callbacks([ $match_cb1, $open_cb1,
                                        $read_cb1, $close_cb1 ] );
-$input_callbacks-&gt;register_callbacks([ $match_cb2, $open_cb2, 
+$input_callbacks-&gt;register_callbacks([ $match_cb2, $open_cb2,
                                        $read_cb2, $close_cb2 ] );
-$input_callbacks-&gt;register_callbacks( [ $match_cb3, $open_cb3, 
+$input_callbacks-&gt;register_callbacks( [ $match_cb3, $open_cb3,
                                         $read_cb3, $close_cb3 ] );
 
 $parser-&gt;input_callbacks( $input_callbacks );
@@ -5605,13 +5605,13 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
 
             <para>The following example is a purely fictitious example that uses a MyScheme::Handler object that responds to methods similar to an IO::Handle.</para>
 
-            <programlisting>   
+            <programlisting>
 # Define the four callback functions
 sub match_uri {
     my $uri = shift;
     return $uri =~ /^myscheme:/; # trigger our callback group at a 'myscheme' URIs
 }
-  
+
 sub open_uri {
     my $uri = shift;
     my $handler = MyScheme::Handler-&gt;new($uri);
@@ -5627,7 +5627,7 @@ sub read_uri {
     return $buffer; # $buffer will be an empty string '' if read() is done
 }
 
-# Close the handle associated with the resource.  
+# Close the handle associated with the resource.
 sub close_uri {
     my $handler = shift;
     close($handler);
@@ -5635,13 +5635,13 @@ sub close_uri {
 
 # Register them with a instance of XML::LibXML::InputCallback
 my $input_callbacks = XML::LibXML::InputCallback-&gt;new();
-$input_callbacks-&gt;register_callbacks([ \&amp;match_uri, \&amp;open_uri, 
+$input_callbacks-&gt;register_callbacks([ \&amp;match_uri, \&amp;open_uri,
                                        \&amp;read_uri, \&amp;close_uri ] );
 
 # Register the callback group at a parser instance
 $parser-&gt;input_callbacks( $input_callbacks );
 
-# $some_xml_file will be parsed using our callbacks 
+# $some_xml_file will be parsed using our callbacks
 $parser-&gt;parse_file( $some_xml_file );
 
 
@@ -5722,7 +5722,7 @@ $doc = XML::LibXML-&gt;new-&gt;parse_file($url);</programlisting>
             <title>Description</title>
 
         <para>The XML::LibXML::Schema class is a tiny frontend to libxml2's XML Schema implementation. Currently it supports only schema parsing and
-        document validation. As of 2.6.32, libxml2 only supports decimal types up to 24 digits (the standard requires at least 18). 
+        document validation. As of 2.6.32, libxml2 only supports decimal types up to 24 digits (the standard requires at least 18).
 	</para>
 	</sect1>
         <sect1>
@@ -5793,7 +5793,7 @@ my @nodes = $xc-&gt;findnodes('//xhtml:p');</programlisting>
         <title>Custom XPath functions</title>
 <para>This example demonstrates <function>registerFunction()</function> method
 by defining a function filtering nodes based on a Perl regular expression:</para>
-	<programlisting>sub grep_nodes { 
+	<programlisting>sub grep_nodes {
   my ($nodelist,$regexp) =  @_;
   my $result = XML::LibXML::NodeList-&gt;new;
   for my $node ($nodelist-&gt;get_nodelist()) {
@@ -5814,17 +5814,17 @@ method. We use XPath variables to recycle results of previous evaluations:</para
   my ($varname,$ns,$data)=@_;
   return $data-&gt;{$varname};
 }
-        
+
 my $areas = XML::LibXML-&gt;new-&gt;parse_file('areas.xml');
 my $empl = XML::LibXML-&gt;new-&gt;parse_file('employees.xml');
-        
+
 my $xc = XML::LibXML::XPathContext-&gt;new($empl);
-        
-my %variables = ( 
+
+my %variables = (
   A =&gt; $xc-&gt;find('/employees/employee[@salary&gt;10000]'),
-  B =&gt; $areas-&gt;find('/areas/area[district='Brooklyn']/street'), 
+  B =&gt; $areas-&gt;find('/areas/area[district='Brooklyn']/street'),
 );
-        
+
 # get names of employees from $A working in an area listed in $B
 $xc-&gt;registerVarLookupFunc(\&amp;var_lookup, \%variables);
 my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
@@ -5966,7 +5966,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>
-          <para>The xpath expression can be passed either as a string or 
+          <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
           </listitem>
@@ -5987,7 +5987,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      thing'' in different contexts. Optionally, a node may be
 	      passed as a second argument to set the context node for
 	      the query.</para>
-          <para>The xpath expression can be passed either as a string or 
+          <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
           </listitem>
@@ -6005,7 +6005,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
             select=``some_xpath''/&gt;. Optionally, a node may be
             passed in the second argument to set the context node for
             the query.</para>
-          <para>The xpath expression can be passed either as a string or 
+          <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
           </listitem>
@@ -6106,9 +6106,9 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
     </sect1>
     <sect1>
       <title>Authors</title>
-      <para>Ilya Martynov and Petr Pajas, based on 
-	XML::LibXML and XML::LibXSLT code by Matt Sergeant and 
-	Christian Glahn.</para> 
+      <para>Ilya Martynov and Petr Pajas, based on
+	XML::LibXML and XML::LibXSLT code by Matt Sergeant and
+	Christian Glahn.</para>
     </sect1>
     <sect1>
       <title>Historical remark</title>
@@ -6150,7 +6150,7 @@ sub processNode {
       <title>DESCRIPTION</title>
       <para>This is a perl interface to libxml2's pull-parser implementation
 	xmlTextReader
-	<emphasis>http://xmlsoft.org/html/libxml-xmlreader.html</emphasis>. 
+	<emphasis>http://xmlsoft.org/html/libxml-xmlreader.html</emphasis>.
 	This feature requires at least libxml2-2.6.21.
 	Pull-parser (StAX in Java, XmlReader in C#) use an iterator
 	approach to parse a xml-file. They are easier to program than
@@ -6265,7 +6265,7 @@ sub processNode {
             <term>...</term>
             <listitem>
               <para>the reader further supports various
-	      parser options described in 
+	      parser options described in
 	      <xref linkend="XML-LibXML-Parser"/> (specificly those
 	      labeled by /reader/).
 	      </para>
@@ -6338,7 +6338,7 @@ sub processNode {
             <para>Skip nodes following the current one in the document
 	      order until an element matching a given
 	      compiled pattern is reached. See
-              <xref linkend="XML-LibXML-Pattern"/> for information on 
+              <xref linkend="XML-LibXML-Pattern"/> for information on
 	      compiled patterns. See also the <literal>matchesPattern</literal>
 	      method.</para>
             <para>Returns 1 if the element was found, 0 if there is no more nodes to read, or -1 in case of error.</para>
@@ -6474,10 +6474,10 @@ sub processNode {
         <varlistentry>
           <term>nodePath()</term>
           <listitem>
-            <para>Returns a cannonical location path to the current element 
+            <para>Returns a cannonical location path to the current element
 	    from the root node to the current node. Namespaced
 	    elements are matched by '*', because there is no way to declare
-	    prefixes within XPath patterns. Unlike 
+	    prefixes within XPath patterns. Unlike
 	    <literal>XML::LibXML::Node::nodePath()</literal>, this function
 	    does not provide sibling counts (i.e. instead of e.g. '/a/b[1]' and '/a/b[2]'
 	    you get '/a/b' for both matches).
@@ -6489,11 +6489,11 @@ sub processNode {
           <listitem>
             <para>Returns a true value if the current
 	    node matches a compiled pattern.
-            See <xref linkend="XML-LibXML-Pattern"/> for information on 
+            See <xref linkend="XML-LibXML-Pattern"/> for information on
 	    compiled patterns. See also the <literal>nextPatternMatch</literal>
 	    method.</para>
           </listitem>
-        </varlistentry>	
+        </varlistentry>
       </variablelist>
     </sect1>
     <sect1>
@@ -6714,7 +6714,7 @@ sub processNode {
           <term>baseURI ()</term>
           <listitem>
             <para>Returns the base URI of a given node.</para>
-          </listitem>	  
+          </listitem>
         </varlistentry>
         <varlistentry>
           <term>isValid ()</term>
@@ -6852,7 +6852,7 @@ XML_READER_ERROR     =&gt;  6
       <programlisting>use XML::LibXML;
 my $compiled_xpath = XML::LibXML::XPathExpression-&gt;new('//foo[@bar="baz"][position()&lt;4]');
 
-# interface from XML::LibXML::Node 
+# interface from XML::LibXML::Node
 
 my $result = $node->find($compiled_xpath);
 my @nodes = $node->findnodes($compiled_xpath);
@@ -6867,11 +6867,11 @@ my $value = $xpc->findvalue($compiled_xpath,$node);
     </sect1>
     <sect1>
       <title>Description</title>
-      <para>This is a perl interface to libxml2's pre-compiled XPath expressions. 
+      <para>This is a perl interface to libxml2's pre-compiled XPath expressions.
       Pre-compiling an XPath expression can give in some performance
-      benefit if the same XPath query is evaluated many times. 
+      benefit if the same XPath query is evaluated many times.
       <function>XML::LibXML::XPathExpression</function> objects
-      can be passed to all <function>find...</function> 
+      can be passed to all <function>find...</function>
       functions <function>XML::LibXML</function>
       that expect an XPath expression.
       </para>
@@ -6914,7 +6914,7 @@ print $reader->nodePath while $reader->nextPatternMatch($pattern);
     <sect1>
       <title>Description</title>
       <para>This is a perl interface to libxml2's pattern matching support
-	<emphasis>http://xmlsoft.org/html/libxml-pattern.html</emphasis>. 
+	<emphasis>http://xmlsoft.org/html/libxml-pattern.html</emphasis>.
       This feature requires recent versions of libxml2.</para>
       <para>Patterns are a small subset of XPath language, which is limitted
       to (disjunctions of) location paths involving the child and descendant axes in abbreviated form
@@ -6955,7 +6955,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	    <funcsynopsis>
 	      <funcsynopsisinfo>$bool = $pattern->matchesNode($node);</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>Given a XML::LibXML::Node object, returns a true value if 
+	    <para>Given a XML::LibXML::Node object, returns a true value if
 	    the node is matched by the compiled pattern expression.</para>
 	  </listitem>
 	</varlistentry>
@@ -6964,7 +6964,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
     <sect1>
       <title>SEE ALSO</title>
       <para><xref linkend="XML-LibXML-Reader"/> for other methods involving compiled patterns.</para>
-    </sect1>      
+    </sect1>
   </chapter>
   <chapter id="XML-LibXML-RegExp">
     <title>XML::LibXML::RegExp - interface to libxml2 regular expressions</title>
@@ -6987,7 +6987,7 @@ if ($compiled_re->matches($string)) { ... }
 	    <funcsynopsis>
 	      <funcsynopsisinfo>$compiled_re = XML::LibXML::RegExp-&gt;new( $regexp_str );</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>The constructor takes a string containing a regular expression 
+	    <para>The constructor takes a string containing a regular expression
 	    and returns a compiled regexp object.
 	    </para>
 	  </listitem>
@@ -6998,7 +6998,7 @@ if ($compiled_re->matches($string)) { ... }
 	    <funcsynopsis>
 	      <funcsynopsisinfo>$bool = $compiled_re->matches($string);</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>Given a string value, returns a true value if 
+	    <para>Given a string value, returns a true value if
 	    the value is matched by the compiled regular expression.</para>
 	  </listitem>
 	</varlistentry>
@@ -7016,7 +7016,7 @@ if ($compiled_re->matches($string)) { ... }
   </chapter>
   <chapter id="XML-LibXML-Error">
     <title>Structured Errors</title>
-    <titleabbrev>XML::LibXML::Error</titleabbrev> 
+    <titleabbrev>XML::LibXML::Error</titleabbrev>
     <sect1>
       <title>Synopsis</title>
       <programlisting>
@@ -7063,7 +7063,7 @@ if ($compiled_re->matches($string)) { ... }
 	    </funcsynopsis>
 	    <para>Traditionally, XML::LibXML was supressing parser
 	      warnings by setting libxml2's global variable
-	      xmlGetWarningsDefaultValue to 0. Since 
+	      xmlGetWarningsDefaultValue to 0. Since
 	      1.70 we do not change libxml2's global
 	      variables anymore; for backward compatibility,
 	      XML::LibXML suppresses warnings.
@@ -7094,7 +7094,7 @@ if ($compiled_re->matches($string)) { ... }
 	    <funcsynopsis>
 	      <funcsynopsisinfo>print $@->dump();</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>This function serializes a XML::LibXML::Error to a 
+	    <para>This function serializes a XML::LibXML::Error to a
 	      string displaying all fields of the error structure
 	      individually on separate lines of the form 'name' => 'value'.
 	    </para>
@@ -7111,7 +7111,7 @@ if ($compiled_re->matches($string)) { ... }
 	      "parser", "tree", "namespace", "validity", "HTML parser",
 	      "memory", "output", "I/O", "ftp", "http",
 	      "XInclude", "XPath", "xpointer", "regexp", "Schemas
-	      datatype", 
+	      datatype",
 	      "Schemas parser", "Schemas validity",
 	      "Relax-NG parser", "Relax-NG validity", "Catalog",
 	      "C14N", "XSLT", "validity".
@@ -7290,8 +7290,8 @@ if ($compiled_re->matches($string)) { ... }
   </chapter>
   <chapter id="XML-LibXML-ErrNo">
     <title>Structured Errors</title>
-    <titleabbrev>XML::LibXML::ErrNo</titleabbrev> 
-    <para>This module is based on xmlerror.h libxml2 C header file. 
+    <titleabbrev>XML::LibXML::ErrNo</titleabbrev>
+    <para>This module is based on xmlerror.h libxml2 C header file.
        It defines symbolic constants for all libxml2 error codes.
        Currently libxml2 uses over 480 different error codes.
        See also XML::LibXML::Error.
@@ -7299,7 +7299,7 @@ if ($compiled_re->matches($string)) { ... }
   </chapter>
   <chapter id="XML-LibXML-Common">
     <title>Constants and Character Encoding Routines</title>
-    <titleabbrev>XML::LibXML::Common</titleabbrev> 
+    <titleabbrev>XML::LibXML::Common</titleabbrev>
     <sect1>
       <title>Synopsis</title>
       <programlisting>use XML::LibXML::Common;</programlisting>
@@ -7309,7 +7309,7 @@ if ($compiled_re->matches($string)) { ... }
       <para>
 	XML::LibXML::Common defines constants for all node types
 	and provides interface to libxml2 charset conversion
-	functions.	
+	functions.
       </para>
       <para>Since XML::LibXML use their own node type definitions,
       one may want to use XML::LibXML::Common in its compatibility
@@ -7341,7 +7341,7 @@ if ($compiled_re->matches($string)) { ... }
 	<title>Encoding functions</title>
 	<para>
 	  To encode or decode a string to or from UTF-8, XML::LibXML::Common exports
-	  two functions, which provide interfact to the encoding support in <literal>libxml2</literal>. 
+	  two functions, which provide interfact to the encoding support in <literal>libxml2</literal>.
 	  Which encodings are supported by these functions depends
 	  on how <literal>libxml2</literal> was compiled.  UTF-16 is
 	  always supported and on most installations, ISO encodings are
