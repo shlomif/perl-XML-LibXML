@@ -9,6 +9,10 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=57652 .
     - Add an external entity resolver (for XSLT/etc.):
         - Fixing https://rt.cpan.org/Ticket/Display.html?id=69166 .
+    - Add the missing string comparison overload in
+    lib/XML/LibXML/NodeList.pm :
+        - https://rt.cpan.org/Ticket/Display.html?id=57737
+        - Thanks to MSCHWERN .
     
 1.76            Thu Jun 30 20:58:46 IDT 2011
     - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter

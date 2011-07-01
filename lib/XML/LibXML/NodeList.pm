@@ -22,6 +22,10 @@ $VERSION = "1.73"; # VERSION TEMPLATE: DO NOT CHANGE
 use overload 
         '""' => \&to_literal,
         'bool' => \&to_boolean,
+        'cmp' => sub {
+            my($aa, $bb, $order) = @_;
+            return ($order ? ("$bb" cmp "$aa") : ("$aa" cmp "$bb"));
+        },
         ;
 
 sub new {
