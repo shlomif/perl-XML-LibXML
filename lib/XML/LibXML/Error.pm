@@ -68,8 +68,10 @@ use constant XML_ERR_FROM_SCHEMATRONV=> 28; # The Schematron validator module
                   "xmlwriter", "dynamic loading", "i18n",
                   "Schematron validity");
 
+my $MAX_ERROR_PREV_DEPTH = 100;
+
 for my $field (qw<code _prev level file line nodename message column context
-                  str1 str2 str3 num1 num2>) {
+                  str1 str2 str3 num1 num2 __prev_depth>) {
     my $method = sub { $_[0]{$field} };
     no strict 'refs';
     *$field = $method;
@@ -94,6 +96,7 @@ for my $field (qw<code _prev level file line nodename message column context
         str3    => $xE->str3(),
         num1    => $xE->num1(),
         num2    => $xE->num2(),
+        __prev_depth => 0,
         (defined($context) ?
            (
              context => $context,
@@ -115,6 +118,7 @@ for my $field (qw<code _prev level file line nodename message column context
         str3    => undef,
         num1    => undef,
         num2    => undef,
+        __prev_depth => 0,
       }, $class;
     }
     return $terr;
@@ -135,8 +139,20 @@ for my $field (qw<code _prev level file line nodename message column context
         # [CG] $terr->{file} = 'string()';
       #}
       #warn "Saving the error ",$terr->dump;
-      $terr->{_prev} = ref($prev) ? $prev :
-        defined($prev) && length($prev) ? XML::LibXML::Error->new($prev) : undef;
+
+      if (ref($prev))
+      {
+          if ($prev->__prev_depth()  >= $MAX_ERROR_PREV_DEPTH)
+          {
+              return $prev;
+          }
+          $terr->{_prev} = $prev;
+          $terr->{__prev_depth} = $prev->__prev_depth() + 1;
+      }
+      else
+      {
+          $terr->{_prev} = defined($prev) && length($prev) ? XML::LibXML::Error->new($prev) : undef;
+      }
       return $terr;
     }
     sub _instant_error_callback {
