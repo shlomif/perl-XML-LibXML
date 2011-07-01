@@ -30,6 +30,7 @@ example/article_internal.xml
 example/article_internal_bad.xml
 example/bad.dtd
 example/bad.xml
+example/thedieline.rss
 example/catalog.xml
 example/cb_example.pl
 example/complex/complex.dtd
@@ -124,6 +125,7 @@ t/16docnodes.t
 t/17callbacks.t
 t/18docfree.t
 t/19encoding.t
+t/19die_on_invalid_utf8_rt_58848.t
 t/20extras.t
 t/21catalog.t
 t/23rawfunctions.t
