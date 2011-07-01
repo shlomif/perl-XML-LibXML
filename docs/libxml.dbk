@@ -2944,7 +2944,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>Implements the DOM Level 2 function</para>
 
-                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2958,7 +2958,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>Implements the DOM Level 2 function</para>
 
-                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -2972,7 +2972,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                     <para>This allows the fetching of all nodes from a given document with the given Localname.</para>
 
-                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -3543,7 +3543,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>@nodes = $node-&gt;findnodes( $xpath_expression );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context, returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context, returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
           <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
@@ -3610,8 +3610,8 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
 
                     <para><emphasis>find</emphasis> evaluates the XPath 1.0 expression using the current node as the context of the expression, and returns the
                     result depending on what type of result the XPath expression had. For example, the XPath "1 * 3 + 52" results in a
-                    <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return a <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
-                    object, or a <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
+                    <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return an <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
+                    object, or an <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
                     the right thing" in different contexts.</para>
           <para>The xpath expression can be passed either as a string or
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
@@ -4309,7 +4309,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 	    A special <function>tagname</function> '*' can be used to match any tag name.
 	  </para>
 
-                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -4327,7 +4327,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                	    A special <function>localname</function> '*' can be used to match any local name
 	            and <function>nsURI</function> '*' can be used to match any namespace URI.</para>
 
-                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -4344,7 +4344,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                     <para>This function is not found in the DOM specification. It is a mix of getElementsByTagName and getElementsByTagNameNS. It will fetch all
                     tags matching the given local-name. This allows one to select tags with the same local name across namespace borders.</para>
 
-                    <para>In SCALAR context this function returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
+                    <para>In SCALAR context this function returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
                 </listitem>
             </varlistentry>
 
@@ -5881,7 +5881,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      (e.g. Document, Element, etc.), or NodeList. For
 	      convenience, simple (non-blessed) array references
 	      containing only <xref linkend="XML-LibXML-Node"/> objects can be
-	      used instead of a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
+	      used instead of an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink>.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -5963,7 +5963,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
           <funcsynopsis><funcsynopsisinfo>$nodelist = $xpc-&gt;findnodes($xpath, $context_node )</funcsynopsisinfo></funcsynopsis>
             <para>Performs the xpath statement on the current node and
 	      returns the result as an array. In scalar context,
-	      returns a <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
+	      returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>
           <para>The xpath expression can be passed either as a string or
@@ -5979,7 +5979,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      as the context of the expression, and returns the result
 	      depending on what type of result the XPath expression
 	      had. For example, the XPath <literal>1 * 3 +
-	      52</literal> results in a <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object
+	      52</literal> results in an <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object
 	      being returned. Other expressions might return a
 	      <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink> object, or a
 	      <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those
