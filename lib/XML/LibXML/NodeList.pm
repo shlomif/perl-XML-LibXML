@@ -16,100 +16,100 @@ use XML::LibXML::Boolean;
 use XML::LibXML::Literal;
 use XML::LibXML::Number;
 
-use vars qw ($VERSION);
+use vars qw($VERSION);
 $VERSION = "1.73"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use overload 
-		'""' => \&to_literal,
-                'bool' => \&to_boolean,
+        '""' => \&to_literal,
+        'bool' => \&to_boolean,
         ;
 
 sub new {
-	my $class = shift;
-	bless [@_], $class;
+    my $class = shift;
+    bless [@_], $class;
 }
 
 sub new_from_ref {
-	my ($class,$array_ref,$reuse) = @_;
-	return bless $reuse ? $array_ref : [@$array_ref], $class;
+    my ($class,$array_ref,$reuse) = @_;
+    return bless $reuse ? $array_ref : [@$array_ref], $class;
 }
 
 sub pop {
-	my $self = CORE::shift;
-	CORE::pop @$self;
+    my $self = CORE::shift;
+    CORE::pop @$self;
 }
 
 sub push {
-	my $self = CORE::shift;
-	CORE::push @$self, @_;
+    my $self = CORE::shift;
+    CORE::push @$self, @_;
 }
 
 sub append {
-	my $self = CORE::shift;
-	my ($nodelist) = @_;
-	CORE::push @$self, $nodelist->get_nodelist;
+    my $self = CORE::shift;
+    my ($nodelist) = @_;
+    CORE::push @$self, $nodelist->get_nodelist;
 }
 
 sub shift {
-	my $self = CORE::shift;
-	CORE::shift @$self;
+    my $self = CORE::shift;
+    CORE::shift @$self;
 }
 
 sub unshift {
-	my $self = CORE::shift;
-	CORE::unshift @$self, @_;
+    my $self = CORE::shift;
+    CORE::unshift @$self, @_;
 }
 
 sub prepend {
-	my $self = CORE::shift;
-	my ($nodelist) = @_;
-	CORE::unshift @$self, $nodelist->get_nodelist;
+    my $self = CORE::shift;
+    my ($nodelist) = @_;
+    CORE::unshift @$self, $nodelist->get_nodelist;
 }
 
 sub size {
-	my $self = CORE::shift;
-	scalar @$self;
+    my $self = CORE::shift;
+    scalar @$self;
 }
 
 sub get_node {
     # uses array index starting at 1, not 0
     # this is mainly because of XPath.
-	my $self = CORE::shift;
-	my ($pos) = @_;
-	$self->[$pos - 1];
+    my $self = CORE::shift;
+    my ($pos) = @_;
+    $self->[$pos - 1];
 }
 
 *item = \&get_node;
 
 sub get_nodelist {
-	my $self = CORE::shift;
-	@$self;
+    my $self = CORE::shift;
+    @$self;
 }
 
 sub to_boolean {
-	my $self = CORE::shift;
-	return (@$self > 0) ? XML::LibXML::Boolean->True : XML::LibXML::Boolean->False;
+    my $self = CORE::shift;
+    return (@$self > 0) ? XML::LibXML::Boolean->True : XML::LibXML::Boolean->False;
 }
 
 # string-value of a nodelist is the string-value of the first node
 sub string_value {
-	my $self = CORE::shift;
-	return '' unless @$self;
-	return $self->[0]->string_value;
+    my $self = CORE::shift;
+    return '' unless @$self;
+    return $self->[0]->string_value;
 }
 
 sub to_literal {
-	my $self = CORE::shift;
-	return XML::LibXML::Literal->new(
-			join('', grep {defined $_} map { $_->string_value } @$self)
-			);
+    my $self = CORE::shift;
+    return XML::LibXML::Literal->new(
+            join('', grep {defined $_} map { $_->string_value } @$self)
+            );
 }
 
 sub to_number {
-	my $self = CORE::shift;
-	return XML::LibXML::Number->new(
-			$self->to_literal
-			);
+    my $self = CORE::shift;
+    return XML::LibXML::Number->new(
+            $self->to_literal
+            );
 }
 
 sub iterator {
