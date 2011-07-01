@@ -8,6 +8,7 @@
 #
 package XML::LibXML::Error;
 
+use Encode ();
 use strict;
 use vars qw(@error_domains $VERSION $WARNINGS);
 use Carp;
@@ -236,7 +237,7 @@ sub as_string {
       # warnings.  This has the pleasing benefit of making the test suite
       # run warning-free.
       no warnings 'utf8';
-      my $context = $self->{context};
+      my $context = Encode::encode('utf8', $self->{context}, Encode::FB_DEFAULT);
       $msg.=$context."\n";
       $context = substr($context,0,$self->{column});
       $context=~s/[^\t]/ /g;

@@ -26,6 +26,10 @@ Revision history for Perl extension XML::LibXML
             - t/60error_prev_chain.t
             - example/JBR-ALLENtrees.htm
         - Thanks to SCOP.
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=58848 :
+        - "Malformed UTF-8 character (fatal) at" exception thrown on invalid
+        UTF-8.
+        - Thanks to David E. Wheeler (DWHEELER) for the report.
 
 1.76            Thu Jun 30 20:58:46 IDT 2011
     - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
