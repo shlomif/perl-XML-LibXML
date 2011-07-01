@@ -146,6 +146,9 @@ typedef enum {
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
 
+/* global external entity loader */
+SV *EXTERNAL_ENTITY_LOADER_FUNC = (SV *)NULL;
+
 SV* PROXY_NODE_REGISTRY_MUTEX = NULL;
 
 /* ****************************************************************
@@ -778,8 +781,6 @@ LibXML_load_external_entity(
         const char * ID,
         xmlParserCtxtPtr ctxt)
 {
-    SV * self;
-    HV * real_obj;
     SV ** func;
     int count;
     SV * results;
@@ -787,7 +788,8 @@ LibXML_load_external_entity(
     const char * results_pv;
     xmlParserInputBufferPtr input_buf;
 
-    if (ctxt->_private == NULL) {
+    if (ctxt->_private == NULL && EXTERNAL_ENTITY_LOADER_FUNC == NULL)
+    {
         return xmlNewInputFromFile(ctxt, URL);
     }
 
@@ -798,11 +800,22 @@ LibXML_load_external_entity(
         ID = "";
     }
 
-    self = (SV *)ctxt->_private;
-    real_obj = (HV *)SvRV(self);
-    func = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
+    /* fetch entity loader function */
+    if(EXTERNAL_ENTITY_LOADER_FUNC != NULL)
+    {
+       func = &EXTERNAL_ENTITY_LOADER_FUNC;
+    }
+    else
+    {
+       SV * self;
+       HV * real_obj;
 
-    if (func != NULL  && SvTRUE(*func)) {
+       self = (SV *)ctxt->_private;
+       real_obj = (HV *)SvRV(self);
+       func = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
+    }
+
+    if (func != NULL && SvTRUE(*func)) {
         dTHX;
         dSP;
 
@@ -899,18 +912,23 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
             if (ctxt) ctxt->linenumbers = 0;
         }
 
-        item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
-        if ( item != NULL  && SvTRUE(*item)) {
-            LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
-            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
-        }
-        else {
-            if (parserOptions & XML_PARSE_NONET) {
+       if(EXTERNAL_ENTITY_LOADER_FUNC == NULL)
+       {
+            item = hv_fetch(real_obj, "ext_ent_handler", 15, 0);
+            if (item != NULL  && SvTRUE(*item)) {
                 LibXML_old_ext_ent_loader =  xmlGetExternalEntityLoader();
-                xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+                xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_load_external_entity );
             }
-            /* LibXML_old_ext_ent_loader =  NULL; */
-        }
+            else 
+             {
+                if (parserOptions & XML_PARSE_NONET)
+                {
+                    LibXML_old_ext_ent_loader = xmlGetExternalEntityLoader();
+                    xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+                }
+                /* LibXML_old_ext_ent_loader =  NULL; */
+            }
+       }
     }
 
     return real_obj;
@@ -921,7 +939,8 @@ LibXML_cleanup_parser() {
 #ifndef WITH_SERRORS
     xmlGetWarningsDefaultValue = 0;
 #endif
-    if (LibXML_old_ext_ent_loader != NULL ) {
+    if (EXTERNAL_ENTITY_LOADER_FUNC == NULL && LibXML_old_ext_ent_loader != NULL)
+    {
         xmlSetExternalEntityLoader( (xmlExternalEntityLoader)LibXML_old_ext_ent_loader );
     }
 }
@@ -2639,6 +2658,26 @@ _default_catalog( self, catalog )
     CODE:
         warn( "this feature is not implemented" );
         RETVAL = 0;
+    OUTPUT:
+        RETVAL
+
+SV*
+_externalEntityLoader( loader )
+        SV* loader
+    CODE:
+        {
+            RETVAL = EXTERNAL_ENTITY_LOADER_FUNC;
+            if(EXTERNAL_ENTITY_LOADER_FUNC == NULL)
+            {
+                EXTERNAL_ENTITY_LOADER_FUNC = newSVsv(loader);
+            }
+
+            if (LibXML_old_ext_ent_loader == NULL )
+            {
+                LibXML_old_ext_ent_loader = xmlGetExternalEntityLoader();
+                xmlSetExternalEntityLoader((xmlExternalEntityLoader)LibXML_load_external_entity);
+            }
+        }
     OUTPUT:
         RETVAL
 
@@ -9408,4 +9447,3 @@ decodeFromUTF8( encoding, string )
 #endif
     OUTPUT:
         RETVAL
-

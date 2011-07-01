@@ -443,6 +443,11 @@ sub createDocument {
 # callback functions                                                      #
 #-------------------------------------------------------------------------#
 
+sub externalEntityLoader(&)
+{
+    return _externalEntityLoader($_[0]);
+}
+
 sub input_callbacks {
     my $self     = shift;
     my $icbclass = shift;

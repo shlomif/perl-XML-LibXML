@@ -7,9 +7,11 @@ Revision history for Perl extension XML::LibXML
     - Change "a XML::LibXML::*" to "an XML::LibXML::*" in the documentation.
     - Document XML::LibXML::NamedNodeMap :
         - https://rt.cpan.org/Ticket/Display.html?id=57652 .
-
+    - Add an external entity resolver (for XSLT/etc.):
+        - Fixing https://rt.cpan.org/Ticket/Display.html?id=69166 .
+    
 1.76            Thu Jun 30 20:58:46 IDT 2011
-     - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
+    - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
      and Stacker class.
         - After that, the regression test for was added:
             - https://rt.cpan.org/Ticket/Display.html?id=51086
