@@ -1955,6 +1955,12 @@ $parser->no_network();</programlisting>
                     <funcsynopsisinfo>$parser-&gt;load_catalog( $catalog_file );</funcsynopsisinfo>
                   </funcsynopsis>
 		  <para>Loads the XML catalog file $catalog_file.</para>
+          <programlisting>
+# Global external entity loader (similar to ext_ent_handler option
+# but this works really globally, also in XML::LibXSLT include etc..)
+
+XML::LibXML::externalEntityLoader(\&amp;my_loader);
+          </programlisting>
 		</listitem>
 	      </varlistentry>
 		</variablelist>
