@@ -42,6 +42,7 @@ example/dtd.xml
 example/enc2_latin2.html
 example/enc_latin2.html
 example/ext_ent.dtd
+example/JBR-ALLENtrees.htm
 example/ns.xml
 example/test.dtd
 example/test.html
@@ -147,6 +148,7 @@ t/48_rt55000.t
 t/49_load_html.t
 t/49global_extent.t
 t/60struct_error.t
+t/60error_prev_chain.t
 t/61error.t
 t/80registryleak.t
 t/90threads.t
