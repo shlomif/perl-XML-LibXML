@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+    - Add a POSIX::setlocale call to t/02parse.t to test for the right
+    error message.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=69248
+
+
 1.77            Fri Jul  1 22:27:56 IDT 2011
     - Change the signature of XML::LibXML::Reader::byteConsumed to be
     "long" instead of "int", so it can return values above 2**31 in
