@@ -13,13 +13,10 @@ use IO::File;
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
 use XML::LibXML::SAX::Builder;
-use POSIX qw(setlocale LC_ALL LC_CTYPE);
 
 use constant XML_DECL => "<?xml version=\"1.0\"?>\n";
 
-# This is to fix https://rt.cpan.org/Public/Bug/Display.html?id=69248
-# Testing for localised error messages.
-POSIX::setlocale (LC_ALL(), 'C');
+use Errno qw(ENOENT);
 
 ##
 # test values
@@ -228,9 +225,18 @@ $parser->pedantic_parser(0);
 eval {my $fail = $parser->parse_file($badfile1);};
 like($@, qr/^$badfile1:3: parser error : Extra content at the end of the document/, "error parsing $badfile1");
 
+{
+    # This is to fix https://rt.cpan.org/Public/Bug/Display.html?id=69248
+    # Testing for localised error messages.
+    $! = ENOENT;
+    my $err_string = "$!";
+    $! = 0;
 
-eval { $parser->parse_file($badfile2); };
-like($@, qr/^Could not create file parser context for file "$badfile2": No such file or directory at/, "error parsing non-existant $badfile2");
+    my $re = qr/\ACould not create file parser context for file "\Q$badfile2\E": \Q$err_string\E/;
+
+    eval { $parser->parse_file($badfile2); };
+    like($@, $re, "error parsing non-existant $badfile2");
+}
 
 {
     my $str = "<a>    <b/> </a>";
