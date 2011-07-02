@@ -13,8 +13,13 @@ use IO::File;
 use XML::LibXML::Common qw(:libxml);
 use XML::LibXML::SAX;
 use XML::LibXML::SAX::Builder;
+use POSIX qw(setlocale LC_ALL LC_CTYPE);
 
 use constant XML_DECL => "<?xml version=\"1.0\"?>\n";
+
+# This is to fix https://rt.cpan.org/Public/Bug/Display.html?id=69248
+# Testing for localised error messages.
+POSIX::setlocale (LC_ALL(), 'C');
 
 ##
 # test values
