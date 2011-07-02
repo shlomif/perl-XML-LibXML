@@ -1,7 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-    - Add a POSIX::setlocale call to t/02parse.t to test for the right
-    error message.
+    - Change t/02parse.t to test for the localized error message:
         - https://rt.cpan.org/Public/Bug/Display.html?id=69248
 
 
