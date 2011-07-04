@@ -67,8 +67,4 @@ foreach my $el ($doc->findnodes('/root/*')) {
 
 #########################
 
-# Insert your test code below, the Test::More module is used here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
-
-
 }
