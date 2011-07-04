@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 45 };
+# Should be 45.
+use Test::More tests => 45;
 
 use XML::LibXML;
 
@@ -22,39 +22,49 @@ if ( defined $dom ) {
   
     # first very simple path starting at root
     my @list   = $elem->findnodes( "species" );
-    ok( scalar(@list), 3 );
+    # TEST
+    is( scalar(@list), 3, ' TODO : Add test name' );
 
     # a simple query starting somewhere ...
     my $node = $list[0];
     my @slist = $node->findnodes( "humps" );
-    ok( scalar(@slist), 1 );
+    # TEST
+    is( scalar(@slist), 1, ' TODO : Add test name' );
 
     # find a single node
     @list   = $elem->findnodes( "species[\@name='Llama']" );
-    ok( scalar( @list ), 1 );
+    # TEST
+    is( scalar( @list ), 1, ' TODO : Add test name' );
   
     # find with not conditions
     @list   = $elem->findnodes( "species[\@name!='Llama']/disposition" );
-    ok( scalar(@list), 2 );
+    # TEST
+    is( scalar(@list), 2, ' TODO : Add test name' );
 
 
     @list   = $elem->findnodes( 'species/@name' );
     # warn $elem->toString();
 
-    ok( scalar @list && $list[0]->toString() eq ' name="Camel"' );
+    # TEST
+
+    ok( scalar @list && $list[0]->toString() eq ' name="Camel"', ' TODO : Add test name' );
 
     my $x = XML::LibXML::Text->new( 1234 );
     if( defined $x ) {
-        ok( $x->getData(), "1234" );
+        # TEST
+        is( $x->getData(), "1234", ' TODO : Add test name' );
     }
     
     my $telem = $dom->createElement('test');
     $telem->appendWellBalancedChunk('<b>c</b>');
   
     finddoc($dom);
-    ok(1);
+    # TEST
+    ok(1, ' TODO : Add test name');
 }
-ok( $dom );
+# TEST
+
+ok( $dom, ' TODO : Add test name' );
 
 # test to make sure that multiple array findnodes() returns
 # don't segfault perl; it'll happen after the second one if it does
@@ -76,22 +86,32 @@ EOT
 
 my $root = $doc->getDocumentElement;
 my @a = $root->findnodes('//a:foo');
-ok(@a, 1);
+# TEST
+
+is(@a, 1, ' TODO : Add test name');
 
 my @b = $root->findnodes('//b:bar');
-ok(@b, 1);
+# TEST
+
+is(@b, 1, ' TODO : Add test name');
 
 my @none = $root->findnodes('//b:foo');
 @none = (@none, $root->findnodes('//foo'));
-ok(@none, 0);
+# TEST
+
+is(@none, 0, ' TODO : Add test name');
 
 my @doc = $root->findnodes('document("example/test.xml")');
-ok(@doc);
+# TEST
+
+ok(@doc, ' TODO : Add test name');
 # warn($doc[0]->toString);
 
 # this query should result an empty array!
 my @nodes = $root->findnodes( "/humpty/dumpty" );
-ok( scalar(@nodes), 0 );
+# TEST
+
+is( scalar(@nodes), 0, ' TODO : Add test name' );
 
 
 my $docstring = q{
@@ -101,10 +121,12 @@ my $docstring = q{
  $root = $doc->documentElement;
 
 my @ns = $root->findnodes('namespace::*');
-ok(scalar(@ns), 2 );
+# TEST
 
-print "#bad xpaths\n";
+is(scalar(@ns), 2, ' TODO : Add test name' );
 
+# bad xpaths
+# TEST:$badxpath=4;
 my @badxpath = (
     'abc:::def',
     'foo///bar',
@@ -115,15 +137,20 @@ my @badxpath = (
 foreach my $xp ( @badxpath ) {
     my $res;
     eval { $res = $root->findnodes( $xp ); };
-    ok($@);
+    # TEST*$badxpath
+    ok($@, ' TODO : Add test name');
     eval { $res = $root->find( $xp ); };
-    ok($@);
+    # TEST*$badxpath
+    ok($@, ' TODO : Add test name');
     eval { $res = $root->findvalue( $xp ); };
-    ok($@);
+    # TEST*$badxpath
+    ok($@, ' TODO : Add test name');
     eval { $res = $root->findnodes( encodeToUTF8( "iso-8859-1", $xp ) ); };
-    ok($@);
+    # TEST*$badxpath
+    ok($@, ' TODO : Add test name');
     eval { $res = $root->find( encodeToUTF8( "iso-8859-1", $xp ) );};
-    ok($@);
+    # TEST*$badxpath
+    ok($@, ' TODO : Add test name');
 }
 
 
@@ -148,12 +175,16 @@ foreach my $xp ( @badxpath ) {
     $root->appendChild( $b );
 
     my @list = $doc->findnodes( '//A' );
-    ok( scalar @list );
-    ok( $list[0]->isSameNode( $root ) );
+    # TEST
+    ok( scalar @list, ' TODO : Add test name' );
+    # TEST
+    ok( $list[0]->isSameNode( $root ), ' TODO : Add test name' );
 
     @list = $doc->findnodes( '//B' );
-    ok( scalar @list );
-    ok( $list[0]->isSameNode( $b ) );
+    # TEST
+    ok( scalar @list, ' TODO : Add test name' );
+    # TEST
+    ok( $list[0]->isSameNode( $b ), ' TODO : Add test name' );
 
 
     # @list = $doc->getElementsByTagName( "A" );
@@ -161,12 +192,14 @@ foreach my $xp ( @badxpath ) {
     # ok( $list[0]->isSameNode( $root ) );        
 
     @list = $root->getElementsByTagName( 'B' );
-    ok( scalar @list );
-    ok( $list[0]->isSameNode( $b ) );
+    # TEST
+    ok( scalar @list, ' TODO : Add test name' );
+    # TEST
+    ok( $list[0]->isSameNode( $b ), ' TODO : Add test name' );
 }
 
 {
-    print "# test potential unbinding-segfault-problem \n";
+    # test potential unbinding-segfault-problem
     my $doc = XML::LibXML->createDocument();
     my $root= $doc->createElement( "A" );
     $doc->setDocumentElement($root);
@@ -181,26 +214,30 @@ foreach my $xp ( @badxpath ) {
     $b->appendChild( $c );
     
     my @list = $root->findnodes( "B" );
-    ok( scalar(@list) , 2 );
+    # TEST
+    is( scalar(@list) , 2, ' TODO : Add test name' );
     foreach my $node ( @list ) {
         my @subnodes = $node->findnodes( "C" );
         $node->unbindNode() if ( scalar( @subnodes ) );
-        ok(1);
+        # TEST*2
+        ok(1, ' TODO : Add test name');
     }
 }
 
 {
-    print "# findnode remove problem\n";
+    # findnode remove problem
 
     my $xmlstr = "<a><b><c>1</c><c>2</c></b></a>";
     
     my $doc       = $parser->parse_string( $xmlstr );
     my $root      = $doc->documentElement;
     my ( $lastc ) = $root->findnodes( 'b/c[last()]' );
-    ok( $lastc );
+    # TEST
+    ok( $lastc, ' TODO : Add test name' );
 
     $root->removeChild( $lastc );
-    ok( $root->toString(), $xmlstr );
+    # TEST
+    is( $root->toString(), $xmlstr, ' TODO : Add test name' );
 }
 
 # --------------------------------------------------------------------------- #
