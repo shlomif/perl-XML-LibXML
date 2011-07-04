@@ -5,7 +5,7 @@ use Test::More tests => 1;
 use XML::LibXML;
 
 if (XML::LibXML::LIBXML_VERSION() < 20627) {
-    skip_all("skipping for libxml2 < 2.6.27");
+    plan skip_all => "skipping for libxml2 < 2.6.27";
 }
 
 sub handler {
