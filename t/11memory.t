@@ -4,45 +4,55 @@ use warnings;
 use lib './t/lib';
 use TestHelpers;
 
-use Test;
-use constant PLAN => 26;
+use Test::More;
 use constant TIMES_THROUGH => $ENV{MEMORY_TIMES} || 100_000;
-BEGIN { 
-    plan tests => PLAN;
-    if ($^O ne 'linux' ) {
-        skip "linux platform only\n" for 1..PLAN;
-    } elsif (not $ENV{MEMORY_TEST}) {
-        skip "developers only (set MEMORY_TEST=1 to run these tests)\n" for 1..PLAN;
-    }   
+
+if ($^O ne 'linux')
+{
+    plan skip_all => 'linux platform only.';
 }
+elsif (! $ENV{MEMORY_TEST} )
+{
+    plan skip_all => "developers only (set MEMORY_TEST=1 to run these tests)\n";
+}
+else
+{
+    # Should be 25.
+    plan tests => 25;
+}
+
 use XML::LibXML;
 use XML::LibXML::SAX::Builder;
 {
-    if ($^O eq 'linux' && $ENV{MEMORY_TEST}) {
 
 #        require Devel::Peek;
         my $peek = 0;
     
-        ok(1);
+        # TEST
+        ok(1, 'Start.');
 
-        print("# BASELINE\n");
+        # BASELINE
         check_mem(1);
 
-        print("# MAKE DOC IN SUB\n");
+        # MAKE DOC IN SUB
         {
             my $doc = make_doc();
-            ok($doc);
-            ok($doc->toString);
+            # TEST
+            ok($doc, 'Make doc in sub 1.');
+            # TEST
+            ok($doc->toString, 'Make doc in sub 1 - toString().');
         }
         check_mem();
-        print("# MAKE DOC IN SUB II\n");
+        # MAKE DOC IN SUB II
         # same test as the first one. if this still leaks, it's
         # our problem, otherwise it's perl :/
         {
             my $doc = make_doc();
-            ok($doc);
+            # TEST
+            ok($doc, 'Make doc in sub 2 - doc.');
 
-            ok($doc->toString);
+            # TEST
+            ok($doc->toString, 'Make doc in sub 2 - toString()');
         }
         check_mem();
 
@@ -50,42 +60,46 @@ use XML::LibXML::SAX::Builder;
             my $elem = XML::LibXML::Element->new("foo");
             my $elem2= XML::LibXML::Element->new("bar");
             $elem->appendChild($elem2);
-            ok( $elem->toString );
+            # TEST
+            ok( $elem->toString, 'appendChild.' );
         }
         check_mem();
 
-        print("# SET DOCUMENT ELEMENT\n");
+        # SET DOCUMENT ELEMENT
         {
             my $doc2 = XML::LibXML::Document->new();
             make_doc_elem( $doc2 );
-            ok( $doc2 );
-            ok( $doc2->documentElement );
+            # TEST
+            ok( $doc2, 'SetDocElem');
+            # TEST
+            ok( $doc2->documentElement, 'SetDocElem documentElement.' );
         }
         check_mem();
 
         # multiple parsers:
-        print("# MULTIPLE PARSERS\n");
-	XML::LibXML->new(); # first parser
+        # MULTIPLE PARSERS
+        XML::LibXML->new(); # first parser
         check_mem(1);
-	
+
         for (1..TIMES_THROUGH) {
             my $parser = XML::LibXML->new();
         }
-        ok(1);
+        # TEST
+        ok(1, 'Initialise multiple parsers.');
 
         check_mem();
         # multiple parses
-        print("# MULTIPLE PARSES\n");
         for (1..TIMES_THROUGH) {
             my $parser = XML::LibXML->new();
             my $dom = $parser->parse_string("<sometag>foo</sometag>");
         }
-        ok(1);
+        # TEST
+        ok(1, 'multiple parses');
 
         check_mem();
 
         # multiple failing parses
-        print("# MULTIPLE FAILURES\n");
+        # MULTIPLE FAILURES
         for (1..TIMES_THROUGH) {
             # warn("$_\n") unless $_ % 100;
             my $parser = XML::LibXML->new();
@@ -93,12 +107,12 @@ use XML::LibXML::SAX::Builder;
                 my $dom = $parser->parse_string("<sometag>foo</somtag>"); # Thats meant to be an error, btw!
             };
         }
-        ok(1);
+        # TEST
+        ok(1, 'Multiple failures.');
     
         check_mem();
 
         # building custom docs
-        print("# CUSTOM DOCS\n");
         my $doc = XML::LibXML::Document->new();
         for (1..TIMES_THROUGH)        {
             my $elem = $doc->createElement('x');
@@ -123,7 +137,8 @@ use XML::LibXML::SAX::Builder;
             warn("Doc should be freed\n");
             # Devel::Peek::Dump($doc);
         }
-        ok(1);
+        # TEST
+        ok(1, 'customDocs');
         check_mem();
 
         {
@@ -132,34 +147,39 @@ use XML::LibXML::SAX::Builder;
                 make_doc2( $doc );
             }
         }
-        ok(1);
+        # TEST
+        ok(1, 'customDocs No. 2');
         check_mem();
 
-        print("# DTD string parsing\n");
+        # DTD string parsing
 
         my $dtdstr = slurp('example/test.dtd');
         $dtdstr =~ s/\r//g;
         $dtdstr =~ s/[\r\n]*$//;
 
-        ok($dtdstr);
+        # TEST
+
+        ok($dtdstr, '$dtdstr');
 
         for ( 1..TIMES_THROUGH ) {
             my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
         }
-        ok(1);
+        # TEST
+        ok(1, 'after dtdstr');
         check_mem();
 
-        print( "# DTD URI parsing \n");
+        # DTD URI parsing
         # parse a DTD from a SYSTEM ID
         for ( 1..TIMES_THROUGH ) {
             my $dtd = XML::LibXML::Dtd->new('ignore', 'example/test.dtd');
         }
-        ok(1);
+        # TEST
+        ok(1, 'DTD URI parsing.');
         check_mem();
 
-        print("# Document validation\n");
+        # Document validation
         {
-            print "# is_valid()\n";
+            # is_valid()
             my $dtd = XML::LibXML::Dtd->parse_string($dtdstr);
             my $xml;
             eval {
@@ -173,7 +193,8 @@ use XML::LibXML::SAX::Builder;
                     $good = $xml->is_valid($dtd);
                 };
             }
-            ok(1);
+            # TEST
+            ok(1, 'is_valid()');
             check_mem();
         
             print "# validate() \n";
@@ -183,7 +204,8 @@ use XML::LibXML::SAX::Builder;
                     $xml->validate($dtd);
                 };
             }
-            ok(1);
+            # TEST
+            ok(1, 'validate()');
             check_mem();
                 
         }
@@ -215,7 +237,8 @@ dromeds.xml
                  processMessage($xml, '/dromedaries/species' );
 #                my @nodes = $doc->findnodes("/foo/bar/foo");
             }
-            ok(1);
+            # TEST
+            ok(1, 'after processMessage');
             check_mem();
 
         }
@@ -226,7 +249,8 @@ dromeds.xml
             for ( 1..TIMES_THROUGH ) {
                 my $nodes = $doc->find("/foo/bar/foo");
             }
-            ok(1);
+            # TEST
+            ok(1, '->find.');
             check_mem();
 
         }
@@ -254,7 +278,7 @@ dromeds.xml
 #            check_mem();
 #        }
         {
-            print "# NAMESPACE TESTS \n";
+            note("NAMESPACE TESTS");
 
             my $string = '<foo:bar xmlns:foo="bar"><foo:a/><foo:b/></foo:bar>';
 
@@ -267,11 +291,12 @@ dromeds.xml
                 my $name = $doc->documentElement->nodeName;
             }  
             check_mem();
-            ok(1);
+            # TEST
+            ok(1, 'namespace tests.');
         }   
 
         {
-            print "# SAX PARSER\n";
+            note('SAX PARSER');
 
         my %xmlStrings = (
             "SIMPLE"      => "<xml1><xml2><xml3></xml3></xml2></xml1>",
@@ -297,11 +322,12 @@ dromeds.xml
 
                 check_mem();
             }
-            ok(1);
+            # TEST
+            ok (1, 'SAX PARSER');
         }
 
         {
-            print "# PUSH PARSER\n";
+            note('PUSH PARSER');
 
         my %xmlStrings = (
             "SIMPLE"      => ["<xml1>","<xml2><xml3></xml3></xml2>","</xml1>"],
@@ -327,7 +353,8 @@ dromeds.xml
 
                 check_mem();
             }
-            ok(1);
+            # Cancelled TEST
+            ok(1, ' TODO : Add test name');
         }
             my %xmlBadStrings = (
                 "SIMPLE"      => ["<xml1>"],
@@ -337,7 +364,7 @@ dromeds.xml
                 "SIMPLE JUNK" => ["<xml1/> ","junk"],
             );
 
-            print "# BAD PUSHED DATA\n";
+            note('BAD PUSHED DATA');
             foreach my $key ( "SIMPLE","SIMPLE2", "SIMPLE TEXT","SIMPLE CDATA","SIMPLE JUNK" )  {
                 print "# $key \n";
                 for (1..TIMES_THROUGH) {
@@ -347,11 +374,12 @@ dromeds.xml
 
                 check_mem();
             }            
-            ok(1);
+            # TEST
+            ok(1, 'BAD PUSHED DATA');
         }
 
         {
-            print "# SAX PUSH PARSER\n";
+            note('SAX PUSH PARSER');
 
             my $handler = sax_null->new;
             my $parser  = XML::LibXML->new;
@@ -378,9 +406,10 @@ dromeds.xml
 
                 check_mem();
             }
-            ok(1);
+            # TEST
+            ok(1, 'SAX PUSH PARSER');
 
-            print "# BAD PUSHED DATA\n";
+            note('BAD PUSHED DATA');
 
             my %xmlBadStrings = (
                 "SIMPLE "      => ["<xml1>"],
@@ -399,9 +428,9 @@ dromeds.xml
 
                 check_mem();
             }            
-            ok(1);
+            # TEST
+            ok(1, 'BAD PUSHED DATA');
         }
-    }
 }
 
 sub processMessage {
@@ -477,7 +506,7 @@ sub check_mem {
             $LibXML::TOTALMEM = $mem{Total};
         }
 
-        print("# Mem Total: $mem{Total} $units, Resident: $mem{Resident} $units\n");
+        note("# Mem Total: $mem{Total} $units, Resident: $mem{Resident} $units\n");
     }
 }
 
