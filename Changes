@@ -6,6 +6,7 @@ Revision history for Perl extension XML::LibXML
     t/49global_extent.t for old versions of XML::LibXML:
         - http://www.cpantesters.org/cpan/report/b648ae66-a569-11e0-a41d-a7c8b84ee953
         - It did not match the one specified in Test::More.
+    - Convert more test scripts from Test.pm to Test::More.
 
 1.77            Fri Jul  1 22:27:56 IDT 2011
     - Change the signature of XML::LibXML::Reader::byteConsumed to be
