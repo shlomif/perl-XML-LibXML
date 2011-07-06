@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.78            Wed Jul  6 20:23:58 IDT 2011
     - Change t/02parse.t to test for the localized error message:
         - https://rt.cpan.org/Public/Bug/Display.html?id=69248
     - Fix the skip() and 'plan skip_all' syntax in t/06elements.t and
