@@ -2,14 +2,18 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More;
 use XML::LibXML;
+
+use XML::LibXML::Error;
 
 if (! XML::LibXML::HAVE_STRUCT_ERRORS() ) {
     plan skip_all => 'XML::LibXML does not have struct errrors.';
 }
-
-use XML::LibXML::Error;
+else
+{
+    plan tests => 3;
+}
 
 my $p = XML::LibXML->new();
 
