@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
+        - https://rt.cpan.org/Ticket/Display.html?id=69070
+        - old version of libxml2 .
+
 1.78            Wed Jul  6 20:23:58 IDT 2011
     - Change t/02parse.t to test for the localized error message:
         - https://rt.cpan.org/Public/Bug/Display.html?id=69248
