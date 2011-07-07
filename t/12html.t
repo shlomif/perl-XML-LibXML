@@ -2,18 +2,22 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 41 }
+# should be 41.
+use Test::More tests => 41;
+
 use XML::LibXML;
 use IO::File;
-ok(1);
+
+# TEST
+ok(1, ' TODO : Add test name');
 
 my $html = "example/test.html";
 
 my $parser = XML::LibXML->new();
 {
     my $doc = $parser->parse_html_file($html);
-    ok($doc);
+    # TEST
+    ok($doc, ' TODO : Add test name');
 }
 
 my $fh;
@@ -29,17 +33,23 @@ my $string;
 
 seek($fh, 0, 0);
 
-ok($string);
+# TEST
+
+ok($string, ' TODO : Add test name');
 
 my $doc = $parser->parse_html_string($string);
 
-ok($doc);
+# TEST
+
+ok($doc, ' TODO : Add test name');
 
 undef $doc;
 
 $doc = $parser->parse_html_fh($fh);
 
-ok($doc);
+# TEST
+
+ok($doc, ' TODO : Add test name');
 
 $fh->close();
 
@@ -66,9 +76,10 @@ eval {
 };
 
 # ok( not $@ );
-ok( $htmldoc );
+# TEST
+ok( $htmldoc, ' TODO : Add test name' );
 
-print "parse_html_string with encoding...\n";
+# parse_html_string with encoding
 # encodings
 if (eval { require Encode; }) {
   use utf8;
@@ -84,18 +95,24 @@ if (eval { require Encode; }) {
 </html>
 EOHTML
    
-  ok( Encode::is_utf8($strhref) );
+  # TEST
+   
+  ok( Encode::is_utf8($strhref), ' TODO : Add test name' );
   $htmldoc = $parser->parse_html_string( $strhref );
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   $htmldoc = $parser->parse_html_string( $strhref, 
 					 { 
 					   encoding => 'UTF-8' 
 					 }
 					);
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
 
   my $iso_str = Encode::encode('iso-8859-2', $strhref);
@@ -104,8 +121,10 @@ EOHTML
 					   encoding => 'iso-8859-2'
 					  }
 					);
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   # w/ 'meta' charset
   $strhref = <<EOHTML;
@@ -121,25 +140,32 @@ EOHTML
 EOHTML
 
   $htmldoc = $parser->parse_html_string( $strhref, { encoding => 'UTF-8' });
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   $iso_str = Encode::encode('iso-8859-2', $strhref);
   $htmldoc = $parser->parse_html_string( $iso_str );
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   $htmldoc = $parser->parse_html_string( $iso_str, { encoding => 'iso-8859-2',
 						     URI => 'foo'
 						   } );
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
-  ok($htmldoc->URI, 'foo');
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
+  # TEST
+  is($htmldoc->URI, 'foo', ' TODO : Add test name');
 } else {
   skip("Encoding related tests require Encode") for 1..14;
 }
 
-print "parse example/enc_latin2.html...\n";
+# parse example/enc_latin2.html
 # w/ 'meta' charset
 {
   use utf8;
@@ -148,22 +174,29 @@ print "parse example/enc_latin2.html...\n";
   my $fh;
 
   $htmldoc = $parser->parse_html_file( $test_file );
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
   
   $htmldoc = $parser->parse_html_file( $test_file, { encoding => 'iso-8859-2',
 						     URI => 'foo'
 						   });
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
-  ok($htmldoc->URI, 'foo');
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
+  # TEST
+  is($htmldoc->URI, 'foo', ' TODO : Add test name');
   
   open $fh, '<', $test_file
     or die "Cannot open '$test_file' for reading - $!";
   $htmldoc = $parser->parse_html_fh( $fh );
   close $fh;
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
   
   open $fh, '<', $test_file
     or die "Cannot open '$test_file' for reading - $!";
@@ -171,9 +204,12 @@ print "parse example/enc_latin2.html...\n";
 					    URI => 'foo',
 					  });
   close $fh;
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->URI, 'foo');
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->URI, 'foo', ' TODO : Add test name');
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   if (1000*$] < 5008) {
     skip("skipping for Perl < 5.8") for 1..2;
@@ -185,12 +221,14 @@ print "parse example/enc_latin2.html...\n";
         or die "Cannot open '$test_file' for reading - $!";
     $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' });
     close $fh;
-    ok( $htmldoc && $htmldoc->getDocumentElement );
-    ok($htmldoc->findvalue('//p/text()'), $utf_str);
+    # TEST
+    ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+    # TEST
+    is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
   }
 }
 
-print "parse example/enc2_latin2.html...\n";
+# parse example/enc2_latin2.html
 # w/o 'meta' charset
 {
   use utf8;
@@ -199,15 +237,19 @@ print "parse example/enc2_latin2.html...\n";
   my $fh;
 
   $htmldoc = $parser->parse_html_file( $test_file, { encoding => 'iso-8859-2' });
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   open $fh, '<', $test_file
     or die "Cannot open '$test_file' for reading - $!";
   $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'iso-8859-2' });
   close $fh;
-  ok( $htmldoc && $htmldoc->getDocumentElement );
-  ok($htmldoc->findvalue('//p/text()'), $utf_str);
+  # TEST
+  ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+  # TEST
+  is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
   if (1000*$] < 5008) {
     skip("skipping for Perl < 5.8") for 1..2;
@@ -217,8 +259,10 @@ print "parse example/enc2_latin2.html...\n";
         or die "Cannot open '$test_file' for reading - $!";
     $htmldoc = $parser->parse_html_fh( $fh, { encoding => 'UTF-8' } );
     close $fh;
-    ok( $htmldoc && $htmldoc->getDocumentElement );
-    ok($htmldoc->findvalue('//p/text()'), $utf_str);
+    # TEST
+    ok( $htmldoc && $htmldoc->getDocumentElement, ' TODO : Add test name' );
+    # TEST
+    is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
   }
 }
 
@@ -247,9 +291,12 @@ EOF
       $html => { recover => 1, suppress_errors => 1 }
      );
   };
-  ok(!$@);
-  ok($doc);
+  # TEST
+  ok (!$@, 'No exception was thrown.');
+  # TEST
+  ok ($doc, ' Parsing was succesful.');
   my $root = $doc && $doc->documentElement;
   my $val = $root && $root->findvalue('//input[@id="foo"]/@value');
-  ok($val eq 'working');
+  # TEST
+  is ($val, 'working', 'XPath');
 }
