@@ -7,6 +7,8 @@ Revision history for Perl extension XML::LibXML
     below 2.6.27):
         - https://rt.cpan.org/Ticket/Display.html?id=69330
         - Thanks to Chris for reporting it.
+    - double plan in t/61error.t .
+        - in accordance to the previous change.
 
 1.78            Wed Jul  6 20:23:58 IDT 2011
     - Change t/02parse.t to test for the localized error message:
