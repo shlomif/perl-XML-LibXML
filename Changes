@@ -3,6 +3,10 @@ Revision history for Perl extension XML::LibXML
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
         - https://rt.cpan.org/Ticket/Display.html?id=69070
         - old version of libxml2 .
+    - t/49global_extent.t : fix the double plan (present on libxml2
+    below 2.6.27):
+        - https://rt.cpan.org/Ticket/Display.html?id=69330
+        - Thanks to Chris for reporting it.
 
 1.78            Wed Jul  6 20:23:58 IDT 2011
     - Change t/02parse.t to test for the localized error message:
