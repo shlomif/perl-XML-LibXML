@@ -19,5 +19,22 @@ eval {
     )
 };
 
-# TEST
-is ($@->column(), 203, "Column is OK.");
+SKIP:
+{
+    my $err = $@;
+    # This is a fix for:
+    # https://rt.cpan.org/Ticket/Display.html?id=69070
+    # << t/46err_column.t is broken on centos/RHEL 4 >>
+
+    # On this system, libxml is as follows:
+    # libxml2-devel-2.6.16-12.8
+
+    if (! ref($err))
+    {
+        skip('parse_string returned a string - not an XML::LibXML::Error object - probably an old libxml2',
+            1
+        );
+    }
+    # TEST
+    is ($err->column(), 203, "Column is OK.");
+}
