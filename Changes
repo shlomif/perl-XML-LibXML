@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.79            Fri Jul  8 20:02:32 IDT 2011
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
         - https://rt.cpan.org/Ticket/Display.html?id=69070
         - old version of libxml2 .
