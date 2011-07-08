@@ -253,6 +253,14 @@ xmlChar * CBufferCharacters(struct CBuffer *buffer) {
 	int copied = 0;
 	struct CBufferChunk *cur;
 
+    /* We need this because stderr on some perls requires
+     * my_perl. See:
+     *
+     * https://rt.cpan.org/Public/Bug/Display.html?id=69082
+     *
+     * */
+	dTHX;
+
 	if (buffer->head->data == NULL) {
 		return NULL;
 	}
