@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fix https://rt.cpan.org/Public/Bug/Display.html?id=69082 :
+        - Compilation on strawberry perl.
+        - The problem was that stderr required a dTHX; call previously.
+
 1.79            Fri Jul  8 20:02:32 IDT 2011
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
         - https://rt.cpan.org/Ticket/Display.html?id=69070
