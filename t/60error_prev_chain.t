@@ -10,7 +10,7 @@ use warnings;
 
 no warnings 'recursion';
 
-use Test::More tests => 1;
+use Test::More;
 
 use XML::LibXML;
 
@@ -27,6 +27,11 @@ use XML::LibXML;
     
     my $err = $@;
     my $count = 0;
+
+    if( $err && !ref($err) ) {
+      plan skip_all => 'The local libxml library does not support errors as objects to $@';
+    }
+    plan tests => 1;
 
     while (defined($err) && $count < 200)
     {
