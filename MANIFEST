@@ -104,6 +104,7 @@ perl-libxml-mm.h
 perl-libxml-sax.c
 perl-libxml-sax.h
 ppport.h
+scripts/fast-eumm.pl
 scripts/Test.pm-to-Test-More.pl
 scripts/prints-to-comments.pl
 t/01basic.t
