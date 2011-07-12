@@ -8,6 +8,10 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=69096
         - "findvalue from XML::LibXML 1.74 is very slow (regression)"
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/5/normalize-bug-fixes
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=69433 :
+        - "t/19die_on_invalid_utf8_rt_58848.t assumes errors will be objects:"
+        - Thanks to TODDR.
+        - Failed on older libxml2's.
 
 1.79            Fri Jul  8 20:02:32 IDT 2011
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:

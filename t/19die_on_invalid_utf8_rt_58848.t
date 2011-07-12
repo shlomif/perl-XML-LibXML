@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 
 use XML::LibXML;
 
@@ -14,9 +14,6 @@ use XML::LibXML;
     };
 
     my $err = $@;
-
-    # TEST
-    isa_ok($err, 'XML::LibXML::Error', "Exception is XML::LibXML::Error");
 
     # TEST
     like ("$err", qr{parser error : Input is not proper UTF-8},
