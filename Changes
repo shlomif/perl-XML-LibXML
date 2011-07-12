@@ -12,6 +12,10 @@ Revision history for Perl extension XML::LibXML
         - "t/19die_on_invalid_utf8_rt_58848.t assumes errors will be objects:"
         - Thanks to TODDR.
         - Failed on older libxml2's.
+    - Add a skip for t/60error_prev_chain.t in case $@ is true but not a ref.
+        - https://rt.cpan.org/Ticket/Display.html?id=69435
+        - Thanks to TODDR.
+        - http://www.cpantesters.org/cpan/report/4ac00aae-a73f-11e0-84bd-8881cd42d09c
 
 1.79            Fri Jul  8 20:02:32 IDT 2011
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
