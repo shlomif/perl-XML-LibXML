@@ -3,6 +3,11 @@ Revision history for Perl extension XML::LibXML
     - Fix https://rt.cpan.org/Public/Bug/Display.html?id=69082 :
         - Compilation on strawberry perl.
         - The problem was that stderr required a dTHX; call previously.
+    - DOM Normalisation patches and a fix for #69096
+        - Thanks to Daniel Frett.
+        - https://rt.cpan.org/Ticket/Display.html?id=69096
+        - "findvalue from XML::LibXML 1.74 is very slow (regression)"
+        - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/5/normalize-bug-fixes
 
 1.79            Fri Jul  8 20:02:32 IDT 2011
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
