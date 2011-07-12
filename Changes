@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.80            Tue Jul 12 23:35:03 IDT 2011
     - Fix https://rt.cpan.org/Public/Bug/Display.html?id=69082 :
         - Compilation on strawberry perl.
         - The problem was that stderr required a dTHX; call previously.
