@@ -105,7 +105,7 @@ EOX
     is( $c14n_res, '<a><b></b></a>', ' TODO : Add test name' );
 }
 
-print "# canonize with xpath expressions\n";
+# canonize with xpath expressions
 {
     my $doc = $parser->parse_string( <<EOX );
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -137,7 +137,7 @@ EOX
     is( $c14n_res, '<b xmlns="http://foo/test#"><c></c><d><e></e></d></b>', ' TODO : Add test name' );
 }
 
-print "# exclusive canonicalization\n";
+# exclusive canonicalization
 
 if (20620 > XML::LibXML::LIBXML_VERSION) {
     skip("skipping Exclusive C14N tests for libxml2 < 2.6.17") for 15..20;
