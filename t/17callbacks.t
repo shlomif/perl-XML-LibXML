@@ -12,6 +12,51 @@ use Stacker;
 use Test::More tests => 29;
 use XML::LibXML;
 
+sub _create_counter_pair
+{
+    my ($worker_cb, $predicate_cb) = @_;
+
+    my $non_global_counter = Counter->new(
+        {
+            gen_cb => sub {
+                my $inc_cb = shift;
+                return sub {
+                    return $worker_cb->(
+                        sub { 
+                            if (!$predicate_cb->())
+                            { 
+                                $inc_cb->() 
+                            }
+                            return;
+                        }
+                    )->(@_);
+                }
+            },
+        }
+    );
+
+    my $global_counter = Counter->new(
+        {
+            gen_cb => sub {
+                my $inc_cb = shift;
+                return sub {
+                    return $worker_cb->(
+                        sub { 
+                            if ($predicate_cb->())
+                            { 
+                                $inc_cb->() 
+                            }
+                            return;
+                        }
+                    )->(@_);
+                }
+            },
+        }
+    );
+
+    return ($non_global_counter, $global_counter);
+}
+
 my $using_globals = '';
 
 my $open1_counter = Counter->new(
@@ -104,18 +149,15 @@ my $match1_global_counter = Counter->new(
     }
 );
 
-my $close1_non_global_counter = Counter->new(
-    {
-        gen_cb => sub {
-            my $inc_cb = shift;
+my ($close1_non_global_counter, $close1_global_counter) =
+    _create_counter_pair(
+        sub {
+            my $cond_cb = shift;
             return sub {
                 my ($fh) = @_;
                 # warn("open: $f\n");
 
-                if (!defined($XML::LibXML::match_cb))
-                {
-                    $inc_cb->();
-                }
+                $cond_cb->();
 
                 if ($fh)
                 {
@@ -125,32 +167,8 @@ my $close1_non_global_counter = Counter->new(
                 return 1;
             };
         },
-    }
-);
-
-my $close1_global_counter = Counter->new(
-    {
-        gen_cb => sub {
-            my $inc_cb = shift;
-            return sub {
-                my ($fh) = @_;
-                # warn("open: $f\n");
-
-                if (defined($XML::LibXML::match_cb))
-                {
-                    $inc_cb->();
-                }
-
-                if ($fh)
-                {
-                    $fh->close();
-                }
-
-                return 1;
-            };
-        },
-    }
-);
+        sub { return defined($XML::LibXML::match_cb); },
+    );
 
 {
     # first test checks if local callbacks work
