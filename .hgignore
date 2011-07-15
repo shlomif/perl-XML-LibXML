@@ -33,6 +33,7 @@ lib/XML/LibXML/XPathExpression.pod
 LibXML.o
 LibXML.pod
 Makefile
+MYMETA.yml
 perl-libxml-mm.o
 perl-libxml-sax.o
 xpath.o
