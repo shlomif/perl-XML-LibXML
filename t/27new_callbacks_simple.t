@@ -8,8 +8,8 @@ use Counter;
 
 # $Id$
 
-# Should be 19.
-use Test::More tests => 19;
+# Should be 14.
+use Test::More tests => 14;
 
 use XML::LibXML;
 use IO::File;
@@ -128,6 +128,29 @@ my $open_hash_counter = Counter->new(
     }
 );
 
+my $read_hash_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            sub {
+                my $h   = shift;
+                my $buflen = shift;
+
+                my $id = $h->{line};
+                $h->{line} += 1;
+                my $rv= $h->{lines}->[$id];
+
+                $rv = "" unless defined $rv;
+
+                $inc_cb->();
+
+                return $rv;
+            }
+        }
+    }
+);
+
 $icb->register_callbacks( [ $match_file_counter->cb(), $open_file_counter->cb(),
                             $read_file_counter->cb(), $close_file_counter->cb() ] );
 
@@ -155,25 +178,28 @@ ok($doc, ' TODO : Add test name');
 is($doc->string_value(),"test..", ' TODO : Add test name');
 
 my $icb2    = XML::LibXML::InputCallback->new();
-# TEST
 
+# TEST
 ok($icb2, ' TODO : Add test name');
 
 $icb2->register_callbacks( [ $match_hash_counter->cb(), $open_hash_counter->cb(),
-                             \&read_hash, \&close_hash ] );
+                             $read_hash_counter->cb(), \&close_hash ] );
 
 $parser->input_callbacks($icb2);
 $doc = $parser->parse_string($string);
 
 # TEST
-$match_hash_counter->test(1, 'match_file matched once.');
+$match_hash_counter->test(1, 'match_hash matched once.');
 
 # TEST
-$open_hash_counter->test(1, 'match_file matched once.');
+$open_hash_counter->test(1, 'open_hash called once.');
 
 # TEST
+$read_hash_counter->test(6, 'read_hash called six times.');
 
+# TEST
 ok($doc, ' TODO : Add test name');
+
 # TEST
 
 is($doc->string_value(),"testbar..", ' TODO : Add test name');
@@ -181,21 +207,6 @@ is($doc->string_value(),"testbar..", ' TODO : Add test name');
 # --------------------------------------------------------------------- #
 # callback set 2 (perl hash reader)
 # --------------------------------------------------------------------- #
-
-sub read_hash {
-        my $h   = shift;
-        my $buflen = shift;
-
-        my $id = $h->{line};
-        $h->{line} += 1;
-        my $rv= $h->{lines}->[$id];
-
-        $rv = "" unless defined $rv;
-
-        # TEST*6
-        ok(1, 'read_hash');
-        return $rv;
-}
 
 sub close_hash {
         my $h   = shift;
