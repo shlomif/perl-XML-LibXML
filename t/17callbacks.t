@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 38.
-use Test::More tests => 38;
+# Should be 37.
+use Test::More tests => 37;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -34,6 +34,33 @@ my $open1_counter = Counter->new(
                 {
                     return 0;
                 }
+            };
+        },
+    }
+);
+
+my $open2_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my ($fn) = @_;
+                # warn("open2: $_[0]\n");
+
+                $fn =~ s/([^\d])(\.xml)$/${1}4$2/; # use a different file
+                my ($ret, $verdict);
+                if ($verdict = open (my $file, '<', $fn))
+                {
+                    $ret = $file;
+                }
+                else
+                {
+                    $ret = 0;
+                }
+
+                $inc_cb->();
+
+                return $ret;
             };
         },
     }
@@ -88,7 +115,7 @@ my $open1_counter = Counter->new(
 
     $parser2->match_callback( \&match2 );
     $parser2->read_callback( \&read2 );
-    $parser2->open_callback( \&open2 );
+    $parser2->open_callback( $open2_counter->cb() );
     $parser2->close_callback( \&close2 );
 
     $parser2->expand_xinclude( 1 );
@@ -99,7 +126,8 @@ my $open1_counter = Counter->new(
     # TEST
     $open1_counter->test(2, 'expand_include for $parser out of ($parser,$parser2)');
     # TEST
-
+    $open2_counter->test(2, 'expand_include for $parser2 out of ($parser,$parser2)');
+    # TEST
     ok($dom1, '$dom1 was returned');
     # TEST
     ok($dom2, '$dom2 was returned');
@@ -193,27 +221,6 @@ sub close2 {
         $_[0]->close();
     }
     return 1;
-}
-
-sub open2 {
-    my ($fn) = @_;
-    # warn("open2: $_[0]\n");
-
-    $fn =~ s/([^\d])(\.xml)$/${1}4$2/; # use a different file
-    my ($ret, $verdict);
-    if ($verdict = open (my $file, '<', $fn))
-    {
-        $ret = $file;
-    }
-    else
-    {
-        $ret = 0;
-    }
- 
-    # TEST*2
-    ok ($verdict, 'open2');
-
-    return $ret;
 }
 
 sub read2 {
