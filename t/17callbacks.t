@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 40.
-use Test::More tests => 40;
+# Should be 38.
+use Test::More tests => 38;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -134,7 +134,7 @@ my $str = slurp('complex.xml');
 
 $using_globals = 1;
 $XML::LibXML::match_cb = \&match1;
-$XML::LibXML::open_cb  = \&open1;
+$XML::LibXML::open_cb  = $open1_counter->cb();
 $XML::LibXML::read_cb  = \&read1;
 $XML::LibXML::close_cb = \&close1;
 
@@ -147,6 +147,8 @@ $XML::LibXML::close_cb = \&close1;
     # TEST
     ok($parser->parse_string($str), 'parse_string returns a true value.');
 
+    # TEST
+    $open1_counter->test(3, 'open1 for global counter.');
     # warn $dom->toString() , "\n";
 }
 
@@ -166,22 +168,6 @@ sub close1 {
         $_[0]->close();
     }
     return 1;
-}
-
-sub open1 {
-    my $f = shift;
-    # warn("open: $f\n");
-
-    if (open my $file, '<', $f)
-    {
-        # TEST*3
-        is($using_globals, defined($XML::LibXML::open_cb), 'open1');
-        return $file;
-    }
-    else
-    {
-        return 0;
-    }
 }
 
 sub read1 {
