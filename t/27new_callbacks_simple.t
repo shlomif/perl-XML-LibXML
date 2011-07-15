@@ -92,6 +92,23 @@ my $close_file_counter = Counter->new(
     }
 );
 
+my $match_hash_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            sub {
+                my $uri = shift;
+                if ( $uri =~ /^\/example\// ){
+                    $inc_cb->();
+                    return 1;
+                }
+                return 0;     
+            }
+        }
+    }
+);
+
 $icb->register_callbacks( [ $match_file_counter->cb(), $open_file_counter->cb(),
                             $read_file_counter->cb(), $close_file_counter->cb() ] );
 
@@ -123,11 +140,14 @@ my $icb2    = XML::LibXML::InputCallback->new();
 
 ok($icb2, ' TODO : Add test name');
 
-$icb2->register_callbacks( [ \&match_hash, \&open_hash, 
+$icb2->register_callbacks( [ $match_hash_counter->cb(), \&open_hash, 
                              \&read_hash, \&close_hash ] );
 
 $parser->input_callbacks($icb2);
 $doc = $parser->parse_string($string);
+
+# TEST
+$match_hash_counter->test(1, 'match_file matched once.');
 
 # TEST
 
@@ -139,14 +159,6 @@ is($doc->string_value(),"testbar..", ' TODO : Add test name');
 # --------------------------------------------------------------------- #
 # callback set 2 (perl hash reader)
 # --------------------------------------------------------------------- #
-sub match_hash {
-        my $uri = shift;
-        if ( $uri =~ /^\/example\// ){
-                # TEST
-                ok(1, 'match_hash');
-                return 1;
-        }
-}
 
 sub open_hash {
         my $uri = shift;
