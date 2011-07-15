@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 36.
-use Test::More tests => 36;
+# Should be 35.
+use Test::More tests => 35;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -128,7 +128,7 @@ my $match1_non_global_counter = Counter->new(
     # TEST
     ok($parser2, '$parser2 was init.');
 
-    $parser->match_callback( \&match1 );
+    $parser->match_callback( $match1_non_global_counter->cb() );
     $parser->read_callback( \&read1 );
     $parser->open_callback( $open1_counter->cb() );
     $parser->close_callback( \&close1 );
@@ -145,6 +145,8 @@ my $match1_non_global_counter = Counter->new(
     my $dom1 = $parser->parse_file( "example/test.xml");
     my $dom2 = $parser2->parse_file("example/test.xml");
 
+    # TEST
+    $match1_non_global_counter->test(2, 'match1 for $parser out of ($parser,$parser2)');
     # TEST
     $open1_counter->test(2, 'expand_include for $parser out of ($parser,$parser2)');
     # TEST
@@ -205,7 +207,7 @@ $XML::LibXML::close_cb = \&close1;
 
 sub match1 {
     # warn "match: $_[0]\n";
-    # TEST*5
+    # TEST*3
     is($using_globals, defined($XML::LibXML::match_cb), 'match1');
     return 1;
 }
