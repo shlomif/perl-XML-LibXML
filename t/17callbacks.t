@@ -111,43 +111,18 @@ my $open2_counter = Counter->new(
     }
 );
 
-my $match1_non_global_counter = Counter->new(
-    {
-        gen_cb => sub {
-            my $inc_cb = shift;
+my ($match1_non_global_counter, $match1_global_counter) =
+    _create_counter_pair(
+        sub {
+            my $cond_cb = shift;
             return sub {
-                my $fn = shift;
-                # warn("open: $f\n");
-
-                if (!defined($XML::LibXML::match_cb))
-                {
-                    $inc_cb->();
-                }
+                $cond_cb->();
 
                 return 1;
             };
         },
-    }
-);
-
-my $match1_global_counter = Counter->new(
-    {
-        gen_cb => sub {
-            my $inc_cb = shift;
-            return sub {
-                my $fn = shift;
-                # warn("open: $f\n");
-
-                if (defined($XML::LibXML::match_cb))
-                {
-                    $inc_cb->();
-                }
-
-                return 1;
-            };
-        },
-    }
-);
+        sub { return defined($XML::LibXML::match_cb); },
+    );
 
 my ($close1_non_global_counter, $close1_global_counter) =
     _create_counter_pair(
@@ -167,7 +142,7 @@ my ($close1_non_global_counter, $close1_global_counter) =
                 return 1;
             };
         },
-        sub { return defined($XML::LibXML::match_cb); },
+        sub { return defined($XML::LibXML::close_cb); },
     );
 
 {
