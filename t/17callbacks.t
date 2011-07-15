@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 35.
-use Test::More tests => 35;
+# Should be 33.
+use Test::More tests => 33;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -75,6 +75,25 @@ my $match1_non_global_counter = Counter->new(
                 # warn("open: $f\n");
 
                 if (!defined($XML::LibXML::match_cb))
+                {
+                    $inc_cb->();
+                }
+
+                return 1;
+            };
+        },
+    }
+);
+
+my $match1_global_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my $fn = shift;
+                # warn("open: $f\n");
+
+                if (defined($XML::LibXML::match_cb))
                 {
                     $inc_cb->();
                 }
@@ -185,7 +204,7 @@ my $str = slurp('complex.xml');
 
 
 $using_globals = 1;
-$XML::LibXML::match_cb = \&match1;
+$XML::LibXML::match_cb = $match1_global_counter->cb();
 $XML::LibXML::open_cb  = $open1_counter->cb();
 $XML::LibXML::read_cb  = \&read1;
 $XML::LibXML::close_cb = \&close1;
@@ -201,15 +220,9 @@ $XML::LibXML::close_cb = \&close1;
 
     # TEST
     $open1_counter->test(3, 'open1 for global counter.');
-    # warn $dom->toString() , "\n";
-}
 
-
-sub match1 {
-    # warn "match: $_[0]\n";
-    # TEST*3
-    is($using_globals, defined($XML::LibXML::match_cb), 'match1');
-    return 1;
+    # TEST
+    $match1_global_counter->test(3, 'match1 for global callback.');
 }
 
 sub close1 {
