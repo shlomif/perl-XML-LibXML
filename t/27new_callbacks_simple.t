@@ -7,8 +7,8 @@ use lib './t/lib';
 use Counter;
 # $Id$
 
-# Should be 20.
-use Test::More tests => 20;
+# Should be 19.
+use Test::More tests => 19;
 
 use XML::LibXML;
 use IO::File;
@@ -57,8 +57,43 @@ my $open_file_counter = Counter->new(
     }
 );
 
+my $read_file_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            sub {
+                my $h   = shift;
+                my $buflen = shift;
+                my $rv   = undef;
+
+                $inc_cb->();
+                my $n = $h->read( $rv , $buflen );
+
+                return $rv;
+            }
+        }
+    }
+);
+
+my $close_file_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            sub {
+                my $h   = shift;
+                $inc_cb->();
+                $h->close();
+                return 1;
+
+            };
+        }
+    }
+);
+
 $icb->register_callbacks( [ $match_file_counter->cb(), $open_file_counter->cb(),
-                            \&read_file, \&close_file ] );
+                            $read_file_counter->cb(), $close_file_counter->cb() ] );
 
 my $parser = XML::LibXML->new();
 $parser->expand_xinclude(1);
@@ -72,7 +107,12 @@ $match_file_counter->test(1, 'match_file matched once.');
 $open_file_counter->test(1, 'open_file called once.');
 
 # TEST
+$read_file_counter->test(2, 'read_file called twice.');
 
+# TEST
+$close_file_counter->test(1, 'close_file called once.');
+
+# TEST
 ok($doc, ' TODO : Add test name');
 # TEST
 
@@ -95,34 +135,6 @@ ok($doc, ' TODO : Add test name');
 # TEST
 
 is($doc->string_value(),"testbar..", ' TODO : Add test name');
-
-# --------------------------------------------------------------------- #
-# CALLBACKS
-# --------------------------------------------------------------------- #
-# --------------------------------------------------------------------- #
-# callback set 1 (perl file reader)
-# --------------------------------------------------------------------- #
-
-sub read_file {
-        my $h   = shift;
-        my $buflen = shift;
-        my $rv   = undef;
-
-        # TEST*2
-        ok(1, 'read_file');
-        
-        my $n = $h->read( $rv , $buflen );
-
-        return $rv;
-}
-
-sub close_file {
-        my $h   = shift;
-        # TEST
-        ok(1, 'close_file');
-        $h->close();
-        return 1;
-}
 
 # --------------------------------------------------------------------- #
 # callback set 2 (perl hash reader)
