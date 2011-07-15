@@ -6,8 +6,8 @@ use warnings;
 use lib './t/lib';
 use TestHelpers;
 
-use Test;
-BEGIN { plan tests => 42 }
+# Should be 42.
+use Test::More tests => 42;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -15,7 +15,8 @@ my $using_globals = '';
 {
     # first test checks if local callbacks work
     my $parser = XML::LibXML->new();
-    ok($parser);
+    # TEST
+    ok($parser, 'Parser was initted.');
 
     $parser->match_callback( \&match1 );
     $parser->read_callback( \&read1 );
@@ -26,13 +27,15 @@ my $using_globals = '';
 
     my $dom = $parser->parse_file("example/test.xml");
 
-    ok($dom);
+    # TEST
+    ok($dom, 'DOM was returned.');
     # warn $dom->toString();
 
     my $root = $dom->getDocumentElement();
 
     my @nodes = $root->findnodes( 'xml/xsl' );
-    ok( scalar @nodes );
+    # TEST
+    ok( scalar(@nodes), 'Found nodes.' );
 }
 
 {
@@ -41,8 +44,10 @@ my $using_globals = '';
     my $parser = XML::LibXML->new();
     my $parser2 = XML::LibXML->new();
 
-    ok($parser);
-    ok($parser2);
+    # TEST
+    ok($parser, '$parser was init.');
+    # TEST
+    ok($parser2, '$parser2 was init.');
 
     $parser->match_callback( \&match1 );
     $parser->read_callback( \&read1 );
@@ -62,8 +67,11 @@ my $using_globals = '';
     my $dom1 = $parser->parse_file( "example/test.xml");
     my $dom2 = $parser2->parse_file("example/test.xml");
 
-    ok($dom1);
-    ok($dom2);
+    # TEST
+
+    ok($dom1, '$dom1 was returned');
+    # TEST
+    ok($dom2, '$dom2 was returned');
 
     my $val1  = ( $dom1->findnodes( "/x/xml/text()") )[0]->string_value();
     my $val2  = ( $dom2->findnodes( "/x/xml/text()") )[0]->string_value();
@@ -71,8 +79,11 @@ my $using_globals = '';
     $val1 =~ s/^\s*|\s*$//g;
     $val2 =~ s/^\s*|\s*$//g;
 
-    ok( $val1, "test" );
-    ok( $val2, "test 4" );
+    # TEST
+
+    is( $val1, "test", ' TODO : Add test name' );
+    # TEST
+    is( $val2, "test 4", ' TODO : Add test name' );
 }
 
 chdir("example/complex") || die "chdir: $!";
@@ -84,7 +95,8 @@ my $str = slurp('complex.xml');
     my $parser2 = XML::LibXML->new();
     $parser2->expand_xinclude( 1 );
     my $dom = $parser2->parse_string($str);
-    ok($dom);
+    # TEST
+    ok($dom, '$dom was init.');
 }
 
 
@@ -98,9 +110,11 @@ $XML::LibXML::close_cb = \&close1;
 {
     # tests if global callbacks are working
     my $parser = XML::LibXML->new();
-    ok($parser);
+    # TEST
+    ok($parser, '$parser was init');
 
-    ok($parser->parse_string($str));
+    # TEST
+    ok($parser->parse_string($str), 'parse_string returns a true value.');
 
     # warn $dom->toString() , "\n";
 }
@@ -108,13 +122,15 @@ $XML::LibXML::close_cb = \&close1;
 
 sub match1 {
     # warn "match: $_[0]\n";
-    ok($using_globals, defined($XML::LibXML::match_cb));
+    # TEST*7
+    is($using_globals, defined($XML::LibXML::match_cb), 'match1');
     return 1;
 }
 
 sub close1 {
     # warn "close $_[0]\n";
-    ok($using_globals, defined($XML::LibXML::close_cb));
+    # TEST*7
+    is($using_globals, defined($XML::LibXML::close_cb), 'close1');
     if ( $_[0] ) {
         $_[0]->close();
     }
@@ -127,7 +143,8 @@ sub open1 {
 
     if (open my $file, '<', $f)
     {
-        ok($using_globals, defined($XML::LibXML::open_cb));
+        # TEST*7
+        is($using_globals, defined($XML::LibXML::open_cb), 'open1');
         return $file;
     }
     else
@@ -142,7 +159,8 @@ sub read1 {
     my $n = 0;
     if ( $_[0] ) {
         $n = $_[0]->read( $rv , $_[1] );
-        ok($using_globals, defined($XML::LibXML::read_cb)) if $n > 0
+        # TEST*7
+        is($using_globals, defined($XML::LibXML::read_cb), 'read1') if $n > 0
     }
     return $rv;
 }
@@ -175,7 +193,8 @@ sub open2 {
         $ret = 0;
     }
  
-    ok ($verdict);
+    # TEST*2
+    ok ($verdict, 'open2');
 
     return $ret;
 }
