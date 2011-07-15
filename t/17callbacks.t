@@ -57,8 +57,6 @@ sub _create_counter_pair
     return ($non_global_counter, $global_counter);
 }
 
-my $using_globals = '';
-
 my ($open1_non_global_counter, $open1_global_counter) =
     _create_counter_pair(
         sub {
@@ -271,8 +269,6 @@ my $str = slurp('complex.xml');
 }
 
 
-
-$using_globals = 1;
 $XML::LibXML::match_cb = $match1_global_counter->cb();
 $XML::LibXML::open_cb  = $open1_global_counter->cb();
 $XML::LibXML::read_cb  = $read1_global_counter->cb();
