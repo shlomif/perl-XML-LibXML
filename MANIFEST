@@ -155,6 +155,9 @@ t/60error_prev_chain.t
 t/61error.t
 t/80registryleak.t
 t/90threads.t
+t/lib/Collector.pm
+t/lib/Counter.pm
+t/lib/Stacker.pm
 t/lib/TestHelpers.pm
 t/pod.t
 test/relaxng/badschema.rng
