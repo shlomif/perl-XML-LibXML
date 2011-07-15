@@ -2,11 +2,7 @@
 use strict;
 use warnings;
 use XML::LibXML;
-use Test;
-BEGIN { 
-  plan tests => 7;
-};
-
+use Test::More tests => 7;
 
 # tests for bug #24953: External entities not expanded in included file (XInclude)
 
@@ -15,26 +11,33 @@ my $file = 'test/xinclude/test.xml';
 {
   $parser->expand_xinclude(0);
   $parser->expand_entities(1);
-  ok($parser->parse_file($file)->toString() !~  /IT WORKS/);
+  # TEST
+  ok (scalar ($parser->parse_file($file)->toString() !~  /IT WORKS/), ' TODO : Add test name');
 }
 {
   $parser->expand_xinclude(1);
   $parser->expand_entities(0);
-  ok($parser->parse_file($file)->toString() !~  /IT WORKS/);
+  # TEST
+  ok (scalar($parser->parse_file($file)->toString() !~  /IT WORKS/), ' TODO : Add test name');
 }
 {
   $parser->expand_xinclude(1);
   $parser->expand_entities(1);
-  ok($parser->parse_file($file)->toString() =~  /IT WORKS/);
+  # TEST
+  ok (scalar($parser->parse_file($file)->toString() =~  /IT WORKS/), ' TODO : Add test name');
 }
 {
   $parser->expand_xinclude(0);
   my $doc = $parser->parse_file($file);
-  ok( $doc->process_xinclude({expand_entities=>0}) );
-  ok( $doc->toString()!~/IT WORKS/ );
+  # TEST
+  ok( $doc->process_xinclude({expand_entities=>0}), ' TODO : Add test name' );
+  # TEST
+  ok( scalar($doc->toString() !~ /IT WORKS/), ' TODO : Add test name' );
 }
 {
   my $doc = $parser->parse_file($file);
-  ok( $doc->process_xinclude({expand_entities=>1}) );
-  ok( $doc->toString()=~/IT WORKS/ );
+  # TEST
+  ok( $doc->process_xinclude({expand_entities=>1}), ' TODO : Add test name' );
+  # TEST
+  ok( scalar($doc->toString() =~ /IT WORKS/), ' TODO : Add test name' );
 }
