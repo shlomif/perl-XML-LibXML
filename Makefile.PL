@@ -38,6 +38,7 @@ my %INFOS = (
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'LICENSE' => 'perl',
     'PREREQ_PM' => {
+        'base' => 0,
         'ExtUtils::MakeMaker' => '6.56',
         'strict' => 0,
         'Test::More' => 0,
