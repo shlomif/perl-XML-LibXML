@@ -3,6 +3,8 @@ Revision history for Perl extension XML::LibXML
     - Add scripts/fast-eumm.pl to remove the explicit objects dependency on 
     the "Makefile" file so after running scripts/fast-eumm.pl one won't have to
     rebuild the C-files.
+    - Add no warnings 'recursion' to lib/XML/LibXML/Error.pm to get rid of
+    a "Deep recursion" warning.
 
 1.80            Tue Jul 12 23:35:03 IDT 2011
     - Fix https://rt.cpan.org/Public/Bug/Display.html?id=69082 :
