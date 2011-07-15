@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 41.
-use Test::More tests => 41;
+# Should be 40.
+use Test::More tests => 40;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -81,7 +81,7 @@ my $open1_counter = Counter->new(
 
     $parser->match_callback( \&match1 );
     $parser->read_callback( \&read1 );
-    $parser->open_callback( \&open1 );
+    $parser->open_callback( $open1_counter->cb() );
     $parser->close_callback( \&close1 );
 
     $parser->expand_xinclude( 1 );
@@ -92,11 +92,12 @@ my $open1_counter = Counter->new(
     $parser2->close_callback( \&close2 );
 
     $parser2->expand_xinclude( 1 );
-
    
     my $dom1 = $parser->parse_file( "example/test.xml");
     my $dom2 = $parser2->parse_file("example/test.xml");
 
+    # TEST
+    $open1_counter->test(2, 'expand_include for $parser out of ($parser,$parser2)');
     # TEST
 
     ok($dom1, '$dom1 was returned');
@@ -173,7 +174,7 @@ sub open1 {
 
     if (open my $file, '<', $f)
     {
-        # TEST*5
+        # TEST*3
         is($using_globals, defined($XML::LibXML::open_cb), 'open1');
         return $file;
     }
