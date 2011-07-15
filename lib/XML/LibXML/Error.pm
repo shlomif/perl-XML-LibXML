@@ -8,8 +8,14 @@
 #
 package XML::LibXML::Error;
 
-use Encode ();
 use strict;
+use warnings;
+
+# To avoid a "Deep recursion on subroutine as_string" warning
+no warnings 'recursion';
+
+use Encode ();
+
 use vars qw(@error_domains $VERSION $WARNINGS);
 use Carp;
 use overload 
