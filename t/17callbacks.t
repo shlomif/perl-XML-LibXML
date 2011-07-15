@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 37.
-use Test::More tests => 37;
+# Should be 36.
+use Test::More tests => 36;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -66,13 +66,32 @@ my $open2_counter = Counter->new(
     }
 );
 
+my $match1_non_global_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my $fn = shift;
+                # warn("open: $f\n");
+
+                if (!defined($XML::LibXML::match_cb))
+                {
+                    $inc_cb->();
+                }
+
+                return 1;
+            };
+        },
+    }
+);
+
 {
     # first test checks if local callbacks work
     my $parser = XML::LibXML->new();
     # TEST
     ok($parser, 'Parser was initted.');
 
-    $parser->match_callback( \&match1 );
+    $parser->match_callback( $match1_non_global_counter->cb() );
     $parser->read_callback( \&read1 );
     $parser->open_callback( $open1_counter->cb() );
     $parser->close_callback( \&close1 );
@@ -80,6 +99,9 @@ my $open2_counter = Counter->new(
     $parser->expand_xinclude( 1 );
 
     my $dom = $parser->parse_file("example/test.xml");
+
+    # TEST
+    $match1_non_global_counter->test(2, 'match1 for expand_include called twice.');
 
     # TEST
     $open1_counter->test(2, 'expand_include open1 worked.');
@@ -183,7 +205,7 @@ $XML::LibXML::close_cb = \&close1;
 
 sub match1 {
     # warn "match: $_[0]\n";
-    # TEST*7
+    # TEST*5
     is($using_globals, defined($XML::LibXML::match_cb), 'match1');
     return 1;
 }
