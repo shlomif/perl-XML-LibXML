@@ -5,12 +5,39 @@ use warnings;
 
 use lib './t/lib';
 use TestHelpers;
+use Counter;
+use Stacker;
 
-# Should be 42.
-use Test::More tests => 42;
+# Should be 41.
+use Test::More tests => 41;
 use XML::LibXML;
 
 my $using_globals = '';
+
+my $open1_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my $fn = shift;
+                # warn("open: $f\n");
+
+                if (open my $fh, '<', $fn)
+                {
+                    if (! ($using_globals xor defined($XML::LibXML::open_cb)))
+                    {
+                        $inc_cb->();
+                    }
+                    return $fh;
+                }
+                else
+                {
+                    return 0;
+                }
+            };
+        },
+    }
+);
 
 {
     # first test checks if local callbacks work
@@ -20,12 +47,15 @@ my $using_globals = '';
 
     $parser->match_callback( \&match1 );
     $parser->read_callback( \&read1 );
-    $parser->open_callback( \&open1 );
+    $parser->open_callback( $open1_counter->cb() );
     $parser->close_callback( \&close1 );
 
     $parser->expand_xinclude( 1 );
 
     my $dom = $parser->parse_file("example/test.xml");
+
+    # TEST
+    $open1_counter->test(2, 'expand_include open1 worked.');
 
     # TEST
     ok($dom, 'DOM was returned.');
@@ -143,7 +173,7 @@ sub open1 {
 
     if (open my $file, '<', $f)
     {
-        # TEST*7
+        # TEST*5
         is($using_globals, defined($XML::LibXML::open_cb), 'open1');
         return $file;
     }
