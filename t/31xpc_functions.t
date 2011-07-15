@@ -3,8 +3,7 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 32 };
+use Test::More  tests => 32;
 
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -12,7 +11,8 @@ use XML::LibXML::XPathContext;
 my $doc = XML::LibXML->new->parse_string(<<'XML');
 <foo><bar a="b">Bla</bar><bar/></foo>
 XML
-ok($doc);
+# TEST
+ok($doc, ' TODO : Add test name');
 
 my $xc = XML::LibXML::XPathContext->new($doc);
 $xc->registerNs('foo','urn:foo');
@@ -22,36 +22,57 @@ $xc->registerFunctionNS('copy','urn:foo',
 		       );
 
 # copy string, real, integer, nodelist
-ok($xc->findvalue('foo:copy("bar")') eq 'bar');
-ok($xc->findvalue('foo:copy(3.14)') < 3.141); # can't use == here because of
-ok($xc->findvalue('foo:copy(3.14)') > 3.139); # float math
-ok($xc->findvalue('foo:copy(7)') == 7);
-ok($xc->find('foo:copy(//*)')->size() == 3);
+# TEST
+ok($xc->findvalue('foo:copy("bar")') eq 'bar', ' TODO : Add test name');
+# TEST
+
+ok($xc->findvalue('foo:copy(3.14)') < 3.141, ' TODO : Add test name'); # can't use == here because of
+# TEST
+
+ok($xc->findvalue('foo:copy(3.14)') > 3.139, ' TODO : Add test name'); # float math
+# TEST
+
+ok($xc->findvalue('foo:copy(7)') == 7, ' TODO : Add test name');
+# TEST
+
+ok($xc->find('foo:copy(//*)')->size() == 3, ' TODO : Add test name');
 my ($foo)=$xc->findnodes('(//*)[2]');
-ok($xc->findnodes('foo:copy(//*)[2]')->pop->isSameNode($foo));
+# TEST
+
+ok($xc->findnodes('foo:copy(//*)[2]')->pop->isSameNode($foo), ' TODO : Add test name');
 
 # too many arguments
 eval { $xc->findvalue('foo:copy(1,xyz)') };
-ok ($@);
+# TEST
+
+ok ($@, ' TODO : Add test name');
 
 # without a namespace
 $xc->registerFunction('dummy', sub { 'DUMMY' });
-ok($xc->findvalue('dummy()') eq 'DUMMY');
+# TEST
+
+ok($xc->findvalue('dummy()') eq 'DUMMY', ' TODO : Add test name');
 
 # unregister it
 $xc->unregisterFunction('dummy');
 eval { $xc->findvalue('dummy()') };
-ok ($@);
+# TEST
+
+ok ($@, ' TODO : Add test name');
 
 # retister by name
 sub dummy2 { 'DUMMY2' };
 $xc->registerFunction('dummy2', 'dummy2');
-ok($xc->findvalue('dummy2()') eq 'DUMMY2');
+# TEST
+
+ok($xc->findvalue('dummy2()') eq 'DUMMY2', ' TODO : Add test name');
 
 # unregister
 $xc->unregisterFunction('dummy2');
 eval { $xc->findvalue('dummy2()') };
-ok ($@);
+# TEST
+
+ok ($@, ' TODO : Add test name');
 
 
 # a mix of different arguments types
@@ -62,46 +83,80 @@ $xc->registerFunction('join',
 	  @_
 	});
 
-ok($xc->findvalue('join("","a","b","c")') eq 'abc');
-ok($xc->findvalue('join("-","a",/foo,//*)') eq 'a-foo-foo-bar-bar');
-ok($xc->findvalue('join("-",foo:copy(//*))') eq 'foo-bar-bar');
+# TEST
+
+ok($xc->findvalue('join("","a","b","c")') eq 'abc', ' TODO : Add test name');
+# TEST
+
+ok($xc->findvalue('join("-","a",/foo,//*)') eq 'a-foo-foo-bar-bar', ' TODO : Add test name');
+# TEST
+
+ok($xc->findvalue('join("-",foo:copy(//*))') eq 'foo-bar-bar', ' TODO : Add test name');
 
 # unregister foo:copy
 $xc->unregisterFunctionNS('copy','urn:foo');
 eval { $xc->findvalue('foo:copy("bar")') };
-ok ($@);
+# TEST
+
+ok ($@, ' TODO : Add test name');
 
 # test context reentrance
 $xc->registerFunction('test-lock1', sub { $xc->find('string(//node())') });
 $xc->registerFunction('test-lock2', sub { $xc->findnodes('//bar') });
-ok($xc->find('test-lock1()') eq $xc->find('string(//node())'));
-ok($xc->find('count(//bar)=2'));
-ok($xc->find('count(test-lock2())=count(//bar)'));
-ok($xc->find('count(test-lock2()|//bar)=count(//bar)'));
-ok($xc->findnodes('test-lock2()[2]')->pop()->isSameNode($xc->findnodes('//bar[2]')));
+# TEST
+
+ok($xc->find('test-lock1()') eq $xc->find('string(//node())'), ' TODO : Add test name');
+# TEST
+
+ok($xc->find('count(//bar)=2'), ' TODO : Add test name');
+# TEST
+
+ok($xc->find('count(test-lock2())=count(//bar)'), ' TODO : Add test name');
+# TEST
+
+ok($xc->find('count(test-lock2()|//bar)=count(//bar)'), ' TODO : Add test name');
+# TEST
+
+ok($xc->findnodes('test-lock2()[2]')->pop()->isSameNode($xc->findnodes('//bar[2]')), ' TODO : Add test name');
 
 $xc->registerFunction('test-lock3', sub { $xc->findnodes('test-lock2(//bar)') });
-ok($xc->find('count(test-lock2())=count(test-lock3())'));
-ok($xc->find('count(test-lock3())=count(//bar)'));
-ok($xc->find('count(test-lock3()|//bar)=count(//bar)'));
+# TEST
+
+ok($xc->find('count(test-lock2())=count(test-lock3())'), ' TODO : Add test name');
+# TEST
+
+ok($xc->find('count(test-lock3())=count(//bar)'), ' TODO : Add test name');
+# TEST
+
+ok($xc->find('count(test-lock3()|//bar)=count(//bar)'), ' TODO : Add test name');
 
 # function creating new nodes
 $xc->registerFunction('new-foo',
 		      sub {
 			return $doc->createElement('foo');
 		      });
-ok($xc->findnodes('new-foo()')->pop()->nodeName eq 'foo');
+# TEST
+
+ok($xc->findnodes('new-foo()')->pop()->nodeName eq 'foo', ' TODO : Add test name');
 my ($test_node) = $xc->findnodes('new-foo()');
 
 $xc->registerFunction('new-chunk',
 		      sub {
 			XML::LibXML->new->parse_string('<x><y><a/><a/></y><y><a/></y></x>')->find('//a')
 		      });
-ok($xc->findnodes('new-chunk()')->size() == 3);
+# TEST
+
+ok($xc->findnodes('new-chunk()')->size() == 3, ' TODO : Add test name');
 my ($x)=$xc->findnodes('new-chunk()/parent::*');
-ok($x->nodeName() eq 'y');
-ok($xc->findvalue('name(new-chunk()/parent::*)') eq 'y');
-ok($xc->findvalue('count(new-chunk()/parent::*)=2'));
+# TEST
+
+ok($x->nodeName() eq 'y', ' TODO : Add test name');
+# TEST
+
+ok($xc->findvalue('name(new-chunk()/parent::*)') eq 'y', ' TODO : Add test name');
+# TEST
+
+ok($xc->findvalue('count(new-chunk()/parent::*)=2'), ' TODO : Add test name');
 
 my $largedoc=XML::LibXML->new->parse_string('<a>'.('<b/>' x 3000).'</a>');
 $xc->setContextNode($largedoc);
@@ -113,7 +168,13 @@ $xc->registerFunction('pass2',sub { $_[0] } );
 $xc->registerVarLookupFunc( sub { [$largedoc->findnodes('(//*)')] }, undef);
 $largedoc->toString();
 
-ok($xc->find('$a[name()="b"]')->size()==3000);
+# TEST
+
+ok($xc->find('$a[name()="b"]')->size()==3000, ' TODO : Add test name');
 my @pass1=$xc->findnodes('pass1()');
-ok(@pass1==3001);
-ok($xc->find('pass2(//*)')->size()==3001);
+# TEST
+
+ok(@pass1==3001, ' TODO : Add test name');
+# TEST
+
+ok($xc->find('pass2(//*)')->size()==3001, ' TODO : Add test name');
