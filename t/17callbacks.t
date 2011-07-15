@@ -8,8 +8,8 @@ use TestHelpers;
 use Counter;
 use Stacker;
 
-# Should be 33.
-use Test::More tests => 33;
+# Should be 29.
+use Test::More tests => 29;
 use XML::LibXML;
 
 my $using_globals = '';
@@ -104,6 +104,54 @@ my $match1_global_counter = Counter->new(
     }
 );
 
+my $close1_non_global_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my ($fh) = @_;
+                # warn("open: $f\n");
+
+                if (!defined($XML::LibXML::match_cb))
+                {
+                    $inc_cb->();
+                }
+
+                if ($fh)
+                {
+                    $fh->close();
+                }
+
+                return 1;
+            };
+        },
+    }
+);
+
+my $close1_global_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+            return sub {
+                my ($fh) = @_;
+                # warn("open: $f\n");
+
+                if (defined($XML::LibXML::match_cb))
+                {
+                    $inc_cb->();
+                }
+
+                if ($fh)
+                {
+                    $fh->close();
+                }
+
+                return 1;
+            };
+        },
+    }
+);
+
 {
     # first test checks if local callbacks work
     my $parser = XML::LibXML->new();
@@ -113,12 +161,14 @@ my $match1_global_counter = Counter->new(
     $parser->match_callback( $match1_non_global_counter->cb() );
     $parser->read_callback( \&read1 );
     $parser->open_callback( $open1_counter->cb() );
-    $parser->close_callback( \&close1 );
+    $parser->close_callback( $close1_non_global_counter->cb() );
 
     $parser->expand_xinclude( 1 );
 
     my $dom = $parser->parse_file("example/test.xml");
 
+    # TEST
+    $close1_non_global_counter->test(2, 'close1 for expand_include called twice.');
     # TEST
     $match1_non_global_counter->test(2, 'match1 for expand_include called twice.');
 
@@ -150,7 +200,7 @@ my $match1_global_counter = Counter->new(
     $parser->match_callback( $match1_non_global_counter->cb() );
     $parser->read_callback( \&read1 );
     $parser->open_callback( $open1_counter->cb() );
-    $parser->close_callback( \&close1 );
+    $parser->close_callback( $close1_non_global_counter->cb() );
 
     $parser->expand_xinclude( 1 );
 
@@ -163,6 +213,9 @@ my $match1_global_counter = Counter->new(
    
     my $dom1 = $parser->parse_file( "example/test.xml");
     my $dom2 = $parser2->parse_file("example/test.xml");
+
+    # TEST
+    $close1_non_global_counter->test(2, 'close1 for $parser out of ($parser,$parser2)');
 
     # TEST
     $match1_non_global_counter->test(2, 'match1 for $parser out of ($parser,$parser2)');
@@ -207,7 +260,7 @@ $using_globals = 1;
 $XML::LibXML::match_cb = $match1_global_counter->cb();
 $XML::LibXML::open_cb  = $open1_counter->cb();
 $XML::LibXML::read_cb  = \&read1;
-$XML::LibXML::close_cb = \&close1;
+$XML::LibXML::close_cb = $close1_global_counter->cb();
 
 {
     # tests if global callbacks are working
@@ -223,16 +276,9 @@ $XML::LibXML::close_cb = \&close1;
 
     # TEST
     $match1_global_counter->test(3, 'match1 for global callback.');
-}
 
-sub close1 {
-    # warn "close $_[0]\n";
-    # TEST*7
-    is($using_globals, defined($XML::LibXML::close_cb), 'close1');
-    if ( $_[0] ) {
-        $_[0]->close();
-    }
-    return 1;
+    # TEST
+    $close1_global_counter->test(3, 'close1 for global callback.');
 }
 
 sub read1 {
