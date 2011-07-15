@@ -103,9 +103,6 @@ is($doc->string_value(),"testbar..", ' TODO : Add test name');
 # callback set 1 (perl file reader)
 # --------------------------------------------------------------------- #
 
-sub open_file {
-}
-
 sub read_file {
         my $h   = shift;
         my $buflen = shift;
