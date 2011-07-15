@@ -2,9 +2,7 @@
 use strict;
 use warnings;
 
-use Test;
-
-BEGIN { plan tests => 1; }
+use Test::More tests => 1;
 
 use XML::LibXML;
 
@@ -28,4 +26,5 @@ my $doc = XML::LibXML->new( catalog => "example/catalog.xml" )->parse_string(<<E
 </article>
 EOF
 
-ok($doc);
+# TEST
+ok($doc, 'Doc was parsed with catalog');
