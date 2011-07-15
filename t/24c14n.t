@@ -5,11 +5,11 @@
 # these testcases are for xml canonization interfaces.
 #
 
-use Test;
+# should be 23.
+use Test::More tests => 23;
 use strict;
 use warnings;
 
-BEGIN { plan tests => 23 };
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 
@@ -19,19 +19,23 @@ my $parser = XML::LibXML->new;
     my $doc = $parser->parse_string( "<a><b/> <c/> <!-- d --> </a>" );
 
     my $c14n_res = $doc->toStringC14N();
-    ok( $c14n_res, "<a><b></b> <c></c>  </a>" );
+    # TEST
+    is( $c14n_res, "<a><b></b> <c></c>  </a>", ' TODO : Add test name' );
 
     $c14n_res = $doc->toStringC14N(1);
-    ok( $c14n_res, "<a><b></b> <c></c> <!-- d --> </a>" );
+    # TEST
+    is( $c14n_res, "<a><b></b> <c></c> <!-- d --> </a>", ' TODO : Add test name' );
 }
 
 {
     my $doc = $parser->parse_string( '<a><b/><![CDATA[ >e&f<]]><!-- d --> </a>' );
     
     my $c14n_res = $doc->toStringC14N();
-    ok( $c14n_res, '<a><b></b> &gt;e&amp;f&lt; </a>' );
+    # TEST
+    is( $c14n_res, '<a><b></b> &gt;e&amp;f&lt; </a>', ' TODO : Add test name' );
     $c14n_res = $doc->toStringC14N(1);
-    ok( $c14n_res, '<a><b></b> &gt;e&amp;f&lt;<!-- d --> </a>' );
+    # TEST
+    is( $c14n_res, '<a><b></b> &gt;e&amp;f&lt;<!-- d --> </a>', ' TODO : Add test name' );
 }
 
 {
@@ -39,7 +43,8 @@ my $parser = XML::LibXML->new;
     
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
-    ok( $c14n_res, '<a a="foo"></a>' );
+    # TEST
+    is( $c14n_res, '<a a="foo"></a>', ' TODO : Add test name' );
 }
 
 {
@@ -47,7 +52,8 @@ my $parser = XML::LibXML->new;
     
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
-    ok( $c14n_res, '<b:a xmlns:b="http://foo"></b:a>' );
+    # TEST
+    is( $c14n_res, '<b:a xmlns:b="http://foo"></b:a>', ' TODO : Add test name' );
 }
 
 
@@ -59,7 +65,8 @@ my $parser = XML::LibXML->new;
     
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
-    ok( $c14n_res, '<b:a xmlns:a="xml://bar" xmlns:b="http://foo"></b:a>' );
+    # TEST
+    is( $c14n_res, '<b:a xmlns:a="xml://bar" xmlns:b="http://foo"></b:a>', ' TODO : Add test name' );
 
     # would be correct, but will not work.
     # ok( $c14n_res, '<b:a xmlns:b="http://foo"></b:a>' );
@@ -73,7 +80,8 @@ my $parser = XML::LibXML->new;
     
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
-    ok( $c14n_res, '<b:a xmlns:b="http://foo"><b:b></b:b></b:a>' );
+    # TEST
+    is( $c14n_res, '<b:a xmlns:b="http://foo"><b:b></b:b></b:a>', ' TODO : Add test name' );
 }
 
 {
@@ -81,7 +89,8 @@ my $parser = XML::LibXML->new;
     
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
-    ok( $c14n_res, '<a xmlns="xml://foo"></a>' );
+    # TEST
+    is( $c14n_res, '<a xmlns="xml://foo"></a>', ' TODO : Add test name' );
 }
 
 {
@@ -92,7 +101,8 @@ EOX
 
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
-    ok( $c14n_res, '<a><b></b></a>' );
+    # TEST
+    is( $c14n_res, '<a><b></b></a>', ' TODO : Add test name' );
 }
 
 print "# canonize with xpath expressions\n";
@@ -103,7 +113,8 @@ print "# canonize with xpath expressions\n";
 EOX
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0, "//d" );
-    ok( $c14n_res, '<d></d>' );
+    # TEST
+    is( $c14n_res, '<d></d>', ' TODO : Add test name' );
 }
 
 {
@@ -114,13 +125,16 @@ EOX
     my $rootnode=$doc->documentElement;
     my $c14n_res;
     $c14n_res = $rootnode->toStringC14N(0, "//*[local-name()='d']");
-    ok( $c14n_res, '<d></d>' );
+    # TEST
+    is( $c14n_res, '<d></d>', ' TODO : Add test name' );
     ($rootnode) = $doc->findnodes("//*[local-name()='d']");
     $c14n_res = $rootnode->toStringC14N();
-    ok( $c14n_res, '<d xmlns="http://foo/test#"><e></e></d>' );
+    # TEST
+    is( $c14n_res, '<d xmlns="http://foo/test#"><e></e></d>', ' TODO : Add test name' );
     $rootnode = $doc->documentElement->firstChild;
     $c14n_res = $rootnode->toStringC14N(0);
-    ok( $c14n_res, '<b xmlns="http://foo/test#"><c></c><d><e></e></d></b>' );
+    # TEST
+    is( $c14n_res, '<b xmlns="http://foo/test#"><c></c><d><e></e></d></b>', ' TODO : Add test name' );
 }
 
 print "# exclusive canonicalization\n";
@@ -154,27 +168,33 @@ EOX
 
   {
     my $c14n_res = $doc1->toStringEC14N(0, $xpath);
-    ok( $c14n_res, $result);
+    # TEST
+    is( $c14n_res, $result, ' TODO : Add test name');
   }
   {
     my $c14n_res = $doc2->toStringEC14N(0, $xpath);
-    ok( $c14n_res, $result);
+    # TEST
+    is( $c14n_res, $result, ' TODO : Add test name');
   }
   {
     my $c14n_res = $doc1->toStringEC14N(0, $xpath,[]);
-    ok( $c14n_res, $result);
+    # TEST
+    is( $c14n_res, $result, ' TODO : Add test name');
   }
   {
     my $c14n_res = $doc2->toStringEC14N(0, $xpath,[]);
-    ok( $c14n_res, $result);
+    # TEST
+    is( $c14n_res, $result, ' TODO : Add test name');
   }
   {
     my $c14n_res = $doc2->toStringEC14N(0, $xpath,['n1','n3']);
-    ok( $c14n_res, $result);
+    # TEST
+    is( $c14n_res, $result, ' TODO : Add test name');
   }
   {
     my $c14n_res = $doc2->toStringEC14N(0, $xpath,['n0','n2']);
-    ok( $c14n_res, $result_n0n2);
+    # TEST
+    is( $c14n_res, $result_n0n2, ' TODO : Add test name');
   }
 
 }
@@ -192,8 +212,14 @@ my $doc = XML::LibXML->load_xml(string=>$xml);
 my $xpc = XML::LibXML::XPathContext->new($doc);
 $xpc->registerNs(x => "http://www.w3.org/2005/08/addressing");
 my $expect = '<wsa:MessageID xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="MessageID">urn:www.sve.man.ac.uk-54690551758351720271010843310</wsa:MessageID>';
-ok( $doc->toStringEC14N( 0, $xpath2, [qw(soap)] ), $expect );
-ok( $doc->toStringEC14N( 0, $xpath, $xpc, [qw(soap)] ), $expect );
-ok( $doc->toStringEC14N( 0, $xpath2, $xpc, [qw(soap)] ), $expect );
+# TEST
+
+is( $doc->toStringEC14N( 0, $xpath2, [qw(soap)] ), $expect, ' TODO : Add test name' );
+# TEST
+
+is( $doc->toStringEC14N( 0, $xpath, $xpc, [qw(soap)] ), $expect, ' TODO : Add test name' );
+# TEST
+
+is( $doc->toStringEC14N( 0, $xpath2, $xpc, [qw(soap)] ), $expect, ' TODO : Add test name' );
 
 }
