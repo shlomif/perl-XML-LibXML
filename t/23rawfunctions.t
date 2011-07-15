@@ -2,8 +2,7 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 2 };
+use Test::More tests => 2;
 
 use XML::LibXML;
 
@@ -17,6 +16,8 @@ $t1->addChild( $t2 );
 eval {
     my $v = $t2->nodeValue;
 };
-ok($@);
+# TEST
+ok($@, 'An exception was thrown');
 
-ok(1); 
+# TEST
+ok(1, 'End'); 
