@@ -3,9 +3,9 @@ use strict;
 use warnings;
 
 # $Id$
-use Test;
 
-BEGIN { plan tests => 20 }
+# Should be 20.
+use Test::More tests => 20;
 
 use XML::LibXML;
 use IO::File;
@@ -18,7 +18,9 @@ my $string = <<EOF;
 EOF
 
 my $icb    = XML::LibXML::InputCallback->new();
-ok($icb);
+# TEST
+
+ok($icb, ' TODO : Add test name');
 
 $icb->register_callbacks( [ \&match_file, \&open_file, 
                             \&read_file, \&close_file ] );
@@ -28,11 +30,17 @@ $parser->expand_xinclude(1);
 $parser->input_callbacks($icb);
 my $doc = $parser->parse_string($string);
 
-ok($doc);
-ok($doc->string_value(),"test..");
+# TEST
+
+ok($doc, ' TODO : Add test name');
+# TEST
+
+is($doc->string_value(),"test..", ' TODO : Add test name');
 
 my $icb2    = XML::LibXML::InputCallback->new();
-ok($icb2);
+# TEST
+
+ok($icb2, ' TODO : Add test name');
 
 $icb2->register_callbacks( [ \&match_hash, \&open_hash, 
                              \&read_hash, \&close_hash ] );
@@ -40,8 +48,12 @@ $icb2->register_callbacks( [ \&match_hash, \&open_hash,
 $parser->input_callbacks($icb2);
 $doc = $parser->parse_string($string);
 
-ok($doc);
-ok($doc->string_value(),"testbar..");
+# TEST
+
+ok($doc, ' TODO : Add test name');
+# TEST
+
+is($doc->string_value(),"testbar..", ' TODO : Add test name');
 
 # --------------------------------------------------------------------- #
 # CALLBACKS
@@ -52,7 +64,8 @@ ok($doc->string_value(),"testbar..");
 sub match_file {
         my $uri = shift;
         if ( $uri =~ /^\/example\// ){
-                ok(1);
+                # TEST
+                ok(1, 'match_file');
                 return 1;
         }
         return 0;        
@@ -62,7 +75,8 @@ sub open_file {
         my $uri = shift;
         open my $file, '<', ".$uri"
             or die "Cannot open '.$uri'";
-        ok(1);
+        # TEST
+        ok(1, 'open_file');
         return $file;
 }
 
@@ -71,7 +85,8 @@ sub read_file {
         my $buflen = shift;
         my $rv   = undef;
 
-        ok(1);
+        # TEST*2
+        ok(1, 'read_file');
         
         my $n = $h->read( $rv , $buflen );
 
@@ -80,7 +95,8 @@ sub read_file {
 
 sub close_file {
         my $h   = shift;
-        ok(1);
+        # TEST
+        ok(1, 'close_file');
         $h->close();
         return 1;
 }
@@ -91,7 +107,8 @@ sub close_file {
 sub match_hash {
         my $uri = shift;
         if ( $uri =~ /^\/example\// ){
-                ok(1);
+                # TEST
+                ok(1, 'match_hash');
                 return 1;
         }
 }
@@ -101,7 +118,8 @@ sub open_hash {
         my $hash = { line => 0,
                      lines => [ "<foo>", "bar", "<xsl/>", "..", "</foo>" ],
                    };                
-        ok(1);
+        # TEST
+        ok(1, 'open_hash');
 
         return $hash;
 }
@@ -116,12 +134,14 @@ sub read_hash {
 
         $rv = "" unless defined $rv;
 
-        ok(1);
+        # TEST*6
+        ok(1, 'read_hash');
         return $rv;
 }
 
 sub close_hash {
         my $h   = shift;
         undef $h;
-        ok(1);
+        # TEST
+        ok(1, 'close_hash');
 }
