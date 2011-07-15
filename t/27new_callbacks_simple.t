@@ -128,6 +128,22 @@ my $open_hash_counter = Counter->new(
     }
 );
 
+my $close_hash_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            sub {
+                my $h   = shift;
+                undef $h;
+                $inc_cb->();
+
+                return;
+            }
+        }
+    }
+);
+
 my $read_hash_counter = Counter->new(
     {
         gen_cb => sub {
@@ -183,7 +199,7 @@ my $icb2    = XML::LibXML::InputCallback->new();
 ok($icb2, ' TODO : Add test name');
 
 $icb2->register_callbacks( [ $match_hash_counter->cb(), $open_hash_counter->cb(),
-                             $read_hash_counter->cb(), \&close_hash ] );
+                             $read_hash_counter->cb(), $close_hash_counter->cb() ] );
 
 $parser->input_callbacks($icb2);
 $doc = $parser->parse_string($string);
@@ -198,19 +214,12 @@ $open_hash_counter->test(1, 'open_hash called once.');
 $read_hash_counter->test(6, 'read_hash called six times.');
 
 # TEST
+$close_hash_counter->test(1, 'close_hash called once.');
+
+# TEST
 ok($doc, ' TODO : Add test name');
 
 # TEST
 
 is($doc->string_value(),"testbar..", ' TODO : Add test name');
 
-# --------------------------------------------------------------------- #
-# callback set 2 (perl hash reader)
-# --------------------------------------------------------------------- #
-
-sub close_hash {
-        my $h   = shift;
-        undef $h;
-        # TEST
-        ok(1, 'close_hash');
-}
