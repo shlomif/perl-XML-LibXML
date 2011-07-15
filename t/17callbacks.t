@@ -9,8 +9,6 @@ use TestHelpers;
 use Test;
 BEGIN { plan tests => 42 }
 use XML::LibXML;
-use IO::File;
-
 
 my $using_globals = '';
 
