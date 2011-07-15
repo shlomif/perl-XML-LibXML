@@ -10,7 +10,7 @@ use warnings;
 use lib './t/lib';
 use TestHelpers;
 
-use Test;
+use Test::More;
 
 BEGIN { 
     use XML::LibXML;
@@ -19,8 +19,7 @@ BEGIN {
         plan tests => 13;
     }
     else {
-        plan tests => 0;
-        print( "# Skip No RNG Support compiled\n" );
+        plan skip_all => 'Skip No RNG Support compiled';
     }
 };
 
@@ -37,10 +36,12 @@ my $demo4        = "test/relaxng/demo4.rng";
 print "# 1 parse schema from a file\n";
 {
     my $rngschema = XML::LibXML::RelaxNG->new( location => $file );
-    ok ( $rngschema );
+    # TEST
+    ok ( $rngschema, ' TODO : Add test name' );
     
     eval { $rngschema = XML::LibXML::RelaxNG->new( location => $badfile ); };
-    ok( $@ );
+    # TEST
+    ok( $@, ' TODO : Add test name' );
 }
 
 print "# 2 parse schema from a string\n";
@@ -48,23 +49,27 @@ print "# 2 parse schema from a string\n";
     my $string = slurp($file);
 
     my $rngschema = XML::LibXML::RelaxNG->new( string => $string );
-    ok ( $rngschema );
+    # TEST
+    ok ( $rngschema, ' TODO : Add test name' );
 
     $string = slurp($badfile);
 
     eval { $rngschema = XML::LibXML::RelaxNG->new( string => $string ); };
-    ok( $@ );
+    # TEST
+    ok( $@, ' TODO : Add test name' );
 }
 
 print "# 3 parse schema from a document\n";
 {
     my $doc       = $xmlparser->parse_file( $file );
     my $rngschema = XML::LibXML::RelaxNG->new( DOM => $doc );
-    ok ( $rngschema );
+    # TEST
+    ok ( $rngschema, ' TODO : Add test name' );
    
     $doc       = $xmlparser->parse_file( $badfile );
     eval { $rngschema = XML::LibXML::RelaxNG->new( DOM => $doc ); };
-    ok( $@ );
+    # TEST
+    ok( $@, ' TODO : Add test name' );
 }
 
 print "# 4 validate a document\n";
@@ -74,12 +79,14 @@ print "# 4 validate a document\n";
 
     my $valid = 0;
     eval { $valid = $rngschema->validate( $doc ); };
-    ok( $valid, 0 );
+    # TEST
+    is( $valid, 0, ' TODO : Add test name' );
 
     $doc       = $xmlparser->parse_file( $invalidfile );
     $valid     = 0;
     eval { $valid = $rngschema->validate( $doc ); };
-    ok ( $@ );
+    # TEST
+    ok ( $@, ' TODO : Add test name' );
 }
 
 print "# 5 re-validate a modified document\n";
@@ -95,23 +102,28 @@ EOXML
   my $bogusElem = $doc->createElement('bogus-element');
 
   eval{$rng->validate($doc);};
-  ok ($@);
+  # TEST
+  ok ($@, ' TODO : Add test name');
 
   $rootElem->setAttribute('name', 'rootElem');
   eval{ $rng->validate($doc); };
-  ok (!$@);
+  # TEST
+  ok (!$@, ' TODO : Add test name');
 
   $rootElem->appendChild($bogusElem);
   eval{$rng->validate($doc);};
-  ok ($@);
+  # TEST
+  ok ($@, ' TODO : Add test name');
 
   $bogusElem->unlinkNode();
   eval{$rng->validate($doc);};
-  ok (!$@);
+  # TEST
+  ok (!$@, ' TODO : Add test name');
 
   $rootElem->removeAttribute('name');
   eval{$rng->validate($doc);};
-  ok ($@);
+  # TEST
+  ok ($@, ' TODO : Add test name');
 
 }
 
