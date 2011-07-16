@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.81            Sat Jul 16 18:30:02 IDT 2011
     - Add scripts/fast-eumm.pl to remove the explicit objects dependency on 
     the "Makefile" file so after running scripts/fast-eumm.pl one won't have to
     rebuild the C-files.
