@@ -580,7 +580,7 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move, int reconcileNS ) {
             return_node = (xmlNodePtr) xmlCopyDtd((xmlDtdPtr) node);
         }
         else {
-            return_node = xmlCopyNode( node, 1 );
+            return_node = xmlDocCopyNode( node, doc, 1 );
         }
     }
 

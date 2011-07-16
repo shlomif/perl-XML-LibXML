@@ -23,6 +23,7 @@ debian/rules
 docs/libxml.dbk
 dom.c
 dom.h
+example/JBR-ALLENtrees.htm
 example/article.xml
 example/article_bad.xml
 example/article_external_bad.xml
@@ -30,7 +31,6 @@ example/article_internal.xml
 example/article_internal_bad.xml
 example/bad.dtd
 example/bad.xml
-example/thedieline.rss
 example/catalog.xml
 example/cb_example.pl
 example/complex/complex.dtd
@@ -43,7 +43,6 @@ example/dtd.xml
 example/enc2_latin2.html
 example/enc_latin2.html
 example/ext_ent.dtd
-example/JBR-ALLENtrees.htm
 example/ns.xml
 example/test.dtd
 example/test.html
@@ -52,6 +51,7 @@ example/test.xml
 example/test2.xml
 example/test3.xml
 example/test4.xml
+example/thedieline.rss
 example/utf-16-1.html
 example/utf-16-2.html
 example/utf-16-2.xml
@@ -104,8 +104,8 @@ perl-libxml-mm.h
 perl-libxml-sax.c
 perl-libxml-sax.h
 ppport.h
-scripts/fast-eumm.pl
 scripts/Test.pm-to-Test-More.pl
+scripts/fast-eumm.pl
 scripts/prints-to-comments.pl
 t/01basic.t
 t/02parse.t
@@ -125,8 +125,8 @@ t/15nodelist.t
 t/16docnodes.t
 t/17callbacks.t
 t/18docfree.t
-t/19encoding.t
 t/19die_on_invalid_utf8_rt_58848.t
+t/19encoding.t
 t/20extras.t
 t/21catalog.t
 t/23rawfunctions.t
@@ -148,10 +148,11 @@ t/45regex.t
 t/46err_column.t
 t/47load_xml_callbacks.t
 t/48_rt55000.t
+t/48importing_nodes_IDs_rt_69520.t
 t/49_load_html.t
 t/49global_extent.t
-t/60struct_error.t
 t/60error_prev_chain.t
+t/60struct_error.t
 t/61error.t
 t/80registryleak.t
 t/90threads.t
