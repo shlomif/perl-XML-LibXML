@@ -18,6 +18,36 @@ not be used for new code.
 Any bug fixes or feature addition patches should be accompanied with
 a test script to test the code.
 
+Avoid trailing statement modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One should not use trailing "if"s "while"s "until"s, etc.
+
+Bad:
+
+----------------
+print "Hello\n" if $cond;
+----------------
+
+Good:
+
+----------------
+if ($cond)
+{
+    print "Hello\n";
+}
+----------------
+
+Avoid until and unless
+~~~~~~~~~~~~~~~~~~~~~~
+
+"until" and "unless" should be spelled using "if !" or "while !".
+
+Other elements to avoid
+~~~~~~~~~~~~~~~~~~~~~~~
+
+See http://perl-begin.org/tutorials/bad-elements/
+
 C Style Guidelines
 ------------------
 
