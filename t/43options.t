@@ -163,26 +163,26 @@ no_network
 
 {
   my $p = XML::LibXML->new(map { $_=>0 } @all);
-  for (@all) {
+  for my $opt (@all) {
     # TEST*$all
-    ok($p->get_option($_)==0, ' TODO : Add test name');
+    ok($p->get_option($opt)==0, ' TODO : Add test name');
     # TEST*$old
-    if ($old{$_})
+    if ($old{$opt})
     {
-        ok($p->$_()==0, ' TODO : Add test name');
+        ok($p->$opt()==0, ' TODO : Add test name');
     }
   }
 }
 
 {
     my $p = XML::LibXML->new({map { $_=>1 } @all});
-    for (@all) {
+    for my $opt (@all) {
         # TEST*$all
-        ok($p->get_option($_)==1, ' TODO : Add test name');
+        ok($p->get_option($opt)==1, ' TODO : Add test name');
         # TEST*$old
-        if ($old{$_})
+        if ($old{$opt})
         {
-            ok($p->$_()==1, ' TODO : Add test name');
+            ok($p->$opt()==1, ' TODO : Add test name');
         }
     }
 }
