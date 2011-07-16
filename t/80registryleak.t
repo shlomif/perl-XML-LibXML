@@ -2,12 +2,12 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { plan tests => 2; }
+use Test::More tests => 2;
 use XML::LibXML;
 
 my $p = XML::LibXML->new();
-ok($p);
+# TEST
+ok($p, 'Parser was initialized.');
 
 my $xml = <<EOX;
 <?xml version="1.0"?>
@@ -20,4 +20,5 @@ my $root = $doc->documentElement;
 my $child = $root->firstChild;
 }
 
-ok(&XML::LibXML::_leaked_nodes == 0);
+# TEST
+is (scalar(XML::LibXML::_leaked_nodes()), 0, '0 leaked nodes');
