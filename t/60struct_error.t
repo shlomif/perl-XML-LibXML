@@ -4,53 +4,53 @@
 use strict;
 use warnings;
 
-use Test;
-BEGIN { 
-    use XML::LibXML;
-    if ( XML::LibXML::HAVE_STRUCT_ERRORS() ) {
-        plan tests => 8;
-    } else {
-        plan tests => 1;
-    }
+use Test::More;
+use XML::LibXML;
 
+if (! XML::LibXML::HAVE_STRUCT_ERRORS() )
+{
+    plan skip_all => 'Does not have struct errors - skipping';
+}
+else
+{
+    plan tests => 7;
 }
 
-my $loaded;
-eval {
-  use XML::LibXML::Error;
-  use XML::LibXML::ErrNo;
-  $loaded = 1;
-};
-ok(!$@ && $loaded);
+use XML::LibXML::Error;
+use XML::LibXML::ErrNo;
 
-if (XML::LibXML::HAVE_STRUCT_ERRORS() ) {
-  my $p = XML::LibXML->new();
-  my $xmlstr = '<X></Y>';
+{
+    my $p = XML::LibXML->new();
+    my $xmlstr = '<X></Y>';
 
-  eval {
-    my $doc = $p->parse_string( $xmlstr );
-  };
-  my $err = $@;
-  ok(defined $err);
-  if ($err) {
-    ok(ref($err), "XML::LibXML::Error");
-    ok($err->domain(), "parser");
-    ok($err->line(), 1);
-    ok($err->code == XML::LibXML::ErrNo::ERR_TAG_NAME_MISMATCH);
-  } else {
-    fail() for 1..3;
-  }
+    eval {
+        my $doc = $p->parse_string( $xmlstr );
+    };
+    my $err = $@;
+    # TEST
+    ok (defined($err), 'Error is defined.');
+    # TEST
+    isa_ok ($err, "XML::LibXML::Error", '$err is an XML::LibXML::Error');
+    # TEST
+    is ($err->domain(), "parser", 'domain');
+    # TEST
+    is ($err->line(), 1, 'line');
+    # TEST
+    ok ($err->code == XML::LibXML::ErrNo::ERR_TAG_NAME_MISMATCH, ' TODO : Add test name');
 
-  my $fake_err = XML::LibXML::Error->new('fake error');
-  my $domain_num = @XML::LibXML::Error::error_domains;      # too big
-  $fake_err->{domain} = $domain_num;                        # white-box test
-  ok($fake_err->domain, "domain_$domain_num",
-     '$err->domain is reasonable on unknown domain');
-  {
-      my $warnings = 0;
-      local $SIG{__WARN__} = sub { $warnings++; warn "@_\n" };
-      my $s = $fake_err->as_string;
-      ok($warnings, 0,
-         'no warnings when stringifying unknown-domain error');
-  }
-} # HAVE_STRUCT_ERRORS
+    my $fake_err = XML::LibXML::Error->new('fake error');
+    my $domain_num = @XML::LibXML::Error::error_domains;      # too big
+    $fake_err->{domain} = $domain_num;                        # white-box test
+    # TEST
+    is($fake_err->domain, "domain_$domain_num",
+        '$err->domain is reasonable on unknown domain');
+    {
+        my $warnings = 0;
+        local $SIG{__WARN__} = sub { $warnings++; warn "@_\n" };
+        my $s = $fake_err->as_string;
+        # TEST
+        is($warnings, 0,
+            'No warnings when stringifying unknown-domain error',
+        );
+    }
+}
