@@ -136,26 +136,26 @@ no_network
     }
   }
 
-  for (@all) {
+  for my $opt (@all) {
     # TEST*$all
-    ok($p->option_exists($_), ' TODO : Add test name');
+    ok($p->option_exists($opt), ' TODO : Add test name');
     # TEST*$all
-    ok($p->set_option($_,0)==0, ' TODO : Add test name');
+    ok($p->set_option($opt,0)==0, ' TODO : Add test name');
     # TEST*$all
-    ok($p->get_option($_)==0, ' TODO : Add test name');
+    ok($p->get_option($opt)==0, ' TODO : Add test name');
     # TEST*$all
-    ok($p->set_option($_,1)==1, ' TODO : Add test name');
+    ok($p->set_option($opt,1)==1, ' TODO : Add test name');
     # TEST*$all
-    ok($p->get_option($_)==1, ' TODO : Add test name');
-    if ($old{$_}) {
+    ok($p->get_option($opt)==1, ' TODO : Add test name');
+    if ($old{$opt}) {
       # TEST*$old
-      ok($p->$_()==1, ' TODO : Add test name');
+      ok($p->$opt()==1, ' TODO : Add test name');
       # TEST*$old
-      ok($p->$_(0)==0, ' TODO : Add test name');
+      ok($p->$opt(0)==0, ' TODO : Add test name');
       # TEST*$old
-      ok($p->$_()==0, ' TODO : Add test name');
+      ok($p->$opt()==0, ' TODO : Add test name');
       # TEST*$old
-      ok($p->$_(1)==1, ' TODO : Add test name');
+      ok($p->$opt(1)==1, ' TODO : Add test name');
     }
 
   }
