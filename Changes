@@ -9,6 +9,7 @@ Revision history for Perl extension XML::LibXML
     - Fix "IDs of elements is lost when importing nodes"
         - https://rt.cpan.org/Public/Bug/Display.html?id=69520
         - With t/48importing_nodes_IDs_rt_69520.t .
+        - Thanks to Yuriy Ustushenko.
     - Convert all remaining Test.pm-based test scripts except t/14sax.t to
     Test::More .
 
