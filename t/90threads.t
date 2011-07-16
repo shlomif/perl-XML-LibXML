@@ -6,45 +6,56 @@ use warnings;
 use lib './t/lib';
 use TestHelpers;
 
-use Test;
+use Test::More;
 use Config;
 use constant MAX_THREADS => 10;
 use constant MAX_LOOP => 50;
-use constant PLAN => 24;
-BEGIN {
-  plan tests => PLAN;
-  if( $Config{useithreads} ) {
-    if ($ENV{THREAD_TEST}) {
-      require threads;
-      require threads::shared;
-    } else {
-      skip("optional (set THREAD_TEST=1 to run these tests)\n") for (1..PLAN);
-      exit;
+# use constant PLAN => 24;
+BEGIN
+{
+    my $will_run = 0;
+    if ( $Config{useithreads} )
+    {
+        if ($ENV{THREAD_TEST})
+        {
+            require threads;
+            require threads::shared;
+            $will_run = 1;
+        }
+        else
+        {
+            plan skip_all => "optional (set THREAD_TEST=1 to run these tests)";
+        }
     }
-  } else {
-    skip("no ithreads in this Perl\n") for (1..PLAN);
-    exit;
-  }
+    else
+    {
+        plan skip_all => "no ithreads in this Perl";
+    }
+
+    if ($will_run)
+    {
+        plan tests => 24;
+    }
 }
+
 use XML::LibXML qw(:threads_shared);
-ok(1);
+# TEST
+ok(1, 'Loaded');
 
 my $p = XML::LibXML->new();
-ok($p);
+# TEST
+ok($p, 'Parser initted.');
 
-
-
-print "Simple spawn threads with a parser in scope\n";
 {
 for(1..MAX_THREADS)
 {
 	threads->new(sub {});
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1,  "Simple spawn threads with a parser in scope");
 }
 
-print "RelaxNG\n";
 {
   my $grammar = <<'EOF';
 <grammar xmlns="http://relaxng.org/ns/structure/1.0">
@@ -58,21 +69,21 @@ EOF
       threads->new(sub { XML::LibXML::RelaxNG->new(string=>$grammar) });
     }
   $_->join for(threads->list);
-  ok(1);
+  # TEST
+  ok(1, "RelaxNG");
 }
 
-print "XML error\n";
 {
-eval { XML::LibXML->new->parse_string('foo') };
-for(1..40) {
-	threads->new(sub { eval { XML::LibXML->new->parse_string('foo') } for(1..1000);  1; });
-}
-$_->join for(threads->list);
-ok(1);
+    eval { XML::LibXML->new->parse_string('foo') };
+    for(1..40) {
+        threads->new(sub { eval { XML::LibXML->new->parse_string('foo') } for(1..1000);  1; });
+    }
+    $_->join for(threads->list);
+    # TEST
+    ok(1, "XML error\n");
 }
 
 
-print "accessing document elements without lock\n";
 {
   my $doc=XML::LibXML::Document->new;
   $doc->setDocumentElement($doc->createElement('root'));
@@ -95,8 +106,8 @@ print "accessing document elements without lock\n";
   }
   $_->join for(threads->list);
 }
-ok(1);
-print "operating on different documents without lock\n";
+# TEST
+ok(1, "accessing document elements without lock");
 {
   my @docs=map {
     my $doc = XML::LibXML::Document->new;
@@ -118,8 +129,10 @@ print "operating on different documents without lock\n";
   }
   $_->join for(threads->list);
 }
-ok(1);
-print "operating on the same document with a lock\n";
+# TEST
+ok(1, "operating on different documents without lock\n");
+
+# operating on the same document with a lock
 {
   my $lock : shared;
   my $doc=XML::LibXML::Document->new;
@@ -144,7 +157,6 @@ my $xml = <<EOF;
 <root><node><leaf/></node></root>
 EOF
 
-print "Spawn threads with a document in scope\n";
 {
 my $doc = $p->parse_string( $xml );
 for(1..MAX_THREADS)
@@ -153,9 +165,10 @@ for(1..MAX_THREADS)
 }
 $_->join for(threads->list);
 }
-ok(1);
+# TEST
+ok(1, "Spawn threads with a document in scope");
 
-print "Spawn threads that use document that has gone out of scope from where it was created\n";
+
 {
 my $waitfor : shared;
 {
@@ -167,17 +180,18 @@ for(1..MAX_THREADS)
 }
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, "Spawn threads that use document that has gone out of scope from where it was created");
 }
 
-print "Parse a correct XML document\n";
 {
 for(1..MAX_THREADS)
 {
 	threads->new(sub { $p->parse_string($xml) for 1..MAX_LOOP; 1; });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, "Parse a correct XML document");
 }
 
 my $xml_bad = <<EOF;
@@ -186,14 +200,14 @@ my $xml_bad = <<EOF;
 EOF
 
 
-print "Parse a bad XML document\n";
 {
 for(1..MAX_THREADS)
 {
 	threads->new(sub { eval { my $x = $p->parse_string($xml_bad)} for(1..MAX_LOOP); 1; });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, "Parse a bad XML document\n");
 }
 
 
@@ -205,7 +219,6 @@ my $xml_invalid = <<EOF;
 <root><something/></root>
 EOF
 
-print "Parse an invalid XML document\n";
 {
 for(1..MAX_THREADS)
 {
@@ -220,7 +233,8 @@ for(1..MAX_THREADS)
 	       });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, "Parse an invalid XML document");
 }
 
 my $rngschema = <<EOF;
@@ -234,7 +248,6 @@ my $rngschema = <<EOF;
 </r:grammar>
 EOF
 
-print "test RNG validation errors are thread safe\n";
 {
 for(1..MAX_THREADS)
 {
@@ -248,7 +261,8 @@ for(1..MAX_THREADS)
     });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, "test RNG validation errors are thread safe");
 }
 
 my $xsdschema = <<EOF;
@@ -260,7 +274,6 @@ my $xsdschema = <<EOF;
 </xsd:schema>
 EOF
 
-print "test Schema validation errors are thread safe\n";
 {
 for(1..MAX_THREADS)
 {
@@ -274,12 +287,14 @@ for(1..MAX_THREADS)
     });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, "test Schema validation errors are thread safe");
 }
 
 my $bigfile = "docs/libxml.dbk";
 $xml = utf8_slurp($bigfile);
-ok($xml);
+# TEST
+ok($xml, 'bigfile was slurped fine.');
 sub use_dom
 {
 	my $d = shift;
@@ -296,13 +311,14 @@ for(1..MAX_THREADS) {
 	threads->new(sub { my $dom = do { $p->parse_string($xml); }; use_dom($dom) for 1..5; 1; });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, 'Joined all threads.');
 }
 
 {
 package MyHandler;
 
-use base XML::SAX::Base;
+use base 'XML::SAX::Base';
 
 sub AUTOLOAD
 {
@@ -313,7 +329,8 @@ use XML::LibXML::SAX;
 $p = XML::LibXML::SAX->new(
 	Handler=>MyHandler->new(),
 );
-ok($p);
+# TEST
+ok($p, 'XML::LibXML::SAX was initted.');
 
 {
 for(1..MAX_THREADS)
@@ -322,7 +339,8 @@ for(1..MAX_THREADS)
 }
 $_->join for threads->list;
 
-ok(1);
+# TEST
+ok(1, 'After XML::LibXML::SAX - join.');
 }
 
 $p = XML::LibXML->new(
@@ -342,11 +360,12 @@ use_dom($p->parse_chunk("",1));
 });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, 'XML::LibXML thread.');
 }
 
 $p = XML::LibXML->new();
-print "parse a big file using the same parser\n";
+# parse a big file using the same parser
 {
 for(1..MAX_THREADS)
 {
@@ -359,11 +378,11 @@ close $fh;
 });
 }
 my @results = $_->join for(threads->list);
-print@results,"\n";
-ok(1);
+# TEST
+ok(1, 'threads->join after opening bigfile.');
 }
 
-print "create elements\n";
+# create elements
 {
 my @n = map XML::LibXML::Element->new('bar'.$_), 1..1000;
 for(1..MAX_THREADS)
@@ -374,11 +393,11 @@ for(1..MAX_THREADS)
 });
 }
 $_->join for(threads->list);
-ok(1);
+# TEST
+ok(1, 'create elements');
 }
 
 {
-print "docfrag\n";
 my $e = XML::LibXML::Element->new('foo');
 for(1..MAX_THREADS) {
   threads->new(sub {
@@ -391,12 +410,11 @@ for(1..MAX_THREADS) {
 	       },$_);
 }
 $_->join for(threads->list);
-ok(1);
-print $e->ownerDocument->toString(),"\n";
+# TEST
+ok(1, "docfrag");
 }
 
 {
-print "docfrag2\n";
 my $e = XML::LibXML::Element->new('foo');
 my $d = XML::LibXML::Document->new();
 $d->setDocumentElement($d->createElement('root'));
@@ -409,12 +427,11 @@ for(1..MAX_THREADS) {
 	       },$_);
 }
 $_->join for(threads->list);
-ok(1);
-print $e->ownerDocument->toString(),"\n";
+# TEST
+ok(1, "docfrag2");
 }
 
 {
-print "docfrag3\n";
 my $e = XML::LibXML::Element->new('foo');
 for(1..MAX_THREADS) {
   threads->new(sub {
@@ -425,7 +442,7 @@ for(1..MAX_THREADS) {
 	       },$_);
 }
 $_->join for(threads->list);
-ok(1);
-print $e->parentNode->toString(),"\n";
+# TEST
+ok(1, "docfrag3");
 }
 
