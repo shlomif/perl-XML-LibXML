@@ -1,9 +1,9 @@
 use strict;
 use warnings;
 
-use Test;
+use Test::More tests => 55;
 
-BEGIN { plan tests => 55 }
+# BEGIN { plan tests => 55 }
 
 use XML::LibXML;
 use XML::LibXML::SAX;
@@ -11,36 +11,45 @@ use XML::LibXML::SAX::Parser;
 use XML::LibXML::SAX::Builder;
 use XML::SAX;
 use IO::File;
-ok(1);
+# TEST
+ok(1, 'Loaded');
 
-ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)));
+# TEST
+ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.');
 
 local $XML::SAX::ParserPackage = 'XML::LibXML::SAX::Parser';
 
 my $sax = SAXTester->new;
-ok($sax);
+# TEST
+ok($sax, ' TODO : Add test name');
 
 my $str = join('', IO::File->new("example/dromeds.xml")->getlines);
 my $doc = XML::LibXML->new->parse_string($str);
-ok($doc);
+# TEST
+ok($doc, ' TODO : Add test name');
 
 my $generator = XML::LibXML::SAX::Parser->new(Handler => $sax);
-ok($generator);
+# TEST
+ok($generator, ' TODO : Add test name');
 
-$generator->generate($doc);
+$generator->generate($doc); # SAXTester::start_document
 
 my $builder = XML::LibXML::SAX::Builder->new();
-ok($builder);
+# TEST
+ok($builder, ' TODO : Add test name');
 my $gen2 = XML::LibXML::SAX::Parser->new(Handler => $builder);
 my $dom2 = $gen2->generate($doc);
-ok($dom2);
+# TEST
+ok($dom2, ' TODO : Add test name');
 
-ok($dom2->toString, $str);
+# TEST
+is($dom2->toString, $str, ' TODO : Add test name');
 # warn($dom2->toString);
 
 ########### XML::SAX Tests ###########
 my $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
-ok($parser);
+# TEST
+ok($parser, ' TODO : Add test name');
 $parser->parse_uri("example/dromeds.xml");
 
 $parser->parse_string(<<EOT);
@@ -49,7 +58,8 @@ $parser->parse_string(<<EOT);
 EOT
 
 $sax = SAXNSTester->new;
-ok($sax);
+# TEST
+ok($sax, ' TODO : Add test name');
 
 $parser->set_handler($sax);
 
@@ -87,13 +97,16 @@ sub {
     eval {
       $pkg->new(Handler => $handler)->parse_string($xml);
     };
-    ok($@); # We got an error
+    # TEST*2
+    ok($@, ' TODO : Add test name'); # We got an error
   }
   
   $handler = SAXErrorCallbackTester->new;
   eval { XML::LibXML::SAX->new(Handler => $handler )->parse_string($xml) };
-  ok($@); # We got an error
-  ok( $handler->{fatal_called} );
+  # TEST
+  ok($@, ' TODO : Add test name'); # We got an error
+  # TEST
+  ok( $handler->{fatal_called}, ' TODO : Add test name' );
 
 }
 
@@ -109,7 +122,8 @@ sub {
   $parser->parse_chunk($chunk);
   $builder->end_element({Name=>'foo'});
   $parser->end_document();
-  ok($builder->result()->documentElement->toString(), '<foo>'.$chunk.$chunk.'</foo>');
+  # TEST
+  is($builder->result()->documentElement->toString(), '<foo>'.$chunk.$chunk.'</foo>', ' TODO : Add test name');
 }
 
 
@@ -137,13 +151,15 @@ sub {
         <Moin>Moin</Moin>
 </TVChannel>
 EOF
-  ok(ref($@), 'MySAXException');
-  ok(ref($@) && $@->{Message}, "My exception");
+  # TEST
+  is(ref($@), 'MySAXException', ' TODO : Add test name');
+  # TEST
+  is(ref($@) && $@->{Message}, "My exception", ' TODO : Add test name');
 }
 ########### Helper class #############
 
 package SAXTester;
-use Test;
+use Test::More;
 
 sub new {
     my $class = shift;
@@ -151,16 +167,19 @@ sub new {
 }
 
 sub start_document {
-  ok(1);
+  # TEST*3
+  ok(1, 'SAXTester::start_document');
 }
 
 sub end_document {
-  ok(1);
+  # TEST*3
+  ok(1, 'SAXTester::end_document');
 }
 
 sub start_element {
   my ($self, $el) = @_;
-  ok($el->{LocalName}, qr{^(dromedaries|species|humps|disposition|legs)$});
+  # TEST*21
+  like ($el->{LocalName}, qr{^(dromedaries|species|humps|disposition|legs)$}, 'SAXTester::start_element');
   foreach my $attr (keys %{$el->{Attributes}}) {
     # warn("Attr: $attr = $el->{Attributes}->{$attr}\n");
   }
@@ -180,7 +199,7 @@ sub characters {
 1;
 
 package SAXNSTester;
-use Test;
+use Test::More;
 
 sub new {
     bless {}, shift;
@@ -188,7 +207,8 @@ sub new {
 
 sub start_element {
     my ($self, $node) = @_;
-    ok($node->{NamespaceURI} =~ /^urn:/);
+    # TEST*3
+    ok(scalar($node->{NamespaceURI} =~ /^urn:/), 'SAXNSTester::start_element');
     # warn("start_element:\n", Dumper($node));
 }
 
@@ -199,20 +219,28 @@ sub end_element {
 
 sub start_prefix_mapping {
     my ($self, $node) = @_;
-    ok($node->{NamespaceURI} =~ /^(urn:camels|urn:mammals|urn:a)$/);
+    # TEST*3
+    ok(scalar(
+            $node->{NamespaceURI} =~ /\A(?:urn:camels|urn:mammals|urn:a)\z/
+        ), 
+        'SAXNSTester::start_prefix_mapping'
+    );
     # warn("start_prefix_mapping:\n", Dumper($node));
 }
 
 sub end_prefix_mapping {
     my ($self, $node) = @_;
     # warn("end_prefix_mapping:\n", Dumper($node));
-    ok($node->{NamespaceURI} =~ /^(urn:camels|urn:mammals|urn:a)$/);
+    # TEST*3
+    like($node->{NamespaceURI}, qr/\A(?:urn:camels|urn:mammals|urn:a)\z/, 
+        'SAXNSTester::end_prefix_mapping'
+    );
 }
 
 1;
 
 package SAXNS2Tester;
-use Test;
+use Test::More;
 
 #sub new {
 #    my $class = shift;
@@ -222,14 +250,17 @@ use Test;
 sub start_element {
     my $self = shift;
     my ( $elt ) = @_;
-    ok $elt->{NamespaceURI} eq "xml://A"
-        if $elt->{Name} eq "b"
+    if ($elt->{Name} eq "b")
+    {
+        # TEST*2
+        is($elt->{NamespaceURI}, "xml://A", 'SAXNS2Tester::start_element');
+    }
 }
 
 1;
 
 package SAXErrorTester;
-use Test;
+use Test::More;
 
 sub new {
     bless {}, shift;
@@ -241,7 +272,7 @@ sub end_document {
 }
 
 package SAXErrorCallbackTester;
-use Test;
+use Test::More;
 
 sub fatal_error {
     $_[0]->{fatal_called} = 1;
