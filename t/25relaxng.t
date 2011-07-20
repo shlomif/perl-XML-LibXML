@@ -16,7 +16,7 @@ BEGIN {
     use XML::LibXML;
 
     if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-        plan tests => 13;
+        plan tests => 17;
     }
     else {
         plan skip_all => 'Skip No RNG Support compiled';
@@ -32,6 +32,7 @@ my $badfile      = "test/relaxng/badschema.rng";
 my $validfile    = "test/relaxng/demo.xml";
 my $invalidfile  = "test/relaxng/invaliddemo.xml";
 my $demo4        = "test/relaxng/demo4.rng";
+my $namespace    = "test/relaxng/ns.rng";
 
 print "# 1 parse schema from a file\n";
 {
@@ -125,6 +126,64 @@ EOXML
   # TEST
   ok ($@, ' TODO : Add test name');
 
+}
+
+# 6 re-validate a modified document
+{
+    my $parser = new XML::LibXML();
+
+    my $rngschema = XML::LibXML::RelaxNG->new(location => $namespace);
+    my $doc = $parser->parse_string(<<EOD);
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE datastore SYSTEM "//test/test/datastore" [
+<!ATTLIST element id ID #IMPLIED>
+]>
+<!-- datastore -->
+<datastore xmlns="http://xmlns.example.com/2007/test/datastore">
+  <data>
+    <active>
+      <element id="uuidtest1">
+        <title>Ze element</title>
+        <payload>Ze element payload</payload>
+      </element>
+    </active>
+  </data>
+</datastore>
+EOD
+    eval{$rngschema->validate($doc);}; 
+    # TEST
+    ok (!$@);
+
+    my $node = $doc->createElement("element");
+
+    my $title = $doc->createElement("title");
+    $title->appendText("Annoying tests are annoying");
+    $node->appendChild($title);
+
+    my $payload = $doc->createElement("payload");
+    $payload->appendText("some payload");
+    $node->appendChild($payload);
+
+    $node->setAttribute('id', 'uuidIamAtestElement');
+
+    my ($active) = $doc->getElementsByTagName("active");
+    eval{$rngschema->validate($doc);}; 
+    # TEST
+    ok (!$@);
+    $active->appendChild($node);
+
+    # If there's a bug in the dynamically-generated content, this test
+    # will always fail no matter what. Hence, we reparse the document
+    # and validate that (that always works) to make sure our
+    # modifications are really valid
+    my $reparsed_doc = $parser->parse_string($doc->toString);
+    eval{$rngschema->validate($reparsed_doc);}; 
+    # TEST
+    ok (!$@);
+
+    eval{$rngschema->validate($doc);}; 
+    # TEST
+    ok (!$@);
 }
 
 
