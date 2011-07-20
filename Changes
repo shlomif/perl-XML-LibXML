@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.82            Wed Jul 20 23:43:53 IDT 2011
     - Moved some if blocks after the dSP; (which contains declarations) to be
     compliant with C89/C90, which don't allow declarations in the middle of
     a C function.
