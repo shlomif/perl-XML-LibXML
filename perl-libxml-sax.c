@@ -886,13 +886,14 @@ PSaxEndDocument(void * ctx)
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr  sax  = (PmmSAXVectorPtr)ctxt->_private;
 
+    dTHX;
+    dSP;
+
     if (sax->joinchars)
     {
         PSaxCharactersFlush(ctxt, sax->charbuf);
     }
 
-    dTHX;
-    dSP;
 
     ENTER;
     SAVETMPS;
@@ -924,13 +925,13 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     SV * rv;
     SV * arv;
 
+    dSP;
+    
     if (sax->joinchars)
     {
         PSaxCharactersFlush(ctxt, sax->charbuf);
     }
 
-    dSP;
-    
     ENTER;
     SAVETMPS;
 
@@ -975,12 +976,12 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     SV * rv;
     HV * element;
 
+    dSP;
+
     if (sax->joinchars)
     {
         PSaxCharactersFlush(ctxt, sax->charbuf);
     }
-
-    dSP;
 
     ENTER;
     SAVETMPS;
