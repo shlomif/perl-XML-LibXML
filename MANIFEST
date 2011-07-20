@@ -168,6 +168,7 @@ test/relaxng/demo2.rng
 test/relaxng/demo3.rng
 test/relaxng/demo4.rng
 test/relaxng/invaliddemo.xml
+test/relaxng/ns.rng
 test/relaxng/schema.rng
 test/schema/badschema.xsd
 test/schema/demo.xml

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" -->
+<grammar ns="http://xmlns.example.com/2007/test/datastore" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <!-- Document -->
+  <start>
+    <ref name="Datastore"/>
+  </start>
+  <define name="Datastore">
+    <element name="datastore">
+      <ref name="Data"/>
+    </element>
+  </define>
+  <define name="Data">
+    <element name="data">
+      <ref name="Active"/>
+    </element>
+  </define>
+  <!-- Structure elements -->
+  <define name="Active">
+    <element name="active">
+      <choice>
+        <interleave>
+          <zeroOrMore>
+            <ref name="Element"/>
+          </zeroOrMore>
+        </interleave>
+        <empty/>
+      </choice>
+    </element>
+  </define>
+  <define name="Element">
+    <element name="element">
+      <choice>
+        <ref name="Id"/>
+        <ref name="Did"/>
+      </choice>
+      <interleave>
+        <optional>
+          <ref name="Title"/>
+        </optional>
+        <optional>
+          <ref name="Payload"/>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+
+  <!-- Simple elements -->
+  <define name="Title">
+    <element name="title">
+      <data type="token"/>
+    </element>
+  </define>
+  <define name="Payload">
+    <element name="payload">
+      <data type="token"/>
+    </element>
+  </define>
+  <!-- Attributes -->
+  <define name="Id">
+    <attribute name="id">
+      <data type="ID"/>
+    </attribute>
+  </define>
+  <define name="Did">
+    <attribute name="did">
+      <data type="token"/>
+    </attribute>
+  </define>
+</grammar>
