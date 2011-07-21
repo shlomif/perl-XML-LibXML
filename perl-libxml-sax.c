@@ -1099,14 +1099,14 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     SV * rv = NULL;
 
     if ( ch != NULL && handler != NULL ) {
+        dSP;
+
         int len = xmlStrlen( ch );
 
         if (sax->joinchars)
         {
             PSaxCharactersFlush(ctxt, sax->charbuf);
         }
-
-        dSP;
 
         ENTER;
         SAVETMPS;
@@ -1145,13 +1145,13 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     SV * rv = NULL;
 
     if ( ch != NULL && handler != NULL ) {
+        dSP;
 
         if (sax->joinchars)
         {
             PSaxCharactersFlush(ctxt, sax->charbuf);
         }
 
-        dSP;
 
         ENTER;
         SAVETMPS;
@@ -1213,12 +1213,12 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     SV * rv = NULL;
 
     if ( handler != NULL ) {
+        dSP;
+
         if (sax->joinchars)
         {
             PSaxCharactersFlush(ctxt, sax->charbuf);
         }
-
-        dSP;
     
         ENTER;
         SAVETMPS;
