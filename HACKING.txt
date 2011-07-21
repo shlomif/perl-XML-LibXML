@@ -203,4 +203,9 @@ Removed code here.
 =cut
 ----------------
 
-Perl
+No declarations after statements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One should make sure there are no declarations after statements in the ANSI
+C code. If you're using gcc, you can make sure this is the case by adding
+the flags "-Wdeclaration-after-statement -Werror" to "CCFLAGS" in the makefile.
