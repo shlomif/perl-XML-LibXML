@@ -57,6 +57,26 @@ my $SAXNSTester_start_element_stacker = Stacker->new(
     }
 );
 
+my $SAXNS2Tester_start_element_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $elt = shift;
+
+                if ($elt->{Name} eq "b")
+                {
+                    $push_cb->(
+                        ($elt->{NamespaceURI} eq "xml://A") ? 'true' : 'false'
+                    );
+                }
+
+                return;
+            };
+        },
+    }
+);
+
 # TEST
 ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.');
 
@@ -131,7 +151,7 @@ EOT
         [
             qw(true true true)
         ],
-        'Three successful SAXNS2Tester elements.',
+        'Three successful SAXNSTester elements.',
     );
 }
 
@@ -143,10 +163,14 @@ EOT
     my @tests = (
 sub {
     XML::LibXML::SAX        ->new( Handler => $h )->parse_string( $xml );
+    # TEST
+    $SAXNS2Tester_start_element_stacker->test([qw(true)], 'XML::LibXML::SAX');
 },
 
 sub {
     XML::LibXML::SAX::Parser->new( Handler => $h )->parse_string( $xml );
+    # TEST
+    $SAXNS2Tester_start_element_stacker->test([qw(true)], 'XML::LibXML::SAX::Parser');
 },
 );  
     
@@ -323,11 +347,10 @@ use Test::More;
 sub start_element {
     my $self = shift;
     my ( $elt ) = @_;
-    if ($elt->{Name} eq "b")
-    {
-        # TEST*2
-        is($elt->{NamespaceURI}, "xml://A", 'SAXNS2Tester::start_element');
-    }
+
+    $SAXNS2Tester_start_element_stacker->cb()->($elt);
+
+    return;
 }
 
 1;
