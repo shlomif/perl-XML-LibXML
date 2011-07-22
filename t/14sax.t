@@ -38,7 +38,7 @@ sub _create_simple_counter {
 my $SAXTester_start_document_counter = _create_simple_counter();
 my $SAXTester_end_document_counter = _create_simple_counter();
 
-my $SAXNS2Tester_start_element_stacker = Stacker->new(
+my $SAXNSTester_start_element_stacker = Stacker->new(
     {
         gen_cb => sub {
             my $push_cb = shift;
@@ -127,7 +127,7 @@ EOT
     $parser->parse_uri("example/ns.xml");
 
     # TEST
-    $SAXNS2Tester_start_element_stacker->test(
+    $SAXNSTester_start_element_stacker->test(
         [
             qw(true true true)
         ],
@@ -280,7 +280,7 @@ sub new {
 sub start_element {
     my ($self, $node) = @_;
 
-    $SAXNS2Tester_start_element_stacker->cb()->($node);
+    $SAXNSTester_start_element_stacker->cb()->($node);
 
     return;
 }
