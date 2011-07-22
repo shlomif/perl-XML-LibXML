@@ -41,59 +41,62 @@ ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.
 
 local $XML::SAX::ParserPackage = 'XML::LibXML::SAX::Parser';
 
-my $sax = SAXTester->new;
-# TEST
-ok($sax, ' TODO : Add test name');
+my $parser;
+{
+    my $sax = SAXTester->new;
+    # TEST
+    ok($sax, ' TODO : Add test name');
 
-my $str = join('', IO::File->new("example/dromeds.xml")->getlines);
-my $doc = XML::LibXML->new->parse_string($str);
-# TEST
-ok($doc, ' TODO : Add test name');
+    my $str = join('', IO::File->new("example/dromeds.xml")->getlines);
+    my $doc = XML::LibXML->new->parse_string($str);
+    # TEST
+    ok($doc, ' TODO : Add test name');
 
-my $generator = XML::LibXML::SAX::Parser->new(Handler => $sax);
-# TEST
-ok($generator, ' TODO : Add test name');
+    my $generator = XML::LibXML::SAX::Parser->new(Handler => $sax);
+    # TEST
+    ok($generator, ' TODO : Add test name');
 
-$generator->generate($doc); # SAXTester::start_document
+    $generator->generate($doc); # SAXTester::start_document
 
-# TEST
-$SAXTester_start_document_counter->test(1, 'start_document called once.');
-# TEST
-$SAXTester_end_document_counter->test(1, 'end_document called once.');
+    # TEST
+    $SAXTester_start_document_counter->test(1, 'start_document called once.');
+    # TEST
+    $SAXTester_end_document_counter->test(1, 'end_document called once.');
 
-my $builder = XML::LibXML::SAX::Builder->new();
-# TEST
-ok($builder, ' TODO : Add test name');
-my $gen2 = XML::LibXML::SAX::Parser->new(Handler => $builder);
-my $dom2 = $gen2->generate($doc);
-# TEST
-ok($dom2, ' TODO : Add test name');
+    my $builder = XML::LibXML::SAX::Builder->new();
+    # TEST
+    ok($builder, ' TODO : Add test name');
+    my $gen2 = XML::LibXML::SAX::Parser->new(Handler => $builder);
+    my $dom2 = $gen2->generate($doc);
+    # TEST
+    ok($dom2, ' TODO : Add test name');
 
-# TEST
-is($dom2->toString, $str, ' TODO : Add test name');
-# warn($dom2->toString);
+    # TEST
+    is($dom2->toString, $str, ' TODO : Add test name');
+    # warn($dom2->toString);
 
 ########### XML::SAX Tests ###########
-my $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
-# TEST
-ok($parser, ' TODO : Add test name');
-$parser->parse_uri("example/dromeds.xml");
+    $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
+    # TEST
+    ok($parser, ' TODO : Add test name');
+    $parser->parse_uri("example/dromeds.xml");
 
-# TEST
-$SAXTester_start_document_counter->test(1, 'start_document called once.');
-# TEST
-$SAXTester_end_document_counter->test(1, 'end_document called once.');
+    # TEST
+    $SAXTester_start_document_counter->test(1, 'start_document called once.');
+    # TEST
+    $SAXTester_end_document_counter->test(1, 'end_document called once.');
 
-$parser->parse_string(<<EOT);
+    $parser->parse_string(<<EOT);
 <?xml version='1.0' encoding="US-ASCII"?>
 <dromedaries one="1" />
 EOT
-# TEST
-$SAXTester_start_document_counter->test(1, 'start_document called once.');
-# TEST
-$SAXTester_end_document_counter->test(1, 'end_document called once.');
+    # TEST
+    $SAXTester_start_document_counter->test(1, 'start_document called once.');
+    # TEST
+    $SAXTester_end_document_counter->test(1, 'end_document called once.');
+}
 
-$sax = SAXNSTester->new;
+my $sax = SAXNSTester->new;
 # TEST
 ok($sax, ' TODO : Add test name');
 
