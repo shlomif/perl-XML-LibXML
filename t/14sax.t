@@ -6,8 +6,8 @@ use lib './t/lib';
 use Counter;
 use Stacker;
 
-# should be 53.
-use Test::More tests => 53;
+# should be 51.
+use Test::More tests => 51;
 
 # BEGIN { plan tests => 55 }
 
@@ -70,6 +70,25 @@ my $SAXNS2Tester_start_element_stacker = Stacker->new(
                         ($elt->{NamespaceURI} eq "xml://A") ? 'true' : 'false'
                     );
                 }
+
+                return;
+            };
+        },
+    }
+);
+
+my $SAXNSTester_start_prefix_mapping_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $node = shift;
+
+                $push_cb->(
+                    ($node->{NamespaceURI} =~ /\A(?:urn:camels|urn:mammals|urn:a)\z/)
+                    ? 'true'
+                    : 'false'
+                );
 
                 return;
             };
@@ -152,6 +171,13 @@ EOT
             qw(true true true)
         ],
         'Three successful SAXNSTester elements.',
+    );
+    # TEST
+    $SAXNSTester_start_prefix_mapping_stacker->test(
+        [
+            qw(true true true)
+        ],
+        'Three successful SAXNSTester start_prefix_mapping.',
     );
 }
 
@@ -316,13 +342,10 @@ sub end_element {
 
 sub start_prefix_mapping {
     my ($self, $node) = @_;
-    # TEST*3
-    ok(scalar(
-            $node->{NamespaceURI} =~ /\A(?:urn:camels|urn:mammals|urn:a)\z/
-        ), 
-        'SAXNSTester::start_prefix_mapping'
-    );
-    # warn("start_prefix_mapping:\n", Dumper($node));
+
+    $SAXNSTester_start_prefix_mapping_stacker->cb()->($node);
+
+    return;
 }
 
 sub end_prefix_mapping {
