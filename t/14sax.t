@@ -6,8 +6,8 @@ use lib './t/lib';
 use Counter;
 use Stacker;
 
-# should be 51.
-use Test::More tests => 51;
+# should be 49.
+use Test::More tests => 49;
 
 # BEGIN { plan tests => 55 }
 
@@ -77,24 +77,32 @@ my $SAXNS2Tester_start_element_stacker = Stacker->new(
     }
 );
 
-my $SAXNSTester_start_prefix_mapping_stacker = Stacker->new(
-    {
-        gen_cb => sub {
-            my $push_cb = shift;
-            return sub {
-                my $node = shift;
 
-                $push_cb->(
-                    ($node->{NamespaceURI} =~ /\A(?:urn:camels|urn:mammals|urn:a)\z/)
-                    ? 'true'
-                    : 'false'
-                );
+sub _create_urn_stacker
+{
+    return
+    Stacker->new(
+        {
+            gen_cb => sub {
+                my $push_cb = shift;
+                return sub {
+                    my $node = shift;
 
-                return;
-            };
-        },
-    }
-);
+                    $push_cb->(
+                        ($node->{NamespaceURI} =~ /\A(?:urn:camels|urn:mammals|urn:a)\z/)
+                        ? 'true'
+                        : 'false'
+                    );
+
+                    return;
+                };
+            },
+        }
+    );
+}
+
+my $SAXNSTester_start_prefix_mapping_stacker = _create_urn_stacker();
+my $SAXNSTester_end_prefix_mapping_stacker = _create_urn_stacker();
 
 # TEST
 ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.');
@@ -178,6 +186,13 @@ EOT
             qw(true true true)
         ],
         'Three successful SAXNSTester start_prefix_mapping.',
+    );
+    # TEST
+    $SAXNSTester_end_prefix_mapping_stacker->test(
+        [
+            qw(true true true)
+        ],
+        'Three successful SAXNSTester end_prefix_mapping.',
     );
 }
 
@@ -350,11 +365,10 @@ sub start_prefix_mapping {
 
 sub end_prefix_mapping {
     my ($self, $node) = @_;
-    # warn("end_prefix_mapping:\n", Dumper($node));
-    # TEST*3
-    like($node->{NamespaceURI}, qr/\A(?:urn:camels|urn:mammals|urn:a)\z/, 
-        'SAXNSTester::end_prefix_mapping'
-    );
+
+    $SAXNSTester_end_prefix_mapping_stacker->cb()->($node);
+
+    return;
 }
 
 1;
