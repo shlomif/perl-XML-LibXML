@@ -1,6 +1,10 @@
 use strict;
 use warnings;
 
+use lib './t/lib';
+
+use Counter;
+
 use Test::More tests => 55;
 
 # BEGIN { plan tests => 55 }
@@ -13,6 +17,19 @@ use XML::SAX;
 use IO::File;
 # TEST
 ok(1, 'Loaded');
+
+my $SAXTester_start_document_counter = Counter->new(
+    {
+        gen_cb => sub {
+            my $inc_cb = shift;
+
+            sub {
+                $inc_cb->();
+                return;    
+            }
+        }
+    }
+);
 
 # TEST
 ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.');
@@ -34,6 +51,9 @@ ok($generator, ' TODO : Add test name');
 
 $generator->generate($doc); # SAXTester::start_document
 
+# TEST
+$SAXTester_start_document_counter->test(1, 'start_document called once.');
+
 my $builder = XML::LibXML::SAX::Builder->new();
 # TEST
 ok($builder, ' TODO : Add test name');
@@ -52,10 +72,15 @@ my $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
 ok($parser, ' TODO : Add test name');
 $parser->parse_uri("example/dromeds.xml");
 
+# TEST
+$SAXTester_start_document_counter->test(1, 'start_document called once.');
+
 $parser->parse_string(<<EOT);
 <?xml version='1.0' encoding="US-ASCII"?>
 <dromedaries one="1" />
 EOT
+# TEST
+$SAXTester_start_document_counter->test(1, 'start_document called once.');
 
 $sax = SAXNSTester->new;
 # TEST
@@ -167,8 +192,10 @@ sub new {
 }
 
 sub start_document {
-  # TEST*3
-  ok(1, 'SAXTester::start_document');
+
+  $SAXTester_start_document_counter->cb()->();
+
+  return;
 }
 
 sub end_document {
