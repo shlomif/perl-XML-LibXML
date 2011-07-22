@@ -96,13 +96,15 @@ EOT
     $SAXTester_end_document_counter->test(1, 'end_document called once.');
 }
 
-my $sax = SAXNSTester->new;
-# TEST
-ok($sax, ' TODO : Add test name');
+{
+    my $sax = SAXNSTester->new;
+    # TEST
+    ok($sax, ' TODO : Add test name');
 
-$parser->set_handler($sax);
+    $parser->set_handler($sax);
 
-$parser->parse_uri("example/ns.xml");
+    $parser->parse_uri("example/ns.xml");
+}
 
 ########### Namespace test ( empty namespaces ) ########
 
