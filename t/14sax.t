@@ -4,8 +4,10 @@ use warnings;
 use lib './t/lib';
 
 use Counter;
+use Stacker;
 
-use Test::More tests => 55;
+# should be 53.
+use Test::More tests => 53;
 
 # BEGIN { plan tests => 55 }
 
@@ -35,6 +37,25 @@ sub _create_simple_counter {
 
 my $SAXTester_start_document_counter = _create_simple_counter();
 my $SAXTester_end_document_counter = _create_simple_counter();
+
+my $SAXNS2Tester_start_element_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $node = shift;
+
+                $push_cb->(
+                    scalar($node->{NamespaceURI} =~ /^urn:/)
+                    ? 'true'
+                    : 'false'
+                );
+
+                return;
+            };
+        },
+    }
+);
 
 # TEST
 ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.');
@@ -104,6 +125,14 @@ EOT
     $parser->set_handler($sax);
 
     $parser->parse_uri("example/ns.xml");
+
+    # TEST
+    $SAXNS2Tester_start_element_stacker->test(
+        [
+            qw(true true true)
+        ],
+        'Three successful SAXNS2Tester elements.',
+    );
 }
 
 ########### Namespace test ( empty namespaces ) ########
@@ -250,9 +279,10 @@ sub new {
 
 sub start_element {
     my ($self, $node) = @_;
-    # TEST*3
-    ok(scalar($node->{NamespaceURI} =~ /^urn:/), 'SAXNSTester::start_element');
-    # warn("start_element:\n", Dumper($node));
+
+    $SAXNS2Tester_start_element_stacker->cb()->($node);
+
+    return;
 }
 
 sub end_element {
