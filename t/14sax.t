@@ -18,18 +18,23 @@ use IO::File;
 # TEST
 ok(1, 'Loaded');
 
-my $SAXTester_start_document_counter = Counter->new(
-    {
-        gen_cb => sub {
-            my $inc_cb = shift;
+sub _create_simple_counter {
+    return Counter->new(
+        {
+            gen_cb => sub {
+                my $inc_cb = shift;
 
-            sub {
-                $inc_cb->();
-                return;    
+                sub {
+                    $inc_cb->();
+                    return;    
+                }
             }
         }
-    }
-);
+    );
+}
+
+my $SAXTester_start_document_counter = _create_simple_counter();
+my $SAXTester_end_document_counter = _create_simple_counter();
 
 # TEST
 ok(XML::SAX->add_parser(q(XML::LibXML::SAX::Parser)), 'add_parser is successful.');
@@ -53,6 +58,8 @@ $generator->generate($doc); # SAXTester::start_document
 
 # TEST
 $SAXTester_start_document_counter->test(1, 'start_document called once.');
+# TEST
+$SAXTester_end_document_counter->test(1, 'end_document called once.');
 
 my $builder = XML::LibXML::SAX::Builder->new();
 # TEST
@@ -74,6 +81,8 @@ $parser->parse_uri("example/dromeds.xml");
 
 # TEST
 $SAXTester_start_document_counter->test(1, 'start_document called once.');
+# TEST
+$SAXTester_end_document_counter->test(1, 'end_document called once.');
 
 $parser->parse_string(<<EOT);
 <?xml version='1.0' encoding="US-ASCII"?>
@@ -81,6 +90,8 @@ $parser->parse_string(<<EOT);
 EOT
 # TEST
 $SAXTester_start_document_counter->test(1, 'start_document called once.');
+# TEST
+$SAXTester_end_document_counter->test(1, 'end_document called once.');
 
 $sax = SAXNSTester->new;
 # TEST
@@ -199,8 +210,8 @@ sub start_document {
 }
 
 sub end_document {
-  # TEST*3
-  ok(1, 'SAXTester::end_document');
+    $SAXTester_end_document_counter->cb()->();
+    return;
 }
 
 sub start_element {
