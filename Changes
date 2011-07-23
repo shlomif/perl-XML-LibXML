@@ -6,6 +6,10 @@ Revision history for Perl extension XML::LibXML
     - Fix docbook source validity
         - resolves https://rt.cpan.org/Ticket/Display.html?id=69702
         - thanks to Ville Skytta / SCOP for the patch.
+    - Applied patch from https://rt.cpan.org/Ticket/Display.html?id=69703
+        - [PATCH] Documentation spelling fixes
+        - thanks to Ville Skytta / SCOP for the patch.
+        - minor correction by the current maintainer (SHLOMIF).
 
 1.82            Wed Jul 20 23:43:53 IDT 2011
     - Moved some if blocks after the dSP; (which contains declarations) to be

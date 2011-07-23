@@ -610,7 +610,7 @@ print {$out} $doc-&gt;toString();</programlisting>
 		<para>All functions working with DOM accept and return
 		character strings (UTF-8 encoded with UTF8 flag on). E.g.
 		<programlisting><![CDATA[
-my $doc = XML::LibXML:Document->new('1.0',$some_encoding);
+my $doc = XML::LibXML::Document->new('1.0',$some_encoding);
 my $element = $doc->createElement($name);
 $element->appendText($text);
 $xml_fragment = $element->toString(); # returns a character string
@@ -625,7 +625,7 @@ $xml_document = $doc->toString(); # returns a byte string
 		Note that the method <function>toString</function>
 		returns XML as a character string if applied to
 		other node than the Document node and
-		a byte string containing the apropriate
+		a byte string containing the appropriate
 		<programlisting>&lt;?xml version="1.0" encoding="..."?&gt;</programlisting>
 		declaration if applied to a <xref linkend="XML-LibXML-Document"/>.
 		</para>
@@ -637,7 +637,7 @@ $xml_document = $doc->toString(); # returns a byte string
 		since it is considered bad practice.
 		</para>
 		<programlisting><![CDATA[
-my $doc = XML::LibXML:Document->new('1.0','iso-8859-2');
+my $doc = XML::LibXML::Document->new('1.0','iso-8859-2');
 my $text = $doc->createTextNode($some_latin2_encoded_byte_string);
 # WORKS, BUT NOT RECOMMENDED!
 ]]>
@@ -728,7 +728,7 @@ my $thr = threads->new(sub{
 $thr->join;
 </programlisting>
 <para>Note that libxml2 uses dictionaries to store short strings and
-these dicionaries are kept on a document node. Without mutex locks, it
+these dictionaries are kept on a document node. Without mutex locks, it
 could happen in the previous example that the thread modifies the
 dictionary while other threads attempt to read from it, which could
 easily lead to a crash.</para>
@@ -937,7 +937,7 @@ XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
                             <funcsynopsisinfo>$libxmlnode = XML::LibXML-&gt;import_GDOME( $node, $deep );</funcsynopsisinfo>
                         </funcsynopsis>
 
-                        <para>This clones an XML::GDOME node to a XML::LibXML node explicitly.</para>
+                        <para>This clones an XML::GDOME node to an XML::LibXML node explicitly.</para>
                     </listitem>
                 </varlistentry>
 
@@ -949,7 +949,7 @@ XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
                             <funcsynopsisinfo>$gdomenode = XML::LibXML-&gt;export_GDOME( $node, $deep );</funcsynopsisinfo>
                         </funcsynopsis>
 
-                        <para>Allows to clone an XML::LibXML node into a XML::GDOME node.</para>
+                        <para>Allows to clone an XML::LibXML node into an XML::GDOME node.</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1012,7 +1012,7 @@ my $fragment = $parser-&gt;parse_xml_chunk( $xml_wb_chunk );
         <sect1>
             <title>Parsing</title>
 
-            <para>A XML document is read into a data structure such as a DOM tree by a piece of software, called a parser. XML::LibXML currently provides four
+            <para>An XML document is read into a data structure such as a DOM tree by a piece of software, called a parser. XML::LibXML currently provides four
             different parser interfaces:</para>
 
             <itemizedlist>
@@ -1164,7 +1164,7 @@ $dom = $parser-&gt;load_html(...);
                 <para>The functions described above are implemented to
                 parse well formed documents. In some cases a program
                 gets well balanced XML instead of well formed
-                documents (e.g. a XML fragment from a Database). With
+                documents (e.g. an XML fragment from a database). With
                 XML::LibXML it is not required to wrap such fragments
                 in the code, because XML::LibXML is capable even to
                 parse well balanced XML fragments.</para>
@@ -1195,7 +1195,7 @@ $dom = $parser-&gt;load_html(...);
                     </varlistentry>
                 </variablelist>
 
-                <para>By default XML::LibXML does not process XInclude tags within a XML Document (see options section below). XML::LibXML allows to post
+                <para>By default XML::LibXML does not process XInclude tags within an XML Document (see options section below). XML::LibXML allows to post
                 process a document to expand XInclude tags.</para>
 
                 <variablelist>
@@ -1284,7 +1284,7 @@ $dom = $parser-&gt;load_html(...);
                                 <funcsynopsisinfo>$doc = $parser-&gt;parse_string( $xmlstring);</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>This function is similar to parse_fh(), but it parses a XML document that is available as a single string in memory. Again,
+                            <para>This function is similar to parse_fh(), but it parses an XML document that is available as a single string in memory. Again,
                             you can pass an optional base URI to the function.</para>
 
                             <programlisting>my $doc = $parser-&gt;parse_string( $xmlstring, $baseuri );</programlisting>
@@ -1638,7 +1638,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 	      </para>
 	      <para>IMPORTANT:
 		Due to limitations in the libxml2 library line numbers greater than
-		65535 will be returned as 65535. Unfortunatelly, this is a long and sad story, please see
+		65535 will be returned as 65535. Unfortunately, this is a long and sad story, please see
 		<ulink url="http://bugzilla.gnome.org/show_bug.cgi?id=325533">http://bugzilla.gnome.org/show_bug.cgi?id=325533</ulink> for more details.
               </para>
             </listitem>
@@ -1676,7 +1676,7 @@ local $XML::LibXML::setTagCompression = 1;</programlisting>
 	      <para>Note that although this flag disables entity substitution, it
 	      does not prevent the parser from loading external entities;
 	      when substitution of an external entity is disabled, the
-	      entity will be represented in the document tree by a XML_ENTITY_REF_NODE node
+	      entity will be represented in the document tree by an XML_ENTITY_REF_NODE node
 	      whose subtree will be the content obtained by parsing the external resource;
 	      Although this nesting is visible from the DOM
 	      it is transparent to XPath data model, so it is possible to
@@ -1781,7 +1781,7 @@ $parser->input_callbacks($c);
             <listitem>
 	      <para>/parser, reader/</para>
               <para>Implement XInclude substitution; possible values are 0 and 1</para>
-              <para>Expands XIinclude tags immediately while parsing the document.
+              <para>Expands XInclude tags immediately while parsing the document.
 		Note that the parser will use the URI resolvers installed
 		via <function>XML::LibXML::InputCallback</function> to parse the included document (if any).</para>
             </listitem>
@@ -1905,9 +1905,9 @@ $parser->no_network();</programlisting>
                         <programlisting>
                             $parser-&gt;keep_blanks(0);
                         </programlisting>
-                        <para>This is actually an oposite of the <literal>no_blanks</literal> parser option.
+                        <para>This is actually the opposite of the <literal>no_blanks</literal> parser option.
 			  If used without an argument retrieves negated value of <literal>no_blanks</literal>.
-			  If used with an argument sets <literal>no_blanks</literal> to the oposite value.
+			  If used with an argument sets <literal>no_blanks</literal> to the opposite value.
 			</para>
                     </listitem>
                 </varlistentry>
@@ -1998,7 +1998,7 @@ XML::LibXML::externalEntityLoader(\&amp;my_loader);
             parsing a document. While using the SAX parser XML::LibXML will not create a DOM Document tree.</para>
 
             <para>Such an interface is useful if very large XML documents have to be processed and no DOM functions are required. By using this interface it is
-            possible to read data stored within a XML document directly into the application data structures without loading the document into memory.</para>
+            possible to read data stored within an XML document directly into the application data structures without loading the document into memory.</para>
 
             <para>The SAX interface of XML::LibXML is based on the famous XML::SAX interface. It uses the generic interface as provided by XML::SAX::Base.</para>
 
@@ -2079,7 +2079,7 @@ my $doc = $builder-&gt;result();</programlisting>
             array. The only way to access these structure's values is
             through the DOM interface provided by XML::LibXML. This
             also means, that one <emphasis>can't</emphasis> simply
-            inherit a XML::LibXML node and add new member variables as
+            inherit an XML::LibXML node and add new member variables as
             they were hash keys.</para>
 
             <para>The DOM interface of XML::LibXML does not intend to
@@ -2163,7 +2163,7 @@ my $doc = $builder-&gt;result();</programlisting>
              In this respect,
 	     XML::LibXML DOM implementation differs from the DOM
              Level 2 specification according to which special
-              attributes for declaring the apropriate XML namespaces
+              attributes for declaring the appropriate XML namespaces
               should not be added when a node with a namespace prefix
               and namespace URI is created.
             </para>
@@ -2194,7 +2194,7 @@ $root-&gt;setAttributeNodeNS( $attr );</programlisting>
             <para>The namespace is declared on the document element
               during the setAttributeNodeNS() call.
             </para>
-            <para>Namespaces can be also declared explicitly by the use of XML::LibXML:Element's setNamespace() function.
+            <para>Namespaces can be also declared explicitly by the use of XML::LibXML::Element's setNamespace() function.
 	     Since 1.61, they can also be manipulated with functions
              setNamespaceDeclPrefix() and setNamespaceDeclURI() (not available in DOM).
 	     Changing an URI or prefix of an existing namespace declaration
@@ -2451,7 +2451,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                     </funcsynopsis>
 
                     <para><emphasis>toString</emphasis> is a DOM serializing function,
-		    so the DOM Tree is serialized into a XML string, ready for output.</para>
+		    so the DOM Tree is serialized into an XML string, ready for output.</para>
                     <para>IMPORTANT: unlike toString for other nodes, on document nodes
 		      this function returns the XML as a byte string in the original encoding of the
                       document (see the actualEncoding() method)! This means you
@@ -3335,7 +3335,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     <para><emphasis>cloneNode</emphasis> creates a
                     copy of <function>$node</function>. When $deep is
                     set to 1 (true) the function will copy all
-                    childnodes as well. If $deep is 0 only the current
+                    child nodes as well. If $deep is 0 only the current
                     node will be copied. Note that in case of element,
                     attributes are copied even if $deep is 0.
                     </para>
@@ -3422,7 +3422,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$boolean = $node-&gt;hasChildNodes();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>If the current node has Childnodes this function returns TRUE (1), otherwise it returns FALSE (0, not undef).</para>
+                    <para>If the current node has child nodes this function returns TRUE (1), otherwise it returns FALSE (0, not undef).</para>
                 </listitem>
             </varlistentry>
 
@@ -3436,7 +3436,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$childnode = $node-&gt;firstChild;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>If a node has childnodes this function will return the first node in the childlist.</para>
+                    <para>If a node has child nodes this function will return the first node in the child list.</para>
                 </listitem>
             </varlistentry>
 
@@ -3450,7 +3450,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$childnode = $node-&gt;lastChild;</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>If the <function>$node</function> has childnodes this function returns the last child node.</para>
+                    <para>If the <function>$node</function> has child nodes this function returns the last child node.</para>
                 </listitem>
             </varlistentry>
 
@@ -3985,7 +3985,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                         <funcsynopsisinfo>$node-&gt;setBaseURI($strURI);</funcsynopsisinfo>
                     </funcsynopsis>
             <para>This method only does something useful for an element node
-	    in a XML document.
+	    in an XML document.
             It sets the xml:base attribute on the node to $strURI, which
 	    effectively sets the base URI of the node to the same value.
 	    </para>
@@ -4906,7 +4906,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                         <funcsynopsisinfo>$attr = XML::LibXML::Attr-&gt;new($name [,$value]);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Class constructor. If you need to work with ISO encoded strings, you should <emphasis>always</emphasis> use the <function>createAttrbute</function>
+                    <para>Class constructor. If you need to work with ISO encoded strings, you should <emphasis>always</emphasis> use the <function>createAttribute</function>
                     of <xref linkend="XML-LibXML-Document"/>.</para>
                 </listitem>
             </varlistentry>
@@ -5404,7 +5404,7 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
                 <sect3>
                     <title>The Parser Process</title>
 
-                    <para>The parser process work on a XML data stream, along which, links to other resources can be embedded. This can be links to external
+                    <para>The parser process works on an XML data stream, along which, links to other resources can be embedded. This can be links to external
                     DTDs or XIncludes for example. Those resources are identified by URIs. The callback implementation of libxml2 assumes that one callback
                     group can handle a certain amount of URIs and a certain URI scheme. Per default, callback handlers for <emphasis>file://*</emphasis>,
                     <emphasis>file:://*.gz</emphasis>, <emphasis>http://*</emphasis> and <emphasis>ftp://*</emphasis> are registered.</para>
@@ -5706,7 +5706,7 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This function allows to validate a (parsed) document
-	            against the given RelaxNG schema. The argument of this function should be a XML::LibXML::Document object.
+	            against the given RelaxNG schema. The argument of this function should be an XML::LibXML::Document object.
 	            If this function succeeds, it will return 0, otherwise
                     it will die() and report the errors found. Because of this validate() should be always evaluated.</para>
                 </listitem>
@@ -6159,7 +6159,7 @@ sub processNode {
 	<emphasis>http://xmlsoft.org/html/libxml-xmlreader.html</emphasis>.
 	This feature requires at least libxml2-2.6.21.
 	Pull-parser (StAX in Java, XmlReader in C#) use an iterator
-	approach to parse a xml-file. They are easier to program than
+	approach to parse XML documents. They are easier to program than
 	event-based parser (SAX) and much more lightweight than
 	tree-based parser (DOM), which load the complete tree into
 	memory.</para>
@@ -6272,7 +6272,7 @@ sub processNode {
             <listitem>
               <para>the reader further supports various
 	      parser options described in
-	      <xref linkend="XML-LibXML-Parser"/> (specificly those
+	      <xref linkend="XML-LibXML-Parser"/> (specifically those
 	      labeled by /reader/).
 	      </para>
             </listitem>
@@ -6480,7 +6480,7 @@ sub processNode {
         <varlistentry>
           <term>nodePath()</term>
           <listitem>
-            <para>Returns a cannonical location path to the current element
+            <para>Returns a canonical location path to the current element
 	    from the root node to the current node. Namespaced
 	    elements are matched by '*', because there is no way to declare
 	    prefixes within XPath patterns. Unlike
@@ -6904,11 +6904,11 @@ my $value = $xpc->findvalue($compiled_xpath,$node);
       <title>Synopsis</title>
       <programlisting>use XML::LibXML;
 my $pattern = XML::LibXML::Pattern-&gt;new('/x:html/x:body//x:div', { 'x' => 'http://www.w3.org/1999/xhtml' });
-# test a match on a XML::LibXML::Node $node
+# test a match on an XML::LibXML::Node $node
 
 if ($pattern->matchesNode($node)) { ... }
 
-# or on a XML::LibXML::Reader
+# or on an XML::LibXML::Reader
 
 if ($reader->matchesPattern($pattern)) { ... }
 
@@ -6922,7 +6922,7 @@ print $reader->nodePath while $reader->nextPatternMatch($pattern);
       <para>This is a perl interface to libxml2's pattern matching support
 	<emphasis>http://xmlsoft.org/html/libxml-pattern.html</emphasis>.
       This feature requires recent versions of libxml2.</para>
-      <para>Patterns are a small subset of XPath language, which is limitted
+      <para>Patterns are a small subset of XPath language, which is limited
       to (disjunctions of) location paths involving the child and descendant axes in abbreviated form
       as described by the extended BNF given below:
       </para>
@@ -6961,7 +6961,7 @@ NameTest ::=     QName | '*' | NCName ':' '*'</programlisting>
 	    <funcsynopsis>
 	      <funcsynopsisinfo>$bool = $pattern->matchesNode($node);</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>Given a XML::LibXML::Node object, returns a true value if
+	    <para>Given an XML::LibXML::Node object, returns a true value if
 	    the node is matched by the compiled pattern expression.</para>
 	  </listitem>
 	</varlistentry>
@@ -7165,8 +7165,8 @@ my $node_with_index_2 = $map->item(2);
       <para>The
 	XML::LibXML::Error class is a tiny frontend to
 	<emphasis>libxml2</emphasis>&#39;s structured error support. If
-	XML::LibXML is compied with structured error support, all errors
-	reported by libxml2 are transformed to XML::LibXML:Error
+	XML::LibXML is compiled with structured error support, all errors
+	reported by libxml2 are transformed to XML::LibXML::Error
 	objects. These objects automatically serialize to the
 	corresponding error messages when printed or used in a string
 	operation, but as objects, can also be used to get a detailed and
@@ -7191,7 +7191,7 @@ my $node_with_index_2 = $map->item(2);
 	    <funcsynopsis>
 	      <funcsynopsisinfo>$XML::LibXML::Error::WARNINGS=1;</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>Traditionally, XML::LibXML was supressing parser
+	    <para>Traditionally, XML::LibXML was suppressing parser
 	      warnings by setting libxml2's global variable
 	      xmlGetWarningsDefaultValue to 0. Since
 	      1.70 we do not change libxml2's global
@@ -7210,7 +7210,7 @@ my $node_with_index_2 = $map->item(2);
 	    <funcsynopsis>
 	      <funcsynopsisinfo>$message = $@-&#62;as_string();</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>This functions takes serializes a XML::LibXML::Error
+	    <para>This function serializes an XML::LibXML::Error
 	      object to a string containing the full error message
 	      close to the message produced by <emphasis>libxml2</emphasis> default error
 	      handlers and tools like xmllint. This method is also used
@@ -7226,7 +7226,7 @@ my $node_with_index_2 = $map->item(2);
 	    <funcsynopsis>
 	      <funcsynopsisinfo>print $@->dump();</funcsynopsisinfo>
 	    </funcsynopsis>
-	    <para>This function serializes a XML::LibXML::Error to a
+	    <para>This function serializes an XML::LibXML::Error to a
 	      string displaying all fields of the error structure
 	      individually on separate lines of the form 'name' => 'value'.
 	    </para>
@@ -7473,7 +7473,7 @@ my $node_with_index_2 = $map->item(2);
 	<title>Encoding functions</title>
 	<para>
 	  To encode or decode a string to or from UTF-8, XML::LibXML::Common exports
-	  two functions, which provide interfact to the encoding support in <literal>libxml2</literal>.
+	  two functions, which provide an interface to the encoding support in <literal>libxml2</literal>.
 	  Which encodings are supported by these functions depends
 	  on how <literal>libxml2</literal> was compiled.  UTF-16 is
 	  always supported and on most installations, ISO encodings are
@@ -7481,7 +7481,7 @@ my $node_with_index_2 = $map->item(2);
 	</para>
 	<para>
 	  This interface was useful for older versions of Perl.
-	  Since Perl >= 5.8 provides similar funcions via the <literal>Encode</literal> module,
+	  Since Perl >= 5.8 provides similar functions via the <literal>Encode</literal> module,
 	  it is probably a good idea to use those instead.
 	</para>
 	<variablelist>
@@ -7509,7 +7509,7 @@ my $node_with_index_2 = $map->item(2);
 	  </varlistentry>
 	</variablelist>
 	<para>Both these functions report their errors on the standard
-	error. If an error occours the function will croak(). To catch
+	error. If an error occurs the function will croak(). To catch
 	the error information it is required to call the encoding
 	function from within an eval block in order to prevent the
 	entire script from being stopped on encoding error.</para>
@@ -7526,7 +7526,7 @@ my $node_with_index_2 = $map->item(2);
 	</para>
 	<para>The merge also naturally eliminates a practical and
 	urgent problem experienced by many XML::LibXML users on certain
-	platforms, namely misterious misbehavior of XML::LibXML
+	platforms, namely mysterious misbehavior of XML::LibXML
 	occurring if the installed (often pre-packaged) version of
 	XML::LibXML::Common was compiled against an older version of
 	libxml2 than XML::LibXML.

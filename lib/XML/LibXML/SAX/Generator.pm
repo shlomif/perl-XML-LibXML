@@ -142,7 +142,7 @@ XML::LibXML::SAX::Generator - Generate SAX events from a LibXML tree
 
 =head1 DESCRIPTION
 
-THIS CLASS IS DEPRACED! Use XML::LibXML::SAX::Parser instead!
+THIS CLASS IS DEPRECATED! Use XML::LibXML::SAX::Parser instead!
 
 This helper class allows you to generate SAX events from any XML::LibXML
 node, and all it's sub-nodes. This basically gives you interop from
