@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.83            Sat Jul 23 14:28:40 IDT 2011
     - Fixed missing declarations after statements:
         - resolves https://rt.cpan.org/Ticket/Display.html?id=69622 again.
         - thanks to Vadim / VKON.
