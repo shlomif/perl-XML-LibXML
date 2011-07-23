@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fix for perl 5.8.x before 5.8.8:
+        - "You can now use the x operator to repeat a qw// list. This used to raise a syntax error."
+            - http://search.cpan.org/perldoc?perl588delta
+        - fixes https://rt.cpan.org/Ticket/Display.html?id=69722 .
+        - thanks to paul@city-fan.org for the report.
+
 1.83            Sat Jul 23 14:28:40 IDT 2011
     - Fixed missing declarations after statements:
         - resolves https://rt.cpan.org/Ticket/Display.html?id=69622 again.

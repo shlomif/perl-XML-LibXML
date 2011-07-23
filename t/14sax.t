@@ -147,7 +147,7 @@ my $parser;
 
     # TEST
     $SAXTester_start_element_stacker->test(
-        [qw(true) x 10],
+        [(qw(true)) x 10],
         'start_element was successful 10 times.',
     );
     # TEST
@@ -175,7 +175,7 @@ my $parser;
 
     # TEST
     $SAXTester_start_element_stacker->test(
-        [qw(true) x 10],
+        [(qw(true)) x 10],
         'parse_uri(): start_element was successful 10 times.',
     );
     # TEST
