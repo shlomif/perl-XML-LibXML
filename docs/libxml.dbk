@@ -7123,23 +7123,23 @@ my $node_with_index_2 = $map->item(2);
             <varlistentry>
                 <term>getNamedItemNS</term>
 
-                <para>
+                <listitem><para>
                 <emphasis>Not implemented yet.</emphasis>.
-                </para>
+                </para></listitem>
             </varlistentry>
             <varlistentry>
                 <term>setNamedItemNS</term>
 
-                <para>
+                <listitem><para>
                 <emphasis>Not implemented yet.</emphasis>.
-                </para>
+                </para></listitem>
             </varlistentry>
             <varlistentry>
                 <term>removeNamedItemNS</term>
 
-                <para>
+                <listitem><para>
                 <emphasis>Not implemented yet.</emphasis>.
-                </para>
+                </para></listitem>
             </varlistentry>
         </variablelist>
       </sect1>
@@ -7203,6 +7203,8 @@ my $node_with_index_2 = $map->item(2);
 	      and to 2 to report hem via <literal>die</literal>.
 	    </para>
 	  </listitem>
+        </varlistentry>
+        <varlistentry>
 	  <term>as_string</term>
 	  <listitem>
 	    <funcsynopsis>
