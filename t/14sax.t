@@ -6,8 +6,8 @@ use lib './t/lib';
 use Counter;
 use Stacker;
 
-# should be 49.
-use Test::More tests => 49;
+# should be 31.
+use Test::More tests => 31;
 
 # BEGIN { plan tests => 55 }
 
@@ -37,6 +37,25 @@ sub _create_simple_counter {
 
 my $SAXTester_start_document_counter = _create_simple_counter();
 my $SAXTester_end_document_counter = _create_simple_counter();
+
+my $SAXTester_start_element_stacker = Stacker->new(
+    {
+        gen_cb => sub {
+            my $push_cb = shift;
+            return sub {
+                my $el = shift;
+
+                $push_cb->(
+                    ($el->{LocalName} =~ m{\A(?:dromedaries|species|humps|disposition|legs)\z}) 
+                    ? 'true'
+                    : 'false'
+                );
+
+                return;
+            };
+        },
+    }
+);
 
 my $SAXNSTester_start_element_stacker = Stacker->new(
     {
@@ -124,8 +143,13 @@ my $parser;
     # TEST
     ok($generator, ' TODO : Add test name');
 
-    $generator->generate($doc); # SAXTester::start_document
+    $generator->generate($doc); # start_element*10
 
+    # TEST
+    $SAXTester_start_element_stacker->test(
+        [qw(true) x 10],
+        'start_element was successful 10 times.',
+    );
     # TEST
     $SAXTester_start_document_counter->test(1, 'start_document called once.');
     # TEST
@@ -147,17 +171,27 @@ my $parser;
     $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
     # TEST
     ok($parser, ' TODO : Add test name');
-    $parser->parse_uri("example/dromeds.xml");
+    $parser->parse_uri("example/dromeds.xml"); # start_element*10
 
+    # TEST
+    $SAXTester_start_element_stacker->test(
+        [qw(true) x 10],
+        'parse_uri(): start_element was successful 10 times.',
+    );
     # TEST
     $SAXTester_start_document_counter->test(1, 'start_document called once.');
     # TEST
     $SAXTester_end_document_counter->test(1, 'end_document called once.');
 
-    $parser->parse_string(<<EOT);
+    $parser->parse_string(<<EOT); # start_element*1
 <?xml version='1.0' encoding="US-ASCII"?>
 <dromedaries one="1" />
 EOT
+    # TEST
+    $SAXTester_start_element_stacker->test(
+        [qw(true)],
+        'parse_string() : start_element was successful 1 times.',
+    );
     # TEST
     $SAXTester_start_document_counter->test(1, 'start_document called once.');
     # TEST
@@ -314,13 +348,16 @@ sub end_document {
 }
 
 sub start_element {
-  my ($self, $el) = @_;
-  # TEST*21
-  like ($el->{LocalName}, qr{^(dromedaries|species|humps|disposition|legs)$}, 'SAXTester::start_element');
-  foreach my $attr (keys %{$el->{Attributes}}) {
-    # warn("Attr: $attr = $el->{Attributes}->{$attr}\n");
-  }
-# warn("start_element: $el->{Name}\n");
+    my ($self, $el) = @_;
+
+    $SAXTester_start_element_stacker->cb()->($el);
+
+    # foreach my $attr (keys %{$el->{Attributes}}) {
+    #   warn("Attr: $attr = $el->{Attributes}->{$attr}\n");
+    # }
+    # warn("start_element: $el->{Name}\n");
+
+    return;
 }
 
 sub end_element {
