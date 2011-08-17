@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Gracefully handle returned undef()s in the read callback under -w ($^W):
+        - t/49callbacks_returning_undef.t
+        - https://rt.cpan.org/Ticket/Display.html?id=70321
+
 1.84            Sat Jul 23 23:12:28 IDT 2011
     - Fix for perl 5.8.x before 5.8.8:
         - "You can now use the x operator to repeat a qw// list. This used to raise a syntax error."
