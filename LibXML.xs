@@ -652,6 +652,7 @@ LibXML_input_read(void * context, char * buffer, int len)
     STRLEN res_len;
     const char * output;
     SV * ctxt;
+    SV * output_sv;
 
     res_len = 0;
     ctxt = (SV *)context;
@@ -685,7 +686,15 @@ LibXML_input_read(void * context, char * buffer, int len)
             croak_obj;
         }
 
-        output = POPp;
+        /*
+         * Handle undef()s gracefully, to avoid using POPpx which warns upon $^W
+         * being set. See t/49callbacks_returning_undef.t and:
+         * https://rt.cpan.org/Ticket/Display.html?id=70321
+         * */
+        
+        output_sv = POPs;
+        output = SvOK(output_sv) ? SvPVx_nolen(output_sv) : NULL;    
+
         if (output != NULL) {
             res_len = strlen(output);
             if (res_len) {
