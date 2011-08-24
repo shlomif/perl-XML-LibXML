@@ -285,7 +285,7 @@ if ($config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
     if( $ENV{ACTIVEPERL_MINGW} ) {
       $config{LIBS} .= ' -llibxml2.lib -lzlib.lib';
     } else {
-      $config{LIBS} .= ' -llibxml2 -lzlib';
+      $config{LIBS} .= ' -llibxml2 -lzlib -llibgettextlib.dll';
     }
   } else {
     $config{LIBS} .= ' -lxml2 -lz -lm';
