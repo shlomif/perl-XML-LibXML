@@ -1,8 +1,13 @@
 Revision history for Perl extension XML::LibXML
 
+1.85            Wed Aug 24 17:05:19 IDT 2011
     - Gracefully handle returned undef()s in the read callback under -w ($^W):
         - t/49callbacks_returning_undef.t
         - https://rt.cpan.org/Ticket/Display.html?id=70321
+    - Add a patch from Mithaldu to get XML::LibXML to compile on Win32:
+        - https://rt.cpan.org/Ticket/Display.html?id=70141
+        - I'm applying it by faith, so if it breaks, blame him. (;-).
+        - the patch adds -lllibgettextlib.dll to the Makefile.PL.
 
 1.84            Sat Jul 23 23:12:28 IDT 2011
     - Fix for perl 5.8.x before 5.8.8:
