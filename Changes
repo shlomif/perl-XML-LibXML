@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+    - Changed SvPVx_nolen() to SvPV_nolen() in LibXML.xs for better compatibility.
+        - SvPVx_nolen() appears to be undocumented API.
+        - Resolves https://rt.cpan.org/Public/Bug/Display.html?id=70476
+        - Thanks to Paul for the report.
+
 1.85            Wed Aug 24 17:05:19 IDT 2011
     - Gracefully handle returned undef()s in the read callback under -w ($^W):
         - t/49callbacks_returning_undef.t

@@ -693,7 +693,7 @@ LibXML_input_read(void * context, char * buffer, int len)
          * */
         
         output_sv = POPs;
-        output = SvOK(output_sv) ? SvPVx_nolen(output_sv) : NULL;    
+        output = SvOK(output_sv) ? SvPV_nolen(output_sv) : NULL;    
 
         if (output != NULL) {
             res_len = strlen(output);
