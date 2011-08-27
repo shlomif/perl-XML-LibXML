@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+1.87
+    - Fix t/49callbacks_returning_undef.t to not read /etc/passed which may
+    not be valid XML. Instead, we're reading a local file while using 
+    URI::file (assuming it exists - else - we skip_all.)
+
 1.86            Thu Aug 25 11:42:55 IDT 2011
     - Changed SvPVx_nolen() to SvPV_nolen() in LibXML.xs for better compatibility.
         - SvPVx_nolen() appears to be undocumented API.

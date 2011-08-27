@@ -13,14 +13,45 @@ use warnings;
 
 use lib './t/lib';
 
-use Test::More tests => 1;
+use Test::More;
+use File::Spec;
 
 use XML::LibXML;
 
-my $string = <<EOF;
+if (! eval { require URI::file; } )
+{
+    plan skip_all => "URI::file is not available.";
+}
+else
+{
+    plan tests => 1;
+}
+
+sub _escape_html
+{
+    my $string = shift;
+    $string =~ s{&}{&amp;}gso;
+    $string =~ s{<}{&lt;}gso;
+    $string =~ s{>}{&gt;}gso;
+    $string =~ s{"}{&quot;}gso;
+    return $string;
+}
+
+
+my $uri = URI::file->new(
+    File::Spec->rel2abs(
+        File::Spec->catfile(
+            File::Spec->curdir(), "t", "data", "callbacks_returning_undef.xml"
+        )
+    )
+);
+
+my $esc_path = _escape_html("$uri");
+
+my $string = <<"EOF";
 <?xml version="1.0" encoding="us-ascii"?>
 <!DOCTYPE foo [
-    <!ENTITY foo SYSTEM "file:///etc/passwd">
+    <!ENTITY foo SYSTEM "${esc_path}">
 ]>
 <methodCall>
   <methodName>metaWeblog.newPost</methodName>
