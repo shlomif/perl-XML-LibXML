@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-1.87
+1.87            Sat Aug 27 14:05:37 IDT 2011
     - Fix t/49callbacks_returning_undef.t to not read /etc/passed which may
     not be valid XML. Instead, we're reading a local file while using 
     URI::file (assuming it exists - else - we skip_all.)
