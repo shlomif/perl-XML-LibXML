@@ -169,6 +169,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,6,32,1], # tested, works ok
                      [2,7,1,0], # broken release, broken utf-16
                      [2,7,6,1], # tested, ok
+                     [2,7,8,1], # tested, ok
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
