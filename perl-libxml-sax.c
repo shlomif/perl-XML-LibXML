@@ -236,7 +236,7 @@ int CBufferLength(struct CBuffer *buffer) {
 }
 
 void CBufferAppend(struct CBuffer *buffer, const xmlChar *newstring, int len) {
-	char *copy = xmlMalloc(len);
+	xmlChar *copy = xmlMalloc(len);
 
 	memcpy(copy, newstring, len);
 
@@ -249,7 +249,7 @@ void CBufferAppend(struct CBuffer *buffer, const xmlChar *newstring, int len) {
 xmlChar * CBufferCharacters(struct CBuffer *buffer) {
 	int length = CBufferLength(buffer);
 	xmlChar *new = xmlMalloc(length + 1);
-	char *p = new;
+	xmlChar *p = new;
 	int copied = 0;
 	struct CBufferChunk *cur;
 
