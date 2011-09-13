@@ -2,8 +2,10 @@ Revision history for Perl extension XML::LibXML
 
     - Add libxml2 2.7.8 as tested and working fine for the Makefile.PL.
     (Thanks to H. Merijn Brand.).
-    - Apply a patch to perl-libxml-sax.c to use xmlChat * instead of char *.
+    - Apply a patch to perl-libxml-sax.c to use xmlChar * instead of char *.
     (Thanks to H. Merijn Brand.).
+    - Correct the README so it won't read XML-LibXML-Common.
+        - see http://code.activestate.com/lists/perl-xml/8907/
 
 1.87            Sat Aug 27 14:05:37 IDT 2011
     - Fix t/49callbacks_returning_undef.t to not read /etc/passed which may
