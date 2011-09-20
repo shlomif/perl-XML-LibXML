@@ -157,7 +157,7 @@ can use any directory you prefer; just adjust the instructions accordingly.)
 
 Get the latest version of XML-LibXML from CPAN. Extract them.
 
-Issue these commands in the XML-LibXML-${VERSION} directory:
+Issue these commands in the XML-LibXML-Common-VERSION directory:
 
 >   perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
 >   nmake

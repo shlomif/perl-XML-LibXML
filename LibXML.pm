@@ -1050,6 +1050,7 @@ sub _html_options {
   #  return (undef,undef) unless ref $opts;
   my $flags = 0;
   $flags |=     1 if exists $opts->{recover} ? $opts->{recover} : $self->recover;
+  $flags |=     4 if $opts->{no_defdtd}; # default is ON: injects DTD as needed
   $flags |=    32 if exists $opts->{suppress_errors} ? $opts->{suppress_errors} : $self->get_option('suppress_errors');
   # This is to fix https://rt.cpan.org/Ticket/Display.html?id=58024 :
   # <quote> 
@@ -1064,7 +1065,7 @@ sub _html_options {
   $flags |=   128 if exists $opts->{pedantic_parser} ? $opts->{pedantic_parser} : $self->pedantic_parser;
   $flags |=   256 if exists $opts->{no_blanks} ? $opts->{no_blanks} : !$self->keep_blanks;
   $flags |=  2048 if exists $opts->{no_network} ? $opts->{no_network} : !$self->no_network;
-  $flags |= 16384 if  $opts->{no_cdata};
+  $flags |= 16384 if $opts->{no_cdata};
   $flags |= 65536 if $opts->{compact}; # compact small text nodes; no modification
                                          # of the tree allowed afterwards
                                          # (WILL possibly CRASH IF YOU try to MODIFY THE TREE)
