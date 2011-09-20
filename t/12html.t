@@ -2,8 +2,8 @@
 use strict;
 use warnings;
 
-# should be 41.
-use Test::More tests => 41;
+# should be 43.
+use Test::More tests => 43;
 
 use XML::LibXML;
 use IO::File;
@@ -312,3 +312,28 @@ EOF
   # TEST
   is ($val, 'working', 'XPath');
 }
+
+
+{
+    # 70878
+    # HTML_PARSE_NODEFDTD
+
+    SKIP: {
+        skip("LibXML version is below 20708", 2) unless ( XML::LibXML::LIBXML_VERSION >= 20708 );
+
+        my $html = q(<body bgcolor='#ffffff' style="overflow: hidden;" leftmargin=0 MARGINWIDTH=0 CLASS="text">);
+        my $p = XML::LibXML->new;
+
+        # TEST
+        like( $p->parse_html_string( $html, {
+                    recover => 2,
+                    no_defdtd => 1,
+                    encoding => 'UTF-8' } )->toStringHTML, qr/^\Q<html>\E/, 'do not add a default DOCTYPE' );
+
+        # TEST
+        like ( $p->parse_html_string( $html, {
+                    recover => 2,
+                    encoding => 'UTF-8' } )->toStringHTML, qr/^\Q<!DOCTYPE html\E/, 'add a default DOCTYPE' );
+    }
+}
+

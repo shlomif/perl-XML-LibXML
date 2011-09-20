@@ -6,6 +6,9 @@ Revision history for Perl extension XML::LibXML
     (Thanks to H. Merijn Brand.).
     - Correct the README so it won't read XML-LibXML-Common.
         - see http://code.activestate.com/lists/perl-xml/8907/
+    - Add a patch to implement the no_defdtd option in recent libxml2's:
+        - https://rt.cpan.org/Ticket/Display.html?id=70878
+        - Thanks to zzgrim@gmail.com .
 
 1.87            Sat Aug 27 14:05:37 IDT 2011
     - Fix t/49callbacks_returning_undef.t to not read /etc/passed which may

@@ -1777,6 +1777,14 @@ $parser->input_callbacks($c);
             </listitem>
           </varlistentry>
           <varlistentry>
+            <term>no_defdtd</term>
+            <listitem>
+	      <para>/html/</para>
+              <para>do not add a default DOCTYPE; possible values are 0 and 1</para>
+              <para>the default is (0) to add a DTD when the input html lacks one</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
             <term>expand_xinclude or xinclude</term>
             <listitem>
 	      <para>/parser, reader/</para>
