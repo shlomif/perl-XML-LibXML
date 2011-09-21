@@ -33,7 +33,7 @@ sub process_file
 process_file('LibXML.pm');
 
 while (my $r = $tree->next()) {
-    if ($r =~ m{/\.svn\z})
+    if ($r =~ m{/\.(?:svn|hg|git)\z})
     {
         $tree->prune();
     }
