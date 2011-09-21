@@ -23,7 +23,7 @@ sub process_file
     my @lines = io->file($r)->getlines();
     foreach (@lines)
     {
-        s#(\$VERSION = '|^Version )\d+\.\d+(?:\.\d+)?('|)#$1 . $version_n . $2#e;
+        s#(\$VERSION = "|^Version )\d+\.\d+(?:\.\d+)?("|)#$1 . $version_n . $2#e;
     }
     io->file($r)->print(
         @lines
