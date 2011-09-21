@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.88            Wed Sep 21 12:54:33 IDT 2011
     - Add libxml2 2.7.8 as tested and working fine for the Makefile.PL.
     (Thanks to H. Merijn Brand.).
     - Apply a patch to perl-libxml-sax.c to use xmlChar * instead of char *.
