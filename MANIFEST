@@ -103,6 +103,7 @@ perl-libxml-sax.c
 perl-libxml-sax.h
 ppport.h
 README
+scripts/bump-version-number.pl
 scripts/fast-eumm.pl
 scripts/prints-to-comments.pl
 scripts/Test.pm-to-Test-More.pl
