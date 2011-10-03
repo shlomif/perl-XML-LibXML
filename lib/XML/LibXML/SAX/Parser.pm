@@ -121,7 +121,7 @@ sub process_node {
     elsif ($node_type == XML_DOCUMENT_NODE
            || $node_type == XML_HTML_DOCUMENT_NODE
            || $node_type == XML_DOCUMENT_FRAG_NODE) {
-        # some times it is just usefull to generate SAX events from
+        # sometimes it is just useful to generate SAX events from
         # a document fragment (very good with filters).
         foreach my $kid ($node->childNodes) {
             $self->process_node($kid);

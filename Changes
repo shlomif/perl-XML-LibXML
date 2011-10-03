@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Apply a patch with spelling fixes by Kevin Lyda :
+        - https://rt.cpan.org/Public/Bug/Display.html?id=71403
+        - Thanks to Kevin.
+
 1.88            Wed Sep 21 12:54:33 IDT 2011
     - Add libxml2 2.7.8 as tested and working fine for the Makefile.PL.
     (Thanks to H. Merijn Brand.).
