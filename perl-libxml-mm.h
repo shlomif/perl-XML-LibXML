@@ -302,7 +302,7 @@ PmmCloneNode( xmlNodePtr node , int deep );
  *
  * DESCRIPTION
  * creates an Gdome node from our XML::LibXML node.
- * this function is very usefull for the parser.
+ * this function is very useful for the parser.
  *
  * the function will only work, if XML::LibXML is compiled with
  * XML::GDOME support.

@@ -235,7 +235,7 @@ like($@, qr/^$badfile1:3: parser error : Extra content at the end of the documen
     my $re = qr/\ACould not create file parser context for file "\Q$badfile2\E": \Q$err_string\E/;
 
     eval { $parser->parse_file($badfile2); };
-    like($@, $re, "error parsing non-existant $badfile2");
+    like($@, $re, "error parsing non-existent $badfile2");
 }
 
 {
@@ -267,7 +267,7 @@ like($@, qr/^Entity: line 3: parser error : Extra content at the end of the docu
 $fh = IO::File->new($badfile2);
 
 eval { my $doc = $parser->parse_fh($fh); };
-like($@, qr/^Can't use an undefined value as a symbol reference at/, "error parsing bad file from file handle of non-existant $badfile2");
+like($@, qr/^Can't use an undefined value as a symbol reference at/, "error parsing bad file from file handle of non-existent $badfile2");
 
 {
     $parser->expand_entities(1);

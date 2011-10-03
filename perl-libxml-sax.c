@@ -87,7 +87,7 @@ static U32 PublicIdHash;
 static U32 SystemIdHash;
 
 /* helper function C2Sv is ment to work faster than the perl-libxml-mm
-   version. this shortcut is usefull, because SAX handles only UTF8
+   version. this shortcut is useful, because SAX handles only UTF8
    strings, so there is no conversion logic required.
 */
 SV*

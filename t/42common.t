@@ -83,7 +83,7 @@ is (decodeFromUTF8( 'UTF-16' , '' ), '', 'decodeFromUTF8 of empty string');
 ok (!defined(decodeFromUTF8( 'UTF-16' , undef )), 'decodeFromUTF8 of undef.');
 
 # here should be a test to test badly encoded strings. but for some
-# reasons i am unable to create an apropriate test :(
+# reasons i am unable to create an appropriate test :(
 
 # uncomment these lines if your system is capable to handel not only i
 # so latin 1

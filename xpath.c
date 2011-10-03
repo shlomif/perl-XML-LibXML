@@ -178,7 +178,7 @@ domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
         
         if ( refNode->doc == NULL ) {
             /* if one XPaths a node from a fragment, libxml2 will
-               refuse the lookup. this is not very usefull for XML
+               refuse the lookup. this is not very useful for XML
                scripters. thus we need to create a temporary document
                to make libxml2 do it's job correctly.
              */
@@ -332,7 +332,7 @@ domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_
 
         if ( ctxt->node->doc == NULL ) {
             /* if one XPaths a node from a fragment, libxml2 will
-               refuse the lookup. this is not very usefull for XML
+               refuse the lookup. this is not very useful for XML
                scripters. thus we need to create a temporary document
                to make libxml2 do it's job correctly.
              */
