@@ -11,7 +11,8 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=70878
         - Thanks to zzgrim@gmail.com .
     - Add scripts/bump-version-number.pl to modify the version number globally.
-        - Currently the version numbers of the modules under lib/ where 1.73.
+        - Up to then, the version numbers of the modules under lib/ had
+        been 1.73.
 
 1.87            Sat Aug 27 14:05:37 IDT 2011
     - Fix t/49callbacks_returning_undef.t to not read /etc/passed which may
