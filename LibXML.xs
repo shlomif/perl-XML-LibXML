@@ -1434,6 +1434,9 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML
 PROTOTYPES: DISABLE
 
 BOOT:
+    /* Load Devel first, so debug_memory can 
+       be called before any allocation. */
+    boot_XML__LibXML__Devel(aTHX_ cv);
     LIBXML_TEST_VERSION
     xmlInitParser();
     PmmSAXInitialize(aTHX);
@@ -1444,6 +1447,7 @@ BOOT:
     /* xmlCatalogSetDebug(10); */
     xmlInitializeCatalog(); /* use catalog data */
 #endif
+
 
 void
 _CLONE( class )
