@@ -1,6 +1,7 @@
 Av_CharPtrPtr.c
 Av_CharPtrPtr.h
 Changes
+Devel.xs
 debian/changelog
 debian/compat
 debian/control
@@ -60,6 +61,7 @@ lib/XML/LibXML/Common.pm
 lib/XML/LibXML/Common.pod
 lib/XML/LibXML/DocumentFragment.pod
 lib/XML/LibXML/Document.pod
+lib/XML/LibXML/Devel.pm
 lib/XML/LibXML/DOM.pod
 lib/XML/LibXML/Dtd.pod
 lib/XML/LibXML/Element.pod
@@ -152,6 +154,7 @@ t/48_rt55000.t
 t/49callbacks_returning_undef.t
 t/49global_extent.t
 t/49_load_html.t
+t/50devel.t
 t/60error_prev_chain.t
 t/60struct_error.t
 t/61error.t
