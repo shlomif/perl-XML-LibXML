@@ -28,6 +28,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
   node_from_perl
   refcnt_inc
   refcnt_dec
+  refcnt
   fix_owner
   mem_used
 ) ] );
@@ -146,7 +147,13 @@ If the node is part of a
 subtree, refcnt_dec will fix the reference counts and delete
 the subtree if it is not required any more.
 
-=item refcnt_dec
+=item refcnt
+
+  refcnt($raw_node);
+
+Returns the value of the reference counter. 
+
+=item fix_owner
 
   fix_owner($raw_node, $raw_parent);
 

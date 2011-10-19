@@ -92,6 +92,15 @@ refcnt_dec( n )
     OUTPUT:
         RETVAL
 
+int 
+refcnt( n )
+        void *n
+    CODE:
+        xmlNode *node = n;
+        RETVAL = PmmREFCNT(((ProxyNode *)(node->_private)));
+    OUTPUT:
+        RETVAL
+
 int
 fix_owner( n, p )
         void * n
