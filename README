@@ -155,9 +155,9 @@ containing bin, lib, and include directories.
 Combine all the bin, include, and lib directories under c:\Prog\LibXML. (You
 can use any directory you prefer; just adjust the instructions accordingly.)
 
-Get the latest version of XML-LibXML from CPAN. Extract them.
+Get the latest version of XML-LibXML from CPAN. Extract it.
 
-Issue these commands in the XML-LibXML-Common-VERSION directory:
+Issue these commands in the XML-LibXML-VERSION directory:
 
 >   perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
 >   nmake
@@ -171,12 +171,6 @@ By copying the libxml2 DLLs to the arch directory, you help avoid conflicts
 with other programs you may have installed that use other (possibly
 incompatible) versions of those DLLs.
 
-Issue these commands in the XML-LibXML-VERSION directory:
-
->   perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
->   nmake
->   nmake test
->   nmake install
 
 
 Notes for Mac OS X
