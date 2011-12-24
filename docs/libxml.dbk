@@ -22,7 +22,7 @@
         </authorgroup>
 
 
-        <edition>1.88</edition>
+        <edition>1.89</edition>
         <copyright>
             <year>2001-2007</year>
             <holder>AxKit.com Ltd</holder>
@@ -208,8 +208,8 @@ See Notes for Microsoft Windows below.)</para>
   (You can use any directory you prefer; just adjust the instructions
   accordingly.)</para>
   <para>Get the latest version of XML-LibXML from CPAN.
-  Extract them.</para>
-  <para>Issue these commands in the XML-LibXML-Common-VERSION directory:</para>
+  Extract it.</para>
+  <para>Issue these commands in the XML-LibXML-VERSION directory:</para>
   <programlisting>  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
   nmake
   copy c:\Prog\LibXML\bin\*.dll blib\arch\auto\XML\LibXML
@@ -219,11 +219,6 @@ See Notes for Microsoft Windows below.)</para>
   <para>By copying the libxml2 DLLs to the arch directory, you help avoid
   conflicts with other programs you may have installed that use other
   (possibly incompatible) versions of those DLLs.</para>
-  <para>Issue these commands in the XML-LibXML-VERSION directory:</para>
-  <programlisting>  perl Makefile.PL INC=-Ic:\Prog\LibXML\include LIBS=-Lc:\Prog\LibXML\lib
-  nmake
-  nmake test
-  nmake install</programlisting>
 	    </sect2>
             <sect2>
                 <title>Notes for Mac OS X</title>
