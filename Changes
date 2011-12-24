@@ -5,6 +5,8 @@ Revision history for Perl extension XML::LibXML
         - Thanks to Kevin.
     - Apply a pull request by ElDiablo with the implementation of
     lib/XML/LibXML/Devel.pm .
+    - Adjust the Win32 Build Instructions in the README file.
+        - Thanks to Christopher J. Madsen.
 
 1.88            Wed Sep 21 12:54:33 IDT 2011
     - Add libxml2 2.7.8 as tested and working fine for the Makefile.PL.
