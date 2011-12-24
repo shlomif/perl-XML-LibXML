@@ -1,5 +1,7 @@
 Av_CharPtrPtr.o
 blib
+Devel.c
+Devel.o
 dom.o
 LibXML.bs
 LibXML.c
