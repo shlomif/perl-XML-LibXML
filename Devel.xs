@@ -60,9 +60,10 @@ SV*
 node_to_perl( n, o = NULL )
         void * n
         void * o
-    CODE:
+    PREINIT:
         xmlNode *node = n;
         xmlNode *owner = o;
+    CODE:
         RETVAL = PmmNodeToSv(node , owner?owner->_private:NULL );
     OUTPUT:
         RETVAL
@@ -70,8 +71,9 @@ node_to_perl( n, o = NULL )
 void *
 node_from_perl( sv )
         SV *sv
-    CODE:
+    PREINIT:
         xmlNode *n = PmmSvNodeExt(sv, 0);
+    CODE:
         RETVAL = n;
     OUTPUT:
         RETVAL
@@ -79,15 +81,17 @@ node_from_perl( sv )
 void 
 refcnt_inc( n )
         void *n
-    CODE:
+    PREINIT:
         xmlNode *node = n;
+    CODE:
         PmmREFCNT_inc(((ProxyNode *)(node->_private)));
 
 int 
 refcnt_dec( n )
         void *n
-    CODE:
+    PREINIT:
         xmlNode *node = n;
+    CODE:
         RETVAL = PmmREFCNT_dec(((ProxyNode *)(node->_private)));
     OUTPUT:
         RETVAL
@@ -95,8 +99,9 @@ refcnt_dec( n )
 int 
 refcnt( n )
         void *n
-    CODE:
+    PREINIT:
         xmlNode *node = n;
+    CODE:
         RETVAL = PmmREFCNT(((ProxyNode *)(node->_private)));
     OUTPUT:
         RETVAL
@@ -105,9 +110,10 @@ int
 fix_owner( n, p )
         void * n
         void * p
-    CODE:
+    PREINIT:
         xmlNode *node = n;
         xmlNode *parent = p;
+    CODE:
         RETVAL = PmmFixOwner(node->_private , parent->_private);
     OUTPUT:
         RETVAL
