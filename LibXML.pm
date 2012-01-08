@@ -27,7 +27,7 @@ use XML::LibXML::XPathContext;
 use IO::Handle; # for FH reads called as methods
 
 BEGIN {
-$VERSION = "1.89"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.90"; # VERSION TEMPLATE: DO NOT CHANGE
 $ABI_VERSION = 2;
 require Exporter;
 require DynaLoader;

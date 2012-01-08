@@ -18,7 +18,7 @@ sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;
 }
 
-$VERSION = "1.89"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.90"; # VERSION TEMPLATE: DO NOT CHANGE
 
 sub new {
     my $class = shift;

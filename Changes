@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.90
     - Pull a commit from Aaron Crange to fix compilation bugs in Devel.xs:
         - local variable declarations must be in the PREINIT section,
         not `CODE`, at least for some compiler/OS combinations.
