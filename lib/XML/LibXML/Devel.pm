@@ -46,10 +46,13 @@ XML::LibXML::Devel - makes functions from LibXML.xs available
 
 =head1 SYNOPSIS
   
-  // C functions 
+  /**********************************************
+   * C functions you want to access
+   */
   xmlNode *return_node();
   void receive_node(xmlNode *);
 
+  ###############################################
   # XS Code
   void *
     xs_return_node
@@ -64,6 +67,7 @@ XML::LibXML::Devel - makes functions from LibXML.xs available
     CODE:
         receive_node(n);
 
+  ###############################################
   # Perl code
   use XML::LibXML::Devel;
 
@@ -92,14 +96,15 @@ This gives cleaner dependencies than using LibXML.so directly.
 
 To XS a library that uses libxml2 nodes the first step is to 
 do this so that xmlNodePtr is passed as void *. These raw nodes 
-are then turned into libxml nodes by using this Devel functions.
+are then turned into libxml nodes by using this C<Devel> functions.
 
-Be aware that this is currently rather experimental. The function 
+Be aware that this module is currently rather experimental. The function 
 names may change if I XS more functions and introduce a reasonable 
 naming convention.
 
-Be also aware that this is a great tool to cause segfaults and 
-introduce memory leaks.
+Be also aware that this module is a great tool to cause segfaults and 
+introduce memory leaks. It does however provide a partial cure by making 
+C<xmlMemUsed> available as C<mem_used>.
 
 =head1 FUNCTIONS
 
