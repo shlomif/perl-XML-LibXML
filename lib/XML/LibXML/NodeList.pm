@@ -105,7 +105,7 @@ sub string_value {
 sub to_literal {
     my $self = CORE::shift;
     return XML::LibXML::Literal->new(
-            join('', grep {defined $_} map { $_->string_value } @$self)
+            join('', grep {defined $_} CORE::map { $_->string_value } @$self)
             );
 }
 
@@ -119,6 +119,14 @@ sub to_number {
 sub iterator {
     warn "this function is obsolete!\nIt was disabled in version 1.54\n";
     return undef;
+}
+
+sub map {
+    my $self = CORE::shift;
+    my $sub  = CORE::shift;
+    local $_;
+    my @results = CORE::map { @{[ $sub->($_) ]} } @$self;    
+    return wantarray ? @results : (ref $self)->new(@results);
 }
 
 1;

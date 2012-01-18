@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 17;
 
 use XML::LibXML;
 use IO::Handle;
@@ -61,6 +61,26 @@ is(ref($dom->find("32 + 13")), "XML::LibXML::Number", ' TODO : Add test name');
 
 # TEST
 is(ref($dom->find("//CCC")), "XML::LibXML::NodeList", ' TODO : Add test name');
+
+my $numbers = XML::LibXML::NodeList->new(1..10);
+my $oddify  = sub { $_ + ($_%2?0:9) }; # add 9 to even numbers
+my @map = $numbers->map($oddify);
+
+# TEST
+is(scalar(@map), 10, 'map called in list context returns list');
+
+# TEST
+is(join('|',@map), '1|11|3|13|5|15|7|17|9|19', 'mapped data correct');
+
+my $map = $numbers->map($oddify);
+
+# TEST
+isa_ok($map => 'XML::LibXML::NodeList', '$map');
+
+my @map2 = $map->map(sub { $_ > 10 ? () : ($_,$_,$_) });
+
+# TEST
+is(join('|',@map2), '1|1|1|3|3|3|5|5|5|7|7|7|9|9|9', 'mapping can add/remove nodes');
 
 __DATA__
 <AAA>
