@@ -105,7 +105,7 @@ sub string_value {
 sub to_literal {
     my $self = CORE::shift;
     return XML::LibXML::Literal->new(
-            join('', grep {defined $_} CORE::map { $_->string_value } @$self)
+            join('', CORE::grep {defined $_} CORE::map { $_->string_value } @$self)
             );
 }
 
@@ -126,6 +126,14 @@ sub map {
     my $sub  = CORE::shift;
     local $_;
     my @results = CORE::map { @{[ $sub->($_) ]} } @$self;    
+    return wantarray ? @results : (ref $self)->new(@results);
+}
+
+sub grep {
+    my $self = CORE::shift;
+    my $sub  = CORE::shift;
+    local $_;
+    my @results = CORE::grep { $sub->($_) } @$self;    
     return wantarray ? @results : (ref $self)->new(@results);
 }
 
@@ -206,6 +214,10 @@ the current list.
 
 =head2 map($coderef)
 
-Equivalent to Perl's map function.
+Equivalent to perl's map function.
+
+=head2 grep($coderef)
+
+Equivalent to perl's grep function.
 
 =cut
