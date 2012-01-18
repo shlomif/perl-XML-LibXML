@@ -220,7 +220,7 @@ detailed by the W3C DOM documentation of Node Lists.
 
 =head1 API
 
-=head2 new()
+=head2 new(@nodes)
 
 You will almost never have to create a new NodeList object, as it is all
 done for you by XPath.
