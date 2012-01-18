@@ -204,4 +204,8 @@ Equivalent to perl's unshift function.
 Given a nodelist, prepends the list of nodes in $nodelist to the front of
 the current list.
 
+=head2 map($coderef)
+
+Equivalent to Perl's map function.
+
 =cut
