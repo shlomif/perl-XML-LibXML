@@ -125,7 +125,8 @@ sub map {
     my $self = CORE::shift;
     my $sub  = CORE::shift;
     local $_;
-    my @results = CORE::map { @{[ $sub->($_) ]} } @$self;    
+    my @results = CORE::map { @{[ $sub->($_) ]} } @$self;
+    return unless defined wantarray;
     return wantarray ? @results : (ref $self)->new(@results);
 }
 
@@ -133,7 +134,14 @@ sub grep {
     my $self = CORE::shift;
     my $sub  = CORE::shift;
     local $_;
-    my @results = CORE::grep { $sub->($_) } @$self;    
+    my @results = CORE::grep { $sub->($_) } @$self;
+    return wantarray ? @results : (ref $self)->new(@results);
+}
+
+sub sort {
+    my $self = CORE::shift;
+    my $sub  = CORE::shift;
+    my @results = CORE::sort { $sub->($a,$b) } @$self;
     return wantarray ? @results : (ref $self)->new(@results);
 }
 
@@ -219,5 +227,12 @@ Equivalent to perl's map function.
 =head2 grep($coderef)
 
 Equivalent to perl's grep function.
+
+=head2 sort($coderef)
+
+Equivalent to perl's sort function.
+
+Caveat: Perl's magic C<$a> and C<$b> variables are not available in
+C<$coderef>. Instead the two terms are passed to the coderef as arguments.
 
 =cut
