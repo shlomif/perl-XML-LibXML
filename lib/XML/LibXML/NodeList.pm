@@ -183,6 +183,10 @@ sub __is_code {
         return $code;
     }
     
+    # The other possibility is that $code is a coderef, but is
+    # blessed into a class that doesn't overload '&{}'. In which
+    # case... well, I'm stumped!
+    
     die "Not a subroutine reference\n";
 }
 
