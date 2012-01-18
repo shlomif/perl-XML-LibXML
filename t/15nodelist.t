@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 21;
+use Test::More tests => 23;
 
 use XML::LibXML;
 use IO::Handle;
@@ -100,6 +100,35 @@ is(join('|',@alphabetical), '1|10|2|3|4|5|6|7|8|9', 'sort works 1');
 
 # TEST
 is(join('|',@numeric), '1|2|3|4|5|6|7|8|9|10', 'sort works 2');
+
+my $reverse = XML::LibXML::NodeList->new;
+my $return  = $numbers->foreach( sub { $reverse->unshift($_) } );
+
+# TEST
+is(
+  blessed_refaddr($return),
+  blessed_refaddr($numbers),
+  'foreach returns $self',
+  );
+
+# TEST
+is(join('|',@$reverse), '10|9|8|7|6|5|4|3|2|1', 'foreach works');
+
+
+# modified version of Scalar::Util::PP::refaddr
+# only works with blessed references
+sub blessed_refaddr($) {
+  return undef unless length(ref($_[0]));
+  my $addr;
+  if(defined(my $pkg = ref($_[0]))) {
+    $addr .= bless $_[0], 'Scalar::Util::Fake';
+    bless $_[0], $pkg;
+  }
+  $addr =~ /0x(\w+)/;
+  local $^W;
+  hex($1);
+}
+
 
 __DATA__
 <AAA>

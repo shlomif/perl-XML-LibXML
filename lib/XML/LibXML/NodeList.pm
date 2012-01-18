@@ -145,6 +145,13 @@ sub sort {
     return wantarray ? @results : (ref $self)->new(@results);
 }
 
+sub foreach {
+    my $self = CORE::shift;
+    my $sub  = CORE::shift;
+    $self->map($sub);
+    return $self;
+}
+
 1;
 __END__
 
@@ -234,5 +241,11 @@ Equivalent to perl's sort function.
 
 Caveat: Perl's magic C<$a> and C<$b> variables are not available in
 C<$coderef>. Instead the two terms are passed to the coderef as arguments.
+
+=head2 foreach($coderef)
+
+Inspired by perl's foreach loop. Executes the coderef on each item in
+the list. Similar to C<map>, but instead returning the list of values
+returned by $coderef, returns the original NodeList.
 
 =cut
