@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 
 use XML::LibXML;
 use IO::Handle;
@@ -81,6 +81,16 @@ my @map2 = $map->map(sub { $_ > 10 ? () : ($_,$_,$_) });
 
 # TEST
 is(join('|',@map2), '1|1|1|3|3|3|5|5|5|7|7|7|9|9|9', 'mapping can add/remove nodes');
+
+my @grep = $numbers->grep(sub {$_%2});
+my $grep = $numbers->grep(sub {$_%2});
+
+# TEST
+is(join('|',@grep), '1|3|5|7|9', 'grep works');
+
+# TEST
+isa_ok($grep => 'XML::LibXML::NodeList', '$grep');
+
 
 __DATA__
 <AAA>
