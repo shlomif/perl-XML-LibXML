@@ -1,0 +1,97 @@
+#!/usr/bin/make -f
+#-*- makefile -*-
+# Made with the aid of dh_make, by Craig Small
+# Sample debian/rules that uses debhelper. GNU copyright 1997 by Joey Hess.
+# Some lines taken from debmake, by Christoph Lameter.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# If set to a true value then MakeMaker's prompt function will
+# always return the default without waiting for user input.
+export PERL_MM_USE_DEFAULT=1
+
+PACKAGE=$(shell dh_listpackages)
+
+ifndef PERL
+PERL = /usr/bin/perl
+endif
+
+ifndef DESTDIR
+DESTDIR=..
+endif
+TMP     =`pwd`/debian/$(PACKAGE)
+
+OPTIMIZE = -g -Wall
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+OPTIMIZE += -O0
+else
+OPTIMIZE += -O2
+endif
+# dh_strip automatically handles nostrip
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	
+	# Add here commands to compile the package.
+	$(PERL) Makefile.PL INSTALLDIRS=vendor SKIP_SAX_INSTALL=1
+	# DEFINE=-DXS_WARNINGS
+	$(MAKE) OPTIMIZE="$(OPTIMIZE)" LD_RUN_PATH=""
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) realclean
+
+	dh_clean
+
+install: 
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Add here commands to install the package into debian/tmp.
+	#$(MAKE) install DESTDIR=`pwd`/debian/tmp
+	$(MAKE) install PREFIX=$(TMP)/usr
+
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdocs README
+	dh_installexamples 
+	dh_installmenu
+#	dh_installemacsen
+#	dh_installinit
+	dh_installcron
+	dh_installman
+	dh_installchangelogs Changes
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_makeshlibs
+	dh_installdeb
+	dh_perl 
+	dh_shlibdeps --exclude=libxml2
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb --destdir=$(DESTDIR)
+
+source diff:                                                                  
+	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary
