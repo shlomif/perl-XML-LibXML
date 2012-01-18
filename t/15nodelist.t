@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More tests => 25;
 
 use XML::LibXML;
 use IO::Handle;
@@ -114,10 +114,18 @@ is(
 # TEST
 is(join('|',@$reverse), '10|9|8|7|6|5|4|3|2|1', 'foreach works');
 
+my $biggest  = $shuffled->reduce(sub { $_[0] > $_[1] ? $_[0] : $_[1] }, -1);
+my $smallest = $shuffled->reduce(sub { $_[0] < $_[1] ? $_[0] : $_[1] }, 9999);
+
+# TEST
+is($biggest, 10, 'reduce works 1');
+
+# TEST
+is($smallest, 1, 'reduce works 2');
 
 # modified version of Scalar::Util::PP::refaddr
 # only works with blessed references
-sub blessed_refaddr($) {
+sub blessed_refaddr {
   return undef unless length(ref($_[0]));
   my $addr;
   if(defined(my $pkg = ref($_[0]))) {

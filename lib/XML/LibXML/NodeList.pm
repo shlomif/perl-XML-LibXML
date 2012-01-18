@@ -123,7 +123,7 @@ sub iterator {
 
 sub map {
     my $self = CORE::shift;
-    my $sub  = CORE::shift;
+    my $sub  = __is_code(CORE::shift);
     local $_;
     my @results = CORE::map { @{[ $sub->($_) ]} } @$self;
     return unless defined wantarray;
@@ -132,7 +132,7 @@ sub map {
 
 sub grep {
     my $self = CORE::shift;
-    my $sub  = CORE::shift;
+    my $sub  = __is_code(CORE::shift);
     local $_;
     my @results = CORE::grep { $sub->($_) } @$self;
     return wantarray ? @results : (ref $self)->new(@results);
@@ -140,7 +140,7 @@ sub grep {
 
 sub sort {
     my $self = CORE::shift;
-    my $sub  = CORE::shift;
+    my $sub  = __is_code(CORE::shift);
     my @results = CORE::sort { $sub->($a,$b) } @$self;
     return wantarray ? @results : (ref $self)->new(@results);
 }
@@ -150,6 +150,40 @@ sub foreach {
     my $sub  = CORE::shift;
     $self->map($sub);
     return $self;
+}
+
+sub reduce {
+    my $self = CORE::shift;
+    my $sub  = __is_code(CORE::shift);
+    
+    my @list = @$self;
+    CORE::unshift @list, $_[0] if @_;
+    
+    my $a = CORE::shift(@list);
+    foreach my $b (@list)
+    {
+        $a = $sub->($a, $b);
+    }
+    return $a;
+}
+
+sub __is_code {
+    my ($code) = @_;
+    
+    if (ref $code eq 'CODE') {
+        return $code;
+    }
+    
+    # There are better ways of doing this, but here I've tried to
+    # avoid adding any additional external dependencies.
+    #
+    if (UNIVERSAL::can($code, 'can')        # is blessed (sort of)
+    and overload::Overloaded($code)         # is overloaded
+    and overload::Method($code, '&{}')) {   # overloads '&{}'
+        return $code;
+    }
+    
+    die "Not a subroutine reference\n";
 }
 
 1;
@@ -247,5 +281,13 @@ C<$coderef>. Instead the two terms are passed to the coderef as arguments.
 Inspired by perl's foreach loop. Executes the coderef on each item in
 the list. Similar to C<map>, but instead returning the list of values
 returned by $coderef, returns the original NodeList.
+
+=head2 reduce($coderef, $init)
+
+Equivalent to List::Util's reduce function. C<$init> is optional and
+provides an initial value for the reduction.
+
+Caveat: Perl's magic C<$a> and C<$b> variables are not available in
+C<$coderef>. Instead the two terms are passed to the coderef as arguments.
 
 =cut
