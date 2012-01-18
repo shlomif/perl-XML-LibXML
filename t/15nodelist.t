@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 26;
 
 use XML::LibXML;
 use IO::Handle;
@@ -122,6 +122,11 @@ is($biggest, 10, 'reduce works 1');
 
 # TEST
 is($smallest, 1, 'reduce works 2');
+
+my @reverse = $numbers->reverse;
+
+# TEST
+is(join('|',@reverse), '10|9|8|7|6|5|4|3|2|1', 'reverse works');
 
 # modified version of Scalar::Util::PP::refaddr
 # only works with blessed references

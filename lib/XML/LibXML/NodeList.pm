@@ -135,6 +135,7 @@ sub grep {
     my $sub  = __is_code(CORE::shift);
     local $_;
     my @results = CORE::grep { $sub->($_) } @$self;
+    return unless defined wantarray;
     return wantarray ? @results : (ref $self)->new(@results);
 }
 
@@ -149,7 +150,14 @@ sub foreach {
     my $self = CORE::shift;
     my $sub  = CORE::shift;
     $self->map($sub);
-    return $self;
+    return wantarray ? @$self : $self;
+}
+
+sub reverse
+{
+    my $self    = CORE::shift;
+    my @results = reverse @$self;
+    return wantarray ? @results : (ref $self)->new(@results);
 }
 
 sub reduce {
@@ -279,6 +287,10 @@ Equivalent to perl's sort function.
 
 Caveat: Perl's magic C<$a> and C<$b> variables are not available in
 C<$coderef>. Instead the two terms are passed to the coderef as arguments.
+
+=head2 reverse()
+
+Equivalent to perl's reverse function.
 
 =head2 foreach($coderef)
 
