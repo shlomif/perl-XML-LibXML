@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 21;
 
 use XML::LibXML;
 use IO::Handle;
@@ -91,6 +91,15 @@ is(join('|',@grep), '1|3|5|7|9', 'grep works');
 # TEST
 isa_ok($grep => 'XML::LibXML::NodeList', '$grep');
 
+my $shuffled = XML::LibXML::NodeList->new(qw/1 4 2 3 6 5 9 7 8 10/);
+my @alphabetical = $shuffled->sort(sub { my ($a, $b) = @_; $a cmp $b });
+my @numeric      = $shuffled->sort(sub { my ($a, $b) = @_; $a <=> $b });
+
+# TEST
+is(join('|',@alphabetical), '1|10|2|3|4|5|6|7|8|9', 'sort works 1');
+
+# TEST
+is(join('|',@numeric), '1|2|3|4|5|6|7|8|9|10', 'sort works 2');
 
 __DATA__
 <AAA>
