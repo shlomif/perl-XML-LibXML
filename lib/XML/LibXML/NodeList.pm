@@ -153,10 +153,9 @@ sub foreach {
     return wantarray ? @$self : $self;
 }
 
-sub reverse
-{
+sub reverse {
     my $self    = CORE::shift;
-    my @results = reverse @$self;
+    my @results = CORE::reverse @$self;
     return wantarray ? @results : (ref $self)->new(@results);
 }
 
