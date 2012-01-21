@@ -149,7 +149,13 @@ sub sort {
 sub foreach {
     my $self = CORE::shift;
     my $sub  = CORE::shift;
-    $self->map($sub);
+
+    foreach my $item (@$self)
+    {
+        local $_ = $item;
+        $sub->($item);
+    }
+
     return wantarray ? @$self : $self;
 }
 
