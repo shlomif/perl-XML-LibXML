@@ -1487,6 +1487,24 @@ use vars qw(@ISA);
 use XML::LibXML qw(:ns :libxml);
 use Carp;
 
+use overload
+    '%{}'  => 'getAttributesHash',
+    '@{}'  => 'childNodes',
+    'bool' => sub { 1 },
+    ;
+
+sub getAttributesHash {
+    my $self = shift;
+    my %attr;
+    foreach ($self->attributes) {
+        next if $_->isa('XML::LibXML::Namespace');
+        my $ns  = $_->namespaceURI;
+        my $key = $_->localname;
+        $attr{defined $ns ? "{$ns}$key" : $key} = $_->value;
+    }
+    \%attr
+}
+
 sub setNamespace {
     my $self = shift;
     my $n = $self->nodeName;
