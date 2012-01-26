@@ -1,0 +1,23 @@
+#!/bin/sh
+## ----------------------------------------------------------------------
+## debian/postinst : postinstallation script for libxml-libxml-perl
+## ----------------------------------------------------------------------
+
+## ----------------------------------------------------------------------
+set -e
+
+## ----------------------------------------------------------------------
+if [ "$1" = "configure" ]
+then
+    update-perl-sax-parsers --add XML::LibXML::SAX::Parser
+    update-perl-sax-parsers --add XML::LibXML::SAX
+    update-perl-sax-parsers --update
+fi
+
+## ---------------------------------------------------------------------- 
+## automatically generated debhelper commands
+#DEBHELPER#
+
+exit 0
+
+## ----------------------------------------------------------------------

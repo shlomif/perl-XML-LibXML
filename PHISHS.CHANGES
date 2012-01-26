@@ -1,0 +1,106 @@
+Ok, I don't implement namespace handling yet. 
+
+But I introduced the node types in XML::LibXML and by default I 
+export them. I am aware this is not very beautyfull -- well, the 
+way it's done ... 
+
+Since most functions need more than just a simple call to libxml2
+I wrapped them in dom.c. I believe this is a better way than just put
+the whole code in the XS file.
+
+Then I patched LibXML.xs and added the parts
+ XML::LibXML::Node 
+ XML::LibXML::Element
+ XML::LibXML::Text
+ XML::LibXML::Comment
+ XML::LibXML::CDATASection
+As well some extra functions in XML::LibXML::Document.
+
+Common node related functions are implemented in XML::LibXML::Node, 
+so only specialized functions had to be reimplemented for sublevel 
+classes. 
+
+I treat XML::LibXML::Text as the CharacterData Class from the 
+DOM spec. Since libxml2 implements all character classes slightly
+different, each constructor had to be implemented seperatly.
+
+This implementation is aware about all subclasses that are supported:
+The CLASS Constant is set depending on the type of the node currently 
+handled. Differently to the previous implementation it does not 
+coredump that much any more. ;-)
+
+As well I added a chunk of documentation and a new example.
+
+_VERSION_F_ (05.17.2001)
+
+code cleanup and better documentation
+"dom.h" , "dom.c" are both much smaller after I removed redundant code
+"dom.c" is sorted analogue to "dom.h"
+
+all documentation about my extensions can be found in "examples/libxml.xml"
+the script "examples/xml2pod.pl" will transform this XML document into 
+various .pod documents.  
+better testing the encoding
+
+
+_VERSION_D_
+
+added nodelist functions 
+and 
+element->getElementsByTagName 
+
+
+_VERSION_C_
+
+the current version includes some securety fixes in dom.c and LibXML.xs
+
+also a better testsuite
+
+-- LibXML.xs_1.22
+
+completed function setAttributeNode
+added function getAttributes 
+added function getAttributesNS
+
+more node security fixes 
+
+these functions will return an array of attribute nodes.
+both will probably renamed before i make them public
+
+
+idea: global encoding constant, so all user input will be encoded from
+that encoding to utf8 INTERNALLY
+
+todo: add xmlEncodeEntitiesReentrant for all text content
+
+dom.h/dom.c
+
+introduced domSetAttributeNode
+cleaned the test suite
+
+LibXML.xs_1.23
+    + getOwner returns the Owner Node (root of the subtree)
+      of the current element 
+    + getOwnerDocument returns the Owner document of the node if any 
+    + proxy fixes
+    + introduced documentfragment
+      i will allways create a document fragment for EACH unbound node.
+      made the documentFragment a node 
+    + more securety checks and less memory leaks...
+    + better array handling
+    + DOM L2 conform naming (optional)
+    + entity encoding fixed
+
+dom.c_1.21
+   + domsetnodevalue is aware of attributes as well
+   + domreplacenode introduced
+   + added internal function insert_node_to_nodelist
+
+t/06nodetypes.t
+   + document_fragment tests 
+
+VERSION 1.01
+
+   + multiple parser layer (it looks like overkill but it is not!)
+   + on the fly XInclude expanding while parsing
+
