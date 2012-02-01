@@ -14,7 +14,7 @@ use strict;
 use vars qw($VERSION $ABI_VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
             $MatchCB $ReadCB $OpenCB $CloseCB %PARSER_FLAGS
-	    $XML_LIBXML_PARSE_DEFAULTS
+            $XML_LIBXML_PARSE_DEFAULTS
             );
 use Carp;
 
@@ -79,8 +79,8 @@ sub VERSION {
                            XML_XINCLUDE_START
                            encodeToUTF8
                            decodeFromUTF8
-		           XML_XMLNS_NS
-		           XML_XML_NS
+                           XML_XMLNS_NS
+                           XML_XML_NS
                           )],
                 libxml => [qw(
                            XML_ELEMENT_NODE
@@ -108,10 +108,10 @@ sub VERSION {
                                 encodeToUTF8
                                 decodeFromUTF8
                                )],
-		ns => [qw(
-		           XML_XMLNS_NS
-		           XML_XML_NS
-		 )],
+                ns => [qw(
+                          XML_XMLNS_NS
+                          XML_XML_NS
+                         )],
                );
 
 @EXPORT_OK = (
@@ -185,18 +185,18 @@ sub import {
     require threads;
     if (!defined($__threads_shared)) {
       if (INIT_THREAD_SUPPORT()) {
-	eval q{
+        eval q{
           use threads::shared;
           share($__PROXY_NODE_REGISTRY_MUTEX);
         };
-	if ($@) { # something went wrong
-	  DISABLE_THREAD_SUPPORT(); # leave the library in a usable state
-	  die $@; # and die
-	}
-	$__PROXY_NODE_REGISTRY = XML::LibXML::HashTable->new();
-	$__threads_shared=1;
+        if ($@) { # something went wrong
+          DISABLE_THREAD_SUPPORT(); # leave the library in a usable state
+          die $@; # and die
+        }
+        $__PROXY_NODE_REGISTRY = XML::LibXML::HashTable->new();
+        $__threads_shared=1;
       } else {
-	croak("XML::LibXML or Perl compiled without ithread support!");
+        croak("XML::LibXML or Perl compiled without ithread support!");
       }
     } elsif (!$__threads_shared) {
       croak("XML::LibXML already loaded without thread support. Too late to enable thread support!");
@@ -233,28 +233,28 @@ sub threads_shared_enabled {
 
 # Copied directly from http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
 use constant {
-  XML_PARSE_RECOVER	  => 1,	       # recover on errors
-  XML_PARSE_NOENT	  => 2,	       # substitute entities
-  XML_PARSE_DTDLOAD	  => 4,	       # load the external subset
-  XML_PARSE_DTDATTR	  => 8,	       # default DTD attributes
-  XML_PARSE_DTDVALID	  => 16,       # validate with the DTD
-  XML_PARSE_NOERROR	  => 32,       # suppress error reports
-  XML_PARSE_NOWARNING	  => 64,       # suppress warning reports
-  XML_PARSE_PEDANTIC	  => 128,      # pedantic error reporting
-  XML_PARSE_NOBLANKS	  => 256,      # remove blank nodes
-  XML_PARSE_SAX1	  => 512,      # use the SAX1 interface internally
-  XML_PARSE_XINCLUDE	  => 1024,     # Implement XInclude substitition
-  XML_PARSE_NONET	  => 2048,     # Forbid network access
-  XML_PARSE_NODICT	  => 4096,     # Do not reuse the context dictionnary
-  XML_PARSE_NSCLEAN	  => 8192,     # remove redundant namespaces declarations
-  XML_PARSE_NOCDATA	  => 16384,    # merge CDATA as text nodes
-  XML_PARSE_NOXINCNODE	  => 32768,    # do not generate XINCLUDE START/END nodes
-  XML_PARSE_COMPACT	  => 65536,    # compact small text nodes; no modification of the tree allowed afterwards
-                                       # (will possibly crash if you try to modify the tree)
-  XML_PARSE_OLD10	  => 131072,   # parse using XML-1.0 before update 5
-  XML_PARSE_NOBASEFIX	  => 262144,   # do not fixup XINCLUDE xml#base uris
-  XML_PARSE_HUGE	  => 524288,   # relax any hardcoded limit from the parser
-  XML_PARSE_OLDSAX	  => 1048576,  # parse using SAX2 interface from before 2.7.0
+  XML_PARSE_RECOVER   => 1,        # recover on errors
+  XML_PARSE_NOENT     => 2,        # substitute entities
+  XML_PARSE_DTDLOAD   => 4,        # load the external subset
+  XML_PARSE_DTDATTR   => 8,        # default DTD attributes
+  XML_PARSE_DTDVALID  => 16,       # validate with the DTD
+  XML_PARSE_NOERROR   => 32,       # suppress error reports
+  XML_PARSE_NOWARNING => 64,       # suppress warning reports
+  XML_PARSE_PEDANTIC  => 128,      # pedantic error reporting
+  XML_PARSE_NOBLANKS  => 256,      # remove blank nodes
+  XML_PARSE_SAX1      => 512,      # use the SAX1 interface internally
+  XML_PARSE_XINCLUDE  => 1024,     # Implement XInclude substitition
+  XML_PARSE_NONET     => 2048,     # Forbid network access
+  XML_PARSE_NODICT    => 4096,     # Do not reuse the context dictionnary
+  XML_PARSE_NSCLEAN   => 8192,     # remove redundant namespaces declarations
+  XML_PARSE_NOCDATA   => 16384,    # merge CDATA as text nodes
+  XML_PARSE_NOXINCNODE=> 32768,    # do not generate XINCLUDE START/END nodes
+  XML_PARSE_COMPACT   => 65536,    # compact small text nodes; no modification of the tree allowed afterwards
+                                   # (will possibly crash if you try to modify the tree)
+  XML_PARSE_OLD10     => 131072,   # parse using XML-1.0 before update 5
+  XML_PARSE_NOBASEFIX => 262144,   # do not fixup XINCLUDE xml#base uris
+  XML_PARSE_HUGE      => 524288,   # relax any hardcoded limit from the parser
+  XML_PARSE_OLDSAX    => 1048576,  # parse using SAX2 interface from before 2.7.0
 };
 
 $XML_LIBXML_PARSE_DEFAULTS = ( XML_PARSE_NODICT | XML_PARSE_HUGE | XML_PARSE_DTDLOAD | XML_PARSE_NOENT );
@@ -263,34 +263,34 @@ $XML_LIBXML_PARSE_DEFAULTS = ( XML_PARSE_NODICT | XML_PARSE_HUGE | XML_PARSE_DTD
 # libxml2 parser flags as temporary workaround
 
 %PARSER_FLAGS = (
-  recover		 => XML_PARSE_RECOVER,
-  expand_entities	 => XML_PARSE_NOENT,
-  load_ext_dtd	         => XML_PARSE_DTDLOAD,
-  complete_attributes	 => XML_PARSE_DTDATTR,
-  validation		 => XML_PARSE_DTDVALID,
-  suppress_errors	 => XML_PARSE_NOERROR,
-  suppress_warnings	 => XML_PARSE_NOWARNING,
-  pedantic_parser	 => XML_PARSE_PEDANTIC,
-  no_blanks		 => XML_PARSE_NOBLANKS,
-  expand_xinclude	 => XML_PARSE_XINCLUDE,
-  xinclude		 => XML_PARSE_XINCLUDE,
-  no_network		 => XML_PARSE_NONET,
-  clean_namespaces	 => XML_PARSE_NSCLEAN,
-  no_cdata		 => XML_PARSE_NOCDATA,
-  no_xinclude_nodes	 => XML_PARSE_NOXINCNODE,
-  old10		         => XML_PARSE_OLD10,
-  no_base_fix		 => XML_PARSE_NOBASEFIX,
-  huge		         => XML_PARSE_HUGE,
-  oldsax		 => XML_PARSE_OLDSAX,
+  recover                => XML_PARSE_RECOVER,
+  expand_entities        => XML_PARSE_NOENT,
+  load_ext_dtd           => XML_PARSE_DTDLOAD,
+  complete_attributes    => XML_PARSE_DTDATTR,
+  validation             => XML_PARSE_DTDVALID,
+  suppress_errors        => XML_PARSE_NOERROR,
+  suppress_warnings      => XML_PARSE_NOWARNING,
+  pedantic_parser        => XML_PARSE_PEDANTIC,
+  no_blanks              => XML_PARSE_NOBLANKS,
+  expand_xinclude        => XML_PARSE_XINCLUDE,
+  xinclude               => XML_PARSE_XINCLUDE,
+  no_network             => XML_PARSE_NONET,
+  clean_namespaces       => XML_PARSE_NSCLEAN,
+  no_cdata               => XML_PARSE_NOCDATA,
+  no_xinclude_nodes      => XML_PARSE_NOXINCNODE,
+  old10                  => XML_PARSE_OLD10,
+  no_base_fix            => XML_PARSE_NOBASEFIX,
+  huge                   => XML_PARSE_HUGE,
+  oldsax                 => XML_PARSE_OLDSAX,
 );
 
 my %OUR_FLAGS = (
-  recover => 'XML_LIBXML_RECOVER',
-  line_numbers => 'XML_LIBXML_LINENUMBERS',
-  URI => 'XML_LIBXML_BASE_URI',
-  base_uri => 'XML_LIBXML_BASE_URI',
-  gdome => 'XML_LIBXML_GDOME',
-  ext_ent_handler => 'ext_ent_handler',
+  recover            => 'XML_LIBXML_RECOVER',
+  line_numbers       => 'XML_LIBXML_LINENUMBERS',
+  URI                => 'XML_LIBXML_BASE_URI',
+  base_uri           => 'XML_LIBXML_BASE_URI',
+  gdome              => 'XML_LIBXML_GDOME',
+  ext_ent_handler    => 'ext_ent_handler',
 );
 
 sub _parser_options {
@@ -303,7 +303,7 @@ sub _parser_options {
   if (ref($self)) {
     $flags = ($self->{XML_LIBXML_PARSER_OPTIONS}||0);
   } else {
-    $flags = $XML_LIBXML_PARSE_DEFAULTS;		# safety precaution
+    $flags = $XML_LIBXML_PARSE_DEFAULTS;    # safety precaution
   }
 
   my ($key, $value);
@@ -311,9 +311,9 @@ sub _parser_options {
     my $f = $PARSER_FLAGS{ $key };
     if (defined $f) {
       if ($value) {
-	$flags |= $f
+        $flags |= $f
       } else {
-	$flags &= ~$f;
+        $flags &= ~$f;
       }
     } elsif ($key eq 'set_parser_flags') { # this can be used to pass flags XML::LibXML does not yet know about
       $flags |= $value;
@@ -350,21 +350,21 @@ sub new {
     if (@_) {
       my %opts = ();
       if (ref($_[0]) eq 'HASH') {
-	%opts = %{$_[0]};
+        %opts = %{$_[0]};
       } else {
-	# old interface
-	my %args = @_;
-	%opts=(
-	  map {
-	    (($compatibility_flags{ $_ }||$_) => $args{ $_ })
-	  } keys %args
-	);
+        # old interface
+        my %args = @_;
+        %opts=(
+          map {
+            (($compatibility_flags{ $_ }||$_) => $args{ $_ })
+          } keys %args
+        );
       }
       # parser flags
       $opts{no_blanks} = !$opts{keep_blanks} if exists($opts{keep_blanks}) and !exists($opts{no_blanks});
 
       for (keys %OUR_FLAGS) {
-	$self->{$OUR_FLAGS{$_}} = delete $opts{$_};
+        $self->{$OUR_FLAGS{$_}} = delete $opts{$_};
       }
       $class->load_catalog(delete($opts{catalog})) if $opts{catalog};
 
@@ -372,7 +372,7 @@ sub new {
 
       # store remaining unknown options directly in $self
       for (keys %opts) {
-	$self->{$_}=$opts{$_} unless exists $PARSER_FLAGS{$_};
+        $self->{$_}=$opts{$_} unless exists $PARSER_FLAGS{$_};
       }
     } else {
       $self->{XML_LIBXML_PARSER_OPTIONS} = $XML_LIBXML_PARSE_DEFAULTS;
@@ -388,10 +388,10 @@ sub new {
 sub _clone {
   my ($self)=@_;
   my $new = ref($self)->new({
-      recover => $self->{XML_LIBXML_RECOVER},
-      line_nubers => $self->{XML_LIBXML_LINENUMBERS},
-      base_uri => $self->{XML_LIBXML_BASE_URI},
-      gdome => $self->{XML_LIBXML_GDOME},
+      recover          => $self->{XML_LIBXML_RECOVER},
+      line_nubers      => $self->{XML_LIBXML_LINENUMBERS},
+      base_uri         => $self->{XML_LIBXML_BASE_URI},
+      gdome            => $self->{XML_LIBXML_GDOME},
       set_parser_flags => $self->{XML_LIBXML_PARSER_OPTIONS},
     });
   $new->input_callbacks($self->input_callbacks());
@@ -834,7 +834,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -845,7 +845,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -872,7 +872,7 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -882,7 +882,7 @@ sub parse_fh {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -911,7 +911,7 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -921,7 +921,7 @@ sub parse_file {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -958,8 +958,8 @@ sub parse_xml_chunk {
             # will be terminated. in case of a SAX filter the parsing is not
             # finished at that state. therefore we must not reset the parsing
             unless ( $self->{IS_FILTER} ) {
-	      $result = $self->{HANDLER}->end_document();
-	    }
+              $result = $self->{HANDLER}->end_document();
+            }
         };
     }
     else {
@@ -1088,9 +1088,7 @@ sub parse_html_string {
 
     $self->_init_callbacks();
     eval { 
-      $result = $self->_parse_html_string( $str,
-					   $self->_html_options($opts)
-					  ); 
+      $result = $self->_parse_html_string($str, $self->_html_options($opts));
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -1113,9 +1111,9 @@ sub parse_html_file {
     my $result;
 
     $self->_init_callbacks();
-    eval { $result = $self->_parse_html_file($file,
-					     $self->_html_options($opts)
-					    ); };
+    eval {
+      $result = $self->_parse_html_file($file, $self->_html_options($opts));
+    };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
@@ -1137,9 +1135,9 @@ sub parse_html_fh {
 
     my $result;
     $self->_init_callbacks();
-    eval { $result = $self->_parse_html_fh( $fh, 
-					    $self->_html_options($opts)
-					   ); };
+    eval {
+      $result = $self->_parse_html_fh($fh, $self->_html_options($opts));
+    };
     my $err = $@;
     $self->{_State_} = 0;
     if ($err) {
@@ -1326,31 +1324,31 @@ sub setOwnerDocument {
 sub toStringC14N {
     my ($self, $comments, $xpath, $xpc) = @_;
     return $self->_toStringC14N( $comments || 0,
-				 (defined $xpath ? $xpath : undef),
-				 0,
-				 undef,
-				 (defined $xpc ? $xpc : undef)
-				);
+                                 (defined $xpath ? $xpath : undef),
+                                 0,
+                                 undef,
+                                 (defined $xpc ? $xpc : undef)
+                               );
 }
 sub toStringEC14N {
     my ($self, $comments, $xpath, $xpc, $inc_prefix_list) = @_;
     unless (UNIVERSAL::isa($xpc,'XML::LibXML::XPathContext')) {
       if ($inc_prefix_list) {
-	croak("toStringEC14N: 3rd argument is not an XML::LibXML::XPathContext");
+        croak("toStringEC14N: 3rd argument is not an XML::LibXML::XPathContext");
       } else {
-	$inc_prefix_list=$xpc;
-	$xpc=undef;
+        $inc_prefix_list = $xpc;
+        $xpc = undef;
       }
     }
     if (defined($inc_prefix_list) and !UNIVERSAL::isa($inc_prefix_list,'ARRAY')) {
       croak("toStringEC14N: inclusive_prefix_list must be undefined or ARRAY");
     }
     return $self->_toStringC14N( $comments || 0,
-				 (defined $xpath ? $xpath : undef),
-				 1,
-				 (defined $inc_prefix_list ? $inc_prefix_list : undef),
-				 (defined $xpc ? $xpc : undef)
-				);
+                                 (defined $xpath ? $xpath : undef),
+                                 1,
+                                 (defined $inc_prefix_list ? $inc_prefix_list : undef),
+                                 (defined $xpc ? $xpc : undef)
+                                );
 }
 
 *serialize_c14n = \&toStringC14N;
@@ -1532,7 +1530,7 @@ sub getAttribute {
     if ( $name =~ /^xmlns(?::|$)/ ) {
         # user wants to get a namespace ...
         (my $prefix = $name )=~s/^xmlns:?//;
-	$self->_getNamespaceDeclURI($prefix);
+        $self->_getNamespaceDeclURI($prefix);
     }
     else {
         $self->_getAttribute(@_);
@@ -1550,9 +1548,9 @@ sub setAttribute {
       (my $nsprefix = $name )=~s/^xmlns:?//;
       my $nn = $self->nodeName;
       if ( $nn =~ /^\Q${nsprefix}\E:/ ) {
-	# the element has the same prefix
-	$self->setNamespaceDeclURI($nsprefix,$value) ||
-	  $self->setNamespace($value,$nsprefix,1);
+        # the element has the same prefix
+        $self->setNamespaceDeclURI($nsprefix,$value) ||
+        $self->setNamespace($value,$nsprefix,1);
         ##
         ## We set the namespace here.
         ## This is helpful, as in:
@@ -1562,9 +1560,9 @@ sub setAttribute {
         ##
       }
       else {
-	# just modify the namespace
-	$self->setNamespaceDeclURI($nsprefix, $value) ||
-	  $self->setNamespace($value,$nsprefix,0);
+        # just modify the namespace
+        $self->setNamespaceDeclURI($nsprefix, $value) ||
+        $self->setNamespace($value,$nsprefix,0);
       }
     }
     else {
@@ -1577,7 +1575,7 @@ sub getAttributeNS {
     my ($nsURI, $name) = @_;
     croak("invalid attribute name") if !defined($name) or $name eq q{};
     if ( defined($nsURI) and $nsURI eq XML_XMLNS_NS ) {
-	$self->_getNamespaceDeclURI($name eq 'xmlns' ? undef : $name);
+        $self->_getNamespaceDeclURI($name eq 'xmlns' ? undef : $name);
     }
     else {
         $self->_getAttributeNS(@_);
@@ -1620,9 +1618,9 @@ sub  getElementsByTagNameNS {
     my $xpath;
     if ( $name eq '*' ) {
       if ( $nsURI eq '*' ) {
-	$xpath = "descendant::*";
+        $xpath = "descendant::*";
       } else {
-	$xpath = "descendant::*[namespace-uri()='$nsURI']";
+        $xpath = "descendant::*[namespace-uri()='$nsURI']";
       }
     } elsif ( $nsURI eq '*' ) {
       $xpath = "descendant::*[local-name()='$name']";
@@ -1650,7 +1648,7 @@ sub getChildrenByTagName {
     my @nodes;
     if ($name eq '*') {
       @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() }
-	$node->childNodes();
+      $node->childNodes();
     } else {
       @nodes = grep { $_->nodeName eq $name } $node->childNodes();
     }
@@ -1662,10 +1660,10 @@ sub getChildrenByLocalName {
     # my @nodes;
     # if ($name eq '*') {
     #   @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() }
-    # 	$node->childNodes();
+    #   $node->childNodes();
     # } else {
     #   @nodes = grep { $_->nodeType == XML_ELEMENT_NODE() and
-    # 		      $_->localName eq $name } $node->childNodes();
+    #                   $_->localName eq $name } $node->childNodes();
     # }
     # return wantarray ? @nodes : XML::LibXML::NodeList->new_from_ref(\@nodes, 1);
     my @nodes = $node->_getChildrenByTagNameNS('*',$name);
@@ -2050,7 +2048,7 @@ sub new {
   
   unless (UNIVERSAL::can($class,'_compilePattern')) {
     croak("Cannot create XML::LibXML::Pattern - ".
-	  "your libxml2 is compiled without pattern support!");
+          "your libxml2 is compiled without pattern support!");
   }
 
   if (ref($ns_map) eq 'HASH') {
@@ -2077,7 +2075,7 @@ sub new {
   my ($regexp)=@_;
   unless (UNIVERSAL::can($class,'_compile')) {
     croak("Cannot create XML::LibXML::RegExp - ".
-	  "your libxml2 is compiled without regexp support!");
+          "your libxml2 is compiled without regexp support!");
   }
   return $class->_compile($regexp);
 }
