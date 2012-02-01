@@ -1,42 +1,109 @@
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 16;
 use XML::LibXML;
 
 my $root = XML::LibXML->load_xml( IO => \*DATA )->documentElement;
 
-isa_ok
-	$root->[0],
-	'XML::LibXML::Text',
-	'text nodes in array deref';
+# TEST
+ok
+	tied %$root,
+	'elements can be hash dereffed to a tied hash';
 
+# TEST
 isa_ok
-	$root->[1],
-	'XML::LibXML::Element',
-	'element nodes in array deref';
+	tied %$root,
+	'XML::LibXML::AttributeHash',
+	'tied %$element';
 
+# TEST
+ok
+	exists $root->{'attr1'},
+	'EXISTS non-namespaced';
+
+# TEST
 is
-	$root->[1]{'attr1'},
+	$root->{'attr1'},
 	'foo',
-	'non-namespaced attribute';
+	'FETCH non-namespaced';
 
-is
-	$root->[1]{'{http://localhost/}attr2'},
+$root->{attr1} = 'bar';
+# TEST
+is 
+	$root->getAttribute('attr1'),
 	'bar',
-	'namespaced attribute';
+	'STORE non-namespaced';
 
-is
-	$root->[3][0]->textContent,
-	'Hello world',
-	'more deeply nested';
-
-is
-	$root->[3]{'attr1'},
+$root->{attr11} = 'baz';
+# TEST
+is 
+	$root->getAttribute('attr11'),
 	'baz',
-	'things can overload @{} and %{} simultaneously';
+	'STORE (and create) non-namespaced';
+
+delete $root->{attr11};
+# TEST
+ok 
+	!$root->hasAttribute('attr11'),
+	'DELETE non-namespaced';
+
+while (my ($k, $v) = each %$root) {
+	if ($k eq 'attr1') {
+		# TEST
+		ok 1, 'FIRSTKEY/NEXTKEY non-namespaced'
+	}
+}
+
+# TEST
+ok
+	exists $root->{'{http://localhost/}attr2'},
+	'EXISTS namespaced';
+
+# TEST
+is
+	$root->{'{http://localhost/}attr2'},
+	'bar',
+	'FETCH namespaced';
+
+$root->{'{http://localhost/}attr2'} = 'quux';
+# TEST
+is
+	$root->getAttributeNS('http://localhost/', 'attr2'),
+	'quux',
+	'STORE namespaced';
+
+$root->{'{http://localhost/}attr22'} = 'quuux';
+# TEST
+is
+	$root->getAttributeNS('http://localhost/', 'attr22'),
+	'quuux',
+	'STORE (and create) namespaced';
+
+$root->{'{http://localhost/another}attr22'} = 'xyzzy';
+# TEST
+is
+	$root->getAttributeNS('http://localhost/another', 'attr22'),
+	'xyzzy',
+	'STORE (and create) namespaced, in new namespace';
+
+delete $root->{'{http://localhost/another}attr22'};
+# TEST
+ok 
+	!$root->hasAttributeNS('http://localhost/another', 'attr22'),
+	'DELETE namespaced';
+
+while (my ($k, $v) = each %$root) {
+	if ($k eq '{http://localhost/}attr22') {
+		# TEST
+		ok 1, 'FIRSTKEY/NEXTKEY namespaced'
+	}
+}
+
+# TEST
+like
+	$root->toStringEC14N,
+	qr{<root xmlns:x="http://localhost/" attr1="bar" x:attr2="quux" x:attr22="quuux"></root>},
+	'!!! toStringEC14N';
 
 __DATA__
-<root>
-	<elem1 attr1="foo" xmlns:x="http://localhost/" x:attr2="bar" />
-	<elem2 attr1="baz">Hello world</elem2>
-</root>
+<root attr1="foo" xmlns:x="http://localhost/" x:attr2="bar" />

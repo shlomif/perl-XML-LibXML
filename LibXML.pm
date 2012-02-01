@@ -1485,24 +1485,33 @@ package XML::LibXML::Element;
 use vars qw(@ISA);
 @ISA = ('XML::LibXML::Node');
 use XML::LibXML qw(:ns :libxml);
+use XML::LibXML::AttributeHash;
 use Carp;
 
 use overload
     '%{}'  => 'getAttributesHash',
-    '@{}'  => 'childNodes',
     'bool' => sub { 1 },
     ;
 
-sub getAttributesHash {
-    my $self = shift;
-    my %attr;
-    foreach ($self->attributes) {
-        next if $_->isa('XML::LibXML::Namespace');
-        my $ns  = $_->namespaceURI;
-        my $key = $_->localname;
-        $attr{defined $ns ? "{$ns}$key" : $key} = $_->value;
+{
+    # Note that we could generate a new hashref each time this
+    # is called. However, that breaks "each %$element" and
+    # "keys %$element". So instead we consistently return the
+    # same reference to the same (tied) hash. To do that, we
+    # need to use a fieldhash. Hash::FieldHash requires at least
+    # Perl 5.8, but XML-LibXML already dropped support for older
+    # Perls since XML-LibXML-1.77.
+    use Hash::FieldHash qw();
+    my %tiecache;
+    BEGIN { Hash::FieldHash::fieldhash(%tiecache) };
+    sub getAttributesHash {
+        my $self = shift;
+        if (!exists $tiecache{ $self }) {
+            tie my %attr, 'XML::LibXML::AttributeHash', $self;
+            $tiecache{ $self } = \%attr;
+        }
+        return $tiecache{ $self };
     }
-    \%attr
 }
 
 sub setNamespace {
