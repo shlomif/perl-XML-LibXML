@@ -2,6 +2,7 @@ package XML::LibXML::AttributeHash;
 
 use strict;
 use warnings;
+use Scalar::Util qw//;
 use Tie::Hash;
 our @ISA = qw/Tie::Hash/;
 
@@ -35,8 +36,11 @@ sub all_keys {
 }
 
 sub TIEHASH {
-    my ($class, $element) = @_;
-    bless [$element], $class;
+    my ($class, $element, %args) = @_;
+    if ($args{weaken}) {
+        Scalar::Util::weaken($element);
+    }
+    bless [$element, undef, \%args], $class;
 }
 
 sub STORE {
@@ -155,3 +159,11 @@ overloading. The example in the SYNOPSIS could have been written:
  $element->{'href'} = 'http://example.com/';
  print $element->getAttribute('href') . "\n";
 
+The tie interface allows the passing of additional arguments to
+XML::LibXML::AttributeHash:
+
+ tie my %hash, 'XML::LibXML::AttributeHash', $element, %args;
+
+Currently only one argument is supported, the boolean "weaken" which (if
+true) indicates that the tied object's reference to the element should be
+a weak reference. This is used by XML::LibXML::Element's overloading.
