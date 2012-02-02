@@ -9,127 +9,161 @@ our @ISA = qw/Tie::Hash/;
 use vars qw($VERSION);
 $VERSION = "1.90"; # VERSION TEMPLATE: DO NOT CHANGE
 
-BEGIN {
+BEGIN
+{
     *__HAS_WEAKEN  = defined(&Scalar::Util::weaken)
         ? sub () { 1 }
         : sub () { 0 };
 };
 
-sub element {
+sub element
+{
     return $_[0][0];
 }
 
-sub from_clark {
+sub from_clark
+{
     my ($self, $str) = @_;
-    if ($str =~ m! \{ (.+) \} (.+) !x) {
+    if ($str =~ m! \{ (.+) \} (.+) !x)
+    {
         return ($1, $2);
     }
     return (undef, $str);
 }
 
-sub to_clark {
+sub to_clark
+{
     my ($self, $ns, $local) = @_;
     defined $ns ? "{$ns}$local" : $local;
 }
 
-sub all_keys {
+sub all_keys
+{
     my ($self, @keys) = @_;
-    foreach ($self->element->attributes) {
-        next if $_->isa('XML::LibXML::Namespace');
-        push @keys, $self->to_clark($_->namespaceURI, $_->localname);
+    foreach ($self->element->attributes)
+    {
+        if (! $_->isa('XML::LibXML::Namespace'))
+        {
+            push @keys, $self->to_clark($_->namespaceURI, $_->localname);
+        }
     }
     return sort @keys;
 }
 
-sub TIEHASH {
+sub TIEHASH
+{
     my ($class, $element, %args) = @_;
     my $self = bless [$element, undef, \%args], $class;
-    if (__HAS_WEAKEN and $args{weaken}) {
+    if (__HAS_WEAKEN and $args{weaken})
+    {
         Scalar::Util::weaken( $self->[0] );
     }
     return $self;
 }
 
-sub STORE {
+sub STORE
+{
     my ($self, $key, $value) = @_;
     my ($key_ns, $key_local) = $self->from_clark($key);
-    if (defined $key_ns) {
+    if (defined $key_ns)
+    {
         return $self->element->setAttributeNS($key_ns, "xxx:$key_local", "$value");
     }
-    else {
+    else
+    {
         return $self->element->setAttribute($key_local, "$value");
     }
 }
 
-sub FETCH {
+sub FETCH
+{
     my ($self, $key) = @_;
     my ($key_ns, $key_local) = $self->from_clark($key);
-    if (defined $key_ns) {
+    if (defined $key_ns)
+    {
         return $self->element->getAttributeNS($key_ns, "$key_local");
     }
-    else {
+    else
+    {
         return $self->element->getAttribute($key_local);
     }
 }
 
-sub EXISTS {
+sub EXISTS
+{
     my ($self, $key) = @_;
     my ($key_ns, $key_local) = $self->from_clark($key);
-    if (defined $key_ns) {
+    if (defined $key_ns)
+    {
         return $self->element->hasAttributeNS($key_ns, "$key_local");
     }
-    else {
+    else
+    {
         return $self->element->hasAttribute($key_local);
     }
 }
 
-sub DELETE {
+sub DELETE
+{
     my ($self, $key) = @_;
     my ($key_ns, $key_local) = $self->from_clark($key);
-    if (defined $key_ns) {
+    if (defined $key_ns)
+    {
         return $self->element->removeAttributeNS($key_ns, "$key_local");
     }
-    else {
+    else
+    {
         return $self->element->removeAttribute($key_local);
     }
 }
 
-sub FIRSTKEY {
+sub FIRSTKEY
+{
     my ($self) = @_;
     my @keys = $self->all_keys;
     $self->[1] = \@keys;
-    if (wantarray) {
+    if (wantarray)
+    {
         return ($keys[0], $self->FETCH($keys[0]));
     }
     $keys[0];
 }
 
-sub NEXTKEY {
+sub NEXTKEY
+{
     my ($self, $lastkey) = @_;
     my @keys = defined $self->[1] ? @{ $self->[1] } : $self->all_keys;
-    my $found;	
-    foreach my $k (@keys) {
-        next if $k le $lastkey;
-        $found = $k and last;
+    my $found;
+    foreach my $k (@keys)
+    {
+        if ($k gt $lastkey)
+        {
+            $found = $k and last;
+        }
     }
-    if (!defined $found) {
+    if (!defined $found)
+    {
         $self->[1] = undef;
         return;
     }
-    if (wantarray) {
+    if (wantarray)
+    {
         return ($found, $self->FETCH($found));
     }
     return $found;
 }
 
-sub SCALAR {
+sub SCALAR
+{
     my ($self) = @_;
     return $self->element;
 }
 
-sub CLEAR {
+sub CLEAR
+{
     my ($self) = @_;
-    foreach my $k ($self->all_keys) {
+    foreach my $k ($self->all_keys)
+    {
         $self->DELETE($k);
     }
     return $self;
