@@ -1,7 +1,17 @@
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More;
+use Scalar::Util;
 use XML::LibXML;
+
+if (defined (&Scalar::Util::weaken))
+{
+	plan tests => 1;
+}
+else
+{
+	plan skip_all => 'Need Scalar::Util::weaken';
+}
 
 my $is_destroyed;
 BEGIN {
