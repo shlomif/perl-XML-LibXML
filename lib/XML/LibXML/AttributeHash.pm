@@ -9,6 +9,12 @@ our @ISA = qw/Tie::Hash/;
 use vars qw($VERSION);
 $VERSION = "1.90"; # VERSION TEMPLATE: DO NOT CHANGE
 
+BEGIN {
+    *__HAS_WEAKEN  = defined(&Scalar::Util::weaken)
+        ? sub () { 1 }
+        : sub () { 0 };
+};
+
 sub element {
     return $_[0][0];
 }
@@ -37,10 +43,11 @@ sub all_keys {
 
 sub TIEHASH {
     my ($class, $element, %args) = @_;
-    if ($args{weaken}) {
-        Scalar::Util::weaken($element);
+    my $self = bless [$element, undef, \%args], $class;
+    if (__HAS_WEAKEN and $args{weaken}) {
+        Scalar::Util::weaken( $self->[0] );
     }
-    bless [$element, undef, \%args], $class;
+    return $self;
 }
 
 sub STORE {
@@ -166,4 +173,5 @@ XML::LibXML::AttributeHash:
 
 Currently only one argument is supported, the boolean "weaken" which (if
 true) indicates that the tied object's reference to the element should be
-a weak reference. This is used by XML::LibXML::Element's overloading.
+a weak reference. This is used by XML::LibXML::Element's overloading. The
+"weaken" argument is ignored if you don't have a working Scalar::Util::weaken.

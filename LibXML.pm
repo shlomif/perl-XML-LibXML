@@ -1502,13 +1502,20 @@ use overload
     use Hash::FieldHash qw();
     use Scalar::Util qw();
     my %tiecache;
-    BEGIN { Hash::FieldHash::fieldhash(%tiecache) };
+    BEGIN {
+        Hash::FieldHash::fieldhash(%tiecache);
+        *__HAS_WEAKEN  = defined(&Scalar::Util::weaken)
+            ? sub () { 1 }
+            : sub () { 0 };
+    };
     sub getAttributeHash {
         my $self = shift;
         if (!exists $tiecache{ $self }) {
             tie my %attr, 'XML::LibXML::AttributeHash', $self, weaken => 1;
             $tiecache{ $self } = \%attr;
-            Scalar::Util::weaken($tiecache{ $self });
+            if ( __HAS_WEAKEN ) {
+                Scalar::Util::weaken($tiecache{ $self });
+            }
         }
         return $tiecache{ $self };
     }
