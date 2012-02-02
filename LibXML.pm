@@ -1487,7 +1487,7 @@ use XML::LibXML::AttributeHash;
 use Carp;
 
 use overload
-    '%{}'  => 'getAttributesHash',
+    '%{}'  => 'getAttributeHash',
     'bool' => sub { 1 },
     ;
 
@@ -1500,13 +1500,15 @@ use overload
     # Perl 5.8, but XML-LibXML already dropped support for older
     # Perls since XML-LibXML-1.77.
     use Hash::FieldHash qw();
+    use Scalar::Util qw();
     my %tiecache;
     BEGIN { Hash::FieldHash::fieldhash(%tiecache) };
-    sub getAttributesHash {
+    sub getAttributeHash {
         my $self = shift;
         if (!exists $tiecache{ $self }) {
-            tie my %attr, 'XML::LibXML::AttributeHash', $self;
+            tie my %attr, 'XML::LibXML::AttributeHash', $self, weaken => 1;
             $tiecache{ $self } = \%attr;
+            Scalar::Util::weaken($tiecache{ $self });
         }
         return $tiecache{ $self };
     }
