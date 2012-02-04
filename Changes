@@ -3,7 +3,6 @@ Revision history for Perl extension XML::LibXML
     - Overload hash dereferencing on XML::LibXML::Elements, to provide
     access to the element's attributes.
         - See XML::LibXML::AttributeHash for details.
-        - Requires Hash::FieldHash 0.09 or above.
         - Thanks to Toby Inkster.
     - Pull some commits from Toby Inkster to add more convenient methods
     to XML::LibXML::NodeList such as sort, map, grep, etc.
