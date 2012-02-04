@@ -1499,18 +1499,38 @@ use overload
     # need to use a fieldhash. Hash::FieldHash requires at least
     # Perl 5.8, but XML-LibXML already dropped support for older
     # Perls since XML-LibXML-1.77.
-    use Hash::FieldHash qw();
+    #
+    # If Hash::FieldHash isn't available we can sort of do the
+    # same thing by relying upon the stringification of non-scalar
+    # hash keys, and performing a bit of cleanup in DESTROY.
+    #
     my %tiecache;
-    BEGIN {
-        Hash::FieldHash::fieldhash(%tiecache);
+    BEGIN
+    {
+        if (eval { require Hash::FieldHash 0.09; 1 })
+        {
+            Hash::FieldHash::fieldhashes(\%tiecache);
+            *__destroy_tiecache = sub {};
+        }
+        else
+        {
+            *__destroy_tiecache = sub { delete $tiecache{ $_[0] } };
+        }
     };
-    sub getAttributeHash {
+    sub getAttributeHash
+    {
         my $self = shift;
         if (!exists $tiecache{ $self }) {
             tie my %attr, 'XML::LibXML::AttributeHash', $self, weaken => 1;
             $tiecache{ $self } = \%attr;
         }
         return $tiecache{ $self };
+    }
+    sub DESTROY
+    {
+        my ($self) = @_;
+        $self->__destroy_tiecache;
+        $self->SUPER::DESTROY;
     }
 }
 

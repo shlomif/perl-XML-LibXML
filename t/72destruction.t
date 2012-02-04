@@ -15,10 +15,12 @@ else
 
 my $is_destroyed;
 BEGIN {
-	no warnings 'once';
+	no warnings 'once', 'redefine';
+	my $old = \&XML::LibXML::Element::DESTROY;
 	*XML::LibXML::Element::DESTROY = sub {
 		# warn sprintf("DESTROY %s", $_[0]->toString);
 		$is_destroyed++;
+		$old->(@_);
 	};
 }
 
