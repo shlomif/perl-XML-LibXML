@@ -488,11 +488,11 @@ sub rm_fr {
 }
 
 sub xsystem {
-    my $command = shift;
+    my $command_aref = shift;
     if ($DEBUG) {
-        print $command, "\n";
-        if (system($command) != 0) {
-            die "system call to '$command' failed";
+        print "@$command_aref\n";
+        if ((system { $command_aref->[0] } @$command_aref) != 0) {
+            die "system call to '@$command_aref' failed";
         }
         return 1;
     }
@@ -500,11 +500,11 @@ sub xsystem {
     open(OLDERR, ">&STDERR");
     open(STDOUT, ">$DEVNULL");
     open(STDERR, ">$DEVNULL");
-    my $retval = system($command);
+    my $retval = (system { $command_aref->[0] } @$command_aref);
     open(STDOUT, ">&OLDOUT");
     open(STDERR, ">&OLDERR");
     if ($retval != 0) {
-        die "system call to '$command' failed";
+        die "system call to '@$command_aref' failed";
     }
     return 1;
 }
@@ -607,8 +607,9 @@ EOT
         close($cfile);
     }
     my $quote = $is_Win32 ? '"' : "'";
-    xsystem("$^X Makefile.PL "
-        . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config)
+    xsystem([$^X, 'Makefile.PL',
+        (map { "$_=$config{$_}" } keys %config),
+        ]
     );
 
     my $def_opt = defined($opt) ? $opt : '';
@@ -616,7 +617,7 @@ EOT
     # libraries to include do not belong here!
     # I would assume a user to set OTHERLDFLAGS in the %config if they are
     # really required. if done so, we don't have to pass them here ...
-    xsystem("$Config{make} test ${quote}OTHERLDFLAGS=${def_opt}${quote}");
+    xsystem([$Config{make}, 'test', "OTHERLDFLAGS=${def_opt}"]);
 } # end try_link0
 
 sub try_link {
