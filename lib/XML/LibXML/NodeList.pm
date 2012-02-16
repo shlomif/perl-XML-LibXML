@@ -149,7 +149,13 @@ sub sort {
 sub foreach {
     my $self = CORE::shift;
     my $sub  = CORE::shift;
-    $self->map($sub);
+
+    foreach my $item (@$self)
+    {
+        local $_ = $item;
+        $sub->($item);
+    }
+
     return wantarray ? @$self : $self;
 }
 
@@ -294,7 +300,7 @@ Equivalent to perl's reverse function.
 =head2 foreach($coderef)
 
 Inspired by perl's foreach loop. Executes the coderef on each item in
-the list. Similar to C<map>, but instead returning the list of values
+the list. Similar to C<map>, but instead of returning the list of values
 returned by $coderef, returns the original NodeList.
 
 =head2 reduce($coderef, $init)

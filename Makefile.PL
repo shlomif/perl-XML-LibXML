@@ -202,7 +202,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
             }
             if ( $@ =~ /^UNTESTED (\S*)/ ) {
                 warn "Note: libxml2 $1 was not tested with this XML::LibXML version.\n"
-#                 warn <<UNTESTED;
+#                 warn <<"UNTESTED";
 # WARNING!
 # The installed version of libxml2 was not tested with this version of XML::LibXML.
 
@@ -218,7 +218,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                 warn "\nusing fallback values for LIBS and INC\n";
                 $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lm';
                 $config{INC} = '-I/usr/local/include -I/usr/include';
-                print <<OPT;
+                print <<"OPT";
 options:
   LIBS='$config{LIBS}'
   INC='$config{INC}'
@@ -248,7 +248,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                          [0,7,2,0],
                          [0,7,3,1],
                         );
-        print <<GDOME;
+        print <<"GDOME";
 
 GDOME Support (experimental):
    XML::LibXML can parse into XML::GDOME DOMs if libgdome is installed.
@@ -326,7 +326,7 @@ if ($config{LIBS} !~ /\-lz\b/ and !($is_Win32 && $config{LIBS} !~ /\-lzlib\b/)) 
 # -------------------------------------------------------------------------- #
 # test if the libraries are really installed!
 unless (have_library("xml2") or have_library("libxml2")) {
-    print STDERR <<DEATH;
+    print STDERR <<"DEATH";
 libxml2, zlib, and/or the Math library (-lm) have not been found.
 Try setting LIBS and INC values on the command line
 Or get libxml2 from 
@@ -364,7 +364,7 @@ sub MY::manifypods {
     my $str = shift->SUPER::manifypods(@_);
 #    warn $str;
 #    $str =~ s/^manifypods : pure_all (.*)$/manifypods : pure_all docs $1/m;
-    $str .= <<EOF;
+    $str .= <<"EOF";
 
 docs-fast :
 \t\@$^X -pi~ -e 's{<edition>[0-9.]*</edition>}{<edition>'"\$(VERSION)"'</edition>}' docs/libxml.dbk
@@ -489,11 +489,11 @@ sub rm_fr {
 }
 
 sub xsystem {
-    my $command = shift;
+    my $command_aref = shift;
     if ($DEBUG) {
-        print $command, "\n";
-        if (system($command) != 0) {
-            die "system call to '$command' failed";
+        print "@$command_aref\n";
+        if ((system { $command_aref->[0] } @$command_aref) != 0) {
+            die "system call to '@$command_aref' failed";
         }
         return 1;
     }
@@ -501,11 +501,11 @@ sub xsystem {
     open(OLDERR, ">&STDERR");
     open(STDOUT, ">$DEVNULL");
     open(STDERR, ">$DEVNULL");
-    my $retval = system($command);
+    my $retval = (system { $command_aref->[0] } @$command_aref);
     open(STDOUT, ">&OLDOUT");
     open(STDERR, ">&OLDERR");
     if ($retval != 0) {
-        die "system call to '$command' failed";
+        die "system call to '@$command_aref' failed";
     }
     return 1;
 }
@@ -548,7 +548,7 @@ sub try_link0 {
     {
         open(my $cfile, '>', 'Conftest.xs') 
             or die "Cannot write to file Conftest.xs: $!";
-        print {$cfile} <<EOT;
+        print {$cfile} <<"EOT";
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -561,7 +561,7 @@ extern "C" {
 
 EOT
         print {$cfile} $src;
-        print {$cfile} <<EOT;
+        print {$cfile} <<"EOT";
 
 MODULE = Conftest          PACKAGE = Conftest
 
@@ -601,15 +601,16 @@ EOT
     {
         open(my $cfile, ">test.pl") 
             or die "Cannot write to file test.pl: $!";
-        print {$cfile} <<EOT;
+        print {$cfile} <<"EOT";
 use Test; BEGIN { plan tests => 1; } END { ok(\$loaded) }
 use Conftest; \$loaded++;
 EOT
         close($cfile);
     }
     my $quote = $is_Win32 ? '"' : "'";
-    xsystem("$^X Makefile.PL "
-        . join(' ', map { "${quote}$_=$config{$_}${quote}" } keys %config)
+    xsystem([$^X, 'Makefile.PL',
+        (map { "$_=$config{$_}" } keys %config),
+        ]
     );
 
     my $def_opt = defined($opt) ? $opt : '';
@@ -617,7 +618,7 @@ EOT
     # libraries to include do not belong here!
     # I would assume a user to set OTHERLDFLAGS in the %config if they are
     # really required. if done so, we don't have to pass them here ...
-    xsystem("$Config{make} test ${quote}OTHERLDFLAGS=${def_opt}${quote}");
+    xsystem([$Config{make}, 'test', "OTHERLDFLAGS=${def_opt}"]);
 } # end try_link0
 
 sub try_link {
