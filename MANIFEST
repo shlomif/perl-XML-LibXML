@@ -54,6 +54,7 @@ example/xpath.pl
 example/yahoo-finance-html-with-errors.html
 HACKING.txt
 lib/XML/LibXML/Attr.pod
+lib/XML/LibXML/AttributeHash.pm
 lib/XML/LibXML/Boolean.pm
 lib/XML/LibXML/CDATASection.pod
 lib/XML/LibXML/Comment.pod
@@ -158,6 +159,8 @@ t/50devel.t
 t/60error_prev_chain.t
 t/60struct_error.t
 t/61error.t
+t/71overloads.t
+t/72destruction.t
 t/80registryleak.t
 t/90threads.t
 t/data/callbacks_returning_undef.xml

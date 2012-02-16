@@ -4559,6 +4559,18 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 
         </variablelist>
 	</sect1>
+	<sect1>
+	  <title>Overloading</title>
+	  <para>XML::LibXML::Element overloads hash dereferencing to
+	  provide access to the element's attributes. For non-namespaced
+	  attributes, the attribute name is the hash key, and the attribute
+	  value is the hash value. For namespaced attributes, the hash key
+	  is qualified with the namespace URI, using Clark notation.</para>
+          <para>Perl's "tied hash" feature is used, which means that the
+	  hash gives you read-write access to the element's attributes.
+          For more information, see <olink targetdoc="XML::LibXML::AttributeHash"
+          >XML::LibXML::AttributeHash</olink></para>
+	</sect1>
     </chapter>
 
     <chapter id="XML-LibXML-Text">

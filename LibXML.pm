@@ -1485,7 +1485,56 @@ package XML::LibXML::Element;
 use vars qw(@ISA);
 @ISA = ('XML::LibXML::Node');
 use XML::LibXML qw(:ns :libxml);
+use XML::LibXML::AttributeHash;
 use Carp;
+
+use overload
+    '%{}'  => 'getAttributeHash',
+    'bool' => sub { 1 },
+    ;
+
+{
+    # Note that we could generate a new hashref each time this
+    # is called. However, that breaks "each %$element" and
+    # "keys %$element". So instead we consistently return the
+    # same reference to the same (tied) hash. To do that, we
+    # need to use a fieldhash. Hash::FieldHash requires at least
+    # Perl 5.8, but XML-LibXML already dropped support for older
+    # Perls since XML-LibXML-1.77.
+    #
+    # If Hash::FieldHash isn't available we can sort of do the
+    # same thing by relying upon the stringification of non-scalar
+    # hash keys, and performing a bit of cleanup in DESTROY.
+    #
+    my %tiecache;
+    BEGIN
+    {
+        if (eval { require Hash::FieldHash 0.09; 1 })
+        {
+            Hash::FieldHash::fieldhashes(\%tiecache);
+            *__destroy_tiecache = sub {};
+        }
+        else
+        {
+            *__destroy_tiecache = sub { delete $tiecache{ $_[0] } };
+        }
+    };
+    sub getAttributeHash
+    {
+        my $self = shift;
+        if (!exists $tiecache{ $self }) {
+            tie my %attr, 'XML::LibXML::AttributeHash', $self, weaken => 1;
+            $tiecache{ $self } = \%attr;
+        }
+        return $tiecache{ $self };
+    }
+    sub DESTROY
+    {
+        my ($self) = @_;
+        $self->__destroy_tiecache;
+        $self->SUPER::DESTROY;
+    }
+}
 
 sub setNamespace {
     my $self = shift;
