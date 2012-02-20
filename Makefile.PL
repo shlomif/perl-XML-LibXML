@@ -613,7 +613,7 @@ EOT
     );
 
     my $def_opt = defined($opt) ? $opt : '';
-    # I am not shure if OTHERLDFLAGS is really required - at least the
+    # I am not sure if OTHERLDFLAGS is really required - at least the
     # libraries to include do not belong here!
     # I would assume a user to set OTHERLDFLAGS in the %config if they are
     # really required. if done so, we don't have to pass them here ...
