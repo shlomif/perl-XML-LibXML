@@ -214,7 +214,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
             }
 
             if ( not defined $config{LIBS} and not defined $config{INC} ) {
-                warn "\nusing fallback values for LIBS and INC\n";
+                warn "didn't manage to get libxml2 config, guessing\n";
                 $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lm';
                 $config{INC} = '-I/usr/local/include -I/usr/include';
                 print <<"OPT";
@@ -625,7 +625,7 @@ sub try_link {
     my $result = eval {
         try_link0(@_);
     };
-    warn $@ if $DEBUG && $@;
+    warn $@ if $@;
     chdir($start_dir);
     rm_fr(".testlink");
     return $result;
