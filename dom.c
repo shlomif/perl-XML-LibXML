@@ -329,7 +329,7 @@ domParseChar( xmlChar *cur, int *len )
  *
  * this function is pretty neat, since you can read in well balanced 
  * strings and get a list of nodes, which can be added to any other node.
- * (shure - this should return a doucment_fragment, but still it doesn't)
+ * (sure - this should return a doucment_fragment, but still it doesn't)
  *
  * the code is pretty heavy i think, but deep in my heard i believe it's 
  * worth it :) (e.g. if you like to read a chunk of well-balanced code 
