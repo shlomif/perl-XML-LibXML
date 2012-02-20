@@ -4,6 +4,8 @@ Revision history for Perl extension XML::LibXML
     to XML::LibXML::NodeList such as sort, map, grep, etc.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/11/xml-libxml-nodelist-improvements
         - Thanks, Toby!
+    - Printed some warnings regardless if DEBUG is on.
+        - Thanks to http://search.cpan.org/~mstrout/ for the suggestion.
 
 1.90            Sun Jan  8 20:57:58 IST 2012
     - Pull a commit from Aaron Crange to fix compilation bugs in Devel.xs:
