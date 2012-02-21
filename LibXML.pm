@@ -1509,7 +1509,7 @@ use overload
     my %tiecache;
     BEGIN
     {
-        if (eval { require Hash::FieldHash 0.09; 1 })
+        if (eval { require Hash::FieldHash; 1 })
         {
             Hash::FieldHash::fieldhashes(\%tiecache);
             *__destroy_tiecache = sub {};
