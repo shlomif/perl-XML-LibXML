@@ -215,7 +215,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
             }
 
             if ( not defined $config{LIBS} and not defined $config{INC} ) {
-                warn "\nusing fallback values for LIBS and INC\n";
+                warn "didn't manage to get libxml2 config, guessing\n";
                 $config{LIBS} = '-L/usr/local/lib -L/usr/lib -lxml2 -lm';
                 $config{INC} = '-I/usr/local/include -I/usr/include';
                 print <<"OPT";
@@ -614,7 +614,7 @@ EOT
     );
 
     my $def_opt = defined($opt) ? $opt : '';
-    # I am not shure if OTHERLDFLAGS is really required - at least the
+    # I am not sure if OTHERLDFLAGS is really required - at least the
     # libraries to include do not belong here!
     # I would assume a user to set OTHERLDFLAGS in the %config if they are
     # really required. if done so, we don't have to pass them here ...
@@ -626,7 +626,7 @@ sub try_link {
     my $result = eval {
         try_link0(@_);
     };
-    warn $@ if $DEBUG && $@;
+    warn $@ if $@;
     chdir($start_dir);
     rm_fr(".testlink");
     return $result;
