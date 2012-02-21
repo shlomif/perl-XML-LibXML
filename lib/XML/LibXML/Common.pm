@@ -23,7 +23,7 @@ use vars qw( @ISA $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = "1.91"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.92"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use XML::LibXML qw(:libxml);
 
