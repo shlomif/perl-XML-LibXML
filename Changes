@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+
+    - Fix for test failure on perls < 5.10.
+        - Fixes https://rt.cpan.org/Public/Bug/Display.html?id=75195
+        - Thanks to Paul for the report, and for a patch that was not
+        accepted.
+
 1.91            Tue Feb 21 13:57:54 IST 2012
     - Overload hash dereferencing on XML::LibXML::Elements, to provide
     access to the element's attributes.
