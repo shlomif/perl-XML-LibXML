@@ -53,7 +53,7 @@ extern "C" {
  * @encoding: this value is missing in libxml2's doc structure
  *
  * Since XML::LibXML will not know, is a certain node is already
- * defined in the perl layer, it can't shurely tell when a node can be
+ * defined in the perl layer, it can't surely tell when a node can be
  * safely be removed from the memory. This structure helps to keep
  * track how intense the nodes of a document are used and will not
  * delete the nodes unless they are not refered from somewhere else.
