@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.91            Tue Feb 21 13:57:54 IST 2012
     - Overload hash dereferencing on XML::LibXML::Elements, to provide
     access to the element's attributes.
         - See XML::LibXML::AttributeHash for details.
