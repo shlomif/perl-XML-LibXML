@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-1.93
+1.93            Mon Feb 27 11:15:50 IST 2012
     - Fix XML::LibXML::Element comparision with == and eq.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=75257 ,
         https://rt.cpan.org/Ticket/Display.html?id=75293 ,
