@@ -13,7 +13,7 @@ use XML::LibXML::Literal;
 use strict;
 
 use vars qw ($VERSION);
-$VERSION = "1.92"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.93"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use overload
         '""' => \&value,
