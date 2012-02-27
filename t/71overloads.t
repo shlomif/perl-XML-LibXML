@@ -137,6 +137,12 @@ like(
     '!!! toStringEC14N',
     );
 
+# These are tests for:
+# https://rt.cpan.org/Ticket/Display.html?id=75257
+# https://rt.cpan.org/Ticket/Display.html?id=75293
+# https://rt.cpan.org/Ticket/Display.html?id=75259
+# (Three duplicate reports for the same problem.)
+
 # TEST
 is_deeply(
     [($root == $root)],
