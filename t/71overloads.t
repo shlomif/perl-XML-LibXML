@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 16;
+use Test::More tests => 22;
 use XML::LibXML;
 
 my $root = XML::LibXML->load_xml( IO => \*DATA )->documentElement;
@@ -137,5 +137,54 @@ like(
     '!!! toStringEC14N',
     );
 
+# TEST
+is_deeply(
+    [($root == $root)],
+    [1],
+    '== comparison',
+);
+
+# TEST
+is_deeply(
+    [($root eq $root)],
+    [1],
+    'eq comparison',
+);
+
+# TEST
+is_deeply(
+    [($root == 'not-root')],
+    [''],
+    '== negative comparison',
+);
+
+# TEST
+is_deeply(
+    [($root eq 'not-root')],
+    [''],
+    'eq negative comparison',
+);
+
+{
+    my $doc = XML::LibXML->load_xml( string => <<'EOT' )->documentElement;
+<foo>
+    <bar />
+    <baz />
+</foo>
+EOT
+
+    my ($bar_elem) = $doc->findnodes('//bar');
+    my ($baz_elem) = $doc->findnodes('//baz');
+
+    # TEST
+    is_deeply([$bar_elem == $baz_elem], [''],
+        '== comparison between two differenet nodes'
+    );
+
+    # TEST
+    is_deeply([$bar_elem eq $baz_elem], [''],
+        'eq comparison between two differenet nodes'
+    );
+}
 __DATA__
 <root attr1="foo" xmlns:x="http://localhost/" x:attr2="bar" />
