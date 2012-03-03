@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+1.94            Sat Mar  3 22:05:18 IST 2012
+    - Fix XML::LibXML::Element tests for ineqaulity with == and eq.
+        - Fixes https://rt.cpan.org/Ticket/Display.html?id=75505 .
+        - Thanks to Mark Overmeer for the report and for a preliminary patch
+        to t/71overload.t .
+
 1.93            Mon Feb 27 11:15:50 IST 2012
     - Fix XML::LibXML::Element comparision with == and eq.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=75257 ,

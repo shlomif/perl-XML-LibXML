@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 25;
 use XML::LibXML;
 
 my $root = XML::LibXML->load_xml( IO => \*DATA )->documentElement;
@@ -166,7 +166,28 @@ is_deeply(
 
 # TEST
 is_deeply(
+    [($root == 'not-root')],
+    [''],
+    '== negative comparison',
+);
+
+# TEST
+is_deeply(
+    [!($root != 'not-root')],
+    [''],
+    '!== negative comparison',
+);
+
+# TEST
+is_deeply(
     [($root eq 'not-root')],
+    [''],
+    'eq negative comparison',
+);
+
+# TEST
+is_deeply(
+    [!($root ne 'not-root')],
     [''],
     'eq negative comparison',
 );

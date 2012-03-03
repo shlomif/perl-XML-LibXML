@@ -1494,7 +1494,14 @@ use overload
     '%{}'  => 'getAttributeHash',
     'bool' => sub { 1 },
     'eq' => '_isSameNodeLax', '==' => '_isSameNodeLax',
+    'ne' => '_isNotSameNodeLax', '!=' => '_isNotSameNodeLax',
     ;
+
+sub _isNotSameNodeLax {
+    my ($self, $other) = @_;
+
+    return ((not $self->_isSameNodeLax($other)) ? 1 : '');
+}
 
 sub _isSameNodeLax { 
     my ($self, $other) = @_;
