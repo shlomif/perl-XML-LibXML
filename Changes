@@ -1,5 +1,14 @@
 Revision history for Perl extension XML::LibXML
 
+1.95            Tue Mar  6 10:35:26 IST 2012
+    - Got rid of a broken test (at least with recent libxml2s) in
+    t/03doc.t :
+        - https://rt.cpan.org/Ticket/Display.html?id=75403
+        - The problem was that the test tested for an undefined XML
+        namespace, a behaviour which was changed in a recent libxml2
+        release.
+        - Thanks to vcizek for the report.
+
 1.94            Sat Mar  3 22:05:18 IST 2012
     - Fix XML::LibXML::Element tests for ineqaulity with == and eq.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=75505 .
