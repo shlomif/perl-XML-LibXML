@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.96            Fri Mar 16 21:01:09 IST 2012
     - Apply a patch to add leading minus signs to the commands of 
     install_sax_driver.
         - This makes the make process succeed even if they fail.
