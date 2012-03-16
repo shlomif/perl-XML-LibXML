@@ -22,6 +22,10 @@ if (! eval { require URI::file; } )
 {
     plan skip_all => "URI::file is not available.";
 }
+elsif( 0 && URI->VERSION < 1.35 )
+{
+	plan skip_all => "URI >= 1.35 is not available (".URI->VERSION.").";
+}
 else
 {
     plan tests => 1;
