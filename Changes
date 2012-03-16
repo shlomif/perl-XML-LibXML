@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+    - Apply a patch to add leading minus signs to the commands of 
+    install_sax_driver.
+        - This makes the make process succeed even if they fail.
+        - Fixes https://rt.cpan.org/Public/Bug/Display.html?id=75007
+        - Thanks to POPEL for the report, and to Petr Pajas for the patch.
+
 1.95            Tue Mar  6 10:35:26 IST 2012
     - Got rid of a broken test (at least with recent libxml2s) in
     t/03doc.t :

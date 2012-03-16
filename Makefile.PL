@@ -389,8 +389,8 @@ sub MY::install {
      $script .= <<"INSTALL";
 
 install_sax_driver :
-\t\@\$(PERL) -I\$(INSTALLSITELIB) -I\$(INSTALLSITEARCH) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
-\t\@\$(PERL) -I\$(INSTALLSITELIB) -I\$(INSTALLSITEARCH) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
+\t-\@\$(PERL) -I\$(INSTALLSITELIB) -I\$(INSTALLSITEARCH) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
+\t-\@\$(PERL) -I\$(INSTALLSITELIB) -I\$(INSTALLSITEARCH) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
 
 INSTALL
    } else {
