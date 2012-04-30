@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.97            Mon Apr 30 20:31:24 IDT 2012
     - Apply a test and a fix to correct keep_blanks having no effect on
     parse_balanced_chunk.
         - fixes https://rt.cpan.org/Ticket/Display.html?id=76696
