@@ -913,6 +913,21 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
         }
         if (ctxt) xmlCtxtUseOptions(ctxt, parserOptions ); /* Note: sets ctxt->linenumbers = 1 */
 
+        /* 
+         * Without this if/else conditional, NOBLANKS has no effect.
+         *
+         * For more information, see:
+         *
+         * https://rt.cpan.org/Ticket/Display.html?id=76696
+         *
+         * */
+        if (parserOptions & XML_PARSE_NOBLANKS) {
+            xmlKeepBlanksDefault(0);
+        }
+        else {
+            xmlKeepBlanksDefault(1);
+        }
+
         item =  hv_fetch( real_obj, "XML_LIBXML_LINENUMBERS", 22, 0 );
         if ( item != NULL && SvTRUE(*item) ) {
             if (ctxt) ctxt->linenumbers = 1;

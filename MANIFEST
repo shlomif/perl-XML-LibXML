@@ -139,6 +139,7 @@ t/26schema.t
 t/27new_callbacks_simple.t
 t/28new_callbacks_multiple.t
 t/29id.t
+t/30keep_blanks.t
 t/30xpathcontext.t
 t/31xpc_functions.t
 t/32xpc_variables.t

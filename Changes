@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+    - Apply a test and a fix to correct keep_blanks having no effect on
+    parse_balanced_chunk.
+        - fixes https://rt.cpan.org/Ticket/Display.html?id=76696
+        - Add t/30keep_blanks.t .
+        - Thanks to SREZIC for the report, the test and the fix.
+
 1.96            Fri Mar 16 21:01:09 IST 2012
     - Apply a patch to add leading minus signs to the commands of 
     install_sax_driver.
