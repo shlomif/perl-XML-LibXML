@@ -1098,6 +1098,10 @@ $dom = XML::LibXML-&gt;load_xml(
     string => $xml_string
     # parser options ...
   );
+$dom = XML::LibXML-&gt;load_xml(
+    string => (\$xml_string)
+    # parser options ...
+  );
 $dom = XML::LibXML-&gt;load_xml({
     IO => $perl_file_handle
     # parser options ...
