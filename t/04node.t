@@ -11,7 +11,7 @@
 # since all tests are run on a preparsed 
 
 # Should be 166.
-use Test::More tests => 166;
+use Test::More tests => 194;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -605,7 +605,7 @@ my $doc    = $parser->parse_string( $xmlstring );
 }
 
 {
-  my $doc = XML::LibXML->load_xml(string=><<'EOF');
+    my $string = <<'EOF';
 <r>
   <a/>
 	  <b/>
@@ -621,89 +621,95 @@ my $doc    = $parser->parse_string( $xmlstring );
   text
 </r>
 EOF
-  my $r = $doc->getDocumentElement;
-  # TEST
-  ok($r, ' TODO : Add test name');
-  my @nonblank = $r->nonBlankChildNodes;
-  # TEST
-  is(join(',',map $_->nodeName,@nonblank), 'a,b,#comment,#cdata-section,foo,c,#text', ' TODO : Add test name' );
-  # TEST
-  is($r->firstChild->nodeName, '#text', ' TODO : Add test name');
 
-  my @all = $r->childNodes;
-  # TEST
-  is(join(',',map $_->nodeName,@all), '#text,a,#text,b,#text,#cdata-section,#text,#comment,#text,#cdata-section,#text,foo,#text,c,#text', ' TODO : Add test name' );
+    # TEST:$count=2;
+    foreach my $arg_to_parse ($string, \$string)
+    {
+        my $doc = XML::LibXML->load_xml(string=>$arg_to_parse);
+        my $r = $doc->getDocumentElement;
+        # TEST*$count
+        ok($r, ' TODO : Add test name');
+        my @nonblank = $r->nonBlankChildNodes;
+        # TEST*$count
+        is(join(',',map $_->nodeName,@nonblank), 'a,b,#comment,#cdata-section,foo,c,#text', ' TODO : Add test name' );
+        # TEST*$count
+        is($r->firstChild->nodeName, '#text', ' TODO : Add test name');
 
-  my $f = $r->firstNonBlankChild;
-  my $p;
-  # TEST
-  is($f->nodeName, 'a', ' TODO : Add test name');
-  # TEST
-  is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  is($f->previousSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  ok( !$f->previousNonBlankSibling, ' TODO : Add test name' );
+        my @all = $r->childNodes;
+        # TEST*$count
+        is(join(',',map $_->nodeName,@all), '#text,a,#text,b,#text,#cdata-section,#text,#comment,#text,#cdata-section,#text,foo,#text,c,#text', ' TODO : Add test name' );
 
-  $p = $f;
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  is($f->nodeName, 'b', ' TODO : Add test name');
-  # TEST
-  is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
+        my $f = $r->firstNonBlankChild;
+        my $p;
+        # TEST*$count
+        is($f->nodeName, 'a', ' TODO : Add test name');
+        # TEST*$count
+        is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        is($f->previousSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        ok( !$f->previousNonBlankSibling, ' TODO : Add test name' );
 
-  $p = $f;
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  ok($f->isa('XML::LibXML::Comment'), ' TODO : Add test name');
-  # TEST
-  is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
+        $p = $f;
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        is($f->nodeName, 'b', ' TODO : Add test name');
+        # TEST*$count
+        is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
 
-  $p = $f;
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  ok($f->isa('XML::LibXML::CDATASection'), ' TODO : Add test name');
-  # TEST
-  is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
+        $p = $f;
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        ok($f->isa('XML::LibXML::Comment'), ' TODO : Add test name');
+        # TEST*$count
+        is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
 
-  $p = $f;
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  ok($f->isa('XML::LibXML::PI'), ' TODO : Add test name');
-  # TEST
-  is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
+        $p = $f;
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        ok($f->isa('XML::LibXML::CDATASection'), ' TODO : Add test name');
+        # TEST*$count
+        is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
 
-  $p = $f;
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  is($f->nodeName, 'c', ' TODO : Add test name');
-  # TEST
-  is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
+        $p = $f;
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        ok($f->isa('XML::LibXML::PI'), ' TODO : Add test name');
+        # TEST*$count
+        is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
 
-  $p = $f;
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  is($f->nodeName, '#text', ' TODO : Add test name');
-  # TEST
-  is($f->nodeValue, "\n  text\n", ' TODO : Add test name');
-  # TEST
-  ok(!$f->nextSibling, ' TODO : Add test name');
-  # TEST
-  ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
+        $p = $f;
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        is($f->nodeName, 'c', ' TODO : Add test name');
+        # TEST*$count
+        is($f->nextSibling->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
 
-  $f=$f->nextNonBlankSibling;
-  # TEST
-  ok(!defined $f, ' TODO : Add test name');
+        $p = $f;
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        is($f->nodeName, '#text', ' TODO : Add test name');
+        # TEST*$count
+        is($f->nodeValue, "\n  text\n", ' TODO : Add test name');
+        # TEST*$count
+        ok(!$f->nextSibling, ' TODO : Add test name');
+        # TEST*$count
+        ok( $f->previousNonBlankSibling->isSameNode($p), ' TODO : Add test name' );
 
+        $f=$f->nextNonBlankSibling;
+        # TEST*$count
+        ok(!defined $f, ' TODO : Add test name');
+
+    }
 }
 
