@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+1.98            Sun May 13 21:02:14 IDT 2012
     - Make sure parse_string() and load_xml() also accept references to
     strings (to avoid unnecessary copying).
         - See: https://rt.cpan.org/Ticket/Display.html?id=64051
