@@ -835,7 +835,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
@@ -846,7 +846,7 @@ sub parse_string {
         my $err = $@;
         $self->{_State_} = 0;
         if ($err) {
-	    chomp $err unless ref $err;
+            chomp $err unless ref $err;
             $self->_cleanup_callbacks();
             croak $err;
         }
