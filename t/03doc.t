@@ -13,7 +13,7 @@ use strict;
 use warnings;
 
 # Should be 168.
-use Test::More tests => 167;
+use Test::More tests => 180;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -602,46 +602,50 @@ sub _count_children_by_name_ns
 =end taken_out
 
 =cut
+    # TEST:$count=2;
+    # Also test that we can parse from scalar references:
+    # See RT #64051 ( https://rt.cpan.org/Ticket/Display.html?id=64051 )
+        foreach my $input ( $string5, \$string5 )
         {
-            my $doc2 = $parser2->parse_string($string5);
-            # TEST
+            my $doc2 = $parser2->parse_string($input);
+            # TEST*$count
             _count_tag_name($doc2, 'C:A', 1, q{3 C:As});
-            # TEST
+            # TEST*$count
             _count_tag_name($doc2, 'A', 3, q{3 As});
-            # TEST
+            # TEST*$count
             _count_elements_by_name_ns($doc2, ["*", "A"], 4,
                 q{4 Elements of A of any namespace}
             );
-            # TEST
+            # TEST*$count
             _count_elements_by_name_ns($doc2, ['*', '*'], 5,
                 q{4 Elements of any namespace},
             );
-            # TEST
+            # TEST*$count
             _count_elements_by_name_ns( $doc2, ["xml://D", "*" ], 2,
                 q{2 elements of any name in D}
             );
 
             my $A = $doc2->getDocumentElement;
-            # TEST
+            # TEST*$count
             _count_children_by_name($A, 'A', 1, q{1 A});
-            # TEST
+            # TEST*$count
             _count_children_by_name($A, 'C:A', 1, q{C:A});
-            # TEST
+            # TEST*$count
             _count_children_by_name($A, 'C:B', 0, q{No C:B children});
-            # TEST
+            # TEST*$count
             _count_children_by_name($A, "*", 2, q{2 Childern in $A in total});
-            # TEST
+            # TEST*$count
             _count_children_by_name_ns($A, ['*', 'A'], 2, 
                 q{2 As of any namespace});
-            # TEST
+            # TEST*$count
             _count_children_by_name_ns($A, [ "xml://D", "*" ], 1,
                 q{1 Child of D},
             );
-            # TEST
+            # TEST*$count
             _count_children_by_name_ns($A, [ "*", "*" ], 2,
                 q{2 Children in total},
             );
-            # TEST
+            # TEST*$count
             _count_children_by_local_name($A, 'A', 2, q{2 As});
         }
     }

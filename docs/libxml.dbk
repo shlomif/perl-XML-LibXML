@@ -1279,10 +1279,12 @@ $dom = $parser-&gt;load_html(...);
                                 <funcsynopsisinfo>$doc = $parser-&gt;parse_string( $xmlstring);</funcsynopsisinfo>
                             </funcsynopsis>
 
-                            <para>This function is similar to parse_fh(), but it parses an XML document that is available as a single string in memory. Again,
+                            <para>This function is similar to parse_fh(), but it parses an XML document that is available as a single string in memory, or alternatively as a reference to a scalar containing a string. Again,
                             you can pass an optional base URI to the function.</para>
 
-                            <programlisting>my $doc = $parser-&gt;parse_string( $xmlstring, $baseuri );</programlisting>
+                            <programlisting>my $doc = $parser-&gt;parse_string( $xmlstring, $baseuri );
+my $doc = $parser-&gt;parse_string(\$xmlstring, $baseuri);
+                            </programlisting>
                         </listitem>
                     </varlistentry>
 

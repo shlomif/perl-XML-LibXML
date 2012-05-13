@@ -1612,6 +1612,11 @@ _parse_string(self, string, dir = &PL_sv_undef)
                 directory = NULL;
             }
         }
+        /* If string is a reference to a string - dereference it.
+         * See: https://rt.cpan.org/Ticket/Display.html?id=64051 . */
+        if (SvROK(string)) {
+            string = SvRV(string);
+        }
         ptr = SvPV(string, len);
         if (len <= 0) {
             croak("Empty string\n");

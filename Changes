@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Make sure parse_string() and load_xml() also accept references to
+    strings (to avoid unnecessary copying).
+        - See: https://rt.cpan.org/Ticket/Display.html?id=64051
+
 1.97            Mon Apr 30 20:31:24 IDT 2012
     - Apply a test and a fix to correct keep_blanks having no effect on
     parse_balanced_chunk.
