@@ -160,6 +160,7 @@ t/50devel.t
 t/60error_prev_chain.t
 t/60struct_error.t
 t/61error.t
+t/62overload.t
 t/71overloads.t
 t/72destruction.t
 t/80registryleak.t
