@@ -1,4 +1,9 @@
 Revision history for Perl extension XML::LibXML
+    
+    - Apply a patch from Mons Anderson ( mons@cpan.org ) for fixing the 
+    overloading.
+        - t/62overload.t
+        - Thanks to Mons.
 
 1.98            Sun May 13 21:02:14 IDT 2012
     - Make sure parse_string() and load_xml() also accept references to

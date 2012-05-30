@@ -1246,6 +1246,14 @@ sub finish_push {
 #-------------------------------------------------------------------------#
 package XML::LibXML::Node;
 
+use overload
+    '""'   => sub { $_[0]->toString() },
+    'bool' => sub { 1 },
+    '0+'   => sub { Scalar::Util::refaddr($_[0]) },
+    fallback => 1,
+    ;
+
+
 sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;
 }
@@ -1493,9 +1501,9 @@ use Scalar::Util qw(blessed);
 
 use overload
     '%{}'  => 'getAttributeHash',
-    'bool' => sub { 1 },
     'eq' => '_isSameNodeLax', '==' => '_isSameNodeLax',
     'ne' => '_isNotSameNodeLax', '!=' => '_isNotSameNodeLax',
+    fallback => 1,
     ;
 
 sub _isNotSameNodeLax {
@@ -1540,17 +1548,17 @@ sub _isSameNodeLax {
         }
         else
         {
-            *__destroy_tiecache = sub { delete $tiecache{ $_[0] } };
+            *__destroy_tiecache = sub { delete $tiecache{ 0+$_[0] } };
         }
     };
     sub getAttributeHash
     {
         my $self = shift;
-        if (!exists $tiecache{ $self }) {
+        if (!exists $tiecache{ 0+$self }) {
             tie my %attr, 'XML::LibXML::AttributeHash', $self, weaken => 1;
-            $tiecache{ $self } = \%attr;
+            $tiecache{ 0+$self } = \%attr;
         }
-        return $tiecache{ $self };
+        return $tiecache{ 0+$self };
     }
     sub DESTROY
     {
