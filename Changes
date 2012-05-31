@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
     
+1.99            Thu May 31 10:21:23 IDT 2012
     - Apply a patch from Mons Anderson ( mons@cpan.org ) for fixing the 
     overloading.
         - t/62overload.t

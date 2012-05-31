@@ -16,7 +16,7 @@ use Carp;
 use XML::LibXML;
 use XML::LibXML::NodeList;
 
-$VERSION = "1.98"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "1.99"; # VERSION TEMPLATE: DO NOT CHANGE
 
 # should LibXML XPath data types be used for simple objects
 # when passing parameters to extension functions (default: no)
