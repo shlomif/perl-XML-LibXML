@@ -4,6 +4,11 @@ Revision history for Perl extension XML::LibXML
     overloading.
         - t/62overload.t
         - Thanks to Mons.
+    - Fix test failures (and general functionality) on 64-bit big endian 
+    platforms
+        - https://rt.cpan.org/Ticket/Display.html?id=77340
+        - Thanks to Gregor Herrmann and Niko Tyni from the 
+        Debian Perl group.
 
 1.98            Sun May 13 21:02:14 IDT 2012
     - Make sure parse_string() and load_xml() also accept references to

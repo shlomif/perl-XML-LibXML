@@ -2930,13 +2930,13 @@ toStringHTML(self)
        XML::LibXML::Document::serialize_html = 1
     PREINIT:
         xmlChar *result=NULL;
-        STRLEN len = 0;
+        int len = 0;
         PREINIT_SAVED_ERROR
     CODE:
         PERL_UNUSED_VAR(ix);
         xs_warn( "use no formated toString!" );
         INIT_ERROR_HANDLER;
-        htmlDocDumpMemory(self, &result, (int*)&len);
+        htmlDocDumpMemory(self, &result, &len);
         CLEANUP_ERROR_HANDLER;
         REPORT_ERROR(0);
 
