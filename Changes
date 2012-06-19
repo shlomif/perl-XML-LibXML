@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0000          Tue Jun 19 23:04:23 IDT 2012
     - Fix warnings that appear when compiling using the clang C compiler by
     default.
         - https://rt.cpan.org/Ticket/Display.html?id=77802
