@@ -928,7 +928,8 @@ PmmFastEncodeString( int charset,
     int i;
     /* first check that the input is not ascii */
     /* since we do not want to recode ascii as, say, UTF-16 */
-    if (len<0) len=xmlStrlen(string);
+    if (len == 0)
+        len=xmlStrlen(string);
     for (i=0; i<len; i++) {
         if(!string[i] || string[i] & 0x80) {
             break;
