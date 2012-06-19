@@ -177,7 +177,7 @@ void CBufferPurge(struct CBuffer *buffer) {
 		return;
 	}
 
-	if (p1 = buffer->head) {
+	if ((p1 = buffer->head)) {
 
 		while(p1) {
 			p2 = p1->next;
@@ -204,7 +204,7 @@ void CBufferFree(struct CBuffer *buffer) {
 		return;
 	}
 
-	if (p1 = buffer->head) {
+	if ((p1 = buffer->head)) {
 
 		while(p1) {
 			p2 = p1->next;

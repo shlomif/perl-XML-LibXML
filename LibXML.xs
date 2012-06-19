@@ -637,7 +637,7 @@ LibXML_input_open(char const * filename)
 
     results = POPs;
 
-    SvREFCNT_inc(results);
+    (void)SvREFCNT_inc(results);
 
     PUTBACK;
     FREETMPS;
@@ -1443,6 +1443,8 @@ LibXML_configure_xpathcontext( xmlXPathContextPtr ctxt ) {
     ctxt->node = node;
     LibXML_configure_namespaces(ctxt);
 }
+
+extern void boot_XML__LibXML__Devel(pTHX_ CV*);
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML
 
@@ -8072,7 +8074,7 @@ _newForIO(CLASS, fh, url, encoding, options)
 	const char * encoding = SvOK($arg) ? SvPV_nolen($arg) : NULL;
 	int options = SvOK($arg) ? SvIV($arg) : 0;
     CODE:
-        SvREFCNT_inc(fh); /* _dec'd by LibXML_close_perl */
+        (void)SvREFCNT_inc(fh); /* _dec'd by LibXML_close_perl */
         RETVAL = xmlReaderForIO((xmlInputReadCallback) LibXML_read_perl,
 				(xmlInputCloseCallback) LibXML_close_perl,
 				(void *) fh, url, encoding, options);
