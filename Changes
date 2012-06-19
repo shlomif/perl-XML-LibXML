@@ -5,6 +5,12 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=77802
         - Thanks to duvny for the report, and to seldon, doy and Zefram
         for their assistance in fixing the warnings.
+    - Fix tests and run-time errors when Hash::FieldHash is installed
+    by no longer using Hash::FieldHash.
+        - https://rt.cpan.org/Ticket/Display.html?id=77576
+        - Thanks to hsk@fli-leibniz.de for reporting it, and to
+        Father Chrysostomos ( http://search.cpan.org/~sprout/ ) and
+        Mons Anderson for some diagnosis.
 
 1.99            Thu May 31 10:21:23 IDT 2012
     - Apply a patch from Mons Anderson ( mons@cpan.org ) for fixing the 
