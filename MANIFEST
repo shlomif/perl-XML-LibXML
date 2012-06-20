@@ -102,7 +102,6 @@ Makefile.PL
 MANIFEST
 perl-libxml-mm.c
 perl-libxml-mm.h
-perl-libxml-libxml.h
 perl-libxml-sax.c
 perl-libxml-sax.h
 ppport.h
