@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Remove the leftover perl-libxml-libxml.h from the distribution.
+        - https://rt.cpan.org/Ticket/Display.html?id=77924
+        - Thanks to Martin Mann for the report.
+
 2.0000          Tue Jun 19 23:04:23 IDT 2012
     - Fix warnings that appear when compiling using the clang C compiler by
     default.
