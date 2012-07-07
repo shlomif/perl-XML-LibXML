@@ -1886,7 +1886,7 @@ $parser->no_network();</programlisting>
                     <term>recover_silently</term>
                     <listitem>
                         <programlisting>
-                            $parser-&gt;recover_silently(1);;
+                            $parser-&gt;recover_silently(1);
                         </programlisting>
                         <para>If called without an argument,
 			  returns true if the current value of the <literal>recover</literal> parser

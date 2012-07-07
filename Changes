@@ -68,7 +68,7 @@ Revision history for Perl extension XML::LibXML
         to t/71overload.t .
 
 1.93            Mon Feb 27 11:15:50 IST 2012
-    - Fix XML::LibXML::Element comparision with == and eq.
+    - Fix XML::LibXML::Element comparison with == and eq.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=75257 ,
         https://rt.cpan.org/Ticket/Display.html?id=75293 ,
         https://rt.cpan.org/Ticket/Display.html?id=75259 .
@@ -472,7 +472,7 @@ Revision history for Perl extension XML::LibXML
    - make Reader interface require Perl 5.8 (patches to extend to 5.6 are welcome)
 
 1.64
-   - fix reconcilation of the "xml" namespace [rt.cpan.org #26450]
+   - fix reconciliation of the "xml" namespace [rt.cpan.org #26450]
    - make tests pass with libxml2 2.9.29 - PI regression tests now
      accept "" as data of an empty PI [rt.cpan.org #27659]
    - strip-off UTF8 flag with $node->toString($format,1) for consistent

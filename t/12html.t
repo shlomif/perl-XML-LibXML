@@ -306,7 +306,7 @@ EOF
   # TEST
   ok (!$@, 'No exception was thrown.');
   # TEST
-  ok ($doc, ' Parsing was succesful.');
+  ok ($doc, ' Parsing was successful.');
   my $root = $doc && $doc->documentElement;
   my $val = $root && $root->findvalue('//input[@id="foo"]/@value');
   # TEST

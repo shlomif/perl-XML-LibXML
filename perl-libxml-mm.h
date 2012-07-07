@@ -5,7 +5,7 @@
  * Basic concept:
  * perl varies in the implementation of UTF8 handling. this header (together
  * with the c source) implements a few functions, that can be used from within
- * the core module inorder to avoid cascades of c pragmas
+ * the core module in order to avoid cascades of c pragmas
  */
 
 #ifndef __PERL_LIBXML_MM_H__
@@ -56,7 +56,7 @@ extern "C" {
  * defined in the perl layer, it can't surely tell when a node can be
  * safely be removed from the memory. This structure helps to keep
  * track how intense the nodes of a document are used and will not
- * delete the nodes unless they are not refered from somewhere else.
+ * delete the nodes unless they are not referred from somewhere else.
  */
 struct _ProxyNode {
     xmlNodePtr node;
@@ -75,7 +75,7 @@ struct _DocProxyNode {
 /* the psvi_status flag requires some explanation:
 
    each time libxml2 validates a document (using DTD, Schema or
-   RelaxNG) it stores a pointer to a last successfully applied grammer
+   RelaxNG) it stores a pointer to a last successfully applied grammar
    rule in node->psvi. Upon next validation, if libxml2 wants to check
    that node matches some grammar rule, it first compares the rule
    pointer and node->psvi. If these are equal, the validation of the
@@ -286,7 +286,7 @@ PmmSvContext( SV * perlctxt );
  * returns libxml2 node
  *
  * DESCRIPTION
- * This function implements a nodetype independant node cloning.
+ * This function implements a nodetype independent node cloning.
  * 
  * Note that this function has to stay in this module, since
  * XML::LibXSLT reuses it.

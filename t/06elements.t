@@ -296,7 +296,7 @@ my @badnames= ("1A", "<><", "&", "-:");
     my @cn = $e->childNodes;
 
     # this is the correct behaviour for DOM. the nodes are still
-    # refered
+    # referred
     # TEST
     is( scalar( @cn ), 4, ' TODO : Add test name' );
     
@@ -330,7 +330,7 @@ my @badnames= ("1A", "<><", "&", "-:");
     my @cn = $e->childNodes;
 
     # this is the correct behaviour for DOM. the nodes are still
-    # refered
+    # referred
     # TEST
     is( scalar( @cn ), 4, ' TODO : Add test name' );
 

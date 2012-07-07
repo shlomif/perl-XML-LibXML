@@ -381,8 +381,8 @@ PmmNewFragment(xmlDocPtr doc)
     return retval;
 }
 
-/* frees the node if nessecary. this method is aware, that libxml2
- * has several diffrent nodetypes.
+/* frees the node if necessary. this method is aware that libxml2
+ * has several different nodetypes.
  */
 void
 PmmFreeNode( xmlNodePtr node )
@@ -700,7 +700,7 @@ void PmmFixOwnerList( xmlNodePtr list, ProxyNodePtr parent );
  * the method uses the internal methods PmmFixNode and PmmChildNodes to
  * do the real updates.
  * 
- * in the worst case this traverses the subtree twice durig a node 
+ * in the worst case this traverses the subtree twice during a node
  * operation. this case is only given when the node has to be
  * adopted by the document. Since the ownerdocument and the effective 
  * owner may differ this double traversing makes sense.

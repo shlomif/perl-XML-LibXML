@@ -380,7 +380,7 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* block, int repair ) {
 /** 
  * internal helper: insert node to nodelist
  * synopsis: xmlNodePtr insert_node_to_nodelist( leader, insertnode, followup );
- * while leader and followup are allready list nodes. both may be NULL
+ * while leader and followup are already list nodes. both may be NULL
  * if leader is null the parents children will be reset
  * if followup is null the parent last will be reset.
  * leader and followup has to be followups in the nodelist!!!
@@ -1169,7 +1169,7 @@ domSetAttributeNode( xmlNodePtr node, xmlAttrPtr attr ) {
     if ( attr != NULL && attr->type != XML_ATTRIBUTE_NODE )
         return NULL;
     if ( node == attr->parent ) {
-        return attr; /* attribute is allready part of the node */
+        return attr; /* attribute is already part of the node */
     }  
     if ( attr->doc != node->doc ){
         attr = (xmlAttrPtr) domImportNode( node->doc, (xmlNodePtr) attr, 1, 1 ); 
@@ -1252,7 +1252,7 @@ domNodeNormalize( xmlNodePtr node )
             xmlUnlinkNode( next );
 
             /**
-             * keep only nodes that are refered by perl (or GDOME)
+             * keep only nodes that are referred by perl (or GDOME)
              */
             if ( !next->_private )
                 xmlFreeNode( next );
