@@ -49,7 +49,7 @@ my $doc = $parser->parse_file( $srcfile );
 # ------------------------------------------------------------------------- #
 #
 # ------------------------------------------------------------------------- #
-# good implementations would use XSLT to convert a docbook to anyother
+# good implementations would use XSLT to convert a docbook to any other
 # text format. Since the module does not presume libxslt installed, we
 # have to do the dirty job.
 my $ch = ChapterHandler->new($targetdir);

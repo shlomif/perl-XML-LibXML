@@ -891,7 +891,7 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
     /* resetting the entire module will lead to unwanted */
     /* results in server environments, such as if        */ 
     /* mod_perl is used together with php's xml module.  */
-    /* calling xmlInitParser() here is definitly wrong!  */
+    /* calling xmlInitParser() here is definitely wrong!  */
     /* xmlInitParser(); */ 
 
 #ifndef WITH_SERRORS
@@ -4546,7 +4546,7 @@ _attributes( self )
                      * as soon we have a namespace isolated from its
                      * owner, we loose the context. therefore it is
                      * forbidden to access the NS information directly.
-                     * instead the use will recieve a copy of the real
+                     * instead the use will receive a copy of the real
                      * namespace, that can be destroied and is not
                      * bound to a document.
                      *

@@ -110,7 +110,7 @@ domIsParent( xmlNodePtr cur, xmlNodePtr ref );
  * NAME domTestHierarchy
  * TYPE function
  *
- * tests the general hierachy error
+ * tests the general hierarchy error
  *
  * SYNOPSIS
  * if ( domTestHierarchy(cur, ref) ) ...

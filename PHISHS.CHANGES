@@ -1,7 +1,7 @@
 Ok, I don't implement namespace handling yet. 
 
 But I introduced the node types in XML::LibXML and by default I 
-export them. I am aware this is not very beautyfull -- well, the 
+export them. I am aware this is not very beautiful -- well, the 
 way it's done ... 
 
 Since most functions need more than just a simple call to libxml2
