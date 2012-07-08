@@ -326,7 +326,7 @@ domXPathFindCtxt( xmlXPathContextPtr ctxt, xmlChar * path, int to_bool ) {
 xmlXPathObjectPtr
 domXPathCompFindCtxt( xmlXPathContextPtr ctxt, xmlXPathCompExprPtr comp, int to_bool ) {
     xmlXPathObjectPtr res = NULL;
-    if ( comp != NULL && ctxt->node != NULL && comp != NULL ) {
+    if ( ctxt != NULL && ctxt->node != NULL && comp != NULL ) {
         xmlDocPtr tdoc = NULL;
         xmlNodePtr froot = ctxt->node;
 
