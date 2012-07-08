@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0002          Sun Jul  8 18:09:13 IDT 2012
     - Applied spelling fixes correction patch by
     Ville Skyttä <ville.skytta@iki.fi>.
         - Thanks, Ville!
