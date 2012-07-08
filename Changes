@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Applied spelling fixes correction patch by
+    Ville Skyttä <ville.skytta@iki.fi>.
+        - Thanks, Ville!
+
 2.0001          Wed Jun 20 19:40:05 IDT 2012
     - Remove the leftover perl-libxml-libxml.h from the distribution.
         - https://rt.cpan.org/Ticket/Display.html?id=77924
