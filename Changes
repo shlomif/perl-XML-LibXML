@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+    - Patch to a potential NULL dereference in xpath.c.
+        - Thanks to Ville Skyttä <ville.skytta@iki.fi> and cppcheck.
+
 2.0002          Sun Jul  8 18:09:13 IDT 2012
     - Applied spelling fixes correction patch by
     Ville Skyttä <ville.skytta@iki.fi>.
