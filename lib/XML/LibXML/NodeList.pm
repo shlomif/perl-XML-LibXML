@@ -83,10 +83,10 @@ sub get_node {
     $self->[$pos - 1];
 }
 
-sub item {
-	my $self = CORE::shift;
-	my ($pos) = @_;
-	$self->[$pos];
+sub item
+{
+    my ($self, $pos) = @_;
+    return $self->[$pos];
 }
 
 sub get_nodelist {
