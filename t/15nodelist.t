@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 26;
+use Test::More tests => 27;
 
 use XML::LibXML;
 use IO::Handle;
@@ -14,6 +14,12 @@ my $dom = XML::LibXML->new->parse_fh(*DATA);
 
 # TEST
 ok($dom, ' TODO : Add test name');
+
+{
+	my $nodelist = $dom->documentElement->childNodes;
+	# 0 is #text
+	is($nodelist->item(1)->nodeName, 'BBB', 'item is 0-indexed');
+}
 
 my @nodelist = $dom->findnodes('//BBB');
 
