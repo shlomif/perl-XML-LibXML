@@ -109,6 +109,7 @@ README
 scripts/bump-version-number.pl
 scripts/fast-eumm.pl
 scripts/prints-to-comments.pl
+scripts/tag-release.pl
 scripts/update-HACKING-file.bash
 scripts/Test.pm-to-Test-More.pl
 t/01basic.t
