@@ -17,8 +17,9 @@ ok($dom, ' TODO : Add test name');
 
 {
 	my $nodelist = $dom->documentElement->childNodes;
+    # TEST
 	# 0 is #text
-	is($nodelist->item(1)->nodeName, 'BBB', 'item is 0-indexed');
+	is ($nodelist->item(1)->nodeName, 'BBB', 'item is 0-indexed');
 }
 
 my @nodelist = $dom->findnodes('//BBB');
