@@ -1,11 +1,14 @@
 Revision history for Perl extension XML::LibXML
 
+2.0003          Fri 27 Jul 17:11:21 IDT 2012
     - Patch to a potential NULL dereference in xpath.c.
         - Thanks to Ville Skyttä <ville.skytta@iki.fi> and cppcheck.
     - Fix NodeList::item() calling a 1-indxed array reference.
         - See:
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/18
         - Thanks to Tim Brody
+    - Add the scripts/tag-release.pl script to tag a release using
+    Mercurial
 
 2.0002          Sun Jul  8 18:09:13 IDT 2012
     - Applied spelling fixes correction patch by
