@@ -8,7 +8,7 @@ Revision history for Perl extension XML::LibXML
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/18
         - Thanks to Tim Brody
     - Add the scripts/tag-release.pl script to tag a release using
-    Mercurial
+    Mercurial.
 
 2.0002          Sun Jul  8 18:09:13 IDT 2012
     - Applied spelling fixes correction patch by
