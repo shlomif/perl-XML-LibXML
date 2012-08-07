@@ -75,7 +75,7 @@ my %INFOS = (
             "xs",
         ],
     },
-            );
+);
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #
 
@@ -410,7 +410,15 @@ sub MY::test {
 
 # echo perl -pi~ -e '$$_=q($(version))."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM)
 sub MY::postamble {
-  return <<'MAKE_FRAG';
+
+    my $CC =
+    (
+        exists($ENV{CC})
+            ? "CC = $ENV{CC}"
+            : ''
+    );
+
+  return "$CC\n\n" . <<'MAKE_FRAG';
 
 # used to update version numbers in all modules
 version:
