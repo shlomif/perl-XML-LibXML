@@ -389,7 +389,7 @@ sub _clone {
   my ($self)=@_;
   my $new = ref($self)->new({
       recover => $self->{XML_LIBXML_RECOVER},
-      line_nubers => $self->{XML_LIBXML_LINENUMBERS},
+      line_numbers => $self->{XML_LIBXML_LINENUMBERS},
       base_uri => $self->{XML_LIBXML_BASE_URI},
       gdome => $self->{XML_LIBXML_GDOME},
       set_parser_flags => $self->{XML_LIBXML_PARSER_OPTIONS},

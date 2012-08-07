@@ -5,6 +5,8 @@ Revision history for Perl extension XML::LibXML
     set to the path to the alternate compiler.
         - This way we can use «CC=/usr/bin/clang perl Makefile.PL»
         in order to compile faster.
+    - LibXML.pm (_clone): Fix typo in line_numbers handling.
+        - Thanks to Bernhard Reutner-Fischer for the report and fix.
 
 2.0003          Fri 27 Jul 17:11:21 IDT 2012
     - Patch to a potential NULL dereference in xpath.c.
