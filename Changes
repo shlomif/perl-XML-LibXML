@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+    - Add a way to specify a different compiler to be used in the
+    "Makefile" by calling Makefile.PL with the CC environment variable
+    set to the path to the alternate compiler.
+        - This way we can use «CC=/usr/bin/clang perl Makefile.PL»
+        in order to compile faster.
+
 2.0003          Fri 27 Jul 17:11:21 IDT 2012
     - Patch to a potential NULL dereference in xpath.c.
         - Thanks to Ville Skyttä <ville.skytta@iki.fi> and cppcheck.
