@@ -197,7 +197,7 @@ EOF
     # TEST
     is ( $root->getAttributeNS('http://example.com','attr'), 'value', ' TODO : Add test name' );
     # TEST
-    is ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(), 
+    is ( $root->getAttributeNode('xxx:attr')->getNamespaceURI(),
         'http://example.com', ' TODO : Add test name');
 }
 

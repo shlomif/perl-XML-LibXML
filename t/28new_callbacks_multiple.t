@@ -205,7 +205,7 @@ my $match_hash2_stacker = Stacker->new(
     {
         gen_cb => sub {
             my $push_cb = shift;
-            return sub {        
+            return sub {
                 my $uri = shift;
                 if ( $uri =~ /^\/example\// ){
                     $push_cb->({ verdict => 1, uri => $uri, });
@@ -223,7 +223,7 @@ my $match_xml_stacker = Stacker->new(
     {
         gen_cb => sub {
             my $push_cb = shift;
-            return sub {        
+            return sub {
                 my $uri = shift;
                 if ( $uri =~ /^\/xmldom\// ){
                     $push_cb->({ verdict => 1, uri => $uri, });
@@ -241,7 +241,7 @@ my $read_xml_stacker = Stacker->new(
     {
         gen_cb => sub {
             my $push_cb = shift;
-            return sub {        
+            return sub {
                 my $dom   = shift;
                 my $buflen = shift;
 
@@ -343,7 +343,7 @@ EOF
             # TEST:$c++;
             $open_hash_counter->test(1, 'open_hash() : called 1 times');
             # TEST:$c++;
-            $open_xml_counter->test(1, 'open_xml() : parse_string() successful.',); 
+            $open_xml_counter->test(1, 'open_xml() : parse_string() successful.',);
             # TEST:$c++;
             $close_xml_counter->test(1, "close_xml() called once.");
             # TEST:$c++;
@@ -365,7 +365,7 @@ EOF
         # TEST
         ok ($doc, 'parse_string() returns a doc.');
         # TEST
-        is ($doc->string_value(), 
+        is ($doc->string_value(),
             "\ntest\n..\nbar..\nbarbar\n",
             '->string_value()',
         );
@@ -373,7 +373,7 @@ EOF
         # TEST
         ok ($doc2, 'second parse_string() returns a doc.');
         # TEST
-        is ($doc2->string_value(), 
+        is ($doc2->string_value(),
             "\ntest\n..\nbar..\nbarbar\n",
             q{Second parse_string()'s ->string_value()},
         );
@@ -390,7 +390,7 @@ EOF
 
         my $icb    = XML::LibXML::InputCallback->new();
 
-        $icb->register_callbacks( [ $match_file_stacker->cb, $open_file_stacker->cb(), 
+        $icb->register_callbacks( [ $match_file_stacker->cb, $open_file_stacker->cb(),
                                     $read_file_counter->cb(), $close_file_counter->cb(), ] );
 
         $icb->register_callbacks( [ $match_hash2_stacker->cb, $open_hash_counter->cb,
@@ -439,7 +439,7 @@ EOF
             2, "close_hash() called twice on two xincludes."
         );
 
-        $icb->unregister_callbacks( [ $match_hash2_stacker->cb, \&open_hash, 
+        $icb->unregister_callbacks( [ $match_hash2_stacker->cb, \&open_hash,
                                       $read_hash_counter->cb(), $close_hash_counter->cb] );
         $doc = $parser->parse_string($string);
 
@@ -476,9 +476,9 @@ EOF
 
 
         # TEST
-        is($doc->string_value(), 
+        is($doc->string_value(),
            "\ntest\n..\n\n         \n   \n",
-           'string_value() after unregister callbacks', 
+           'string_value() after unregister callbacks',
         );
 }
 
@@ -510,7 +510,7 @@ EOF
                 my $dom = $parser->parse_string($string2);
                 # TEST
                 ok ($dom, 'parse_string() inside open_xml2');
-        
+
                 return $dom;
         };
 

@@ -96,7 +96,7 @@ ok($dtdstr, "DTD String read");
     # TEST
     is (scalar(@a), 2, "Two child nodes");
 }
- 
+
 ##
 # Tests for ticket 2021
 {

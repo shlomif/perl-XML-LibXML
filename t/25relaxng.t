@@ -12,7 +12,7 @@ use TestHelpers;
 
 use Test::More;
 
-BEGIN { 
+BEGIN {
     use XML::LibXML;
 
     if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
@@ -38,7 +38,7 @@ print "# 1 parse schema from a file\n";
     my $rngschema = XML::LibXML::RelaxNG->new( location => $file );
     # TEST
     ok ( $rngschema, ' TODO : Add test name' );
-    
+
     eval { $rngschema = XML::LibXML::RelaxNG->new( location => $badfile ); };
     # TEST
     ok( $@, ' TODO : Add test name' );
@@ -65,7 +65,7 @@ print "# 3 parse schema from a document\n";
     my $rngschema = XML::LibXML::RelaxNG->new( DOM => $doc );
     # TEST
     ok ( $rngschema, ' TODO : Add test name' );
-   
+
     $doc       = $xmlparser->parse_file( $badfile );
     eval { $rngschema = XML::LibXML::RelaxNG->new( DOM => $doc ); };
     # TEST
@@ -128,4 +128,4 @@ EOXML
 }
 
 
-} # Version >= 20510 test 
+} # Version >= 20510 test

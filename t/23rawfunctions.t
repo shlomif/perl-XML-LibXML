@@ -20,4 +20,4 @@ eval {
 ok($@, 'An exception was thrown');
 
 # TEST
-ok(1, 'End'); 
+ok(1, 'End');

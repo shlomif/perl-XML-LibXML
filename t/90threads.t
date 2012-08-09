@@ -224,7 +224,7 @@ for(1..MAX_THREADS)
 {
   threads->new(sub {
 		 for (1..MAX_LOOP) {
-		   my $x = $p->parse_string($xml_invalid); 
+		   my $x = $p->parse_string($xml_invalid);
 		   die if $x->is_valid;
 		   eval { $x->validate };
 		   die unless $@;
@@ -335,7 +335,7 @@ ok($p, 'XML::LibXML::SAX was initted.');
 {
 for(1..MAX_THREADS)
 {
-	threads->new(sub { $p->parse_string($xml) for (1..5); 1; });	 
+	threads->new(sub { $p->parse_string($xml) for (1..5); 1; });
 }
 $_->join for threads->list;
 

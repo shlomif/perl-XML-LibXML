@@ -70,12 +70,12 @@ EOF
 my $icb    = XML::LibXML::InputCallback->new();
 
 my $match_ret = 1;
-$icb->register_callbacks( [ 
-        sub { my $to_ret = $match_ret; $match_ret = 0; return $to_ret; }, 
+$icb->register_callbacks( [
+        sub { my $to_ret = $match_ret; $match_ret = 0; return $to_ret; },
         sub { return undef; },
         undef,
-        undef 
-    ] 
+        undef
+    ]
 );
 
 my $parser = XML::LibXML->new();

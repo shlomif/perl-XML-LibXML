@@ -11,6 +11,6 @@ if (system("$^X", "Makefile.PL"))
 }
 
 edit_file_lines(
-    sub { $_ = '' if m/\$\(OBJECT\).*:.*\$\(FIRST_MAKEFILE\)/ }, 
+    sub { $_ = '' if m/\$\(OBJECT\).*:.*\$\(FIRST_MAKEFILE\)/ },
 'Makefile'
 );

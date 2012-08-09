@@ -62,7 +62,7 @@ XML_DECL. '<!DOCTYPE foobar [<!ENTITY foo "bar">]><foobar foo="&gt;&foo;"/>',
 my @badWFStrings = (
 "",                                        # totally empty document
 XML_DECL,                                  # only XML Declaration
-"<!--ouch-->",                             # comment only is like an empty document 
+"<!--ouch-->",                             # comment only is like an empty document
 '<!DOCTYPE ouch [<!ENTITY foo "bar">]>',   # no good either ...
 "<ouch>",                                  # single tag (tag mismatch)
 "<ouch/>foo",                              # trailing junk
@@ -75,7 +75,7 @@ XML_DECL,                                  # only XML Declaration
 "<ouch>&foo;</ouch>",                      # undefind entity
 "<ouch>&gt</ouch>",                        # unterminated entity
 XML_DECL. '<!DOCTYPE foobar [<!ENTITY foo "bar">]><foobar &foo;="ouch"/>',          # bad placed entity
-XML_DECL. '<!DOCTYPE foobar [<!ENTITY foo "bar=&quot;foo&quot;">]><foobar &foo;/>', # even worse 
+XML_DECL. '<!DOCTYPE foobar [<!ENTITY foo "bar=&quot;foo&quot;">]><foobar &foo;/>', # even worse
 "<ouch><!---></ouch>",                     # bad comment
 '<ouch><!-----></ouch>',                   # bad either... (is this conform with the spec????)
                     );
@@ -221,7 +221,7 @@ $parser->pedantic_parser(0);
     my $doc = $parser->parse_file($goodfile);
     isa_ok($doc, 'XML::LibXML::Document');
 }
- 
+
 eval {my $fail = $parser->parse_file($badfile1);};
 like($@, qr/^$badfile1:3: parser error : Extra content at the end of the document/, "error parsing $badfile1");
 
@@ -289,7 +289,7 @@ like($@, qr/^Can't use an undefined value as a symbol reference at/, "error pars
 
 my $goodXInclude = q{
 <x>
-<xinclude:include 
+<xinclude:include
  xmlns:xinclude="http://www.w3.org/2001/XInclude"
  href="test2.xml"/>
 </x>
@@ -327,7 +327,7 @@ my $badXInclude = q{
     like($@, qr/$badfile1:3: parser error : Extra content at the end of the document/, "error parsing $badfile1 in include");
     is($doc, undef, "no doc returned");
 
-    # some bad stuff 
+    # some bad stuff
     eval{ $parser->processXIncludes(undef); };
     like($@, qr/^No document to process! at/, "Error parsing undef include");
 
@@ -340,9 +340,9 @@ my $badXInclude = q{
 {
     my $pparser = XML::LibXML->new();
     # 2.1 PARSING WELLFORMED DOCUMENTS
-    foreach my $key ( qw(single1 single2 single3 single4 single5 single6 
+    foreach my $key ( qw(single1 single2 single3 single4 single5 single6
                          single7 single8 single9 multiple1 multiple2 multiple3
-                         multiple4 multiple5 multiple6 multiple7 multiple8 
+                         multiple4 multiple5 multiple6 multiple7 multiple8
                          multiple9 multiple10 comment1 comment2 comment3
                          comment4 comment5 attr1 attr2 attr3
 			 ns1 ns2 ns3 ns4 ns5 ns6 dtd1 dtd2) ) {
@@ -357,7 +357,7 @@ my $badXInclude = q{
     }
 
     my @good_strings = ("<foo>", "bar", "</foo>" );
-    my %bad_strings  = ( 
+    my %bad_strings  = (
                             predocend1   => ["<A>" ],
                             predocend2   => ["<A>", "B"],
                             predocend3   => ["<A>", "<C>"],
@@ -372,7 +372,7 @@ my $badXInclude = q{
 
     my $parser = XML::LibXML->new;
     {
-        for ( @good_strings ) {        
+        for ( @good_strings ) {
             $parser->parse_chunk( $_ );
         }
         my $doc = $parser->parse_chunk("",1);
@@ -399,7 +399,7 @@ my $badXInclude = q{
                 next;
             }
 
-            eval {    
+            eval {
                 $doc = $parser->parse_chunk("",1);
             };
             isnt($@, '', "Got an error parsing empty chunk after chunks for $key");
@@ -479,7 +479,7 @@ my $badXInclude = q{
     my $root = $doc->documentElement;
 
     # bad thing: i have to do some NS normalizing.
-    # libxml2 will only do some fixing. this will lead to multiple 
+    # libxml2 will only do some fixing. this will lead to multiple
     # declarations, if a node with a new namespace is added.
 
     my $vstring = q{<foo xmlns:bar="http://foo.bar">bar<bar:bi/></foo>};
@@ -499,7 +499,7 @@ my $badXInclude = q{
 
     # 3.6 PARSE CHUNK
 
-        
+
 }
 
 # 4 SAXY PUSHER
@@ -529,7 +529,7 @@ my $badXInclude = q{
     my $MAX_WF_C = 11;
     my $MAX_WB_C = 16;
 
-    my %chunks = ( 
+    my %chunks = (
                     wellformed1  => '<A/>',
                     wellformed2  => '<A></A>',
                     wellformed3  => '<A B="C"/>',
@@ -539,8 +539,8 @@ my $badXInclude = q{
                     wellformed7  => '<A><K/></A>',
                     wellformed8  => '<A xmlns="xml://E"/>',
                     wellformed9  => '<F:A xmlns:F="xml://G" F:A="B">D</F:A>',
-                    wellformed10 => '<!--D-->',      
-                    wellformed11  => '<A xmlns:F="xml://E"/>',              
+                    wellformed10 => '<!--D-->',
+                    wellformed11  => '<A xmlns:F="xml://E"/>',
                     wellbalance1 => '<A/><A/>',
                     wellbalance2 => '<A></A><A></A>',
                     wellbalance3 => '<A B="C"/><A B="H"/>',
@@ -549,7 +549,7 @@ my $badXInclude = q{
                     wellbalance6 => '<A><![CDATA[D]]></A><A><![CDATA[I]]></A>',
                     wellbalance7 => '<A><!--D--></A><A><!--I--></A>',
                     wellbalance8 => '<F:A xmlns:F="xml://G" F:A="B">D</F:A><J:A xmlns:J="xml://G" J:A="M">D</J:A>',
-                    wellbalance9 => 'D<A/>',                    
+                    wellbalance9 => 'D<A/>',
                     wellbalance10=> 'D<A/>D',
                     wellbalance11=> 'D<A/><!--D-->',
                     wellbalance12=> 'D<A/><![CDATA[D]]>',
@@ -573,7 +573,7 @@ my $badXInclude = q{
 
 
     my $pparser = XML::LibXML->new;
-    
+
     # 5.1 DOM CHUNK PARSER
 
     for ( 1..$MAX_WF_C ) {
@@ -791,20 +791,20 @@ SKIP: {
 
     is( $parser->parse_string( $xsDoc1 )->documentElement->toString(),
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
-    is( $parser->parse_string( $xsDoc2 )->documentElement->toString(), 
+    is( $parser->parse_string( $xsDoc2 )->documentElement->toString(),
         $xsDoc2 );
 
-    is( $parser->parse_file( $fn1  )->documentElement->toString(), 
+    is( $parser->parse_file( $fn1  )->documentElement->toString(),
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
-    is( $parser->parse_file( $fn2 )->documentElement->toString() , 
+    is( $parser->parse_file( $fn2 )->documentElement->toString() ,
         $xsDoc2 );
-    
-    my $fh1 = IO::File->new($fn1);  
-    my $fh2 = IO::File->new($fn2);  
 
-    is( $parser->parse_fh( $fh1  )->documentElement->toString(), 
+    my $fh1 = IO::File->new($fn1);
+    my $fh2 = IO::File->new($fn2);
+
+    is( $parser->parse_fh( $fh1  )->documentElement->toString(),
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
-    is( $parser->parse_fh( $fh2 )->documentElement->toString() , 
+    is( $parser->parse_fh( $fh2 )->documentElement->toString() ,
         $xsDoc2 );
 
     my @xaDoc1 = ('<A:B xmlns:A="http://D">','<A:C xmlns:A="h','ttp://D"/>' ,'</A:B>');
@@ -816,7 +816,7 @@ SKIP: {
         $parser->parse_chunk( $_ );
     }
     $doc = $parser->parse_chunk( "", 1 );
-    is( $doc->documentElement->toString(), 
+    is( $doc->documentElement->toString(),
         q{<A:B xmlns:A="http://D"><A:C/></A:B>} );
 
 
@@ -824,7 +824,7 @@ SKIP: {
         $parser->parse_chunk( $_ );
     }
     $doc = $parser->parse_chunk( "", 1 );
-    is( $doc->documentElement->toString() , 
+    is( $doc->documentElement->toString() ,
         $xsDoc2 );
 };
 
@@ -838,20 +838,20 @@ SKIP: {
 <X>&foo;</X>
 EOXML
         my $parser = XML::LibXML->new();
-        
+
         $parser->load_ext_dtd(1);
 
         # first time it should work
         my $doc    = $parser->parse_string( $xmldoc );
         is( $doc->documentElement()->string_value(), " test " );
 
-        # second time it must not fail.        
+        # second time it must not fail.
         my $doc2   = $parser->parse_string( $xmldoc );
         is( $doc2->documentElement()->string_value(), " test " );
 }
 
 ##
-# Test ticket #7668 xinclude breaks entity expansion 
+# Test ticket #7668 xinclude breaks entity expansion
 # [CG] removed again, since #7668 claims the spec is incorrect
 
 ##
@@ -862,7 +862,7 @@ EOXML
 <X>&foo;</X>
 EOXML
         my $parser = XML::LibXML->new();
-        
+
         $parser->load_ext_dtd(1);
 
         # first time it should work

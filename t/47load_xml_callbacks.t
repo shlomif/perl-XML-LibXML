@@ -1,5 +1,5 @@
 #!/usr/bin/perl
- 
+
 # Fix the handling of XML::LibXML::InputCallbacks at load_xml().
 # - https://rt.cpan.org/Ticket/Display.html?id=58190
 # - The problem was that the input callbacks were not cloned in

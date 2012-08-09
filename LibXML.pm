@@ -1054,7 +1054,7 @@ sub _html_options {
   $flags |=     4 if $opts->{no_defdtd}; # default is ON: injects DTD as needed
   $flags |=    32 if exists $opts->{suppress_errors} ? $opts->{suppress_errors} : $self->get_option('suppress_errors');
   # This is to fix https://rt.cpan.org/Ticket/Display.html?id=58024 :
-  # <quote> 
+  # <quote>
   # In XML::LibXML, warnings are not suppressed when specifying the recover
   # or recover_silently flags as per the following excerpt from the manpage:
   # </quote>
@@ -1088,10 +1088,10 @@ sub parse_html_string {
     my $result;
 
     $self->_init_callbacks();
-    eval { 
+    eval {
       $result = $self->_parse_html_string( $str,
 					   $self->_html_options($opts)
-					  ); 
+					  );
     };
     my $err = $@;
     $self->{_State_} = 0;
@@ -1124,7 +1124,7 @@ sub parse_html_file {
       $self->_cleanup_callbacks();
       croak $err;
     }
-    
+
     $self->_cleanup_callbacks();
 
     return $result;
@@ -1138,7 +1138,7 @@ sub parse_html_fh {
 
     my $result;
     $self->_init_callbacks();
-    eval { $result = $self->_parse_html_fh( $fh, 
+    eval { $result = $self->_parse_html_fh( $fh,
 					    $self->_html_options($opts)
 					   ); };
     my $err = $@;
@@ -1175,7 +1175,7 @@ sub push {
     my $self = shift;
 
     $self->_init_callbacks();
-    
+
     if ( not defined $self->{CONTEXT} ) {
         $self->init_push();
     }
@@ -1512,12 +1512,12 @@ sub _isNotSameNodeLax {
     return ((not $self->_isSameNodeLax($other)) ? 1 : '');
 }
 
-sub _isSameNodeLax { 
+sub _isSameNodeLax {
     my ($self, $other) = @_;
 
-    if (blessed($other) and $other->isa('XML::LibXML::Element')) 
-    { 
-        return ($self->isSameNode($other) ? 1 : ''); 
+    if (blessed($other) and $other->isa('XML::LibXML::Element'))
+    {
+        return ($self->isSameNode($other) ? 1 : '');
     }
     else
     {
@@ -2083,7 +2083,7 @@ sub new {
   my $class = shift;
   my ($pattern,$ns_map)=@_;
   my $self = undef;
-  
+
   unless (UNIVERSAL::can($class,'_compilePattern')) {
     croak("Cannot create XML::LibXML::Pattern - ".
 	  "your libxml2 is compiled without pattern support!");
@@ -2162,9 +2162,9 @@ sub _callback_match {
     # any new global callbacks are shifted to the callback stack.
     foreach my $cb ( @_GLOBAL_CALLBACKS ) {
 
-        # callbacks have to return 1, 0 or undef, while 0 and undef 
-        # are handled the same way. 
-        # in fact, if callbacks return other values, the global match 
+        # callbacks have to return 1, 0 or undef, while 0 and undef
+        # are handled the same way.
+        # in fact, if callbacks return other values, the global match
         # assumes silently that the callback failed.
 
         $retval = $cb->[0]->($uri);
@@ -2172,7 +2172,7 @@ sub _callback_match {
         if ( defined $retval and $retval == 1 ) {
             # make the other callbacks use this callback
             $_CUR_CB = $cb;
-            unshift @_CB_STACK, $cb; 
+            unshift @_CB_STACK, $cb;
             last;
         }
     }
@@ -2183,22 +2183,22 @@ sub _callback_match {
 sub _callback_open {
     my $uri = shift;
     my $retval = undef;
-    
-    # the open callback has to return a defined value. 
-    # if one works on files this can be a file handle. But 
-    # depending on the needs of the callback it also can be a 
+
+    # the open callback has to return a defined value.
+    # if one works on files this can be a file handle. But
+    # depending on the needs of the callback it also can be a
     # database handle or a integer labeling a certain dataset.
 
     if ( defined $_CUR_CB ) {
         $retval = $_CUR_CB->[1]->( $uri );
-        
+
         # reset the callbacks, if one callback cannot open an uri
         if ( not defined $retval or $retval == 0 ) {
             shift @_CB_STACK;
             $_CUR_CB = $_CB_STACK[0];
         }
     }
-    
+
     return $retval;
 }
 
@@ -2218,7 +2218,7 @@ sub _callback_read {
 sub _callback_close {
     my $fh = shift;
     my $retval = 0;
-    
+
     if ( defined $_CUR_CB ) {
         $retval = $_CUR_CB->[3]->( $fh );
         shift @_CB_STACK;
@@ -2242,7 +2242,7 @@ sub new {
 sub register_callbacks {
     my $self = shift;
     my $cbset = shift;
-    
+
     # test if callback set is complete
     if ( ref $cbset eq "ARRAY" and scalar( @$cbset ) == 4 ) {
         unshift @{$self->{_CALLBACKS}}, $cbset;
@@ -2262,7 +2262,7 @@ sub unregister_callbacks {
     }
 }
 
-# make libxml2 use the callbacks 
+# make libxml2 use the callbacks
 sub init_callbacks {
     my $self = shift;
     my $parser = shift;
@@ -2282,7 +2282,7 @@ sub init_callbacks {
     $_CUR_CB           = undef;
     @_CB_STACK         = ();
     @_GLOBAL_CALLBACKS = @{ $self->{_CALLBACKS} };
-    
+
     #attach parser specific callbacks
     if($parser) {
         my $mcb = $parser->match_callback();
@@ -2295,9 +2295,9 @@ sub init_callbacks {
     }
 
     #attach global callbacks
-    if ( defined $XML::LibXML::match_cb and 
-         defined $XML::LibXML::open_cb  and 
-         defined $XML::LibXML::read_cb  and 
+    if ( defined $XML::LibXML::match_cb and
+         defined $XML::LibXML::open_cb  and
+         defined $XML::LibXML::read_cb  and
          defined $XML::LibXML::close_cb ) {
         push @_GLOBAL_CALLBACKS, [$XML::LibXML::match_cb,
                                   $XML::LibXML::open_cb,

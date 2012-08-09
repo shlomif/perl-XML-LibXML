@@ -36,7 +36,7 @@ my $match_file_counter = Counter->new(
                     $inc_cb->();
                     return 1;
                 }
-                return 0;     
+                return 0;
             }
         }
     }
@@ -104,7 +104,7 @@ my $match_hash_counter = Counter->new(
                     $inc_cb->();
                     return 1;
                 }
-                return 0;     
+                return 0;
             }
         }
     }
@@ -119,7 +119,7 @@ my $open_hash_counter = Counter->new(
                 my $uri = shift;
                 my $hash = { line => 0,
                     lines => [ "<foo>", "bar", "<xsl/>", "..", "</foo>" ],
-                }; 
+                };
                 $inc_cb->();
 
                 return $hash;

@@ -44,7 +44,7 @@ for my $time (0 .. 2) {
 for my $time (0 .. 2) {
     my $e = $doc->getLastChild;
     # TEST*3
-    isa_ok($e,'XML::LibXML::Element', 
+    isa_ok($e,'XML::LibXML::Element',
         "last child is an element - time No. $time"
     );
 }
@@ -56,7 +56,7 @@ for my $time (0 .. 2) {
     my $doc = XML::LibXML::Document->new();
 
     my $node = XML::LibXML::Element->new('test');
-    $node->setAttribute(contents => $in); 
+    $node->setAttribute(contents => $in);
     $doc->setDocumentElement($node);
 
     # TEST
@@ -65,8 +65,8 @@ for my $time (0 .. 2) {
     $doc->setEncoding('utf-8');
     # Second output
     # TEST
-    is( $node->serialize(), 
-        encodeToUTF8( 'iso-8859-1', '<test contents="ä"/>' ), 
-        'UTF-8 node serialize', 
+    is( $node->serialize(),
+        encodeToUTF8( 'iso-8859-1', '<test contents="ä"/>' ),
+        'UTF-8 node serialize',
     );
 }

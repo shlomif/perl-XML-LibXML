@@ -39,7 +39,7 @@ my $string = $doc->toString(1);
 unlike ($string, qr/[^\w:]attribute="text"/,
     "Not placed as an unprefixed attribute");
 # TEST
-unlike ($string, qr/\bwrong:attribute="text"/, 
+unlike ($string, qr/\bwrong:attribute="text"/,
     "Not placed in the wrong namespace");
 
 # TEST

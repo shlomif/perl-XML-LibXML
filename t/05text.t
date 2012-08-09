@@ -88,7 +88,7 @@ my $doc = XML::LibXML::Document->new();
     # 6. XML::LibXML features
     $textnode->setData( "test" );
 
-    $textnode->replaceDataString( "es", "new" );   
+    $textnode->replaceDataString( "es", "new" );
     # TEST
     is( $textnode->nodeValue(), "tnewt", 'replaceDataString() 1');
 
@@ -99,42 +99,42 @@ my $doc = XML::LibXML::Document->new();
     $textnode->setData( "blue phish, white phish, no phish" );
     $textnode->replaceDataRegEx( 'phish', 'test' );
     # TEST
-    is( $textnode->nodeValue(), "blue test, white phish, no phish", 
+    is( $textnode->nodeValue(), "blue test, white phish, no phish",
         'replaceDataRegEx 3',);
 
     # replace them all!
     $textnode->replaceDataRegEx( 'phish', 'test', 'g' );
     # TEST
-    is( $textnode->nodeValue(), "blue test, white test, no test", 
+    is( $textnode->nodeValue(), "blue test, white test, no test",
         'replaceDataRegEx g',);
 
-    # check if special chars are encoded properly 
+    # check if special chars are encoded properly
     $textnode->setData( "te?st" );
-    $textnode->replaceDataString( "e?s", 'ne\w' );   
+    $textnode->replaceDataString( "e?s", 'ne\w' );
     # TEST
     is( $textnode->nodeValue(), 'tne\wt', ' TODO : Add test name' );
 
-    # check if "." is encoded properly 
+    # check if "." is encoded properly
     $textnode->setData( "h.thrt");
-    $textnode->replaceDataString( "h.t", 'new', 1 );   
+    $textnode->replaceDataString( "h.t", 'new', 1 );
     # TEST
     is( $textnode->nodeValue(), 'newhrt', ' TODO : Add test name' );
 
     # check if deleteDataString does not delete dots.
     $textnode->setData( 'hitpit' );
-    $textnode->deleteDataString( 'h.t' );   
+    $textnode->deleteDataString( 'h.t' );
     # TEST
     is( $textnode->nodeValue(), 'hitpit', ' TODO : Add test name' );
 
     # check if deleteDataString works
     $textnode->setData( 'hitpithit' );
-    $textnode->deleteDataString( 'hit' );   
+    $textnode->deleteDataString( 'hit' );
     # TEST
     is( $textnode->nodeValue(), 'pithit', ' TODO : Add test name' );
 
     # check if deleteDataString all works
     $textnode->setData( 'hitpithit' );
-    $textnode->deleteDataString( 'hit', 1 );   
+    $textnode->deleteDataString( 'hit', 1 );
     # TEST
     is( $textnode->nodeValue(), 'pit', ' TODO : Add test name' );
 

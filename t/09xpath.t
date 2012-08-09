@@ -31,7 +31,7 @@ EOSTR
         is ( scalar( @nodes ), 2, 'Two bar nodes' );
 
         # TEST
-        ok( $doc->isSameNode($nodes[0]->ownerDocument), 
+        ok( $doc->isSameNode($nodes[0]->ownerDocument),
             'Doc is the same as the owner document.' );
 
         my $compiled = XML::LibXML::XPathExpression->new("/foo/bar");
@@ -42,7 +42,7 @@ EOSTR
         }
 
         # TEST
-        ok( $doc->isSameNode($nodes[0]->ownerDocument), 
+        ok( $doc->isSameNode($nodes[0]->ownerDocument),
             'Same owner as previous one',
         );
 
@@ -236,7 +236,7 @@ EOSTR
 sub _utf16_content_test
 {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    
+
     my ($nodes_ref, $blurb) = @_;
 
     SKIP:
@@ -246,7 +246,7 @@ sub _utf16_content_test
             skip "UTF-16 and HTML broken in libxml2 < 2.7", 1;
         }
 
-        is ($nodes_ref->[0]->textContent, 
+        is ($nodes_ref->[0]->textContent,
             "utf-16 test with umlauts: \x{e4}\x{f6}\x{fc}\x{c4}\x{d6}\x{dc}\x{df}",
             $blurb,
         );

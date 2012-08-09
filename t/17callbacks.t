@@ -22,10 +22,10 @@ sub _create_counter_pair
                 my $inc_cb = shift;
                 return sub {
                     return $worker_cb->(
-                        sub { 
+                        sub {
                             if (!$predicate_cb->())
-                            { 
-                                $inc_cb->() 
+                            {
+                                $inc_cb->()
                             }
                             return;
                         }
@@ -41,10 +41,10 @@ sub _create_counter_pair
                 my $inc_cb = shift;
                 return sub {
                     return $worker_cb->(
-                        sub { 
+                        sub {
                             if ($predicate_cb->())
-                            { 
-                                $inc_cb->() 
+                            {
+                                $inc_cb->()
                             }
                             return;
                         }
@@ -200,7 +200,7 @@ my ($read1_non_global_counter, $read1_global_counter) =
 
 {
     # test per parser callbacks. These tests must not fail!
-    
+
     my $parser = XML::LibXML->new();
     my $parser2 = XML::LibXML->new();
 
@@ -222,7 +222,7 @@ my ($read1_non_global_counter, $read1_global_counter) =
     $parser2->close_callback( \&close2 );
 
     $parser2->expand_xinclude( 1 );
-   
+
     my $dom1 = $parser->parse_file( "example/test.xml");
     my $dom2 = $parser2->parse_file("example/test.xml");
 

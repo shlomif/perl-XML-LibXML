@@ -34,8 +34,8 @@ extern "C" {
 #endif
 
 
-/* 
-   we must call CLEAR_SERROR_HANDLER upon each excurse from 
+/*
+   we must call CLEAR_SERROR_HANDLER upon each excurse from
    perl
 */
 #define WITH_SERRORS
@@ -47,7 +47,7 @@ extern "C" {
 #endif
 
 #define NSDELIM ':'
-/* #define NSDEFAULTURI "http://www.w3.org/XML/1998/namespace" */ 
+/* #define NSDEFAULTURI "http://www.w3.org/XML/1998/namespace" */
 #define NSDEFAULTURI "http://www.w3.org/2000/xmlns/"
 typedef struct {
     SV * parser;
@@ -100,7 +100,7 @@ _C2Sv( const xmlChar *string, const xmlChar *dummy )
 
     if ( string != NULL ) {
         len = xmlStrlen( string );
-        retval = NEWSV(0, len+1); 
+        retval = NEWSV(0, len+1);
         sv_setpvn(retval, (const char *)string, len );
 #ifdef HAVE_UTF8
         SvUTF8_on( retval );
@@ -118,7 +118,7 @@ _C2Sv_len( const xmlChar *string, int len )
     SV *retval = &PL_sv_undef;
 
     if ( string != NULL ) {
-        retval = NEWSV(0, len+1); 
+        retval = NEWSV(0, len+1);
         sv_setpvn(retval, (const char *)string, (STRLEN) len );
 #ifdef HAVE_UTF8
         SvUTF8_on( retval );
@@ -342,7 +342,7 @@ PmmSAXInitContext( xmlParserCtxtPtr ctxt, SV * parser, SV * saved_error )
     ctxt->_private = (void*)vec;
 }
 
-void 
+void
 PmmSAXCloseContext( xmlParserCtxtPtr ctxt )
 {
     PmmSAXVector * vec = (PmmSAXVectorPtr) ctxt->_private;
@@ -375,7 +375,7 @@ PmmGetNsMapping( xmlNodePtr ns_stack, const xmlChar * prefix )
     if ( ns_stack != NULL ) {
         return xmlSearchNs( ns_stack->doc, ns_stack, prefix );
     }
-    
+
     return NULL;
 }
 
@@ -464,18 +464,18 @@ PSaxEndPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
     CLEAR_SERROR_HANDLER
 }
 
-void 
+void
 PmmExtendNsStack( PmmSAXVectorPtr sax , const xmlChar * name) {
     xmlNodePtr newNS = NULL;
     xmlChar * localname = NULL;
     xmlChar * prefix = NULL;
-    
+
     localname = xmlSplitQName( NULL, name, &prefix );
     if ( prefix != NULL ) {
         /* check if we can find a namespace with that prefix... */
@@ -515,7 +515,7 @@ PmmNarrowNsStack( PmmSAXVectorPtr sax, SV *handler )
         if ( !xmlStrEqual(list->prefix, (const xmlChar*)"xml") ) {
             PSaxEndPrefix( sax, list->prefix, list->href, handler );
         }
-        list = list->next;        
+        list = list->next;
     }
     xmlUnlinkNode(sax->ns_stack);
     xmlFreeNode(sax->ns_stack);
@@ -535,7 +535,7 @@ PmmAddNamespace( PmmSAXVectorPtr sax, const xmlChar * name,
         return;
     }
 
-    ns = xmlNewNs( sax->ns_stack, href, name );         
+    ns = xmlNewNs( sax->ns_stack, href, name );
 
     if ( sax->ns_stack->ns == NULL ) {
         localname = xmlSplitQName( NULL, sax->ns_stack->name, &prefix );
@@ -625,7 +625,7 @@ PmmGenNsName( const xmlChar * name, const xmlChar * nsURI )
     if ( nsURI != NULL ) {
         urilen = xmlStrlen( nsURI );
         retval =xmlStrncat( retval, nsURI, urilen );
-    } 
+    }
     retval = xmlStrncat( retval, (const xmlChar *)"}", 1 );
     retval = xmlStrncat( retval, name, namelen );
     return retval;
@@ -671,7 +671,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
 
                 if ( xmlStrEqual( (const xmlChar *)"xmlns", name ) ) {
                     /* a default namespace */
-                    PmmAddNamespace( sax, NULL, value, handler);  
+                    PmmAddNamespace( sax, NULL, value, handler);
                     /* nsURI = (const xmlChar*)NSDEFAULTURI; */
                     nsURI = NULL;
                     (void) hv_store(atV, "Name", 4,
@@ -683,7 +683,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                              _C2Sv(name,NULL), LocalNameHash);
                     (void) hv_store(atV, "NamespaceURI", 12,
                              _C2Sv((const xmlChar *)"", NULL), NsURIHash);
-                    
+
                 }
                 else if (xmlStrncmp((const xmlChar *)"xmlns:", name, 6 ) == 0 ) {
                     PmmAddNamespace( sax,
@@ -692,7 +692,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                                      handler);
 
                     nsURI = (const xmlChar*)NSDEFAULTURI;
-         
+
                     (void) hv_store(atV, "Prefix", 6,
                              _C2Sv(prefix, NULL), PrefixHash);
                     (void) hv_store(atV, "LocalName", 9,
@@ -745,14 +745,14 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
                 }
                 prefix    = NULL;
 
-            }            
+            }
         }
     }
 
     return retval;
 }
 
-HV * 
+HV *
 PmmGenCharDataSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * data, int len )
 {
     HV * retval = newHV();
@@ -765,7 +765,7 @@ PmmGenCharDataSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * data, int len )
     return retval;
 }
 
-HV * 
+HV *
 PmmGenPISV( pTHX_ PmmSAXVectorPtr sax,
             const xmlChar * target,
             const xmlChar * data )
@@ -789,7 +789,7 @@ PmmGenPISV( pTHX_ PmmSAXVectorPtr sax,
     return retval;
 }
 
-HV * 
+HV *
 PmmGenDTDSV( pTHX_ PmmSAXVectorPtr sax,
 	     const xmlChar * name,
 	     const xmlChar * publicId,
@@ -822,28 +822,28 @@ PSaxStartDocument(void * ctx)
 
     SV * rv;
     if ( handler != NULL ) {
-       
+
         dSP;
-        
+
         ENTER;
         SAVETMPS;
-        
+
         empty = newHV();
         PUSHMARK(SP) ;
         XPUSHs(handler);
         XPUSHs(sv_2mortal(newRV_noinc((SV*)empty)));
         PUTBACK;
-        
+
         call_method( "start_document", G_SCALAR | G_EVAL | G_DISCARD );
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
+
         SPAGAIN;
 
         PUSHMARK(SP) ;
 
-    
+
         XPUSHs(handler);
 
         empty = newHV();
@@ -855,7 +855,7 @@ PSaxStartDocument(void * ctx)
             (void) hv_store(empty, "Version", 7,
                      _C2Sv((const xmlChar *)"1.0", NULL), VersionHash);
         }
-        
+
         if ( ctxt->input->encoding != NULL ) {
             (void) hv_store(empty, "Encoding", 8,
                      _C2Sv(ctxt->input->encoding, NULL), EncodingHash);
@@ -865,14 +865,14 @@ PSaxStartDocument(void * ctx)
         XPUSHs( rv);
 
         PUTBACK;
-        
+
         call_method( "xml_decl", G_SCALAR | G_EVAL | G_DISCARD );
 	CLEAR_SERROR_HANDLER
         sv_2mortal(rv);
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
+
         FREETMPS ;
         LEAVE ;
     }
@@ -906,7 +906,7 @@ PSaxEndDocument(void * ctx)
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
     CLEAR_SERROR_HANDLER
@@ -926,7 +926,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     SV * arv;
 
     dSP;
-    
+
     if (sax->joinchars)
     {
         PSaxCharactersFlush(ctxt, sax->charbuf);
@@ -946,7 +946,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
               10,
               arv,
               AttributesHash );
-    
+
     PUSHMARK(SP) ;
 
     XPUSHs(handler);
@@ -960,7 +960,7 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
     CLEAR_SERROR_HANDLER
@@ -997,11 +997,11 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
 
     call_method( "end_element", G_SCALAR | G_EVAL | G_DISCARD );
     sv_2mortal(rv);
-    
+
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
 
@@ -1095,7 +1095,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     dTHX;
     HV* element;
     SV * handler = sax->handler;
-    
+
     SV * rv = NULL;
 
     if ( ch != NULL && handler != NULL ) {
@@ -1125,7 +1125,7 @@ PSaxComment(void *ctx, const xmlChar * ch) {
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
+
         FREETMPS ;
         LEAVE ;
     }
@@ -1141,7 +1141,7 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
 
     HV* element;
     SV * handler = sax->handler;
-    
+
     SV * rv = NULL;
 
     if ( ch != NULL && handler != NULL ) {
@@ -1163,10 +1163,10 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
-        SPAGAIN;        
+
+        SPAGAIN;
         PUSHMARK(SP) ;
-    
+
         XPUSHs(handler);
         element = PmmGenCharDataSV(aTHX_ sax, ch, len);
 
@@ -1178,20 +1178,20 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
-        SPAGAIN;        
+
+        SPAGAIN;
         PUSHMARK(SP) ;
-    
+
         XPUSHs(handler);
         PUTBACK;
 
         call_method( "end_cdata", G_SCALAR | G_EVAL | G_DISCARD );
         sv_2mortal(rv);
-        
+
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
+
         FREETMPS ;
         LEAVE ;
 
@@ -1219,7 +1219,7 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
         {
             PSaxCharactersFlush(ctxt, sax->charbuf);
         }
-    
+
         ENTER;
         SAVETMPS;
 
@@ -1238,7 +1238,7 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
         if (SvTRUE(ERRSV)) {
             croak_obj;
         }
-        
+
         FREETMPS ;
         LEAVE ;
     }
@@ -1246,9 +1246,9 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     return 1;
 }
 
-void PSaxExternalSubset (void * ctx, 
-			const xmlChar * name, 
-			const xmlChar * ExternalID, 
+void PSaxExternalSubset (void * ctx,
+			const xmlChar * name,
+			const xmlChar * ExternalID,
 			const xmlChar * SystemID)
 {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
@@ -1261,13 +1261,13 @@ void PSaxExternalSubset (void * ctx,
 
     if ( handler != NULL ) {
         dSP;
-    
+
         ENTER;
         SAVETMPS;
 
         PUSHMARK(SP) ;
         XPUSHs(handler);
-        element = (SV*)PmmGenDTDSV(aTHX_ sax, 
+        element = (SV*)PmmGenDTDSV(aTHX_ sax,
 				   name,
 				   ExternalID,
 				   SystemID);
@@ -1291,7 +1291,7 @@ void PSaxExternalSubset (void * ctx,
         PUTBACK;
 
         call_method( "end_dtd", G_SCALAR | G_EVAL | G_DISCARD );
-        
+
         FREETMPS ;
         LEAVE ;
     }
@@ -1302,9 +1302,9 @@ void PSaxExternalSubset (void * ctx,
 
 /*
 
-void PSaxInternalSubset (void * ctx, 
-			const xmlChar * name, 
-			const xmlChar * ExternalID, 
+void PSaxInternalSubset (void * ctx,
+			const xmlChar * name,
+			const xmlChar * ExternalID,
 			const xmlChar * SystemID)
 {
   // called before ExternalSubset
@@ -1312,7 +1312,7 @@ void PSaxInternalSubset (void * ctx,
 }
 
 void PSaxElementDecl (void *ctx, const xmlChar *name,
-		      int type, 
+		      int type,
 		      xmlElementContentPtr content) {
   // this one is  not easy to implement
   // since libxml2 has no (reliable) public method
@@ -1320,39 +1320,39 @@ void PSaxElementDecl (void *ctx, const xmlChar *name,
 }
 
 void
-PSaxAttributeDecl (void * ctx, 
-		   const xmlChar * elem, 
-		   const xmlChar * fullname, 
-		   int type, 
-		   int def, 
-		   const xmlChar * defaultValue, 
+PSaxAttributeDecl (void * ctx,
+		   const xmlChar * elem,
+		   const xmlChar * fullname,
+		   int type,
+		   int def,
+		   const xmlChar * defaultValue,
 		   xmlEnumerationPtr tree)
 {
 }
 
 void
-PSaxEntityDecl (void * ctx, 
-		const xmlChar * name, 
-		int type, 
-		const xmlChar * publicId, 
-		const xmlChar * systemId, 
+PSaxEntityDecl (void * ctx,
+		const xmlChar * name,
+		int type,
+		const xmlChar * publicId,
+		const xmlChar * systemId,
 		xmlChar * content)
 {
 }
 
 void
-PSaxNotationDecl (void * ctx, 
-		  const xmlChar * name, 
-		  const xmlChar * publicId, 
+PSaxNotationDecl (void * ctx,
+		  const xmlChar * name,
+		  const xmlChar * publicId,
 		  const xmlChar * systemId)
 {
 }
 
 void
-PSaxUnparsedEntityDecl (void * ctx, 
-			const xmlChar * name, 
-			const xmlChar * publicId, 
-			const xmlChar * systemId, 
+PSaxUnparsedEntityDecl (void * ctx,
+			const xmlChar * name,
+			const xmlChar * publicId,
+			const xmlChar * systemId,
 			const xmlChar * notationName)
 {
 }
@@ -1398,7 +1398,7 @@ PmmSaxWarning(void * ctx, const char * msg, ...)
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
     CLEAR_SERROR_HANDLER
@@ -1417,7 +1417,7 @@ PmmSaxError(void * ctx, const char * msg, ...)
 
 #if LIBXML_VERSION > 20600
     xmlErrorPtr last_err = xmlCtxtGetLastError( ctxt );
-#endif    
+#endif
     dTHX;
     dSP;
 
@@ -1444,8 +1444,8 @@ PmmSaxError(void * ctx, const char * msg, ...)
 
     PUTBACK;
 #if LIBXML_VERSION > 20600
-    /* 
-       this is a workaround: at least some versions of libxml2 didn't not call 
+    /*
+       this is a workaround: at least some versions of libxml2 didn't not call
        the fatalError callback at all
     */
     if (last_err && last_err->level == XML_ERR_FATAL) {
@@ -1460,7 +1460,7 @@ PmmSaxError(void * ctx, const char * msg, ...)
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
     CLEAR_SERROR_HANDLER
@@ -1476,7 +1476,7 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
 
     va_list args;
     SV * svMessage;
- 
+
     dTHX;
     dSP;
 
@@ -1507,7 +1507,7 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
     if (SvTRUE(ERRSV)) {
         croak_obj;
     }
-    
+
     FREETMPS ;
     LEAVE ;
     CLEAR_SERROR_HANDLER
@@ -1515,7 +1515,7 @@ PmmSaxFatalError(void * ctx, const char * msg, ...)
 }
 
 /* NOTE:
- * end document is not handled by the parser itself! use 
+ * end document is not handled by the parser itself! use
  * XML::LibXML::SAX instead!
  */
 xmlSAXHandlerPtr
@@ -1526,7 +1526,7 @@ PSaxGetHandler()
 
     retval->startDocument = (startDocumentSAXFunc)&PSaxStartDocument;
 
-    /* libxml2 will not handle perls returnvalue correctly, so we have 
+    /* libxml2 will not handle perls returnvalue correctly, so we have
      * to end the document ourselfes
      */
     retval->endDocument   = NULL; /* (endDocumentSAXFunc)&PSaxEndDocument; */

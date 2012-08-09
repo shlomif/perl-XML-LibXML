@@ -27,7 +27,7 @@ use XML::LibXML::SAX::Builder;
 
 #        require Devel::Peek;
         my $peek = 0;
-    
+
         # TEST
         ok(1, 'Start.');
 
@@ -109,23 +109,23 @@ use XML::LibXML::SAX::Builder;
         }
         # TEST
         ok(1, 'Multiple failures.');
-    
+
         check_mem();
 
         # building custom docs
         my $doc = XML::LibXML::Document->new();
         for (1..TIMES_THROUGH)        {
             my $elem = $doc->createElement('x');
-            
+
             if($peek) {
                 warn("Doc before elem\n");
                 # Devel::Peek::Dump($doc);
                 warn("Elem alone\n");
                 # Devel::Peek::Dump($elem);
             }
-            
+
             $doc->setDocumentElement($elem);
-            
+
             if ($peek) {
                 warn("Elem after attaching\n");
                 # Devel::Peek::Dump($elem);
@@ -196,7 +196,7 @@ use XML::LibXML::SAX::Builder;
             # TEST
             ok(1, 'is_valid()');
             check_mem();
-        
+
             print "# validate() \n";
             for ( 1..TIMES_THROUGH ) {
                 eval {
@@ -207,7 +207,7 @@ use XML::LibXML::SAX::Builder;
             # TEST
             ok(1, 'validate()');
             check_mem();
-                
+
         }
 
         print "# FIND NODES \n";
@@ -217,15 +217,15 @@ use XML::LibXML::SAX::Builder;
     <species name="Camel">
       <humps>1 or 2</humps>
       <disposition>Cranky</disposition>
-    </species>                         
+    </species>
     <species name="Llama">
       <humps>1 (sort of)</humps>
       <disposition>Aloof</disposition>
-    </species>                        
+    </species>
     <species name="Alpaca">
       <humps>(see Llama)</humps>
       <disposition>Friendly</disposition>
-    </species>                           
+    </species>
 </dromedaries>
 dromeds.xml
 
@@ -270,7 +270,7 @@ dromeds.xml
 #            }
 #            ok(1);
 #            check_mem();
-#    
+#
 #            for ( 1..TIMES_THROUGH ) {
 #                my $str = decodeFromUTF8( "iso-8859-1" , $encstr );
 #            }
@@ -289,11 +289,11 @@ dromeds.xml
                 # warn "ns : " . $_->localname . "=>" . $_->href foreach @ns;
                 my $prefix = $_->localname foreach @ns;
                 my $name = $doc->documentElement->nodeName;
-            }  
+            }
             check_mem();
             # TEST
             ok(1, 'namespace tests.');
-        }   
+        }
 
         {
             note('SAX PARSER');
@@ -313,7 +313,7 @@ dromeds.xml
             $parser->set_handler( $handler );
 
             check_mem();
-       
+
             foreach my $key ( keys %xmlStrings )  {
                 print "# $key \n";
                 for (1..TIMES_THROUGH) {
@@ -373,7 +373,7 @@ dromeds.xml
                 }
 
                 check_mem();
-            }            
+            }
             # TEST
             ok(1, 'BAD PUSHED DATA');
         }
@@ -396,7 +396,7 @@ dromeds.xml
             "NAMESPACES SIMPLE" => ['<xm:xml1 xmlns:x','m="foo"><xm:xml2','/></xm:xml1>'],
             "NAMESPACES ATTRIBUTE" => ['<xm:xml1 xmlns:xm="foo">','<xm:xml2 xm:foo="bar"/></xm',':xml1>'],
         );
-       
+
             foreach my $key ( keys %xmlStrings )  {
                 print "# $key \n";
                 for (1..TIMES_THROUGH) {
@@ -427,7 +427,7 @@ dromeds.xml
                 }
 
                 check_mem();
-            }            
+            }
             # TEST
             ok(1, 'BAD PUSHED DATA');
         }
@@ -436,10 +436,10 @@ dromeds.xml
 sub processMessage {
       my ($msg, $xpath) = @_;
       my $parser = XML::LibXML->new();
-                                      
+
       my $doc  = $parser->parse_string($msg);
-      my $elm  = $doc->getDocumentElement;   
-      my $node = $doc->findnodes($xpath);      
+      my $elm  = $doc->getDocumentElement;
+      my $node = $doc->findnodes($xpath);
       my $text = $node->to_literal->value;
 #      undef $doc;   # comment this line to make memory leak much worse
 #      undef $parser;
@@ -452,15 +452,15 @@ sub make_doc {
     # warn("document: $document\n");
     my ($parent);
 
-    { 
+    {
         my $elem = $document->createElement(q(p));
-        $document->setDocumentElement($elem); 
-        $parent = $elem; 
+        $document->setDocumentElement($elem);
+        $parent = $elem;
     }
 
     $parent->setAttribute("xmlns:" . q(param), q(http://axkit.org/XSP/param));
-    
-    { 
+
+    {
         my $elem = $document->createElementNS(q(http://axkit.org/XSP/param),q(param:foo),);
         $parent->appendChild($elem);
         $parent = $elem;

@@ -158,7 +158,7 @@ sub handle {
         my $dir = $self->{directory};
 
         $filename =~ s/XML\:\:LibXML//g;
-        $filename =~ s/^-|^\:\://g;   # remove the first colon or minus. 
+        $filename =~ s/^-|^\:\://g;   # remove the first colon or minus.
         $filename =~ s/\:\:/\//g;     # transform remaining colons to paths.
         # the previous statement should work for existing modules. This could be
         # dangerous for nested modules, which do not exist at the time of writing
@@ -239,7 +239,7 @@ sub dump_text {
             my $str = $title->string_value();
             my $len = length $str;
 
-            $self->{OFILE}->print( "\n" . uc($str) . "\n" ); 
+            $self->{OFILE}->print( "\n" . uc($str) . "\n" );
             $self->{OFILE}->print( "=" x $len );
             $self->{OFILE}->print( "\n\n" );
             $self->dump_text( $node );

@@ -35,7 +35,7 @@ sub open_uri {
     if ( not $handler->open( "<$uri" ) ){
         $handler = 0;
     }
-    
+
     return $handler;
 }
 

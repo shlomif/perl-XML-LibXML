@@ -2,9 +2,9 @@
 # $Id$
 #
 # This should test the XML::LibXML internal encoding/ decoding.
-# Since most of the internal encoding code is dependent on 
-# the perl version the module is built for. only the encodeToUTF8() and 
-# decodeFromUTF8() functions are supposed to be general, while all the 
+# Since most of the internal encoding code is dependent on
+# the perl version the module is built for. only the encodeToUTF8() and
+# decodeFromUTF8() functions are supposed to be general, while all the
 # magic code is only available for more recent perl version (5.6+)
 #
 # Added note by Shlomi Fish: we are now perl-5.8.x and above so I removed
@@ -92,7 +92,7 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "EUC-JP" ) {
     my $domstrjp = q{<?xml version="1.0" encoding="EUC-JP"?>
 <À¸ÇþÀ¸ÊÆÀ¸Íñ>À¸ÇþÀ¸ÊÆÀ¸Íñ</À¸ÇþÀ¸ÊÆÀ¸Íñ>
 };
-    
+
 
     {
         my $dom_euc_jp = XML::LibXML::Document->new('1.0', 'EUC-JP');
@@ -122,7 +122,7 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "EUC-JP" ) {
         # TEST
 
         is( $dom_euc_jp->toString(), $domstrjp, ' TODO : Add test name' );
-    }   
+    }
 
 }
 
@@ -133,7 +133,7 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "KOI8-R" ) {
     my $domstrkoi = q{<?xml version="1.0" encoding="KOI8-R"?>
 <ÐÒÏÂÁ>ÐÒÏÂÁ</ÐÒÏÂÁ>
 };
-    
+
 
     {
         my ($dom_koi8, $elemkoi8);
@@ -143,12 +143,12 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "KOI8-R" ) {
 
         # TEST
 
-        is( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->nodeName()), 
+        is( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->nodeName()),
             $tstr_koi8r, ' TODO : Add test name' );
 
         # TEST
 
-        is( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->toString()), 
+        is( decodeFromUTF8( 'KOI8-R' ,$elemkoi8->toString()),
             "<$tstr_koi8r/>", ' TODO : Add test name');
         # TEST
         is( $elemkoi8->toString(0,1), "<$tstr_koi8r/>", ' TODO : Add test name');
@@ -168,6 +168,6 @@ if ( $ENV{TEST_LANGUAGES} eq 'all' or $ENV{TEST_LANGUAGES} eq "KOI8-R" ) {
 
         is( $dom_koi8->toString(),
             $domstrkoi, ' TODO : Add test name' );
-        
+
     }
 }

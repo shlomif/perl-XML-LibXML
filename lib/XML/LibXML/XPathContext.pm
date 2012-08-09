@@ -74,10 +74,10 @@ sub _guarded_find_call {
     $self->_free_node_pool;
     $self->setContextNode($prev_node) if ref($node);
 
-    if ($@) { 
+    if ($@) {
       my $err = $@;
       chomp $err;
-      croak $err; 
+      croak $err;
     }
 
     return @ret;

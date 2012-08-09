@@ -29,7 +29,7 @@ my $parser = XML::LibXML->new;
 
 {
     my $doc = $parser->parse_string( '<a><b/><![CDATA[ >e&f<]]><!-- d --> </a>' );
-    
+
     my $c14n_res = $doc->toStringC14N();
     # TEST
     is( $c14n_res, '<a><b></b> &gt;e&amp;f&lt; </a>', ' TODO : Add test name' );
@@ -40,7 +40,7 @@ my $parser = XML::LibXML->new;
 
 {
     my $doc = $parser->parse_string( '<a a="foo"/>' );
-    
+
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
     # TEST
@@ -49,7 +49,7 @@ my $parser = XML::LibXML->new;
 
 {
     my $doc = $parser->parse_string( '<b:a xmlns:b="http://foo"/>' );
-    
+
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
     # TEST
@@ -62,7 +62,7 @@ my $parser = XML::LibXML->new;
 # ----------------------------------------------------------------- #
 {
     my $doc = $parser->parse_string( '<b:a xmlns:b="http://foo" xmlns:a="xml://bar"/>' );
-    
+
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
     # TEST
@@ -77,7 +77,7 @@ my $parser = XML::LibXML->new;
 # ----------------------------------------------------------------- #
 {
     my $doc = $parser->parse_string( '<b:a xmlns:b="http://foo"><b:b xmlns:b="http://foo"/></b:a>' );
-    
+
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
     # TEST
@@ -86,7 +86,7 @@ my $parser = XML::LibXML->new;
 
 {
     my $doc = $parser->parse_string( '<a xmlns="xml://foo"/>' );
-    
+
     my $c14n_res;
     $c14n_res = $doc->toStringC14N(0);
     # TEST

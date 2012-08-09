@@ -69,7 +69,7 @@ foreach my $stmt (@{$statements})
         my $comment = PPI::Token::Comment->new;
         $comment->line(1);
         $comment->set_content ("# TEST\n");
-        
+
         my $which_to_prepend = $stmt;
         my $prev = $stmt->previous_sibling;
         if ($prev->isa('PPI::Token::Whitespace'))
@@ -91,11 +91,11 @@ foreach my $stmt (@{$statements})
         my $num_args = 1 + scalar (() = grep { is_comma($_) } $args->children());
 
         my $last_child = $args->child($num_childs - 1);
-        if (is_comma($last_child) 
+        if (is_comma($last_child)
                 ||
             (
                 $last_child->isa('PPI::Token::Whitespace')
-                    && 
+                    &&
                 is_comma($args->child($num_childs - 2))
             )
         )

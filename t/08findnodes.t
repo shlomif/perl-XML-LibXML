@@ -19,7 +19,7 @@ my $dom    = $parser->parse_file( $file );
 if ( defined $dom ) {
     # get the root document
     my $elem   = $dom->getDocumentElement();
-  
+
     # first very simple path starting at root
     my @list   = $elem->findnodes( "species" );
     # TEST
@@ -35,7 +35,7 @@ if ( defined $dom ) {
     @list   = $elem->findnodes( "species[\@name='Llama']" );
     # TEST
     is( scalar( @list ), 1, ' TODO : Add test name' );
-  
+
     # find with not conditions
     @list   = $elem->findnodes( "species[\@name!='Llama']/disposition" );
     # TEST
@@ -54,10 +54,10 @@ if ( defined $dom ) {
         # TEST
         is( $x->getData(), "1234", ' TODO : Add test name' );
     }
-    
+
     my $telem = $dom->createElement('test');
     $telem->appendWellBalancedChunk('<b>c</b>');
-  
+
     finddoc($dom);
     # TEST
     ok(1, ' TODO : Add test name');
@@ -189,7 +189,7 @@ foreach my $xp ( @badxpath ) {
 
     # @list = $doc->getElementsByTagName( "A" );
     # ok( scalar @list );
-    # ok( $list[0]->isSameNode( $root ) );        
+    # ok( $list[0]->isSameNode( $root ) );
 
     @list = $root->getElementsByTagName( 'B' );
     # TEST
@@ -212,7 +212,7 @@ foreach my $xp ( @badxpath ) {
     $root->appendChild( $b );
     $c= $doc->createElement( "C" );
     $b->appendChild( $c );
-    
+
     my @list = $root->findnodes( "B" );
     # TEST
     is( scalar(@list) , 2, ' TODO : Add test name' );
@@ -228,7 +228,7 @@ foreach my $xp ( @badxpath ) {
     # findnode remove problem
 
     my $xmlstr = "<a><b><c>1</c><c>2</c></b></a>";
-    
+
     my $doc       = $parser->parse_string( $xmlstr );
     my $root      = $doc->documentElement;
     my ( $lastc ) = $root->findnodes( 'b/c[last()]' );

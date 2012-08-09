@@ -32,7 +32,7 @@ my @badnames= ("1A", "<><", "&", "-:");
     ok($elem, ' TODO : Add test name');
     # TEST
     is($elem->tagName, $foo, ' TODO : Add test name');
-    
+
     {
         foreach my $name ( @badnames ) {
             eval { $elem->setNodeName( $name ); };
@@ -40,7 +40,7 @@ my @badnames= ("1A", "<><", "&", "-:");
             ok( $@, "setNodeName throws an exception for $name" );
         }
     }
-    
+
     $elem->setAttribute( $attname1, $attvalue1 );
     # TEST
     ok( $elem->hasAttribute($attname1), ' TODO : Add test name' );
@@ -75,13 +75,13 @@ my @badnames= ("1A", "<><", "&", "-:");
     # TEST
     ok($tattr->isSameNode($attr2), ' TODO : Add test name');
 
-    $elem->setAttribute($attname2, "");    
+    $elem->setAttribute($attname2, "");
     # TEST
     ok($elem->hasAttribute($attname2), ' TODO : Add test name' );
     # TEST
     is($elem->getAttribute($attname2), "", ' TODO : Add test name');
-    
-    $elem->setAttribute($attname3, "");    
+
+    $elem->setAttribute($attname3, "");
     # TEST
     ok($elem->hasAttribute($attname3), ' TODO : Add test name' );
     # TEST
@@ -145,7 +145,7 @@ my @badnames= ("1A", "<><", "&", "-:");
     ok($elem->hasAttributeNS(undef, $foo) == 1, ' TODO : Add test name');
     # TEST
     ok($elem->hasAttributeNS('', $foo) == 1, ' TODO : Add test name');
-     
+
     $elem->removeAttributeNode( $tattr );
     # TEST
     ok( !$elem->hasAttributeNS('', $foo), ' TODO : Add test name' );
@@ -160,7 +160,7 @@ my @badnames= ("1A", "<><", "&", "-:");
     ok( $nsAttr, ' TODO : Add test name' );
     $elem->setAttributeNodeNS($nsAttr);
     # TEST
-    ok( $elem->hasAttributeNS($nsURI.".x", $foo), ' TODO : Add test name' );    
+    ok( $elem->hasAttributeNS($nsURI.".x", $foo), ' TODO : Add test name' );
     $elem->removeAttributeNS( $nsURI.".x", $foo);
     # TEST
     ok( !$elem->hasAttributeNS($nsURI.".x", $foo), ' TODO : Add test name' );
@@ -187,7 +187,7 @@ my @badnames= ("1A", "<><", "&", "-:");
             ok( $@, "setAttributeNS throws an exception for '$name'");
         }
     }
-} 
+}
 
 # 2. unbound node
 {
@@ -247,12 +247,12 @@ my @badnames= ("1A", "<><", "&", "-:");
 
     $elem->setAttributeNodeNS($nsAttr);
     # TEST
-    ok( $elem->hasAttributeNS($nsURI, $foo), ' TODO : Add test name' );    
+    ok( $elem->hasAttributeNS($nsURI, $foo), ' TODO : Add test name' );
 
     # TEST
     ok( ! defined $nsAttr->ownerDocument, ' TODO : Add test name');
     # warn $elem->toString() , "\n";
-} 
+}
 
 # 3.2 default Namespace and Attributes
 {
@@ -299,7 +299,7 @@ my @badnames= ("1A", "<><", "&", "-:");
     # referred
     # TEST
     is( scalar( @cn ), 4, ' TODO : Add test name' );
-    
+
     $e->normalize;
 
     @cn = $e->childNodes;
@@ -352,11 +352,11 @@ my @badnames= ("1A", "<><", "&", "-:");
 {
     my $plainstring = "foo";
     my $stdentstring= "$foo & this";
-    
+
     my $doc = XML::LibXML::Document->new();
     my $elem = $doc->createElement( $foo );
     $doc->setDocumentElement( $elem );
-    
+
     $elem->appendText( $plainstring );
     # TEST
     is( $elem->string_value , $plainstring, ' TODO : Add test name' );
@@ -497,20 +497,20 @@ EOF
             # TEST*$xml
             ok ($attr, "Attribute foo exists for $n");
             # TEST*$xml
-            isa_ok ($attr, 'XML::LibXML::Attr', 
+            isa_ok ($attr, 'XML::LibXML::Attr',
                 "Attribute is of type XML::LibXML::Attr - $n");
             # TEST*$xml
-            ok ($root->isSameNode($attr->ownerElement), 
+            ok ($root->isSameNode($attr->ownerElement),
                 "attr owner element is root - $n");
             # TEST*$xml
-            is ($attr->value, q{"barENT"}, 
+            is ($attr->value, q{"barENT"},
                 "attr value is OK - $n");
             # TEST*$xml
-            is ($attr->serializeContent, 
+            is ($attr->serializeContent,
                 '&quot;barENT&quot;',
                 "serializeContent - $n");
             # TEST*$xml
-            is ($attr->toString, ' foo="&quot;barENT&quot;"', 
+            is ($attr->toString, ' foo="&quot;barENT&quot;"',
                 "toString - $n");
         }
         # fixed values are defined

@@ -32,8 +32,8 @@ my $root = XML::LibXML->load_xml( IO => \*DATA )->documentElement;
 {
     my %hash = %$root;
     # assignment to ensure block is not optimized away
-    $hash{foo} = 'phooey'; 
-} 
+    $hash{foo} = 'phooey';
+}
 
 # Destroy element...
 undef($root);

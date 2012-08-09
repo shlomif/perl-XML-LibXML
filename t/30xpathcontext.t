@@ -303,7 +303,7 @@ ok($@, ' TODO : Add test name');
         # x1:a will match the first element
         # TEST
         ok( $x->findvalue('count(/x1:a)',$d->documentElement)==1, ' TODO : Add test name' );
-        # but not the second 
+        # but not the second
         # TEST
         ok( $x->findvalue('count(/x1:a/x1:a)',$d->documentElement)==0, ' TODO : Add test name' );
         # this will work, though
@@ -336,7 +336,7 @@ SKIP:
     # 37332
     if (XML::LibXML::LIBXML_VERSION() < 20617) {
         skip(
-            'xpath does not work on nodes without a document in libxml2 < 2.6.17', 
+            'xpath does not work on nodes without a document in libxml2 < 2.6.17',
             3
         );
     }

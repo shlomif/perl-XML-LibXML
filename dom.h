@@ -1,20 +1,20 @@
 /* dom.h
  * $Id$
  * Author: Christian Glahn (2001)
- * 
+ *
  * This header file provides some definitions for wrapper functions.
  * These functions hide most of libxml2 code, and should make the
- * code in the XS file more readable . 
+ * code in the XS file more readable .
  *
  * The Functions are sorted in four parts:
- * part 0 ..... general wrapper functions which do not belong 
- *              to any of the other parts and not specified in DOM. 
+ * part 0 ..... general wrapper functions which do not belong
+ *              to any of the other parts and not specified in DOM.
  * part A ..... wrapper functions for general nodeaccess
- * part B ..... document wrapper 
+ * part B ..... document wrapper
  * part C ..... element wrapper
- * 
+ *
  * I did not implement any Text, CDATASection or comment wrapper functions,
- * since it is pretty straightforeward to access these nodes. 
+ * since it is pretty straightforeward to access these nodes.
  */
 
 #ifndef __LIBXML_DOM_H__
@@ -48,7 +48,7 @@ extern "C" {
 /**
  * part 0:
  *
- * unsortet. 
+ * unsortet.
  **/
 
 void
@@ -86,7 +86,7 @@ domReconcileNs(xmlNodePtr tree);
 int
 domParseChar( xmlChar *characters, int *len );
 
-xmlNodePtr 
+xmlNodePtr
 domReadWellBalancedString( xmlDocPtr doc, xmlChar* string, int repair );
 
 /**
@@ -97,8 +97,8 @@ domReadWellBalancedString( xmlDocPtr doc, xmlChar* string, int repair );
  *
  * SYNOPSIS
  * if ( domIsParent(cur, ref) ) ...
- * 
- * this function is very useful to resolve if an operation would cause 
+ *
+ * this function is very useful to resolve if an operation would cause
  * circular references.
  *
  * the function returns 1 if the ref node is a parent of the cur node.
@@ -115,13 +115,13 @@ domIsParent( xmlNodePtr cur, xmlNodePtr ref );
  * SYNOPSIS
  * if ( domTestHierarchy(cur, ref) ) ...
  *
- * this function tests the general hierarchy error.   
- * it tests if the ref node would cause any hierarchical error for 
+ * this function tests the general hierarchy error.
+ * it tests if the ref node would cause any hierarchical error for
  * cur node. the function evaluates domIsParent() internally.
- * 
- * the function will retrun 1 if there is no hierarchical error found. 
+ *
+ * the function will retrun 1 if there is no hierarchical error found.
  * otherwise it returns 0.
- */ 
+ */
 int
 domTestHierarchy( xmlNodePtr cur, xmlNodePtr ref );
 
@@ -145,27 +145,27 @@ domTestDocument( xmlNodePtr cur, xmlNodePtr ref );
 * SYNOPSIS
 * domAddNodeToList( cur, prevNode, nextNode )
 *
-* This function inserts a node between the two nodes prevNode 
+* This function inserts a node between the two nodes prevNode
 * and nextNode. prevNode and nextNode MUST be adjacent nodes,
 * otherwise the function leads into undefined states.
-* Either prevNode or nextNode can be NULL to mark, that the 
-* node has to be inserted to the beginning or the end of the 
-* nodelist. in such case the given reference node has to be 
-* first or the last node in the list. 
+* Either prevNode or nextNode can be NULL to mark, that the
+* node has to be inserted to the beginning or the end of the
+* nodelist. in such case the given reference node has to be
+* first or the last node in the list.
 *
-* if prevNode is the same node as cur node (or in case of a 
-* Fragment its first child) only the parent information will 
+* if prevNode is the same node as cur node (or in case of a
+* Fragment its first child) only the parent information will
 * get updated.
-* 
+*
 * The function behaves different to libxml2's list functions.
-* The function is aware about document fragments. 
+* The function is aware about document fragments.
 * the function does not perform any text node normalization!
 *
-* NOTE: this function does not perform any highlevel 
+* NOTE: this function does not perform any highlevel
 * errorhandling. use this function with caution, since it can
 * lead into undefined states.
-* 
-* the function will return 1 if the cur node is appended to 
+*
+* the function will return 1 if the cur node is appended to
 * the list. otherwise the function returns 0.
 */
 int
@@ -196,12 +196,12 @@ xmlNodePtr
 domRemoveChild( xmlNodePtr self,
                xmlNodePtr Child );
 xmlNodePtr
-domInsertBefore( xmlNodePtr self, 
+domInsertBefore( xmlNodePtr self,
                  xmlNodePtr newChild,
                  xmlNodePtr refChild );
 
 xmlNodePtr
-domInsertAfter( xmlNodePtr self, 
+domInsertAfter( xmlNodePtr self,
                 xmlNodePtr newChild,
                 xmlNodePtr refChild );
 
@@ -215,7 +215,7 @@ domSetNodeValue( xmlNodePtr self, xmlChar* value );
 xmlNodePtr
 domReplaceNode( xmlNodePtr old, xmlNodePtr new );
 
-/** 
+/**
  * part B:
  *
  * class Document
@@ -228,16 +228,16 @@ domReplaceNode( xmlNodePtr old, xmlNodePtr new );
  * node = domImportNode( document, node, move, reconcileNS);
  *
  * the function will import a node to the given document. it will work safe
- * with namespaces and subtrees. 
+ * with namespaces and subtrees.
  *
- * if move is set to 1, then the node will be entirely removed from its 
- * original document. if move is set to 0, the node will be copied with the 
- * deep option. 
+ * if move is set to 1, then the node will be entirely removed from its
+ * original document. if move is set to 0, the node will be copied with the
+ * deep option.
  *
  * if reconcileNS is 1, namespaces are reconciled.
  *
  * the function will return the imported node on success. otherwise NULL
- * is returned 
+ * is returned
  */
 xmlNodePtr
 domImportNode( xmlDocPtr document, xmlNodePtr node, int move, int reconcileNS );

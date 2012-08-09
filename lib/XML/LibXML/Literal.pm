@@ -15,17 +15,17 @@ use strict;
 use vars qw ($VERSION);
 $VERSION = "2.0004"; # VERSION TEMPLATE: DO NOT CHANGE
 
-use overload 
+use overload
 		'""' => \&value,
 		'cmp' => \&cmp;
 
 sub new {
 	my $class = shift;
 	my ($string) = @_;
-	
+
 #	$string =~ s/&quot;/"/g;
 #	$string =~ s/&apos;/'/g;
-	
+
 	bless \$string, $class;
 }
 
