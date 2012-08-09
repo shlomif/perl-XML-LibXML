@@ -1,5 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
+    - Added t/style-trailing-space.t and removed trailing space.
+
 2.0004          Tue  7 Aug 23:04:55 IDT 2012
     - Add a way to specify a different compiler to be used in the
     "Makefile" by calling Makefile.PL with the CC environment variable
