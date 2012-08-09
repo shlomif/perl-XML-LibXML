@@ -7096,7 +7096,7 @@ my $node_with_index_2 = $map->item(2);
                         <funcsynopsisinfo>my $node_2 = $map->item(2);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Returns the node with the index of the argument 
+                    <para>Returns the node with the index of the argument
                     (starting from 0)</para>
                 </listitem>
             </varlistentry>
@@ -7122,8 +7122,8 @@ my $node_with_index_2 = $map->item(2);
                         <funcsynopsisinfo>$map->setNamedItem($new_node)</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Sets the node with the same name as 
-                    <literal>$new_node</literal> to 
+                    <para>Sets the node with the same name as
+                    <literal>$new_node</literal> to
                     <literal>$new_node</literal>.</para>
                 </listitem>
             </varlistentry>
@@ -7136,7 +7136,7 @@ my $node_with_index_2 = $map->item(2);
                         <funcsynopsisinfo>$map->removeNamedItem($name)</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Remove the item with the name 
+                    <para>Remove the item with the name
                     <literal>$name</literal>.</para>
                 </listitem>
             </varlistentry>
