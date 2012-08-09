@@ -23,15 +23,15 @@ is (XML_ELEMENT_NODE, 1, 'XML_ELEMENT_NODE is 1.' );
 
 # TEST
 is (decodeFromUTF8(
-        'iso-8859-1', encodeToUTF8('iso-8859-1', TEST_STRING_GER2 ) 
-    ), 
+        'iso-8859-1', encodeToUTF8('iso-8859-1', TEST_STRING_GER2 )
+    ),
     TEST_STRING_GER2,
     'Roundup trip from UTF-8 to ISO-8859-1 and back.',
 );
 
 # TEST
 is ( decodeFromUTF8(
-        'UTF-8' , encodeToUTF8('UTF-8', TEST_STRING_UTF ) 
+        'UTF-8' , encodeToUTF8('UTF-8', TEST_STRING_UTF )
     ),
     TEST_STRING_UTF,
     'Rountrip trip through UTF-8',
@@ -43,7 +43,7 @@ my $u16 =
     ;
 
 # TEST
-is ( length($u16), 2*length(TEST_STRING_UTF), 
+is ( length($u16), 2*length(TEST_STRING_UTF),
     'UTF-16 String is twice as long.'
 );
 
@@ -54,7 +54,7 @@ is ( length($u16be), 2*length(TEST_STRING_UTF),
     'UTF-16BE String is twice as long.'
 );
 
-my $u16le = decodeFromUTF8( 'UTF-16LE', 
+my $u16le = decodeFromUTF8( 'UTF-16LE',
                             encodeToUTF8('UTF-8', TEST_STRING_UTF ) );
 # TEST
 is ( length($u16le), 2*length(TEST_STRING_UTF),
@@ -72,7 +72,7 @@ ok( $@, 'Exception was thrown.' );
 is (encodeToUTF8( 'UTF-16' , '' ), '', 'Encoding empty string to UTF-8');
 
 # TEST
-ok (!defined(encodeToUTF8( 'UTF-16' , undef )), 
+ok (!defined(encodeToUTF8( 'UTF-16' , undef )),
     'encoding undef to UTF-8 is undefined'
 );
 

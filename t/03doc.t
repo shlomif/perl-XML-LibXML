@@ -7,7 +7,7 @@
 # it will ONLY test the DOM capabilities as specified in DOM Level3
 # XPath tests should be done in another test file
 
-# since all tests are run on a preparsed 
+# since all tests are run on a preparsed
 
 use strict;
 use warnings;
@@ -20,7 +20,7 @@ use XML::LibXML::Common qw(:libxml);
 
 use IO::Handle;
 
-sub is_empty_str 
+sub is_empty_str
 {
     my $s = shift;
     return (!defined($s) or (length($s) == 0));
@@ -61,7 +61,7 @@ sub _multi_arg_generic_count
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     my ($doc, $method, $params) = @_;
-    
+
     my ($meth_params, $want_count, $blurb) = @$params;
 
     my @elems = $doc->$method( @$meth_params );
@@ -74,7 +74,7 @@ sub _generic_count
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     my ($doc, $method, $params) = @_;
-    
+
     my ($name, $want_count, $blurb) = @$params;
 
     return _multi_arg_generic_count(
@@ -141,7 +141,7 @@ sub _count_children_by_name_ns
     # TEST
     ok($doc, ' TODO : Add test name');
     # TEST
-    ok( ! defined($doc->encoding), ' TODO : Add test name'); 
+    ok( ! defined($doc->encoding), ' TODO : Add test name');
     # TEST
     is( $doc->version,  "1.0", ' TODO : Add test name' );
     # TEST
@@ -151,7 +151,7 @@ sub _count_children_by_name_ns
     ok( !defined($doc->URI), ' TODO : Add test name');  # should be set by default.
     # TEST
     is( $doc->compression, -1, ' TODO : Add test name' ); # -1 indicates NO compression at all!
-                                 # while 0 indicates just no zip compression 
+                                 # while 0 indicates just no zip compression
                                  # (big difference huh?)
 
     $doc->setEncoding( "iso-8859-1" );
@@ -192,7 +192,7 @@ sub _count_children_by_name_ns
 
     # TEST*$_check_created_element
     _check_created_element($doc, 'foo', 'foo', 'Simple Element');
-    
+
     {
         # document with encoding
         my $encdoc = XML::LibXML::Document->new( "1.0" );
@@ -405,7 +405,7 @@ sub _count_children_by_name_ns
 
 {
     # Document Manipulation
-    # -> Document Elements 
+    # -> Document Elements
 
     my $doc = XML::LibXML::Document->new();
     my $node = $doc->createElement( "foo" );
@@ -485,7 +485,7 @@ sub _count_children_by_name_ns
 {
     # Document Storing
     my $parser = XML::LibXML->new;
-    my $doc = $parser->parse_string("<foo>bar</foo>");  
+    my $doc = $parser->parse_string("<foo>bar</foo>");
 
     # TEST
 
@@ -529,7 +529,7 @@ sub _count_children_by_name_ns
         is( $tdoc->documentElement->nodeName, "foo", ' TODO : Add test name' );
         # TEST
         is( $tdoc->documentElement->textContent, "bar", ' TODO : Add test name' );
-        unlink "example/testrun.xml" ;        
+        unlink "example/testrun.xml" ;
     }
 
     # ELEMENT LIKE FUNCTIONS
@@ -563,7 +563,7 @@ sub _count_children_by_name_ns
             # TEST
             _count_tag_name( $doc2, 'C:A', 3, q{C:A count});
             # TEST
-            _count_elements_by_name_ns($doc2, [ "xml://D", "A" ], 3, 
+            _count_elements_by_name_ns($doc2, [ "xml://D", "A" ], 3,
                 q{3 elements of namespace xml://D and A},
             );
             # TEST
@@ -585,16 +585,16 @@ sub _count_children_by_name_ns
 =begin taken_out
         # This was taken out because the XML uses an undefined namespace.
         # I don't know why this test was introduced in the first place,
-        # but it fails now 
+        # but it fails now
         #
-        # This test fails in this bug report - 
+        # This test fails in this bug report -
         # https://rt.cpan.org/Ticket/Display.html?id=75403
         # -- Shlomi Fish
         {
             $parser2->recover(1);
-            local $SIG{'__WARN__'} = sub { 
+            local $SIG{'__WARN__'} = sub {
                   print "warning caught: @_\n";
-            }; 
+            };
             # my $doc2 = $parser2->parse_string($string4);
             #-TEST
             # _count_local_name( $doc2, 'A', 3, q{3 As});
@@ -635,7 +635,7 @@ sub _count_children_by_name_ns
             # TEST*$count
             _count_children_by_name($A, "*", 2, q{2 Childern in $A in total});
             # TEST*$count
-            _count_children_by_name_ns($A, ['*', 'A'], 2, 
+            _count_children_by_name_ns($A, ['*', 'A'], 2,
                 q{2 As of any namespace});
             # TEST*$count
             _count_children_by_name_ns($A, [ "xml://D", "*" ], 1,
@@ -653,7 +653,7 @@ sub _count_children_by_name_ns
 
 {
     # Bug fixes (to be used with valgrind)
-    {  
+    {
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createPI(foo=>"bar");      # create a PI
        undef $doc;                            # should not free
@@ -661,7 +661,7 @@ sub _count_children_by_name_ns
        # TEST
        ok(1, ' TODO : Add test name');
     }
-    {  
+    {
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createAttribute(foo=>"bar"); # create an attribute
        undef $doc;                            # should not free
@@ -669,7 +669,7 @@ sub _count_children_by_name_ns
        # TEST
        ok(1, ' TODO : Add test name');
     }
-    {  
+    {
        my $doc=XML::LibXML->createDocument(); # create a doc
        my $x=$doc->createAttributeNS(undef,foo=>"bar"); # create an attribute
        undef $doc;                            # should not free
@@ -677,7 +677,7 @@ sub _count_children_by_name_ns
        # TEST
        ok(1, ' TODO : Add test name');
     }
-    {  
+    {
        my $doc=XML::LibXML->new->parse_string('<foo xmlns:x="http://foo.bar"/>');
        my $x=$doc->createAttributeNS('http://foo.bar','x:foo'=>"bar"); # create an attribute
        undef $doc;                            # should not free
@@ -695,7 +695,7 @@ sub _count_children_by_name_ns
       $object->appendChild( $lom_root );
       # TEST
       ok(!defined($object->firstChild->ownerDocument), ' TODO : Add test name');
-    }   
+    }
 }
 
 

@@ -4,13 +4,13 @@
  * Perl itself.
  *
  * Copyright 2011 Joachim Zobel
- * 
- * This module gives external access to the functions needed to create 
- * and use XML::LibXML::Nodes from C functions. These functions are made 
+ *
+ * This module gives external access to the functions needed to create
+ * and use XML::LibXML::Nodes from C functions. These functions are made
  * accessible from Perl to have cleaner dependencies.
- * The idea is to pass xmlNode * pointers (as typemapped void *) to and 
- * from Perl and call the functions that turns them to and from  
- * XML::LibXML::Nodes there.  
+ * The idea is to pass xmlNode * pointers (as typemapped void *) to and
+ * from Perl and call the functions that turns them to and from
+ * XML::LibXML::Nodes there.
  *
  * Be aware that using this module gives you the ability to easily create
  * segfaults and memory leaks.
@@ -45,7 +45,7 @@ static int debug_memory()
                           xmlMemStrdup);
 }
 
-MODULE = XML::LibXML::Devel		PACKAGE = XML::LibXML::Devel		
+MODULE = XML::LibXML::Devel		PACKAGE = XML::LibXML::Devel
 
 PROTOTYPES: DISABLE
 
@@ -78,7 +78,7 @@ node_from_perl( sv )
     OUTPUT:
         RETVAL
 
-void 
+void
 refcnt_inc( n )
         void *n
     PREINIT:
@@ -86,7 +86,7 @@ refcnt_inc( n )
     CODE:
         PmmREFCNT_inc(((ProxyNode *)(node->_private)));
 
-int 
+int
 refcnt_dec( n )
         void *n
     PREINIT:
@@ -96,7 +96,7 @@ refcnt_dec( n )
     OUTPUT:
         RETVAL
 
-int 
+int
 refcnt( n )
         void *n
     PREINIT:

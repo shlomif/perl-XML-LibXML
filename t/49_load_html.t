@@ -1,5 +1,5 @@
 #!/usr/bin/perl
- 
+
 use strict;
 use warnings;
 use utf8;
@@ -26,7 +26,7 @@ use XML::LibXML;
 
     local $SIG{__WARN__} = sub {
         my $warning = shift;
-        push @warnings, $warning; 
+        push @warnings, $warning;
     };
     my $dom = $parser->load_html(string => $content);
 

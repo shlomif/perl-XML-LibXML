@@ -41,7 +41,7 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
     }
 
 
-    /* first assure the XML::LibXML error handler is deactivated 
+    /* first assure the XML::LibXML error handler is deactivated
        otherwise strange things might happen
      */
 
@@ -143,7 +143,7 @@ perlDocumentFunction(xmlXPathParserContextPtr ctxt, int nargs){
 
 
 /**
- * Most of the code is stolen from testXPath. 
+ * Most of the code is stolen from testXPath.
  * The almost only thing I added, is the storeing of the data, so
  * we can access the data easily - or say more easiely than through
  * libxml2.
@@ -165,7 +165,7 @@ domXPathFind( xmlNodePtr refNode, xmlChar * path, int to_bool ) {
 xmlXPathObjectPtr
 domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
     xmlXPathObjectPtr res = NULL;
-  
+
     if ( refNode != NULL && comp != NULL ) {
         xmlXPathContextPtr ctxt;
 
@@ -175,7 +175,7 @@ domXPathCompFind( xmlNodePtr refNode, xmlXPathCompExprPtr comp, int to_bool ) {
         if ( comp == NULL ) {
             return NULL;
         }
-        
+
         if ( refNode->doc == NULL ) {
             /* if one XPaths a node from a fragment, libxml2 will
                refuse the lookup. this is not very useful for XML
@@ -260,16 +260,16 @@ xmlNodeSetPtr
 domXPathSelect( xmlNodePtr refNode, xmlChar * path ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
-  
+
     res = domXPathFind( refNode, path, 0 );
-    
+
     if (res != NULL) {
             /* here we have to transfer the result from the internal
                structure to the return value */
         	/* get the result from the query */
-        	/* we have to unbind the nodelist, so free object can 
+        	/* we have to unbind the nodelist, so free object can
         	   not kill it */
-        rv = res->nodesetval;  
+        rv = res->nodesetval;
         res->nodesetval = 0 ;
     }
 
@@ -283,16 +283,16 @@ xmlNodeSetPtr
 domXPathCompSelect( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
-  
+
     res = domXPathCompFind( refNode, comp, 0 );
-    
+
     if (res != NULL) {
             /* here we have to transfer the result from the internal
                structure to the return value */
         	/* get the result from the query */
-        	/* we have to unbind the nodelist, so free object can 
+        	/* we have to unbind the nodelist, so free object can
         	   not kill it */
-        rv = res->nodesetval;  
+        rv = res->nodesetval;
         res->nodesetval = 0 ;
     }
 
@@ -302,7 +302,7 @@ domXPathCompSelect( xmlNodePtr refNode, xmlXPathCompExprPtr comp ) {
 }
 
 /**
- * Most of the code is stolen from testXPath. 
+ * Most of the code is stolen from testXPath.
  * The almost only thing I added, is the storeing of the data, so
  * we can access the data easily - or say more easiely than through
  * libxml2.
@@ -387,16 +387,16 @@ xmlNodeSetPtr
 domXPathSelectCtxt( xmlXPathContextPtr ctxt, xmlChar * path ) {
     xmlNodeSetPtr rv = NULL;
     xmlXPathObjectPtr res = NULL;
-  
+
     res = domXPathFindCtxt( ctxt, path, 0 );
-    
+
     if (res != NULL) {
             /* here we have to transfer the result from the internal
                structure to the return value */
         	/* get the result from the query */
-        	/* we have to unbind the nodelist, so free object can 
+        	/* we have to unbind the nodelist, so free object can
         	   not kill it */
-        rv = res->nodesetval;  
+        rv = res->nodesetval;
         res->nodesetval = 0 ;
     }
 

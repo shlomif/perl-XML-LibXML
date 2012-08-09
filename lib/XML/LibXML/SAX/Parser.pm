@@ -173,10 +173,10 @@ sub process_element {
             unless ( defined $attr->name ) {
                 ## It's an atter like "xmlns='foo'"
                 $attribs->{"{}xmlns"} =
-                  {     
+                  {
                    Name         => "xmlns",
                    LocalName    => "xmlns",
-                   Prefix       => "",     
+                   Prefix       => "",
                    Value        => $attr->href,
                    NamespaceURI => "",
                   };

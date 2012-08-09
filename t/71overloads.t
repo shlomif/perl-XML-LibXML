@@ -33,7 +33,7 @@ is(
 
 $root->{attr1} = 'bar';
 # TEST
-is( 
+is(
     $root->getAttribute('attr1'),
     'bar',
     'STORE non-namespaced',

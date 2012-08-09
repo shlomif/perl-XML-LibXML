@@ -18,10 +18,10 @@ $|=1;
   my $mem_before = mem_used();
   {
     my $node = $doc->createTextNode("Hello");
-  
+
     $raw = node_from_perl($node);
     refcnt_inc($raw);
-  } 
+  }
   cmp_ok(mem_used(), '>', $mem_before);
   is(refcnt_dec($raw), 1);
   is(mem_used(), $mem_before);
@@ -49,7 +49,7 @@ $|=1;
   is(refcnt_dec($rawT), 1);
   is(mem_used(), $mem_before);
 
-  # The owner node remains until the last node is gone 
+  # The owner node remains until the last node is gone
   my ($rawR, $rawD);
   $mem_before = mem_used();
   {
@@ -59,35 +59,35 @@ $|=1;
   <text>Hello</text>
 </test>
 EOT
-    my ($root) = $dom->getElementsByTagName('test'); 
+    my ($root) = $dom->getElementsByTagName('test');
     $rawR = node_from_perl($root);
     $rawD = node_from_perl($dom);
 
     is(refcnt($rawR), 1);
     is(refcnt($rawD), 2);
 
-    my ($node) = $dom->getElementsByTagName('text'); 
+    my ($node) = $dom->getElementsByTagName('text');
     $rawN = node_from_perl($node);
-    
+
     is(refcnt($rawN), 1);
     is(refcnt($rawR), 1);
-    is(refcnt($rawD), 3);      
+    is(refcnt($rawD), 3);
 
     refcnt_inc($rawN);
 
-    is(refcnt($rawD), 3);      
+    is(refcnt($rawD), 3);
 
     my $child = $node->firstChild;
 
-    is(refcnt($rawD), 4);      
+    is(refcnt($rawD), 4);
   }
   cmp_ok(mem_used(), '>', $mem_before);
   # $rawR's proxy node is no longer accessible
   # but $rawD still has one
-  is(refcnt($rawD), 1);      
+  is(refcnt($rawD), 1);
   is(refcnt_dec($rawN), 1);
   is(mem_used(), $mem_before);
-  
+
 }
 
 

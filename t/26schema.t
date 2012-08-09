@@ -12,10 +12,10 @@ use TestHelpers;
 
 use Test::More;
 
-    use XML::LibXML;
+use XML::LibXML;
 
 if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-    plan tests => 6; 
+    plan tests => 6;
 }
 else {
     plan skip_all => 'No Schema Support compiled.';
@@ -34,7 +34,7 @@ my $invalidfile  = "test/schema/invaliddemo.xml";
     my $rngschema = XML::LibXML::Schema->new( location => $file );
     # TEST
     ok ( $rngschema, 'Good XML::LibXML::Schema was initialised' );
-    
+
     eval { $rngschema = XML::LibXML::Schema->new( location => $badfile ); };
     # TEST
     ok( $@, 'Bad XML::LibXML::Schema throws an exception.' );

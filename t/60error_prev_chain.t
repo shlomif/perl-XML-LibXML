@@ -1,7 +1,7 @@
 # This test script checks for:
-# 
+#
 # https://rt.cpan.org/Ticket/Display.html?id=56671 .
-# 
+#
 # It makes sure an error chain cannot be too long, because if it is it consumes
 # a lot of RAM.
 
@@ -24,7 +24,7 @@ use XML::LibXML;
         local $^W = 0;
         $parser->parse_file('example/JBR-ALLENtrees.htm');
     };
-    
+
     my $err = $@;
     my $count = 0;
 
@@ -41,7 +41,7 @@ use XML::LibXML;
     {
         $count++;
     }
-   
+
     # TEST
     ok ((!$err), "Reached the end of the chain.");
 }

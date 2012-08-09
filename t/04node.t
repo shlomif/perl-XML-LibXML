@@ -8,7 +8,7 @@
 # it will ONLY test the DOM capabilities as specified in DOM Level3
 # XPath tests should be done in another test file
 
-# since all tests are run on a preparsed 
+# since all tests are run on a preparsed
 
 # Should be 166.
 use Test::More tests => 194;
@@ -95,7 +95,7 @@ my $doc    = $parser->parse_string( $xmlstring );
         # TEST
         ok( $xc->isSameNode($node), ' TODO : Add test name' );
 
-        $xc = $children[2];   
+        $xc = $children[2];
         {
             # 1.2 Attribute Node
             # TEST
@@ -135,7 +135,7 @@ my $doc    = $parser->parse_string( $xmlstring );
 	    $cnode->setAttributeNS('http://ns','x:bbb','BBB');
             my $c1node = $doc->createElement("bar");
             $cnode->appendChild( $c1node );
-            
+
             my $xnode = $cnode->cloneNode(0);
             # TEST
             ok( $xnode, ' TODO : Add test name' );
@@ -215,7 +215,7 @@ my $doc    = $parser->parse_string( $xmlstring );
         # 2.1.1 Single Node
 
         my $inode = $doc->createElement("kungfoo"); # already tested
-        my $jnode = $doc->createElement("kungfoo"); 
+        my $jnode = $doc->createElement("kungfoo");
         my $xn = $node->insertBefore($inode, $rnode);
         # TEST
         ok( $xn, ' TODO : Add test name' );
@@ -241,14 +241,14 @@ my $doc    = $parser->parse_string( $xmlstring );
         ok($xn, ' TODO : Add test name');
         # TEST
         ok($xn->isSameNode($inode), ' TODO : Add test name');
-    
+
         @cn = $node->childNodes;
         # TEST
         is(scalar(@cn), 5, ' TODO : Add test name');
         # TEST
         ok( $cn[3]->isSameNode($rnode), ' TODO : Add test name' );
-    
-        $xn = $node->appendChild($inode);    
+
+        $xn = $node->appendChild($inode);
         # TEST
         ok($xn, ' TODO : Add test name');
         # TEST
@@ -295,14 +295,14 @@ my $doc    = $parser->parse_string( $xmlstring );
         $anode->insertAfter( $cnode, $bnode );
         # TEST
         is( $anode->toString(), '<a><b/><c/><d/></a>', ' TODO : Add test name' );
-        
+
     }
 
     {
         my ($inode, $jnode );
 
         $inode = $doc->createElement("kungfoo"); # already tested
-        $jnode = $doc->createElement("foobar"); 
+        $jnode = $doc->createElement("foobar");
 
         my $xn = $inode->insertBefore( $jnode, undef);
         # TEST
@@ -354,7 +354,7 @@ my $doc    = $parser->parse_string( $xmlstring );
         $frag->appendChild( $node1 );
         $frag->appendChild( $node2 );
 
-        $xn = $node->insertBefore( $frag, $cn[0] );           
+        $xn = $node->insertBefore( $frag, $cn[0] );
         # TEST
         ok($xn, ' TODO : Add test name');
         # TEST
@@ -367,7 +367,7 @@ my $doc    = $parser->parse_string( $xmlstring );
     # 2.2 Invalid Operations
 
 
-    # 2.3 DOM extensions 
+    # 2.3 DOM extensions
     {
         my $str = "<foo><bar/>com</foo>";
         my $doc = XML::LibXML->new->parse_string( $str );
@@ -380,7 +380,7 @@ my $doc    = $parser->parse_string( $xmlstring );
         # TEST
         is( $elem->hasChildNodes,0, ' TODO : Add test name' );
         $elem->toString;
-    }    
+    }
 }
 
 # 3   Standalone With NameSpaces
@@ -437,7 +437,7 @@ my $doc    = $parser->parse_string( $xmlstring );
     # TEST
     ok( $xroot->isSameNode($docA), ' TODO : Add test name' );
 
- 
+
 }
 
 # 5.   libxml2 specials
@@ -446,7 +446,7 @@ my $doc    = $parser->parse_string( $xmlstring );
     my $docA = XML::LibXML::Document->new;
     my $e1   = $docA->createElement( "A" );
     my $e2   = $docA->createElement( "B" );
-    my $e3   = $docA->createElement( "C" ); 
+    my $e3   = $docA->createElement( "C" );
 
     $e1->appendChild( $e2 );
     my $x = $e2->replaceNode( $e3 );
@@ -454,20 +454,20 @@ my $doc    = $parser->parse_string( $xmlstring );
     # TEST
     ok(@cn, ' TODO : Add test name');
     # TEST
-    is( scalar(@cn), 1, ' TODO : Add test name' );   
+    is( scalar(@cn), 1, ' TODO : Add test name' );
     # TEST
     ok($cn[0]->isSameNode($e3), ' TODO : Add test name');
     # TEST
     ok($x->isSameNode($e2), ' TODO : Add test name');
 
     $e3->addSibling( $e2 );
-    @cn = $e1->childNodes;  
+    @cn = $e1->childNodes;
     # TEST
-    is( scalar(@cn), 2, ' TODO : Add test name' );   
+    is( scalar(@cn), 2, ' TODO : Add test name' );
     # TEST
     ok($cn[0]->isSameNode($e3), ' TODO : Add test name');
     # TEST
-    ok($cn[1]->isSameNode($e2), ' TODO : Add test name');     
+    ok($cn[1]->isSameNode($e2), ' TODO : Add test name');
 }
 
 # 6.   implicit attribute manipulation
@@ -482,7 +482,7 @@ my $doc    = $parser->parse_string( $xmlstring );
 
     my $newAttr = $doc->createAttribute( "kung", "foo" );
     $attributes->setNamedItem( $newAttr );
-        
+
     my @att = $root->attributes;
     # TEST
     ok(@att, ' TODO : Add test name');
@@ -570,7 +570,7 @@ my $doc    = $parser->parse_string( $xmlstring );
     # TEST
     ok( $xnode2->ownerDocument, ' TODO : Add test name' );
     # TEST
-    ok( $doc3->isSameNode( $xnode2->ownerDocument ), ' TODO : Add test name' );    
+    ok( $doc3->isSameNode( $xnode2->ownerDocument ), ' TODO : Add test name' );
 }
 
 {
@@ -588,9 +588,9 @@ my $doc    = $parser->parse_string( $xmlstring );
    my $schema = $doc->createElement('sphinx:schema');
    eval { $schema->appendChild( $schema ) };
    # TEST
-   like ($@, qr/HIERARCHY_REQUEST_ERR/, 
+   like ($@, qr/HIERARCHY_REQUEST_ERR/,
        ' Thrown HIERARCHY_REQUEST_ERR exception'
-   );   	
+   );
 }
 
 {

@@ -8,7 +8,7 @@ use XML::LibXML;
 
 # XML::LibXML->load_catalog( "example/catalog.xml" );
 
-# the following document should not be able to get parsed 
+# the following document should not be able to get parsed
 # if the catalog is not available
 
 my $doc = XML::LibXML->new( catalog => "example/catalog.xml" )->parse_string(<<EOF);

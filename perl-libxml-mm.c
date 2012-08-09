@@ -43,10 +43,10 @@ extern "C" {
 #endif
 
 /**
- * this is a wrapper function that does the type evaluation for the 
+ * this is a wrapper function that does the type evaluation for the
  * node. this makes the code a little more readable in the .XS
- * 
- * the code is not really portable, but i think we'll avoid some 
+ *
+ * the code is not really portable, but i think we'll avoid some
  * memory leak problems that way.
  **/
 const char*
@@ -56,7 +56,7 @@ PmmNodeTypeName( xmlNodePtr elem ){
     if ( elem != NULL ) {
         switch ( elem->type ) {
         case XML_ELEMENT_NODE:
-            name = "XML::LibXML::Element";   
+            name = "XML::LibXML::Element";
             break;
         case XML_TEXT_NODE:
             name = "XML::LibXML::Text";
@@ -68,7 +68,7 @@ PmmNodeTypeName( xmlNodePtr elem ){
             name = "XML::LibXML::CDATASection";
             break;
         case XML_ATTRIBUTE_NODE:
-            name = "XML::LibXML::Attr"; 
+            name = "XML::LibXML::Attr";
             break;
         case XML_DOCUMENT_NODE:
         case XML_HTML_DOCUMENT_NODE:
@@ -357,7 +357,7 @@ PmmNewNode(xmlNodePtr node)
 }
 
 ProxyNodePtr
-PmmNewFragment(xmlDocPtr doc) 
+PmmNewFragment(xmlDocPtr doc)
 {
     ProxyNodePtr retval = NULL;
     xmlNodePtr frag = NULL;
@@ -386,7 +386,7 @@ PmmNewFragment(xmlDocPtr doc)
  */
 void
 PmmFreeNode( xmlNodePtr node )
-{  
+{
     switch( node->type ) {
     case XML_DOCUMENT_NODE:
     case XML_HTML_DOCUMENT_NODE:
@@ -403,7 +403,7 @@ PmmFreeNode( xmlNodePtr node )
         break;
     case XML_DTD_NODE:
         if ( node->doc != NULL ) {
-            if ( node->doc->extSubset != (xmlDtdPtr)node 
+            if ( node->doc->extSubset != (xmlDtdPtr)node
                  && node->doc->intSubset != (xmlDtdPtr)node ) {
                 xs_warn( "PmmFreeNode: XML_DTD_NODE\n");
                 node->doc = NULL;
@@ -429,10 +429,10 @@ PmmFreeNode( xmlNodePtr node )
    the subtree if it is not required any more.
  */
 int
-PmmREFCNT_dec( ProxyNodePtr node ) 
-{ 
+PmmREFCNT_dec( ProxyNodePtr node )
+{
     xmlNodePtr libnode = NULL;
-    ProxyNodePtr owner = NULL;  
+    ProxyNodePtr owner = NULL;
     int retval = 0;
 
     if ( node != NULL ) {
@@ -471,7 +471,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
             }
             else if ( libnode != NULL ) {
                 xs_warn( "PmmREFCNT_dec:   STANDALONE REAL DELETE\n" );
-                
+
                 PmmFreeNode( libnode );
             }
 			else {
@@ -500,7 +500,7 @@ PmmREFCNT_dec( ProxyNodePtr node )
  * nodes.
  */
 SV*
-PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner ) 
+PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 {
     ProxyNodePtr dfProxy= NULL;
     SV * retval = &PL_sv_undef;
@@ -516,7 +516,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
         xs_warn("PmmNodeToSv: return new perl node of class:\n");
         xs_warn( CLASS );
 
-        if ( node->_private != NULL ) { 
+        if ( node->_private != NULL ) {
             dfProxy = PmmNewNode(node);
             /* fprintf(stderr, " at 0x%08.8X\n", dfProxy); */
         }
@@ -544,7 +544,7 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 	if( PmmUSEREGISTRY )
 	    PmmRegistryREFCNT_inc(dfProxy);
 #endif
-        PmmREFCNT_inc(dfProxy); 
+        PmmREFCNT_inc(dfProxy);
         /* fprintf(stderr, "REFCNT incremented on node: 0x%08.8X\n", dfProxy); */
 
         switch ( node->type ) {
@@ -575,7 +575,7 @@ xmlNodePtr
 PmmCloneNode( xmlNodePtr node, int recursive )
 {
     xmlNodePtr retval = NULL;
-    
+
     if ( node != NULL ) {
         switch ( node->type ) {
         case XML_ELEMENT_NODE:
@@ -585,7 +585,7 @@ PmmCloneNode( xmlNodePtr node, int recursive )
 	case XML_PI_NODE:
 	case XML_COMMENT_NODE:
 	case XML_DOCUMENT_FRAG_NODE:
-	case XML_ENTITY_DECL: 
+	case XML_ENTITY_DECL:
 	  retval = xmlCopyNode( node, recursive ? 1 : 2 );
 	  break;
 	case XML_ATTRIBUTE_NODE:
@@ -614,7 +614,7 @@ PmmCloneNode( xmlNodePtr node, int recursive )
  */
 
 xmlNodePtr
-PmmSvNodeExt( SV* perlnode, int copy ) 
+PmmSvNodeExt( SV* perlnode, int copy )
 {
     xmlNodePtr retval = NULL;
     ProxyNodePtr proxy = NULL;
@@ -643,7 +643,7 @@ PmmSvNodeExt( SV* perlnode, int copy )
         else if ( sv_derived_from( perlnode, "XML::GDOME::Node" ) ) {
             GdomeNode* gnode = (GdomeNode*)SvIV((SV*)SvRV( perlnode ));
             if ( gnode == NULL ) {
-                warn( "no XML::GDOME data found (datastructure empty)" );    
+                warn( "no XML::GDOME data found (datastructure empty)" );
             }
             else {
                 retval = gdome_xml_n_get_xmlNode( gnode );
@@ -664,7 +664,7 @@ PmmSvNodeExt( SV* perlnode, int copy )
 /* extracts the libxml2 owner node from a perl reference
  */
 xmlNodePtr
-PmmSvOwner( SV* perlnode ) 
+PmmSvOwner( SV* perlnode )
 {
     xmlNodePtr retval = NULL;
     if ( perlnode != NULL
@@ -678,10 +678,10 @@ PmmSvOwner( SV* perlnode )
 /* reverse to PmmSvOwner(). sets the owner of the current node. this
  * will increase the proxy count of the owner.
  */
-SV* 
+SV*
 PmmSetSvOwner( SV* perlnode, SV* extra )
 {
-    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {        
+    if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
         PmmOWNER( SvPROXYNODE(perlnode)) = PmmNODE( SvPROXYNODE(extra) );
         PmmREFCNT_inc( SvPROXYNODE(extra) );
         /* fprintf(stderr, "REFCNT incremented on new owner: 0x%08.8X\n", SvPROXYNODE(extra)); */
@@ -695,18 +695,18 @@ void PmmFixOwnerList( xmlNodePtr list, ProxyNodePtr parent );
  * this functions fixes the reference counts for an entire subtree.
  * it is very important to fix an entire subtree after node operations
  * where the documents or the owner node may get changed. this method is
- * aware about nodes that already belong to a certain owner node. 
+ * aware about nodes that already belong to a certain owner node.
  *
  * the method uses the internal methods PmmFixNode and PmmChildNodes to
  * do the real updates.
- * 
+ *
  * in the worst case this traverses the subtree twice during a node
  * operation. this case is only given when the node has to be
- * adopted by the document. Since the ownerdocument and the effective 
+ * adopted by the document. Since the ownerdocument and the effective
  * owner may differ this double traversing makes sense.
- */ 
+ */
 int
-PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent ) 
+PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
 {
     ProxyNodePtr oldParent = NULL;
 
@@ -726,7 +726,7 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
         if ( PmmOWNER(nodetofix) != NULL ) {
             oldParent = PmmOWNERPO(nodetofix);
         }
-        
+
         /* The owner data is only fixed if the node is neither a
          * fragment nor a document. Also no update will happen if
          * the node is already his owner or the owner has not
@@ -743,10 +743,10 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
             else {
                 PmmOWNER(nodetofix) = NULL;
             }
-            
+
             if ( oldParent != NULL && oldParent != nodetofix )
                 PmmREFCNT_dec(oldParent);
-            
+
             if ( PmmNODE(nodetofix)->type != XML_ATTRIBUTE_NODE
                  && PmmNODE(nodetofix)->properties != NULL ) {
                 PmmFixOwnerList( (xmlNodePtr)PmmNODE(nodetofix)->properties,
@@ -813,9 +813,9 @@ PmmFixOwnerNode( xmlNodePtr node, ProxyNodePtr parent )
         else {
             xs_warn( "PmmFixOwnerNode: calling PmmFixOwnerList\n" );
             PmmFixOwnerList(node->children, parent );
-        } 
+        }
     }
-} 
+}
 
 ProxyNodePtr
 PmmNewContext(xmlParserCtxtPtr node)
@@ -833,10 +833,10 @@ PmmNewContext(xmlParserCtxtPtr node)
     }
     return proxy;
 }
- 
+
 int
-PmmContextREFCNT_dec( ProxyNodePtr node ) 
-{ 
+PmmContextREFCNT_dec( ProxyNodePtr node )
+{
     xmlParserCtxtPtr libnode = NULL;
     int retval = 0;
     if ( node != NULL ) {
@@ -876,9 +876,9 @@ PmmContextSv( xmlParserCtxtPtr ctxt )
 
         retval = NEWSV(0,0);
         sv_setref_pv( retval, CLASS, (void*)dfProxy );
-        PmmREFCNT_inc(dfProxy); 
+        PmmREFCNT_inc(dfProxy);
         /* fprintf(stderr, "REFCNT incremented on new context: 0x%08.8X\n", dfProxy); */
-    }         
+    }
     else {
         xs_warn( "PmmContextSv: no node found!\n" );
     }
@@ -887,7 +887,7 @@ PmmContextSv( xmlParserCtxtPtr ctxt )
 }
 
 xmlParserCtxtPtr
-PmmSvContext( SV * scalar ) 
+PmmSvContext( SV * scalar )
 {
     xmlParserCtxtPtr retval = NULL;
 
@@ -919,7 +919,7 @@ xmlChar*
 PmmFastEncodeString( int charset,
                      const xmlChar *string,
                      const xmlChar *encoding,
-                     STRLEN len ) 
+                     STRLEN len )
 {
     xmlCharEncodingHandlerPtr coder = NULL;
     xmlChar *retval = NULL;
@@ -988,7 +988,7 @@ PmmFastEncodeString( int charset,
         else {
             /* warn( "b0rked encoiding!\n"); */
         }
-        
+
         xmlBufferFree( in );
         xmlBufferFree( out );
         xmlCharEncCloseFunc( coder );
@@ -1000,7 +1000,7 @@ xmlChar*
 PmmFastDecodeString( int charset,
                      const xmlChar *string,
                      const xmlChar *encoding,
-                     STRLEN* len ) 
+                     STRLEN* len )
 {
     xmlCharEncodingHandlerPtr coder = NULL;
     xmlChar *retval = NULL;
@@ -1040,7 +1040,7 @@ PmmFastDecodeString( int charset,
         else {
             /* xs_warn("PmmFastEncodeString: decoding error\n"); */
         }
-        
+
         xmlBufferFree( in );
         xmlBufferFree( out );
         xmlCharEncCloseFunc( coder );
@@ -1048,15 +1048,15 @@ PmmFastDecodeString( int charset,
     return retval;
 }
 
-/** 
+/**
  * encodeString returns an UTF-8 encoded String
  * while the encodig has the name of the encoding of string
- **/ 
+ **/
 xmlChar*
 PmmEncodeString( const char *encoding, const xmlChar *string, STRLEN len ){
     xmlCharEncoding enc;
     xmlChar *ret = NULL;
-    
+
     if ( string != NULL ) {
         if( encoding != NULL ) {
             xs_warn("PmmEncodeString: encoding to UTF-8 from:\n");
@@ -1091,13 +1091,13 @@ C2Sv( const xmlChar *string, const xmlChar *encoding )
         }
 
         retval = newSVpvn( (const char *)string, (STRLEN) xmlStrlen(string) );
-   
+
         if ( enc == XML_CHAR_ENCODING_UTF8 ) {
-            /* create an UTF8 string. */       
+            /* create an UTF8 string. */
 #ifdef HAVE_UTF8
             xs_warn("C2Sv: set UTF8-SV-flag\n");
             SvUTF8_on(retval);
-#endif            
+#endif
         }
     }
 
@@ -1121,7 +1121,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
             xs_warn( "SV2C:   use UTF8\n" );
             if( !DO_UTF8(scalar) && encoding != NULL ) {
 #else
-            if ( encoding != NULL ) {        
+            if ( encoding != NULL ) {
 #endif
                 xs_warn( "SV2C:   domEncodeString!\n" );
                 ts= PmmEncodeString( (const char *)encoding, string, len );
@@ -1132,7 +1132,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
                 string=ts;
             }
         }
-             
+
         retval = xmlStrdup(string);
         if (string != NULL ) {
             xmlFree(string);
@@ -1164,7 +1164,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
 
             decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc),
                                            (const xmlChar *)string,
-                                           (const xmlChar *)real_doc->encoding, 
+                                           (const xmlChar *)real_doc->encoding,
                                            &len );
 
             xs_warn( "push decoded string into SV" );
@@ -1175,9 +1175,9 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
 #ifdef HAVE_UTF8
                 xs_warn("nodeC2Sv: set UTF8-SV-flag\n");
                 SvUTF8_on(retval);
-#endif            
+#endif
             }
-           
+
             return retval;
         }
     }
@@ -1227,7 +1227,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
                         xs_warn( "nodeSv2C:   no encoding set, use UTF8!\n" );
                     }
 #endif
-                } 
+                }
                 if (string==NULL) {
                     return xmlStrndup((xmlChar*)t_pv,len);
                 } else {
@@ -1246,11 +1246,11 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
     }
     xs_warn("nodeSv2C: no encoding !!\n");
 
-    return  Sv2C( scalar, NULL ); 
+    return  Sv2C( scalar, NULL );
 }
 
-SV * 
-PmmNodeToGdomeSv( xmlNodePtr node ) 
+SV *
+PmmNodeToGdomeSv( xmlNodePtr node )
 {
     SV * retval = &PL_sv_undef;
 
@@ -1270,34 +1270,34 @@ PmmNodeToGdomeSv( xmlNodePtr node )
                 CLASS = "XML::GDOME::Attr";
                 break;
             case GDOME_TEXT_NODE:
-                CLASS = "XML::GDOME::Text"; 
+                CLASS = "XML::GDOME::Text";
                 break;
             case GDOME_CDATA_SECTION_NODE:
-                CLASS = "XML::GDOME::CDATASection"; 
+                CLASS = "XML::GDOME::CDATASection";
                 break;
             case GDOME_ENTITY_REFERENCE_NODE:
-                CLASS = "XML::GDOME::EntityReference"; 
+                CLASS = "XML::GDOME::EntityReference";
                 break;
             case GDOME_ENTITY_NODE:
-                CLASS = "XML::GDOME::Entity"; 
+                CLASS = "XML::GDOME::Entity";
                 break;
             case GDOME_PROCESSING_INSTRUCTION_NODE:
-                CLASS = "XML::GDOME::ProcessingInstruction"; 
+                CLASS = "XML::GDOME::ProcessingInstruction";
                 break;
             case GDOME_COMMENT_NODE:
-                CLASS = "XML::GDOME::Comment"; 
+                CLASS = "XML::GDOME::Comment";
                 break;
             case GDOME_DOCUMENT_TYPE_NODE:
-                CLASS = "XML::GDOME::DocumentType"; 
+                CLASS = "XML::GDOME::DocumentType";
                 break;
             case GDOME_DOCUMENT_FRAGMENT_NODE:
-                CLASS = "XML::GDOME::DocumentFragment"; 
+                CLASS = "XML::GDOME::DocumentFragment";
                 break;
             case GDOME_NOTATION_NODE:
-                CLASS = "XML::GDOME::Notation"; 
+                CLASS = "XML::GDOME::Notation";
                 break;
             case GDOME_DOCUMENT_NODE:
-                CLASS = "XML::GDOME::Document"; 
+                CLASS = "XML::GDOME::Document";
                 break;
             default:
                 break;

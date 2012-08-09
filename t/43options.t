@@ -132,7 +132,7 @@ no_network
     # TEST*$old
     if ($old{$opt})
     {
-        ok($p->$opt()==1, ' TODO : Add test name') 
+        ok($p->$opt()==1, ' TODO : Add test name')
     }
   }
 

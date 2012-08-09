@@ -19,7 +19,7 @@ use XML::LibXML::Number;
 use vars qw($VERSION);
 $VERSION = "2.0004"; # VERSION TEMPLATE: DO NOT CHANGE
 
-use overload 
+use overload
         '""' => \&to_literal,
         'bool' => \&to_boolean,
         'cmp' => sub {
@@ -172,10 +172,10 @@ sub reverse {
 sub reduce {
     my $self = CORE::shift;
     my $sub  = __is_code(CORE::shift);
-    
+
     my @list = @$self;
     CORE::unshift @list, $_[0] if @_;
-    
+
     my $a = CORE::shift(@list);
     foreach my $b (@list)
     {
@@ -186,11 +186,11 @@ sub reduce {
 
 sub __is_code {
     my ($code) = @_;
-    
+
     if (ref $code eq 'CODE') {
         return $code;
     }
-    
+
     # There are better ways of doing this, but here I've tried to
     # avoid adding any additional external dependencies.
     #
@@ -199,11 +199,11 @@ sub __is_code {
     and overload::Method($code, '&{}')) {   # overloads '&{}'
         return $code;
     }
-    
+
     # The other possibility is that $code is a coderef, but is
     # blessed into a class that doesn't overload '&{}'. In which
     # case... well, I'm stumped!
-    
+
     die "Not a subroutine reference\n";
 }
 

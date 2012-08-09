@@ -28,7 +28,7 @@ sub _create_simple_counter {
 
                 sub {
                     $inc_cb->();
-                    return;    
+                    return;
                 }
             }
         }
@@ -46,7 +46,7 @@ my $SAXTester_start_element_stacker = Stacker->new(
                 my $el = shift;
 
                 $push_cb->(
-                    ($el->{LocalName} =~ m{\A(?:dromedaries|species|humps|disposition|legs)\z}) 
+                    ($el->{LocalName} =~ m{\A(?:dromedaries|species|humps|disposition|legs)\z})
                     ? 'true'
                     : 'false'
                 );
@@ -247,11 +247,11 @@ sub {
     # TEST
     $SAXNS2Tester_start_element_stacker->test([qw(true)], 'XML::LibXML::SAX::Parser');
 },
-);  
-    
+);
+
     $_->() for @tests;
 
-    
+
 }
 
 
@@ -269,7 +269,7 @@ sub {
     # TEST*2
     ok($@, ' TODO : Add test name'); # We got an error
   }
-  
+
   $handler = SAXErrorCallbackTester->new;
   eval { XML::LibXML::SAX->new(Handler => $handler )->parse_string($xml) };
   # TEST
@@ -296,7 +296,7 @@ sub {
 }
 
 
-######## TEST error exceptions ############## 
+######## TEST error exceptions ##############
 {
 
   package MySAXHandler;
@@ -449,7 +449,7 @@ sub fatal_error {
 }
 
 sub start_element {
-    # test if we can do other stuff 
+    # test if we can do other stuff
     XML::LibXML->new->parse_string("<foo/>");
     return;
 }

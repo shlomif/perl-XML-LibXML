@@ -3,14 +3,14 @@
 
 /*
  * xpathcontext.h
- * 
+ *
  * This file is directly included into LibXML.xs.
  *
  */
 
 struct _XPathContextData {
     SV* node;
-    HV* pool;  
+    HV* pool;
     SV* varLookup;
     SV* varData;
 };

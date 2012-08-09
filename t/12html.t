@@ -109,9 +109,9 @@ EOHTML
     # TEST
     is($htmldoc->findvalue('//p/text()'), $utf_str, ' TODO : Add test name');
 
-    $htmldoc = $parser->parse_html_string( $strhref, 
-        { 
-            encoding => 'UTF-8' 
+    $htmldoc = $parser->parse_html_string( $strhref,
+        {
+            encoding => 'UTF-8'
         }
     );
     # TEST
@@ -265,7 +265,7 @@ EOHTML
         if (1000*$] < 5008)
         {
             skip("skipping for Perl < 5.8", 2);
-        } 
+        }
         # translate to UTF8 on perl-side
         open my $fh, '<:encoding(iso-8859-2)', $test_file
             or die "Cannot open '$test_file' for reading - $!";
