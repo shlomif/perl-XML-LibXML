@@ -195,7 +195,32 @@ sub handle {
         }
         # close the file
         $self->{OFILE}->close();
+
+        # Strip trailing space.
+        my $text = _slurp($dir.$filename);
+        $text =~ s/[ \t]+$//gms;
+
+        open my $out, '>', $dir.$filename
+            or die "Cannot open $dir$filename for writing.";
+        print {$out} $text;
+        close ($out);
+
     }
+}
+
+sub _slurp
+{
+    my $filename = shift;
+
+    open my $in, '<', $filename
+        or die "Cannot open '$filename' for slurping - $!";
+
+    local $/;
+    my $contents = <$in>;
+
+    close($in);
+
+    return $contents;
 }
 
 # ------------------------------------------------------------------------- #

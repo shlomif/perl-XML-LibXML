@@ -181,7 +181,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
         $xml2cfg = $libprefix . '/bin/' . $xml2cfg;
     }
 
-    # if a user defined INC and LIBS on the command line we must not 
+    # if a user defined INC and LIBS on the command line we must not
     # override them
     if ( not defined $config{LIBS} and not defined $config{INC} ) {
         print "running xml2-config...";
@@ -197,7 +197,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                     "  - don't report errors!\n".
                     "  - don't send patches!\n\n".
                     "Check the README file for more information on versions\n".
-                    "that are tested with XML::LibXML\n\n"; 
+                    "that are tested with XML::LibXML\n\n";
             exit 0 unless $FORCE; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
             }
             if ( $@ =~ /^UNTESTED (\S*)/ ) {
@@ -329,7 +329,7 @@ unless (have_library("xml2") or have_library("libxml2")) {
     print STDERR <<"DEATH";
 libxml2, zlib, and/or the Math library (-lm) have not been found.
 Try setting LIBS and INC values on the command line
-Or get libxml2 from 
+Or get libxml2 from
   http://xmlsoft.org/
 If you install via RPMs, make sure you also install the -devel
 RPMs, as this is where the headers (.h files) are.
@@ -554,7 +554,7 @@ sub try_link0 {
     }
     chdir(".testlink");
     {
-        open(my $cfile, '>', 'Conftest.xs') 
+        open(my $cfile, '>', 'Conftest.xs')
             or die "Cannot write to file Conftest.xs: $!";
         print {$cfile} <<"EOT";
 #ifdef __cplusplus
@@ -579,7 +579,7 @@ EOT
         close($cfile);
     }
     {
-        open(my $cfile, '>', 'Conftest.pm') 
+        open(my $cfile, '>', 'Conftest.pm')
             or die "Cannot write to file Conftest.pm: $!";
         print {$cfile} <<'EOT';
 package Conftest;
@@ -592,7 +592,7 @@ EOT
         close($cfile);
     }
     {
-        open (my $cfile, '>', 'Makefile.PL') 
+        open (my $cfile, '>', 'Makefile.PL')
             or die "Cannot write to file Makefile.PL: $!";
         print {$cfile} <<'EOT';
 use ExtUtils::MakeMaker;
@@ -607,7 +607,7 @@ EOT
         close($cfile);
     }
     {
-        open(my $cfile, ">test.pl") 
+        open(my $cfile, ">test.pl")
             or die "Cannot write to file test.pl: $!";
         print {$cfile} <<"EOT";
 use Test; BEGIN { plan tests => 1; } END { ok(\$loaded) }
