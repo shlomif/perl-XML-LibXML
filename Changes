@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0005          Sat 13 Oct 13:18:48 IST 2012
     - Added t/style-trailing-space.t and removed trailing space.
     - Add a check for the existence of included C headers (*.h) files
     in Makefile.PL to avoid failed compilations.
