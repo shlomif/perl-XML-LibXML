@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0006          Sat 13 Oct 22:27:54 IST 2012
+    - When xml2-config returns several paths, the configuration failed.
+    Fixed that.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=80167
+        - Thanks to VOVKASM for the report and fix.
+
 2.0005          Sat 13 Oct 13:18:48 IST 2012
     - Added t/style-trailing-space.t and removed trailing space.
     - Add a check for the existence of included C headers (*.h) files

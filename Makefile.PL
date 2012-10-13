@@ -357,12 +357,12 @@ if ($ldflags) {
 }
 
 my $incpath = $config{INC};
-$incpath =~ s#(\b|\A)-I##g;
+$incpath =~ s#(\A|\s)\s*-I#$1#g;
 
 check_lib_or_exit(
     # fill in what you prompted the user for here
     lib => [qw(xml2)],
-    incpath => $incpath,
+    incpath => [split(/\s/,$incpath)],
     header =>
     [
         'libxml/c14n.h',
