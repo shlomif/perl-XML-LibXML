@@ -61,6 +61,7 @@ example/xmlns/badguy.xml
 example/xmlns/goodguy.xml
 example/xpath.pl
 example/yahoo-finance-html-with-errors.html
+inc/Devel/CheckLib.pm
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/AttributeHash.pm
 lib/XML/LibXML/Boolean.pm

@@ -79,6 +79,12 @@ my %INFOS = (
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #
 
+use lib qw(inc);
+use Devel::CheckLib;
+
+# Prompt the user here for any paths and other configuration
+
+
 # -------------------------------------------------------------------------- #
 # libxml2 valid versions
 
@@ -349,6 +355,41 @@ my $ldflags = delete $config{LDFLAGS};
 if ($ldflags) {
     $config{dynamic_lib} = { OTHERLDFLAGS => " $ldflags " };
 }
+
+my $incpath = $config{INC};
+$incpath =~ s#(\b|\A)-I##g;
+
+check_lib_or_exit(
+    # fill in what you prompted the user for here
+    lib => [qw(xml2)],
+    incpath => $incpath,
+    header =>
+    [
+        'libxml/c14n.h',
+        'libxml/catalog.h',
+        'libxml/entities.h',
+        'libxml/globals.h',
+        'libxml/HTMLparser.h',
+        'libxml/HTMLtree.h',
+        'libxml/parser.h',
+        'libxml/parserInternals.h',
+        'libxml/pattern.h',
+        'libxml/relaxng.h',
+        'libxml/tree.h',
+        'libxml/uri.h',
+        'libxml/valid.h',
+        'libxml/xinclude.h',
+        'libxml/xmlerror.h',
+        'libxml/xmlIO.h',
+        'libxml/xmlmemory.h',
+        'libxml/xmlreader.h',
+        'libxml/xmlregexp.h',
+        'libxml/xmlschemas.h',
+        'libxml/xmlversion.h',
+        'libxml/xpath.h',
+        'libxml/xpathInternals.h',
+    ],
+);
 
 WriteMakefile(
               %INFOS,
