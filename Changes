@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0007          Wed 17 Oct 18:38:37 IST 2012
+    - Fix for build failures on Windows with Microsoft Visual C++.
+        - https://rt.cpan.org/Ticket/Display.html?id=80229
+        - Thanks to Desmond Daignault for the report and an initial patch.
+        - Patch modified by Shlomi Fish
+
 2.0006          Sat 13 Oct 22:27:54 IST 2012
     - When xml2-config returns several paths, the configuration failed.
     Fixed that.

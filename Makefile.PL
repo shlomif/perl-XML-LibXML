@@ -286,7 +286,7 @@ GDOME
 # -------------------------------------------------------------------------- #
 # fix the ld flags
 # -------------------------------------------------------------------------- #
-if ($config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
+if (!defined $config{LIBS} || $config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
     # in this case we are not able to run xml2-config. therefore we need to
     # expand the libz as well.
   if ($is_Win32) {
@@ -327,12 +327,64 @@ if ($config{LIBS} !~ /\-lz\b/ and !($is_Win32 && $config{LIBS} !~ /\-lzlib\b/)) 
 # if the Build Target is set correctly. Otherwise we have to set it by
 # hand
 
-# -------------------------------------------------------------------------- #
+my $ldflags = delete $config{LDFLAGS};
+if ($ldflags) {
+    $config{dynamic_lib} = { OTHERLDFLAGS => " $ldflags " };
+}
 
-# -------------------------------------------------------------------------- #
-# test if the libraries are really installed!
-unless (have_library("xml2") or have_library("libxml2")) {
-    print STDERR <<"DEATH";
+my $incpath = $config{INC} || "";
+$incpath =~ s#(\A|\s)\s*-I#$1#g;
+
+sub _libxml_check_lib
+{
+    my ($lib_name) = @_;
+
+    return
+    check_lib(
+        # fill in what you prompted the user for here
+        lib => [$lib_name],
+        incpath => [split(/\s/,$incpath)],
+        header =>
+        [
+            'libxml/c14n.h',
+            'libxml/catalog.h',
+            'libxml/entities.h',
+            'libxml/globals.h',
+            'libxml/HTMLparser.h',
+            'libxml/HTMLtree.h',
+            'libxml/parser.h',
+            'libxml/parserInternals.h',
+            'libxml/pattern.h',
+            'libxml/relaxng.h',
+            'libxml/tree.h',
+            'libxml/uri.h',
+            'libxml/valid.h',
+            'libxml/xinclude.h',
+            'libxml/xmlerror.h',
+            'libxml/xmlIO.h',
+            'libxml/xmlmemory.h',
+            'libxml/xmlreader.h',
+            'libxml/xmlregexp.h',
+            'libxml/xmlschemas.h',
+            'libxml/xmlversion.h',
+            'libxml/xpath.h',
+            'libxml/xpathInternals.h',
+        ],
+    );
+}
+
+print "Checking for ability to link against xml2...";
+if ( _libxml_check_lib('xml2') ) {
+    print "yes\n";
+}
+else {
+    print "no\n";
+    print "Checking for ability to link against libxml2...";
+    if ( _libxml_check_lib('libxml2')) {
+        print "yes\n";
+    }
+    else {
+        print STDERR <<"DEATH";
 libxml2, zlib, and/or the Math library (-lm) have not been found.
 Try setting LIBS and INC values on the command line
 Or get libxml2 from
@@ -344,52 +396,12 @@ Also, you may try to run perl Makefile.PL with the DEBUG=1 parameter
 to see the exact reason why the detection of libxml2 installation
 failed or why Makefile.PL was not able to compile a test program.
 DEATH
-exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
+        exit 0; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
+    }
 }
-# -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
 # _NOW_ write the Makefile
-
-my $ldflags = delete $config{LDFLAGS};
-if ($ldflags) {
-    $config{dynamic_lib} = { OTHERLDFLAGS => " $ldflags " };
-}
-
-my $incpath = $config{INC};
-$incpath =~ s#(\A|\s)\s*-I#$1#g;
-
-check_lib_or_exit(
-    # fill in what you prompted the user for here
-    lib => [qw(xml2)],
-    incpath => [split(/\s/,$incpath)],
-    header =>
-    [
-        'libxml/c14n.h',
-        'libxml/catalog.h',
-        'libxml/entities.h',
-        'libxml/globals.h',
-        'libxml/HTMLparser.h',
-        'libxml/HTMLtree.h',
-        'libxml/parser.h',
-        'libxml/parserInternals.h',
-        'libxml/pattern.h',
-        'libxml/relaxng.h',
-        'libxml/tree.h',
-        'libxml/uri.h',
-        'libxml/valid.h',
-        'libxml/xinclude.h',
-        'libxml/xmlerror.h',
-        'libxml/xmlIO.h',
-        'libxml/xmlmemory.h',
-        'libxml/xmlreader.h',
-        'libxml/xmlregexp.h',
-        'libxml/xmlschemas.h',
-        'libxml/xmlversion.h',
-        'libxml/xpath.h',
-        'libxml/xpathInternals.h',
-    ],
-);
 
 WriteMakefile(
               %INFOS,
@@ -679,52 +691,6 @@ sub try_link {
     chdir($start_dir);
     rm_fr(".testlink");
     return $result;
-}
-
-sub have_library {
-    my ($lib, $func) = (@_, "blank");
-    printf("checking for %s() in -l%s... ", $func, $lib) if $func ne "blank";
-    printf("looking for -l%s... ", $lib) if $func eq "blank";
-
-    my $result;
-    if ($func) {
-        my $libs = $is_Win32 ? " $lib.lib  " : "-l$lib";
-#        my $libs = "-l$lib";
-        if ($is_Win32) {
-            $result = try_link(<<"SRC", undef);
-#include <windows.h>
-#include <winsock.h>
-blank() { return 0; }
-int t() { ${func}(); return 0; }
-SRC
-            unless ($result) {
-                $result = try_link(<<"SRC", undef);
-#include <windows.h>
-#include <winsock.h>
-blank() { return 0; }
-int t() { void ((*p)()); p = (void ((*)()))${func}; return 0; }
-SRC
-            }
-        }
-        else {
-            $result = try_link(<<"SRC", undef);
-blank() { return 0; }
-int t() { ${func}(); return 0; }
-SRC
-        }
-    }
-
-    unless ($result) {
-        print "no\n";
-        return 0;
-    }
-
-    if ($func ne "main") {
-        $config{DEFINE} .= uc(" -Dhave_$func");
-    }
-
-    print "yes\n";
-    return 1;
 }
 
 # -------------------------------------------------------------------------- #
