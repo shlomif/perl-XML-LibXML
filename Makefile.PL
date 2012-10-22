@@ -341,6 +341,7 @@ sub _libxml_check_lib
 
     return
     check_lib(
+        LIBS => $config{LIBS},
         # fill in what you prompted the user for here
         lib => [$lib_name],
         incpath => [split(/\s/,$incpath)],
