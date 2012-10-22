@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0008          Mon 22 Oct 12:09:11 IST 2012
+    - Fix build error when using non-standard libxml2 installation
+        - https://rt.cpan.org/Ticket/Display.html?id=80332
+        - Thanks to L RW for the report.
+
 2.0007          Wed 17 Oct 18:38:37 IST 2012
     - Fix for build failures on Windows with Microsoft Visual C++.
         - https://rt.cpan.org/Ticket/Display.html?id=80229
