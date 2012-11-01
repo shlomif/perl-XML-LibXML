@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0010          Thu  1 Nov 20:13:08 IST 2012
     - Passing debug (an undocumented option) to check_lib in Makefile.PL.
         - This way we get more meaningful traces on perl Makefile.PL DEBUG=1.
         - Thanks to MSTROUT for the report and a proposed fix.
