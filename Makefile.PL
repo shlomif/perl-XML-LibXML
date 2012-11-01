@@ -295,13 +295,19 @@ if (!defined $config{LIBS} || $config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
             $config{LIBS} .= ' -llibxml2.lib -lzlib.lib';
         }
         else {
+            my $l = $config{LIBS};
+
+            if (!defined($l)) {
+                $l = '';
+            }
+
             # Put several options.
             $config_LIBS_alternatives = [
-                map { "$config{LIBS} $_" }
+                map { "$l $_" }
                 q/ -lxml2 -lzlib/,
                 q/ -llibxml2 -lzlib -llibgettextlib.dll/
             ];
-            $config{LIBS} = $config_LIBS_alternatives->[1];
+            $config{LIBS} = $config_LIBS_alternatives->[-1];
         }
     }
     else {
