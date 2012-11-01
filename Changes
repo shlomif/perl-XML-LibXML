@@ -4,6 +4,7 @@ Revision history for Perl extension XML::LibXML
         - Another Devel::CheckOS fallout.
         - Thanks to KMX for the report and for a proposed fix. The actual fix
         was made to be more generic considering the use-cases.
+        - https://rt.cpan.org/Ticket/Display.html?id=80540
 
 2.0008          Mon 22 Oct 12:09:11 IST 2012
     - Fix build error when using non-standard libxml2 installation
