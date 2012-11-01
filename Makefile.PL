@@ -355,6 +355,7 @@ sub _libxml_check_lib_with_config_LIBs
 
     return
     check_lib(
+        debug => $DEBUG,
         LIBS => $conf_LIBS,
         # fill in what you prompted the user for here
         lib => [$lib_name],

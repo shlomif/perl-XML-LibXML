@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Passing debug (an undocumented option) to check_lib in Makefile.PL.
+        - This way we get more meaningful traces on perl Makefile.PL DEBUG=1.
+        - Thanks to MSTROUT for the report and a proposed fix.
+
 2.0009          Thu  1 Nov 16:26:45 IST 2012
     - Fix libxml2 detection in Strawberry Perl.
         - Another Devel::CheckOS fallout.
