@@ -6179,7 +6179,7 @@ sub processNode {
 	xmlTextReader
 	<emphasis>http://xmlsoft.org/html/libxml-xmlreader.html</emphasis>.
 	This feature requires at least libxml2-2.6.21.
-	Pull-parser (StAX in Java, XmlReader in C#) use an iterator
+	Pull-parsers (such as StAX in Java, XmlReader in C#) use an iterator
 	approach to parse XML documents. They are easier to program than
 	event-based parser (SAX) and much more lightweight than
 	tree-based parser (DOM), which load the complete tree into
