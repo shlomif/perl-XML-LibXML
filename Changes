@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0009          Thu  1 Nov 16:26:45 IST 2012
     - Fix libxml2 detection in Strawberry Perl.
         - Another Devel::CheckOS fallout.
         - Thanks to KMX for the report and for a proposed fix. The actual fix
