@@ -172,7 +172,7 @@ _domReconcileNsAttr(xmlAttrPtr attr, xmlNsPtr * unused)
 void
 _domReconcileNs(xmlNodePtr tree, xmlNsPtr * unused)
 {
-        if ( tree->ns != NULL )
+        if( tree->ns != NULL )
         {
                 xmlNsPtr ns = xmlSearchNs( tree->doc, tree->parent, tree->ns->prefix );
                 if( ns != NULL && ns->href != NULL && tree->ns->href != NULL &&
