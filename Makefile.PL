@@ -283,24 +283,32 @@ GDOME
 # -------------------------------------------------------------------------- #
 
 
+my $config_LIBS_alternatives;
 # -------------------------------------------------------------------------- #
 # fix the ld flags
 # -------------------------------------------------------------------------- #
 if (!defined $config{LIBS} || $config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
     # in this case we are not able to run xml2-config. therefore we need to
     # expand the libz as well.
-  if ($is_Win32) {
-    if( $ENV{ACTIVEPERL_MINGW} ) {
-      $config{LIBS} .= ' -llibxml2.lib -lzlib.lib';
-    } else {
-      $config{LIBS} .= ' -llibxml2 -lzlib -llibgettextlib.dll';
+    if ($is_Win32) {
+        if( $ENV{ACTIVEPERL_MINGW} ) {
+            $config{LIBS} .= ' -llibxml2.lib -lzlib.lib';
+        }
+        else {
+            # Put several options.
+            $config_LIBS_alternatives = [
+                map { "$config{LIBS} $_" }
+                q/ -lxml2 -lzlib/,
+                q/ -llibxml2 -lzlib -llibgettextlib.dll/
+            ];
+            $config{LIBS} = $config_LIBS_alternatives->[1];
+        }
     }
-  } else {
-    $config{LIBS} .= ' -lxml2 -lz -lm';
-  }
+    else {
+        $config{LIBS} .= ' -lxml2 -lz -lm';
+    }
 }
-
-if ($config{LIBS} !~ /\-lz\b/ and !($is_Win32 && $config{LIBS} !~ /\-lzlib\b/)) {
+elsif ($config{LIBS} !~ /\-lz\b/ and !($is_Win32 && $config{LIBS} !~ /\-lzlib\b/)) {
     # note if libxml2 has not -lz within its cflags, we should not use
     # it! We should trust libxml2 and assume libz is not available on the
     # current system (this is ofcourse not true with win32 systems.
@@ -335,13 +343,13 @@ if ($ldflags) {
 my $incpath = $config{INC} || "";
 $incpath =~ s#(\A|\s)\s*-I#$1#g;
 
-sub _libxml_check_lib
+sub _libxml_check_lib_with_config_LIBs
 {
-    my ($lib_name) = @_;
+    my ($lib_name, $conf_LIBS) = @_;
 
     return
     check_lib(
-        LIBS => $config{LIBS},
+        LIBS => $conf_LIBS,
         # fill in what you prompted the user for here
         lib => [$lib_name],
         incpath => [split(/\s/,$incpath)],
@@ -372,6 +380,22 @@ sub _libxml_check_lib
             'libxml/xpathInternals.h',
         ],
     );
+}
+
+sub _libxml_check_lib {
+    my ($libname) = @_;
+
+    if (defined($config_LIBS_alternatives)) {
+        foreach my $conf_LIBS (@$config_LIBS_alternatives) {
+            if (_libxml_check_lib_with_config_LIBs($libname, $conf_LIBS)) {
+                $config{LIBS} = $conf_LIBS;
+                return 1;
+            }
+        }
+    }
+    else {
+        return _libxml_check_lib_with_config_LIBs($libname, $config{LIBS});
+    }
 }
 
 print "Checking for ability to link against xml2...";
