@@ -495,6 +495,7 @@ sub MY::test {
 
 # echo perl -pi~ -e '$$_=q($(version))."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM)
 sub MY::postamble {
+    my $mpl_args = join " ", map qq["$_"], @ARGV;
 
     my $CC =
     (
@@ -503,7 +504,7 @@ sub MY::postamble {
             : ''
     );
 
-  return "$CC\n\n" . <<'MAKE_FRAG';
+  my $ret = "$CC\n\n" . <<'MAKE_FRAG';
 
 # used to update version numbers in all modules
 version:
@@ -516,11 +517,15 @@ runtest: pure_all
         "local @INC = @INC;	unshift @INC, map { File::Spec->rel2abs(\$$_) } ('$(INST_LIB)', '$(INST_ARCHLIB)'); Test::Run::CmdLine::Iface->new({test_files => [glob(q{t/*.t})]})->run();"
 
 distruntest: distdir
-	cd $(DISTVNAME) && $(ABSPERLRUN) Makefile.PL
+	cd $(DISTVNAME) && $(ABSPERLRUN) Makefile.PL {#mpl_args#}
 	cd $(DISTVNAME) && $(MAKE) $(PASTHRU)
 	cd $(DISTVNAME) && $(MAKE) runtest $(PASTHRU)
 
 MAKE_FRAG
+
+    $ret =~ s/{#mpl_args#}/$mpl_args/;
+
+    return $ret;
 }
 
 
