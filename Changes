@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0011          Thu  8 Nov 00:25:15 IST 2012
     - Fix crash in removeChild() when not expanding entities
         - https://rt.cpan.org/Ticket/Display.html?id=80395
             - "removeChild() segfaults when not expanding entities"
