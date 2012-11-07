@@ -157,6 +157,7 @@ t/46err_column.t
 t/47load_xml_callbacks.t
 t/48_rt55000.t
 t/48importing_nodes_IDs_rt_69520.t
+t/48_removeChild_crashes_rt_80395.t
 t/49_load_html.t
 t/49callbacks_returning_undef.t
 t/49global_extent.t

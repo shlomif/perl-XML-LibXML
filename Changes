@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fix crash in removeChild() when not expanding entities
+        - https://rt.cpan.org/Ticket/Display.html?id=80395
+            - "removeChild() segfaults when not expanding entities"
+        - Thanks to GUIDO@cpan.org for the report, for a test case (that
+        was adapted into t/48_removeChild_crashes_rt_80395.t ) and for
+        a patch to fix it.
+
 2.0010          Thu  1 Nov 20:13:08 IST 2012
     - Passing debug (an undocumented option) to check_lib in Makefile.PL.
         - This way we get more meaningful traces on perl Makefile.PL DEBUG=1.
