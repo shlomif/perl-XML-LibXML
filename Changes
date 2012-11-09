@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0012          Fri  9 Nov 06:39:32 IST 2012
     - Fix support for references to scalars with overloaded stringification
     magic.
         - https://rt.cpan.org/Public/Bug/Display.html?id=77864
