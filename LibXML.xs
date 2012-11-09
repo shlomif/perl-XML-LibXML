@@ -1599,7 +1599,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
     PREINIT:
         char * directory = NULL;
         STRLEN len;
-        char * ptr;
+        const char * ptr;
         HV * real_obj;
         int well_formed;
         int valid;
@@ -1615,11 +1615,12 @@ _parse_string(self, string, dir = &PL_sv_undef)
             }
         }
         /* If string is a reference to a string - dereference it.
-         * See: https://rt.cpan.org/Ticket/Display.html?id=64051 . */
-        if (SvROK(string)) {
+         * See: https://rt.cpan.org/Ticket/Display.html?id=64051 (broke it)
+         *      https://rt.cpan.org/Ticket/Display.html?id=77864 (fixed it) */
+        if (SvROK(string) && !SvOBJECT(SvRV(string))) {
             string = SvRV(string);
         }
-        ptr = SvPV(string, len);
+        ptr = SvPV_const(string, len);
         if (len <= 0) {
             croak("Empty string\n");
             XSRETURN_UNDEF;
@@ -1628,7 +1629,7 @@ _parse_string(self, string, dir = &PL_sv_undef)
         RETVAL = &PL_sv_undef;
         INIT_ERROR_HANDLER;
         {
-            xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
+            xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt(ptr, len);
             if (ctxt == NULL) {
 	        CLEANUP_ERROR_HANDLER;
                 REPORT_ERROR(1);

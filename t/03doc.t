@@ -13,7 +13,7 @@ use strict;
 use warnings;
 
 # Should be 168.
-use Test::More tests => 180;
+use Test::More tests => 193;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -482,6 +482,17 @@ sub _count_children_by_name_ns
     }
 }
 
+package Stringify;
+
+use overload q[""] => sub { return '<A xmlns:C="xml://D"><C:A>foo<A/>bar</C:A><A><C:B/>X</A>baz</A>'; };
+
+sub new
+{
+    return bless \(my $x);
+}
+
+package main;
+
 {
     # Document Storing
     my $parser = XML::LibXML->new;
@@ -602,10 +613,16 @@ sub _count_children_by_name_ns
 =end taken_out
 
 =cut
-    # TEST:$count=2;
+    # TEST:$count=3;
     # Also test that we can parse from scalar references:
     # See RT #64051 ( https://rt.cpan.org/Ticket/Display.html?id=64051 )
-        foreach my $input ( $string5, \$string5 )
+    # Also test that we can parse from references to scalars with
+    # overloaded strings:
+    # See RT #77864 ( https://rt.cpan.org/Public/Bug/Display.html?id=77864 )
+
+        my $obj = Stringify->new;
+
+        foreach my $input ( $string5, (\$string5), $obj )
         {
             my $doc2 = $parser2->parse_string($input);
             # TEST*$count
