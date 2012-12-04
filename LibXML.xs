@@ -8954,7 +8954,7 @@ _DESTROY(reader)
         if (doc) {
           perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
           if ( PmmREFCNT(SvPROXYNODE(perl_doc))>1 ) {
-	    /* was incremented in document() to pervent from PMM destruction */
+	    /* was incremented in document() to prevent from PMM destruction */
 	    PmmREFCNT_dec(SvPROXYNODE(perl_doc));
 	  }
           SvREFCNT_dec(perl_doc);
