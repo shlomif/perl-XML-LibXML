@@ -148,6 +148,7 @@ t/30xpathcontext.t
 t/31xpc_functions.t
 t/32xpc_variables.t
 t/40reader.t
+t/40reader_mem_error.t
 t/41xinclude.t
 t/42common.t
 t/43options.t
