@@ -8950,15 +8950,18 @@ _DESTROY(reader)
 	/* SV * error_sv = NULL;
            xmlTextReaderErrorFunc f = NULL; */
     CODE:
-	doc = xmlTextReaderCurrentDoc(reader);
+
+    if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_EOF) {
+        doc = xmlTextReaderCurrentDoc(reader);
         if (doc) {
-          perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
-          if ( PmmREFCNT(SvPROXYNODE(perl_doc))>1 ) {
-	    /* was incremented in document() to prevent from PMM destruction */
-	    PmmREFCNT_dec(SvPROXYNODE(perl_doc));
-	  }
-          SvREFCNT_dec(perl_doc);
-	}
+            perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
+            if ( PmmREFCNT(SvPROXYNODE(perl_doc))>1 ) {
+                /* was incremented in document() to prevent from PMM destruction */
+                PmmREFCNT_dec(SvPROXYNODE(perl_doc));
+            }
+            SvREFCNT_dec(perl_doc);
+        }
+    }
         if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_CLOSED) {
 	  xmlTextReaderClose(reader);
 	}
