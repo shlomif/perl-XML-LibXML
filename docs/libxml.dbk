@@ -1057,9 +1057,8 @@ $parser = XML::LibXML-&gt;new({option=>value, ...});</funcsynopsisinfo>
 			      a list of option => value pairs to
 			      set a different default set of options.
 			      Unless specified otherwise, the options
-			      <literal>load_ext_dtd</literal>,
-			      <literal>expand_entities</literal>, and
-			      <literal>huge</literal> are set to 1.
+			      <literal>load_ext_dtd</literal>, and
+			      <literal>expand_entities</literal> are set to 1.
 			      See <xref linkend="parser-options"/> for a list of libxml2 parser's options.
 			    </para>
                         </listitem>
@@ -1845,7 +1844,11 @@ $parser->input_callbacks($c);
             <listitem>
 	      <para>/parser, html, reader/</para>
               <para>relax any hardcoded limit from the parser; possible values are 0 and 1. Unless specified,
-		XML::LibXML sets this option to 1.</para>
+		XML::LibXML sets this option to 0.</para>
+              <para>Note: the default value for this option was changed to protect against denial
+                of service through entity expansion attacks.  Before enabling the option ensure
+                you have taken alternative measures to protect your application against this type
+                of attack.</para>
             </listitem>
           </varlistentry>
           <varlistentry>
