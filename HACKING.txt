@@ -1,0 +1,331 @@
+Coding Style and Conventions for Shlomi Fish’s Projects
+=======================================================
+Shlomi Fish <shlomif@cpan.org>
+:Date: 2012-05-14
+:Revision: $Id$
+
+Perl Style Guidelines
+---------------------
+
+Use Test::More for test scripts while using Test::Count annotations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One should use Test::More for new test scripts, while using Test::Count
+( http://beta.metacpan.org/module/Test::Count ) "# TEST" annotations. Some
+of the old test scripts under +t/*.t+ are still using Test.pm, but it should
+not be used for new code.
+
+Any bug fixes or feature addition patches should be accompanied with
+a test script to test the code.
+
+Avoid trailing statement modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One should not use trailing "if"s "while"s "until"s, etc.
+
+Bad:
+
+----------------
+print "Hello\n" if $cond;
+----------------
+
+Good:
+
+----------------
+if ($cond)
+{
+    print "Hello\n";
+}
+----------------
+
+Avoid until and unless
+~~~~~~~~~~~~~~~~~~~~~~
+
+"until" and "unless" should be spelled using "if !" or "while !" or
+alternatively "if not" or "while not".
+
+Make sure you update the "MANIFEST" file with any new source files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All the new source files should be places in the "MANIFEST" file in the core
+distribution. Note that I am considering to make use of "MANIFEST.SKIP"
+instead, which would not necessitate that in general.
+
+Make sure to update the "Changes" (or equivalently named) file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A patch should also patch the "Changes" file (whose name may vary) with the
+explanation of the change. A Changes file should not be automatically
+generated. Note that due to historical reasons, the exact format of the Changes
+varies between different projects of mine and you should try to emulate the
+style and format of the one of the CPAN distribution in question.
+
+Test programs should not connect to Internet resources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As a general rule, test programs should not connect to Internet resources
+(such as global web-sites) using LWP or WWW::Mechanize or whatever, and
+should rely only on local resources. The reasons for that are that relying
+on such Internet resources:
+
+* May fail if the machine does not have a fully open Internet connection.
+
+* Will add load to the hosts in question.
+
+* Such Internet resources can fluctuate in their content and behaviour,
+which may break the tests.
+
+Other elements to avoid
+~~~~~~~~~~~~~~~~~~~~~~~
+
+See http://perl-begin.org/tutorials/bad-elements/ .
+
+C Style Guidelines
+------------------
+
+Here are some style guidelines for new code to be accepted into XML-LibXML:
+
+4 Spaces for Indentation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The source code should be kept free of horizontal
+tabs (\t, HT, \x09) and use spaces alone. Furthermore, there should be
+a 4 wide space indentation inside blocks:
+
+----------------
+if (COND())
+{
+    int i;
+
+    printf("%s\n", "COND() is successful!");
+
+    for (i=0 ; i < 10 ; i++)
+    {
+        ...
+    }
+}
+----------------
+
+Curly Braces Alignment
+~~~~~~~~~~~~~~~~~~~~~~
+
+The opening curly brace of an if-statement or a for-statement should be
+placed below the statement on the same level as the other line, and the
+inner block indented by 4 spaces. A good example can be found in the previous
+section. Here are some bad examples:
+
+----------------
+if ( COND() ) {
+    /* Bad because the opening brace is on the same line.
+}
+----------------
+
+----------------
+if ( COND() )
+    {
+    /* Bad because the left and right braces are indented along with
+    the block. */
+    printf(....)
+    }
+----------------
+
+----------------
+/* GNU Style - fear and loathing. */
+if ( COND() )
+  {
+    printf(....)
+  }
+----------------
+
+Comments should precede the lines performing the action
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Comments should come one line before the line that they explain:
+
+----------------
+/* Check if it can be moved to something on the same stack */
+for(dc=0;dc<c-1;dc++)
+{
+    .
+    .
+    .
+}
+----------------
+
++TODO: Fill in+
+
+One line clauses should be avoided
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One should avoid one-line clauses inside the clauses of +if+, +else+,
++elsif+, +while+, etc. Instead one should wrap the single statements inside
+blocks. This is to avoid common errors with extraneous semicolons:
+
+----------------
+/* Bad: */
+if (COND())
+    printf ("%s\n", "Success!");
+
+/* Good: */
+if (COND())
+{
+    printf ("%s\n", "Success!");
+}
+
+/* Bad: */
+while (COND())
+    printf("%s\n", "I'm still running.");
+
+/* Good: */
+while (COND())
+{
+    printf("%s\n", "I'm still running.");
+}
+----------------
+
+Identifier Naming Conventions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here are some naming conventions for identifiers:
+
+1. Please do not use capital letters (including not +CamelCase+) - use
+all lowercase letters with words separated by underscores. Remember, C is
+case sensitive.
+
+2. Note, however, that comments should be phrased in proper English, with
+proper Capitalization and distinction between uppercase and lowercase
+letters. So should the rest of the internal and external documentation.
+
+3. Some commonly used abbreviations:
+
+----------------
+max - maximum
+num - numbers
+dest - destination
+src - source
+ptr - pointer
+val - value
+iter - iterator
+idx - index
+i, j - indexes
+----------------
+
+Don't comment-out - use #if 0 to temporarily remove code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Code should not be commented-out using gigantic +/* ... */+ comments. Instead,
+it should be out-blocked using +#if 0...#endif+.
+
+In Perl code, one can use the following POD paradigm to remove a block of
+code:
+
+----------------
+=begin Removed
+
+Removed code here.
+
+=end Removed
+
+=cut
+----------------
+
+No declarations after statements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One should make sure there are no declarations after statements in the ANSI
+C code. If you're using gcc, you can make sure this is the case by adding
+the flags "-Wdeclaration-after-statement -Werror" to "CCFLAGS" in the makefile.
+
+Bad:
+
+----------------
+int my_func(int arg)
+{
+    int var;
+
+    printf("%s\n", "Foo");
+
+    /* Declaration after statement. */
+    int other_var = var;
+
+    return;
+}
+----------------
+
+Better:
+
+----------------
+int my_func(int arg)
+{
+    int var;
+    int other_var;
+
+    printf("%s\n", "Foo");
+
+    other_var = var;
+
+    return;
+}
+----------------
+
+Comments should have an empty space after the comment leader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Comments in Perl, C, Python, Ruby, and other languages should have an
+empty space after the comment leader.
+
+Bad:
+
+----------------
+#Print a value.
+print "Hello\n";
+/*Print a value.*/
+printf("%s\n", "Hello");
+----------------
+
+Better:
+
+----------------
+# Print a value.
+print "Hello\n";
+/* Print a value. */
+printf("%s\n", "Hello");
+----------------
+
+sizeof(var) is preferable to sizeof(mytype_t)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Given the choice between +sizeof(var)+ as well as +sizeof(*var)+
+and +sizeof(mytype_t)+ where +mytype_t+ is a type, the former should be
+prfereable. This way, if the type of the variable changes, one does not
+need to fix the +sizeof(…)+.
+
+sizeof() must always be enclosed in parentheses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Do not write +sizeof int+, +sizeof mystruct_t+ etc. Instead write
++sizeof(int)+, +sizeof(mystruct_t)+ .
+
+Types should end in “_t” ; Raw struct definitions in “_struct”
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+New typedefs should call their types in names that end with a “_t”:
+
+----------------
+typedef int myint_t;
+typedef struct
+{
+    .
+    .
+    .
+} mystruct_t
+----------------
+
+Prefer doing +typedef struct { ... } mystruct_t+ to declaring a struct
+separately. If a struct declartion is still needed (e.g: if it contains
+a pointer to itself) it should:
+
+1. Have an identifier that ends with “_struct”.
+
+2. Be typedefed into a type (that ends with “_t”):
++typedef struct my_struct_struct my_struct_t;+.
