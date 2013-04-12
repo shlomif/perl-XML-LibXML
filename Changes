@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0015          Sat 13 Apr 02:30:33 IDT 2013
+    - Don't enable XML_PARSE_HUGE by default.
+        - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/19
+        - Thanks to Grant McLean ( https://metacpan.org/author/GRANTM ) for
+        the bug report and patch.
+
 2.0014          Wed  5 Dec 11:06:26 IST 2012
     - Got 40reader_mem_error.t to not fetch the external DTDs.
         - https://rt.cpan.org/Public/Bug/Display.html?id=81703
