@@ -147,6 +147,7 @@ t/30keep_blanks.t
 t/30xpathcontext.t
 t/31xpc_functions.t
 t/32xpc_variables.t
+t/35huge_mode.t
 t/40reader.t
 t/40reader_mem_error.t
 t/41xinclude.t
