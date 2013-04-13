@@ -50,7 +50,7 @@ no_network
 {
   my $p = XML::LibXML->new();
   for my $opt (@all) {
-    my $ret = (($opt =~ /^(?:load_ext_dtd|expand_entities|huge)$/) ? 1 : 0);
+    my $ret = (($opt =~ /^(?:load_ext_dtd|expand_entities)$/) ? 1 : 0);
     # TEST*$all
     ok(
         ($p->get_option($opt)||0) == $ret
