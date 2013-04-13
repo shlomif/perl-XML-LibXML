@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+2.0016          Sat 13 Apr 22:36:51 IDT 2013
+    - Don't enable XML_PARSE_HUGE by default.
+        - Fix the previous version due to a mercurial SNAFU.
+
 2.0015          Sat 13 Apr 02:30:33 IDT 2013
     - Don't enable XML_PARSE_HUGE by default.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/19
