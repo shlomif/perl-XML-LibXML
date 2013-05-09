@@ -192,7 +192,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
     if ( not defined $config{LIBS} and not defined $config{INC} ) {
         print "running xml2-config...";
         eval {
-            try_libconfig( $xml2cfg, \%config, @blacklist );
+            try_libconfig( $xml2cfg, \%config, \@blacklist );
         };
 
         if ( $@ ) {
@@ -736,7 +736,7 @@ sub try_link {
 sub try_libconfig {
     my $cfgscript = shift;
     my $config = shift;
-    my @bl = @_;
+    my $bl = shift;
 
     my $state = undef; # there are three possible states:
                        # 1     : works
@@ -746,13 +746,13 @@ sub try_libconfig {
     my $ver = backtick("$cfgscript --version");
     if ( defined $ver ) {
         my ( $major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-        foreach ( @bl ) {
-            $state = $_->[3];
-            last if $major <  $_->[0];
-            next if $major >  $_->[0];
-            last if $minor <  $_->[1];
-            next if $minor >  $_->[1];
-            last if $point <= $_->[2];
+        foreach my $i ( @$bl ) {
+            $state = $i->[3];
+            last if $major <  $i->[0];
+            next if $major >  $i->[0];
+            last if $minor <  $i->[1];
+            next if $minor >  $i->[1];
+            last if $point <= $i->[2];
             $state = undef;
         }
 
