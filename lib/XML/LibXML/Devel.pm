@@ -12,7 +12,7 @@ use warnings;
 use XML::LibXML;
 
 use vars qw ($VERSION);
-$VERSION = "2.0016"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0017"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use 5.008_000;
 

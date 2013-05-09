@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0017          Thu  9 May 11:03:36 IDT 2013
+    - Made the minimal version of libxml2 2.9.0 as previous versions were
+    too buggy due to spuriourous CPAN test failures.
+        - Please upgrade.
+        - By SHLOMIF
+
 2.0016          Sat 13 Apr 22:36:51 IDT 2013
     - Don't enable XML_PARSE_HUGE by default.
         - Fix the previous version due to a mercurial SNAFU.
