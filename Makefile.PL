@@ -746,19 +746,6 @@ sub try_libconfig {
     my $ver = backtick("$cfgscript --version");
     if ( defined $ver ) {
         my ( $major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
-
-        if (($major < 2) ||
-            (($major == 2) && ($minor < 9)))
-        {
-                print STDERR <<"EOF";
-The installed version of libxml2 is too low, as older versions proved to
-be buggy.
-You need at least version 2.9.0.
-You have version $ver .
-EOF
-            # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
-            exit 0 unless $FORCE;
-        }
         foreach my $i ( @$bl ) {
             $state = $i->[3];
             last if $major <  $i->[0];
