@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0018          Mon 13 May 13:35:06 IDT 2013
+    - Revert previous change of minimal version of libxml2.
+        - This change proved to be unpopular and didn't prevent
+        the CPAN test failures.
+        - By SHLOMIF
+
 2.0017          Thu  9 May 11:03:36 IDT 2013
     - Made the minimal version of libxml2 2.9.0 as previous versions were
     too buggy due to spuriourous CPAN test failures.
