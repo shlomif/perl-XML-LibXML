@@ -1858,7 +1858,7 @@ $parser->input_callbacks($c);
               <para>THIS OPTION IS EXPERIMENTAL!</para>
               <para>Although quite powerful, XML::LibXML's DOM implementation is incomplete with respect to
 		the DOM level 2 or level 3 specifications.
-                XML::GDOME is based on libxml2 as well and and provides a rather complete DOM implementation by wrapping libgdome.
+                XML::GDOME is based on libxml2 as well, and provides a rather complete DOM implementation by wrapping libgdome.
 		This flag allows you to make
                 use of XML::LibXML's full parser options and XML::GDOME's DOM implementation at the same time.</para>
               <para>To make use of this function, one has to install libgdome and configure XML::LibXML to use this library.
@@ -3562,8 +3562,8 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para><emphasis>findnodes</emphasis> evaluates the xpath expression (XPath 1.0) on the current node and returns the resulting node set as an array. In scalar context, returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object.</para>
-          <para>The xpath expression can be passed either as a string or
-	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+          <para>The xpath expression can be passed either as a string, or
+	  as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
 	  <para><emphasis>NOTE ON NAMESPACES AND XPATH</emphasis>:</para>
 	  <para>A common mistake about
@@ -3631,7 +3631,7 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <olink targetdoc="XML::LibXML::Number">XML::LibXML::Number</olink> object being returned. Other expressions might return an <olink targetdoc="XML::LibXML::Boolean">XML::LibXML::Boolean</olink>
                     object, or an <olink targetdoc="XML::LibXML::Literal">XML::LibXML::Literal</olink> object (a string). Each of those objects uses Perl's overload feature to "do
                     the right thing" in different contexts.</para>
-          <para>The xpath expression can be passed either as a string or
+          <para>The xpath expression can be passed either as a string,
 	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;find.</para>
@@ -3655,8 +3655,8 @@ $xpc-&gt;find('/x:html',$node);</programlisting>
                     <para>That is, it returns the literal value of the results. This enables you to ensure that you get a string back from your search, allowing
                     certain shortcuts. This could be used as the equivalent of XSLT's &lt;xsl:value-of select="some_xpath"/&gt;.</para>
 	  <para>See also <xref linkend="XML-LibXML-XPathContext"/>-&gt;findvalue.</para>
-          <para>The xpath expression can be passed either as a string or
-	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+          <para>The xpath expression can be passed either as a string, or
+	  as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
                 </listitem>
             </varlistentry>
@@ -5262,7 +5262,7 @@ $dom-&gt;appendChild( $pi );</programlisting>
 
         <para>will have the same result as above.</para>
 
-        <para><xref linkend="XML-LibXML-PI"/>'s implementation of setData() documented below differs a bit from the the standard version as available in <xref linkend="XML-LibXML-Node"/>:</para>
+        <para><xref linkend="XML-LibXML-PI"/>'s implementation of setData() documented below differs a bit from the standard version as available in <xref linkend="XML-LibXML-Node"/>:</para>
         <variablelist>
             <varlistentry>
                 <term>setData</term>
@@ -5802,7 +5802,7 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
       The XML::LibXML::XPathContext
       class provides an almost complete
       interface to libxml2's XPath implementation.
-      With XML::LibXML::XPathContext is is possible to
+      With XML::LibXML::XPathContext, it is possible to
       evaluate XPath expressions in the context
       of arbitrary node, context size, and context position,
       with a user-defined namespace-prefix mapping,
@@ -5996,8 +5996,8 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      returns an <olink targetdoc="XML::LibXML::NodeList">XML::LibXML::NodeList</olink> object. Optionally, a
 	      node may be passed as a second argument to set the
 	      context node for the query.</para>
-          <para>The xpath expression can be passed either as a string or
-	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+          <para>The xpath expression can be passed either as a string, or
+	  as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
           </listitem>
         </varlistentry>
@@ -6017,8 +6017,8 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
 	      thing'' in different contexts. Optionally, a node may be
 	      passed as a second argument to set the context node for
 	      the query.</para>
-          <para>The xpath expression can be passed either as a string or
-	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+          <para>The xpath expression can be passed either as a string, or
+	  as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
           </listitem>
         </varlistentry>
@@ -6035,8 +6035,8 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
             select=``some_xpath''/&gt;. Optionally, a node may be
             passed in the second argument to set the context node for
             the query.</para>
-          <para>The xpath expression can be passed either as a string or
-	  or as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
+          <para>The xpath expression can be passed either as a string, or
+	  as a  <olink targetdoc="XML::LibXML::XPathExpression">XML::LibXML::XPathExpression</olink> object.
 	  </para>
           </listitem>
         </varlistentry>
@@ -7203,7 +7203,7 @@ my $node_with_index_2 = $map->item(2);
 	structured error information as hash key-value pairs. Individual
 	items (fields) of a structured error can either be
 	obtained directly as $@-&#62;{field}, or using autoloaded
-	methods such as as $@-&#62;field() (where field is the field
+	methods such as $@-&#62;field() (where field is the field
 	name). XML::LibXML::Error objects have the following fields:
 	domain, code, level, file, line, nodename, message, str1, str2,
 	str3, num1, num2, and _prev (some of them may be undefined).

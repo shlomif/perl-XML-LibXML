@@ -243,9 +243,9 @@ use constant {
   XML_PARSE_PEDANTIC	  => 128,      # pedantic error reporting
   XML_PARSE_NOBLANKS	  => 256,      # remove blank nodes
   XML_PARSE_SAX1	  => 512,      # use the SAX1 interface internally
-  XML_PARSE_XINCLUDE	  => 1024,     # Implement XInclude substitition
+  XML_PARSE_XINCLUDE	  => 1024,     # Implement XInclude substitution
   XML_PARSE_NONET	  => 2048,     # Forbid network access
-  XML_PARSE_NODICT	  => 4096,     # Do not reuse the context dictionnary
+  XML_PARSE_NODICT	  => 4096,     # Do not reuse the context dictionary
   XML_PARSE_NSCLEAN	  => 8192,     # remove redundant namespaces declarations
   XML_PARSE_NOCDATA	  => 16384,    # merge CDATA as text nodes
   XML_PARSE_NOXINCNODE	  => 32768,    # do not generate XINCLUDE START/END nodes
@@ -1455,7 +1455,7 @@ sub insertPI {
 
 #-------------------------------------------------------------------------#
 # DOM L3 Document functions.
-# added after robins implicit feature requst
+# added after robins implicit feature request
 #-------------------------------------------------------------------------#
 *getElementsByTagName = \&XML::LibXML::Element::getElementsByTagName;
 *getElementsByTagNameNS = \&XML::LibXML::Element::getElementsByTagNameNS;
@@ -1852,7 +1852,7 @@ package XML::LibXML::Namespace;
 
 sub CLONE_SKIP { 1 }
 
-# this is infact not a node!
+# In fact, this is not a node!
 sub prefix { return "xmlns"; }
 sub getPrefix { return "xmlns"; }
 sub getNamespaceURI { return "http://www.w3.org/2000/xmlns/" };
@@ -2157,9 +2157,9 @@ sub _callback_match {
     my $uri = shift;
     my $retval = 0;
 
-    # loop through the callbacks and and find the first matching
-    # The callbacks are stored in execution order (reverse stack order)
-    # any new global callbacks are shifted to the callback stack.
+    # loop through the callbacks, and find the first matching one.
+    # The callbacks are stored in execution order (reverse stack order).
+    # Any new global callbacks are shifted to the callback stack.
     foreach my $cb ( @_GLOBAL_CALLBACKS ) {
 
         # callbacks have to return 1, 0 or undef, while 0 and undef
