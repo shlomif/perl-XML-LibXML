@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0019          Mon  1 Jul 11:04:31 IDT 2013
+    - Correct typos reported in RT #86599.
+        - https://rt.cpan.org/Ticket/Display.html?id=86599
+        - Thanks to dsteinbrunner.
+
 2.0018          Mon 13 May 13:35:06 IDT 2013
     - Revert previous change of minimal version of libxml2.
         - This change proved to be unpopular and didn't prevent
