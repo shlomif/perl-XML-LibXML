@@ -123,6 +123,11 @@ typedef enum {
 #include "xpath.h"
 #include "xpathcontext.h"
 
+/* unique_key stuff */
+#include "stdint.h"
+/*1 per bit in intptr_t, + 1 for trailing 0*/
+#define KEY_SIZE sizeof(intptr_t)+1
+
 #ifdef __cplusplus
 }
 #endif
@@ -5007,6 +5012,19 @@ isSameNode( self, oNode )
     CODE:
         PERL_UNUSED_VAR(ix);
         RETVAL = ( self == oNode ) ? 1 : 0;
+    OUTPUT:
+        RETVAL
+
+char*
+unique_key( self )
+        xmlNodePtr self
+    CODE:
+        /* Convert the node address into a hex string */
+        char hex_string[KEY_SIZE];
+        intptr_t address = (intptr_t) self;
+        sprintf(hex_string, "%0x", address);
+        hex_string[KEY_SIZE-1] = 0;
+        RETVAL = hex_string;
     OUTPUT:
         RETVAL
 

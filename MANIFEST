@@ -172,6 +172,7 @@ t/71overloads.t
 t/72destruction.t
 t/80registryleak.t
 t/90threads.t
+t/91unique_key.t
 t/data/callbacks_returning_undef.xml
 t/lib/Collector.pm
 t/lib/Counter.pm
