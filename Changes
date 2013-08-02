@@ -1,5 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
+    - Added unique_key
+
 2.0019          Mon  1 Jul 11:04:31 IDT 2013
     - Correct typos reported in RT #86599.
         - https://rt.cpan.org/Ticket/Display.html?id=86599
