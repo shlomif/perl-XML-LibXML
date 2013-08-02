@@ -3145,7 +3145,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$string = $node-&gt;unique_key;</funcsynopsisinfo>
+                        <funcsynopsisinfo>$num = $node-&gt;unique_key;</funcsynopsisinfo>
                     </funcsynopsis>
 
                     <para>This function is not specified for any DOM level. It returns a key guaranteed to be unique for this node, and to always be the same value for this node. In other words, two node objects return the same key if and only if isSameNode indicates that they are the same node.</para>

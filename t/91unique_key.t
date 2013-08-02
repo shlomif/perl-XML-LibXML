@@ -31,12 +31,12 @@ for my $c1(0..4){
     for my $c2(0..4){
         if($c1 == $c2){
             # TEST*$num_children
-            ok($children_1[$c1]->unique_key eq $children_2[$c2]->unique_key,
+            ok($children_1[$c1]->unique_key == $children_2[$c2]->unique_key,
                 'Key for ' . $children_1[$c1]->nodeName .
                 ' matches key from same node');
         }else{
             # TEST*($num_children)*($num_children-1)
-            ok($children_1[$c1]->unique_key ne $children_2[$c2]->unique_key,
+            ok($children_1[$c1]->unique_key != $children_2[$c2]->unique_key,
                 'Key for ' . $children_1[$c1]->nodeName .
                 ' does not match key for' . $children_2[$c2]->nodeName);
         }
