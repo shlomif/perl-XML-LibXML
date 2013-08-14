@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0100          Wed 14 Aug 08:23:53 IDT 2013
     - Added the unique_key() method to XML::LibXML::Node.
     - t/40reader.t: assigning from $@ to a lexical so it won't be
     over-ridden.
