@@ -208,10 +208,12 @@ EOF
     URI => "mystring.xml"
    );
   eval { $reader->finish };
+  my $Err = $@;
   use Data::Dumper;
-  print Dumper($@);
-  print $@;
-  ok((defined $@ and $@ =~ /in mystring.xml at line 3:|mystring.xml:5:/), 'catchin error');
+  # print Dumper($Err);
+  # print $Err;
+  ok((defined($Err) and $Err =~ /in mystring.xml at line 3:|mystring.xml:5:/),
+      'caught the error');
 }
 
 {

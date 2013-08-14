@@ -1,6 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
     - Added unique_key
+    - t/40reader.t: assigning from $@ to a lexical so it won't be
+    over-ridden.
+        - https://rt.cpan.org/Ticket/Display.html?id=87830
+        - Thanks to Douglas Christopher Wilson for the report.
 
 2.0019          Mon  1 Jul 11:04:31 IDT 2013
     - Correct typos reported in RT #86599.
