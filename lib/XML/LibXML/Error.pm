@@ -29,7 +29,7 @@ use overload
   fallback => 1;
 
 $WARNINGS = 0; # 0: suppress, 1: report via warn, 2: report via die
-$VERSION = "2.0100"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0101"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant XML_ERR_NONE            => 0;
 use constant XML_ERR_WARNING         => 1; # A simple warning
