@@ -164,6 +164,7 @@ t/49_load_html.t
 t/49callbacks_returning_undef.t
 t/49global_extent.t
 t/50devel.t
+t/51_parse_html_string_rt87089.t
 t/60error_prev_chain.t
 t/60struct_error.t
 t/61error.t

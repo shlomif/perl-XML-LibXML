@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0101          Thu 15 Aug 08:29:15 IDT 2013
+    - Fixed https://rt.cpan.org/Ticket/Display.html?id=87089 .
+        - "HTML doctype differs for string/scalar input"
+        - Thanks to NGLENN for the report and to Yuriy for the tests and
+        fix.
+
 2.0100          Wed 14 Aug 08:23:53 IDT 2013
     - Added the unique_key() method to XML::LibXML::Node.
     - t/40reader.t: assigning from $@ to a lexical so it won't be
