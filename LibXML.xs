@@ -2054,6 +2054,12 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
         int recover = 0;
         PREINIT_SAVED_ERROR
     INIT:
+        /* If string is a reference to a string - dereference it.
+         * See: https://rt.cpan.org/Ticket/Display.html?id=64051 (broke it)
+         *      https://rt.cpan.org/Ticket/Display.html?id=77864 (fixed it) */
+        if (SvROK(string) && !SvOBJECT(SvRV(string))) {
+            string = SvRV(string);
+        }
         ptr = SvPV(string, len);
         if (len <= 0) {
             croak("Empty string\n");
