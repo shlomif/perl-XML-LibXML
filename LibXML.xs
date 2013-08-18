@@ -7751,7 +7751,7 @@ registerFunctionNS( pxpath_context, name, uri, func)
                 || SvPOK(func)))) {
             if (ctxt->funcLookupData == NULL) {
                 if (SvOK(func)) {
-                    pfdr = newRV_inc((SV*) newHV());
+                    pfdr = newRV_noinc((SV*) newHV());
                     ctxt->funcLookupData = pfdr;
                 } else {
                     /* looks like no perl function was never registered, */

@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fixed https://rt.cpan.org/Ticket/Display.html?id=83744
+        - XPathContext memory leak on registerFunction.
+        - Thanks to DGINEV for the report and Yuriy for the patch.
+
 2.0101          Thu 15 Aug 08:29:15 IDT 2013
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=87089 .
         - "HTML doctype differs for string/scalar input"
