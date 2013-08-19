@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0102          Mon 19 Aug 15:14:13 IDT 2013
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=83744
         - XPathContext memory leak on registerFunction.
         - Thanks to DGINEV for the report and Yuriy for the patch.
