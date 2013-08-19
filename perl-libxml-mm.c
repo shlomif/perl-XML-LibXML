@@ -748,6 +748,7 @@ PmmFixOwner( ProxyNodePtr nodetofix, ProxyNodePtr parent )
                 PmmREFCNT_dec(oldParent);
 
             if ( PmmNODE(nodetofix)->type != XML_ATTRIBUTE_NODE
+                 && PmmNODE(nodetofix)->type != XML_DTD_NODE
                  && PmmNODE(nodetofix)->properties != NULL ) {
                 PmmFixOwnerList( (xmlNodePtr)PmmNODE(nodetofix)->properties,
                                  parent );

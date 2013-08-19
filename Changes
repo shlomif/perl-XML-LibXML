@@ -3,6 +3,10 @@ Revision history for Perl extension XML::LibXML
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=83744
         - XPathContext memory leak on registerFunction.
         - Thanks to DGINEV for the report and Yuriy for the patch.
+    - Apply proposed fix for https://rt.cpan.org/Ticket/Display.html?id=80521
+        - "replaceNode() segfaults when copying DTD nodes with ATTLISTs"
+        - Thanks to GUIDO@cpan.org for the report and to YOREEK for
+        the patch.
 
 2.0101          Thu 15 Aug 08:29:15 IDT 2013
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=87089 .
