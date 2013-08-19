@@ -8790,11 +8790,6 @@ copyCurrentNode(reader,expand = 0)
 	  REPORT_ERROR(0);
           XSRETURN_UNDEF;
 	}
-        perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
-        if ( PmmREFCNT(SvPROXYNODE(perl_doc))==1 ) {
-	  /* will be decremented in Reader destructor */
-	  PmmREFCNT_inc(SvPROXYNODE(perl_doc));
-	}
         if (xmlTextReaderGetParserProp(reader,XML_PARSER_VALIDATE))
             PmmInvalidatePSVI(doc); /* the document may have psvi info */
 
@@ -8873,7 +8868,7 @@ preserveNode(reader)
     PREINIT:
         xmlNodePtr node;
         xmlDocPtr doc;
-        SV * perl_doc;
+        ProxyNodePtr proxy;
 	PREINIT_SAVED_ERROR
     CODE:
 	INIT_ERROR_HANDLER;
@@ -8883,16 +8878,16 @@ preserveNode(reader)
 	  REPORT_ERROR(0);
 	  XSRETURN_UNDEF;
 	}
-        perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
-        if ( PmmREFCNT(SvPROXYNODE(perl_doc))==1 ) {
-	  /* will be decremented in Reader destructor */
-	  PmmREFCNT_inc(SvPROXYNODE(perl_doc));
+    proxy = PmmNewNode((xmlNodePtr)doc);
+    if ( PmmREFCNT(proxy) == 0 ) {
+	  /* new proxy node */
+	  PmmREFCNT_inc(proxy);
 	}
 	node = xmlTextReaderPreserve(reader);
         CLEANUP_ERROR_HANDLER;
 	REPORT_ERROR(0);
         if (node) {
-           RETVAL = PmmNodeToSv(node, PmmOWNERPO(PmmPROXYNODE(doc)));
+           RETVAL = PmmNodeToSv(node, proxy);
 	} else {
 	    XSRETURN_UNDEF;
 	}
@@ -8961,20 +8956,16 @@ _DESTROY(reader)
 	xmlTextReaderPtr reader
     PREINIT:
         xmlDocPtr doc;
-        SV * perl_doc;
+        ProxyNodePtr proxy;
 	/* SV * error_sv = NULL;
            xmlTextReaderErrorFunc f = NULL; */
     CODE:
 
-    if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_EOF) {
-        doc = xmlTextReaderCurrentDoc(reader);
-        if (doc) {
-            perl_doc = PmmNodeToSv((xmlNodePtr)doc, NULL);
-            if ( PmmREFCNT(SvPROXYNODE(perl_doc))>1 ) {
-                /* was incremented in document() to prevent from PMM destruction */
-                PmmREFCNT_dec(SvPROXYNODE(perl_doc));
-            }
-            SvREFCNT_dec(perl_doc);
+    doc = xmlTextReaderCurrentDoc(reader);
+    if (doc) {
+        proxy = PmmNewNode((xmlNodePtr)doc);
+        if ( PmmREFCNT(proxy) > 0 ) {
+            PmmREFCNT_dec(proxy);
         }
     }
         if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_CLOSED) {
