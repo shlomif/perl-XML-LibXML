@@ -7,6 +7,10 @@ Revision history for Perl extension XML::LibXML
         - "replaceNode() segfaults when copying DTD nodes with ATTLISTs"
         - Thanks to GUIDO@cpan.org for the report and to YOREEK for
         the patch.
+    - Apply fix for https://rt.cpan.org/Ticket/Display.html?id=83779
+        - "building on RHEL-5-64 fails"
+        - Thanks to mathias@koerber.org for the report, SREZIC@cpan.org
+        and d.thomas@its.uq.edu.au for taking part and Yuriy for the patch.
 
 2.0101          Thu 15 Aug 08:29:15 IDT 2013
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=87089 .
