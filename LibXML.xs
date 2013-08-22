@@ -1444,6 +1444,39 @@ LibXML_configure_xpathcontext( xmlXPathContextPtr ctxt ) {
     LibXML_configure_namespaces(ctxt);
 }
 
+static void
+LibXML_set_reader_preserve_flag( xmlTextReaderPtr reader ) {
+    HV *hash;
+    char key[32];
+
+    hash = get_hv("XML::LibXML::Reader::_preserve_flag", 0);
+    if (!hash) {
+        return;
+    }
+
+    (void) snprintf(key, sizeof(key), "%p", reader);
+    (void) hv_store(hash, key, strlen(key), newSV(0), 0);
+}
+
+static int
+LibXML_get_reader_preserve_flag( xmlTextReaderPtr reader ) {
+    HV *hash;
+    char key[32];
+
+    hash = get_hv("XML::LibXML::Reader::_preserve_flag", 0);
+    if (!hash) {
+        return 0;
+    }
+
+    (void) snprintf(key, sizeof(key), "%p", reader);
+    if ( hv_exists(hash, key, strlen(key)) ) {
+        (void) hv_delete(hash, key, strlen(key), G_DISCARD);
+        return 1;
+    }
+
+    return 0;
+}
+
 extern void boot_XML__LibXML__Devel(pTHX_ CV*);
 
 MODULE = XML::LibXML         PACKAGE = XML::LibXML
@@ -8771,7 +8804,7 @@ copyCurrentNode(reader,expand = 0)
 	xmlNodePtr node = NULL;
 	xmlNodePtr copy;
         xmlDocPtr  doc = NULL;
-        SV * perl_doc;
+        ProxyNodePtr proxy;
     PREINIT:
 	PREINIT_SAVED_ERROR
     CODE:
@@ -8808,6 +8841,12 @@ copyCurrentNode(reader,expand = 0)
             if ( doc != NULL ) {
                 xmlSetTreeDoc(copy, doc);
             }
+            proxy = PmmNewNode((xmlNodePtr)doc);
+            if (PmmREFCNT(proxy) == 0) {
+                PmmREFCNT_inc(proxy);
+            }
+            LibXML_set_reader_preserve_flag(reader);
+
             docfrag = PmmNewFragment( doc );
             xmlAddChild( PmmNODE(docfrag), copy );
             RETVAL = PmmNodeToSv(copy, docfrag);
@@ -8833,6 +8872,8 @@ document(reader)
 	}
         if (xmlTextReaderGetParserProp(reader,XML_PARSER_VALIDATE))
             PmmInvalidatePSVI(doc); /* the document may have psvi info */
+
+        LibXML_set_reader_preserve_flag(reader);
 
     OUTPUT:
         RETVAL
@@ -8883,6 +8924,8 @@ preserveNode(reader)
 	  /* new proxy node */
 	  PmmREFCNT_inc(proxy);
 	}
+        LibXML_set_reader_preserve_flag(reader);
+
 	node = xmlTextReaderPreserve(reader);
         CLEANUP_ERROR_HANDLER;
 	REPORT_ERROR(0);
@@ -8961,10 +9004,13 @@ _DESTROY(reader)
            xmlTextReaderErrorFunc f = NULL; */
     CODE:
 
-    doc = xmlTextReaderCurrentDoc(reader);
-    if (doc) {
-        proxy = PmmNewNode((xmlNodePtr)doc);
-        if ( PmmREFCNT(proxy) > 0 ) {
+    if ( LibXML_get_reader_preserve_flag(reader) ) {
+        doc = xmlTextReaderCurrentDoc(reader);
+        if (doc) {
+            proxy = PmmNewNode((xmlNodePtr)doc);
+            if ( PmmREFCNT(proxy) == 0 ) {
+                PmmREFCNT_inc(proxy);
+            }
             PmmREFCNT_dec(proxy);
         }
     }

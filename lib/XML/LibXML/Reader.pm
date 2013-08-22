@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 use vars qw ($VERSION);
-$VERSION = "2.0102"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0103"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use 5.008_000;
 
@@ -98,6 +98,8 @@ BEGIN {
 @EXPORT_OK = @EXPORT;
 $EXPORT_TAGS{all}=\@EXPORT_OK;
 }
+
+our %_preserve_flag;
 
 {
   my %props = (
