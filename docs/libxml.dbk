@@ -973,7 +973,7 @@ XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
         <sect1>
             <title>Synopsis</title>
 
-            <programlisting>use XML::LibXML 1.70;
+            <programlisting>use XML::LibXML '1.70';
 <!--
 my $dom = XML::LibXML-&gt;load_xml(
  location => $file_or_url,
