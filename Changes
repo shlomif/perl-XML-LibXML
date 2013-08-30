@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0104          Fri 30 Aug 12:36:06 IDT 2013
     - Fix https://rt.cpan.org/Ticket/Display.html?id=88060
         - Use quoted version number in the SYNOPSIS.
         - Thanks to Philipp Gortan for the report.
