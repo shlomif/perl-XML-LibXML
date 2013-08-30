@@ -16,6 +16,12 @@ use lib './t/lib';
 use Test::More;
 use File::Spec;
 
+BEGIN
+{
+    # Part of the fix for https://rt.cpan.org/Ticket/Display.html?id=86665
+    delete $ENV{'XML_CATALOG_FILES'};
+}
+
 use XML::LibXML;
 
 if (! eval { require URI::file; } )
@@ -71,7 +77,12 @@ my $icb    = XML::LibXML::InputCallback->new();
 
 my $match_ret = 1;
 $icb->register_callbacks( [
-        sub { my $to_ret = $match_ret; $match_ret = 0; return $to_ret; },
+        sub {
+            my $uri = shift;
+            # skip for XML catalogs in /etc/xml/
+            return 0 if $uri =~ m{^file:///etc/xml/};
+            my $to_ret = $match_ret; $match_ret = 0; return $to_ret;
+        },
         sub { return undef; },
         undef,
         undef
