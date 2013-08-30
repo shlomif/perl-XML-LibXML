@@ -3,6 +3,9 @@ Revision history for Perl extension XML::LibXML
     - Fix https://rt.cpan.org/Ticket/Display.html?id=88060
         - Use quoted version number in the SYNOPSIS.
         - Thanks to Philipp Gortan for the report.
+    - Apply a patch from Yuriy / YOREEK for test failures with a
+    directory component that contains whitespace.
+        - https://rt.cpan.org/Ticket/Display.html?id=86665
 
 2.0103          Thu 22 Aug 08:34:46 IDT 2013
     - Apply patch from Yuriy / YOREEK for test failures in t/40reader.t:
