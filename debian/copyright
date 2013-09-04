@@ -1,0 +1,22 @@
+This package was debianized by Ardo van Rangelrooij <ardo@debian.org>
+on Tue, 29 May, 2001, 17:45:10 -0500.
+
+It was downloaded from the Comprehensive Perl Archive Network (CPAN).
+Visit <http://www.cpan.org/> to find a CPAN site near you.
+
+Upstream Author: Petr Pajas <pajas@ufal.mff.cuni.cz>
+
+Copyright:
+
+Copyright 2001-2003, AxKit.com Ltd. 
+Copyright 2002-2006 Christian Glahn
+Copyright 2006-2009 Petr Pajas
+
+This is free software, you may use it and distribute it under the same
+terms as Perl itself.
+
+Perl is distributed under your choice of the GNU General Public License or
+the Artistic License.  On Debian GNU/Linux systems, the complete text of the
+GNU General Public License can be found in `/usr/share/common-licenses/GPL'
+and the Artistic Licence in `/usr/share/common-licenses/Artistic'.
+
