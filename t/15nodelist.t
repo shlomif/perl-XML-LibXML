@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More tests => 29;
 
 use XML::LibXML;
 use IO::Handle;
@@ -36,6 +36,12 @@ is($nodelist->string_value, "OK", ' TODO : Add test name'); # first node in set
 
 # TEST
 is($nodelist->to_literal, "OKNOT OK", ' TODO : Add test name');
+
+# TEST
+is($nodelist->to_literal_delimited(','), "OK,,,,NOT OK", 'TODO : Add test name');
+
+# TEST
+is_deeply([$nodelist->to_literal_list()], ['OK', '', '', '', 'NOT OK'], 'TODO : Add test name');
 
 {
     my $other_nodelist = $dom->findnodes('//BBB');
