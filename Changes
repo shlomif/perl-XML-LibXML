@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0105          Sat  7 Sep 20:18:06 IDT 2013
     - Pull some commits from Jason Mash (JRMASH) to add convenience methods
       to the XML::LibXML::NodeList module.
           - New method 'to_literal_delimited($separator)'
