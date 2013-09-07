@@ -123,7 +123,7 @@ sub to_literal_delimited {
 sub to_literal_list {
     my $self = CORE::shift;
     my @nodes = CORE::map{ XML::LibXML::Literal->new($_->string_value())->value() } @{$self};
-    
+
     if (wantarray) {
         return( @nodes );
     }
