@@ -1341,6 +1341,24 @@ sub toStringC14N {
 				 (defined $xpc ? $xpc : undef)
 				);
 }
+
+{
+my $C14N_version_1_dot_1_val = 2;
+
+sub toStringC14N_v1_1 {
+    my ($self, $comments, $xpath, $xpc) = @_;
+
+    return $self->_toStringC14N(
+        $comments || 0,
+        (defined $xpath ? $xpath : undef),
+        $C14N_version_1_dot_1_val,
+        undef,
+        (defined $xpc ? $xpc : undef)
+    );
+}
+
+}
+
 sub toStringEC14N {
     my ($self, $comments, $xpath, $xpc, $inc_prefix_list) = @_;
     unless (UNIVERSAL::isa($xpc,'XML::LibXML::XPathContext')) {

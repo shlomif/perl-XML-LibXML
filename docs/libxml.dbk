@@ -3787,6 +3787,21 @@ $c14nstring = $node-&gt;toStringC14N($with_comments, $xpath_expression , $xpath_
                 </listitem>
             </varlistentry>
             <varlistentry>
+                <term>toStringC14N_v1_1</term>
+
+                <listitem>
+                    <funcsynopsis>
+                        <funcsynopsisinfo>$c14nstring = $node-&gt;toStringC14N_v1_1();
+$c14nstring = $node-&gt;toStringC14N_v1_1($with_comments, $xpath_expression , $xpath_context);</funcsynopsisinfo>
+                    </funcsynopsis>
+                    <para>
+                        This function behaves like toStringC14N() except that
+                        it uses the "XML_C14N_1_1" constant for
+                        canonicalising using the "C14N 1.1 spec".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
                 <term>toStringEC14N</term>
 
                 <listitem>
