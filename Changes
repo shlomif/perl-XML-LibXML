@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fix t/35huge_mode.t on libxml2 versions less than 2.7.0.
+        - Fixes https://rt.cpan.org/Ticket/Display.html?id=88375
+        - Thanks to Yuriy / YOREEK for the patch.
+
 2.0104          Fri 30 Aug 12:36:06 IDT 2013
     - Fix https://rt.cpan.org/Ticket/Display.html?id=88060
         - Use quoted version number in the SYNOPSIS.
