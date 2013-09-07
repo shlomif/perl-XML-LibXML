@@ -9,9 +9,16 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More;
 
 use XML::LibXML;
+
+if (XML::LibXML::LIBXML_VERSION() < 20700) {
+    plan skip_all => "XML_PARSE_HUGE option not supported for libxml2 < 2.7.0";
+}
+else {
+    plan tests => 5;
+}
 
 my $benign_xml = <<'EOF';
 <?xml version="1.0"?>
