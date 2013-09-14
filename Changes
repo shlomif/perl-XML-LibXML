@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+    - Import croak from "use Carp;" to fix a missing croak definition.
+        - https://rt.cpan.org/Ticket/Display.html?id=88624
+
 2.0105          Sat  7 Sep 20:18:06 IDT 2013
     - Pull some commits from Jason Mash (JRMASH) to add convenience methods
       to the XML::LibXML::NodeList module.

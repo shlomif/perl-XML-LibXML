@@ -1246,6 +1246,8 @@ sub finish_push {
 #-------------------------------------------------------------------------#
 package XML::LibXML::Node;
 
+use Carp qw(croak);
+
 use overload
     '""'   => sub { $_[0]->toString() },
     'bool' => sub { 1 },
@@ -1362,22 +1364,22 @@ sub toStringC14N_v1_1 {
 sub toStringEC14N {
     my ($self, $comments, $xpath, $xpc, $inc_prefix_list) = @_;
     unless (UNIVERSAL::isa($xpc,'XML::LibXML::XPathContext')) {
-      if ($inc_prefix_list) {
-	croak("toStringEC14N: 3rd argument is not an XML::LibXML::XPathContext");
-      } else {
-	$inc_prefix_list=$xpc;
-	$xpc=undef;
-      }
+        if ($inc_prefix_list) {
+            croak("toStringEC14N: 3rd argument is not an XML::LibXML::XPathContext");
+        } else {
+            $inc_prefix_list=$xpc;
+            $xpc=undef;
+        }
     }
     if (defined($inc_prefix_list) and !UNIVERSAL::isa($inc_prefix_list,'ARRAY')) {
-      croak("toStringEC14N: inclusive_prefix_list must be undefined or ARRAY");
+        croak("toStringEC14N: inclusive_prefix_list must be undefined or ARRAY");
     }
     return $self->_toStringC14N( $comments || 0,
-				 (defined $xpath ? $xpath : undef),
-				 1,
-				 (defined $inc_prefix_list ? $inc_prefix_list : undef),
-				 (defined $xpc ? $xpc : undef)
-				);
+        (defined $xpath ? $xpath : undef),
+        1,
+        (defined $inc_prefix_list ? $inc_prefix_list : undef),
+        (defined $xpc ? $xpc : undef)
+    );
 }
 
 *serialize_c14n = \&toStringC14N;
