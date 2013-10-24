@@ -7061,6 +7061,21 @@ declaredPrefix(self)
     OUTPUT:
         RETVAL
 
+SV*
+unique_key( self )
+        SV * self
+    PREINIT:
+        xmlNsPtr ns = INT2PTR(xmlNsPtr,SvIV(SvRV(self)));
+        xmlChar* key;
+    CODE:
+        /* Concatenate prefix and URI with vertical bar dividing*/
+        key = xmlStrdup(ns->prefix);
+        key = xmlStrcat(key, (const xmlChar*)"|");
+        key = xmlStrcat(key, ns->href);
+        RETVAL = C2Sv(key, NULL);
+    OUTPUT:
+        RETVAL
+
 int
 _isEqual(self, ref_node)
        SV * self
