@@ -3,9 +3,10 @@
 
 ##
 # This test checks that unique_key works correctly.
-# it relies on the success of t/01basic.t, t/02parse.t, and t/04node.t
+# it relies on the success of t/01basic.t, t/02parse.t,
+# t/04node.t and namespace tests (not done yet)
 
-use Test::More tests => 26;
+use Test::More tests => 31;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -42,3 +43,43 @@ for my $c1(0..4){
         }
     }
 }
+
+my $foo_default_ns = XML::LibXML::Namespace->new('foo.com');
+my $foo_ns = XML::LibXML::Namespace->new('foo.com','foo');
+my $bar_default_ns = XML::LibXML::Namespace->new('bar.com');
+my $bar_ns = XML::LibXML::Namespace->new('bar.com','bar');
+
+# TEST
+is(
+    XML::LibXML::Namespace->new('foo.com')->unique_key,
+    XML::LibXML::Namespace->new('foo.com')->unique_key,
+    'default foo ns key matches itself'
+);
+
+# TEST
+isnt(
+    XML::LibXML::Namespace->new('foo.com', 'foo')->unique_key,
+    XML::LibXML::Namespace->new('foo.com', 'bar')->unique_key,
+    q[keys for ns's with different prefixes don't match]
+);
+
+# TEST
+isnt(
+    XML::LibXML::Namespace->new('foo.com', 'foo')->unique_key,
+    XML::LibXML::Namespace->new('foo.com')->unique_key,
+    q[key for prefixed ns doesn't match key for default ns]
+);
+
+# TEST
+isnt(
+    XML::LibXML::Namespace->new('foo.com', 'foo')->unique_key,
+    XML::LibXML::Namespace->new('bar.com', 'foo')->unique_key,
+    q[keys for ns's with different URI's don't match]
+);
+
+# TEST
+isnt(
+    XML::LibXML::Namespace->new('foo.com', 'foo')->unique_key,
+    XML::LibXML::Namespace->new('bar.com', 'bar')->unique_key,
+    q[keys for ns's with different URI's and prefixes don't match]
+);
