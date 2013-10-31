@@ -944,7 +944,9 @@ XML_XMLNS_NS  =&gt; 'http://www.w3.org/2000/xmlns/'
                             <funcsynopsisinfo>$gdomenode = XML::LibXML-&gt;export_GDOME( $node, $deep );</funcsynopsisinfo>
                         </funcsynopsis>
 
-                        <para>Allows to clone an XML::LibXML node into an XML::GDOME node.</para>
+                        <para>Allows one to clone an XML::LibXML node into an
+                            XML::GDOME node.</para>
+
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1193,8 +1195,10 @@ $dom = $parser-&gt;load_html(...);
                     </varlistentry>
                 </variablelist>
 
-                <para>By default XML::LibXML does not process XInclude tags within an XML Document (see options section below). XML::LibXML allows to post
-                process a document to expand XInclude tags.</para>
+                <para>By default XML::LibXML does not process XInclude tags
+                    within an XML Document (see options section below).
+                    XML::LibXML allows one to post-process a document to expand
+                    XInclude tags.</para>
 
                 <variablelist>
                     <varlistentry>
@@ -2374,7 +2378,7 @@ print $doc-&gt;encoding; # prints ISO-8859-15</programlisting>
                         <funcsynopsisinfo>$doc-&gt;setEncoding($new_encoding);</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This method allows to change the declaration of
+                    <para>This method allows one to change the declaration of
                       encoding in the XML declaration of the document.
 		      The value also affects the encoding in which the
 		      document is serialized to XML by $doc-&gt;toString().
@@ -4805,8 +4809,12 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
 
                     <para>The more programmer friendly version of replaceData() :)</para>
 
-                    <para>Instead of giving offsets and length one can specify the exact string (<emphasis>$oldstring</emphasis>) to be replaced. Additionally
-                    the <emphasis>$all</emphasis> flag allows to replace all occurrences of <emphasis>$oldstring</emphasis>.</para>
+                    <para>Instead of giving offsets and length one can specify
+                        the exact string (<emphasis>$oldstring</emphasis>) to
+                        be replaced. Additionally the <emphasis>$all</emphasis>
+                        flag allows one to replace all occurrences of
+                        <emphasis>$oldstring</emphasis>.</para>
+
                 </listitem>
             </varlistentry>
 
@@ -4820,8 +4828,11 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
                         <funcsynopsisinfo>$text-&gt;replaceDataRegEx( $search_cond, $replace_cond, $reflags );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This method replaces the node's data by a <function>simple</function> regular expression. Optional, this function allows to pass
-                    some flags that will be added as flag to the replace statement.</para>
+                    <para>This method replaces the node's data by a
+                        <function>simple</function> regular expression.
+                        Optional, this function allows one to pass some flags
+                        that will be added as flag to the replace
+                        statement.</para>
 
                     <para><emphasis>NOTE:</emphasis> This is a shortcut for</para>
 
@@ -5316,8 +5327,12 @@ $dom-&gt;appendChild( $pi );</programlisting>
 $pinode-&gt;setData( name=&gt;string_value [...] );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This method allows to change the content data of a PI. Additionally to the interface specified for DOM Level2, the method provides a
-                    named parameter interface to set the data. This parameter list is converted into a string before it is appended to the PI.</para>
+                    <para>This method allows one to change the content data of
+                        a PI. Additionally to the interface specified for DOM
+                        Level2, the method provides a named parameter
+                        interface to set the data. This parameter list is
+                        converted into a string before it is appended to the
+                        PI.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -5490,9 +5505,13 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
                 <sect3>
                     <title>Organisation of callback groups in XML::LibXML::InputCallback</title>
 
-                    <para>Callback groups are implemented as a stack (Array), each entry holds a reference to an array of the callbacks. For the libxml2
-                    library, the XML::LibXML::InputCallback callback implementation appears as one single callback group. The Perl implementation however allows
-                    to manage different callback stacks on a per libxml2-parser basis.</para>
+                    <para>Callback groups are implemented as a stack (Array),
+                        each entry holds a reference to an array of the
+                        callbacks. For the libxml2 library, the
+                        XML::LibXML::InputCallback callback implementation
+                        appears as one single callback group. The Perl
+                        implementation however allows one to manage different
+                        callback stacks on a per libxml2-parser basis.</para>
                 </sect3>
             </sect2>
 
@@ -5754,11 +5773,12 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
                     <para>The constructor of XML::LibXML::RelaxNG may get called with either one of three parameters. The parameter tells the class from which
                     source it should generate a validation schema. It is important, that each schema only have a single source.</para>
 
-                    <para>The location parameter allows to parse a schema from the filesystem or a URL.</para>
+                <para>The location parameter allows one to parse a schema
+                    from the filesystem or a URL.</para>
 
                     <para>The string parameter will parse the schema from the given XML string.</para>
 
-                    <para>The DOM parameter allows to parse the schema from a pre-parsed <xref linkend="XML-LibXML-Document"/>.</para>
+                    <para>The DOM parameter allows one to parse the schema from a pre-parsed <xref linkend="XML-LibXML-Document"/>.</para>
 
                     <para>Note that the constructor will die() if the schema does not meed the constraints of the RelaxNG specification.</para>
                 </listitem>
@@ -5772,10 +5792,14 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
                         <funcsynopsisinfo>eval { $rngschema-&gt;validate( $doc ); };</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function allows to validate a (parsed) document
-	            against the given RelaxNG schema. The argument of this function should be an XML::LibXML::Document object.
-	            If this function succeeds, it will return 0, otherwise
-                    it will die() and report the errors found. Because of this validate() should be always evaluated.</para>
+                    <para>This function allows one to validate a (parsed)
+                        document against the given RelaxNG schema. The argument
+                        of this function should be an XML::LibXML::Document
+                        object.  If this function succeeds, it will return 0,
+                        otherwise it will die() and report the errors found.
+                        Because of this validate() should be always
+                        evaluated.</para>
+
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -5813,7 +5837,8 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
                     <para>The constructor of XML::LibXML::Schema may get called with either one of two parameters. The parameter tells the class from which
                     source it should generate a validation schema. It is important, that each schema only have a single source.</para>
 
-                    <para>The location parameter allows to parse a schema from the filesystem or a URL.</para>
+                <para>The location parameter allows one to parse a schema
+                    from the filesystem or a URL.</para>
 
                     <para>The string parameter will parse the schema from the given XML string.</para>
 
@@ -5829,10 +5854,14 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
                         <funcsynopsisinfo>eval { $xmlschema-&gt;validate( $doc ); };</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>This function allows to validate a (parsed) document against the given XML Schema.
-                     The argument of this function should be a <xref linkend="XML-LibXML-Document"/> object.
-	             If this function succeeds, it will return 0, otherwise it
-                    will die() and report the errors found. Because of this validate() should be always evaluated.</para>
+                    <para>This function allows one to validate a (parsed)
+                        document against the given XML Schema.  The argument of
+                        this function should be a <xref
+                            linkend="XML-LibXML-Document"/> object.  If this
+                        function succeeds, it will return 0, otherwise it will
+                        die() and report the errors found. Because of this
+                        validate() should be always evaluated.</para>
+
                 </listitem>
             </varlistentry>
         </variablelist>
