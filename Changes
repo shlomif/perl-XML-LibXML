@@ -1,5 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
+2.0107          Thu 31 Oct 09:12:03 IST 2013
     - Add a unique_key method for namespace objects.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/24/unique_key-method-for-namespace-objects/diff
         - Thanks to garfieldnate for the pull request.
