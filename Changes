@@ -3,6 +3,9 @@ Revision history for Perl extension XML::LibXML
     - Add a unique_key method for namespace objects.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/24/unique_key-method-for-namespace-objects/diff
         - Thanks to garfieldnate for the pull request.
+    - Grammar fixes in the documentation.
+        - https://rt.cpan.org/Ticket/Display.html?id=89718
+        - Thanks to Gregor Herrman and the Debian Team
 
 2.0106          Tue 17 Sep 19:08:31 IDT 2013
     - Import croak from "use Carp;" to fix a missing croak definition.
