@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+    - Replace local $^W with << no warnings 'portable'; >> in t/15nodelist.t
+        - Should fix https://rt.cpan.org/Public/Bug/Display.html?id=88017
+        - Thanks to "pagenyon" for the report.
+
 2.0107          Thu 31 Oct 09:12:03 IST 2013
     - Add a unique_key method for namespace objects.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/24/unique_key-method-for-namespace-objects/diff

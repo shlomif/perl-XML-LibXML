@@ -150,8 +150,8 @@ sub blessed_refaddr {
     $addr .= bless $_[0], 'Scalar::Util::Fake';
     bless $_[0], $pkg;
   }
+  no warnings 'portable';
   $addr =~ /0x(\w+)/;
-  local $^W;
   hex($1);
 }
 
