@@ -188,7 +188,7 @@ sub start_element {
                 # ok, the generator does not set namespaces correctly!
                 my $uri = $attr->{Value};
                 $node->setNamespace($uri,
-                                    $attr->{Localname},
+                                    $attr->{LocalName},
                                     $uri eq $el->{NamespaceURI} ? 1 : 0 );
             }
             else {
