@@ -14,7 +14,7 @@ use strict;
 use XML::LibXML;
 use vars qw ($VERSION);
 
-$VERSION = "2.0107"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0108"; # VERSION TEMPLATE: DO NOT CHANGE
 
 sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;
