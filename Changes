@@ -7,6 +7,7 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Public/Bug/Display.html?id=91433
         - Thanks to Thomas Berger for the report and for a reproducing
         testcase.
+    - Convert from "use base" to the more modern "use parent".
 
 2.0107          Thu 31 Oct 09:12:03 IST 2013
     - Add a unique_key method for namespace objects.

@@ -41,6 +41,7 @@ my %INFOS = (
         'base' => 0,
         'ExtUtils::MakeMaker' => '6.56',
         #'Hash::FieldHash' => '0.09',
+        'parent' => 0,
         'strict' => 0,
         'Test::More' => 0,
         'vars' => 0,

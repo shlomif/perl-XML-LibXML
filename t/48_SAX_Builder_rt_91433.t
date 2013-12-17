@@ -58,7 +58,7 @@ eq_or_diff(
 
 
 package outerSAX;
-use base qw(XML::SAX::Base);
+use parent qw(XML::SAX::Base);
 
 sub new {
     my ($class, %opts) = @_;
@@ -95,7 +95,7 @@ sub end_element {
 
 
 package innerSAX;
-use base qw(XML::SAX::Base);
+use parent qw(XML::SAX::Base);
 use XML::LibXML::SAX::Builder;
 
 sub new {

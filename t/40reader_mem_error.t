@@ -16,7 +16,7 @@ use XML::LibXML::Reader;
 
 use Test::More;
 
-use base 'Exporter';
+use parent 'Exporter';
 
 use vars '@EXPORT_OK';
 

@@ -3,7 +3,7 @@ package Counter;
 use strict;
 use warnings;
 
-use base 'Collector';
+use parent 'Collector';
 
 sub _counter
 {

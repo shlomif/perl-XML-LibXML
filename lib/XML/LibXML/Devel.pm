@@ -16,7 +16,7 @@ $VERSION = "2.0107"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use 5.008_000;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 
 use vars qw( @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
