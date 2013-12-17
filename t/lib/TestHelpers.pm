@@ -5,7 +5,7 @@ use warnings;
 
 our @EXPORT = (qw(slurp utf8_slurp eq_or_diff));
 
-use base 'Exporter';
+use parent 'Exporter';
 
 use Test::More ();
 

@@ -5,7 +5,7 @@ use warnings;
 
 use TestHelpers;
 
-use base 'Collector';
+use parent 'Collector';
 
 sub _stack
 {

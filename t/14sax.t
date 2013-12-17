@@ -302,7 +302,7 @@ sub {
   package MySAXHandler;
   use strict;
   use warnings;
-  use base 'XML::SAX::Base';
+  use parent 'XML::SAX::Base';
   use Carp;
   sub start_element {
     my( $self, $elm) = @_;

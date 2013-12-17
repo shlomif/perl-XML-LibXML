@@ -318,7 +318,7 @@ ok(1, 'Joined all threads.');
 {
 package MyHandler;
 
-use base 'XML::SAX::Base';
+use parent 'XML::SAX::Base';
 
 sub AUTOLOAD
 {
