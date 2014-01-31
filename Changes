@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fix for requiring XML::LibXML more than once in perl-5.19.6 and up.
+        - https://rt.cpan.org/Ticket/Display.html?id=92606
+        - Thanks to Father Chrysostomos for the investigation, the test
+        case, and the fix.
+
 2.0108          Tue 17 Dec 11:04:40 IST 2013
     - Replace local $^W with << no warnings 'portable'; >> in t/15nodelist.t
         - Should fix https://rt.cpan.org/Public/Bug/Display.html?id=88017

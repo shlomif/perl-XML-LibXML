@@ -1486,6 +1486,11 @@ PROTOTYPES: DISABLE
 BOOT:
     /* Load Devel first, so debug_memory can
        be called before any allocation. */
+
+    /* The ++ is a bit hacky, but boot_blahblah_Devel, being an
+     * XSUB body, will try to pop once more the mark we have just
+     * (implicitly) popped, this boot sector also being an XSUB body */
+    PL_markstack_ptr++;
     boot_XML__LibXML__Devel(aTHX_ cv);
     LIBXML_TEST_VERSION
     xmlInitParser();
