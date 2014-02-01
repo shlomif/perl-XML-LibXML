@@ -16,6 +16,7 @@ package XML::LibXML::Common;
 # global blur                                                             #
 #-------------------------------------------------------------------------#
 use strict;
+use warnings;
 
 require Exporter;
 require DynaLoader;

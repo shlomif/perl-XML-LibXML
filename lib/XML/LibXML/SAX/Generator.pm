@@ -10,6 +10,7 @@
 package XML::LibXML::SAX::Generator;
 
 use strict;
+use warnings;
 
 use XML::LibXML;
 use vars qw ($VERSION);

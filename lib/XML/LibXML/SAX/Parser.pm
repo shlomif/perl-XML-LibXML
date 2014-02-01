@@ -10,6 +10,7 @@
 package XML::LibXML::SAX::Parser;
 
 use strict;
+use warnings;
 use vars qw($VERSION @ISA);
 
 use XML::LibXML;

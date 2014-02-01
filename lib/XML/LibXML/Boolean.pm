@@ -12,6 +12,7 @@ package XML::LibXML::Boolean;
 use XML::LibXML::Number;
 use XML::LibXML::Literal;
 use strict;
+use warnings;
 
 use vars qw ($VERSION);
 

@@ -10,6 +10,7 @@
 package XML::LibXML::XPathContext;
 
 use strict;
+use warnings;
 use vars qw($VERSION @ISA $USE_LIBXML_DATA_TYPES);
 
 use Carp;

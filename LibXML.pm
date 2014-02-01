@@ -11,6 +11,8 @@
 package XML::LibXML;
 
 use strict;
+use warnings;
+
 use vars qw($VERSION $ABI_VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
             $skipDTD $skipXMLDeclaration $setTagCompression
             $MatchCB $ReadCB $OpenCB $CloseCB %PARSER_FLAGS
