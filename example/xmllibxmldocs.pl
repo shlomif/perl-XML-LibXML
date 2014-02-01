@@ -124,18 +124,26 @@ sub set_general_info {
     my @copyright = $infonode->findnodes( "copyright" );
     if ( @copyright ) {
         $infostr .= "=head1 COPYRIGHT\n\n";
-	foreach my $copyright (@copyright) {
-	  my $node_y = $copyright->getChildrenByTagName( "year" );
-	  my $node_h = $copyright->getChildrenByTagName( "holder" );
-	  if ( defined $node_y ) {
+        foreach my $copyright (@copyright) {
+          my $node_y = $copyright->getChildrenByTagName( "year" );
+          my $node_h = $copyright->getChildrenByTagName( "holder" );
+          if ( defined $node_y ) {
             $infostr .= $node_y->string_value() . ", ";
-	  }
-	  if ( defined $node_h ) {
+          }
+          if ( defined $node_h ) {
             $infostr .= $node_h->string_value();
-	  }
-	  $infostr .= ".\n\n";
-	}
-        $infostr .= "=cut\n"
+          }
+          $infostr .= ".\n\n";
+        }
+        $infostr .= "=cut\n";
+
+        $infostr .= "\n\n".<<'EOF';
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+EOF
     }
 
     $self->{infoblock} = $infostr;
@@ -164,7 +172,7 @@ sub handle {
         # dangerous for nested modules, which do not exist at the time of writing
         # this code.
 
-	unless ( length $filename ) {
+        unless ( length $filename ) {
             $dir = "";
             $filename = "LibXML";
         }
@@ -327,16 +335,16 @@ sub dump_pod {
         my ( $title ) = $chap->getChildrenByTagName( "title" );
         my ( $ttlabbr ) = $chap->getChildrenByTagName( "titleabbrev" );
         my $str =  $ttlabbr->string_value() . " - ".$title->string_value();
-	$str=~s/^\s+|\s+$//g;
+        $str=~s/^\s+|\s+$//g;
         $self->{OFILE}->print(  "=head1 NAME\n\n$str\n" );
-	my ($synopsis) = $chap->findnodes( "sect1[title='Synopsis']" );
+        my ($synopsis) = $chap->findnodes( "sect1[title='Synopsis']" );
         my @funcs = $chap->findnodes( ".//funcsynopsis" );
-	if ($synopsis or scalar @funcs) {
+        if ($synopsis or scalar @funcs) {
             $self->{OFILE}->print( "\n=head1 SYNOPSIS\n\n" )
-	}
-	if ($synopsis) {
-	  $self->dump_pod( $synopsis );
-	}
+        }
+        if ($synopsis) {
+          $self->dump_pod( $synopsis );
+        }
         if ( scalar @funcs ) {
             foreach my $s ( @funcs ) {
                 $self->dump_pod( $s );
@@ -347,46 +355,46 @@ sub dump_pod {
 
     foreach my $node ( $chap->childNodes() ) {
       if ( $node->nodeType == XML_TEXT_NODE ||
-	     $node->nodeType == XML_CDATA_SECTION_NODE ) {
- 	# we split at the last whitespace before 80 chars
-	my $prev_inline =
-	  ($node->previousSibling and
-	   $node->previousSibling->nodeName !~
-	     /^(?:itemizedlist|orderedlist|variablelist|programlisting|funcsynopsis)/)
-	    ? 1 : 0;
-	my $str = $node->data();
-	$str=~s/(^|\n)[ \t]+($|\n)/$1$2/g;
-	if ($str=~/\S/) {
-	  my $string = $str;
-	  my $space_before = ($string =~ s/^\s+//g) ? $prev_inline : 0;
-	  my $space_after = ($string =~ s/\s+$//g) ? 1 : 0;
-	  $self->{OFILE}->print( " " ) if $space_before;
-	  my $os = "";
-	  my @words = split /\s+/, $string;
-	  foreach my $word ( @words ) {
-	    if ( (length( $os ) + length( $word ) + 1) < 80 ) {
-	      if ( length $os ) { $os .= " "; }
-	    $os .= $word;
-	    }
-	    else {
-	      $self->{OFILE}->print( $os . "\n" );
-	      $os = $word;
-	    }
-	  }
-	  $os.=" " if $space_after;
-	  $self->{OFILE}->print( $os );
-	}
+             $node->nodeType == XML_CDATA_SECTION_NODE ) {
+        # we split at the last whitespace before 80 chars
+        my $prev_inline =
+          ($node->previousSibling and
+           $node->previousSibling->nodeName !~
+             /^(?:itemizedlist|orderedlist|variablelist|programlisting|funcsynopsis)/)
+            ? 1 : 0;
+        my $str = $node->data();
+        $str=~s/(^|\n)[ \t]+($|\n)/$1$2/g;
+        if ($str=~/\S/) {
+          my $string = $str;
+          my $space_before = ($string =~ s/^\s+//g) ? $prev_inline : 0;
+          my $space_after = ($string =~ s/\s+$//g) ? 1 : 0;
+          $self->{OFILE}->print( " " ) if $space_before;
+          my $os = "";
+          my @words = split /\s+/, $string;
+          foreach my $word ( @words ) {
+            if ( (length( $os ) + length( $word ) + 1) < 80 ) {
+              if ( length $os ) { $os .= " "; }
+            $os .= $word;
+            }
+            else {
+              $self->{OFILE}->print( $os . "\n" );
+              $os = $word;
+            }
+          }
+          $os.=" " if $space_after;
+          $self->{OFILE}->print( $os );
+        }
       } elsif ( $node->nodeName() eq "para" ) {
-	$self->dump_pod( $node );
-	$self->{OFILE}->print( "\n\n" );
+        $self->dump_pod( $node );
+        $self->{OFILE}->print( "\n\n" );
       } elsif ( $node->nodeName() eq "sect1" ) {
             my ( $title ) = $node->getChildrenByTagName( "title" );
-	    my $str = $title->string_value();
-	    unless ($chap->nodeName eq "chapter" and $str eq 'Synopsis') {
-	      $self->{OFILE}->print( "\n=head1 " . uc($str) );
-	      $self->{OFILE}->print( "\n\n" );
-	      $self->dump_pod( $node );
-	    }
+            my $str = $title->string_value();
+            unless ($chap->nodeName eq "chapter" and $str eq 'Synopsis') {
+              $self->{OFILE}->print( "\n=head1 " . uc($str) );
+              $self->{OFILE}->print( "\n\n" );
+              $self->dump_pod( $node );
+            }
         }
         elsif (  $node->nodeName() eq "sect2" ) {
             my ( $title ) = $node->getChildrenByTagName( "title" );
@@ -411,7 +419,7 @@ sub dump_pod {
             $self->{OFILE}->print( "\n=over 4\n\n" );
             foreach my $item ( @items ) {
                 $self->{OFILE}->print( "=item *\n\n" );
-		$self->dump_pod( $item );
+                $self->dump_pod( $item );
                 $self->{OFILE}->print( "\n\n" );
             }
             $self->{OFILE}->print( "=back\n\n" );
@@ -424,7 +432,7 @@ sub dump_pod {
             foreach my $item ( @items ) {
                 $i++;
                 $self->{OFILE}->print( "=item $i.\n\n" );
-		$self->dump_pod($item);
+                $self->dump_pod($item);
                 $self->{OFILE}->print( "\n\n" );
             }
             $self->{OFILE}->print( "=back\n\n" );
@@ -439,7 +447,7 @@ sub dump_pod {
             my ( $term ) = $node->findnodes( "term" );
             $self->{OFILE}->print( "=item " );
             if ( defined $term ) {
-	      $self->dump_pod( $term );
+              $self->dump_pod( $term );
             }
             $self->{OFILE}->print( "\n\n" );
             my @nodes =$node->findnodes( "listitem" );
@@ -450,14 +458,14 @@ sub dump_pod {
         }
         elsif ( $node->nodeName() eq "programlisting" ) {
             my $str = $node->string_value();
-	    $str =~ s/^\s+|\s+$//g;
+            $str =~ s/^\s+|\s+$//g;
             $str =~ s/\n/\n  /g;
-	    $str=~s/(^|\n)[ \t]+($|\n)/$1$2/g;
+            $str=~s/(^|\n)[ \t]+($|\n)/$1$2/g;
             $self->{OFILE}->print( "\n\n" );
             $self->{OFILE}->print( "  ". $str );
             $self->{OFILE}->print( "\n\n" );
         }
-	elsif ( $node->nodeName() eq "funcsynopsis") {
+        elsif ( $node->nodeName() eq "funcsynopsis") {
             if (($node->getAttribute('role')||'') ne 'synopsis') {
               $self->dump_pod($node);
               $self->{OFILE}->print( "\n" );
@@ -468,57 +476,57 @@ sub dump_pod {
             $str =~ s/\n/\n  /g;
             $self->{OFILE}->print( "  $str\n" );
         } elsif(  $node->nodeName() eq "title" or
-		  $node->nodeName() eq "titleabbrev"
-		 ) {
-	  # IGNORE
+                  $node->nodeName() eq "titleabbrev"
+                 ) {
+          # IGNORE
         } elsif(  $node->nodeName() eq "emphasis" ) {
             my $str = $node->string_value() ;
             $str =~ s/\n/ /g;
             $self->{OFILE}->print( "I<<<<<< $str >>>>>>" );
         } elsif(  $node->nodeName() eq "function" or
-		  $node->nodeName() eq "email" or
-		  $node->nodeName() eq "literal"
-	       ) {
+                  $node->nodeName() eq "email" or
+                  $node->nodeName() eq "literal"
+               ) {
             my $str = $node->string_value() ;
             $str =~ s/\n/ /g;
             $self->{OFILE}->print( "C<<<<<< $str >>>>>>" );
         } elsif(  $node->nodeName() eq "ulink" ) {
             my $str = $node->string_value() ;
-	    my $url = $node->getAttribute('url');
+            my $url = $node->getAttribute('url');
             $str =~ s/\n/ /g;
-	    if ($str eq $url) {
-	      $self->{OFILE}->print( "L<<<<<< $url >>>>>>" );
-	    } else {
-	      $self->{OFILE}->print( "$str (L<<<<<< $url >>>>>>)" );
-	    }
+            if ($str eq $url) {
+              $self->{OFILE}->print( "L<<<<<< $url >>>>>>" );
+            } else {
+              $self->{OFILE}->print( "$str (L<<<<<< $url >>>>>>)" );
+            }
         } elsif(  $node->nodeName() eq "xref" ) {
-	    my $linkend = $node->getAttribute('linkend');
-	    my ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/titleabbrev));
-	    ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/title)) unless $target;
-	    if ($target) {
-	      my $str = $target->string_value() ;
-	      $str =~ s/\n/ /g;
-	      $self->{OFILE}->print( "L<<<<<< $str >>>>>>" );
-	    } else {
-	      warn "WARNING: Didn't find any section with id='$linkend'\n";
-	      $self->{OFILE}->print( "$linkend" );
-	    }
+            my $linkend = $node->getAttribute('linkend');
+            my ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/titleabbrev));
+            ($target) = $node->findnodes(qq(//*[\@id="$linkend"]/title)) unless $target;
+            if ($target) {
+              my $str = $target->string_value() ;
+              $str =~ s/\n/ /g;
+              $self->{OFILE}->print( "L<<<<<< $str >>>>>>" );
+            } else {
+              warn "WARNING: Didn't find any section with id='$linkend'\n";
+              $self->{OFILE}->print( "$linkend" );
+            }
         } elsif(  $node->nodeName() eq "olink" ) {
             my $str = $node->string_value() ;
-	    my $url = $node->getAttribute('targetdoc');
-	    if (!defined $url) {
-	      warn $node->toString(1),"\n";
-	    }
+            my $url = $node->getAttribute('targetdoc');
+            if (!defined $url) {
+              warn $node->toString(1),"\n";
+            }
             $str =~ s/\n/ /g;
-	    if ($str eq $url) {
-	      $self->{OFILE}->print( "L<<<<<< $url >>>>>>" );
-	    } else {
-	      $self->{OFILE}->print( "$str (L<<<<<< $url >>>>>>)" );
-	    }
+            if ($str eq $url) {
+              $self->{OFILE}->print( "L<<<<<< $url >>>>>>" );
+            } else {
+              $self->{OFILE}->print( "$str (L<<<<<< $url >>>>>>)" );
+            }
         } else {
-	  print STDERR "Ignoring ",$node->nodeName(),"\n";
-	  $self->dump_pod($node);
-	}
+          print STDERR "Ignoring ",$node->nodeName(),"\n";
+          $self->dump_pod($node);
+        }
     }
 }
 
