@@ -3,6 +3,7 @@ Revision history for Perl extension XML::LibXML
 2.0110          Sat  1 Feb 15:59:54 IST 2014
     - Add "use strict;" and "use warnings;" to all modules (CPANTS).
     - MIN_PERL_VERSION (CPANTS).
+    - Add a LICENSE section to the POD (CPANTS).
 
 2.0109          Fri 31 Jan 09:56:18 IST 2014
     - Fix for requiring XML::LibXML more than once in perl-5.19.6 and up.
