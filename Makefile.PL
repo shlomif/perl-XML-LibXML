@@ -37,6 +37,10 @@ my %INFOS = (
     'AUTHOR'    => 'Petr Pajas',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'LICENSE' => 'perl',
+    (($ExtUtils::MakeMaker::VERSION >= 6.48)
+        ? (MIN_PERL_VERSION => '5.008',)
+        : ()
+    ),
     'PREREQ_PM' => {
         'base' => 0,
         'ExtUtils::MakeMaker' => '6.56',
