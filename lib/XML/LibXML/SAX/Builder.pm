@@ -9,6 +9,9 @@
 
 package XML::LibXML::SAX::Builder;
 
+use strict;
+use warnings;
+
 use XML::LibXML;
 use XML::NamespaceSupport;
 
