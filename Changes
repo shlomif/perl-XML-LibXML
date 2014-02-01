@@ -6,7 +6,7 @@ Revision history for Perl extension XML::LibXML
     - Add a LICENSE section to the POD (CPANTS).
 
 2.0109          Fri 31 Jan 09:56:18 IST 2014
-    - Fix for requiring XML::LibXML more than once in perl-5.19.6 and up.
+    - Fix for requiring XML::LibXML inside two loops in perl-5.19.6 and up.
         - https://rt.cpan.org/Ticket/Display.html?id=92606
         - Thanks to Father Chrysostomos for the investigation, the test
         case, and the fix.
