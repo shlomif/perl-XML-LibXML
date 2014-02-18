@@ -497,6 +497,7 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
 
     int cnt;
     SV * read_results;
+    IV read_results_iv;
     STRLEN read_length;
     char * chars;
     SV * tbuff = NEWSV(0,len);
@@ -536,9 +537,20 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
         croak("read error");
     }
 
-    read_length = SvIV(read_results);
+    read_results_iv = SvIV(read_results);
 
     chars = SvPV(tbuff, read_length);
+
+    /*
+     * If the file handle uses an encoding layer, the length parameter is
+     * interpreted as character count, not as byte count. So it's possible
+     * that more than len bytes are read which would overflow the buffer.
+     * Check for this condition also by comparing the return value.
+     */
+    if (read_results_iv != read_length || read_length > len) {
+        croak("Read more bytes than requested. Do you use an encoding-related"
+              " PerlIO layer?");
+    }
     strncpy(buffer, chars, read_length);
 
     PUTBACK;

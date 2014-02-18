@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 531;
+use Test::More tests => 533;
 use IO::File;
 
 use XML::LibXML::Common qw(:libxml);
@@ -938,6 +938,18 @@ EOXML
    is( $doc->baseURI, "foo.html" );
    is( $el->baseURI, "foo.html" );
 
+}
+
+{
+    my $parser = XML::LibXML->new();
+    open(my $fh, '<:utf8', 't/data/chinese.xml');
+    ok( $fh, 'open chinese.xml');
+    eval {
+        $parser->parse_fh($fh);
+    };
+    like( $@, qr/Read more bytes than requested/,
+          'UTF-8 encoding layer throws exception' );
+    close($fh);
 }
 
 sub tsub {
