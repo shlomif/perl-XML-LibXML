@@ -1,0 +1,20 @@
+Source: libxml-libxml-perl
+Section: perl
+Priority: optional
+Maintainer: Michael K. Edwards <medwards-debian@sane.net>
+Uploaders: Jay Bonci <jaybonci@debian.org>
+Standards-Version: 3.6.1
+Build-Depends: debhelper (>= 4.1), perl (>= 5.8.2), libxml-libxml-common-perl, libxml-namespacesupport-perl (>= 1.07), libxml-sax-perl (>= 0.11), libxml2-dev (>= 2.6.3-1), zlib1g-dev (>= 1:1.1.4)
+
+Package: libxml-libxml-perl
+Section: perl
+Priority: optional
+Architecture: any
+Depends: ${perl:Depends}, libxml-libxml-common-perl, libxml-namespacesupport-perl (>= 1.07), libxml-sax-perl (>= 0.11), ${shlibs:Depends}
+Description: Perl module for using the GNOME libxml2 library
+ This module implements a Perl interface to the Gnome libxml2 library.
+ The libxml2 library provides interfaces for parsing and manipulating
+ XML files.  This module allows Perl programmers to make use of the
+ highly capable validating XML parser and the high performance DOM
+ implementation.  It also provides an XML::XPath-like findnodes()
+ interface, providing access to the XPath API in libxml2.

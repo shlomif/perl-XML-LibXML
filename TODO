@@ -1,0 +1,10 @@
+* Fix 'line_nubers' in LibXML.pm (with a test).
+
+* Fix the 'suppress_warnings' similarly to https://rt.cpan.org/Ticket/Display.html?id=53270 .
+
+- add a flag to disable touching the I/O callbacks (as requested by
+  thread users on xml@gnome.org)
+
+- apply user-data patch (changes the proxy node data structure)
+
+
