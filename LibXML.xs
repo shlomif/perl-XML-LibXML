@@ -402,7 +402,7 @@ LibXML_reader_error_handler(void * ctxt,
 {
   int line = xmlTextReaderLocatorLineNumber(locator);
   xmlChar * filename = xmlTextReaderLocatorBaseURI(locator);
-  SV * msg_sv = sv_2mortal(C2Sv((xmlChar*) msg,NULL));
+  SV * msg_sv = sv_2mortal(C2Sv((const xmlChar*) msg));
   SV * error = sv_2mortal(newSVpv("", 0));
 
   switch (severity) {
@@ -1212,8 +1212,8 @@ LibXML_generic_variable_lookup(void* varLookupData,
     PUSHMARK(SP);
 
     XPUSHs( (data->varData != NULL) ? data->varData : &PL_sv_undef );
-    XPUSHs(sv_2mortal(C2Sv(name,NULL)));
-    XPUSHs(sv_2mortal(C2Sv(ns_uri,NULL)));
+    XPUSHs(sv_2mortal(C2Sv(name)));
+    XPUSHs(sv_2mortal(C2Sv(ns_uri)));
 
     /* save context to allow recursive usage of XPathContext */
     copy = LibXML_save_context(ctxt);
@@ -1353,12 +1353,12 @@ LibXML_generic_extension_function(xmlXPathParserContextPtr ctxt, int nargs)
             break;
         case XPATH_STRING:
             XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-            XPUSHs(sv_2mortal(C2Sv(obj->stringval, 0)));
+            XPUSHs(sv_2mortal(C2Sv(obj->stringval)));
             break;
         default:
             warn("Unknown XPath return type (%d) in call to {%s}%s - assuming string", obj->type, uri, function);
             XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-            XPUSHs(sv_2mortal(C2Sv(xmlXPathCastToString(obj), 0)));
+            XPUSHs(sv_2mortal(C2Sv(xmlXPathCastToString(obj))));
         }
         xmlXPathFreeObject(obj);
     }
@@ -1476,6 +1476,55 @@ LibXML_get_reader_preserve_flag( xmlTextReaderPtr reader ) {
 
     return 0;
 }
+
+/* ****************************************************************
+ * Character encoding functions
+ * **************************************************************** */
+
+static SV*
+LibXML_encode_string(const xmlChar *string, const xmlChar *encoding) {
+    xmlCharEncoding enc_code;
+    xmlCharEncodingHandlerPtr handler = NULL;
+    xmlBufferPtr in = NULL, out = NULL;
+    SV *retval = &PL_sv_undef;
+
+    if (encoding == NULL) {
+        /* Encoded UTF-8 string (UTF-8 flag is off). */
+        return newSVpvn((const char *)string, xmlStrlen(string));
+    }
+
+    handler = xmlFindCharEncodingHandler(encoding);
+    if (handler == NULL) {
+        croak("No CharEncodingHandler found for encoding '%s'\n", encoding);
+    }
+
+    if (strcmp(handler->name, "UTF-8") == 0) {
+        xmlCharEncCloseFunc(handler);
+
+        /* Encoded UTF-8 string (UTF-8 flag is off). */
+        return newSVpvn((const char *)string, xmlStrlen(string));
+    }
+
+    in  = xmlBufferCreateStatic((xmlChar *)string, xmlStrlen(string));
+    out = xmlBufferCreate();
+
+    if (xmlCharEncOutFunc(handler, out, in) < 0) {
+        xmlBufferFree(in);
+        xmlBufferFree(out);
+        xmlCharEncCloseFunc(handler);
+
+        croak("Error converting to '%s'\n", encoding);
+    }
+
+    retval = newSVpvn((const char *)out->content, out->use);
+
+    xmlBufferFree(in);
+    xmlBufferFree(out);
+    xmlCharEncCloseFunc(handler);
+
+    return retval;
+}
+
 
 extern void boot_XML__LibXML__Devel(pTHX_ CV*);
 
@@ -2324,7 +2373,8 @@ _parse_xml_chunk(self, svchunk, enc = &PL_sv_undef)
         INIT_ERROR_HANDLER;
         real_obj = LibXML_init_parser(self,NULL);
 
-        chunk = Sv2C(svchunk, (const xmlChar*)encoding);
+        // TODO: Decode
+        chunk = Sv2C(svchunk);
 
         if ( chunk != NULL ) {
             recover = LibXML_get_recover(real_obj);
@@ -2400,7 +2450,8 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
     CODE:
         INIT_ERROR_HANDLER;
 
-        chunk = Sv2C(svchunk, (const xmlChar*)encoding);
+        // TODO: Decode
+        chunk = Sv2C(svchunk);
 
         if ( chunk != NULL ) {
             xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt((const char*)ptr, len);
@@ -2708,7 +2759,7 @@ int
 load_catalog( self, filename )
         SV * filename
     PREINIT:
-        const char * fn = (const char *) Sv2C(filename, NULL);
+        const char * fn = (const char *) Sv2C(filename);
     INIT:
         if ( fn == NULL || xmlStrlen( (xmlChar *)fn ) == 0 ) {
             croak( "cannot load catalog" );
@@ -2848,7 +2899,7 @@ _toString(self, format=0)
         } else {
             /* warn("%s, %d\n",result, len); */
             RETVAL = newSVpvn( (const char *)result, len );
-	    /* C2Sv( result, self->encoding ); */
+	    /* C2Sv(result); */
             xmlFree(result);
         }
     OUTPUT:
@@ -3049,13 +3100,13 @@ createInternalSubset( self, Pname, extID, sysID )
         xmlChar * externalID = NULL;
         xmlChar * systemID = NULL;
     CODE:
-        name = Sv2C( Pname, NULL );
+        name = Sv2C(Pname);
         if ( name == NULL ) {
             XSRETURN_UNDEF;
         }
 
-        externalID = Sv2C(extID, NULL);
-        systemID   = Sv2C(sysID, NULL);
+        externalID = Sv2C(extID);
+        systemID   = Sv2C(sysID);
 
         dtd = xmlCreateIntSubset( self, name, externalID, systemID );
         xmlFree(externalID);
@@ -3082,13 +3133,13 @@ createExternalSubset( self, Pname, extID, sysID )
         xmlChar * externalID = NULL;
         xmlChar * systemID = NULL;
     CODE:
-        name = Sv2C( Pname, NULL );
+        name = Sv2C(Pname);
         if ( name == NULL ) {
             XSRETURN_UNDEF;
         }
 
-        externalID = Sv2C(extID, NULL);
-        systemID   = Sv2C(sysID, NULL);
+        externalID = Sv2C(extID);
+        systemID   = Sv2C(sysID);
 
         dtd = xmlNewDtd( self, name, externalID, systemID );
 
@@ -3116,13 +3167,13 @@ createDTD( self, Pname, extID, sysID )
         xmlChar * externalID = NULL;
         xmlChar * systemID = NULL;
     CODE:
-        name = Sv2C( Pname, NULL );
+        name = Sv2C(Pname);
         if ( name == NULL ) {
             XSRETURN_UNDEF;
         }
 
-        externalID = Sv2C(extID, NULL);
-        systemID   = Sv2C(sysID, NULL);
+        externalID = Sv2C(extID);
+        systemID   = Sv2C(sysID);
 
         dtd = xmlNewDtd( NULL, name, externalID, systemID );
         dtd->doc = self;
@@ -3156,7 +3207,7 @@ createElement( self, name )
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        elname = nodeSv2C( name , (xmlNodePtr) self);
+        elname = Sv2C(name);
         if ( !LibXML_test_node_name( elname ) ) {
             xmlFree( elname );
             croak( "bad name" );
@@ -3186,7 +3237,7 @@ createRawElement( self, name )
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        elname = nodeSv2C( name , (xmlNodePtr) self);
+        elname = Sv2C(name);
         if ( !elname || xmlStrlen(elname) <= 0 ) {
             xmlFree( elname );
             croak( "bad name" );
@@ -3220,13 +3271,13 @@ createElementNS( self, nsURI, name )
         ProxyNodePtr docfrag   = NULL;
         xmlNodePtr newNode     = NULL;
     CODE:
-        ename = nodeSv2C( name , (xmlNodePtr) self );
+        ename = Sv2C(name);
         if ( !LibXML_test_node_name( ename ) ) {
             xmlFree( ename );
             croak( "bad name" );
         }
 
-        eURI  = Sv2C( nsURI , NULL );
+        eURI  = Sv2C(nsURI);
 
         if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
             localname = xmlSplitQName2(ename, &prefix);
@@ -3276,13 +3327,13 @@ createRawElementNS( self, nsURI, name )
         ProxyNodePtr docfrag   = NULL;
         xmlNodePtr newNode     = NULL;
     CODE:
-        ename = nodeSv2C( name , (xmlNodePtr) self );
+        ename = Sv2C(name);
         if ( !LibXML_test_node_name( ename ) ) {
             xmlFree( ename );
             croak( "bad name" );
         }
 
-        eURI  = Sv2C( nsURI , NULL );
+        eURI  = Sv2C(nsURI);
 
         if ( eURI != NULL && xmlStrlen(eURI)!=0 ){
             localname = xmlSplitQName2(ename, &prefix);
@@ -3343,7 +3394,7 @@ createTextNode( self, content )
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        elname = nodeSv2C( content , (xmlNodePtr) self );
+        elname = Sv2C(content);
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
             newNode = xmlNewDocText( self, elname );
             xmlFree(elname);
@@ -3373,7 +3424,7 @@ createComment( self , content )
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        elname = nodeSv2C( content , (xmlNodePtr) self );
+        elname = Sv2C(content);
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
             newNode = xmlNewDocComment( self, elname );
             xmlFree(elname);
@@ -3404,7 +3455,7 @@ createCDATASection( self, content )
         xmlChar * elname = NULL;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        elname = nodeSv2C( content , (xmlNodePtr)self );
+        elname = Sv2C(content);
         if ( elname != NULL || xmlStrlen(elname) > 0 ) {
             newNode = xmlNewCDataBlock( self, elname, xmlStrlen(elname) );
             xmlFree(elname);
@@ -3432,7 +3483,7 @@ createEntityReference( self , pname )
         SV * pname
     PREINIT:
         xmlNodePtr newNode;
-        xmlChar * name = Sv2C( pname, NULL );
+        xmlChar * name = Sv2C(pname);
         ProxyNodePtr docfrag = NULL;
     CODE:
         if ( name == NULL ) {
@@ -3460,13 +3511,13 @@ createAttribute( self, pname, pvalue=&PL_sv_undef )
         xmlAttrPtr newAttr = NULL;
         xmlChar * buffer = NULL;
     CODE:
-        name = nodeSv2C( pname , (xmlNodePtr) self );
+        name = Sv2C(pname);
         if ( !LibXML_test_node_name( name ) ) {
             xmlFree(name);
             XSRETURN_UNDEF;
         }
 
-        value = nodeSv2C( pvalue , (xmlNodePtr) self );
+        value = Sv2C(pvalue);
         /* unlike xmlSetProp, xmlNewDocProp does not encode entities in value */
         buffer = xmlEncodeEntitiesReentrant(self, value);
         newAttr = xmlNewDocProp( self, name, buffer );
@@ -3496,14 +3547,14 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
         xmlAttrPtr newAttr = NULL;
         xmlNsPtr ns = NULL;
     CODE:
-        name = nodeSv2C( pname , (xmlNodePtr) self );
+        name = Sv2C(pname);
         if ( !LibXML_test_node_name( name ) ) {
             xmlFree(name);
             XSRETURN_UNDEF;
         }
 
-        nsURI = Sv2C( URI , NULL );
-        value = nodeSv2C( pvalue, (xmlNodePtr) self  );
+        nsURI = Sv2C(URI);
+        value = Sv2C(pvalue);
 
         if ( nsURI != NULL && xmlStrlen(nsURI) > 0 ) {
             xmlNodePtr root = xmlDocGetRootElement(self );
@@ -3587,11 +3638,11 @@ createProcessingInstruction(self, name, value=&PL_sv_undef)
         ProxyNodePtr docfrag = NULL;
     CODE:
         PERL_UNUSED_VAR(ix);
-        n = nodeSv2C(name, (xmlNodePtr)self);
+        n = Sv2C(name);
         if ( !n ) {
             XSRETURN_UNDEF;
         }
-        v = nodeSv2C(value, (xmlNodePtr)self);
+        v = Sv2C(value);
         newNode = xmlNewPI(n,v);
         xmlFree(v);
         xmlFree(n);
@@ -3867,23 +3918,15 @@ void
 setEncoding( self, encoding = NULL )
         xmlDocPtr self
         char *encoding
-    PREINIT:
-        int charset = XML_CHAR_ENCODING_ERROR;
     CODE:
         if ( self->encoding != NULL ) {
             xmlFree( (xmlChar*) self->encoding );
         }
         if (encoding!=NULL && strlen(encoding)) {
 	  self->encoding = xmlStrdup( (const xmlChar *)encoding );
-	  charset = (int)xmlParseCharEncoding( (const char*)self->encoding );
-	  if ( charset <= 0 ) {
-            charset = XML_CHAR_ENCODING_ERROR;
-	  }
 	} else {
 	  self->encoding=NULL;
-          charset = XML_CHAR_ENCODING_UTF8;
 	}
-        SetPmmNodeEncoding(self, charset);
 
 
 int
@@ -4125,7 +4168,7 @@ nodeName( self )
         PERL_UNUSED_VAR(ix);
         name =  (xmlChar*)domName( self );
         if ( name != NULL ) {
-            RETVAL = C2Sv(name,NULL);
+            RETVAL = C2Sv(name);
             xmlFree( name );
         }
         else {
@@ -4147,7 +4190,7 @@ localname( self )
              || self->type == XML_ATTRIBUTE_NODE
              || self->type == XML_ELEMENT_DECL
              || self->type == XML_ATTRIBUTE_DECL ) {
-            RETVAL = C2Sv(self->name,NULL);
+            RETVAL = C2Sv(self->name);
         }
         else {
             XSRETURN_UNDEF;
@@ -4167,7 +4210,7 @@ prefix( self )
 	    || self->type == XML_PI_NODE )
             && self->ns != NULL
             && self->ns->prefix != NULL ) {
-            RETVAL = C2Sv(self->ns->prefix, NULL);
+            RETVAL = C2Sv(self->ns->prefix);
         }
         else {
             XSRETURN_UNDEF;
@@ -4190,7 +4233,7 @@ namespaceURI( self )
 	     && self->ns != NULL
              && self->ns->href != NULL ) {
             nsURI =  xmlStrdup(self->ns->href);
-            RETVAL = C2Sv( nsURI, NULL );
+            RETVAL = C2Sv(nsURI);
             xmlFree( nsURI );
         }
         else {
@@ -4209,7 +4252,7 @@ lookupNamespaceURI( self, svprefix=&PL_sv_undef )
         xmlChar * prefix = NULL;
         xmlNsPtr ns;
     CODE:
-        prefix = nodeSv2C( svprefix , self );
+        prefix = Sv2C(svprefix);
         if ( prefix != NULL && xmlStrlen(prefix) == 0) {
             xmlFree( prefix );
             prefix = NULL;
@@ -4220,7 +4263,7 @@ lookupNamespaceURI( self, svprefix=&PL_sv_undef )
 	}
         if ( ns != NULL ) {
 	  nsURI = xmlStrdup(ns->href);
-	  RETVAL = C2Sv( nsURI, NULL );
+	  RETVAL = C2Sv(nsURI);
 	  xmlFree( nsURI );
 	}
 	else {
@@ -4237,14 +4280,14 @@ lookupNamespacePrefix( self, svuri )
         xmlChar * nsprefix;
         xmlChar * href = NULL;
     CODE:
-        href = nodeSv2C( svuri , self );
+        href = Sv2C(svuri);
         if ( href != NULL && xmlStrlen(href) > 0) {
             xmlNsPtr ns = xmlSearchNsByHref( self->doc, self, href );
             xmlFree( href );
             if ( ns != NULL ) {
 		    if ( ns->prefix != NULL ) {
 			  nsprefix = xmlStrdup( ns->prefix );
-			  RETVAL = C2Sv( nsprefix, NULL );
+			  RETVAL = C2Sv(nsprefix);
 			  xmlFree(nsprefix);
 		    } else {
 			  RETVAL = newSVpv("",0);
@@ -4273,7 +4316,7 @@ setNodeName( self , value )
         xmlChar* prefix;
     CODE:
         PERL_UNUSED_VAR(ix);
-        string = nodeSv2C( value , self );
+        string = Sv2C(value);
         if ( !LibXML_test_node_name( string ) ) {
             xmlFree(string);
             croak( "bad name" );
@@ -4305,7 +4348,7 @@ setRawName( self, value )
         xmlChar* localname;
         xmlChar* prefix;
     CODE:
-        string = nodeSv2C( value , self );
+        string = Sv2C(value);
         if ( !string || xmlStrlen( string) <= 0 ) {
             xmlFree(string);
             XSRETURN_UNDEF;
@@ -4343,10 +4386,10 @@ nodeValue( self, useDomEncoding = &PL_sv_undef )
 
         if ( content != NULL ) {
             if ( SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv(content, self);
+                RETVAL = LibXML_encode_string(content, self->doc->encoding);
             }
             else {
-                RETVAL = C2Sv(content, NULL);
+                RETVAL = C2Sv(content);
             }
             xmlFree(content);
         }
@@ -4481,8 +4524,8 @@ _getChildrenByTagNameNS( self, namespaceURI, node_name )
 	int ns_wildcard = 0;
         int wantarray = GIMME_V;
     PPCODE:
-        name = nodeSv2C(node_name, self );
-        nsURI = nodeSv2C(namespaceURI, self );
+        name = Sv2C(node_name);
+        nsURI = Sv2C(namespaceURI);
 
         if ( nsURI != NULL ) {
             if (xmlStrlen(nsURI) == 0 ) {
@@ -5070,7 +5113,7 @@ baseURI( self )
         xmlChar * uri;
     CODE:
         uri = xmlNodeGetBase( self->doc, self );
-        RETVAL = C2Sv( uri, NULL );
+        RETVAL = C2Sv(uri);
         xmlFree( uri );
     OUTPUT:
         RETVAL
@@ -5082,7 +5125,7 @@ setBaseURI( self, URI )
     PREINIT:
         xmlChar * uri;
     CODE:
-        uri = nodeSv2C( URI, self );
+        uri = Sv2C(URI);
         if ( uri != NULL ) {
             xmlNodeSetBase( self, uri );
         }
@@ -5128,11 +5171,10 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
 
         if ( ret != NULL ) {
             if ( useDomEncoding != &PL_sv_undef && SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv((xmlChar*)ret, PmmNODE(PmmPROXYNODE(self))) ;
-                SvUTF8_off(RETVAL);
+                RETVAL = LibXML_encode_string(ret, self->doc->encoding);
             }
             else {
-                RETVAL = C2Sv((xmlChar*)ret, NULL) ;
+                RETVAL = C2Sv(ret);
             }
             xmlBufferFree( buffer );
         }
@@ -5174,7 +5216,7 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
         refNode = self;
     CODE:
         if ( xpath != NULL && xpath != &PL_sv_undef ) {
-            nodepath = Sv2C( xpath, NULL );
+            nodepath = Sv2C(xpath);
         }
 
         if ( nodepath != NULL && xmlStrlen( nodepath ) == 0 ) {
@@ -5254,7 +5296,7 @@ _toStringC14N(self, comments=0, xpath=&PL_sv_undef, exclusive=0, inc_prefix_list
         if (result == NULL) {
              croak("Failed to convert doc to string in doc->toStringC14N");
         } else {
-            RETVAL = C2Sv( result, NULL );
+            RETVAL = C2Sv(result);
             xmlFree(result);
         }
     OUTPUT:
@@ -5274,12 +5316,10 @@ string_value ( self, useDomEncoding = &PL_sv_undef )
         /* we can't just return a string, because of UTF8! */
         string = xmlXPathCastNodeToString(self);
         if ( SvTRUE(useDomEncoding) ) {
-            RETVAL = nodeC2Sv(string,
-                              self);
+            RETVAL = LibXML_encode_string(string, self->doc->encoding);
         }
         else {
-            RETVAL = C2Sv(string,
-                          NULL);
+            RETVAL = C2Sv(string);
         }
         xmlFree(string);
     OUTPUT:
@@ -5315,7 +5355,7 @@ _find( pnode, pxpath, to_bool )
              comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( pxpath )));
              if (!comp) XSRETURN_UNDEF;
         } else {
-            xpath = nodeSv2C(pxpath, node);
+            xpath = Sv2C(pxpath);
             if ( !(xpath && xmlStrlen(xpath)) ) {
                 xs_warn( "bad xpath\n" );
                 if ( xpath )
@@ -5401,7 +5441,7 @@ _find( pnode, pxpath, to_bool )
                     /* access ->stringval */
                     /* return as a Literal */
                     XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-                    XPUSHs(sv_2mortal(C2Sv(found->stringval, NULL)));
+                    XPUSHs(sv_2mortal(C2Sv(found->stringval)));
                     break;
                 default:
                     croak("Unknown XPath return type");
@@ -5433,7 +5473,7 @@ _findnodes( pnode, perl_xpath )
              comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( perl_xpath )));
              if (!comp) XSRETURN_UNDEF;
         } else {
-            xpath = nodeSv2C(perl_xpath, node);
+            xpath = Sv2C(perl_xpath);
             if ( !(xpath && xmlStrlen(xpath)) ) {
                 xs_warn( "bad xpath\n" );
                 if ( xpath )
@@ -5578,7 +5618,7 @@ nodePath( self )
         if ( path == NULL ) {
             croak( "cannot calculate path for the given node" );
         }
-        RETVAL = C2Sv( path, NULL );
+        RETVAL = C2Sv(path);
         xmlFree(path);
     OUTPUT:
         RETVAL
@@ -5616,7 +5656,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
         int flag
     PREINIT:
         xmlNodePtr node = PmmSvNode(self);
-        xmlChar * nsURI = nodeSv2C(namespaceURI,node);
+        xmlChar * nsURI = Sv2C(namespaceURI);
         xmlChar * nsPrefix = NULL;
         xmlNsPtr ns = NULL;
     INIT:
@@ -5628,7 +5668,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
             XSRETURN_UNDEF;
 		} */
 
-        nsPrefix = nodeSv2C(namespacePrefix, node);
+        nsPrefix = Sv2C(namespacePrefix);
         if ( xmlStrlen( nsPrefix ) == 0 ) {
             xmlFree(nsPrefix);
             nsPrefix = NULL;
@@ -5688,8 +5728,8 @@ setNamespaceDeclURI( self, svprefix, newURI )
         xmlNsPtr ns;
     CODE:
 	RETVAL = 0;
-	prefix = nodeSv2C( svprefix , self );
-	nsURI = nodeSv2C( newURI , self );
+	prefix = Sv2C(svprefix);
+	nsURI = Sv2C(newURI);
 	/* null empty values */
 	if ( prefix && xmlStrlen(prefix) == 0) {
 	  xmlFree( prefix );
@@ -5731,8 +5771,8 @@ setNamespaceDeclPrefix( self, svprefix, newPrefix )
         xmlNsPtr ns;
     CODE:
 	RETVAL = 0;
-	prefix = nodeSv2C( svprefix , self );
-	nsPrefix = nodeSv2C( newPrefix , self );
+	prefix = Sv2C(svprefix);
+	nsPrefix = Sv2C(newPrefix);
 	/* null empty values */
 	if ( prefix != NULL && xmlStrlen(prefix) == 0) {
 	  xmlFree( prefix );
@@ -5787,7 +5827,7 @@ _getNamespaceDeclURI( self, ns_prefix )
         xmlChar * prefix;
         xmlNsPtr ns;
     CODE:
-        prefix = nodeSv2C(ns_prefix, self );
+        prefix = Sv2C(ns_prefix);
         if ( prefix != NULL && xmlStrlen(prefix) == 0) {
 		xmlFree( prefix );
 		prefix = NULL;
@@ -5797,7 +5837,7 @@ _getNamespaceDeclURI( self, ns_prefix )
         while ( ns != NULL ) {
 		if ( (ns->prefix != NULL || ns->href != NULL) &&
 		     xmlStrcmp( ns->prefix, prefix ) == 0 ) {
-		    RETVAL = C2Sv(ns->href, NULL);
+		    RETVAL = C2Sv(ns->href);
 		    break;
 		} else {
 		    ns = ns->next;
@@ -5817,7 +5857,7 @@ hasAttribute( self, attr_name )
     PREINIT:
         xmlChar * name;
     CODE:
-        name  = nodeSv2C(attr_name, self );
+        name  = Sv2C(attr_name);
         if ( ! name ) {
             XSRETURN_UNDEF;
         }
@@ -5841,8 +5881,8 @@ hasAttributeNS( self, namespaceURI, attr_name )
         xmlChar * nsURI;
 	xmlNodePtr attr;
     CODE:
-        name = nodeSv2C(attr_name, self );
-        nsURI = nodeSv2C(namespaceURI, self );
+        name = Sv2C(attr_name);
+        nsURI = Sv2C(namespaceURI);
 
         if ( name == NULL ) {
             if ( nsURI != NULL ) {
@@ -5881,7 +5921,7 @@ _getAttribute( self, attr_name, useDomEncoding = 0 )
         xmlChar * ret = NULL;
         xmlNsPtr ns = NULL;
     CODE:
-        name = nodeSv2C(attr_name, self );
+        name = Sv2C(attr_name);
         if( !name ) {
             XSRETURN_UNDEF;
         }
@@ -5903,10 +5943,10 @@ _getAttribute( self, attr_name, useDomEncoding = 0 )
         xmlFree(name);
         if ( ret ) {
             if ( useDomEncoding ) {
-                RETVAL = nodeC2Sv(ret, self);
+                RETVAL = LibXML_encode_string(ret, self->doc->encoding);
             }
             else {
-                RETVAL = C2Sv(ret, NULL);
+                RETVAL = C2Sv(ret);
             }
             xmlFree( ret );
         }
@@ -5930,13 +5970,13 @@ _setAttribute( self, attr_name, attr_value )
         xmlChar * localname = NULL;
 #endif
     CODE:
-        name  = nodeSv2C(attr_name, self );
+        name = Sv2C(attr_name);
 
         if ( !LibXML_test_node_name(name) ) {
             xmlFree(name);
             croak( "bad name" );
         }
-        value = nodeSv2C(attr_value, self );
+        value = Sv2C(attr_value);
 #if LIBXML_VERSION >= 20621
 	/*
 	 * For libxml2-2.6.21 and later we can use just xmlSetProp
@@ -5976,7 +6016,7 @@ removeAttribute( self, attr_name )
         xmlChar * name;
         xmlAttrPtr xattr = NULL;
     CODE:
-        name  = nodeSv2C(attr_name, self );
+        name = Sv2C(attr_name);
         if ( name ) {
             xattr = domGetAttrNode( self, name );
 
@@ -6000,7 +6040,7 @@ getAttributeNode( self, attr_name )
         xmlChar * name;
         xmlAttrPtr ret = NULL;
     CODE:
-        name = nodeSv2C(attr_name, self );
+        name = Sv2C(attr_name);
         if ( !name ) {
             XSRETURN_UNDEF;
         }
@@ -6072,8 +6112,8 @@ _getAttributeNS( self, namespaceURI, attr_name, useDomEncoding = 0 )
         xmlChar * nsURI;
         xmlChar * ret = NULL;
     CODE:
-        name = nodeSv2C( attr_name, self );
-        nsURI = nodeSv2C( namespaceURI, self );
+        name = Sv2C(attr_name);
+        nsURI = Sv2C(namespaceURI);
         if ( !name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
@@ -6091,9 +6131,9 @@ _getAttributeNS( self, namespaceURI, attr_name, useDomEncoding = 0 )
         }
         if ( ret ) {
             if (useDomEncoding) {
-                RETVAL = nodeC2Sv( ret, self );
+                RETVAL = LibXML_encode_string(ret, self->doc->encoding);
             } else {
-                RETVAL = C2Sv( ret, NULL );
+                RETVAL = C2Sv(ret);
             }
             xmlFree( ret );
         }
@@ -6119,21 +6159,21 @@ _setAttributeNS( self, namespaceURI, attr_name, attr_value )
         xmlNsPtr * all_ns   = NULL;
         int i;
     INIT:
-        name  = nodeSv2C( attr_name, self );
+        name = Sv2C(attr_name);
 
         if ( !LibXML_test_node_name(name) ) {
             xmlFree(name);
             croak( "bad name" );
         }
 
-        nsURI = nodeSv2C( namespaceURI, self );
+        nsURI = Sv2C(namespaceURI);
         localname = xmlSplitQName2(name, &prefix);
         if ( localname ) {
             xmlFree( name );
             name = localname;
         }
     CODE:
-        value = nodeSv2C( attr_value, self );
+        value = Sv2C(attr_value);
 
         if ( nsURI && xmlStrlen(nsURI) ) {
             xs_warn( "found uri" );
@@ -6206,8 +6246,8 @@ removeAttributeNS( self, namespaceURI, attr_name )
         xmlChar * name  = NULL;
         xmlAttrPtr xattr = NULL;
     CODE:
-        nsURI = nodeSv2C( namespaceURI, self );
-        name  = nodeSv2C( attr_name, self );
+        nsURI = Sv2C(namespaceURI);
+        name  = Sv2C(attr_name);
         if ( ! name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
@@ -6242,8 +6282,8 @@ getAttributeNodeNS( self,namespaceURI, attr_name )
         xmlChar * name;
         xmlAttrPtr ret = NULL;
     CODE:
-        nsURI = nodeSv2C(namespaceURI, self );
-        name = nodeSv2C(attr_name, self );
+        nsURI = Sv2C(namespaceURI);
+        name = Sv2C(attr_name);
         if ( !name ) {
             xmlFree(nsURI);
             XSRETURN_UNDEF;
@@ -6362,7 +6402,7 @@ appendText( self, string )
         xmlChar * content = NULL;
     INIT:
         PERL_UNUSED_VAR(ix);
-        content = nodeSv2C( string, self );
+        content = Sv2C(string);
         if ( content == NULL ) {
             XSRETURN_UNDEF;
         }
@@ -6386,13 +6426,13 @@ appendTextChild( self, strname, strcontent=&PL_sv_undef, nsURI=&PL_sv_undef )
         xmlChar * content = NULL;
         xmlChar * encstr  = NULL;
     INIT:
-        name    = nodeSv2C( strname, self );
+        name = Sv2C(strname);
         if ( xmlStrlen(name) == 0 ) {
             xmlFree(name);
             XSRETURN_UNDEF;
         }
     CODE:
-        content = nodeSv2C(strcontent, self);
+        content = Sv2C(strcontent);
         if ( content &&  xmlStrlen( content ) == 0 ) {
             xmlFree(content);
             content=NULL;
@@ -6425,13 +6465,13 @@ addNewChild( self, namespaceURI, nodename )
         xmlNsPtr ns = NULL;
     CODE:
         PERL_UNUSED_VAR(ix);
-        name = nodeSv2C(nodename, self);
+        name = Sv2C(nodename);
         if ( name &&  xmlStrlen( name ) == 0 ) {
             xmlFree(name);
             XSRETURN_UNDEF;
         }
 
-        nsURI = nodeSv2C(namespaceURI, self);
+        nsURI = Sv2C(namespaceURI);
         if ( nsURI &&  xmlStrlen( nsURI ) == 0 ) {
             xmlFree(nsURI);
             nsURI=NULL;
@@ -6488,7 +6528,7 @@ new( CLASS, content )
         xmlNodePtr newNode;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        data = Sv2C(content, NULL);
+        data = Sv2C(content);
         newNode = xmlNewText( data );
         xmlFree(data);
         if( newNode != NULL ) {
@@ -6515,7 +6555,7 @@ substringData( self, offset, length )
             data = domGetNodeValue( self );
             if ( data != NULL ) {
                 substr = xmlUTF8Strsub( data, offset, length );
-                RETVAL = C2Sv( (const xmlChar*)substr, NULL );
+                RETVAL = C2Sv(substr);
                 xmlFree( substr );
             }
             else {
@@ -6539,7 +6579,7 @@ setData( self, value )
         xmlChar * encstr = NULL;
     CODE:
         PERL_UNUSED_VAR(ix);
-        encstr = nodeSv2C(value,self);
+        encstr = Sv2C(value);
         domSetNodeValue( self, encstr );
         xmlFree(encstr);
 
@@ -6551,8 +6591,7 @@ appendData( self, value )
         xmlChar * encstring = NULL;
         int strlen = 0;
     CODE:
-        encstring = Sv2C( value,
-                          self->doc!=NULL ? self->doc->encoding : NULL );
+        encstring = Sv2C(value);
 
        if ( encstring != NULL ) {
             strlen = xmlStrlen( encstring );
@@ -6573,8 +6612,7 @@ insertData( self, offset, value )
         int dl = 0;
     CODE:
         if ( offset >= 0 ) {
-            encstring = Sv2C( value,
-                              self->doc!=NULL ? self->doc->encoding : NULL );
+            encstring = Sv2C(value);
             if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
                 data = domGetNodeValue(self);
                 if ( data != NULL && xmlStrlen( data ) > 0 ) {
@@ -6670,8 +6708,7 @@ replaceData( self, offset,length, value )
         int dl2 = 0;
     CODE:
         if ( offset >= 0 ) {
-            encstring = Sv2C( value,
-                              self->doc!=NULL ? self->doc->encoding : NULL );
+            encstring = Sv2C(value);
 
             if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
                 data = domGetNodeValue(self);
@@ -6729,7 +6766,7 @@ new( CLASS, content )
         xmlNodePtr newNode;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        encstring = Sv2C(content, NULL);
+        encstring = Sv2C(content);
         newNode = xmlNewComment( encstring );
         xmlFree(encstring);
         if( newNode != NULL ) {
@@ -6753,7 +6790,7 @@ new( CLASS , content )
         xmlNodePtr newNode;
         ProxyNodePtr docfrag = NULL;
     CODE:
-        encstring = Sv2C(content, NULL);
+        encstring = Sv2C(content);
         newNode = xmlNewCDataBlock( NULL , encstring, xmlStrlen( encstring ) );
         xmlFree(encstring);
         if ( newNode != NULL ){
@@ -6790,8 +6827,8 @@ new( CLASS, pname, pvalue )
         xmlChar * name;
         xmlChar * value;
     CODE:
-        name  = Sv2C(pname,NULL);
-        value = Sv2C(pvalue,NULL);
+        name  = Sv2C(pname);
+        value = Sv2C(pvalue);
         if ( name == NULL ) {
             XSRETURN_UNDEF;
         }
@@ -6836,10 +6873,10 @@ serializeContent( self, useDomEncoding = &PL_sv_undef )
         }
         if ( ret != NULL ) {
             if ( useDomEncoding != &PL_sv_undef && SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv((xmlChar*)ret, PmmNODE(PmmPROXYNODE(node))) ;
+                RETVAL = LibXML_encode_string(ret, node->doc->encoding);
             }
             else {
-                RETVAL = C2Sv((xmlChar*)ret, NULL) ;
+                RETVAL = C2Sv(ret);
             }
             xmlBufferFree( buffer );
         }
@@ -6884,10 +6921,10 @@ toString(self , format=0, useDomEncoding = &PL_sv_undef )
         }
         if ( ret != NULL ) {
             if ( useDomEncoding != &PL_sv_undef && SvTRUE(useDomEncoding) ) {
-                RETVAL = nodeC2Sv((xmlChar*)ret, PmmNODE(PmmPROXYNODE(node))) ;
+                RETVAL = LibXML_encode_string(ret, node->doc->encoding);
             }
             else {
-                RETVAL = C2Sv((xmlChar*)ret, NULL) ;
+                RETVAL = C2Sv(ret);
             }
             xmlBufferFree( buffer );
         }
@@ -6907,7 +6944,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
         SV * namespacePrefix
     PREINIT:
         xmlAttrPtr node = (xmlAttrPtr)PmmSvNode(self);
-        xmlChar * nsURI = nodeSv2C(namespaceURI,(xmlNodePtr)node);
+        xmlChar * nsURI = Sv2C(namespaceURI);
         xmlChar * nsPrefix = NULL;
         xmlNsPtr ns = NULL;
     INIT:
@@ -6922,7 +6959,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
         if ( !node->parent ) {
             XSRETURN_UNDEF;
         }
-        nsPrefix = nodeSv2C(namespacePrefix, (xmlNodePtr)node);
+        nsPrefix = Sv2C(namespacePrefix);
         if ( (ns = xmlSearchNs(node->doc, node->parent, nsPrefix)) &&
              xmlStrEqual( ns->href, nsURI) ) {
 	    /* same uri and prefix */
@@ -6979,11 +7016,11 @@ new(CLASS, namespaceURI, namespacePrefix=&PL_sv_undef)
     CODE:
         RETVAL = &PL_sv_undef;
 
-        nsURI = Sv2C(namespaceURI,NULL);
+        nsURI = Sv2C(namespaceURI);
         if ( !nsURI ) {
             XSRETURN_UNDEF;
         }
-        nsPrefix = Sv2C(namespacePrefix, NULL);
+        nsPrefix = Sv2C(namespacePrefix);
         ns = xmlNewNs(NULL, nsURI, nsPrefix);
         if ( ns ) {
             RETVAL = NEWSV(0,0);
@@ -7037,7 +7074,7 @@ declaredURI(self)
     CODE:
         PERL_UNUSED_VAR(ix);
         href = xmlStrdup(ns->href);
-        RETVAL = C2Sv(href, NULL);
+        RETVAL = C2Sv(href);
         xmlFree(href);
     OUTPUT:
         RETVAL
@@ -7054,7 +7091,7 @@ declaredPrefix(self)
     CODE:
         PERL_UNUSED_VAR(ix);
         prefix = xmlStrdup(ns->prefix);
-        RETVAL = C2Sv(prefix, NULL);
+        RETVAL = C2Sv(prefix);
         xmlFree(prefix);
     OUTPUT:
         RETVAL
@@ -7070,7 +7107,7 @@ unique_key( self )
         key = xmlStrdup(ns->prefix);
         key = xmlStrcat(key, (const xmlChar*)"|");
         key = xmlStrcat(key, ns->href);
-        RETVAL = C2Sv(key, NULL);
+        RETVAL = C2Sv(key);
     OUTPUT:
         RETVAL
 
@@ -7132,7 +7169,7 @@ systemId( self )
 	if ( self->SystemID == NULL ) {
             XSRETURN_UNDEF;
 	} else {
-            RETVAL = C2Sv(self->SystemID,NULL);
+            RETVAL = C2Sv(self->SystemID);
 	}
     OUTPUT:
         RETVAL
@@ -7147,7 +7184,7 @@ publicId( self )
 	if ( self->ExternalID == NULL ) {
             XSRETURN_UNDEF;
 	} else {
-            RETVAL = C2Sv(self->ExternalID,NULL);
+            RETVAL = C2Sv(self->ExternalID);
 	}
     OUTPUT:
         RETVAL
@@ -7693,7 +7730,7 @@ lookupNs( pxpath_context, prefix )
         }
         LibXML_configure_xpathcontext(ctxt);
     CODE:
-        RETVAL = C2Sv(xmlXPathNsLookup(ctxt, (xmlChar *) SvPV_nolen(prefix)), NULL);
+        RETVAL = C2Sv(xmlXPathNsLookup(ctxt, (xmlChar *) SvPV_nolen(prefix)));
     OUTPUT:
         RETVAL
 
@@ -7886,7 +7923,7 @@ _findnodes( pxpath_context, perl_xpath )
              comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( perl_xpath )));
              if (!comp) XSRETURN_UNDEF;
         } else {
-            xpath = nodeSv2C(perl_xpath, ctxt->node);
+            xpath = Sv2C(perl_xpath);
             if ( !(xpath && xmlStrlen(xpath)) ) {
                 if ( xpath )
                     xmlFree(xpath);
@@ -7990,7 +8027,7 @@ _find( pxpath_context, pxpath, to_bool )
              comp = INT2PTR(xmlXPathCompExprPtr,SvIV((SV*)SvRV( pxpath )));
              if (!comp) XSRETURN_UNDEF;
         } else {
-            xpath = nodeSv2C(pxpath, ctxt->node);
+            xpath = Sv2C(pxpath);
             if ( !(xpath && xmlStrlen(xpath)) ) {
                 if ( xpath )
                     xmlFree(xpath);
@@ -8084,7 +8121,7 @@ _find( pxpath_context, pxpath, to_bool )
                     /* access ->stringval */
                     /* return as a Literal */
                     XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-                    XPUSHs(sv_2mortal(C2Sv(found->stringval, NULL)));
+                    XPUSHs(sv_2mortal(C2Sv(found->stringval)));
                     break;
                 default:
                     croak("Unknown XPath return type");
@@ -8198,7 +8235,7 @@ baseURI(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstBaseUri(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8225,7 +8262,7 @@ encoding(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstEncoding(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8236,7 +8273,7 @@ localName(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstLocalName(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8247,7 +8284,7 @@ name(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstName(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8258,7 +8295,7 @@ namespaceURI(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstNamespaceUri(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8269,7 +8306,7 @@ prefix(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstPrefix(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8280,7 +8317,7 @@ value(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstValue(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8291,7 +8328,7 @@ xmlLang(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstXmlLang(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8303,7 +8340,7 @@ xmlVersion(reader)
 	const xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderConstXmlVersion(reader);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
     OUTPUT:
 	RETVAL
 
@@ -8325,7 +8362,7 @@ getAttribute(reader, name)
 	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttribute(reader, (xmlChar*) name);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8338,7 +8375,7 @@ getAttributeNo(reader, no)
 	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderGetAttributeNo(reader, no);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8353,7 +8390,7 @@ getAttributeNs(reader, localName, namespaceURI)
     CODE:
 	result = xmlTextReaderGetAttributeNs(reader,  (xmlChar*) localName,
 					     (xmlChar*) namespaceURI);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8413,7 +8450,7 @@ getAttributeHash(reader)
 	if (xmlTextReaderHasAttributes(reader) && xmlTextReaderMoveToFirstAttribute(reader)==1) {
 	  do {
 	    name = xmlTextReaderConstName(reader);
-	    sv=C2Sv((xmlTextReaderConstValue(reader)),NULL);
+	    sv=C2Sv((xmlTextReaderConstValue(reader)));
 	    if (sv && hv_store(hv, (const char*) name, xmlStrlen(name), sv, 0)==NULL) {
 	      SvREFCNT_dec(sv);  /* free if not needed by hv_stores */
 	    }
@@ -8466,7 +8503,7 @@ lookupNamespace(reader, prefix)
 	xmlChar *result = NULL;
     CODE:
 	result = xmlTextReaderLookupNamespace(reader, (xmlChar*) prefix);
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8716,7 +8753,7 @@ readInnerXml(reader)
         CLEANUP_ERROR_HANDLER;
 	REPORT_ERROR(0);
         if (!result) XSRETURN_UNDEF;
-	RETVAL = C2Sv(result, NULL);
+	RETVAL = C2Sv(result);
         xmlFree(result);
     OUTPUT:
 	RETVAL
@@ -8734,7 +8771,7 @@ readOuterXml(reader)
 	CLEANUP_ERROR_HANDLER;
 	REPORT_ERROR(0);
         if (result) {
-	  RETVAL = C2Sv(result, NULL);
+	  RETVAL = C2Sv(result);
 	  xmlFree(result);
 	} else {
            XSRETURN_UNDEF;
@@ -8783,7 +8820,7 @@ _nodePath(reader)
         if ( path == NULL ) {
           XSRETURN_UNDEF;
         }
-        RETVAL = C2Sv(path,NULL);
+        RETVAL = C2Sv(path);
 	xmlFree(path);
     OUTPUT:
         RETVAL
@@ -9192,7 +9229,7 @@ context_and_column( self )
 	}
 	*ctnt = 0;
         EXTEND(SP,2);
-        PUSHs(sv_2mortal(C2Sv(content, NULL)));
+        PUSHs(sv_2mortal(C2Sv(content)));
         PUSHs(sv_2mortal(newSViv(col)));
 
 #endif /* WITH_SERRORS */
@@ -9208,7 +9245,7 @@ _compilePattern(CLASS, ppattern, pattern_type, ns_map=NULL)
         AV * ns_map
 	int pattern_type
     PREINIT:
-        xmlChar * pattern = Sv2C(ppattern, NULL);
+        xmlChar * pattern = Sv2C(ppattern);
         xmlChar** namespaces = NULL;
 	SV** aux;
         int last,i;
@@ -9266,7 +9303,7 @@ xmlRegexpPtr
 _compile(CLASS, pregexp)
         SV * pregexp
     PREINIT:
-        xmlChar * regexp = Sv2C(pregexp, NULL);
+        xmlChar * regexp = Sv2C(pregexp);
 	PREINIT_SAVED_ERROR
     CODE:
         if ( regexp == NULL )
@@ -9287,7 +9324,7 @@ matches(self, pvalue)
         xmlRegexpPtr self
 	SV* pvalue
     PREINIT:
-        xmlChar * value = Sv2C(pvalue, NULL);
+        xmlChar * value = Sv2C(pvalue);
     CODE:
         if ( value == NULL )
 	   XSRETURN_UNDEF;
@@ -9320,7 +9357,7 @@ xmlXPathCompExprPtr
 new(CLASS, pxpath)
         SV * pxpath
     PREINIT:
-        xmlChar * xpath = Sv2C(pxpath, NULL);
+        xmlChar * xpath = Sv2C(pxpath);
         PREINIT_SAVED_ERROR
     CODE:
         if ( pxpath == NULL )

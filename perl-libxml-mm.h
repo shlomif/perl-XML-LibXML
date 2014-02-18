@@ -50,7 +50,6 @@ extern "C" {
  * @owner: libxml defines only the document, but not the node owner
  *         (in case of document fragments, they are not the same!)
  * @count: this is the internal reference count!
- * @encoding: this value is missing in libxml2's doc structure
  *
  * Since XML::LibXML will not know, is a certain node is already
  * defined in the perl layer, it can't surely tell when a node can be
@@ -68,7 +67,7 @@ struct _DocProxyNode {
     xmlNodePtr node;
     xmlNodePtr owner;
     int count;
-    int encoding; /* only used for proxies of xmlDocPtr */
+    int encoding; /* unused */
     int psvi_status; /* see below ... */
 };
 
@@ -147,12 +146,6 @@ typedef DocProxyNode* DocProxyNodePtr;
 #define PmmOWNER(node)       node->owner
 #define PmmOWNERPO(node)     ((node && PmmOWNER(node)) ? (ProxyNodePtr)PmmOWNER(node)->_private : node)
 
-#define PmmENCODING(node)    ((DocProxyNodePtr)(node))->encoding
-#define PmmNodeEncoding(node) ((DocProxyNodePtr)(node->_private))->encoding
-
-#define SetPmmENCODING(node,code) PmmENCODING(node)=(code)
-#define SetPmmNodeEncoding(node,code) PmmNodeEncoding(node)=(code)
-
 #define PmmInvalidatePSVI(doc) if (doc && doc->_private) ((DocProxyNodePtr)(doc->_private))->psvi_status = Pmm_PSVI_TAINTED;
 #define PmmIsPSVITainted(doc) (doc && doc->_private && (((DocProxyNodePtr)(doc->_private))->psvi_status == Pmm_PSVI_TAINTED))
 
@@ -208,21 +201,6 @@ PmmREFCNT_dec( ProxyNodePtr node );
 
 SV*
 PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner );
-
-/* PmmFixProxyEncoding
- * TYPE
- *    Method
- * PARAMETER
- *    @dfProxy: The proxystructure to fix.
- *
- * DESCRIPTION
- *
- * This little helper allows to fix the proxied encoding information
- * after a not standard operation was done. This is required for
- * XML::LibXSLT
- */
-void
-PmmFixProxyEncoding( ProxyNodePtr dfProxy );
 
 /* PmmSvNodeExt
  * TYPE
@@ -323,50 +301,32 @@ PmmNodeToGdomeSv( xmlNodePtr node );
 const char*
 PmmNodeTypeName( xmlNodePtr elem );
 
-xmlChar*
-PmmEncodeString( const char *encoding, const xmlChar *string, STRLEN len );
-
-char*
-PmmDecodeString( const char *encoding, const xmlChar *string, STRLEN* len);
-
 /* string manipulation will go elsewhere! */
 
 /*
  * NAME c_string_to_sv
  * TYPE function
  * SYNOPSIS
- * SV *my_sv = c_string_to_sv( "my string", encoding );
+ * SV *my_sv = c_string_to_sv( "my string" );
  *
  * this function converts a libxml2 string to a SV*. although the
  * string is copied, the func does not free the c-string for you!
  *
- * encoding is either NULL or a encoding string such as provided by
- * the documents encoding. if encoding is NULL UTF8 is assumed.
- *
  */
 SV*
-C2Sv( const xmlChar *string, const xmlChar *encoding );
+C2Sv( const xmlChar *string );
 
 /*
  * NAME sv_to_c_string
  * TYPE function
  * SYNOPSIS
- * SV *my_sv = sv_to_c_string( my_sv, encoding );
+ * SV *my_sv = sv_to_c_string( my_sv );
  *
  * this function converts a SV* to a libxml string. the SV-value will
  * be copied into a *newly* allocated string. (don't forget to free it!)
  *
- * encoding is either NULL or a encoding string such as provided by
- * the documents encoding. if encoding is NULL UTF8 is assumed.
- *
  */
 xmlChar *
-Sv2C( SV* scalar, const xmlChar *encoding );
-
-SV*
-nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode );
-
-xmlChar *
-nodeSv2C( SV * scalar, xmlNodePtr refnode );
+Sv2C( SV* scalar );
 
 #endif
