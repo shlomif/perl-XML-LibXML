@@ -6578,17 +6578,17 @@ insertData( self, offset, value )
             if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
                 data = domGetNodeValue(self);
                 if ( data != NULL && xmlStrlen( data ) > 0 ) {
-                    if ( xmlStrlen( data ) < offset ) {
+                    if ( xmlUTF8Strlen( data ) < offset ) {
                         data = xmlStrcat( data, encstring );
                         domSetNodeValue( self, data );
                     }
                     else {
-                        dl = xmlStrlen( data ) - offset;
+                        dl = xmlUTF8Strlen( data ) - offset;
 
                         if ( offset > 0 )
-                            new   = xmlStrsub(data, 0, offset );
+                            new   = xmlUTF8Strsub(data, 0, offset );
 
-                        after = xmlStrsub(data, offset, dl );
+                        after = xmlUTF8Strsub(data, offset, dl );
 
                         if ( new != NULL ) {
                             new = xmlStrcat(new, encstring );
@@ -6629,17 +6629,17 @@ deleteData( self, offset, length )
     CODE:
         if ( length > 0 && offset >= 0 ) {
             data = domGetNodeValue(self);
-            len = xmlStrlen( data );
+            len = xmlUTF8Strlen( data );
             if ( data != NULL
                  && len > 0
                  && len > offset ) {
                 dl1 = offset + length;
                 if ( offset > 0 )
-                    new = xmlStrsub( data, 0, offset );
+                    new = xmlUTF8Strsub( data, 0, offset );
 
                 if ( len > dl1 ) {
                     dl2 = len - dl1;
-                    after = xmlStrsub( data, dl1, dl2 );
+                    after = xmlUTF8Strsub( data, dl1, dl2 );
                     if ( new != NULL ) {
                         new = xmlStrcat( new, after );
                         xmlFree(after);
@@ -6675,7 +6675,7 @@ replaceData( self, offset,length, value )
 
             if ( encstring != NULL && xmlStrlen( encstring ) > 0 ) {
                 data = domGetNodeValue(self);
-                len = xmlStrlen( data );
+                len = xmlUTF8Strlen( data );
 
                 if ( data != NULL
                      && len > 0
@@ -6683,16 +6683,16 @@ replaceData( self, offset,length, value )
 
                     dl1 = offset + length;
                     if ( dl1 < len ) {
-                        dl2 = xmlStrlen( data ) - dl1;
+                        dl2 = xmlUTF8Strlen( data ) - dl1;
                         if ( offset > 0 ) {
-                            new = xmlStrsub(data, 0, offset );
+                            new = xmlUTF8Strsub(data, 0, offset );
                             new = xmlStrcat(new, encstring );
                         }
                         else {
                             new   = xmlStrdup( encstring );
                         }
 
-                        after = xmlStrsub(data, dl1, dl2 );
+                        after = xmlUTF8Strsub(data, dl1, dl2 );
                         new = xmlStrcat(new, after );
 
                         domSetNodeValue( self, new );
@@ -6703,7 +6703,7 @@ replaceData( self, offset,length, value )
                     else {
                         /* replace until end! */
                         if ( offset > 0 ) {
-                            new = xmlStrsub(data, 0, offset );
+                            new = xmlUTF8Strsub(data, 0, offset );
                             new = xmlStrcat(new, encstring );
                         }
                         else {
