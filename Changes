@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+Not yet released
+    - Fix substringData
+        - https://rt.cpan.org/Ticket/Display.html?id=88730
+
 2.0110          Sat  1 Feb 15:59:54 IST 2014
     - Add "use strict;" and "use warnings;" to all modules (CPANTS).
     - MIN_PERL_VERSION (CPANTS).

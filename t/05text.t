@@ -6,7 +6,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 36;
+use Test::More tests => 37;
 
 use XML::LibXML;
 
@@ -27,8 +27,11 @@ my $doc = XML::LibXML::Document->new();
     my $tnstr = $textnode->substringData( 1,2 );
     # TEST
     is( $tnstr , "oo", 'substring 1');
+    $tnstr = $textnode->substringData( 0,3 );
     # TEST
-    is( $textnode->nodeValue(), $foo,  'substring 2' );
+    is( $tnstr , "foo", 'substring 2');
+    # TEST
+    is( $textnode->nodeValue(), $foo,  'substring - text node unchanged' );
 
     # 3. Expansion
     $textnode->appendData( $foo );

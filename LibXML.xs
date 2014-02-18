@@ -6510,18 +6510,11 @@ substringData( self, offset, length )
     PREINIT:
         xmlChar * data = NULL;
         xmlChar * substr = NULL;
-        int len = 0;
-        int dl = 0;
     CODE:
-        if ( offset >= 0 && length > 0 ) {
-            dl = offset + length - 1 ;
+        if ( offset >= 0 && length >= 0 ) {
             data = domGetNodeValue( self );
-            len = xmlStrlen( data );
-            if ( data != NULL && len > 0 && len > offset ) {
-                if ( dl > len )
-                    dl = offset + len;
-
-                substr = xmlStrsub( data, offset, dl );
+            if ( data != NULL ) {
+                substr = xmlUTF8Strsub( data, offset, length );
                 RETVAL = C2Sv( (const xmlChar*)substr, NULL );
                 xmlFree( substr );
             }
