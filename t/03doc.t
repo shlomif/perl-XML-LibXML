@@ -13,7 +13,7 @@ use strict;
 use warnings;
 
 # Should be 168.
-use Test::More tests => 193;
+use Test::More tests => 181;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -754,17 +754,9 @@ SKIP:
         is($dom->actualEncoding,$enc, ' TODO : Add test name');
         # TEST:$c++;
         is($dom->getDocumentElement->getAttribute('foo'),'bar', ' TODO : Add test name');
-        # TEST:$c++;
-        is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo')), 'bar', ' TODO : Add test name');
-        # TEST:$c++;
-        is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo')), 'bar', ' TODO : Add test name');
         my $exp_enc = $enc eq 'UTF-16' ? 'UTF-16LE' : $enc;
         # TEST:$c++;
         is($dom->getDocumentElement->getAttribute('foo',1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
-        # TEST:$c++;
-        is($dom->getDocumentElement->getAttribute(Encode::encode('UTF-16','foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
-        # TEST:$c++;
-        is($dom->getDocumentElement->getAttribute(Encode::encode($enc,'foo'),1), Encode::encode($exp_enc,'bar'), ' TODO : Add test name');
     }
     # TEST*$num_encs*$c
 }

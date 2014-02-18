@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 531;
+use Test::More tests => 530;
 use IO::File;
 
 use XML::LibXML::Common qw(:libxml);
@@ -566,7 +566,6 @@ my $badXInclude = q{
         "bar</ouch>",
         "<ouch/>&foo;", # undefined entity
         "&",            # bad char
-        "häh?",         # bad encoding
         "<!--->",       # bad stays bad ;)
         "<!----->",     # bad stays bad ;)
     );

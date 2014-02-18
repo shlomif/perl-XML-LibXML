@@ -151,8 +151,6 @@ my $doc = XML::LibXML::Document->new();
     # UTF-8 tests
 
     my $test_str  = "te\xDFt";
-    # Latin1 strings still fail.
-    utf8::upgrade($test_str);
 
     # 1. creation
     my $textnode = $doc->createTextNode($test_str);

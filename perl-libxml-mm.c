@@ -335,7 +335,6 @@ PmmNewNode(xmlNodePtr node)
             proxy = (ProxyNodePtr)xmlMalloc(sizeof(struct _DocProxyNode));
             if (proxy != NULL) {
                 ((DocProxyNodePtr)proxy)->psvi_status = Pmm_NO_PSVI;
-                SetPmmENCODING(proxy, XML_CHAR_ENCODING_NONE);
             }
             break;
         default:
@@ -546,18 +545,6 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 #endif
         PmmREFCNT_inc(dfProxy);
         /* fprintf(stderr, "REFCNT incremented on node: 0x%08.8X\n", dfProxy); */
-
-        switch ( node->type ) {
-        case XML_DOCUMENT_NODE:
-        case XML_HTML_DOCUMENT_NODE:
-        case XML_DOCB_DOCUMENT_NODE:
-            if ( ((xmlDocPtr)node)->encoding != NULL ) {
-                SetPmmENCODING(dfProxy, (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding ));
-            }
-            break;
-        default:
-            break;
-        }
 #ifdef XML_LIBXML_THREADS
       if( PmmUSEREGISTRY )
 		SvUNLOCK(PROXY_NODE_REGISTRY_MUTEX);
@@ -916,338 +903,30 @@ PmmSvContext( SV * scalar )
     return retval;
 }
 
-xmlChar*
-PmmFastEncodeString( int charset,
-                     const xmlChar *string,
-                     const xmlChar *encoding,
-                     STRLEN len )
-{
-    xmlCharEncodingHandlerPtr coder = NULL;
-    xmlChar *retval = NULL;
-    xmlBufferPtr in = NULL, out = NULL;
-
-    int i;
-    /* first check that the input is not ascii */
-    /* since we do not want to recode ascii as, say, UTF-16 */
-    if (len == 0)
-        len=xmlStrlen(string);
-    for (i=0; i<len; i++) {
-        if(!string[i] || string[i] & 0x80) {
-            break;
-        }
-    }
-    if (i>=len) return xmlStrdup( string );
-    xs_warn("PmmFastEncodeString: string is non-ascii\n");
-
-    if ( charset == XML_CHAR_ENCODING_ERROR){
-        if (xmlStrcmp(encoding,(const xmlChar*)"UTF-16LE")==0) {
-            charset = XML_CHAR_ENCODING_UTF16LE;
-        } else if (xmlStrcmp(encoding,(const xmlChar*) "UTF-16BE")==0) {
-            charset = XML_CHAR_ENCODING_UTF16BE;
-        }
-    }
-    if ( charset == XML_CHAR_ENCODING_UTF8 ) {
-        /* warn("use UTF8 for encoding ... %s ", string); */
-        return xmlStrdup( string );
-    }
-    else if ( charset == XML_CHAR_ENCODING_UTF16LE || charset == XML_CHAR_ENCODING_UTF16BE ){
-        /* detect and strip BOM, if any */
-        if (len>=2 && (char)string[0]=='\xFE' && (char)string[1]=='\xFF') {
-            xs_warn("detected BE BOM\n");
-            string += 2;
-            len    -= 2;
-            coder = xmlGetCharEncodingHandler( XML_CHAR_ENCODING_UTF16BE );
-        } else if (len>=2 && (char)string[0]=='\xFF' && (char)string[1]=='\xFE') {
-            xs_warn("detected LE BOM\n");
-            string += 2;
-            len    -= 2;
-            coder = xmlGetCharEncodingHandler( XML_CHAR_ENCODING_UTF16LE );
-        } else {
-            coder= xmlGetCharEncodingHandler( charset );
-        }
-    }
-    else if ( charset == XML_CHAR_ENCODING_ERROR ){
-        /* warn("no standard encoding %s\n", encoding); */
-        coder =xmlFindCharEncodingHandler( (const char *)encoding );
-    }
-    else if ( charset == XML_CHAR_ENCODING_NONE ){
-        xs_warn("PmmFastEncodeString: no encoding found\n");
-    }
-    else {
-        /* warn( "use document encoding %s (%d)", encoding, charset ); */
-        coder= xmlGetCharEncodingHandler( charset );
-    }
-
-    if ( coder != NULL ) {
-        xs_warn("PmmFastEncodeString: coding machine found \n");
-        in    = xmlBufferCreateStatic((void*)string, len);
-        out   = xmlBufferCreate();
-        if ( xmlCharEncInFunc( coder, out, in ) >= 0 ) {
-            retval = xmlStrdup( out->content );
-            /* warn( "encoded string is %s" , retval); */
-        }
-        else {
-            /* warn( "b0rked encoiding!\n"); */
-        }
-
-        xmlBufferFree( in );
-        xmlBufferFree( out );
-        xmlCharEncCloseFunc( coder );
-    }
-    return retval;
-}
-
-xmlChar*
-PmmFastDecodeString( int charset,
-                     const xmlChar *string,
-                     const xmlChar *encoding,
-                     STRLEN* len )
-{
-    xmlCharEncodingHandlerPtr coder = NULL;
-    xmlChar *retval = NULL;
-    xmlBufferPtr in = NULL, out = NULL;
-    if (len==NULL) return NULL;
-    *len = 0;
-    if ( charset == XML_CHAR_ENCODING_ERROR){
-        if (xmlStrcmp(encoding,(const xmlChar*)"UTF-16LE")==0) {
-            charset = XML_CHAR_ENCODING_UTF16LE;
-        } else if (xmlStrcmp(encoding,(const xmlChar*) "UTF-16BE")==0) {
-            charset = XML_CHAR_ENCODING_UTF16BE;
-        }
-    }
-
-    if ( charset == XML_CHAR_ENCODING_UTF8 ) {
-        retval = xmlStrdup( string );
-        *len = xmlStrlen(retval);
-    }
-    else if ( charset == XML_CHAR_ENCODING_ERROR ){
-        coder = xmlFindCharEncodingHandler( (const char *) encoding );
-    }
-    else if ( charset == XML_CHAR_ENCODING_NONE ){
-        warn("PmmFastDecodeString: no encoding found\n");
-    }
-    else {
-        coder= xmlGetCharEncodingHandler( charset );
-    }
-
-    if ( coder != NULL ) {
-        /* warn( "do encoding %s", string ); */
-        in  = xmlBufferCreateStatic((void*)string,xmlStrlen(string));
-        out = xmlBufferCreate();
-        if ( xmlCharEncOutFunc( coder, out, in ) >= 0 ) {
-          *len = xmlBufferLength(out);
-	  retval = xmlStrndup(xmlBufferContent(out), *len);
-        }
-        else {
-            /* xs_warn("PmmFastEncodeString: decoding error\n"); */
-        }
-
-        xmlBufferFree( in );
-        xmlBufferFree( out );
-        xmlCharEncCloseFunc( coder );
-    }
-    return retval;
-}
-
-/**
- * encodeString returns an UTF-8 encoded String
- * while the encodig has the name of the encoding of string
- **/
-xmlChar*
-PmmEncodeString( const char *encoding, const xmlChar *string, STRLEN len ){
-    xmlCharEncoding enc;
-    xmlChar *ret = NULL;
-
-    if ( string != NULL ) {
-        if( encoding != NULL ) {
-            xs_warn("PmmEncodeString: encoding to UTF-8 from:\n");
-            xs_warn( encoding );
-            enc = xmlParseCharEncoding( encoding );
-            ret = PmmFastEncodeString( enc, string, (const xmlChar *)encoding,len);
-        }
-        else {
-            /* if utf-8 is requested we do nothing */
-            ret = xmlStrdup( string );
-        }
-    }
-    return ret;
-}
-
 SV*
-C2Sv( const xmlChar *string, const xmlChar *encoding )
+C2Sv(const xmlChar *string)
 {
     SV *retval = &PL_sv_undef;
-    xmlCharEncoding enc;
 
-    if ( string != NULL ) {
-        if ( encoding != NULL ) {
-            enc = xmlParseCharEncoding( (const char*)encoding );
-        }
-        else {
-            enc = 0;
-        }
-        if ( enc == 0 ) {
-            /* this happens if the encoding is "" or NULL */
-            enc = XML_CHAR_ENCODING_UTF8;
-        }
-
-        retval = newSVpvn( (const char *)string, (STRLEN) xmlStrlen(string) );
-
-        if ( enc == XML_CHAR_ENCODING_UTF8 ) {
-            /* create an UTF8 string. */
-#ifdef HAVE_UTF8
-            xs_warn("C2Sv: set UTF8-SV-flag\n");
-            SvUTF8_on(retval);
-#endif
-        }
+    if (string != NULL) {
+        retval = newSVpvn_utf8((const char *)string, xmlStrlen(string), 1);
     }
 
     return retval;
 }
 
 xmlChar *
-Sv2C( SV* scalar, const xmlChar *encoding )
+Sv2C(SV *scalar)
 {
     xmlChar *retval = NULL;
 
-    xs_warn("SV2C: start!\n");
-    if ( scalar != NULL && scalar != &PL_sv_undef ) {
-        STRLEN len = 0;
-        char * t_pv =SvPV(scalar, len);
-        xmlChar* ts = NULL;
-        xmlChar* string = xmlStrdup((xmlChar*)t_pv);
-        if ( xmlStrlen(string) > 0 ) {
-            xs_warn( "SV2C:   no undefs\n" );
-#ifdef HAVE_UTF8
-            xs_warn( "SV2C:   use UTF8\n" );
-            if( !DO_UTF8(scalar) && encoding != NULL ) {
-#else
-            if ( encoding != NULL ) {
-#endif
-                xs_warn( "SV2C:   domEncodeString!\n" );
-                ts= PmmEncodeString( (const char *)encoding, string, len );
-                xs_warn( "SV2C:   done encoding!\n" );
-                if ( string != NULL ) {
-                    xmlFree(string);
-                }
-                string=ts;
-            }
-        }
-
-        retval = xmlStrdup(string);
-        if (string != NULL ) {
-            xmlFree(string);
-        }
+    if (scalar != NULL && scalar != &PL_sv_undef) {
+        STRLEN len;
+        const char *utf8 = SvPVutf8(scalar, len);
+        retval = xmlStrndup((const xmlChar*)utf8, len);
     }
-    xs_warn("SV2C: end!\n");
+
     return retval;
-}
-
-SV*
-nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
-{
-    /* this is a little helper function to avoid to much redundand
-       code in LibXML.xs */
-    SV* retval = &PL_sv_undef;
-    STRLEN len = 0;
-    xmlChar * decoded = NULL;
-
-    if ( refnode != NULL ) {
-        xmlDocPtr real_doc = refnode->doc;
-        if ( real_doc != NULL && real_doc->encoding != NULL ) {
-            xs_warn( " encode node !!" );
-            /* The following statement is to handle bad
-               values set by XML::LibXSLT */
-
-            if ( PmmNodeEncoding(real_doc) == XML_CHAR_ENCODING_NONE ) {
-                SetPmmNodeEncoding(real_doc, XML_CHAR_ENCODING_UTF8);
-            }
-
-            decoded = PmmFastDecodeString( PmmNodeEncoding(real_doc),
-                                           (const xmlChar *)string,
-                                           (const xmlChar *)real_doc->encoding,
-                                           &len );
-
-            xs_warn( "push decoded string into SV" );
-            retval = newSVpvn( (const char *)decoded, len );
-            xmlFree( decoded );
-
-            if ( PmmNodeEncoding( real_doc ) == XML_CHAR_ENCODING_UTF8 ) {
-#ifdef HAVE_UTF8
-                xs_warn("nodeC2Sv: set UTF8-SV-flag\n");
-                SvUTF8_on(retval);
-#endif
-            }
-
-            return retval;
-        }
-    }
-
-    return C2Sv(string, NULL );
-}
-
-xmlChar *
-nodeSv2C( SV * scalar, xmlNodePtr refnode )
-{
-    /* this function requires conditionized compiling, because we
-       request a function, that does not exists in earlier versions of
-       perl. in this cases the library assumes, all strings are in
-       UTF8. if a programmer likes to have the intelligent code, he
-       needs to upgrade perl */
-
-    if ( refnode != NULL ) {
-        xmlDocPtr real_dom = refnode->doc;
-        xs_warn("nodeSv2C: have node!\n");
-        if (real_dom != NULL && real_dom->encoding != NULL ) {
-            xs_warn("nodeSv2C:   encode string!\n");
-            /*  speed things a bit up.... */
-            if ( scalar != NULL && scalar != &PL_sv_undef ) {
-                STRLEN len = 0;
-                char * t_pv =SvPV(scalar, len);
-                xmlChar* string = NULL;
-                if ( t_pv && len > 0 ) {
-                    xs_warn( "nodeSv2C:   no undefs\n" );
-#ifdef HAVE_UTF8
-                    xs_warn( "nodeSv2C:   use UTF8\n" );
-                    if( !DO_UTF8(scalar) ) {
-#endif
-                        xs_warn( "nodeSv2C:     domEncodeString!\n" );
-                        /* The following statement is to handle bad
-                           values set by XML::LibXSLT */
-                        if ( PmmNodeEncoding(real_dom) == XML_CHAR_ENCODING_NONE ) {
-                            SetPmmNodeEncoding(real_dom, XML_CHAR_ENCODING_UTF8);
-                        }
-                        /* the following allocates a new string (by xmlStrdup if no conversion is done) */
-                        string= PmmFastEncodeString( PmmNodeEncoding(real_dom),
-                                                 (xmlChar*) t_pv,
-                                                 (const xmlChar*)real_dom->encoding,
-                                                 len);
-                        xs_warn( "nodeSv2C:     done!\n" );
-#ifdef HAVE_UTF8
-                    } else {
-                        xs_warn( "nodeSv2C:   no encoding set, use UTF8!\n" );
-                    }
-#endif
-                }
-                if (string==NULL) {
-                    return xmlStrndup((xmlChar*)t_pv,len);
-                } else {
-                    return string;
-                }
-                /* if ( string == NULL ) warn( "nodeSv2C:     string is NULL\n" ); */
-            }
-            else {
-                xs_warn( "nodeSv2C:   return NULL\n" );
-                return NULL;
-            }
-        }
-        else {
-            xs_warn( "nodeSv2C:   document has no encoding defined! use simple SV extraction\n" );
-        }
-    }
-    xs_warn("nodeSv2C: no encoding !!\n");
-
-    return  Sv2C( scalar, NULL );
 }
 
 SV *
