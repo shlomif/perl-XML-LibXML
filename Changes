@@ -1,6 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
 Not yet released
+    - Make insertData, deleteData, replaceData work correctly with UTF-8
+      strings.
     - Fix substringData
         - https://rt.cpan.org/Ticket/Display.html?id=88730
 
