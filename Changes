@@ -1,6 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
 Not yet released
+    - Die if a file handle with an encoding layer returns more bytes
+      than requested in parse_fh.
+        - https://rt.cpan.org/Ticket/Display.html?id=78448
     - Make insertData, deleteData, replaceData work correctly with UTF-8
       strings.
     - Fix substringData
