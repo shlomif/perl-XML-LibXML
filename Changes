@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+    - Fix "Threads still failing?" Bug report.
+        - https://rt.cpan.org/Ticket/Display.html?id=91800
+        - Thanks to Daniel for the bug report and a test case, and to
+        YOREEK for the patch.
+
 2.0110          Sat  1 Feb 15:59:54 IST 2014
     - Add "use strict;" and "use warnings;" to all modules (CPANTS).
     - MIN_PERL_VERSION (CPANTS).
