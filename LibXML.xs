@@ -4112,8 +4112,33 @@ MODULE = XML::LibXML         PACKAGE = XML::LibXML::Node
 void
 DESTROY( node )
         SV * node
+    PREINIT:
+        int count;
+        SV *is_shared;
     CODE:
 #ifdef XML_LIBXML_THREADS
+    if ( (is_shared = get_sv("XML::LibXML::__threads_shared", 0)) == NULL ) {
+        is_shared = &PL_sv_undef;
+    }
+    if ( SvTRUE(is_shared) ) {
+        dSP;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs(node);
+        PUTBACK;
+        count = call_pv("threads::shared::is_shared", G_SCALAR);
+        SPAGAIN;
+        if (count != 1)
+            croak("Couldn't checks if the variable is shared or not\n");
+        is_shared = POPs;
+        PUTBACK;
+        FREETMPS;
+        LEAVE;
+        if (is_shared != &PL_sv_undef) {
+            XSRETURN_UNDEF;
+        }
+    }
 	if( PmmUSEREGISTRY ) {
 	  SvLOCK(PROXY_NODE_REGISTRY_MUTEX);
 	  PmmRegistryREFCNT_dec(SvPROXYNODE(node));
