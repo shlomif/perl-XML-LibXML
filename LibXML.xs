@@ -1689,10 +1689,6 @@ _parse_string(self, string, dir = &PL_sv_undef)
             real_obj = LibXML_init_parser(self, ctxt);
             recover = LibXML_get_recover(real_obj);
 
-
-            if ( directory != NULL ) {
-                ctxt->directory = directory;
-            }
             ctxt->_private = (void*)self;
 
             /* make libxml2-2.6 display line number on error */
@@ -1709,7 +1705,6 @@ _parse_string(self, string, dir = &PL_sv_undef)
             xmlParseDocument(ctxt);
             xs_warn( "document parsed \n");
 
-            ctxt->directory = NULL;
             well_formed = ctxt->wellFormed;
             valid = ctxt->valid;
             validate = ctxt->validate;
