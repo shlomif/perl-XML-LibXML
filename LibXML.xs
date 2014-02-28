@@ -2867,6 +2867,8 @@ _toString(self, format=0)
             else {
                 xmlAddPrevSibling(self->children, INT2PTR(xmlNodePtr,intSubset));
             }
+            /* Must be reset to avoid memory leak. */
+            self->intSubset = intSubset;
         }
 
         xmlSaveNoEmptyTags = oldTagFlag;
@@ -2951,6 +2953,8 @@ toFH( self, filehandler, format=0 )
             else {
                 xmlAddPrevSibling(self->children, INT2PTR(xmlNodePtr,intSubset));
             }
+            /* Must be reset to avoid memory leak. */
+            self->intSubset = intSubset;
         }
 
         xmlIndentTreeOutput = t_indent_var;
