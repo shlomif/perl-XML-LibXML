@@ -6541,6 +6541,7 @@ substringData( self, offset, length )
                 substr = xmlUTF8Strsub( data, offset, length );
                 RETVAL = C2Sv( (const xmlChar*)substr, NULL );
                 xmlFree( substr );
+                xmlFree(data);
             }
             else {
                 XSRETURN_UNDEF;
@@ -6634,6 +6635,8 @@ insertData( self, offset, value )
                 else {
                     domSetNodeValue( self, encstring );
                 }
+            }
+            if (encstring != NULL) {
                 xmlFree(encstring);
             }
         }
@@ -6675,6 +6678,10 @@ deleteData( self, offset, length )
 
                 domSetNodeValue( self, new );
                 xmlFree(new);
+            }
+
+            if (data != NULL) {
+                xmlFree(data);
             }
         }
 
