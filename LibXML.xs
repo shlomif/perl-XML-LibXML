@@ -522,6 +522,11 @@ LibXML_read_perl (SV * ioref, char * buffer, int len)
 
     SPAGAIN;
 
+    /*
+     * TODO: Croaking here can cause memory leaks in the callers of this
+     * function.
+     */
+
     if (cnt != 1) {
         croak("read method call failed");
     }
