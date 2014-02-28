@@ -1786,6 +1786,10 @@ _parse_sax_string(self, string)
             }
 
             PmmSAXCloseContext(ctxt);
+            if (ctxt->myDoc != NULL) {
+                /* Not freed by xmlFreeParserCtxt */
+                xmlFreeDoc(ctxt->myDoc);
+            }
             xmlFreeParserCtxt(ctxt);
         }
 
@@ -1964,6 +1968,10 @@ _parse_sax_fh(self, fh, dir = &PL_sv_undef)
             ctxt->sax = NULL;
             xmlFree(sax);
             PmmSAXCloseContext(ctxt);
+            if (ctxt->myDoc != NULL) {
+                /* Not freed by xmlFreeParserCtxt */
+                xmlFreeDoc(ctxt->myDoc);
+            }
             xmlFreeParserCtxt(ctxt);
         }
         CLEANUP_ERROR_HANDLER;
@@ -2079,6 +2087,10 @@ _parse_sax_file(self, filename_sv)
             }
 
             PmmSAXCloseContext(ctxt);
+            if (ctxt->myDoc != NULL) {
+                /* Not freed by xmlFreeParserCtxt */
+                xmlFreeDoc(ctxt->myDoc);
+            }
             xmlFreeParserCtxt(ctxt);
         }
 
@@ -2436,6 +2448,10 @@ _parse_sax_xml_chunk(self, svchunk, enc = &PL_sv_undef)
 
             xmlFree( handler );
             PmmSAXCloseContext(ctxt);
+            if (ctxt->myDoc != NULL) {
+                /* Not freed by xmlFreeParserCtxt */
+                xmlFreeDoc(ctxt->myDoc);
+            }
             xmlFreeParserCtxt(ctxt);
 
             /* free the chunk we created */
