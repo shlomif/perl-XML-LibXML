@@ -3553,40 +3553,27 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
                 }
 
                 if ( ns == NULL ) {
-                    xmlFree(nsURI);
-                    xmlFree(localname);
-                    if ( prefix ) {
-                        xmlFree(prefix);
-                    }
-                    xmlFree(name);
-                    if ( value ) {
-                        xmlFree(value);
-                    }
-                    XSRETURN_UNDEF;
+                    RETVAL = &PL_sv_undef;
+                }
+                else {
+                    newAttr = xmlNewDocProp( self, localname, value );
+                    xmlSetNs((xmlNodePtr)newAttr, ns);
+
+                    RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, PmmPROXYNODE(self) );
                 }
 
-                newAttr = xmlNewDocProp( self, localname, value );
-                xmlSetNs((xmlNodePtr)newAttr, ns);
-
-                RETVAL = PmmNodeToSv((xmlNodePtr)newAttr, PmmPROXYNODE(self) );
-
-                xmlFree(nsURI);
-                xmlFree(name);
                 if ( prefix ) {
                     xmlFree(prefix);
                 }
                 xmlFree(localname);
-                if ( value ) {
-                    xmlFree(value);
-                }
             }
             else {
-                croak( "can't create a new namespace on an attribute!" );
+                xmlFree(nsURI);
                 xmlFree(name);
                 if ( value ) {
                     xmlFree(value);
                 }
-                XSRETURN_UNDEF;
+                croak( "can't create a new namespace on an attribute!" );
             }
         }
         else {
@@ -3595,11 +3582,15 @@ createAttributeNS( self, URI, pname, pvalue=&PL_sv_undef )
             buffer = xmlEncodeEntitiesReentrant(self, value);
             newAttr = xmlNewDocProp( self, name, buffer );
             RETVAL = PmmNodeToSv((xmlNodePtr)newAttr,PmmPROXYNODE(self));
-            xmlFree(name);
             xmlFree(buffer);
-            if ( value ) {
-                xmlFree(value);
-            }
+        }
+
+        if (nsURI != NULL) {
+            xmlFree(nsURI);
+        }
+        xmlFree(name);
+        if (value != NULL) {
+            xmlFree(value);
         }
     OUTPUT:
         RETVAL
