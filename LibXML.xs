@@ -5092,6 +5092,7 @@ setBaseURI( self, URI )
         uri = nodeSv2C( URI, self );
         if ( uri != NULL ) {
             xmlNodeSetBase( self, uri );
+            xmlFree(uri);
         }
 
 SV*
