@@ -4864,13 +4864,14 @@ void
 removeChildNodes( self )
         xmlNodePtr self
     PREINIT:
-        xmlNodePtr elem, fragment;
+        xmlNodePtr elem, fragment, next;
         ProxyNodePtr docfrag;
     CODE:
         docfrag  = PmmNewFragment( self->doc );
         fragment = PmmNODE( docfrag );
         elem = self->children;
         while ( elem ) {
+            next = elem->next;
             xmlUnlinkNode( elem );
             /* this following piece is the function of domAppendChild()
              * but in this special case we can avoid most of the logic of
@@ -4886,7 +4887,7 @@ removeChildNodes( self )
                 elem->parent= fragment;
             }
             PmmFixOwnerNode( elem, docfrag );
-            elem = elem->next;
+            elem = next;
         }
 
         self->children = self->last = NULL;
