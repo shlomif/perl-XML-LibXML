@@ -2065,7 +2065,6 @@ _parse_sax_file(self, filename_sv)
             real_obj = LibXML_init_parser(self, ctxt);
             recover = LibXML_get_recover(real_obj);
 
-            ctxt->sax = PSaxGetHandler();
             PmmSAXInitContext( ctxt, self, saved_error );
             xs_warn( "context initialized \n");
 
