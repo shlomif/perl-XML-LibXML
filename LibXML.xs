@@ -2594,7 +2594,9 @@ _end_push(self, pctxt, restore)
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
 
         if ( real_doc != NULL ) {
-            if ( restore || well_formed ) {
+            if (!LibXML_will_die_ctx(saved_error, restore)
+                && (restore || well_formed)
+            ) {
                 RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
             } else {
                 xmlFreeDoc(real_doc);
@@ -2633,9 +2635,11 @@ _end_sax_push(self, pctxt)
         xmlParseChunk(ctxt, "", 0, 1); /* finish the parse */
         xs_warn( "Finished with SAX push parser\n" );
 
-        xmlFree(ctxt->sax);
-        ctxt->sax = NULL;
         PmmSAXCloseContext(ctxt);
+        if (ctxt->myDoc) {
+            /* Not freed by xmlFreeParserCtxt */
+            xmlFreeDoc(ctxt->myDoc);
+        }
         xmlFreeParserCtxt(ctxt);
         PmmNODE( SvPROXYNODE( pctxt ) ) = NULL;
 
