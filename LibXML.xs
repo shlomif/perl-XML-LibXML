@@ -2739,14 +2739,15 @@ int
 load_catalog( self, filename )
         SV * filename
     PREINIT:
-        const char * fn = (const char *) Sv2C(filename, NULL);
-    INIT:
-        if ( fn == NULL || xmlStrlen( (xmlChar *)fn ) == 0 ) {
-            croak( "cannot load catalog" );
-        }
+        const char *fn;
+        STRLEN len;
     CODE:
 #ifdef LIBXML_CATALOG_ENABLED
-        RETVAL = xmlLoadCatalog( fn );
+        fn = SvPV(filename, len);
+        if (len == 0) {
+            croak( "cannot load catalog" );
+        }
+        RETVAL = xmlLoadCatalog(fn);
 #else
         XSRETURN_UNDEF;
 #endif
