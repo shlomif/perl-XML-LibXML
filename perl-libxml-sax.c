@@ -380,6 +380,10 @@ PmmGetNsMapping( xmlNodePtr ns_stack, const xmlChar * prefix )
 }
 
 
+/*
+ * TODO: The SAX handlers cause memory leaks when they croak.
+ */
+
 void
 PSaxStartPrefix( PmmSAXVectorPtr sax, const xmlChar * prefix,
                  const xmlChar * uri, SV * handler )
