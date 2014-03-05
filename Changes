@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+2.0112
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=93429 .
+        - Thanks to Nick Wellnhofer for the report and test.
+
 2.0111          Wed  5 Mar 17:15:57 IST 2014
     - Skip t/40reader_mem_error.t with libxml2 < 2.7.4
       The failure is probably due to a known double-free bug.
