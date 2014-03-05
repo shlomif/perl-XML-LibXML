@@ -263,8 +263,6 @@ sub is_xml_ordered
     return $comparator->compare();
 }
 
-1;
-
 my $xml_source = <<'EOF';
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
@@ -337,13 +335,21 @@ my $final_source = <<'EOF';
 </html>
 EOF
 
-my @common = (validation => 0, load_ext_dtd => 0, no_network => 1);
-# TEST
-Test::XML::Ordered::is_xml_ordered(
-    [ string => $final_source, @common,],
-    [ string => $xml_source, @common,],
-    "foo",
-);
+SKIP: {
+    # RT #84564
+    # https://bugzilla.gnome.org/show_bug.cgi?id=447899
+    if (XML::LibXML::LIBXML_RUNTIME_VERSION() < 20704) {
+        skip('Known double-free with libxml2 < 2.7.4', 1);
+    }
+
+    my @common = (validation => 0, load_ext_dtd => 0, no_network => 1);
+    # TEST
+    Test::XML::Ordered::is_xml_ordered(
+        [ string => $final_source, @common,],
+        [ string => $xml_source, @common,],
+        "foo",
+    );
+}
 
 # TEST
 ok (1, "Finished");
