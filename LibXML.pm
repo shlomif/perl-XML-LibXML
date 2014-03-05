@@ -257,6 +257,8 @@ use constant {
   XML_PARSE_NOBASEFIX	  => 262144,   # do not fixup XINCLUDE xml#base uris
   XML_PARSE_HUGE	  => 524288,   # relax any hardcoded limit from the parser
   XML_PARSE_OLDSAX	  => 1048576,  # parse using SAX2 interface from before 2.7.0
+  HTML_PARSE_RECOVER => (1<<0),       # suppress error reports
+  HTML_PARSE_NOERROR  => (1<<5),       # suppress error reports
 };
 
 $XML_LIBXML_PARSE_DEFAULTS = ( XML_PARSE_NODICT | XML_PARSE_DTDLOAD | XML_PARSE_NOENT );
@@ -1052,7 +1054,19 @@ sub _html_options {
   $opts = {} unless ref $opts;
   #  return (undef,undef) unless ref $opts;
   my $flags = 0;
-  $flags |=     1 if exists $opts->{recover} ? $opts->{recover} : $self->recover;
+  {
+    my $recover = exists $opts->{recover} ? $opts->{recover} : $self->recover;
+
+    if ($recover)
+    {
+      $flags |= HTML_PARSE_RECOVER;
+      if ($recover == 2)
+      {
+        $flags |= HTML_PARSE_NOERROR;
+      }
+    }
+  }
+
   $flags |=     4 if $opts->{no_defdtd}; # default is ON: injects DTD as needed
   $flags |=    32 if exists $opts->{suppress_errors} ? $opts->{suppress_errors} : $self->get_option('suppress_errors');
   # This is to fix https://rt.cpan.org/Ticket/Display.html?id=58024 :
