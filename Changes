@@ -1,10 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
-Not yet released
+2.0111          Wed  5 Mar 17:15:57 IST 2014
     - Skip t/40reader_mem_error.t with libxml2 < 2.7.4
       The failure is probably due to a known double-free bug.
         - https://rt.cpan.org/Ticket/Display.html?id=84564
         - https://bugzilla.gnome.org/show_bug.cgi?id=447899
+        - Thanks to Nick Wellnhofer for the pull request.
     - Die if a file handle with an encoding layer returns more bytes
       than requested in parse_fh.
         - https://rt.cpan.org/Ticket/Display.html?id=78448
