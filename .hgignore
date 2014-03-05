@@ -40,3 +40,4 @@ MYMETA.yml
 perl-libxml-mm.o
 perl-libxml-sax.o
 xpath.o
+XML-LibXML-*
