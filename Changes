@@ -1,6 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
 2.0112
+    - Make $schema->validate work with elements. This uses
+      xmlSchemaValidateOneElement under the hood.
+        - https://rt.cpan.org/Ticket/Display.html?id=93496
+        - Thanks to Jeremy Marshall for the report.
     - Fix https://rt.cpan.org/Ticket/Display.html?id=93429 .
         - Thanks to Nick Wellnhofer for the report and test.
 
