@@ -1,6 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
 2.0112
+    - Fix segfaults when accessing attributes of DTD nodes
+        - https://rt.cpan.org/Ticket/Display.html?id=71076
+        - Thanks to Ralph Merridew for the report.
     - Fix https://rt.cpan.org/Ticket/Display.html?id=93429 .
         - Thanks to Nick Wellnhofer for the report and test.
 
