@@ -4,11 +4,12 @@ Revision history for Perl extension XML::LibXML
     - Fix segfaults when accessing attributes of DTD nodes
         - https://rt.cpan.org/Ticket/Display.html?id=71076
         - Thanks to Ralph Merridew for the report.
+    - Make $schema->validate work with elements. This uses
+      xmlSchemaValidateOneElement under the hood.
+        - https://rt.cpan.org/Ticket/Display.html?id=93496
+        - Thanks to Jeremy Marshall for the report.
     - Fix https://rt.cpan.org/Ticket/Display.html?id=93429 .
-        - Thanks to Nick Wellnhofer for the report and the test.
-    - Apply patch to build with MSVC on Windows.
-        - https://rt.cpan.org/Ticket/Display.html?id=90064
-        - Thanks to Nick Wellnhofer for the investigation and the patch.
+        - Thanks to Nick Wellnhofer for the report and test.
 
 2.0111          Wed  5 Mar 17:15:57 IST 2014
     - Skip t/40reader_mem_error.t with libxml2 < 2.7.4
