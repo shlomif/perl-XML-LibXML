@@ -309,6 +309,7 @@ if (!defined $config{LIBS} || $config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
             # Put several options.
             $config_LIBS_alternatives = [
                 map { "$l $_" }
+                q/ -llibxml2/,
                 q/ -lxml2 -lzlib/,
                 q/ -llibxml2 -lzlib -llibgettextlib.dll/
             ];

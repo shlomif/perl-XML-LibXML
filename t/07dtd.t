@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 38.
-use Test::More tests => 38;
+# Should be 40.
+use Test::More tests => 40;
 
 use lib './t/lib';
 use TestHelpers;
@@ -219,3 +219,26 @@ EOF
         ok( $@, ' TODO : Add test name' );
     }
 }
+
+{
+    # RT #71076: https://rt.cpan.org/Public/Bug/Display.html?id=71076
+
+    my $parser = XML::LibXML->new();
+    my $doc = $parser->parse_string(<<'EOF');
+<!DOCTYPE test [
+ <!ELEMENT test (#PCDATA)>
+ <!ATTLIST test
+  attr CDATA #IMPLIED
+ >
+]>
+<test>
+</test>
+EOF
+    my $dtd = $doc->internalSubset;
+
+    # TEST
+    ok( !$dtd->hasAttributes, 'hasAttributes' );
+    # TEST
+    is_deeply( [ $dtd->attributes ], [], 'attributes' );
+}
+
