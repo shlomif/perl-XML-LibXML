@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 use vars qw ($VERSION);
-$VERSION = "2.0111"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0112"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use 5.008_000;
 
