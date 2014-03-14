@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-2.0113
+2.0113          Fri 14 Mar 14:13:05 IST 2014
     - Fix test failures with older libxml2 versions.
         - https://rt.cpan.org/Ticket/Display.html?id=93852
         - Thanks to Nick Wellnhofer for the patch.
