@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0113
+    - Fix test failures with older libxml2 versions.
+        - https://rt.cpan.org/Ticket/Display.html?id=93852
+        - Thanks to Nick Wellnhofer for the patch.
+        - Thanks to the CPAN Testers for reporting this issue.
+
 2.0112          Thu 13 Mar 20:16:52 IST 2014
     - Fix segfaults when accessing attributes of DTD nodes
         - https://rt.cpan.org/Ticket/Display.html?id=71076

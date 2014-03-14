@@ -15,7 +15,7 @@ use Test::More;
 use XML::LibXML;
 
 if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-    plan tests => 7;
+    plan tests => 8;
 }
 else {
     plan skip_all => 'No Schema Support compiled.';
@@ -74,16 +74,12 @@ my $invalidfile  = "test/schema/invaliddemo.xml";
 # 4 validate a node
 {
     my $doc = $xmlparser->load_xml(string => <<'EOF');
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <shiporder orderid="889923">
-      <orderperson>John Smith</orderperson>
-      <shipto>
-        <name>Ola Nordmann</name>
-      </shipto>
-    </shiporder>
-  </soap:Body>
-</soap:Envelope>
+<shiporder orderid="889923">
+  <orderperson>John Smith</orderperson>
+  <shipto>
+    <name>Ola Nordmann</name>
+  </shipto>
+</shiporder>
 EOF
 
     my $schema = XML::LibXML::Schema->new(string => <<'EOF');
@@ -92,24 +88,27 @@ EOF
     <xs:complexType>
       <xs:sequence>
         <xs:element name="orderperson" type="xs:string"/>
-        <xs:element name="shipto">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="name" type="xs:string"/>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
+        <xs:element ref="shipto"/>
       </xs:sequence>
       <xs:attribute name="orderid" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="shipto">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string"/>
+      </xs:sequence>
     </xs:complexType>
   </xs:element>
 </xs:schema>
 EOF
 
-    my $nodelist = $doc->findnodes('/soap:Envelope/soap:Body/shiporder');
+    my $nodelist = $doc->findnodes('/shiporder/shipto');
     my $result = 1;
     eval { $result = $schema->validate($nodelist->get_node(1)); };
     # TEST
-    ok( $result == 0 && !$@, 'validate() works with elements.' );
+    is( $@, '', 'validate() with element doesn\'t throw' );
+    # TEST
+    is( $result, 0, 'validate() with element returns 0' );
 }
 
