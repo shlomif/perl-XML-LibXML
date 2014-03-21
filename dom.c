@@ -544,6 +544,12 @@ domUnlinkNode( xmlNodePtr node ) {
         return;
     }
 
+    if (node->type == XML_DTD_NODE) {
+        /* This clears the doc->intSubset pointer. */
+        xmlUnlinkNode(node);
+        return;
+    }
+
     if ( node->prev != NULL ) {
         node->prev->next = node->next;
     }
@@ -573,9 +579,7 @@ domImportNode( xmlDocPtr doc, xmlNodePtr node, int move, int reconcileNS ) {
 
     if ( move ) {
         return_node = node;
-        if ( node->type != XML_DTD_NODE ) {
-            domUnlinkNode( node );
-        }
+        domUnlinkNode( node );
     }
     else {
         if ( node->type == XML_DTD_NODE ) {
