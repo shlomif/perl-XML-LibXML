@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0113
+    - Fix memory leaks and segfaults related to removal and insertion of
+      DTD nodes.
+        - https://rt.cpan.org/Ticket/Display.html?id=80521
+    - Fix memory leak in $node->removeChildNodes
+
 2.0112          Thu 13 Mar 20:16:52 IST 2014
     - Fix segfaults when accessing attributes of DTD nodes
         - https://rt.cpan.org/Ticket/Display.html?id=71076
