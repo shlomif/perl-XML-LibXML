@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 40.
-use Test::More tests => 40;
+# Should be 54.
+use Test::More tests => 54;
 
 use lib './t/lib';
 use TestHelpers;
@@ -241,4 +241,93 @@ EOF
     # TEST
     is_deeply( [ $dtd->attributes ], [], 'attributes' );
 }
+
+# Remove DTD nodes
+
+sub test_remove_dtd {
+    my ($test_name, $remove_sub) = @_;
+
+    my $parser = XML::LibXML->new;
+    my $doc    = $parser->parse_file('example/dtd.xml');
+    my $dtd    = $doc->internalSubset;
+
+    $remove_sub->($doc, $dtd);
+
+    # TEST*3
+    ok( !$doc->internalSubset, "remove DTD via $test_name" );
+}
+
+test_remove_dtd( "unbindNode", sub {
+    my ($doc, $dtd) = @_;
+    $dtd->unbindNode;
+} );
+test_remove_dtd( "removeChild", sub {
+    my ($doc, $dtd) = @_;
+    $doc->removeChild($dtd);
+} );
+test_remove_dtd( "removeChildNodes", sub {
+    my ($doc, $dtd) = @_;
+    $doc->removeChildNodes;
+} );
+
+# Insert DTD nodes
+
+sub test_insert_dtd {
+    my ($test_name, $insert_sub) = @_;
+
+    my $parser  = XML::LibXML->new;
+    my $src_doc = $parser->parse_file('example/dtd.xml');
+    my $dtd     = $src_doc->internalSubset;
+    my $doc     = $parser->parse_file('example/dtd.xml');
+
+    $insert_sub->($doc, $dtd);
+
+    # TEST*11
+    ok( $doc->internalSubset->isSameNode($dtd), "insert DTD via $test_name" );
+}
+
+test_insert_dtd( "insertBefore internalSubset", sub {
+    my ($doc, $dtd) = @_;
+    $doc->insertBefore($dtd, $doc->internalSubset);
+} );
+test_insert_dtd( "insertBefore documentElement", sub {
+    my ($doc, $dtd) = @_;
+    $doc->insertBefore($dtd, $doc->documentElement);
+} );
+test_insert_dtd( "insertAfter internalSubset", sub {
+    my ($doc, $dtd) = @_;
+    $doc->insertAfter($dtd, $doc->internalSubset);
+} );
+test_insert_dtd( "insertAfter documentElement", sub {
+    my ($doc, $dtd) = @_;
+    $doc->insertAfter($dtd, $doc->documentElement);
+} );
+test_insert_dtd( "replaceChild internalSubset", sub {
+    my ($doc, $dtd) = @_;
+    $doc->replaceChild($dtd, $doc->internalSubset);
+} );
+test_insert_dtd( "replaceChild documentElement", sub {
+    my ($doc, $dtd) = @_;
+    $doc->replaceChild($dtd, $doc->documentElement);
+} );
+test_insert_dtd( "replaceNode internalSubset", sub {
+    my ($doc, $dtd) = @_;
+    $doc->internalSubset->replaceNode($dtd);
+} );
+test_insert_dtd( "replaceNode documentElement", sub {
+    my ($doc, $dtd) = @_;
+    $doc->documentElement->replaceNode($dtd);
+} );
+test_insert_dtd( "appendChild", sub {
+    my ($doc, $dtd) = @_;
+    $doc->appendChild($dtd);
+} );
+test_insert_dtd( "addSibling internalSubset", sub {
+    my ($doc, $dtd) = @_;
+    $doc->internalSubset->addSibling($dtd);
+} );
+test_insert_dtd( "addSibling documentElement", sub {
+    my ($doc, $dtd) = @_;
+    $doc->documentElement->addSibling($dtd);
+} );
 
