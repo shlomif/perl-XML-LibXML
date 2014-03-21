@@ -1025,8 +1025,7 @@ static void
 LibXML_reparent_removed_node(xmlNodePtr node) {
     /*
      * Attribute nodes can't be added to document fragments. Adding
-     * DTD nodes would cause a memory leak. So document and owner are
-     * set to NULL.
+     * DTD nodes would cause a memory leak.
      */
     if (node->type != XML_ATTRIBUTE_NODE
         && node->type != XML_DTD_NODE) {
