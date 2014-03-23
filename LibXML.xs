@@ -1020,6 +1020,39 @@ LibXML_test_node_name( xmlChar * name )
     return(1);
 }
 
+/* Assumes that the node has a proxy. */
+static void
+LibXML_reparent_removed_node(xmlNodePtr node) {
+    /*
+     * Attribute nodes can't be added to document fragments. Adding
+     * DTD nodes would cause a memory leak.
+     */
+    if (node->type != XML_ATTRIBUTE_NODE
+        && node->type != XML_DTD_NODE) {
+        ProxyNodePtr docfrag = PmmNewFragment(node->doc);
+        xmlAddChild(PmmNODE(docfrag), node);
+        PmmFixOwner(PmmPROXYNODE(node), docfrag);
+    }
+}
+
+static void
+LibXML_set_int_subset(xmlDocPtr doc, xmlNodePtr dtd) {
+    xmlNodePtr old_dtd = (xmlNodePtr)doc->intSubset;
+    if (old_dtd == dtd) {
+        return;
+    }
+
+    if (old_dtd != NULL) {
+        xmlUnlinkNode(old_dtd);
+
+        if (PmmPROXYNODE(old_dtd) == NULL) {
+            xmlFreeDtd((xmlDtdPtr)old_dtd);
+        }
+    }
+
+    doc->intSubset = (xmlDtdPtr)dtd;
+}
+
 /* ****************************************************************
  * XPathContext helper functions
  * **************************************************************** */
@@ -3822,6 +3855,9 @@ importNode( self, node, dummy=0 )
             croak( "Can't import Documents!" );
             XSRETURN_UNDEF;
         }
+        if (node->type == XML_DTD_NODE) {
+            croak("Can't import DTD nodes");
+        }
 
         ret = domImportNode( self, node, 0, 1 );
         if ( ret ) {
@@ -3847,6 +3883,9 @@ adoptNode( self, node )
              || node->type == XML_HTML_DOCUMENT_NODE ) {
             croak( "Can't adopt Documents!" );
             XSRETURN_UNDEF;
+        }
+        if (node->type == XML_DTD_NODE) {
+            croak("Can't adopt DTD nodes");
         }
 
         ret = domImportNode( self, node, 1, 1 );
@@ -4733,11 +4772,13 @@ insertBefore( self, nNode, refNode )
         if ( rNode != NULL ) {
             RETVAL = PmmNodeToSv( rNode,
                                   PmmOWNERPO(PmmPROXYNODE(self)) );
-            PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
-                        PmmOWNERPO(PmmPROXYNODE(self)) );
+            if (rNode->type == XML_DTD_NODE) {
+                LibXML_set_int_subset(self->doc, rNode);
+            }
+            PmmFixOwner(PmmPROXYNODE(rNode), PmmOWNERPO(PmmPROXYNODE(self)));
         }
         else {
-                 XSRETURN_UNDEF;
+            XSRETURN_UNDEF;
         }
     OUTPUT:
         RETVAL
@@ -4756,8 +4797,10 @@ insertAfter( self, nNode, refNode )
         if ( rNode != NULL ) {
             RETVAL = PmmNodeToSv( rNode,
                                   PmmOWNERPO(PmmPROXYNODE(self)) );
-                PmmFixOwner(PmmOWNERPO(SvPROXYNODE(RETVAL)),
-                            PmmOWNERPO(PmmPROXYNODE(self)) );
+            if (rNode->type == XML_DTD_NODE) {
+                LibXML_set_int_subset(self->doc, rNode);
+            }
+            PmmFixOwner(PmmPROXYNODE(rNode), PmmOWNERPO(PmmPROXYNODE(self)));
         }
         else {
             XSRETURN_UNDEF;
@@ -4772,7 +4815,6 @@ replaceChild( self, nNode, oNode )
         xmlNodePtr oNode
     PREINIT:
         xmlNodePtr ret = NULL;
-        ProxyNodePtr docfrag = NULL;
     CODE:
        if ( self->type == XML_DOCUMENT_NODE ) {
                 switch ( nNode->type ) {
@@ -4798,16 +4840,15 @@ replaceChild( self, nNode, oNode )
             XSRETURN_UNDEF;
         }
         else {
-                docfrag = PmmNewFragment( self->doc );
-                /* create document fragment */
-                xmlAddChild( PmmNODE(docfrag), ret );
-                RETVAL = PmmNodeToSv(ret, docfrag);
-
-                if ( nNode->_private != NULL ) {
-                    PmmFixOwner( PmmPROXYNODE(nNode),
-                                 PmmOWNERPO(PmmPROXYNODE(self)) );
-                }
-                PmmFixOwner( SvPROXYNODE(RETVAL), docfrag );
+            LibXML_reparent_removed_node(ret);
+            RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
+            if (nNode->type == XML_DTD_NODE) {
+                LibXML_set_int_subset(nNode->doc, nNode);
+            }
+            if ( nNode->_private != NULL ) {
+                PmmFixOwner( PmmPROXYNODE(nNode),
+                             PmmOWNERPO(PmmPROXYNODE(self)) );
+            }
         }
     OUTPUT:
         RETVAL
@@ -4818,14 +4859,12 @@ replaceNode( self,nNode )
         xmlNodePtr nNode
     PREINIT:
         xmlNodePtr ret = NULL;
-        ProxyNodePtr docfrag = NULL;
+        ProxyNodePtr owner = NULL;
     CODE:
         if ( domIsParent( self, nNode ) == 1 ) {
             XSRETURN_UNDEF;
         }
-        if ( self->doc != nNode->doc ) {
-            domImportNode( self->doc, nNode, 1, 1 );
-        }
+        owner = PmmOWNERPO(PmmPROXYNODE(self));
 
         if ( self->type != XML_ATTRIBUTE_NODE ) {
               ret = domReplaceChild( self->parent, nNode, self);
@@ -4834,21 +4873,14 @@ replaceNode( self,nNode )
              ret = xmlReplaceNode( self, nNode );
         }
         if ( ret ) {
-            if ( ret->type == XML_ATTRIBUTE_NODE ) {
-                docfrag = NULL;
+            LibXML_reparent_removed_node(ret);
+            RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
+            if (nNode->type == XML_DTD_NODE) {
+                LibXML_set_int_subset(nNode->doc, nNode);
             }
-            else {
-                /* create document fragment */
-                docfrag = PmmNewFragment( self->doc );
-                xmlAddChild( PmmNODE(docfrag), ret );
-            }
-
-            RETVAL = PmmNodeToSv(ret, docfrag);
             if ( nNode->_private != NULL ) {
-                PmmFixOwner( PmmPROXYNODE(nNode),
-                             PmmOWNERPO(PmmPROXYNODE(self)));
+                PmmFixOwner(PmmPROXYNODE(nNode), owner);
             }
-            PmmFixOwner( SvPROXYNODE(RETVAL), docfrag );
         }
         else {
             croak( "replacement failed" );
@@ -4869,10 +4901,8 @@ removeChild( self, node )
             XSRETURN_UNDEF;
         }
         else {
-                ProxyNodePtr docfrag = PmmNewFragment( ret->doc );
-                xmlAddChild( PmmNODE(docfrag), ret );
-                RETVAL = PmmNodeToSv(ret,NULL);
-                PmmFixOwner( SvPROXYNODE(RETVAL), docfrag );
+            LibXML_reparent_removed_node(ret);
+            RETVAL = PmmNodeToSv(ret, NULL);
         }
     OUTPUT:
         RETVAL
@@ -4888,22 +4918,31 @@ removeChildNodes( self )
         fragment = PmmNODE( docfrag );
         elem = self->children;
         while ( elem ) {
+            xmlNodePtr next = elem->next;
             xmlUnlinkNode( elem );
-            /* this following piece is the function of domAppendChild()
-             * but in this special case we can avoid most of the logic of
-             * that function.
-             */
-            if ( fragment->children != NULL ) {
-                xs_warn("unlink node!\n");
-                domAddNodeToList( elem, fragment->last, NULL );
+            if (elem->type == XML_ATTRIBUTE_NODE
+                || elem->type == XML_DTD_NODE) {
+                if (PmmPROXYNODE(elem) == NULL) {
+                    xmlFreeNode(elem);
+                }
             }
             else {
-                fragment->children = elem;
-                fragment->last     = elem;
-                elem->parent= fragment;
+                /* this following piece is the function of domAppendChild()
+                 * but in this special case we can avoid most of the logic of
+                 * that function.
+                 */
+                if ( fragment->children != NULL ) {
+                    xs_warn("unlink node!\n");
+                    domAddNodeToList( elem, fragment->last, NULL );
+                }
+                else {
+                    fragment->children = elem;
+                    fragment->last     = elem;
+                    elem->parent= fragment;
+                }
+                PmmFixOwnerNode( elem, docfrag );
             }
-            PmmFixOwnerNode( elem, docfrag );
-            elem = elem->next;
+            elem = next;
         }
 
         self->children = self->last = NULL;
@@ -4926,11 +4965,7 @@ unbindNode( self )
         if ( self->type != XML_DOCUMENT_NODE
              && self->type != XML_DOCUMENT_FRAG_NODE ) {
             xmlUnlinkNode( self );
-            if ( self->type != XML_ATTRIBUTE_NODE ) {
-                docfrag = PmmNewFragment( self->doc );
-                xmlAddChild( PmmNODE(docfrag), self );
-            }
-            PmmFixOwner( PmmPROXYNODE(self), docfrag );
+            LibXML_reparent_removed_node(self);
         }
 
 SV*
@@ -4970,6 +5005,9 @@ appendChild( self, nNode )
 
         RETVAL = PmmNodeToSv( nNode,
                               PmmOWNERPO(PmmPROXYNODE(self)) );
+        if (nNode->type == XML_DTD_NODE) {
+            LibXML_set_int_subset(self->doc, nNode);
+        }
         PmmFixOwner( SvPROXYNODE(RETVAL), PmmPROXYNODE(self) );
     OUTPUT:
         RETVAL
@@ -5032,17 +5070,22 @@ addSibling( self, nNode )
         xmlNodePtr nNode
     PREINIT:
         xmlNodePtr ret = NULL;
+        ProxyNodePtr owner = NULL;
     CODE:
         if ( nNode->type == XML_DOCUMENT_FRAG_NODE ) {
             croak("Adding document fragments with addSibling not yet supported!");
             XSRETURN_UNDEF;
         }
+        owner = PmmOWNERPO(PmmPROXYNODE(self));
 
         ret = xmlAddSibling( self, nNode );
 
         if ( ret ) {
             RETVAL = PmmNodeToSv(ret,NULL);
-            PmmFixOwner( SvPROXYNODE(RETVAL), PmmOWNERPO(PmmPROXYNODE(self)) );
+            if (nNode->type == XML_DTD_NODE) {
+                LibXML_set_int_subset(self->doc, nNode);
+            }
+            PmmFixOwner(SvPROXYNODE(RETVAL), owner);
         }
         else {
             XSRETURN_UNDEF;
