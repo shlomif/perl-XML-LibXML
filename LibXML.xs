@@ -5078,17 +5078,36 @@ addSibling( self, nNode )
         }
         owner = PmmOWNERPO(PmmPROXYNODE(self));
 
-        ret = xmlAddSibling( self, nNode );
+        if (self->type == XML_TEXT_NODE && nNode->type == XML_TEXT_NODE
+            && self->name == nNode->name) {
+            /* As a result of text merging, the added node may be freed. */
+            xmlNodePtr copy = xmlCopyNode(nNode, 0);
+            ret = xmlAddSibling(self, copy);
 
-        if ( ret ) {
-            RETVAL = PmmNodeToSv(ret,NULL);
-            if (nNode->type == XML_DTD_NODE) {
-                LibXML_set_int_subset(self->doc, nNode);
+            if (ret) {
+                RETVAL = PmmNodeToSv(ret, owner);
+                /* Unlink original node. */
+                xmlUnlinkNode(nNode);
+                LibXML_reparent_removed_node(nNode);
             }
-            PmmFixOwner(SvPROXYNODE(RETVAL), owner);
+            else {
+                xmlFreeNode(copy);
+                XSRETURN_UNDEF;
+            }
         }
         else {
-            XSRETURN_UNDEF;
+            ret = xmlAddSibling( self, nNode );
+
+            if ( ret ) {
+                RETVAL = PmmNodeToSv(ret, owner);
+                if (nNode->type == XML_DTD_NODE) {
+                    LibXML_set_int_subset(self->doc, nNode);
+                }
+                PmmFixOwner(SvPROXYNODE(RETVAL), owner);
+            }
+            else {
+                XSRETURN_UNDEF;
+            }
         }
     OUTPUT:
         RETVAL

@@ -11,7 +11,7 @@
 # since all tests are run on a preparsed
 
 # Should be 166.
-use Test::More tests => 194;
+use Test::More tests => 195;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -711,5 +711,15 @@ EOF
         ok(!defined $f, ' TODO : Add test name');
 
     }
+}
+
+{
+    # RT #94149
+    # https://rt.cpan.org/Ticket/Display.html?id=94149
+
+    my $orig = XML::LibXML::Text->new('Double ');
+    my $ret = $orig->addSibling(XML::LibXML::Text->new('Free'));
+    # TEST
+    is( $ret->textContent, 'Double Free', 'merge text nodes with addSibling' );
 }
 
