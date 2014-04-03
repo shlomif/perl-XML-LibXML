@@ -1,21 +1,23 @@
 Revision history for Perl extension XML::LibXML
 
-2.0114
+2.0115  2014-04-03
     - Fix double free when calling $node->addSibling with text nodes.
-        - https://rt.cpan.org/Ticket/Display.html?id=94149
-        - Thanks to Jeff Trout for the report.
+          - https://rt.cpan.org/Ticket/Display.html?id=94149
+          - Thanks to Jeff Trout for the report.
+
+2.0114  2014-04-03
     - Fix memory leaks and segfaults related to removal and insertion of
       DTD nodes.
         - https://rt.cpan.org/Ticket/Display.html?id=80521
     - Fix memory leak in $node->removeChildNodes
 
-2.0113          Fri 14 Mar 14:13:05 IST 2014
+2.0113  2014-03-14
     - Fix test failures with older libxml2 versions.
         - https://rt.cpan.org/Ticket/Display.html?id=93852
         - Thanks to Nick Wellnhofer for the patch.
         - Thanks to the CPAN Testers for reporting this issue.
 
-2.0112          Thu 13 Mar 20:16:52 IST 2014
+2.0112  2014-03-13
     - Fix segfaults when accessing attributes of DTD nodes
         - https://rt.cpan.org/Ticket/Display.html?id=71076
         - Thanks to Ralph Merridew for the report.
@@ -29,7 +31,7 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=90064
         - Thanks to Nick Wellnhofer for the investigation and the patch.
 
-2.0111          Wed  5 Mar 17:15:57 IST 2014
+2.0111  2014-03-05
     - Skip t/40reader_mem_error.t with libxml2 < 2.7.4
       The failure is probably due to a known double-free bug.
         - https://rt.cpan.org/Ticket/Display.html?id=84564
@@ -47,12 +49,12 @@ Revision history for Perl extension XML::LibXML
         - Thanks to Daniel for the bug report and a test case, and to
         YOREEK for the patch.
 
-2.0110          Sat  1 Feb 15:59:54 IST 2014
+2.0110  2014-02-01
     - Add "use strict;" and "use warnings;" to all modules (CPANTS).
     - MIN_PERL_VERSION (CPANTS).
     - Add a LICENSE section to the POD (CPANTS).
 
-2.0109          Fri 31 Jan 09:56:18 IST 2014
+2.0109  2014-01-31
     - Fix for requiring XML::LibXML inside two loops in perl-5.19.6 and up.
         - https://rt.cpan.org/Ticket/Display.html?id=92606
         - Thanks to Father Chrysostomos for the investigation, the test
@@ -60,7 +62,7 @@ Revision history for Perl extension XML::LibXML
         - There are other ways to reproduce the bug, but the tests tests
         for a require inside two loops.
 
-2.0108          Tue 17 Dec 11:04:40 IST 2013
+2.0108  2013-12-17
     - Replace local $^W with << no warnings 'portable'; >> in t/15nodelist.t
         - Should fix https://rt.cpan.org/Public/Bug/Display.html?id=88017
         - Thanks to "pagenyon" for the report.
@@ -70,7 +72,7 @@ Revision history for Perl extension XML::LibXML
         testcase.
     - Convert from "use base" to the more modern "use parent".
 
-2.0107          Thu 31 Oct 09:12:03 IST 2013
+2.0107  2013-10-31
     - Add a unique_key method for namespace objects.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/24/unique_key-method-for-namespace-objects/diff
         - Thanks to garfieldnate for the pull request.
@@ -78,13 +80,13 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=89718
         - Thanks to Gregor Herrman and the Debian Team
 
-2.0106          Tue 17 Sep 19:08:31 IDT 2013
+2.0106  2013-09-17
     - Import croak from "use Carp;" to fix a missing croak definition.
         - https://rt.cpan.org/Ticket/Display.html?id=88624
     - Update Devel::CheckLib under "./inc" to 1.01 :
         - Should fix https://rt.cpan.org/Public/Bug/Display.html?id=81297
 
-2.0105          Sat  7 Sep 20:18:06 IDT 2013
+2.0105  2013-09-07
     - Pull some commits from Jason Mash (JRMASH) to add convenience methods
       to the XML::LibXML::NodeList module.
           - New method 'to_literal_delimited($separator)'
@@ -96,7 +98,7 @@ Revision history for Perl extension XML::LibXML
         - Fixes https://rt.cpan.org/Public/Bug/Display.html?id=88254
         - Thanks to Ulrich for the report and for a patch of sorts.
 
-2.0104          Fri 30 Aug 12:36:06 IDT 2013
+2.0104  2013-08-30
     - Fix https://rt.cpan.org/Ticket/Display.html?id=88060
         - Use quoted version number in the SYNOPSIS.
         - Thanks to Philipp Gortan for the report.
@@ -104,13 +106,13 @@ Revision history for Perl extension XML::LibXML
     directory component that contains whitespace.
         - https://rt.cpan.org/Ticket/Display.html?id=86665
 
-2.0103          Thu 22 Aug 08:34:46 IDT 2013
+2.0103  2013-08-22
     - Apply patch from Yuriy / YOREEK for test failures in t/40reader.t:
         - https://rt.cpan.org/Public/Bug/Display.html?id=83779
         - Changed the variable name to start with an underscore for internal
         use.
 
-2.0102          Mon 19 Aug 15:14:13 IDT 2013
+2.0102  2013-08-19
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=83744
         - XPathContext memory leak on registerFunction.
         - Thanks to DGINEV for the report and Yuriy for the patch.
@@ -123,53 +125,53 @@ Revision history for Perl extension XML::LibXML
         - Thanks to mathias@koerber.org for the report, SREZIC@cpan.org
         and d.thomas@its.uq.edu.au for taking part and Yuriy for the patch.
 
-2.0101          Thu 15 Aug 08:29:15 IDT 2013
+2.0101  2013-08-15
     - Fixed https://rt.cpan.org/Ticket/Display.html?id=87089 .
         - "HTML doctype differs for string/scalar input"
         - Thanks to NGLENN for the report and to Yuriy for the tests and
         fix.
 
-2.0100          Wed 14 Aug 08:23:53 IDT 2013
+2.0100  2013-08-14
     - Added the unique_key() method to XML::LibXML::Node.
     - t/40reader.t: assigning from $@ to a lexical so it won't be
     over-ridden.
         - https://rt.cpan.org/Ticket/Display.html?id=87830
         - Thanks to Douglas Christopher Wilson for the report.
 
-2.0019          Mon  1 Jul 11:04:31 IDT 2013
+2.0019  2013-07-01
     - Correct typos reported in RT #86599.
         - https://rt.cpan.org/Ticket/Display.html?id=86599
         - Thanks to dsteinbrunner.
 
-2.0018          Mon 13 May 13:35:06 IDT 2013
+2.0018  2013-05-13
     - Revert previous change of minimal version of libxml2.
         - This change proved to be unpopular and didn't prevent
         the CPAN test failures.
         - By SHLOMIF
 
-2.0017          Thu  9 May 11:03:36 IDT 2013
+2.0017  2013-05-09
     - Made the minimal version of libxml2 2.9.0 as previous versions were
     too buggy due to spuriourous CPAN test failures.
         - Please upgrade.
         - By SHLOMIF
 
-2.0016          Sat 13 Apr 22:36:51 IDT 2013
+2.0016  2013-04-13
     - Don't enable XML_PARSE_HUGE by default.
         - Fix the previous version due to a mercurial SNAFU.
 
-2.0015          Sat 13 Apr 02:30:33 IDT 2013
+2.0015  2013-04-13
     - Don't enable XML_PARSE_HUGE by default.
         - https://bitbucket.org/shlomif/perl-xml-libxml/pull-request/19
         - Thanks to Grant McLean ( https://metacpan.org/author/GRANTM ) for
         the bug report and patch.
 
-2.0014          Wed  5 Dec 11:06:26 IST 2012
+2.0014  2012-12-05
     - Got 40reader_mem_error.t to not fetch the external DTDs.
         - https://rt.cpan.org/Public/Bug/Display.html?id=81703
         - Thanks to Alexandr Ciornii (CHORNY) for the report and Slaven
         Rezic (SREZIC) for the analysis and a proposed fix.
 
-2.0013          Tue  4 Dec 17:40:27 IST 2012
+2.0013  2012-12-04
     - Fix a memory error (double-free) in XML::LibXML::Reader if we reached
     EOF and
     then called destroy.
@@ -177,14 +179,14 @@ Revision history for Perl extension XML::LibXML
         - Fixed by Shlomi Fish.
         - see t/40reader_mem_error.t
 
-2.0012          Fri  9 Nov 06:39:32 IST 2012
+2.0012  2012-11-09
     - Fix support for references to scalars with overloaded stringification
     magic.
         - https://rt.cpan.org/Public/Bug/Display.html?id=77864
         - Thanks to Christian Hansen (CHANSEN) for a report, a testcase, and
         a patch.
 
-2.0011          Thu  8 Nov 00:25:15 IST 2012
+2.0011  2012-11-08
     - Fix crash in removeChild() when not expanding entities
         - https://rt.cpan.org/Ticket/Display.html?id=80395
             - "removeChild() segfaults when not expanding entities"
@@ -192,43 +194,43 @@ Revision history for Perl extension XML::LibXML
         was adapted into t/48_removeChild_crashes_rt_80395.t ) and for
         a patch to fix it.
 
-2.0010          Thu  1 Nov 20:13:08 IST 2012
+2.0010  2012-11-01
     - Passing debug (an undocumented option) to check_lib in Makefile.PL.
         - This way we get more meaningful traces on perl Makefile.PL DEBUG=1.
         - Thanks to MSTROUT for the report and a proposed fix.
 
-2.0009          Thu  1 Nov 16:26:45 IST 2012
+2.0009  2012-11-01
     - Fix libxml2 detection in Strawberry Perl.
         - Another Devel::CheckOS fallout.
         - Thanks to KMX for the report and for a proposed fix. The actual fix
         was made to be more generic considering the use-cases.
         - https://rt.cpan.org/Ticket/Display.html?id=80540
 
-2.0008          Mon 22 Oct 12:09:11 IST 2012
+2.0008  2012-10-22
     - Fix build error when using non-standard libxml2 installation
         - https://rt.cpan.org/Ticket/Display.html?id=80332
         - Thanks to L RW for the report.
 
-2.0007          Wed 17 Oct 18:38:37 IST 2012
+2.0007  2012-10-17
     - Fix for build failures on Windows with Microsoft Visual C++.
         - https://rt.cpan.org/Ticket/Display.html?id=80229
         - Thanks to Desmond Daignault for the report and an initial patch.
         - Patch modified by Shlomi Fish
 
-2.0006          Sat 13 Oct 22:27:54 IST 2012
+2.0006  2012-10-13
     - When xml2-config returns several paths, the configuration failed.
     Fixed that.
         - https://rt.cpan.org/Public/Bug/Display.html?id=80167
         - Thanks to VOVKASM for the report and fix.
 
-2.0005          Sat 13 Oct 13:18:48 IST 2012
+2.0005  2012-10-13
     - Added t/style-trailing-space.t and removed trailing space.
     - Add a check for the existence of included C headers (*.h) files
     in Makefile.PL to avoid failed compilations.
         - Using Devel::CheckLib.
         - Thanks to its maintainers!
 
-2.0004          Tue  7 Aug 23:04:55 IDT 2012
+2.0004  2012-08-07
     - Add a way to specify a different compiler to be used in the
     "Makefile" by calling Makefile.PL with the CC environment variable
     set to the path to the alternate compiler.
@@ -237,7 +239,7 @@ Revision history for Perl extension XML::LibXML
     - LibXML.pm (_clone): Fix typo in line_numbers handling.
         - Thanks to Bernhard Reutner-Fischer for the report and fix.
 
-2.0003          Fri 27 Jul 17:11:21 IDT 2012
+2.0003  2012-07-27
     - Patch to a potential NULL dereference in xpath.c.
         - Thanks to Ville Skyttä <ville.skytta@iki.fi> and cppcheck.
     - Fix NodeList::item() calling a 1-indxed array reference.
@@ -247,17 +249,17 @@ Revision history for Perl extension XML::LibXML
     - Add the scripts/tag-release.pl script to tag a release using
     Mercurial.
 
-2.0002          Sun Jul  8 18:09:13 IDT 2012
+2.0002  2012-07-08
     - Applied spelling fixes correction patch by
     Ville Skyttä <ville.skytta@iki.fi>.
         - Thanks, Ville!
 
-2.0001          Wed Jun 20 19:40:05 IDT 2012
+2.0001  2012-06-20
     - Remove the leftover perl-libxml-libxml.h from the distribution.
         - https://rt.cpan.org/Ticket/Display.html?id=77924
         - Thanks to Martin Mann for the report.
 
-2.0000          Tue Jun 19 23:04:23 IDT 2012
+2.0000  2012-06-19
     - Fix warnings that appear when compiling using the clang C compiler by
     default.
         - https://rt.cpan.org/Ticket/Display.html?id=77802
@@ -270,7 +272,7 @@ Revision history for Perl extension XML::LibXML
         Father Chrysostomos ( http://search.cpan.org/~sprout/ ) and
         Mons Anderson for some diagnosis.
 
-1.99            Thu May 31 10:21:23 IDT 2012
+1.99    2012-05-31
     - Apply a patch from Mons Anderson ( mons@cpan.org ) for fixing the
     overloading.
         - t/62overload.t
@@ -281,19 +283,19 @@ Revision history for Perl extension XML::LibXML
         - Thanks to Gregor Herrmann and Niko Tyni from the
         Debian Perl group.
 
-1.98            Sun May 13 21:02:14 IDT 2012
+1.98    2012-05-13
     - Make sure parse_string() and load_xml() also accept references to
     strings (to avoid unnecessary copying).
         - See: https://rt.cpan.org/Ticket/Display.html?id=64051
 
-1.97            Mon Apr 30 20:31:24 IDT 2012
+1.97    2012-04-30
     - Apply a test and a fix to correct keep_blanks having no effect on
     parse_balanced_chunk.
         - fixes https://rt.cpan.org/Ticket/Display.html?id=76696
         - Add t/30keep_blanks.t .
         - Thanks to SREZIC for the report, the test and the fix.
 
-1.96            Fri Mar 16 21:01:09 IST 2012
+1.96    2012-03-16
     - Apply a patch to add leading minus signs to the commands of
     install_sax_driver.
         - This makes the make process succeed even if they fail.
@@ -304,7 +306,7 @@ Revision history for Perl extension XML::LibXML
         - Thanks to Tim Brody for the patch.
         - Fixes the problem reported in http://www.city-fan.org/tips/PaulHowarth/Blog/2011-09-06.
 
-1.95            Tue Mar  6 10:35:26 IST 2012
+1.95    2012-03-06
     - Got rid of a broken test (at least with recent libxml2s) in
     t/03doc.t :
         - https://rt.cpan.org/Ticket/Display.html?id=75403
@@ -313,13 +315,13 @@ Revision history for Perl extension XML::LibXML
         release.
         - Thanks to vcizek for the report.
 
-1.94            Sat Mar  3 22:05:18 IST 2012
+1.94    2012-03-03
     - Fix XML::LibXML::Element tests for ineqaulity with == and eq.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=75505 .
         - Thanks to Mark Overmeer for the report and for a preliminary patch
         to t/71overload.t .
 
-1.93            Mon Feb 27 11:15:50 IST 2012
+1.93    2012-02-27
     - Fix XML::LibXML::Element comparison with == and eq.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=75257 ,
         https://rt.cpan.org/Ticket/Display.html?id=75293 ,
@@ -327,13 +329,13 @@ Revision history for Perl extension XML::LibXML
         - Thanks to Toby Inkster for a preliminary patch (that was modified by
         me) and to the various people who reported the problem.
 
-1.92            Tue Feb 21 19:00:48 IST 2012
+1.92    2012-02-21
     - Fix for test failure on perls < 5.10.
         - Fixes https://rt.cpan.org/Public/Bug/Display.html?id=75195
         - Thanks to Paul for the report, and for a patch that was not
         accepted.
 
-1.91            Tue Feb 21 13:57:54 IST 2012
+1.91    2012-02-21
     - Overload hash dereferencing on XML::LibXML::Elements, to provide
     access to the element's attributes.
         - See XML::LibXML::AttributeHash for details.
@@ -345,13 +347,13 @@ Revision history for Perl extension XML::LibXML
     - Printed some warnings regardless if DEBUG is on.
         - Thanks to http://search.cpan.org/~mstrout/ for the suggestion.
 
-1.90            Sun Jan  8 20:57:58 IST 2012
+1.90    2012-01-08
     - Pull a commit from Aaron Crange to fix compilation bugs in Devel.xs:
         - local variable declarations must be in the PREINIT section,
         not `CODE`, at least for some compiler/OS combinations.
         - Thanks, Aaron!
 
-1.89            Sat Dec 24 09:46:26 IDT 2011
+1.89    2011-12-24
     - Apply a patch with spelling fixes by Kevin Lyda :
         - https://rt.cpan.org/Public/Bug/Display.html?id=71403
         - Thanks to Kevin.
@@ -360,7 +362,7 @@ Revision history for Perl extension XML::LibXML
     - Adjust the Win32 Build Instructions in the README file.
         - Thanks to Christopher J. Madsen.
 
-1.88            Wed Sep 21 12:54:33 IDT 2011
+1.88    2011-09-21
     - Add libxml2 2.7.8 as tested and working fine for the Makefile.PL.
     (Thanks to H. Merijn Brand.).
     - Apply a patch to perl-libxml-sax.c to use xmlChar * instead of char *.
@@ -374,18 +376,18 @@ Revision history for Perl extension XML::LibXML
         - Up to then, the version numbers of the modules under lib/ had
         been 1.73.
 
-1.87            Sat Aug 27 14:05:37 IDT 2011
+1.87    2011-08-27
     - Fix t/49callbacks_returning_undef.t to not read /etc/passed which may
     not be valid XML. Instead, we're reading a local file while using
     URI::file (assuming it exists - else - we skip_all.)
 
-1.86            Thu Aug 25 11:42:55 IDT 2011
+1.86    2011-08-25
     - Changed SvPVx_nolen() to SvPV_nolen() in LibXML.xs for better compatibility.
         - SvPVx_nolen() appears to be undocumented API.
         - Resolves https://rt.cpan.org/Public/Bug/Display.html?id=70476
         - Thanks to Paul for the report.
 
-1.85            Wed Aug 24 17:05:19 IDT 2011
+1.85    2011-08-24
     - Gracefully handle returned undef()s in the read callback under -w ($^W):
         - t/49callbacks_returning_undef.t
         - https://rt.cpan.org/Ticket/Display.html?id=70321
@@ -394,14 +396,14 @@ Revision history for Perl extension XML::LibXML
         - I'm applying it by faith, so if it breaks, blame him. (;-).
         - the patch adds -lllibgettextlib.dll to the Makefile.PL.
 
-1.84            Sat Jul 23 23:12:28 IDT 2011
+1.84    2011-07-23
     - Fix for perl 5.8.x before 5.8.8:
         - "You can now use the x operator to repeat a qw// list. This used to raise a syntax error."
             - http://search.cpan.org/perldoc?perl588delta
         - fixes https://rt.cpan.org/Ticket/Display.html?id=69722 .
         - thanks to paul@city-fan.org for the report.
 
-1.83            Sat Jul 23 14:28:40 IDT 2011
+1.83    2011-07-23
     - Fixed missing declarations after statements:
         - resolves https://rt.cpan.org/Ticket/Display.html?id=69622 again.
         - thanks to Vadim / VKON.
@@ -416,7 +418,7 @@ Revision history for Perl extension XML::LibXML
     reliable.
         - SHLOMIF
 
-1.82            Wed Jul 20 23:43:53 IDT 2011
+1.82    2011-07-20
     - Moved some if blocks after the dSP; (which contains declarations) to be
     compliant with C89/C90, which don't allow declarations in the middle of
     a C function.
@@ -426,7 +428,7 @@ Revision history for Perl extension XML::LibXML
         - "install_sax_driver doesn't like custom INSTALLARCHLIB"
         - thanks to Milki from U.Cal Berkeley.
 
-1.81            Sat Jul 16 18:30:02 IDT 2011
+1.81    2011-07-16
     - Add scripts/fast-eumm.pl to remove the explicit objects dependency on
     the "Makefile" file so after running scripts/fast-eumm.pl one won't have to
     rebuild the C-files.
@@ -439,7 +441,7 @@ Revision history for Perl extension XML::LibXML
     - Convert all remaining Test.pm-based test scripts except t/14sax.t to
     Test::More .
 
-1.80            Tue Jul 12 23:35:03 IDT 2011
+1.80    2011-07-12
     - Fix https://rt.cpan.org/Public/Bug/Display.html?id=69082 :
         - Compilation on strawberry perl.
         - The problem was that stderr required a dTHX; call previously.
@@ -457,7 +459,7 @@ Revision history for Perl extension XML::LibXML
         - Thanks to TODDR.
         - http://www.cpantesters.org/cpan/report/4ac00aae-a73f-11e0-84bd-8881cd42d09c
 
-1.79            Fri Jul  8 20:02:32 IDT 2011
+1.79    2011-07-08
     - t/46err_column.t : add a skip for a test for CentOS/RHEL 4:
         - https://rt.cpan.org/Ticket/Display.html?id=69070
         - old version of libxml2 .
@@ -468,7 +470,7 @@ Revision history for Perl extension XML::LibXML
     - double plan in t/61error.t .
         - in accordance to the previous change.
 
-1.78            Wed Jul  6 20:23:58 IDT 2011
+1.78    2011-07-06
     - Change t/02parse.t to test for the localized error message:
         - https://rt.cpan.org/Public/Bug/Display.html?id=69248
     - Fix the skip() and 'plan skip_all' syntax in t/06elements.t and
@@ -477,7 +479,7 @@ Revision history for Perl extension XML::LibXML
         - It did not match the one specified in Test::More.
     - Convert more test scripts from Test.pm to Test::More.
 
-1.77            Fri Jul  1 22:27:56 IDT 2011
+1.77    2011-07-01
     - Change the signature of XML::LibXML::Reader::byteConsumed to be
     "long" instead of "int", so it can return values above 2**31 in
     64-bit platforms.
@@ -509,7 +511,7 @@ Revision history for Perl extension XML::LibXML
         UTF-8.
         - Thanks to David E. Wheeler (DWHEELER) for the report.
 
-1.76            Thu Jun 30 20:58:46 IDT 2011
+1.76    2011-06-30
     - Cleaned up t/28new_callbacks_multiple.t - convert to a Counter
      and Stacker class.
         - After that, the regression test for was added:
@@ -528,7 +530,7 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=69205
         - Thanks to DOUGW .
 
-1.75            Fri Jun 24 19:00:40 IDT 2011
+1.75    2011-06-24
     - Correct some typos reported in
         - https://rt.cpan.org/Ticket/Display.html?id=54390
     - Fix the handling of XML::LibXML::InputCallbacks at load_xml().
@@ -556,7 +558,7 @@ Revision history for Perl extension XML::LibXML
         namespace declaration will cause that attribute to have the other
         prefix. >>
 
-1.74            Thu Jun 23 16:20:42 IDT 2011
+1.74    2011-06-23
     - More work on the t/*.t test scripts.
     - Add scripts/Test.pm-to-Test-More.pl to semi-automatically
     convert a test script from Test.pm to Test::More.
@@ -577,7 +579,7 @@ Revision history for Perl extension XML::LibXML
         - Thanks to Evan Carroll ( http://www.evancarroll.com/ ) for the
         report.
 
-1.73            Sat Jun 18 10:53:44 IDT 2011
+1.73    2011-06-18
     - Calculating $err->column() properly, so it won't be maxed out at
     80:
         - https://rt.cpan.org/Public/Bug/Display.html?id=66642
@@ -614,13 +616,13 @@ Revision history for Perl extension XML::LibXML
         - From https://github.com/frett/perl-libxml .
 
 
-1.72            Thu Jun 16 19:26:13 IDT 2011
+1.72    2011-06-16
     - Removed a stray file from the MANIFEST
         - http://rt.cpan.org/Ticket/Display.html?id=68865
         - Warned on "kit not complete".
         - Thanks to obrien.jk
 
-1.71            Tue Jun 14 19:43:50 IDT 2011
+1.71    2011-06-14
    - turn XML_LIBXML_PARSE_DEFAULTS constant to $XML::LibXML::XML_LIBXML_PARSE_DEFAULTS
    - Apply 0001-XML-LibXML-Error-no-need-to-AUTOLOAD-domain.patch from
      https://rt.cpan.org/Public/Bug/Display.html?id=68575 - no need to
@@ -655,7 +657,7 @@ Revision history for Perl extension XML::LibXML
         -- Fixing https://rt.cpan.org/Ticket/Display.html?id=68564
         -- Thanks to Daniel Perrett .
 
-1.70
+1.70     Unknown
    - various fixes and improvements in the documentation
    - added (convenient yet non-standard) methods nonBlankChildNodes,
      firstNonBlankChild, nextNonBlankSibling, prevNonBlankSibling
@@ -672,13 +674,13 @@ Revision history for Perl extension XML::LibXML
    - added 'eq' and 'cmp' overloading on XML::LibXML::Error and set fallback to 1
    - lots of bugs fixed
 
-1.69_2
+1.69_2   Unknown
    - provide context and more accurate column number in
      structured errors
    - clarify license and copyright
    - support for Win32+mingw+ActiveState
 
-1.69_1
+1.69_1   Unknown
    - merge with XML::LibXML::Common
    - fix compilation on Windows with mingw or msvc
    - fix a bug in structured errors preventing the previous errors from being reported
@@ -687,25 +689,26 @@ Revision history for Perl extension XML::LibXML
    - added getAttributeHash to the reader interface
    - fix segfaults: reconcileNs in domReplaceChild, findnodes with a doc fragment (S. Rezic)
 
-1.69
+1.69     Unknown
    - fix incorrect output of getAttributeNS and possibly other methods on UTF-8
    - added $node_or_xpc->exists($xpath) method
    - remove accidental debug output from XML::LibXML::SAX::Builder
 
-1.68
+1.68     Unknown
    - compilation problem fixes
 
-1.67
+1.67     Unknown
    - many bugfixes (rt.cpan.org)
    - added XML::LibXML::Pattern module and extended pattern support in Reader
-   - added XML::LibXML::XPathExpression module that can pre-compile an XPath expression
+   - added XML::LibXML::XPathExpression module that can pre-compile an XPath
+   expression
    - reimplementation of the thread support (mostly by Tim Brody)
    - structured errors XML::LibXML::Error
    - memory leak fixes
    - documentation fixes
    - README - notes for building on Win32 (C.J. Madsen)
 
-1.66
+1.66     Unknown
    - Perl-thread support contributed by Tim Brody [rt.cpan.org #31945]
    - fix [rt.cpan.org #30610] possible segmentation fault when importing nodes from a document to an element created with XML::LibXML::Element->new
    - fix [rt.cpan.org #30261] Segmentation fault when extracting elements from an XML chunk
@@ -715,7 +718,7 @@ Revision history for Perl extension XML::LibXML
    - give registered Ns declarations precedence over document-specific ones
      in XML::LibXML::XPathContext; fixes [rt.cpan.org #29650]
 
-1.65
+1.65     Unknown
    - fix bug in t/40reader.t revealed by a bugfix in Test::More 0.71 (Jonathan Rockway)
    - fix possible SIGSEGV when PI's or attrs created with
      createDocument can get garbage-collected after their owning
@@ -723,7 +726,7 @@ Revision history for Perl extension XML::LibXML
    - skip tests for unsupported features on unsupported versions of Perl/libxml2
    - make Reader interface require Perl 5.8 (patches to extend to 5.6 are welcome)
 
-1.64
+1.64     Unknown
    - fix reconciliation of the "xml" namespace [rt.cpan.org #26450]
    - make tests pass with libxml2 2.9.29 - PI regression tests now
      accept "" as data of an empty PI [rt.cpan.org #27659]
@@ -739,7 +742,7 @@ Revision history for Perl extension XML::LibXML
    - XML::LibXML::Namespace API fixed in order to achieve
      an agreement between the docs and the implementation
 
-1.63
+1.63     Unknown
    - added no_network parser flag
    - added support for exclusive canonicalization (http://www.w3.org/TR/xml-exc-c14n/)
    - make XInclude reflect parser flags
@@ -749,7 +752,7 @@ Revision history for Perl extension XML::LibXML
    - $doc->actualEncoding returns UTF8 if no document encoding is declared
      (unlike $doc->getEncoding, which returns undef)
 
-1.62
+1.62     Unknown
    - interface to libxml2's pull-parser XML::LibXML::Reader
      (initiated by Heiko Klein)
    - make error messages intended to the user report the line of the
@@ -764,7 +767,7 @@ Revision history for Perl extension XML::LibXML
    - toString on empty text node returns empty string, not undef
    - cloneNode copies attributes on an element as required by the DOM spec
 
-1.61
+1.61     Unknown
    - get{Elements,Children}By{TagName,TagNameNS,LocalName} now
      obey wildcards '*', getChildrenByLocalName was added.
    - XML::LibXML::XPathContext merged in
@@ -777,7 +780,7 @@ Revision history for Perl extension XML::LibXML
    - get/setAttribute(NS)? implementation made xmlns aware
    - all sub-modules have the same version as XML::LibXML
 
-1.60
+1.60     Unknown
    - getElementsById corrected to getElementById and the old name kept
      as an alias. Also re-implemented without XPath for improved
      performance
@@ -790,7 +793,7 @@ Revision history for Perl extension XML::LibXML
      bar:foo, which was the old behavior.)
    - added publicId and systemId methods to XML::LibXML::Dtd
 
-1.59
+1.59     Unknown
    - new parser and callback code (Christian Glahn)
    - new XML::LibXML::InputCallback class
    - many bug fixes (including several memory leaks)
@@ -802,7 +805,7 @@ Revision history for Perl extension XML::LibXML
    - faster getChildrenByTagNameNS implementation
    - remove the SGML parser code no longer supported by libxml (Michael Kröll)
 
-1.58
+1.58     Unknown
    - fixed a pointer initialization in parse_xml_chunk(), fixes
      random several segmentation faults on document fragments.
    - added NSCLEAN feature to the parser interface (bug 4560)
@@ -811,7 +814,7 @@ Revision history for Perl extension XML::LibXML
    - fixed croak while requesting nodeName() of CDATA sections (bug 1694).
    - more documentation updates
 
-1.57
+1.57     Unknown
    - added cloneNode to XML::LibXML::Document
    - include Schema/RelaxNG code only with libxml2 >= 2.6.0 (to support old libxml2)
    - applied patch to example/cb_example.pl (bug 4262)
@@ -847,7 +850,7 @@ Revision history for Perl extension XML::LibXML
    - added version information of libxml2
    - Les Richardson's documentation patch applied.
 
-1.56
+1.56     Unknown
    - added line number interface (thanks to Peter Haworth)
    - patch to make perl 5.8.1 and XML::LibXML work together (thanks to François Pons)
    - added getElementById to XML::LibXML::Document (thanks to Robin Berjon)
@@ -856,7 +859,7 @@ Revision history for Perl extension XML::LibXML
    - tiny code clean ups
    - corrected tested versions after a local setup problem
 
-1.55
+1.55     Unknown
    - fixed possible problems with math.h
    - added C14N interface "toStringC14N()" (thanks to Chip Turner)
    - fixed default namespace bug with libxml2 2.5.8 (by Vaclav Barta)
@@ -866,11 +869,8 @@ Revision history for Perl extension XML::LibXML
    - improved more documentation
    - converted documentation to DocBook
 
-*NOTE:*
-Version 1.54 fixes potentional buffer overflows were possible with earlier
-versions of the package.
 
-1.54
+1.54     Unknown
    - fixed some major bugs, works now with libxml2 2.5.x
    - fixed problem with empty document fragments
    - bad tag and attribute names cannot be created anymore
@@ -902,7 +902,11 @@ versions of the package.
    - improved M
    - more documentation
 
-1.53
+    - *NOTE:*
+    - Version 1.54 fixes potentional buffer overflows were possible with
+    - earlier versions of the package.
+
+1.53     Unknown
    Parser
    - catalog interface
    - enabled SGML parsing
@@ -939,14 +943,14 @@ versions of the package.
    - calling external entity handlers work again
    - XML::LibXML::SAX::Parser will not throw warnings on DTD nodes
 
-1.52
+1.52     Unknown
    - fixed some typos (thanks to Randy Kobes and Hildo Biersma)
    - fixed namespace node handling
    - fixed empty Text Node bug
    - corrected the parser default values.
    - added some documentation
 
-1.51
+1.51     Unknown
    - fixed parser bug with broken XML declarations
    - fixed memory management within documents that have subsets
    - fixed some threaded perl issues
@@ -967,7 +971,7 @@ versions of the package.
    - better libxml2 version testing
    - more documentation
 
-1.50
+1.50     Unknown
    - fixed major problems with the validating parser
    - fixed default behaviour of the generic parser
    - fixed attribute setting of the string parser
@@ -989,7 +993,7 @@ versions of the package.
    - cloneNode clones now within documents
    - more documentation
 
-1.49
+1.49     Unknown
    - memory management has been completely rewritten.
         now the module should not cause that many memory leaks
         (special thanks to Merijn Broeren and Petr Pajas for providing
@@ -1011,7 +1015,7 @@ versions of the package.
      $skipXMLDeclaration)
    - more documentation
 
-1.40
+1.40     Unknown
    - new parsefunction: $parser->parse_xml_chunk($string);
    - appendChild( $doc_fragment ) bug fixed
    - removed obsolete files (parser.?)
@@ -1029,13 +1033,13 @@ versions of the package.
    - A number of segfault fixes
    - constants added without XML_ prefix
 
-1.31
+1.31     Unknown
     - Removed C-layer parser implementation.
     - Added support for prefixes in find* functions
     - More memory leak fixes (in custom DOMs)
     - Allow global callbacks
 
-1.30
+1.30     Unknown
     - Full PI access
     - New parser implementation (safer)
     - Callbacks API changed to be on the object, not the class
@@ -1043,7 +1047,7 @@ versions of the package.
     - Memory leak fixes
     - applied a bunch of patches provided by T.J. Mather
 
-1.00
+1.00     Unknown
     - Added SAX serialisation
     - Added a SAX builder module
     - Fixed findnodes in scalar context to return a NodeList object
@@ -1051,13 +1055,13 @@ versions of the package.
     - Added find(), which returns different things depending on the XPath
     - Added Boolean, Number and Literal data types
 
-0.99
+0.99     Unknown
     - Added support for $doc->URI getter/setter
 
-0.98
+0.98     Unknown
     - New have_library implementation
 
-0.97
+0.97     Unknown
     - Addition of Dtd string parser
     - Added support for namespace nodes (e.g. $element->getNamespaces())
     - Some memory leak and segfault fixes
@@ -1065,7 +1069,7 @@ versions of the package.
       $doc->is_valid([$dtd]))
     - Added doc files and test files to CPAN distro
 
-0.96
+0.96     Unknown
     - Addition of HTML parser
     - getOwner method added
     - Element->getAttributes() added
@@ -1074,24 +1078,24 @@ versions of the package.
     - Memory leak fixes
     - Bug Fixes
 
-0.94
+0.94     Unknown
     - Some DOM Level 2 cleanups
     - getParentNode returns XML::LibXML::Document if we get the
       document node
 
-0.93
+0.93     Unknown
     - Addition of DOM Level 2 APIs
     - some more segfault fixes
     - Document is now a Node (which makes lots of things easier)
 
-0.92
+0.92     Unknown
     - Many segfault and other bug fixes
     - More DOM API methods added
 
-0.91
+0.91     Unknown
     - Removed from XML::LibXSLT distribution
     - Added DOM API (phish)
 
-0.01  Sat Mar  3 17:08:00 2001
+0.01    2001-03-03
 	- original version; created by h2xs 1.19
 

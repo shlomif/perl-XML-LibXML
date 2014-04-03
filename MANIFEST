@@ -181,6 +181,7 @@ t/90shared_clone_failed_rt_91800.t
 t/90stack.t
 t/90threads.t
 t/91unique_key.t
+t/cpan-changes.t
 t/data/callbacks_returning_undef.xml
 t/data/chinese.xml
 t/lib/Collector.pm
