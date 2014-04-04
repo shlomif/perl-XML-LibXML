@@ -9,8 +9,8 @@ BEGIN{
   if (1000*$] < 5008) {
      plan skip_all => "Reader interface only supported in Perl >= 5.8";
      exit;
-  } elsif (XML::LibXML::LIBXML_VERSION() <= 20620) {
-     plan skip_all => "Reader not supported for libxml2 <= 2.6.20";
+  } elsif (!XML::LibXML::HAVE_READER()) {
+     plan skip_all => "Reader not supported in this libxml2 build";
      exit;
   } else {
      plan tests => 100;

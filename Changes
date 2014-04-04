@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+2.0116
+    - Support libxml2 builds with disabled xmlReader
+
 2.0115  2014-04-03
     - Fix double free when calling $node->addSibling with text nodes.
           - https://rt.cpan.org/Ticket/Display.html?id=94149

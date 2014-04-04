@@ -6,9 +6,21 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More;
 
 use utf8;
+
+use XML::LibXML;
+
+BEGIN {
+    if (!XML::LibXML::HAVE_READER()) {
+        plan skip_all => 'Reader not supported in this libxml2 build';
+        exit;
+    }
+    else {
+        plan tests => 2;
+    }
+}
 
 package Test::XML::Ordered;
 

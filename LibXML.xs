@@ -69,13 +69,17 @@ extern "C" {
 
 #if LIBXML_VERSION >= 20621
 #define WITH_SERRORS
+#ifdef LIBXML_READER_ENABLED
 #define HAVE_READER_SUPPORT
 #include <libxml/xmlreader.h>
+#endif
 #endif
 
 #ifdef LIBXML_CATALOG_ENABLED
 #include <libxml/catalog.h>
 #endif
+
+#ifdef HAVE_READER_SUPPORT
 
 typedef enum {
     XML_TEXTREADER_NONE = -1,
@@ -95,6 +99,7 @@ typedef enum {
     XML_TEXTREADER_VALIDATE_XSD = 4
 } xmlTextReaderValidate;
 
+#endif /* HAVE_READER_SUPPORT */
 
 /* GDOME support
  * libgdome installs only the core functions to the system.
@@ -1489,6 +1494,8 @@ LibXML_configure_xpathcontext( xmlXPathContextPtr ctxt ) {
     LibXML_configure_namespaces(ctxt);
 }
 
+#ifdef HAVE_READER_SUPPORT
+
 static void
 LibXML_set_reader_preserve_flag( xmlTextReaderPtr reader ) {
     HV *hash;
@@ -1521,6 +1528,8 @@ LibXML_get_reader_preserve_flag( xmlTextReaderPtr reader ) {
 
     return 0;
 }
+
+#endif /* HAVE_READER_SUPPORT */
 
 extern void boot_XML__LibXML__Devel(pTHX_ CV*);
 
