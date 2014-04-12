@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0116  2014-04-12
+    - t/cpan-changes.t : minimum version of Test::CPAN::Changes.
+        - This is to avoid test failures such as:
+            - http://www.cpantesters.org/cpan/report/69ee1a2a-6c09-1014-be8f-3786912f2992
+
 2.0115  2014-04-03
     - Fix double free when calling $node->addSibling with text nodes.
           - https://rt.cpan.org/Ticket/Display.html?id=94149
