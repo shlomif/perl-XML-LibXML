@@ -4,6 +4,9 @@ Revision history for Perl extension XML::LibXML
     - Makefile.PL : don't require a recentish ExtUtils::MakeMaker.
         - https://rt.cpan.org/Ticket/Display.html?id=83322
         - Thanks to Slaven Rezic for the report.
+    - Fix broken t/02parse.t with non-English locale with recent perls.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=97805
+        - Thanks to Slaven Rezic for the report.
 
 2.0116  2014-04-12
     - t/cpan-changes.t : minimum version of Test::CPAN::Changes.
