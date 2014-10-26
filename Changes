@@ -1,7 +1,17 @@
 Revision history for Perl extension XML::LibXML
 
-2.0116
-    - Support libxml2 builds with disabled xmlReader
+2.0117  2014-10-26
+    - Makefile.PL : don't require a recentish ExtUtils::MakeMaker.
+        - https://rt.cpan.org/Ticket/Display.html?id=83322
+        - Thanks to Slaven Rezic for the report.
+    - Fix broken t/02parse.t with non-English locale with recent perls.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=97805
+        - Thanks to Slaven Rezic for the report.
+
+2.0116  2014-04-12
+    - t/cpan-changes.t : minimum version of Test::CPAN::Changes.
+        - This is to avoid test failures such as:
+            - http://www.cpantesters.org/cpan/report/69ee1a2a-6c09-1014-be8f-3786912f2992
 
 2.0115  2014-04-03
     - Fix double free when calling $node->addSibling with text nodes.

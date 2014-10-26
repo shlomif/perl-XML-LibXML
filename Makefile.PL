@@ -43,7 +43,6 @@ my %INFOS = (
     ),
     'PREREQ_PM' => {
         'base' => 0,
-        'ExtUtils::MakeMaker' => '6.56',
         #'Hash::FieldHash' => '0.09',
         'parent' => 0,
         'strict' => 0,
@@ -54,32 +53,37 @@ my %INFOS = (
         'XML::SAX' => '0.11',
     },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
-    META_MERGE =>
-    {
-        resources =>
+    ($ExtUtils::MakeMaker::VERSION >= 6.54)
+    ?
+    (
+        META_MERGE =>
         {
-            repository => 'https://bitbucket.org/shlomif/perl-xml-libxml',
-            homepage => 'https://bitbucket.org/shlomif/perl-xml-libxml',
+            resources =>
+            {
+                repository => 'https://bitbucket.org/shlomif/perl-xml-libxml',
+                homepage => 'https://bitbucket.org/shlomif/perl-xml-libxml',
+            },
+            keywords =>
+            [
+                "dom",
+                "html",
+                "libxml",
+                "object oriented",
+                "oop",
+                "parse",
+                "parser",
+                "parsing",
+                "pullparser",
+                "sax",
+                "sgml",
+                "xml",
+                "xpath",
+                "XPath",
+                "xs",
+            ],
         },
-        keywords =>
-        [
-            "dom",
-            "html",
-            "libxml",
-            "object oriented",
-            "oop",
-            "parse",
-            "parser",
-            "parsing",
-            "pullparser",
-            "sax",
-            "sgml",
-            "xml",
-            "xpath",
-            "XPath",
-            "xs",
-        ],
-    },
+    )
+    : (),
 );
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #
