@@ -7,6 +7,13 @@
 use strict;
 use warnings;
 
+# Fix the locale for the error messages check to work:
+# See https://rt.cpan.org/Public/Bug/Display.html?id=97805 .
+use POSIX qw(locale_h);
+use locale;
+
+POSIX::setlocale(LC_ALL, "C");
+
 use Test::More tests => 533;
 use IO::File;
 
