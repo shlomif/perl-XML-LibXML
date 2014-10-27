@@ -1,6 +1,7 @@
 Revision history for Perl extension XML::LibXML
 
 2.0117  2014-10-26
+    - Support libxml2 builds with disabled xmlReader
     - Makefile.PL : don't require a recentish ExtUtils::MakeMaker.
         - https://rt.cpan.org/Ticket/Display.html?id=83322
         - Thanks to Slaven Rezic for the report.
