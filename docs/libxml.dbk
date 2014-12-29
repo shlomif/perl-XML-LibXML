@@ -2234,7 +2234,7 @@ $root-&gt;setAttributeNodeNS( $attr );</programlisting>
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Document nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
 	<sect1>
             <title>Description</title>
@@ -4091,7 +4091,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Element nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
 	<sect1>
 	  <title>Methods</title>
@@ -4625,7 +4625,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Text nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
         <sect1>
             <title>Description</title>
@@ -4856,7 +4856,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Comment nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
         <sect1>
             <title>Description</title>
@@ -4901,7 +4901,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to CDATA nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
 	<sect1>
 	  <title>Description</title>
@@ -4945,7 +4945,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Attribute nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
 	<sect1>
 	  <title>Description</title>
@@ -5128,7 +5128,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Namespace nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
 	<sect1>
 	  <title>Description</title>
@@ -5290,7 +5290,7 @@ $ec14nstring = $node-&gt;toStringEC14N($with_comments, $xpath_expression, $xpath
             <title>Synopsis</title>
             <programlisting>use XML::LibXML;
 # Only methods specific to Processing Instruction nodes are listed here,
-# see XML::LibXML::Node manpage for other methods</programlisting>
+# see the XML::LibXML::Node manpage for other methods</programlisting>
         </sect1>
 	<sect1>
 	  <title>Description</title>
