@@ -318,6 +318,7 @@ if (!defined $config{LIBS} || $config{LIBS} !~ /\-l(?:lib)?xml2\b/) {
                 q/ -llibxml2 -lzlib -llibgettextlib.dll/
             ];
             $config{LIBS} = $config_LIBS_alternatives->[-1];
+            $config{INC} .= " -I$Config{incpath}";
         }
     }
     else {
