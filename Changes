@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0119  2015-04-23
+    - Preserve unset options after a _clone() call (e.g: in load_xml()).
+        - This caused expand_entities(0) to not be preserved/etc.
+        - Thanks to Tilmann Haak from xing.com for the report.
+
 2.0118  2015-02-05
     - Add $Config{incpath} to the include paths on Win32.
         - Fixes https://rt.cpan.org/Ticket/Display.html?id=101944

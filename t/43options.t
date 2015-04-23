@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 289;
+use Test::More tests => 290;
 
 use XML::LibXML;
 
@@ -122,6 +122,45 @@ no_network
   $p->expand_entities(1);
   # TEST
   ok( $p->expand_entities() == 1, ' TODO : Add test name' );
+}
+
+{
+    my $XML = <<'EOT';
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE title [ <!ELEMENT title ANY >
+<!ENTITY xxe SYSTEM "file:///etc/passwd" >]>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>XXE</title>
+    <link>example.com</link>
+    <description>XXE</description>
+    <item>
+        <title>&xxe;</title>
+        <link>example.com</link>
+        <description>XXE here</description>
+    </item>
+</channel>
+</rss>
+EOT
+
+    my $sys_line = <<'EOT';
+<!ENTITY xxe SYSTEM "file:///etc/passwd"
+EOT
+
+    chomp ($sys_line);
+
+    my $parser = XML::LibXML->new(
+        expand_entities => 0,
+        load_ext_dtd    => 0,
+        no_network      => 1,
+        expand_xinclude => 0,
+    );
+    my $XML_DOC = $parser->load_xml( string => $XML, );
+
+    # TEST
+    like (scalar($XML_DOC->toString()), qr/\Q$sys_line\E/,
+        "expand_entities is preserved after _clone()/etc."
+    );
 }
 
 {
