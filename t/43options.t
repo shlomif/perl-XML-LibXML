@@ -129,9 +129,8 @@ no_network
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE title [ <!ELEMENT title ANY >
 <!ENTITY xxe SYSTEM "file:///etc/passwd" >]>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0">
 <channel>
-    <title>XXE</title>
     <link>example.com</link>
     <description>XXE</description>
     <item>
@@ -144,7 +143,7 @@ no_network
 EOT
 
     my $sys_line = <<'EOT';
-<!ENTITY xxe SYSTEM "file:///etc/passwd"
+<title>&xxe;</title>
 EOT
 
     chomp ($sys_line);
@@ -158,7 +157,7 @@ EOT
     my $XML_DOC = $parser->load_xml( string => $XML, );
 
     # TEST
-    like (scalar($XML_DOC->toString()), qr/\Q$sys_line\E/,
+    ok (scalar($XML_DOC->toString() =~ m{\Q$sys_line\E}),
         "expand_entities is preserved after _clone()/etc."
     );
 }
