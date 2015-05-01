@@ -14,7 +14,7 @@ use warnings;
 
 use vars qw($VERSION @ISA);
 
-$VERSION = "2.0119"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0120"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use XML::LibXML;
 use XML::SAX::Base;

@@ -7,7 +7,7 @@ use Tie::Hash;
 our @ISA = qw/Tie::Hash/;
 
 use vars qw($VERSION);
-$VERSION = "2.0119"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0120"; # VERSION TEMPLATE: DO NOT CHANGE
 
 BEGIN
 {
