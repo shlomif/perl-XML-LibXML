@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0121  2015-05-03
+    - Mention CVE-2015-3451 and related links in the Changes (= this file)
+    entry for 2.0119.
+        - Thanks to Tilmann Haak for pointing it out.
+
 2.0120  2015-05-01
     - Replace the test for the previous change with a more meaningful one.
         - Change was to preserve unset options after a _clone() call.
@@ -8,8 +13,13 @@ Revision history for Perl extension XML::LibXML
         for a proposed fix (which was further refined by Shlomi Fish).
 
 2.0119  2015-04-23
-    - Preserve unset options after a _clone() call (e.g: in load_xml()).
+    - SECURITY: Preserve unset options after a _clone() call (e.g: in
+    load_xml()).
         - This caused expand_entities(0) to not be preserved/etc.
+        - This is a security problem which was assigned the CVE number of
+        CVE-2015-3451 .
+            - https://access.redhat.com/security/cve/CVE-2015-3451
+            - http://seclists.org/oss-sec/2015/q2/313
         - Thanks to Tilmann Haak from xing.com for the report.
 
 2.0118  2015-02-05
