@@ -7,9 +7,9 @@ use TestHelpers;
 use Test::More;
 use constant TIMES_THROUGH => $ENV{MEMORY_TIMES} || 100_000;
 
-if ($^O ne 'linux')
+if (! (($^O eq 'linux') || ($^O eq 'cygwin')) )
 {
-    plan skip_all => 'linux platform only.';
+    plan skip_all => 'Only runs on Linux and Cygwin.';
 }
 elsif (! $ENV{MEMORY_TEST} )
 {
