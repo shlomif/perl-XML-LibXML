@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-2.0122  Unknown
+2.0122  2015-09-01
     - Enable the memory test on cygwin as well as Linux.
         - https://rt.cpan.org/Ticket/Display.html?id=104666
         - Thanks to https://me.yahoo.com/howdidwegetherereally#f714d for
