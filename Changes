@@ -5,6 +5,9 @@ Revision history for Perl extension XML::LibXML
         - https://rt.cpan.org/Ticket/Display.html?id=104666
         - Thanks to https://me.yahoo.com/howdidwegetherereally#f714d for
         the report.
+    - Fix a typo in createElementNS
+        - https://rt.cpan.org/Public/Bug/Display.html?id=106807
+        - Thanks to Rich for the report.
 
 2.0121  2015-05-03
     - Mention CVE-2015-3451 and related links in the Changes (= this file)
