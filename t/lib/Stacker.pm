@@ -3,7 +3,7 @@ package Stacker;
 use strict;
 use warnings;
 
-use TestHelpers;
+use TestHelpers qw(eq_or_diff);
 
 use parent 'Collector';
 

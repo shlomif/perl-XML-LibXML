@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use lib './t/lib';
-use TestHelpers;
+use TestHelpers qw(utf8_slurp);
 
 use Test::More;
 use Config;

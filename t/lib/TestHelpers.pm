@@ -3,7 +3,7 @@ package TestHelpers;
 use strict;
 use warnings;
 
-our @EXPORT = (qw(slurp utf8_slurp eq_or_diff));
+our @EXPORT_OK = (qw(slurp utf8_slurp eq_or_diff));
 
 use parent 'Exporter';
 
