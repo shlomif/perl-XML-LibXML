@@ -140,7 +140,9 @@ our %_preserve_flag;
     }
     elsif ( defined $args{string} ) {
       $self = $class->_newForString( $args{string}, $URI, $encoding, $options );
-      $string_pool{$self} = \$args{string};
+      if (defined($self)) {
+        $string_pool{$self} = \$args{string};
+      }
     }
     elsif ( defined $args{IO} ) {
       $self = $class->_newForIO( $args{IO}, $URI, $encoding, $options  );

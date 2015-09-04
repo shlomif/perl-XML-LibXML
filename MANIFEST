@@ -160,6 +160,7 @@ t/47load_xml_callbacks.t
 t/48_RH5_double_free_rt83779.t
 t/48_SAX_Builder_rt_91433.t
 t/48_memleak_rt_83744.t
+t/48_reader_undef_warning_on_empty_str_rt106830.t
 t/48_removeChild_crashes_rt_80395.t
 t/48_replaceNode_DTD_nodes_rT_80521.t
 t/48_rt55000.t
