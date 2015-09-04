@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 
 use lib './t/lib';
-use TestHelpers;
+use TestHelpers qw(utf8_slurp eq_or_diff);
 
 use Test::More tests => 3;
 

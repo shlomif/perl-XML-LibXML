@@ -5,7 +5,7 @@ use warnings;
 use Test::More tests => 18;
 
 use lib './t/lib';
-use TestHelpers;
+use TestHelpers qw(slurp);
 
 use XML::LibXML;
 

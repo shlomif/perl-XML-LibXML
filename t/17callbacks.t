@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use lib './t/lib';
-use TestHelpers;
+use TestHelpers qw(slurp);
 use Counter;
 use Stacker;
 
