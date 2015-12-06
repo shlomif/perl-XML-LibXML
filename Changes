@@ -1,9 +1,13 @@
 Revision history for Perl extension XML::LibXML
 
 2.0123  Unknown
-    - Get rid of a undef-warning in XML::LibXML::Reader .
+    - Get rid of an undef-warning in XML::LibXML::Reader .
         - https://rt.cpan.org/Ticket/Display.html?id=106830
         - Thanks to Rich for the report and testcase.
+    - Apply patch from Debian for rewording the documentation.
+        - https://rt.cpan.org/Ticket/Display.html?id=110116
+        - Some extra rewording has been done by SHLOMIF.
+        - Thanks to Gregor Herrman and the Debian Team
 
 2.0122  2015-09-01
     - Enable the memory test on cygwin as well as Linux.
