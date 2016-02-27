@@ -6,7 +6,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 58;
+use Test::More tests => 59;
 
 use XML::LibXML;
 
@@ -22,6 +22,17 @@ my $doc = XML::LibXML::Document->new();
     is( $textnode->nodeName(), '#text',  'creation 2');
     # TEST
     is( $textnode->nodeValue(), $foo,  'creation 3',);
+
+    {
+        # Test for https://rt.cpan.org/Ticket/Display.html?id=112470
+        my @attributes = $textnode->attributes();
+        # TEST
+        is_deeply(
+            (\@attributes),
+            [],
+            '::Text->attributes() returns an empty list in list context (RT#112470)',
+        );
+    }
 
     # 2. substring
     my $tnstr = $textnode->substringData( 1,2 );
