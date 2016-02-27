@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0123  Unknown
+    - Fix XML::LibXML::Text->attributes() to return an empty list in list
+    context.
+        - https://rt.cpan.org/Ticket/Display.html?id=112470
+        - Thanks to Rob Dixon for the report.
+
 2.0123  2015-12-06
     - Get rid of an undef-warning in XML::LibXML::Reader .
         - https://rt.cpan.org/Ticket/Display.html?id=106830

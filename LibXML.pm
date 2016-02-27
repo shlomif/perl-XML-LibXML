@@ -1775,7 +1775,7 @@ package XML::LibXML::Text;
 use vars qw(@ISA);
 @ISA = ('XML::LibXML::Node');
 
-sub attributes { return undef; }
+sub attributes { return; }
 
 sub deleteDataString {
     my ($node, $string, $all) = @_;
