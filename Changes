@@ -1,6 +1,6 @@
 Revision history for Perl extension XML::LibXML
 
-2.0123  Unknown
+2.0124  2016-02-27
     - Fix XML::LibXML::Text->attributes() to return an empty list in list
     context.
         - https://rt.cpan.org/Ticket/Display.html?id=112470
