@@ -18,7 +18,7 @@ use XML::LibXML::Common qw(:libxml);
 use XML::SAX::Base;
 use XML::SAX::DocumentLocator;
 
-$VERSION = "2.0123"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0124"; # VERSION TEMPLATE: DO NOT CHANGE
 @ISA = ('XML::SAX::Base');
 
 sub CLONE_SKIP {
