@@ -21,7 +21,7 @@ BEGIN{
 
 my $file = "test/textReader/countries.xml";
 {
-  my $reader = new XML::LibXML::Reader(location => $file, {expand_entities => 1});
+  my $reader = XML::LibXML::Reader->new(location => $file, {expand_entities => 1});
   isa_ok($reader, "XML::LibXML::Reader");
   is($reader->read, 1, "read");
   is($reader->byteConsumed, 488, "byteConsumed");
@@ -89,7 +89,7 @@ my $file = "test/textReader/countries.xml";
 for my $how (qw(FD IO)) {
 #  my $fd;
   open my $fd, '<', $file or die "cannot open $file: $!\n";
-  my $reader = new XML::LibXML::Reader($how => $fd, URI => $file);
+  my $reader = XML::LibXML::Reader->new($how => $fd, URI => $file);
   isa_ok($reader, "XML::LibXML::Reader");
   $reader->read;
   $reader->read;
@@ -109,7 +109,7 @@ for my $how (qw(FD IO)) {
     $doc = <$fd>;
   }
   close $fd;
-  my $reader = new XML::LibXML::Reader(string => $doc, URI => $file);
+  my $reader = XML::LibXML::Reader->new(string => $doc, URI => $file);
   isa_ok($reader, "XML::LibXML::Reader");
   $reader->read;
   $reader->read;
@@ -119,7 +119,7 @@ for my $how (qw(FD IO)) {
 # DOM
 {
   my $DOM = XML::LibXML->new->parse_file($file);
-  my $reader = new XML::LibXML::Reader(DOM => $DOM);
+  my $reader = XML::LibXML::Reader->new(DOM => $DOM);
   isa_ok($reader, "XML::LibXML::Reader");
   $reader->read;
   $reader->read;
@@ -144,7 +144,7 @@ for my $how (qw(FD IO)) {
 </root>
 EOF
   {
-    my $reader = new XML::LibXML::Reader(string => $xml);
+    my $reader = XML::LibXML::Reader->new(string => $xml);
     $reader->preservePattern('//PP');
     $reader->preservePattern('//x:ZZ',{ x => "foo"});
 
@@ -203,7 +203,7 @@ EOF
   </x>
 </root>
 EOF
-  my $reader = new XML::LibXML::Reader(
+  my $reader = XML::LibXML::Reader->new(
     string => $bad_xml,
     URI => "mystring.xml"
    );
@@ -220,14 +220,14 @@ EOF
   my $rng = "test/relaxng/demo.rng";
   for my $RNG ($rng, XML::LibXML::RelaxNG->new(location => $rng)) {
     {
-      my $reader = new XML::LibXML::Reader(
+      my $reader = XML::LibXML::Reader->new(
 	location => "test/relaxng/demo.xml",
 	RelaxNG => $RNG,
        );
       ok($reader->finish, "validate using ".(ref($RNG) ? 'XML::LibXML::RelaxNG' : 'RelaxNG file'));
     }
     {
-      my $reader = new XML::LibXML::Reader(
+      my $reader = XML::LibXML::Reader->new(
 	location => "test/relaxng/invaliddemo.xml",
 	RelaxNG => $RNG,
        );
@@ -243,14 +243,14 @@ EOF
   my $xsd = "test/schema/schema.xsd";
   for my $XSD ($xsd, XML::LibXML::Schema->new(location => $xsd)) {
     {
-      my $reader = new XML::LibXML::Reader(
+      my $reader = XML::LibXML::Reader->new(
 	location => "test/schema/demo.xml",
 	Schema => $XSD,
        );
       ok($reader->finish, "validate using ".(ref($XSD) ? 'XML::LibXML::Schema' : 'Schema file'));
     }
     {
-      my $reader = new XML::LibXML::Reader(
+      my $reader = XML::LibXML::Reader->new(
 	location => "test/schema/invaliddemo.xml",
 	Schema => $XSD,
        );
@@ -275,10 +275,10 @@ EOF
   <YY/>
 </root>
 EOF
-  my $pattern = new XML::LibXML::Pattern('//inner|CC|/root/y:ZZ',{y=>'foo'});
+  my $pattern = XML::LibXML::Pattern->new('//inner|CC|/root/y:ZZ',{y=>'foo'});
   ok($pattern);
   {
-    my $reader = new XML::LibXML::Reader(string => $xml);
+    my $reader = XML::LibXML::Reader->new(string => $xml);
     ok($reader);
     my $matches='';
     while ($reader->read) {
@@ -289,7 +289,7 @@ EOF
     ok($matches,'/root/AA/inner,/root/BB/CC,/root/*,');
   }
   {
-    my $reader = new XML::LibXML::Reader(string => $xml);
+    my $reader = XML::LibXML::Reader->new(string => $xml);
     ok($reader);
     my $matches='';
     while ($reader->nextPatternMatch($pattern)) {
