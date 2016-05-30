@@ -1,6 +1,7 @@
 language: perl
 perl:
-    - "5.24"
+    # Travis-CI does not appear to support perl-5.24 yet. Removing for now.
+    # - "5.24"
     - "5.22"
     - "5.20"
     - "5.18"
