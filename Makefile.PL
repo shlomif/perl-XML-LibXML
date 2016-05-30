@@ -60,8 +60,8 @@ my %INFOS = (
         {
             resources =>
             {
-                repository => 'https://bitbucket.org/shlomif/perl-xml-libxml',
-                homepage => 'https://bitbucket.org/shlomif/perl-xml-libxml',
+                repository => 'https://github.com/shlomif/perl-XML-LibXML',
+                homepage => 'https://github.com/shlomif/perl-XML-LibXML',
             },
             keywords =>
             [

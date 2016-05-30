@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+2.0125  2016-05-30
+    - Moved the repository from Mercurial and BitBucket to Git and GitHub:
+        - https://github.com/shlomif/perl-XML-LibXML
+        - This was done to better encourage contributions to XML::LiBXML and
+        to be able to use the better Continuous Integration options that
+        are available for GitHub projects.
+
 2.0124  2016-02-27
     - Fix XML::LibXML::Text->attributes() to return an empty list in list
     context.

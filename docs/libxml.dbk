@@ -316,11 +316,11 @@ perl Makefile.PL LIBS='-L/path/to/lib' INC='-I/path/to/include'</programlisting>
             <para>As XML::LibXML is open source software, help and
             patches are appreciated. If you find a bug in the current
             release, make sure this bug still exists in the developer
-            version of XML::LibXML. This version can be downloaded
-            from its Mercurial repository. For more information about that,
+            version of XML::LibXML. This version can be cloned
+            from its Git repository. For more information about that,
             see:</para>
 
-            <para>http://bitbucket.org/shlomif/perl-xml-libxml</para>
+            <para>https://github.com/shlomif/perl-XML-LibXML</para>
 
             <para>Please consider all regression tests as correct. If
             any test fails it is most certainly related to a

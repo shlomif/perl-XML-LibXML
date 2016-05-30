@@ -262,10 +262,10 @@ PATCHES AND DEVELOPER VERSION
 
 As XML::LibXML is open source software, help and patches are appreciated. If
 you find a bug in the current release, make sure this bug still exists in the
-developer version of XML::LibXML. This version can be downloaded from its
-Mercurial repository. For more information about that, see:
+developer version of XML::LibXML. This version can be cloned from its Git
+repository. For more information about that, see:
 
-http://bitbucket.org/shlomif/perl-xml-libxml
+https://github.com/shlomif/perl-XML-LibXML
 
 Please consider all regression tests as correct. If any test fails it is most
 certainly related to a bug.
