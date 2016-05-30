@@ -17,7 +17,7 @@ if (!defined ($version))
 }
 
 my @cmd = (
-    "hg", "tag", "-m",
+    "git", "tag", "-m",
     "Tagging the XML-LibXML release as $version",
     "XML-LibXML-$version",
 );
