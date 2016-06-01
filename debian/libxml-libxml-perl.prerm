@@ -14,7 +14,7 @@ then
     update-perl-sax-parsers --update
 fi
 
-## ---------------------------------------------------------------------- 
+## ----------------------------------------------------------------------
 ## automatically generated debhelper commands
 #DEBHELPER#
 

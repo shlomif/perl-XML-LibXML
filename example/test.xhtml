@@ -38,13 +38,13 @@ alias for <code>createDocument()</code></p></dd><dt><strong><a name="item_create
 The constructor for the document class. As Parameter it takes the version
 string and (optionally) the ecoding string. Simply calling <strong>createDocument</strong> will create the document:
 
-</p><p/><pre>  
+</p><p/><pre>
   &lt;?xml version=&quot;your version&quot; encoding=&quot;your encoding&quot;?&gt;
 </pre><p>
 Both parameter are optional. The default value for <strong>$version</strong> is <em>1.0</em> , of course. If the <strong>$encoding</strong> parameter is not set, the encoding will be left unset, which means UTF8 is
 implied (and set). The call of <strong>createDocument</strong> without any parameter will result the following code:
 
-</p><p/><pre>  
+</p><p/><pre>
   &lt;?xml version=&quot;1.0&quot;?&gt;
 </pre></dd><dt><strong><a name="item_getEncoding">getEncoding</a></strong></dt><dd><p>
 returns the encoding string of the document
