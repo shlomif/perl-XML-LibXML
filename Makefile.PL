@@ -186,6 +186,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,7,1,0], # broken release, broken utf-16
                      [2,7,6,1], # tested, ok
                      [2,7,8,1], # tested, ok
+                     [2,9,3,1], # schema regression
                      [2,9,4,0], # schema regression
                     );
     my $xml2cfg = "xml2-config";
