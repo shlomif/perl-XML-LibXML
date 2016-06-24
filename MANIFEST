@@ -190,6 +190,7 @@ t/lib/Counter.pm
 t/lib/Stacker.pm
 t/lib/TestHelpers.pm
 t/pod.t
+t/release-kwalitee.t
 t/style-trailing-space.t
 test/relaxng/badschema.rng
 test/relaxng/demo.rng

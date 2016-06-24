@@ -1,5 +1,15 @@
 Revision history for Perl extension XML::LibXML
 
+2.0126  2016-06-24
+    - Workaround RT#114638:
+        - 2.9.4 broke XSD Schema support.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=114638
+        - https://github.com/shlomif/libxml2-2.9.4-reader-schema-regression
+        - https://bugzilla.gnome.org/show_bug.cgi?id=766834
+        - https://github.com/shlomif/perl-XML-LibXML/pull/1
+        - Thanks to Paul for the report and to RURBAN for a pull-req.
+    - Add t/release-kwalitee.t for testing CPANTS Kwalitee.
+
 2.0125  2016-05-30
     - Moved the repository from Mercurial and BitBucket to Git and GitHub:
         - https://github.com/shlomif/perl-XML-LibXML
