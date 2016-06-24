@@ -51,6 +51,8 @@ my %INFOS = (
         'warnings' => 0,
         'XML::NamespaceSupport' => '1.07',
         'XML::SAX' => '0.11',
+        'XML::SAX::Base' => '0',
+        'XML::SAX::Exception' => '0',
     },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
     ($ExtUtils::MakeMaker::VERSION >= 6.54)
