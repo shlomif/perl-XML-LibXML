@@ -239,7 +239,9 @@ EOF
   }
 }
 
-{
+SKIP: {
+  skip "https://github.com/shlomif/libxml2-2.9.4-reader-schema-regression", 4
+    if !XML::LibXML::HAVE_SCHEMAS or XML::LibXML::LIBXML_DOTTED_VERSION eq '2.9.4';
   my $xsd = "test/schema/schema.xsd";
   for my $XSD ($xsd, XML::LibXML::Schema->new(location => $xsd)) {
     {
@@ -257,9 +259,9 @@ EOF
       eval { $reader->finish };
       ok($@, "catch validation error for ".(ref($XSD) ? 'XML::LibXML::Schema' : 'Schema file'));
     }
-
   }
 }
+
 # Patterns
 {
   my ($node1,$node2, $node3);

@@ -1616,6 +1616,10 @@ HAVE_SCHEMAS()
     CODE:
 #ifdef HAVE_SCHEMAS
         RETVAL = 1;
+# if LIBXML_VERSION == 20904
+        /* exists but broken https://github.com/shlomif/libxml2-2.9.4-reader-schema-regression */
+        RETVAL = 0;
+# endif
 #else
         RETVAL = 0;
 #endif

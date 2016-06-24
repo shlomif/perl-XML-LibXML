@@ -186,6 +186,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,7,1,0], # broken release, broken utf-16
                      [2,7,6,1], # tested, ok
                      [2,7,8,1], # tested, ok
+                     [2,9,4,0], # schema regression
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
@@ -206,14 +207,19 @@ unless ( $is_Win32 ) { # cannot get config in W32
 
         if ( $@ ) {
             if ( $@ =~ /^VERSION|^FORCED/ ) {
-                print STDERR "The installed version of libxml2 not compatible with XML::LibXML (and probably buggy)!\n\n".
+                my $libxml2_version;
+                print STDERR "The installed version of libxml2 $@ is not compatible with XML::LibXML (and probably buggy)!\n\n".
                     "You may continue at your own risk using 'perl Makefile.PL FORCE=1', but:\n\n".
                     "  - don't expect XML::LibXML to build or work correctly!\n".
                     "  - don't report errors!\n".
                     "  - don't send patches!\n\n".
                     "Check the README file for more information on versions\n".
                     "that are tested with XML::LibXML\n\n";
-            exit 0 unless $FORCE; # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
+                if ($@ =~ /^VERSION (\S+)/) {
+                    $libxml2_version = $1;
+                }
+                # 0 recommended by http://cpantest.grango.org (Notes for CPAN Authors)
+                exit 0 if !$FORCE and $libxml2_version ne "2.9.4";
             }
             if ( $@ =~ /^UNTESTED (\S*)/ ) {
                 warn "Note: libxml2 $1 was not tested with this XML::LibXML version.\n"
@@ -245,6 +251,7 @@ OPT
         }
     }
 }
+
 # -------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------- #
