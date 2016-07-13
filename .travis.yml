@@ -10,3 +10,5 @@ perl:
 before_install:
     - "sudo apt-get update"
     - "sudo apt-get install libxml2-dev"
+env:
+    - RELEASE_TESTING=1
