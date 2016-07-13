@@ -5,6 +5,9 @@ use lib './t/lib';
 use TestHelpers qw(slurp);
 
 use Test::More;
+
+plan skip_all => "These tests are for authors only!" unless $ENV{AUTHOR_TESTING} or $ENV{RELEASE_TESTING};
+
 use constant TIMES_THROUGH => $ENV{MEMORY_TIMES} || 100_000;
 
 if (! (($^O eq 'linux') || ($^O eq 'cygwin')) )
@@ -257,7 +260,7 @@ dromeds.xml
 
 #        {
 #            print "# ENCODING TESTS \n";
-#            my $string = "test ä ø is a test string to test iso encoding";
+#            my $string = "test ï¿½ ï¿½ is a test string to test iso encoding";
 #            my $encstr = encodeToUTF8( "iso-8859-1" , $string );
 #            for ( 1..TIMES_THROUGH ) {
 #                my $str = encodeToUTF8( "iso-8859-1" , $string );
