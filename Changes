@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+2.0127  2016-07-22
+    - Make sure t/release-kwalitee.t and other tests do not run by default.
+        - Only with AUTHOR_TESTING or RELEASE_TESTING specified.
+        - Thanks to Lance Wicks for the pull request.
+        - https://rt.cpan.org/Ticket/Display.html?id=115586
+        - https://rt.cpan.org/Ticket/Display.html?id=115859
+
 2.0126  2016-06-24
     - Workaround RT#114638:
         - 2.9.4 broke XSD Schema support.
