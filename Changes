@@ -1,5 +1,14 @@
 Revision history for Perl extension XML::LibXML
 
+2.0128  2016-07-24
+    - Hopefully add the .pod files again as they were missing from 2.0127.
+        - https://github.com/shlomif/perl-XML-LibXML/issues/3
+        - Thanks to Paul Howarth for the report.
+        - This was caused by ExtUtils::Manifest just warning that the files
+        referenced in the "MANIFEST" file were not present and still
+        continuing to prepare the archive as usual. A "do-what-I-don't-want-to"
+        thing.
+
 2.0127  2016-07-22
     - Make sure t/release-kwalitee.t and other tests do not run by default.
         - Only with AUTHOR_TESTING or RELEASE_TESTING specified.
