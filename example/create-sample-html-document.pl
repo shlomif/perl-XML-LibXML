@@ -62,6 +62,18 @@ use XML::LibXML;
                             $_text->(". We hope you enjoyed it."),
                         ],
                     ),
+                    $_el->(
+                        'p',
+                        [
+                            $_el->(
+                                'img',
+                                { 'src' => 'http://example.com/non-exist.png',
+                                    'alt' => 'non-existing image',
+                                },
+                                [],
+                            ),
+                        ],
+                    ),
                 ],
             ),
         ],
