@@ -51,7 +51,15 @@ use XML::LibXML;
                     $_el->(
                         'p',
                         [
-                            $_text->("Sample text inside the p element."),
+                            $_text->("Introducing a link - "),
+                            $_el->(
+                                'a',
+                                { 'href' => 'http://www.wikipedia.org' },
+                                [
+                                    $_text->("Link to Wikipedia"),
+                                ],
+                            ),
+                            $_text->(". We hope you enjoyed it."),
                         ],
                     ),
                 ],
