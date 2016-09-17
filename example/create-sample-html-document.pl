@@ -1,5 +1,13 @@
 #!/usr/bin/perl
 
+=head1 ABOUT
+
+This is a sample program to generate an HTML document using XML::LibXML's
+DOM routines. It was written to resolve
+L<https://rt.cpan.org/Ticket/Display.html?id=117923> . Thanks to Dan Jacobson.
+
+=cut
+
 use strict;
 use warnings;
 
@@ -126,10 +134,6 @@ use XML::LibXML;
     $doc->setDocumentElement( $html );
 
     print $doc->toStringHTML();
-    exit(0);
-
-    # my $attr = $doc->createAttributeNS( "bar", "bar:foo", "test" );
-    # $root->setAttributeNodeNS( $attr );
 }
 
 =head1 COPYRIGHT & LICENSE
