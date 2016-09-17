@@ -39,6 +39,7 @@ example/complex/complex.xml
 example/complex/complex2.xml
 example/complex/dtd/f.dtd
 example/complex/dtd/g.dtd
+example/create-sample-html-document.pl
 example/dromeds.xml
 example/dtd.xml
 example/enc2_latin2.html
