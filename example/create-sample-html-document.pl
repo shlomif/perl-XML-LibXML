@@ -7,14 +7,57 @@ use XML::LibXML;
 
 {
     my $doc = XML::LibXML->createDocument;
-    my $html = $doc->createElementNS( "", "html" );
-    my $body = $doc->createElementNS( "", "body" );
-    $html->appendChild($body);
 
-    my $p = $doc->createElementNS( "", "p");
-    $p->appendChild($doc->createTextNode("Sample text inside <p>!"));
-    $body->appendChild($p);
+    # A small Domain-Specific-Language for generating DOM:
+    my $_text = sub {
+        my ($content) = @_;
 
+        return $doc->createTextNode($content);
+    };
+
+    # Short for element.
+    my $_el = sub {
+        my $name = shift;
+        my $param = shift;
+        my $attrs = {};
+        if (ref($param) eq 'HASH')
+        {
+            $attrs = $param;
+            $param = shift;
+        }
+        my $childs = $param;
+
+        my $elem = $doc->createElementNS("", $name);
+
+        while (my ($k, $v) = each %$attrs)
+        {
+            $elem->setAttribute($k, $v);
+        }
+
+        foreach my $child (@$childs)
+        {
+            $elem->appendChild($child);
+        }
+
+        return $elem;
+    };
+
+    my $html = $_el->(
+        'html',
+        [
+            $_el->(
+                'body',
+                [
+                    $_el->(
+                        'p',
+                        [
+                            $_text->("Sample text inside the p element."),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    );
     $doc->setDocumentElement( $html );
 
     print $doc->toStringHTML();
