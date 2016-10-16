@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::LibXML
 
+2.0129  Unknown
+    - Add example/create-sample-html-document.pl .
+        - https://rt.cpan.org/Ticket/Display.html?id=117923
+
 2.0128  2016-07-24
     - Hopefully add the .pod files again as they were missing from 2.0127.
         - https://github.com/shlomif/perl-XML-LibXML/issues/3
