@@ -249,7 +249,6 @@ EOT
 
     $parser->parse_string(<<EOT);
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE root [ ]>
 <root>
 1
 <!-- comment -->
@@ -259,18 +258,16 @@ EOT
 
     my $expecting = [
         start_document => [ 2, 1  ],
-        start_dtd      => [ 2, 20 ],
-        end_dtd        => [ 2, 20 ],
-        start_element  => [ 3, 6  ],
+        start_element  => [ 2, 6  ],
+        characters     => [ 4, 1  ],
+        comment        => [ 4, 17 ],
         characters     => [ 5, 1  ],
-        comment        => [ 5, 17 ],
+        start_cdata    => [ 5, 20 ],
+        characters     => [ 5, 20 ],
+        end_cdata      => [ 5, 20 ],
         characters     => [ 6, 1  ],
-        start_cdata    => [ 6, 20 ],
-        characters     => [ 6, 20 ],
-        end_cdata      => [ 6, 20 ],
-        characters     => [ 7, 1  ],
-        end_element    => [ 7, 8  ],
-        end_document   => [ 7, 8  ],
+        end_element    => [ 6, 8  ],
+        end_document   => [ 6, 8  ],
     ];
 
     is_deeply( \@stack, $expecting, "Check locator positions" );
