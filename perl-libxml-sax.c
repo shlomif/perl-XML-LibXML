@@ -52,7 +52,7 @@ extern "C" {
 typedef struct {
     SV * parser;
     xmlNodePtr ns_stack;
-    xmlSAXLocator * locator;
+    HV * locator;
     xmlDocPtr ns_stack_root;
     SV * handler;
     SV * saved_error;
@@ -364,6 +364,12 @@ PmmSAXCloseContext( xmlParserCtxtPtr ctxt )
 
     xmlFreeDoc( vec->ns_stack_root );
     vec->ns_stack_root = NULL;
+
+    if ( vec->locator != NULL ) {
+        SvREFCNT_dec( vec->locator );
+        vec->locator = NULL;
+    }
+
     xmlFree( vec );
     ctxt->_private = NULL;
 }
@@ -811,6 +817,104 @@ PmmGenDTDSV( pTHX_ PmmSAXVectorPtr sax,
     return retval;
 }
 
+HV *
+PmmGenLocator( xmlSAXLocatorPtr loc)
+{
+    dTHX;
+    HV * locator = newHV();
+
+    const xmlChar * PublicId = loc->getPublicId(NULL);
+    const xmlChar * SystemId = loc->getSystemId(NULL);
+
+    if ( PublicId != NULL && xmlStrlen( PublicId ) ) {
+      (void) hv_store(locator, "PublicId", 8,
+           newSVpv((char *)PublicId, 0), 0);
+    }
+
+    if ( SystemId != NULL && xmlStrlen( SystemId ) ) {
+      (void) hv_store(locator, "SystemId", 8,
+           newSVpv((char *)SystemId, 0), 0);
+    }
+
+    return locator;
+}
+
+
+void
+PmmUpdateLocator( xmlParserCtxtPtr ctxt )
+{
+    PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
+
+    if (sax->locator == NULL) {
+        return;
+    }
+
+    dTHX;
+
+    (void) hv_store(sax->locator, "LineNumber", 10,
+         newSViv(ctxt->input->line), 0);
+
+    (void) hv_store(sax->locator, "ColumnNumber", 12,
+         newSViv(ctxt->input->col), 0);
+
+    const xmlChar * encoding = ctxt->input->encoding;
+    const xmlChar * version = ctxt->input->version;
+
+    if ( encoding != NULL && xmlStrlen( encoding ) ) {
+      (void) hv_store(sax->locator, "Encoding", 8,
+           newSVpv((char *)encoding, 0), 0);
+    }
+
+    if ( version != NULL && xmlStrlen( version ) ) {
+      (void) hv_store(sax->locator, "XMLVersion", 10,
+           newSVpv((char *)version, 0), 0);
+    }
+}
+
+int
+PSaxSetDocumentLocator(void *ctx, xmlSAXLocatorPtr loc)
+{
+    xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
+    PmmSAXVectorPtr  sax  = (PmmSAXVectorPtr)ctxt->_private;
+    dTHX;
+    HV* empty;
+    SV * handler          = sax->handler;
+    SV * rv;
+
+    dSP;
+
+    if (sax->joinchars)
+    {
+        PSaxCharactersFlush(ctxt, sax->charbuf);
+    }
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP) ;
+
+    XPUSHs(handler);
+
+    sax->locator = PmmGenLocator(loc);
+
+    rv = newRV_inc((SV*)sax->locator);
+    XPUSHs( rv);
+
+    PUTBACK;
+
+    call_method( "set_document_locator", G_SCALAR | G_EVAL | G_DISCARD );
+    sv_2mortal(rv) ;
+
+    if (SvTRUE(ERRSV)) {
+        croak_obj;
+    }
+
+    FREETMPS ;
+    LEAVE ;
+    CLEAR_SERROR_HANDLER
+    return 1;
+}
+
 int
 PSaxStartDocument(void * ctx)
 {
@@ -822,6 +926,8 @@ PSaxStartDocument(void * ctx)
 
     SV * rv;
     if ( handler != NULL ) {
+
+        PmmUpdateLocator(ctx);
 
         dSP;
 
@@ -889,6 +995,8 @@ PSaxEndDocument(void * ctx)
     dTHX;
     dSP;
 
+    PmmUpdateLocator(ctx);
+
     if (sax->joinchars)
     {
         PSaxCharactersFlush(ctxt, sax->charbuf);
@@ -926,6 +1034,8 @@ PSaxStartElement(void *ctx, const xmlChar * name, const xmlChar** attr)
     SV * arv;
 
     dSP;
+
+    PmmUpdateLocator(ctx);
 
     if (sax->joinchars)
     {
@@ -977,6 +1087,8 @@ PSaxEndElement(void *ctx, const xmlChar * name) {
     HV * element;
 
     dSP;
+
+    PmmUpdateLocator(ctx);
 
     if (sax->joinchars)
     {
@@ -1079,6 +1191,8 @@ int PSaxCharacters (void *ctx, const xmlChar * ch, int len) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
 
+    PmmUpdateLocator(ctx);
+
     if (sax->joinchars) {
         struct CBuffer *buffer = sax->charbuf;
         CBufferAppend(buffer, ch, len);
@@ -1095,6 +1209,8 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     dTHX;
     HV* element;
     SV * handler = sax->handler;
+
+    PmmUpdateLocator(ctx);
 
     SV * rv = NULL;
 
@@ -1138,6 +1254,8 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     dTHX;
+
+    PmmUpdateLocator(ctx);
 
     HV* element;
     SV * handler = sax->handler;
@@ -1209,6 +1327,8 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     dTHX;
     SV * handler          = sax->handler;
 
+    PmmUpdateLocator(ctx);
+
     SV * element;
     SV * rv = NULL;
 
@@ -1253,6 +1373,8 @@ void PSaxExternalSubset (void * ctx,
 {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
+    PmmUpdateLocator(ctx);
+
     dTHX;
     SV * handler          = sax->handler;
 
@@ -1523,6 +1645,8 @@ PSaxGetHandler()
 {
     xmlSAXHandlerPtr retval = (xmlSAXHandlerPtr)xmlMalloc(sizeof(xmlSAXHandler));
     memset(retval, 0, sizeof(xmlSAXHandler));
+
+    retval->setDocumentLocator = (setDocumentLocatorSAXFunc)&PSaxSetDocumentLocator;
 
     retval->startDocument = (startDocumentSAXFunc)&PSaxStartDocument;
 

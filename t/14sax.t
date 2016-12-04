@@ -7,7 +7,7 @@ use Counter;
 use Stacker;
 
 # should be 31.
-use Test::More tests => 31;
+use Test::More tests => 33;
 
 # BEGIN { plan tests => 55 }
 
@@ -230,6 +230,53 @@ EOT
     );
 }
 
+{
+    local $XML::SAX::ParserPackage = 'XML::LibXML::SAX';
+
+    my @stack;
+    my $sax = SAXLocatorTester->new( sub {
+        my ($self, $method, @args) = @_;
+        push( @stack, $method => [
+            $self->{locator}->{LineNumber},
+            $self->{locator}->{ColumnNumber}
+        ] );
+    } );
+
+    # TEST
+    ok($sax, 'Created SAX handler with document locator');
+
+    my $parser = XML::SAX::ParserFactory->parser(Handler => $sax);
+
+    $parser->parse_string(<<EOT);
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [ ]>
+<root>
+1
+<!-- comment -->
+<![CDATA[ a < b ]]>
+</root>
+EOT
+
+    my $expecting = [
+        start_document => [ 2, 1  ],
+        start_dtd      => [ 2, 20 ],
+        end_dtd        => [ 2, 20 ],
+        start_element  => [ 3, 6  ],
+        characters     => [ 5, 1  ],
+        comment        => [ 5, 17 ],
+        characters     => [ 6, 1  ],
+        start_cdata    => [ 6, 20 ],
+        characters     => [ 6, 20 ],
+        end_cdata      => [ 6, 20 ],
+        characters     => [ 7, 1  ],
+        end_element    => [ 7, 8  ],
+        end_document   => [ 7, 8  ],
+    ];
+
+    is_deeply( \@stack, $expecting, "Check locator positions" );
+}
+
+
 ########### Namespace test ( empty namespaces ) ########
 
 {
@@ -425,6 +472,34 @@ sub start_element {
     $SAXNS2Tester_start_element_stacker->cb()->($elt);
 
     return;
+}
+
+
+package SAXLocatorTester;
+use Test::More;
+
+sub new {
+    my ($class, $cb) = @_;
+    my $self = bless {}, $class;
+
+    for my $method ( qw(
+        start_document end_document
+        start_element end_element
+        start_cdata end_cdata
+        start_dtd end_dtd 
+        characters
+        comment
+    ) ) {
+        no strict 'refs';
+        *$method = sub { $cb->( $_[0], $method, @_[1..$#_]) };
+    }
+
+    return $self;
+}
+
+sub set_document_locator {
+    my ($self, $locator) = @_;
+    $self->{locator} = $locator;
 }
 
 1;
