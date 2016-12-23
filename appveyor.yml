@@ -17,9 +17,9 @@ build: off
 
 test_script:
     - perl Makefile.PL
-    - make
-    - make test
-    - make disttest
+    - dmake
+    - dmake test
+    - dmake disttest
 
 cache:
     - C:\Perl5
