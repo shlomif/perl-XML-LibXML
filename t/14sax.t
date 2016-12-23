@@ -6,7 +6,7 @@ use lib './t/lib';
 use Counter;
 use Stacker;
 
-# should be 31.
+# should be 33.
 use Test::More tests => 33;
 
 # BEGIN { plan tests => 55 }
@@ -270,6 +270,7 @@ EOT
         end_document   => [ 6, 8  ],
     ];
 
+    # TEST
     is_deeply( \@stack, $expecting, "Check locator positions" );
 }
 
@@ -483,7 +484,7 @@ sub new {
         start_document end_document
         start_element end_element
         start_cdata end_cdata
-        start_dtd end_dtd 
+        start_dtd end_dtd
         characters
         comment
     ) ) {
