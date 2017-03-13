@@ -2,7 +2,7 @@
 # Shamelessly taken from https://github.com/plicease/Dist-Zilla-PluginBundle-Author-Plicease/blob/master/.appveyor.yml
 # Thanks!
 install:
-    - choco install strawberryperl -version 5.20.1.1
+    - choco install strawberryperl -version 5.24.1.1
     - SET PATH=C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin;%PATH%
     - perl -v
     - if not exist C:\Perl5 mkdir C:\Perl5
