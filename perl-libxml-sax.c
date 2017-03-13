@@ -569,7 +569,7 @@ PmmAddNamespace( PmmSAXVectorPtr sax, const xmlChar * name,
     PSaxStartPrefix( sax, name, href, handler );
 }
 
-#define XML_STR_IS_EMPTY(s) ((s)[0] != 0)
+#define XML_STR_NOT_EMPTY(s) ((s)[0] != 0)
 
 HV *
 PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name )
@@ -580,7 +580,7 @@ PmmGenElementSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * name )
 
     xmlNsPtr ns = NULL;
 
-    if ( name != NULL && XML_STR_IS_EMPTY( name )  ) {
+    if ( name != NULL && XML_STR_NOT_EMPTY( name )  ) {
         (void) hv_store(retval, "Name", 4,
                  _C2Sv(name, NULL), NameHash);
 
@@ -667,7 +667,7 @@ PmmGenAttributeHashSV( pTHX_ PmmSAXVectorPtr sax,
             name = *ta;  ta++;
             value = *ta; ta++;
 
-            if ( name != NULL && XML_STR_IS_EMPTY( name ) ) {
+            if ( name != NULL && XML_STR_NOT_EMPTY( name ) ) {
                 localname = xmlSplitQName(NULL, name, &prefix);
 
                 (void) hv_store(atV, "Name", 4,
@@ -765,7 +765,7 @@ PmmGenCharDataSV( pTHX_ PmmSAXVectorPtr sax, const xmlChar * data, int len )
 {
     HV * retval = newHV();
 
-    if ( data != NULL && XML_STR_IS_EMPTY( data ) ) {
+    if ( data != NULL && XML_STR_NOT_EMPTY( data ) ) {
         (void) hv_store(retval, "Data", 4,
                  _C2Sv_len(data, len), DataHash);
     }
@@ -780,11 +780,11 @@ PmmGenPISV( pTHX_ PmmSAXVectorPtr sax,
 {
     HV * retval = newHV();
 
-    if ( target != NULL && XML_STR_IS_EMPTY( target ) ) {
+    if ( target != NULL && XML_STR_NOT_EMPTY( target ) ) {
         (void) hv_store(retval, "Target", 6,
                  _C2Sv(target, NULL), TargetHash);
 
-        if ( data != NULL && XML_STR_IS_EMPTY( data ) ) {
+        if ( data != NULL && XML_STR_NOT_EMPTY( data ) ) {
             (void) hv_store(retval, "Data", 4,
                      _C2Sv(data, NULL), DataHash);
         }
@@ -804,15 +804,15 @@ PmmGenDTDSV( pTHX_ PmmSAXVectorPtr sax,
 	     const xmlChar * systemId )
 {
     HV * retval = newHV();
-    if ( name != NULL && XML_STR_IS_EMPTY( name ) ) {
+    if ( name != NULL && XML_STR_NOT_EMPTY( name ) ) {
       (void) hv_store(retval, "Name", 4,
 	       _C2Sv(name, NULL), NameHash);
     }
-    if ( publicId != NULL && XML_STR_IS_EMPTY( publicId ) ) {
+    if ( publicId != NULL && XML_STR_NOT_EMPTY( publicId ) ) {
       (void) hv_store(retval, "PublicId", 8,
 	       _C2Sv(publicId, NULL), PublicIdHash);
     }
-    if ( systemId != NULL && XML_STR_IS_EMPTY( systemId ) ) {
+    if ( systemId != NULL && XML_STR_NOT_EMPTY( systemId ) ) {
       (void) hv_store(retval, "SystemId", 8,
 	       _C2Sv(systemId, NULL), SystemIdHash);
     }
@@ -828,12 +828,12 @@ PmmGenLocator( xmlSAXLocatorPtr loc)
     const xmlChar * PublicId = loc->getPublicId(NULL);
     const xmlChar * SystemId = loc->getSystemId(NULL);
 
-    if ( PublicId != NULL && XML_STR_IS_EMPTY( PublicId ) ) {
+    if ( PublicId != NULL && XML_STR_NOT_EMPTY( PublicId ) ) {
       (void) hv_store(locator, "PublicId", 8,
            newSVpv((char *)PublicId, 0), 0);
     }
 
-    if ( SystemId != NULL && XML_STR_IS_EMPTY( SystemId ) ) {
+    if ( SystemId != NULL && XML_STR_NOT_EMPTY( SystemId ) ) {
       (void) hv_store(locator, "SystemId", 8,
            newSVpv((char *)SystemId, 0), 0);
     }
@@ -862,12 +862,12 @@ PmmUpdateLocator( xmlParserCtxtPtr ctxt )
     const xmlChar * encoding = ctxt->input->encoding;
     const xmlChar * version = ctxt->input->version;
 
-    if ( encoding != NULL && XML_STR_IS_EMPTY( encoding ) ) {
+    if ( encoding != NULL && XML_STR_NOT_EMPTY( encoding ) ) {
       (void) hv_store(sax->locator, "Encoding", 8,
            newSVpv((char *)encoding, 0), 0);
     }
 
-    if ( version != NULL && XML_STR_IS_EMPTY( version ) ) {
+    if ( version != NULL && XML_STR_NOT_EMPTY( version ) ) {
       (void) hv_store(sax->locator, "XMLVersion", 10,
            newSVpv((char *)version, 0), 0);
     }
