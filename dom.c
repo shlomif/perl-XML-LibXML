@@ -798,7 +798,7 @@ domReplaceChild( xmlNodePtr self, xmlNodePtr new, xmlNodePtr old ) {
         return NULL;
 
     if ( new == old )
-        return new;
+        return NULL;
 
     if ( new == NULL ) {
         /* level2 sais nothing about this case :( */
