@@ -1,7 +1,6 @@
-#test bug use after free in function replaceChild
 use Test::More;
 use XML::LibXML;
-
+#test bug use after free in function replaceChild
 BEGIN { $| = 1 }
 my $data='<mipu94><pwn4fun><ufanode>-------------------------------------------------------tadinhsung-at-gmail-dot-com-----------------------------------------------------</ufanode></pwn4fun></mipu94>';
 my $parser = XML::LibXML->new();
