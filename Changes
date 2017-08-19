@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0130  Unknown
+    - Fix "Non-numeric versions of ExtUtils::MakeMaker crash the build"
+        - https://rt.cpan.org/Ticket/Display.html?id=96384
+        - Thanks to Stuart and ETHER.
+
 2.0129  2017-03-14
     - Add example/create-sample-html-document.pl .
         - https://rt.cpan.org/Ticket/Display.html?id=117923

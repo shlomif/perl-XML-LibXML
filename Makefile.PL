@@ -27,6 +27,9 @@ use File::Spec;
 $|=0;
 my %config;
 
+# See https://rt.cpan.org/Ticket/Display.html?id=96384 .
+my $EUMM_VER = eval "$ExtUtils::MakeMaker::VERSION";
+
 # -------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------- #
 # common information go to the top, so they are easier to find
@@ -37,7 +40,7 @@ my %INFOS = (
     'AUTHOR'    => 'Petr Pajas',
     'ABSTRACT'  => 'Interface to Gnome libxml2 xml parsing and DOM library',
     'LICENSE' => 'perl',
-    (($ExtUtils::MakeMaker::VERSION >= 6.48)
+    (($EUMM_VER >= 6.48)
         ? (MIN_PERL_VERSION => '5.008',)
         : ()
     ),
@@ -55,7 +58,7 @@ my %INFOS = (
         'XML::SAX::Exception' => '0',
     },
     'OBJECT'    => '$(O_FILES)', # add the DOM extensions to libxml2
-    ($ExtUtils::MakeMaker::VERSION >= 6.54)
+    ($EUMM_VER >= 6.54)
     ?
     (
         META_MERGE =>
