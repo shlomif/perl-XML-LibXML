@@ -1594,7 +1594,7 @@ sub _isSameNodeLax {
 
 sub setNamespace {
     my $self = shift;
-    my $n = $self->nodeName;
+    my $n = $self->localname;
     if ( $self->_setNamespace(@_) ){
         if ( scalar @_ < 3 || $_[2] == 1 ){
             $self->setNodeName( $n );
@@ -1838,7 +1838,7 @@ use vars qw( @ISA ) ;
 
 sub setNamespace {
     my ($self,$href,$prefix) = @_;
-    my $n = $self->nodeName;
+    my $n = $self->localname;
     if ( $self->_setNamespace($href,$prefix) ) {
         $self->setNodeName($n);
         return 1;
