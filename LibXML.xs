@@ -7046,7 +7046,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef )
 	    /* set uri, but with a different prefix */
             RETVAL = 1;
 	}
-        else
+        else if (! RETVAL)
             RETVAL = 0;
 
         if ( ns ) {

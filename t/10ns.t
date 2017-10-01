@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 129.
-use Test::More tests => 129;
+# Should be 135.
+use Test::More tests => 135;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -555,4 +555,26 @@ print "# 10. xml namespace\n";
     is($inc->getAttributeNS('http://www.w3.org/XML/1998/namespace','id'),'test', ' TODO : Add test name');
     # TEST
     ok($inc->isSameNode($docOne->getElementById('test')), ' TODO : Add test name');
+}
+
+print "# 11. empty namespace\n";
+{
+    my $doc = XML::LibXML->load_xml(string => $xml1);
+    my $node = $doc->find('/a/b:c')->[0];
+
+    # TEST
+    ok($node->setNamespace(""), 'removing ns from elemenet');
+    # TEST
+    is($node->prefix, undef, 'ns prefix removed from element');
+    # TEST
+    is($node->namespaceURI, undef, 'ns removed from element');
+
+    my $attr = $doc->find('/a/x/@b:href')->[0];
+
+    # TEST
+    ok($attr->setNamespace("", ""), 'removing ns from attr');
+    # TEST
+    is($attr->prefix, undef, 'ns prefix removed from attr');
+    # TEST
+    is($attr->namespaceURI, undef, 'ns removed from attr');
 }
