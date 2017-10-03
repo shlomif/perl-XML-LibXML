@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 135.
-use Test::More tests => 135;
+# Should be 137.
+use Test::More tests => 137;
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
@@ -568,6 +568,8 @@ print "# 11. empty namespace\n";
     is($node->prefix, undef, 'ns prefix removed from element');
     # TEST
     is($node->namespaceURI, undef, 'ns removed from element');
+    # TEST
+    is($node->getName, 'c', 'ns removed from element name');
 
     my $attr = $doc->find('/a/x/@b:href')->[0];
 
@@ -577,4 +579,6 @@ print "# 11. empty namespace\n";
     is($attr->prefix, undef, 'ns prefix removed from attr');
     # TEST
     is($attr->namespaceURI, undef, 'ns removed from attr');
+    # TEST
+    is($attr->getName, 'href', 'ns removed from attr name');
 }
