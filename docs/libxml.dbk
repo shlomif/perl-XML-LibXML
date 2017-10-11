@@ -5870,17 +5870,20 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</func
   <chapter id="XML-LibXML-XPathContext">
     <title>XPath Evaluation</title>
     <titleabbrev>XML::LibXML::XPathContext</titleabbrev>
-    <para>
-      The XML::LibXML::XPathContext
-      class provides an almost complete
-      interface to libxml2's XPath implementation.
-      With XML::LibXML::XPathContext, it is possible to
-      evaluate XPath expressions in the context
-      of arbitrary node, context size, and context position,
-      with a user-defined namespace-prefix mapping,
-      custom XPath functions written in Perl, and
-      even a custom XPath variable resolver.
+    <sect1>
+      <title>Description</title>
+      <para>
+        The XML::LibXML::XPathContext
+        class provides an almost complete
+        interface to libxml2's XPath implementation.
+        With XML::LibXML::XPathContext, it is possible to
+        evaluate XPath expressions in the context
+        of arbitrary node, context size, and context position,
+        with a user-defined namespace-prefix mapping,
+        custom XPath functions written in Perl, and
+        even a custom XPath variable resolver.
     </para>
+    </sect1>
     <sect1>
       <title>Examples</title>
       <sect2>
@@ -7519,11 +7522,14 @@ my $node_with_index_2 = $map->item(2);
   <chapter id="XML-LibXML-ErrNo">
     <title>Structured Errors</title>
     <titleabbrev>XML::LibXML::ErrNo</titleabbrev>
-    <para>This module is based on xmlerror.h libxml2 C header file.
-       It defines symbolic constants for all libxml2 error codes.
-       Currently libxml2 uses over 480 different error codes.
-       See also XML::LibXML::Error.
-    </para>
+    <sect1>
+      <title>Description</title>
+      <para>This module is based on xmlerror.h libxml2 C header file.
+      It defines symbolic constants for all libxml2 error codes.
+      Currently libxml2 uses over 480 different error codes.
+      See also XML::LibXML::Error.
+      </para>
+    </sect1>
   </chapter>
   <chapter id="XML-LibXML-Common">
     <title>Constants and Character Encoding Routines</title>
