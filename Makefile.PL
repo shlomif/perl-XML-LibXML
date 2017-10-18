@@ -190,6 +190,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,7,8,1], # tested, ok
                      [2,9,3,1], # schema regression
                      [2,9,4,0], # schema regression
+                     [2,9,6,1],
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
