@@ -767,7 +767,7 @@ sub try_libconfig {
 
     my $ver = backtick("$cfgscript --version");
     if ( defined $ver ) {
-        my ( $major, $minor, $point) = $ver =~ /(\d+).(\d+)\.(\d+)/g;
+        my ( $major, $minor, $point) = $ver =~ /([0-9]+).([0-9]+)\.([0-9]+)/g;
         foreach my $i ( @$bl ) {
             $state = $i->[3];
             last if $major <  $i->[0];
