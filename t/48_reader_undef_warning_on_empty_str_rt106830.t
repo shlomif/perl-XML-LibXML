@@ -30,9 +30,14 @@ use XML::LibXML::Reader;
     my $xml_reader = XML::LibXML::Reader->new(string => $empty_xml_doc);
 
     # TEST
-    ok (scalar(!defined($xml_reader)),
-        'xml_reader is undef',
-    );
+    SKIP:
+    {
+        if (XML::LibXML::LIBXML_VERSION() >= 20905)
+        {
+            skip 'libxml2 accepts empty strings since 2.9.5 version', 1;
+        }
+        ok (scalar(!defined($xml_reader)), 'xml_reader is undef', );
+    }
 
     # TEST
     eq_or_diff(
@@ -47,7 +52,7 @@ use XML::LibXML::Reader;
 
 Copyright 2015 by Shlomi Fish
 
-This program is distributed under the MIT (X11) License:
+This program is distributed under the MIT (Expat) License:
 L<http://www.opensource.org/licenses/mit-license.php>
 
 Permission is hereby granted, free of charge, to any person

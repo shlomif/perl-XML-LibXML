@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0130  2017-10-18
+    - Fix the tests with libxml2-2.9.6 .
+        - https://rt.cpan.org/Public/Bug/Display.html?id=122958
+        - Thanks to Daniel Macks for the report and ppisar for a patch.
+
 2.0129  2017-03-14
     - Add example/create-sample-html-document.pl .
         - https://rt.cpan.org/Ticket/Display.html?id=117923
