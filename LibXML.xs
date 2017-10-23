@@ -4830,13 +4830,13 @@ replaceChild( self, nNode, oNode )
         xmlNodePtr ret = NULL;
     CODE:
         // if newNode == oldNode or self == newNode then do nothing, just return nNode.
-        if(nNode == oNode || self == nNode ){ 
-		ret = nNode;
-        	RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
+        if (nNode == oNode || self == nNode ) {
+            ret = nNode;
+            RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
         }
         else{
             if ( self->type == XML_DOCUMENT_NODE ) {
-                    switch ( nNode->type ) {
+                switch ( nNode->type ) {
                     case XML_ELEMENT_NODE:
                         warn("replaceChild with an element on a document node not supported yet!");
                         XSRETURN_UNDEF;
@@ -4852,7 +4852,7 @@ replaceChild( self, nNode, oNode )
                         break;
                     default:
                         break;
-                    }
+                }
             }
             ret = domReplaceChild( self, nNode, oNode );
             if (ret == NULL) {
