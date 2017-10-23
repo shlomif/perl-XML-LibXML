@@ -7,5 +7,5 @@ my $parser = XML::LibXML->new();
 my $info = $parser->load_xml(string=>$data) or die;
 my $root = $info->findnodes("mipu94")->[0];
 my $ufanode = $root->findnodes("pwn4fun/ufanode")->[0];
-ok(!$root->replaceChild($ufanode,$ufanode),"Test UFA in replaceChild");
+ok($root->replaceChild($ufanode,$ufanode),"Test UFA in replaceChild");
 done_testing();
