@@ -10,5 +10,6 @@ perl:
 before_install:
     - "sudo apt-get update"
     - "sudo apt-get install libxml2-dev"
+    - "sudo cpanm Test::Pod Test::TrailingSpace"
 env:
     - RELEASE_TESTING=1
