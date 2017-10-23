@@ -4831,7 +4831,8 @@ replaceChild( self, nNode, oNode )
     CODE:
         // if newNode == oldNode or self == newNode then do nothing, just return nNode.
         if(nNode == oNode || self == nNode ){ 
-          RETVAL = nNode;
+		ret = nNode;
+        	RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
         }
         else{
             if ( self->type == XML_DOCUMENT_NODE ) {
