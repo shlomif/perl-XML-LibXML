@@ -4829,40 +4829,46 @@ replaceChild( self, nNode, oNode )
     PREINIT:
         xmlNodePtr ret = NULL;
     CODE:
-       if ( self->type == XML_DOCUMENT_NODE ) {
-                switch ( nNode->type ) {
-                case XML_ELEMENT_NODE:
-                    warn("replaceChild with an element on a document node not supported yet!");
-                    XSRETURN_UNDEF;
-                    break;
-                case XML_DOCUMENT_FRAG_NODE:
-                    warn("replaceChild with a document fragment node on a document node not supported yet!");
-                    XSRETURN_UNDEF;
-                    break;
-                case XML_TEXT_NODE:
-                case XML_CDATA_SECTION_NODE:
-                    warn("replaceChild with a text node not supported on a document node!");
-                    XSRETURN_UNDEF;
-                    break;
-                default:
-                    break;
+        // if newNode == oldNode or self == newNode then do nothing, just return nNode.
+        if(nNode == oNode || self == nNode ){ 
+          RETVAL = nNode;
+        }
+        else{
+            if ( self->type == XML_DOCUMENT_NODE ) {
+                    switch ( nNode->type ) {
+                    case XML_ELEMENT_NODE:
+                        warn("replaceChild with an element on a document node not supported yet!");
+                        XSRETURN_UNDEF;
+                        break;
+                    case XML_DOCUMENT_FRAG_NODE:
+                        warn("replaceChild with a document fragment node on a document node not supported yet!");
+                        XSRETURN_UNDEF;
+                        break;
+                    case XML_TEXT_NODE:
+                    case XML_CDATA_SECTION_NODE:
+                        warn("replaceChild with a text node not supported on a document node!");
+                        XSRETURN_UNDEF;
+                        break;
+                    default:
+                        break;
+                    }
+            }
+            ret = domReplaceChild( self, nNode, oNode );
+            if (ret == NULL) {
+                XSRETURN_UNDEF;
+            }
+            else {
+                LibXML_reparent_removed_node(ret);
+                RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
+                if (nNode->type == XML_DTD_NODE) {
+                    LibXML_set_int_subset(nNode->doc, nNode);
                 }
-        }
-        ret = domReplaceChild( self, nNode, oNode );
-        if (ret == NULL) {
-            XSRETURN_UNDEF;
-        }
-        else {
-            LibXML_reparent_removed_node(ret);
-            RETVAL = PmmNodeToSv(ret, PmmOWNERPO(PmmPROXYNODE(ret)));
-            if (nNode->type == XML_DTD_NODE) {
-                LibXML_set_int_subset(nNode->doc, nNode);
+                if ( nNode->_private != NULL ) {
+                    PmmFixOwner( PmmPROXYNODE(nNode),
+                                 PmmOWNERPO(PmmPROXYNODE(self)) );
+                }
             }
-            if ( nNode->_private != NULL ) {
-                PmmFixOwner( PmmPROXYNODE(nNode),
-                             PmmOWNERPO(PmmPROXYNODE(self)) );
-            }
-        }
+      }
     OUTPUT:
         RETVAL
 
