@@ -23,7 +23,10 @@ sub _is_present
         [qw#lib XML LibXML Parser.pod#],
         )
     {
-        ok( _is_present($path), "Path [@$path] exists." );
+        if ( !ok( scalar( _is_present($path) ), "Path [@$path] exists." ) )
+        {
+            diag('Perhaps you should run "make docs"');
+        }
     }
 }
 
