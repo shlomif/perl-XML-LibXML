@@ -1,5 +1,14 @@
 Revision history for Perl extension XML::LibXML
 
+2.0131  2017-10-24
+    - Re-include the missing *.pod documents.
+        - https://rt.cpan.org/Ticket/Display.html?id=123362
+        - Thanks to Stephen for the report.
+        - Add t/pod-files-presence.t to test for it in the future.
+    - Merge https://github.com/shlomif/perl-XML-LibXML/pull/8
+        - Fix bug in Node::replaceChild()
+        - Thanks to @Mipu94 .
+
 2.0130  2017-10-18
     - Fix the tests with libxml2-2.9.6 .
         - https://rt.cpan.org/Public/Bug/Display.html?id=122958
