@@ -14,3 +14,9 @@ install:
     - cpanm --quiet --installdeps --notest .
 env:
     - RELEASE_TESTING=1
+script:
+    - perl Makefile.PL
+    - "make docs || true"
+    - perl Makefile.PL
+    - make test
+    - make disttest
