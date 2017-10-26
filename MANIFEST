@@ -114,6 +114,7 @@ scripts/bump-version-number.pl
 scripts/fast-eumm.pl
 scripts/prints-to-comments.pl
 scripts/tag-release.pl
+scripts/total-build-and-test.bash
 scripts/update-HACKING-file.bash
 t/01basic.t
 t/02parse.t
