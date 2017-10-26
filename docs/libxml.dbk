@@ -22,7 +22,7 @@
         </authorgroup>
 
 
-        <edition>2.0130</edition>
+        <edition>2.0131</edition>
         <copyright>
             <year>2001-2007</year>
             <holder>AxKit.com Ltd</holder>
@@ -3060,7 +3060,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
             <title>Description</title>
 
         <para>XML::LibXML::Node defines functions that are common to
-        all Node Types. A XML::LibXML::Node should never be created
+        all Node Types. An XML::LibXML::Node should never be created
         standalone, but as an instance of a high level class such as
         XML::LibXML::Element or XML::LibXML::Text. The class itself should
         provide only common functionality. In XML::LibXML each node is
