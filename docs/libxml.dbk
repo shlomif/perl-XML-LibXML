@@ -3060,9 +3060,9 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
             <title>Description</title>
 
         <para>XML::LibXML::Node defines functions that are common to
-        all Node Types. A LibXML::Node should never be created
+        all Node Types. A XML::LibXML::Node should never be created
         standalone, but as an instance of a high level class such as
-        LibXML::Element or LibXML::Text. The class itself should
+        XML::LibXML::Element or XML::LibXML::Text. The class itself should
         provide only common functionality. In XML::LibXML each node is
         part either of a document or a document-fragment. Because of
         this there is no node without a parent. This may causes
@@ -5459,7 +5459,7 @@ $parser-&gt;parse_file( $some_xml_file );</programlisting>
             HTTP, FTP or relative location but a absolute path for example. To get around this limitation, you may add your own input handler to open, read and
             close particular types of locations or URI classes. Using this input callback handlers, you can handle your own custom URI schemes for example.</para>
 
-            <para>The input callbacks are used whenever LibXML has to get something other than externally parsed entities from somewhere. They are implemented
+            <para>The input callbacks are used whenever XML::LibXML has to get something other than externally parsed entities from somewhere. They are implemented
             using a callback stack on the Perl layer in analogy to libxml2's native callback stack.</para>
 
             <para>The XML::LibXML::InputCallback class transparently registers the input callbacks for the libxml2's parser processes.</para>
