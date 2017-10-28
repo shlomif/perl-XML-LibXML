@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+2.0132  2017-10-28
+    - Revert setNamespace() enhancements that broke some dependent tests:
+        - commit df9fdc6659cb2e4e9bc896e58c02dfd79b430fbb
+        - add t/48_rt123379_setNamespace.t .
+        - Thanks to Alexander Bluhm and Slaven Rezic for the reports and
+        the test.
+
 2.0131  2017-10-24
     - Re-include the missing *.pod documents.
         - https://rt.cpan.org/Ticket/Display.html?id=123362
