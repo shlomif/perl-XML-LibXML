@@ -19,6 +19,8 @@ test_script:
     - perl Makefile.PL
     - gmake
     - 'perl -E "system(qw#gmake docs#); exit(0)"'
+    - perl Makefile.PL
+    - gmake
     - gmake test
     - gmake disttest
 
