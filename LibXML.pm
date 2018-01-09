@@ -763,7 +763,8 @@ sub __write {
 
 sub load_xml {
   my $class_or_self = shift;
-  my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+  my @args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+  my %args = @args;
 
   my $URI = delete($args{URI});
   $URI = "$URI"  if defined $URI; # stringify in case it is an URI object
@@ -792,7 +793,8 @@ sub load_xml {
 
 sub load_html {
   my ($class_or_self) = shift;
-  my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+  my @args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+  my %args = @args;
   my $URI = delete($args{URI});
   $URI = "$URI"  if defined $URI; # stringify in case it is an URI object
   my $parser;
