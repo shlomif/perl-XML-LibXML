@@ -11,7 +11,7 @@ before_install:
     - "sudo apt-get install libxml2-dev"
 install:
     - "cpanm Test::CPAN::Changes Test::Pod Test::TrailingSpace || cat /home/travis/.cpanm/work/*/build.log"
-    - cpanm --quiet --installdeps --notest .
+    - cpanm --installdeps --notest .
 env:
     - RELEASE_TESTING=1
 script:
