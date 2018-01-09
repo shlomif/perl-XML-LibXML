@@ -526,7 +526,7 @@ sub MY::postamble {
             : ''
     );
 
-  my $ret = "$CC\n\n" . <<'MAKE_FRAG';
+  my $ret = "$CC\n" . <<'MAKE_FRAG';
 
 # emacs flymake-mode
 check-syntax :
@@ -540,7 +540,7 @@ version:
 	perl -pi~ -e '$$_=q('"$$version"')."\n" if /#\ VERSION TEMPLATE/ ' $(TO_INST_PM);
 
 runtest: pure_all
-	perl -MFile::Spec -MTest::Run::CmdLine::Iface -e \
+	$(ABSPERLRUN) -MFile::Spec -MTest::Run::CmdLine::Iface -e \
         "local @INC = @INC;	unshift @INC, map { File::Spec->rel2abs(\$$_) } ('$(INST_LIB)', '$(INST_ARCHLIB)'); Test::Run::CmdLine::Iface->new({test_files => [glob(q{t/*.t})]})->run();"
 
 distruntest: distdir
