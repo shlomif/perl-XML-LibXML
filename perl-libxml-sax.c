@@ -11,8 +11,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Disable this and use a threaded perl to test MSVC compilation errors */
 #define PERL_NO_GET_CONTEXT     /* we want efficiency */
-
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -629,10 +629,10 @@ PmmGenNsName( const xmlChar * name, const xmlChar * nsURI )
     }
     namelen = xmlStrlen( name );
 
-    retval =xmlStrncat( retval, (const xmlChar *)"{", 1 );
+    retval = xmlStrncat( retval, (const xmlChar *)"{", 1 );
     if ( nsURI != NULL ) {
         urilen = xmlStrlen( nsURI );
-        retval =xmlStrncat( retval, nsURI, urilen );
+        retval = xmlStrncat( retval, nsURI, urilen );
     }
     retval = xmlStrncat( retval, (const xmlChar *)"}", 1 );
     retval = xmlStrncat( retval, name, namelen );
