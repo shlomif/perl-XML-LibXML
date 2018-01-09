@@ -528,6 +528,11 @@ sub MY::postamble {
 
   my $ret = "$CC\n\n" . <<'MAKE_FRAG';
 
+# emacs flymake-mode
+check-syntax :
+	test -n "$(CHK_SOURCES)" && \
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) -o /dev/null -S $(CHK_SOURCES)
+
 # used to update version numbers in all modules
 version:
 	@version=`grep '\# VERSION TEMPLATE' $(VERSION_FROM)`; \
