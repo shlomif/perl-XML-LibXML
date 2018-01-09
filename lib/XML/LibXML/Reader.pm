@@ -116,7 +116,8 @@ our %_preserve_flag;
   }
   sub setParserProp {
     my $self = shift;
-    my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+    my @args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+    my %args = @args;
     my ($key, $value);
     while (($key,$value) = each %args) {
       my $prop = $props{ $key };
@@ -128,7 +129,8 @@ our %_preserve_flag;
   my (%string_pool,%rng_pool,%xsd_pool); # used to preserve data passed to the reader
   sub new {
     my ($class) = shift;
-    my %args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+    my @args = map { ref($_) eq 'HASH' ? (%$_) : $_ } @_;
+    my %args = @args;
     my $encoding = $args{encoding};
     my $URI = $args{URI};
     $URI="$URI" if defined $URI; # stringify in case it is an URI object
