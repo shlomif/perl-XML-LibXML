@@ -18,6 +18,7 @@ build: off
 test_script:
     - perl Makefile.PL
     - gmake
+    - 'perl -E "system(qw#gmake docs#); exit(0)"'
     - gmake test
     - gmake disttest
 
