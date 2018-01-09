@@ -186,7 +186,7 @@ LocalProxyNodePtr
 PmmNewLocalProxyNode(ProxyNodePtr proxy)
 {
 	LocalProxyNodePtr lp;
-    Newc(0, lp, 1, LocalProxyNode, LocalProxyNode);
+        Newc(0, lp, 1, LocalProxyNode, LocalProxyNode);
 	lp->proxy = proxy;
 	lp->count = 0;
 	return lp;
@@ -255,7 +255,7 @@ PmmRegistryLookup(ProxyNodePtr proxy)
 void
 PmmRegistryREFCNT_inc(ProxyNodePtr proxy)
 {
-  /* warn("Registry inc\n"); */
+	/* warn("Registry inc\n"); */
 	LocalProxyNodePtr lp = PmmRegistryLookup( proxy );
 	if( lp )
 		lp->count++;
@@ -269,7 +269,7 @@ PmmRegistryREFCNT_inc(ProxyNodePtr proxy)
 void
 PmmRegistryREFCNT_dec(ProxyNodePtr proxy)
 {
-  /* warn("Registry dec\n"); */
+	/* warn("Registry dec\n"); */
 	LocalProxyNodePtr lp = PmmRegistryLookup(proxy);
 	if( lp && --(lp->count) == 0 )
 		PmmUnregisterProxyNode(proxy);
@@ -503,6 +503,7 @@ SV*
 PmmNodeToSv( xmlNodePtr node, ProxyNodePtr owner )
 {
     ProxyNodePtr dfProxy= NULL;
+    dTHX;
     SV * retval = &PL_sv_undef;
     const char * CLASS = "XML::LibXML::Node";
 
@@ -618,6 +619,7 @@ PmmSvNodeExt( SV* perlnode, int copy )
 {
     xmlNodePtr retval = NULL;
     ProxyNodePtr proxy = NULL;
+    dTHX;
 
     if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
 /*         if ( sv_derived_from(perlnode, "XML::LibXML::Node") */
@@ -666,6 +668,7 @@ PmmSvNodeExt( SV* perlnode, int copy )
 xmlNodePtr
 PmmSvOwner( SV* perlnode )
 {
+    dTHX;
     xmlNodePtr retval = NULL;
     if ( perlnode != NULL
          && perlnode != &PL_sv_undef
@@ -681,6 +684,7 @@ PmmSvOwner( SV* perlnode )
 SV*
 PmmSetSvOwner( SV* perlnode, SV* extra )
 {
+    dTHX;
     if ( perlnode != NULL && perlnode != &PL_sv_undef ) {
         PmmOWNER( SvPROXYNODE(perlnode)) = PmmNODE( SvPROXYNODE(extra) );
         PmmREFCNT_inc( SvPROXYNODE(extra) );
@@ -869,6 +873,7 @@ SV*
 PmmContextSv( xmlParserCtxtPtr ctxt )
 {
     ProxyNodePtr dfProxy= NULL;
+    dTHX;
     SV * retval = &PL_sv_undef;
     const char * CLASS = "XML::LibXML::ParserContext";
 
@@ -891,6 +896,7 @@ xmlParserCtxtPtr
 PmmSvContext( SV * scalar )
 {
     xmlParserCtxtPtr retval = NULL;
+    dTHX;
 
     if ( scalar != NULL
          && scalar != &PL_sv_undef
@@ -1109,6 +1115,7 @@ xmlChar *
 Sv2C( SV* scalar, const xmlChar *encoding )
 {
     xmlChar *retval = NULL;
+    dTHX;
 
     xs_warn("SV2C: start!\n");
     if ( scalar != NULL && scalar != &PL_sv_undef ) {
@@ -1148,6 +1155,7 @@ nodeC2Sv( const xmlChar * string,  xmlNodePtr refnode )
 {
     /* this is a little helper function to avoid to much redundand
        code in LibXML.xs */
+    dTHX;
     SV* retval = &PL_sv_undef;
     STRLEN len = 0;
     xmlChar * decoded = NULL;
@@ -1200,6 +1208,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
         xs_warn("nodeSv2C: have node!\n");
         if (real_dom != NULL && real_dom->encoding != NULL ) {
             xs_warn("nodeSv2C:   encode string!\n");
+            dTHX;
             /*  speed things a bit up.... */
             if ( scalar != NULL && scalar != &PL_sv_undef ) {
                 STRLEN len = 0;
@@ -1253,6 +1262,7 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
 SV *
 PmmNodeToGdomeSv( xmlNodePtr node )
 {
+    dTHX;
     SV * retval = &PL_sv_undef;
 
 #ifdef XML_LIBXML_GDOME_SUPPORT

@@ -40,4 +40,4 @@ PmmSAXCloseContext( xmlParserCtxtPtr ctxt );
 xmlSAXHandlerPtr
 PSaxGetHandler();
 
-#endif
+#endif   /* __PERL_LIBXML_SAX_H__ */
