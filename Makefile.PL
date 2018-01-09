@@ -191,6 +191,7 @@ unless ( $is_Win32 ) { # cannot get config in W32
                      [2,9,3,1], # schema regression
                      [2,9,4,0], # schema regression
                      [2,9,6,1],
+                     [2,9,7,1], # tested, ok
                     );
     my $xml2cfg = "xml2-config";
     my $libprefix = $ENV{XMLPREFIX} || $config{XMLPREFIX};
@@ -300,6 +301,7 @@ GDOME
         }
     }
 }
+
 # -------------------------------------------------------------------------- #
 
 
