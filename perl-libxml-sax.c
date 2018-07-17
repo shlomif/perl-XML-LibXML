@@ -845,13 +845,14 @@ PmmGenLocator( xmlSAXLocatorPtr loc)
 void
 PmmUpdateLocator( xmlParserCtxtPtr ctxt )
 {
+    dTHX;
+    const xmlChar * encoding;
+    const xmlChar * version;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
 
     if (sax->locator == NULL) {
         return;
     }
-
-    dTHX;
 
     (void) hv_store(sax->locator, "LineNumber", 10,
          newSViv(ctxt->input->line), 0);
@@ -859,8 +860,8 @@ PmmUpdateLocator( xmlParserCtxtPtr ctxt )
     (void) hv_store(sax->locator, "ColumnNumber", 12,
          newSViv(ctxt->input->col), 0);
 
-    const xmlChar * encoding = ctxt->input->encoding;
-    const xmlChar * version = ctxt->input->version;
+    encoding = ctxt->input->encoding;
+    version = ctxt->input->version;
 
     if ( encoding != NULL && XML_STR_NOT_EMPTY( encoding ) ) {
       (void) hv_store(sax->locator, "Encoding", 8,
@@ -929,9 +930,8 @@ PSaxStartDocument(void * ctx)
     SV * rv;
     if ( handler != NULL ) {
 
-        PmmUpdateLocator(ctx);
-
         dSP;
+        PmmUpdateLocator(ctx);
 
         ENTER;
         SAVETMPS;
@@ -1211,10 +1211,9 @@ PSaxComment(void *ctx, const xmlChar * ch) {
     dTHX;
     HV* element;
     SV * handler = sax->handler;
+    SV * rv = NULL;
 
     PmmUpdateLocator(ctx);
-
-    SV * rv = NULL;
 
     if ( ch != NULL && handler != NULL ) {
         dSP;
@@ -1256,13 +1255,11 @@ PSaxCDATABlock(void *ctx, const xmlChar * ch, int len) {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax = (PmmSAXVectorPtr)ctxt->_private;
     dTHX;
-
-    PmmUpdateLocator(ctx);
-
     HV* element;
     SV * handler = sax->handler;
-
     SV * rv = NULL;
+
+    PmmUpdateLocator(ctx);
 
     if ( ch != NULL && handler != NULL ) {
         dSP;
@@ -1328,11 +1325,10 @@ PSaxProcessingInstruction( void * ctx, const xmlChar * target, const xmlChar * d
     PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
     dTHX;
     SV * handler          = sax->handler;
-
-    PmmUpdateLocator(ctx);
-
     SV * element;
     SV * rv = NULL;
+
+    PmmUpdateLocator(ctx);
 
     if ( handler != NULL ) {
         dSP;
@@ -1375,13 +1371,13 @@ void PSaxExternalSubset (void * ctx,
 {
     xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)ctx;
     PmmSAXVectorPtr sax   = (PmmSAXVectorPtr)ctxt->_private;
-    PmmUpdateLocator(ctx);
 
     dTHX;
     SV * handler          = sax->handler;
-
     SV * element;
     SV * rv = NULL;
+
+    PmmUpdateLocator(ctx);
 
     if ( handler != NULL ) {
         dSP;

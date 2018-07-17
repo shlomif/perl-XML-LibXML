@@ -1207,8 +1207,8 @@ nodeSv2C( SV * scalar, xmlNodePtr refnode )
         xmlDocPtr real_dom = refnode->doc;
         xs_warn("nodeSv2C: have node!\n");
         if (real_dom != NULL && real_dom->encoding != NULL ) {
-            xs_warn("nodeSv2C:   encode string!\n");
             dTHX;
+            xs_warn("nodeSv2C:   encode string!\n");
             /*  speed things a bit up.... */
             if ( scalar != NULL && scalar != &PL_sv_undef ) {
                 STRLEN len = 0;
