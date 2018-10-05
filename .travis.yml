@@ -8,7 +8,7 @@ perl:
     - "5.16"
 before_install:
     - "sudo apt-get update"
-    - "sudo apt-get install libxml2-dev"
+    - "sudo apt-get --no-install-recommends install libxml2-dev"
 install:
     - "cpanm Test::CPAN::Changes Test::Pod Test::TrailingSpace || cat /home/travis/.cpanm/work/*/build.log"
     - cpanm --installdeps --notest .
