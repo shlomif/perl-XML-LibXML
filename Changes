@@ -2,6 +2,12 @@ Revision history for Perl extension XML::LibXML
 
 2.0133  2019-02-02
     - Mark as working with libxml2 2.9.9 ( and below ).
+    - Allow LibParser to be provided for all methods
+        - https://github.com/shlomif/perl-XML-LibXML/pull/23
+        - Thanks to @lavock .
+    - Portability fixes by Reini Urban and others.
+        - https://github.com/shlomif/perl-XML-LibXML/pull/18 .
+        - Thanks!
 
 2.0132  2017-10-28
     - Revert setNamespace() enhancements that broke some dependent tests:
