@@ -474,6 +474,7 @@ sub dump_pod {
         elsif(  $node->nodeName() eq "funcsynopsisinfo" ) {
             my $str = $node->string_value() ;
             $str =~ s/\n/\n  /g;
+            $str = pod_escape($str);
             $self->{OFILE}->print( "  $str\n" );
         } elsif(  $node->nodeName() eq "title" or
                   $node->nodeName() eq "titleabbrev"
@@ -482,6 +483,7 @@ sub dump_pod {
         } elsif(  $node->nodeName() eq "emphasis" ) {
             my $str = $node->string_value() ;
             $str =~ s/\n/ /g;
+            $str = pod_escape($str);
             $self->{OFILE}->print( "I<<<<<< $str >>>>>>" );
         } elsif(  $node->nodeName() eq "function" or
                   $node->nodeName() eq "email" or
@@ -489,6 +491,7 @@ sub dump_pod {
                ) {
             my $str = $node->string_value() ;
             $str =~ s/\n/ /g;
+            $str = pod_escape($str);
             $self->{OFILE}->print( "C<<<<<< $str >>>>>>" );
         } elsif(  $node->nodeName() eq "ulink" ) {
             my $str = $node->string_value() ;
@@ -506,13 +509,14 @@ sub dump_pod {
             if ($target) {
               my $str = $target->string_value() ;
               $str =~ s/\n/ /g;
+              $str = pod_escape($str);
               $self->{OFILE}->print( "L<<<<<< $str >>>>>>" );
             } else {
               warn "WARNING: Didn't find any section with id='$linkend'\n";
               $self->{OFILE}->print( "$linkend" );
             }
         } elsif(  $node->nodeName() eq "olink" ) {
-            my $str = $node->string_value() ;
+            my $str = pod_escape($node->string_value());
             my $url = $node->getAttribute('targetdoc');
             if (!defined $url) {
               warn $node->toString(1),"\n";
@@ -528,6 +532,21 @@ sub dump_pod {
           $self->dump_pod($node);
         }
     }
+}
+
+sub pod_escape {
+  my ($str) = @_;
+
+  my %escapes = (
+    '>' => 'gt',
+    '<' => 'lt',
+  );
+
+  my $re = join('|', keys %escapes);
+
+  $str =~ s/($re)/E<$escapes{$1}>/g;
+
+  return $str;
 }
 
 1;
