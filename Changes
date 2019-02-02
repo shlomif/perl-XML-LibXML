@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::LibXML
 
+2.0133  2019-02-02
+    - Mark as working with libxml2 2.9.9 ( and below ).
+
 2.0132  2017-10-28
     - Revert setNamespace() enhancements that broke some dependent tests:
         - commit df9fdc6659cb2e4e9bc896e58c02dfd79b430fbb
