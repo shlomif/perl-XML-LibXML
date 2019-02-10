@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0134  2019-02-10
+    - Fix overzealous POD escaping in the docs' synposes
+        - https://github.com/shlomif/perl-XML-LibXML/issues/26
+        - Thanks to @davorg.
+
 2.0133  2019-02-02
     - Mark as working with libxml2 2.9.9 ( and below ).
     - Allow LibParser to be provided for all methods
