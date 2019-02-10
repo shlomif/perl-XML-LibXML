@@ -474,7 +474,6 @@ sub dump_pod {
         elsif(  $node->nodeName() eq "funcsynopsisinfo" ) {
             my $str = $node->string_value() ;
             $str =~ s/\n/\n  /g;
-            $str = pod_escape($str);
             $self->{OFILE}->print( "  $str\n" );
         } elsif(  $node->nodeName() eq "title" or
                   $node->nodeName() eq "titleabbrev"
