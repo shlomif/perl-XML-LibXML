@@ -62,7 +62,6 @@ example/xmlns/badguy.xml
 example/xmlns/goodguy.xml
 example/xpath.pl
 example/yahoo-finance-html-with-errors.html
-inc/Devel/CheckLib.pm
 lib/XML/LibXML/Attr.pod
 lib/XML/LibXML/AttributeHash.pm
 lib/XML/LibXML/Boolean.pm
@@ -116,6 +115,7 @@ scripts/prints-to-comments.pl
 scripts/tag-release.pl
 scripts/total-build-and-test.bash
 scripts/update-HACKING-file.bash
+t/00-report-prereqs.t
 t/01basic.t
 t/02parse.t
 t/03doc.t
