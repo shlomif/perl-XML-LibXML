@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0200  2019-03-23
+    - Convert to use Alien::Libxml2 .
+        - https://github.com/shlomif/perl-XML-LibXML/pull/30
+        - Thanks to @genio and @plicease .
+
 2.0134  2019-02-10
     - Fix overzealous POD escaping in the docs' synposes
         - https://github.com/shlomif/perl-XML-LibXML/issues/26
