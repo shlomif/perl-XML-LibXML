@@ -104,7 +104,8 @@ Which version of libxml2 should be used?
 XML::LibXML is tested against a couple versions of libxml2 before it is
 released. Thus there are versions of libxml2 that are known not to work
 properly with XML::LibXML. The Makefile.PL keeps a blacklist of the
-incompatible libxml2 versions.
+incompatible libxml2 versions using Alien::Libxml2. The blacklist itself is
+kept inside alienfile file.
 
 If Makefile.PL detects one of the incompatible versions, it notifies the user.
 It may still happen that XML::LibXML builds and pass its tests with such a
@@ -121,6 +122,9 @@ It may happen that an unsupported version of libxml2 passes all tests under
 certain conditions. This is no reason to assume that it shall work without
 problems. If Makefile.PL marks a version of libxml2 as incompatible or broken
 it is done for a good reason.
+
+A full linking information for libxml2 can be obtained calling xml2-config --libs
+utility.
 
 
 Notes for Microsoft Windows
