@@ -3,8 +3,8 @@ INTRODUCTION
 
 This module implements a Perl interface to the Gnome libxml2 library which
 provides interfaces for parsing and manipulating XML files. This module allows
-Perl programmers to make use of the highly capable validating XML parser and
-the high performance DOM implementation.
+Perl programmers to make use of its highly capable validating XML parser and
+its high performance DOM implementation.
 
 
 IMPORTANT NOTES
@@ -105,7 +105,7 @@ XML::LibXML is tested against a couple versions of libxml2 before it is
 released. Thus there are versions of libxml2 that are known not to work
 properly with XML::LibXML. The Makefile.PL keeps a blacklist of the
 incompatible libxml2 versions using Alien::Libxml2. The blacklist itself is
-kept inside alienfile file.
+kept inside its "alienfile" file.
 
 If Makefile.PL detects one of the incompatible versions, it notifies the user.
 It may still happen that XML::LibXML builds and pass its tests with such a
@@ -123,8 +123,8 @@ certain conditions. This is no reason to assume that it shall work without
 problems. If Makefile.PL marks a version of libxml2 as incompatible or broken
 it is done for a good reason.
 
-A full linking information for libxml2 can be obtained calling xml2-config --libs
-utility.
+Full linking information for libxml2 can be obtained by invoking
+"xml2-config --libs".
 
 
 Notes for Microsoft Windows
@@ -179,10 +179,10 @@ incompatible) versions of those DLLs.
 Notes for Mac OS X
 ==================
 
-Due refactoring the module, XML::LibXML will not run with some earlier versions
-of Mac OS X. It appears that this is related to special linker options for that
-OS prior to version 10.2.2. Since the developers do not have full access to
-this OS, help/ patches from OS X gurus are highly appreciated.
+Due to a refactoring of the module, XML::LibXML will not run with some earlier
+versions of Mac OS X. It appears that this is related to special linker options
+for that OS prior to version 10.2.2. Since the developers do not have full
+access to this OS, help/ patches from OS X gurus are highly appreciated.
 
 It is confirmed that XML::LibXML builds and runs without problems since Mac OS
 X 10.2.6.
@@ -232,11 +232,12 @@ Additionally I received the following Note from Rozi Kovesdi:
 CONTACT
 =======
 
-For bug reports, please use the CPAN request tracker on
-http://rt.cpan.org/NoAuth/Bugs.html?Dist=XML-LibXML
+For bug reports, please use the issue tracker at
+https://github.com/shlomif/perl-XML-LibXML/issues
 
-For suggestions etc. you may contact the maintainer directly at "pajas at ufal
-dot mff dot cuni dot cz", but in general, it is recommended to use the mailing
+For suggestions etc. you may contact the maintainer directly at
+https://www.shlomifish.org/me/contact-me/
+, but in general, it is recommended to use the mailing
 list given below.
 
 For suggestions etc., and other issues related to XML::LibXML you may use the
@@ -282,4 +283,3 @@ KNOWN ISSUES
 ============
 
 The push-parser implementation causes memory leaks.
-
