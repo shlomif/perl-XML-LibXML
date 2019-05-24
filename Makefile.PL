@@ -15,7 +15,7 @@
 use strict;
 use warnings;
 
-require 5.008;
+require 5.008001;
 
 use Alien::Libxml2;
 use ExtUtils::MakeMaker;
@@ -83,6 +83,7 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl_5",
   "ABSTRACT" => "Interface to Gnome libxml2 xml parsing and DOM library",
   "AUTHOR" => "Petr Pajas <PAJAS\@cpan.org>",
+  "MIN_PERL_VERSION" => '5.008001',
   "VERSION_FROM" => "LibXML.pm",
   'META_MERGE' => {
     'dynamic_config' => 0,
@@ -135,6 +136,9 @@ unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
 
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION('6.52') };
+
+delete $WriteMakefileArgs{MIN_PERL_VERSION}
+  unless eval { ExtUtils::MakeMaker->VERSION('6.48') };
 
 delete $WriteMakefileArgs{META_MERGE}
   unless eval { ExtUtils::MakeMaker->VERSION('6.46') };
