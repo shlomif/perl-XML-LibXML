@@ -393,6 +393,9 @@ EOT</programlisting>
 	    unless stated otherwise, you only need to <literal>use XML::LibXML;</literal>
 	    in your programs.</para>
 
+	    <para>Check out <ulink url="http://grantm.github.io/perl-libxml-by-example/">XML::LibXML by Example</ulink>
+	    for a tutorial.</para>
+
             <para>For further information, please check the following documentation:</para>
 
             <variablelist>
