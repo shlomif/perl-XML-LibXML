@@ -33,6 +33,7 @@ my %DevReqs = (
   'Test::TrailingSpace' => 0,
 );
 my %TestReqs = (
+  "Config" => 0,
   "Errno" => 0,
   "IO::File" => 0,
   "IO::Handle" => 0,
