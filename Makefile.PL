@@ -21,11 +21,6 @@ use Alien::Libxml2;
 use ExtUtils::MakeMaker;
 use Config;
 
-my %BuildReqs = (
-  "Alien::Libxml2" => 0,
-  "Config" => 0,
-  "ExtUtils::MakeMaker" => 0,
-);
 my %ConfigReqs = (
   "Alien::Libxml2" => 0,
   "Config" => 0,
@@ -48,7 +43,6 @@ my %TestReqs = (
   "utf8" => 0,
 );
 my %prereqs = (
-  "Alien::Libxml2" => 0,
   "Carp" => 0,
   "DynaLoader" => 0,
   "Encode" => 0, # actually used in one module. requires Perl 5.8+
@@ -114,7 +108,6 @@ my %WriteMakefileArgs = (
       "xs",
     ],
   },
-  "BUILD_REQUIRES" => \%BuildReqs,
   "CONFIGURE_REQUIRES" => \%ConfigReqs,
   "TEST_REQUIRES" => \%TestReqs,
   "PREREQ_PM" => \%prereqs,
@@ -128,9 +121,8 @@ my %WriteMakefileArgs = (
     %xsbuild,
 );
 unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
-    my %fallback = (%prereqs, %TestReqs, %BuildReqs);
+    my %fallback = (%prereqs, %TestReqs);
     delete $WriteMakefileArgs{TEST_REQUIRES};
-    delete $WriteMakefileArgs{BUILD_REQUIRES};
     $WriteMakefileArgs{PREREQ_PM} = \%fallback;
 }
 
