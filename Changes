@@ -1,5 +1,13 @@
 Revision history for Perl extension XML::LibXML
 
+2.0201  2019-05-25
+    - Set MIN_PERL_VERSION to 5.8.1.
+    - Alien::Libxml2 Makefile.PL cleanups.
+    - Update the README for grammar and info.
+    - Link to XML-LibXML "by Example"
+        - https://github.com/shlomif/perl-XML-LibXML/pull/36
+        - Thanks to @Grinnz .
+
 2.0200  2019-03-23
     - Convert to use Alien::Libxml2 .
         - https://github.com/shlomif/perl-XML-LibXML/pull/30
