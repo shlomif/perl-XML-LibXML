@@ -123,8 +123,8 @@ certain conditions. This is no reason to assume that it shall work without
 problems. If Makefile.PL marks a version of libxml2 as incompatible or broken
 it is done for a good reason.
 
-Full linking information for libxml2 can be obtained by invoking
-"xml2-config --libs".
+Full linking information for libxml2 can be obtained by invoking "xml2-config
+--libs".
 
 
 Notes for Microsoft Windows
@@ -233,12 +233,11 @@ CONTACT
 =======
 
 For bug reports, please use the issue tracker at
-https://github.com/shlomif/perl-XML-LibXML/issues
+https://github.com/shlomif/perl-XML-LibXML/issues .
 
 For suggestions etc. you may contact the maintainer directly at
-https://www.shlomifish.org/me/contact-me/
-, but in general, it is recommended to use the mailing
-list given below.
+https://www.shlomifish.org/me/contact-me/ , but in general, it is recommended
+to use the mailing list given below.
 
 For suggestions etc., and other issues related to XML::LibXML you may use the
 perl XML mailing list (perl-xml@listserv.ActiveState.com), where most
@@ -283,3 +282,4 @@ KNOWN ISSUES
 ============
 
 The push-parser implementation causes memory leaks.
+
