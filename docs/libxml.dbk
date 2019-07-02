@@ -3246,7 +3246,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                     </funcsynopsis>
 
                     <para>This will unbind the Child Node from its parent <function>$node</function>. The function returns the unbound node. If
-                    <function>$childNode</function> is not a child of the given Node the function will fail.</para>
+                    <function>$childnode</function> is not a child of the given Node the function will fail.</para>
                 </listitem>
             </varlistentry>
 
