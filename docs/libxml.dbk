@@ -1143,6 +1143,11 @@ $dom = $parser-&gt;load_xml(...);
 			  and <xref linkend="parser-options"/>
 			  for more information.
 			  </para>
+			  <para>Note that, due to a limitation in the underlying libxml2
+			  library, this call does not recognize HTTPS-based URLs. (It
+			  will treat an HTTPS URL as a filename, likely throwing a "No such
+			  file or directory" exception.)
+			  </para>
 			  </listitem>
 		    </varlistentry>
                     <varlistentry>
@@ -1269,10 +1274,11 @@ $dom = $parser-&gt;load_html(...);
                             </funcsynopsis>
 
                             <para>This function parses an XML document from a file or network;
-		              $xmlfilename can be either a filename or an URL.
+		              $xmlfilename can be either a filename or a (non-HTTPS) URL.
                               Note that for parsing files, this function is the fastest choice,
 		              about 6-8 times faster then parse_fh().
 	                     </para>
+	                     
                         </listitem>
                     </varlistentry>
 
@@ -1319,7 +1325,7 @@ my $doc = $parser-&gt;parse_string(\$xmlstring, $baseuri);
                             </funcsynopsis>
 
                             <para>Similar to parse_file() but parses HTML (strict) documents;
-		               $htmlfile can be filename or URL.
+		               $htmlfile can be filename or (non-HTTPS) URL.
                             </para>
                             <para>An optional second argument can be
                                used to pass some options to the HTML
@@ -5789,7 +5795,7 @@ $rngschema = XML::LibXML::RelaxNG-&gt;new( DOM =&gt; $doc );</funcsynopsisinfo>
                     source it should generate a validation schema. It is important, that each schema only have a single source.</para>
 
                 <para>The location parameter allows one to parse a schema
-                    from the filesystem or a URL.</para>
+                    from the filesystem or a (non-HTTPS) URL.</para>
 
                     <para>The string parameter will parse the schema from the given XML string.</para>
 
@@ -6322,7 +6328,7 @@ sub processNode {
           <varlistentry>
             <term>location</term>
             <listitem>
-              <para>Read XML from a local file or URL.</para>
+              <para>Read XML from a local file or (non-HTTPS) URL.</para>
             </listitem>
           </varlistentry>
           <varlistentry>
