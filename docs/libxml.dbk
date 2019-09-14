@@ -1126,7 +1126,7 @@ $dom = $parser-&gt;load_xml(...);
 			  </funcsynopsisinfo>
 			  </funcsynopsis>
 			  <para>This function is available since XML::LibXML 1.70. It provides easy to use interface to the XML parser that parses
-			  given file (or URL), string, or input stream
+			  given file (or non-HTTPS URL), string, or input stream
 			  to a DOM tree. The arguments
 			  can be passed in a HASH reference
 			  or as name => value pairs.
@@ -5865,7 +5865,7 @@ $xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring, no_netw
                     <para>It is important, that each schema only have a single source.</para>
 
                 <para>The location parameter allows one to parse a schema
-                    from the filesystem or a URL.</para>
+                    from the filesystem or a (non-HTTPS) URL.</para>
 
                     <para>The string parameter will parse the schema from the given XML string.</para>
 
@@ -6379,7 +6379,7 @@ sub processNode {
             <term>RelaxNG => $rng_schema</term>
             <listitem>
               <para>can be used to pass either a <xref linkend="XML-LibXML-RelaxNG"/>
-		object or a filename or URL of a RelaxNG schema to the
+		object or a filename or (non-HTTPS) URL of a RelaxNG schema to the
 		constructor. The schema is then used to validate the
 		document as it is processed.</para>
             </listitem>
@@ -6388,7 +6388,7 @@ sub processNode {
             <term>Schema => $xsd_schema</term>
             <listitem>
               <para>can be used to pass either a <xref linkend="XML-LibXML-Schema"/>
-		object or a filename or URL of a W3C XSD schema to the
+		object or a filename or (non-HTTPS) URL of a W3C XSD schema to the
 		constructor. The schema is then used to validate the
 		document as it is processed.</para>
             </listitem>
