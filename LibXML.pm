@@ -261,7 +261,7 @@ use constant {
   HTML_PARSE_NOERROR  => (1<<5),       # suppress error reports
 };
 
-$XML_LIBXML_PARSE_DEFAULTS = ( XML_PARSE_NODICT | XML_PARSE_DTDLOAD | XML_PARSE_NOENT );
+$XML_LIBXML_PARSE_DEFAULTS = ( XML_PARSE_NODICT );
 
 # this hash is made global so that applications can add names for new
 # libxml2 parser flags as temporary workaround
@@ -366,6 +366,7 @@ sub new {
       }
       # parser flags
       $opts{no_blanks} = !$opts{keep_blanks} if exists($opts{keep_blanks}) and !exists($opts{no_blanks});
+      $opts{load_ext_dtd} = $opts{expand_entities} if exists($opts{expand_entities}) and !exists($opts{load_ext_dtd});
 
       for (keys %OUR_FLAGS) {
 	$self->{$OUR_FLAGS{$_}} = delete $opts{$_};
