@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 290;
+use Test::More tests => 291;
 
 use XML::LibXML;
 
@@ -110,18 +110,20 @@ no_network
   ok( $p->get_option('recover') == 2, ' TODO : Add test name' );
 
   # TEST
-  ok( $p->expand_entities() == 1, ' TODO : Add test name' );
+  ok( $p->expand_entities() == 1, 'expand_entities should default to true' );
   # TEST
-  ok( $p->load_ext_dtd() == 1, ' TODO : Add test name' );
+  ok( $p->load_ext_dtd() == 1, 'load_ext_dtd should default to true' );
   $p->load_ext_dtd(0);
   # TEST
-  ok( $p->load_ext_dtd() == 0, ' TODO : Add test name' );
+  ok( $p->load_ext_dtd() == 0, 'load_ext_dtd should be false after being set to false' );
   $p->expand_entities(0);
   # TEST
-  ok( $p->expand_entities() == 0, ' TODO : Add test name' );
+  ok( $p->expand_entities() == 0, 'expand_entities should be false after being set to false' );
   $p->expand_entities(1);
   # TEST
-  ok( $p->expand_entities() == 1, ' TODO : Add test name' );
+  ok( $p->expand_entities() == 1, 'expand_entities should be true after being set to true' );
+  # TEST
+  ok( $p->load_ext_dtd() == 1, 'load_ext_dtd should be true after expand_entities is set to true' );
 }
 
 {
