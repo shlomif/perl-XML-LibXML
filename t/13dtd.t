@@ -69,7 +69,7 @@ ok($dtdstr, "DTD String read");
     # TEST
     ok ($@, '->validate throws an exception');
 
-    my $parser = XML::LibXML->new();
+    my $parser = XML::LibXML->new(load_ext_dtd => 1);
     # TEST
     ok ($parser->validation(1), '->validation returns 1');
     # this one is OK as it's well formed (no DTD)

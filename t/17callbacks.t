@@ -276,7 +276,7 @@ $XML::LibXML::close_cb = $close1_global_counter->cb();
 
 {
     # tests if global callbacks are working
-    my $parser = XML::LibXML->new();
+    my $parser = XML::LibXML->new(load_ext_dtd => 1);
     # TEST
     ok($parser, '$parser was init');
 
