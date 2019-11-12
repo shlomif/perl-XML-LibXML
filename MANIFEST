@@ -207,6 +207,7 @@ test/relaxng/schema.rng
 test/schema/badschema.xsd
 test/schema/demo.xml
 test/schema/invaliddemo.xml
+test/schema/net.xsd
 test/schema/schema.xsd
 test/textReader/countries.xml
 test/xinclude/entity.txt

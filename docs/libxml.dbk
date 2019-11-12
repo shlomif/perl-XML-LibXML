@@ -5845,12 +5845,15 @@ $doc = XML::LibXML-&gt;new-&gt;parse_file($url);</programlisting>
 
                 <listitem>
                     <funcsynopsis>
-                        <funcsynopsisinfo>$xmlschema = XML::LibXML::Schema-&gt;new( location =&gt; $filename_or_url );
-$xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring );</funcsynopsisinfo>
+                        <funcsynopsisinfo>$xmlschema = XML::LibXML::Schema-&gt;new( location =&gt; $filename_or_url, no_network =&gt; 1 );
+$xmlschema = XML::LibXML::Schema-&gt;new( string =&gt; $xmlschemastring, no_network =&gt; 1 );</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>The constructor of XML::LibXML::Schema may get called with either one of two parameters. The parameter tells the class from which
-                    source it should generate a validation schema. It is important, that each schema only have a single source.</para>
+                    <para>The constructor of XML::LibXML::Schema needs to be called with list of parameters. At least location or string parameter is required to
+                    specify source of schema. Optional parameter no_network set to 1 cause that parser would not access network and optional parameter recover
+                    set 1 cause that parser would not call die() on errors.</para>
+
+                    <para>It is important, that each schema only have a single source.</para>
 
                 <para>The location parameter allows one to parse a schema
                     from the filesystem or a URL.</para>
