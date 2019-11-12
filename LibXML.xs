@@ -7487,11 +7487,14 @@ DESTROY( self )
 
 
 xmlSchemaPtr
-parse_location( self, url )
+parse_location( self, url, parser_options = 0, recover = FALSE )
         char * url
+        int parser_options
+        bool recover
     PREINIT:
         const char * CLASS = "XML::LibXML::Schema";
         xmlSchemaParserCtxtPtr rngctxt = NULL;
+        xmlExternalEntityLoader old_ext_ent_loader = NULL;
         PREINIT_SAVED_ERROR
     CODE:
         INIT_ERROR_HANDLER;
@@ -7509,20 +7512,32 @@ parse_location( self, url )
                                   (xmlSchemaValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
 
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) ) {
+            old_ext_ent_loader = xmlGetExternalEntityLoader();
+            xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+        }
+
         RETVAL = xmlSchemaParse( rngctxt );
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) )
+            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)old_ext_ent_loader );
+
         xmlSchemaFreeParserCtxt( rngctxt );
 	CLEANUP_ERROR_HANDLER;
-        REPORT_ERROR((RETVAL == NULL) ? 0 : 1);
+        REPORT_ERROR((RETVAL == NULL) ? 0 : recover);
     OUTPUT:
         RETVAL
 
 
 xmlSchemaPtr
-parse_buffer( self, perlstring )
+parse_buffer( self, perlstring, parser_options = 0, recover = FALSE )
         SV * perlstring
+        int parser_options
+        bool recover
     PREINIT:
         const char * CLASS = "XML::LibXML::Schema";
         xmlSchemaParserCtxtPtr rngctxt = NULL;
+        xmlExternalEntityLoader old_ext_ent_loader = NULL;
         char * string = NULL;
         STRLEN len    = 0;
         PREINIT_SAVED_ERROR
@@ -7547,10 +7562,19 @@ parse_buffer( self, perlstring )
                                   (xmlSchemaValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
 
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) ) {
+            old_ext_ent_loader = xmlGetExternalEntityLoader();
+            xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+        }
+
         RETVAL = xmlSchemaParse( rngctxt );
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) )
+            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)old_ext_ent_loader );
+
         xmlSchemaFreeParserCtxt( rngctxt );
         CLEANUP_ERROR_HANDLER;
-        REPORT_ERROR((RETVAL == NULL) ? 0 : 1);
+        REPORT_ERROR((RETVAL == NULL) ? 0 : recover);
     OUTPUT:
         RETVAL
 

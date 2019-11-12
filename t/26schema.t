@@ -15,7 +15,7 @@ use Test::More;
 use XML::LibXML;
 
 if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-    plan tests => 8;
+    plan tests => 12;
 }
 else {
     plan skip_all => 'No Schema Support compiled.';
@@ -27,6 +27,7 @@ my $file         = "test/schema/schema.xsd";
 my $badfile      = "test/schema/badschema.xsd";
 my $validfile    = "test/schema/demo.xml";
 my $invalidfile  = "test/schema/invaliddemo.xml";
+my $netfile      = "test/schema/net.xsd";
 
 
 # 1 parse schema from a file
@@ -112,3 +113,19 @@ EOF
     is( $result, 0, 'validate() with element returns 0' );
 }
 
+# 5 check that no_network => 1 works
+{
+    my $schema = eval { XML::LibXML::Schema->new( location => $netfile, no_network => 1 ) };
+    like( $@, qr{I/O error : Attempt to load network entity}, 'Schema from file location with external import and no_network => 1 throws an exception.' );
+    ok( !defined $schema, 'Schema from file location with external import and no_network => 1 is not loaded.' );
+}
+{
+    my $schema = eval { XML::LibXML::Schema->new( string => <<'EOF', no_network => 1 ) };
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:import namespace="http://example.com/namespace" schemaLocation="http://example.com/xml.xsd"/>
+</xsd:schema>
+EOF
+    like( $@, qr{I/O error : Attempt to load network entity}, 'Schema from buffer with external import and no_network => 1 throws an exception.' );
+    ok( !defined $schema, 'Schema from buffer with external import and no_network => 1 is not loaded.' );
+}

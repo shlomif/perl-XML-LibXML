@@ -2102,10 +2102,10 @@ sub new {
 
     my $self = undef;
     if ( defined $args{location} ) {
-        $self = $class->parse_location( $args{location} );
+        $self = $class->parse_location( $args{location}, XML::LibXML->_parser_options(\%args), $args{recover} );
     }
     elsif ( defined $args{string} ) {
-        $self = $class->parse_buffer( $args{string} );
+        $self = $class->parse_buffer( $args{string}, XML::LibXML->_parser_options(\%args), $args{recover} );
     }
 
     return $self;
