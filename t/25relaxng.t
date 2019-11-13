@@ -16,7 +16,7 @@ BEGIN {
     use XML::LibXML;
 
     if ( XML::LibXML::LIBXML_VERSION >= 20510 ) {
-        plan tests => 13;
+        plan tests => 17;
     }
     else {
         plan skip_all => 'Skip No RNG Support compiled';
@@ -32,6 +32,7 @@ my $badfile      = "test/relaxng/badschema.rng";
 my $validfile    = "test/relaxng/demo.xml";
 my $invalidfile  = "test/relaxng/invaliddemo.xml";
 my $demo4        = "test/relaxng/demo4.rng";
+my $netfile      = "test/relaxng/net.rng";
 
 print "# 1 parse schema from a file\n";
 {
@@ -125,6 +126,31 @@ EOXML
   # TEST
   ok ($@, ' TODO : Add test name');
 
+}
+
+print "# 6 check that no_network => 1 works\n";
+{
+    my $rng = eval { XML::LibXML::RelaxNG->new( location => $netfile, no_network => 1 ) };
+    like( $@, qr{I/O error : Attempt to load network entity}, 'RNG from file location with external import and no_network => 1 throws an exception.' );
+    ok( !defined $rng, 'RNG from file location with external import and no_network => 1 is not loaded.' );
+}
+{
+    my $rng = eval { XML::LibXML::RelaxNG->new( string => <<'EOF', no_network => 1 ) };
+<?xml version="1.0" encoding="iso-8859-1"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <include href="http://example.com/xml.rng"/>
+  <start>
+    <ref name="include"/>
+  </start>
+  <define name="include">
+    <element name="include">
+      <text/>
+    </element>
+  </define>
+</grammar>
+EOF
+    like( $@, qr{I/O error : Attempt to load network entity}, 'RNG from buffer with external import and no_network => 1 throws an exception.' );
+    ok( !defined $rng, 'RNG from buffer with external import and no_network => 1 is not loaded.' );
 }
 
 

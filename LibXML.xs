@@ -7337,11 +7337,14 @@ DESTROY( self )
 
 
 xmlRelaxNGPtr
-parse_location( self, url )
+parse_location( self, url, parser_options = 0, recover = FALSE )
         char * url
+        int parser_options
+        bool recover
     PREINIT:
         const char * CLASS = "XML::LibXML::RelaxNG";
         xmlRelaxNGParserCtxtPtr rngctxt = NULL;
+        xmlExternalEntityLoader old_ext_ent_loader = NULL;
         PREINIT_SAVED_ERROR
     CODE:
         INIT_ERROR_HANDLER;
@@ -7357,20 +7360,33 @@ parse_location( self, url )
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
 #endif
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) ) {
+            old_ext_ent_loader = xmlGetExternalEntityLoader();
+            xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+        }
+
         RETVAL = xmlRelaxNGParse( rngctxt );
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) )
+            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)old_ext_ent_loader );
+
         xmlRelaxNGFreeParserCtxt( rngctxt );
 	CLEANUP_ERROR_HANDLER;
-        REPORT_ERROR((RETVAL == NULL) ? 0 : 1);
+        REPORT_ERROR((RETVAL == NULL) ? 0 : recover);
     OUTPUT:
         RETVAL
 
 
 xmlRelaxNGPtr
-parse_buffer( self, perlstring )
+parse_buffer( self, perlstring, parser_options = 0, recover = FALSE )
         SV * perlstring
+        int parser_options
+        bool recover
     PREINIT:
         const char * CLASS = "XML::LibXML::RelaxNG";
         xmlRelaxNGParserCtxtPtr rngctxt = NULL;
+        xmlExternalEntityLoader old_ext_ent_loader = NULL;
         char * string = NULL;
         STRLEN len    = 0;
         PREINIT_SAVED_ERROR
@@ -7393,20 +7409,33 @@ parse_buffer( self, perlstring )
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
 #endif
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) ) {
+            old_ext_ent_loader = xmlGetExternalEntityLoader();
+            xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+        }
+
         RETVAL = xmlRelaxNGParse( rngctxt );
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) )
+            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)old_ext_ent_loader );
+
         xmlRelaxNGFreeParserCtxt( rngctxt );
 	CLEANUP_ERROR_HANDLER;
-        REPORT_ERROR((RETVAL == NULL) ? 0 : 1);
+        REPORT_ERROR((RETVAL == NULL) ? 0 : recover);
     OUTPUT:
         RETVAL
 
 
 xmlRelaxNGPtr
-parse_document( self, doc )
+parse_document( self, doc, parser_options = 0, recover = FALSE )
         xmlDocPtr doc
+        int parser_options
+        bool recover
     PREINIT:
         const char * CLASS = "XML::LibXML::RelaxNG";
         xmlRelaxNGParserCtxtPtr rngctxt = NULL;
+        xmlExternalEntityLoader old_ext_ent_loader = NULL;
         PREINIT_SAVED_ERROR
     CODE:
         INIT_ERROR_HANDLER;
@@ -7422,10 +7451,20 @@ parse_document( self, doc )
                                   (xmlRelaxNGValidityWarningFunc)LibXML_error_handler_ctx,
                                   saved_error );
 #endif
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) ) {
+            old_ext_ent_loader = xmlGetExternalEntityLoader();
+            xmlSetExternalEntityLoader( xmlNoNetExternalEntityLoader );
+        }
+
         RETVAL = xmlRelaxNGParse( rngctxt );
+
+        if ( EXTERNAL_ENTITY_LOADER_FUNC == NULL && (parser_options & XML_PARSE_NONET) )
+            xmlSetExternalEntityLoader( (xmlExternalEntityLoader)old_ext_ent_loader );
+
         xmlRelaxNGFreeParserCtxt( rngctxt );
 	CLEANUP_ERROR_HANDLER;
-        REPORT_ERROR((RETVAL == NULL) ? 0 : 1);
+        REPORT_ERROR((RETVAL == NULL) ? 0 : recover);
     OUTPUT:
         RETVAL
 

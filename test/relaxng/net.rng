@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <include href="http://example.com/xml.rng"/>
+  <start>
+    <ref name="include"/>
+  </start>
+  <define name="include">
+    <element name="include">
+      <text/>
+    </element>
+  </define>
+</grammar>
