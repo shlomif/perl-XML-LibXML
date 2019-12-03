@@ -12,8 +12,7 @@ install:
     - "cpanm Code::TidyAll::Plugin::TestCount Test::Code::TidyAll || cat /home/travis/.cpanm/work/*/build.log"
     - cpanm --installdeps --notest -v .
 env:
-    - RELEASE_TESTING=1
-    - XML_LIBXML_ENABLE_TIDYALL=1
+    - "RELEASE_TESTING=1 XML_LIBXML_ENABLE_TIDYALL=1"
 script:
     - perl Makefile.PL
     - "make docs || true"
