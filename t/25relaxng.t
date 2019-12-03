@@ -131,7 +131,9 @@ EOXML
 print "# 6 check that no_network => 1 works\n";
 {
     my $rng = eval { XML::LibXML::RelaxNG->new( location => $netfile, no_network => 1 ) };
+    # TEST
     like( $@, qr{I/O error : Attempt to load network entity}, 'RNG from file location with external import and no_network => 1 throws an exception.' );
+    # TEST
     ok( !defined $rng, 'RNG from file location with external import and no_network => 1 is not loaded.' );
 }
 {
@@ -149,7 +151,9 @@ print "# 6 check that no_network => 1 works\n";
   </define>
 </grammar>
 EOF
+    # TEST
     like( $@, qr{I/O error : Attempt to load network entity}, 'RNG from buffer with external import and no_network => 1 throws an exception.' );
+    # TEST
     ok( !defined $rng, 'RNG from buffer with external import and no_network => 1 is not loaded.' );
 }
 

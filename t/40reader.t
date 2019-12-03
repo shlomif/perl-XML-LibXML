@@ -19,6 +19,7 @@ BEGIN{
   use_ok('XML::LibXML::Reader');
 };
 
+# TEST*100
 my $file = "test/textReader/countries.xml";
 {
   my $reader = XML::LibXML::Reader->new(location => $file, {expand_entities => 1});

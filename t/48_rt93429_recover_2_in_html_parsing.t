@@ -27,6 +27,7 @@ use XML::LibXML;
 
     close($fh);
 
+    # TEST
     is($buf, '', 'No warning emitted on load_html with recover => 2.');
 }
 

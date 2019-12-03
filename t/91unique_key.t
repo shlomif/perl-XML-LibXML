@@ -23,6 +23,7 @@ my $foo = $doc->documentElement;
 my @children_1 = $foo->childNodes;
 my @children_2 = $foo->childNodes;
 
+# TEST
 ok($children_1[0]->can('unique_key'), 'unique_key method available')
     or exit -1;
 

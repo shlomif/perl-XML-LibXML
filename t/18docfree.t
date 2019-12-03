@@ -9,5 +9,6 @@ use XML::LibXML;
   $doc = XML::LibXML::Document->new();
 }
 # used to get "Attempt to free unreferenced scalar" here
-ok(1, 'docfree Out of scope is OK - no "Attempt to free unreferenced scalar"');
+# TEST
+pass('docfree Out of scope is OK - no "Attempt to free unreferenced scalar"');
 

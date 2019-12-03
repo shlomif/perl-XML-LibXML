@@ -1,0 +1,2 @@
+[TestCount]
+select = t/*.t

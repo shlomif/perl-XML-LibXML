@@ -116,7 +116,9 @@ EOF
 # 5 check that no_network => 1 works
 {
     my $schema = eval { XML::LibXML::Schema->new( location => $netfile, no_network => 1 ) };
+    # TEST
     like( $@, qr{I/O error : Attempt to load network entity}, 'Schema from file location with external import and no_network => 1 throws an exception.' );
+    # TEST
     ok( !defined $schema, 'Schema from file location with external import and no_network => 1 is not loaded.' );
 }
 {
@@ -126,6 +128,8 @@ EOF
   <xsd:import namespace="http://example.com/namespace" schemaLocation="http://example.com/xml.xsd"/>
 </xsd:schema>
 EOF
+    # TEST
     like( $@, qr{I/O error : Attempt to load network entity}, 'Schema from buffer with external import and no_network => 1 throws an exception.' );
+    # TEST
     ok( !defined $schema, 'Schema from buffer with external import and no_network => 1 is not loaded.' );
 }

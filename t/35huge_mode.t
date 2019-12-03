@@ -49,11 +49,14 @@ my($parser, $doc);
 
 $parser = XML::LibXML->new;
 #$parser->set_option(huge => 0);
+# TEST
 ok(!$parser->get_option('huge'), "huge mode disabled by default");
 
 $doc = eval { $parser->parse_string($evil_xml); };
 
+# TEST
 isnt("$@", "", "exception thrown during parse");
+# TEST
 like($@, qr/entity.*loop/si, "exception refers to entity reference loop");
 
 
@@ -61,9 +64,11 @@ $parser = XML::LibXML->new;
 
 $doc = eval { $parser->parse_string($benign_xml); };
 
+# TEST
 is("$@", "", "no exception thrown during parse");
 
 my $body = $doc->findvalue( '/lolz' );
+# TEST
 is($body, 'haha', 'entity was parsed and expanded correctly');
 
 exit;

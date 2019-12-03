@@ -25,6 +25,8 @@ use constant XML_DECL => "<?xml version=\"1.0\"?>\n";
 
 use Errno qw(ENOENT);
 
+# TEST*533
+
 ##
 # test values
 my @goodWFStrings = (

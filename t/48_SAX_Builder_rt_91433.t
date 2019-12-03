@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
@@ -50,6 +50,7 @@ $parser->parse_string(<<'END_OF_XML');
 </rdf:RDF></metadata></record></GetRecord></OAI-PMH>
 END_OF_XML
 
+# TEST
 eq_or_diff(
     \@got_warnings,
     [],
