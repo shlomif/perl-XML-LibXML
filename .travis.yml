@@ -9,9 +9,11 @@ before_install:
 install:
     - "cpanm Test::CPAN::Changes Test::Pod Test::TrailingSpace || cat /home/travis/.cpanm/work/*/build.log"
     - "cpanm Alien::Libxml2 || cat /home/travis/.cpanm/work/*/build.log"
+    - "cpanm Code::TidyAll::Plugin::TestCount Test::Code::TidyAll || cat /home/travis/.cpanm/work/*/build.log"
     - cpanm --installdeps --notest -v .
 env:
     - RELEASE_TESTING=1
+    - XML_LIBXML_ENABLE_TIDYALL=1
 script:
     - perl Makefile.PL
     - "make docs || true"
