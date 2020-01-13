@@ -78,7 +78,7 @@ EOT
 
     my $parser = XML::LibXML->new();
     my $xml_string = eval {
-	my $XML_DOC = $parser->load_xml( string => $XML );
+        my $XML_DOC = $parser->load_xml( string => $XML );
         return $XML_DOC->toString();
     };
 
@@ -115,7 +115,7 @@ EOT
 
     my $parser = XML::LibXML->new();
     my $xml_string = eval {
-	my $XML_DOC = $parser->load_xml( string => $XML );
+        my $XML_DOC = $parser->load_xml( string => $XML );
         return $XML_DOC->toString();
     };
 
