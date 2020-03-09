@@ -17,12 +17,13 @@ use warnings;
 
 require 5.008001;
 
-use Alien::Libxml2;
+use Alien::Base::Wrapper qw( Alien::Libxml2 );
 use ExtUtils::MakeMaker;
 use Config;
 
 my %ConfigReqs = (
   "Alien::Libxml2" => 0,
+  "Alien::Base::Wrapper" => 0,
   "Config" => 0,
   "ExtUtils::MakeMaker" => 0,
 );
@@ -68,8 +69,7 @@ my %prereqs = (
 my %xsbuild = (
   DEFINE  => '-DHAVE_UTF8',
   OBJECT  => '$(O_FILES)',
-  CCFLAGS => Alien::Libxml2->cflags . " $Config{ccflags}",
-  LIBS    => [ Alien::Libxml2->libs ],
+  Alien::Base::Wrapper->mm_args,
 );
 
 my %WriteMakefileArgs = (
