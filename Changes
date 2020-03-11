@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0203  2020-03-11
+    - Use Alien::Base::Wrapper for better portability.
+        - https://github.com/shlomif/perl-XML-LibXML/pull/45
+        - Thanks to @plicease
+
 2.0202  2020-01-13
     - Disable loading external DTDs or external entities by default
         - Thanks to Tim Retout

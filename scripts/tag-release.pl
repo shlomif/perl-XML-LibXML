@@ -3,25 +3,21 @@
 use strict;
 use warnings;
 
-use IO::All;
+use IO::All qw/ io /;
 
 my ($version) =
-    (map { m{\$VERSION *= *"([^"]+)"} ? ($1) : () }
-    io->file('LibXML.pm')->getlines()
-    )
-    ;
+    ( map { m{\$VERSION *= *"([^"]+)"} ? ($1) : () }
+        io->file('LibXML.pm')->getlines() );
 
-if (!defined ($version))
+if ( !defined($version) )
 {
     die "Version is undefined!";
 }
 
 my @cmd = (
-    "git", "tag", "-m",
-    "Tagging the XML-LibXML release as $version",
+    "git", "tag", "-m", "Tagging the XML-LibXML release as $version",
     "XML-LibXML-$version",
 );
 
-print join(" ", map { /\s/ ? qq{"$_"} : $_ } @cmd), "\n";
+print join( " ", map { /\s/ ? qq{"$_"} : $_ } @cmd ), "\n";
 exec(@cmd);
-
