@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use File::Find::Object ();
-use IO::All qw/ io /;
+use Path::Tiny qw/ path tempdir tempfile cwd /;
 
 my $tree = File::Find::Object->new( {}, 'lib/' );
 
@@ -19,14 +19,14 @@ sub process_file
 {
     # The filename.
     my ($r) = @_;
-    my $fh = io()->file($r);
+    my $fh = path($r);
 
-    my @lines = $fh->getlines();
+    my @lines = $fh->lines_utf8;
     foreach (@lines)
     {
 s#(\$VERSION = "|^Version )\d+\.\d+(?:\.\d+)?("|)#$1 . $version_n . $2#e;
     }
-    $fh->print(@lines);
+    $fh->spew_utf8(@lines);
 }
 
 process_file('LibXML.pm');
