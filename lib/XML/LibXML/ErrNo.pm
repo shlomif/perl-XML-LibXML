@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use vars qw($VERSION);
 
-$VERSION = "2.0202"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0203"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant ERR_OK                               => 0;
 use constant ERR_INTERNAL_ERROR                   => 1;
