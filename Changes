@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0204  2020-03-17
+    - Require a recent Alien::Libxml2.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=132129
+        - Thanks to SREZIC
+
 2.0203  2020-03-11
     - Use Alien::Base::Wrapper for better portability.
         - https://github.com/shlomif/perl-XML-LibXML/pull/45

@@ -22,7 +22,7 @@ use ExtUtils::MakeMaker;
 use Config;
 
 my %ConfigReqs = (
-  "Alien::Libxml2" => 0,
+  "Alien::Libxml2" => '0.14',
   "Alien::Base::Wrapper" => 0,
   "Config" => 0,
   "ExtUtils::MakeMaker" => 0,
