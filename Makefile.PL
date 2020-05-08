@@ -141,6 +141,25 @@ delete $WriteMakefileArgs{LICENSE}
 
 WriteMakefile(%WriteMakefileArgs);
 
+# append the install method to include the SAX parser INI file changes
+sub MY::install {
+   package MY;
+   my $script = shift->SUPER::install(@_);
+   unless ( $::skipsaxinstall ) {
+     $script =~ s/install :: (.*)$/install :: $1 install_sax_driver/m;
+     $script .= <<"INSTALL";
+
+install_sax_driver :
+\t-\@\$(PERL) -I\$(INSTALLSITELIB) -I\$(INSTALLSITEARCH) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX::Parser))->save_parsers()"
+\t-\@\$(PERL) -I\$(INSTALLSITELIB) -I\$(INSTALLSITEARCH) -MXML::SAX -e "XML::SAX->add_parser(q(XML::LibXML::SAX))->save_parsers()"
+
+INSTALL
+   } else {
+     warn "Note: 'make install' will skip XML::LibXML::SAX registration with XML::SAX!\n";
+   }
+   return $script;
+}
+
 # helper functions to build the Makefile
 sub MY::manifypods {
   package MY;
