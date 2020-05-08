@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+2.0205  2020-05-08
+    - Add XML::LibXML to the XML/SAX/ParserDetails.ini configuration file
+    upon installation.
+        - https://rt.cpan.org/Public/Bug/Display.html?id=132523
+        - https://github.com/shlomif/perl-XML-LibXML/pull/49
+        - Thanks to SREZIC , @genio , and @plicease .
+
 2.0204  2020-03-17
     - Require a recent Alien::Libxml2.
         - https://rt.cpan.org/Public/Bug/Display.html?id=132129
