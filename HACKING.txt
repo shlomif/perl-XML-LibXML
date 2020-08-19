@@ -11,7 +11,7 @@ Use Test::More for test scripts while using Test::Count annotations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One should use Test::More for new test scripts, while using Test::Count
-( http://beta.metacpan.org/module/Test::Count ) "# TEST" annotations. Some
+( https://metacpan.org/module/Test::Count ) "# TEST" annotations. Some
 of the old test scripts under +t/*.t+ are still using Test.pm, but it should
 not be used for new code.
 
