@@ -6003,7 +6003,7 @@ my @nodes = $xc-&gt;findnodes('$A[work_area/street = $B]/name');
           <term>registerVarLookupFunc</term>
           <listitem><funcsynopsis><funcsynopsisinfo>$xpc-&gt;registerVarLookupFunc($callback, $data)</funcsynopsisinfo></funcsynopsis>
             <para>Registers variable lookup function
-	      <literal>$prefix</literal>. The registered function is
+	      <literal>$callback</literal>. The registered function is
 	      executed by the XPath engine each time an XPath variable
 	      is evaluated. It takes three arguments:
 	      <literal>$data</literal>, variable name, and variable
