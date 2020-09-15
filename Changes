@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+2.0206  2020-09-15
+    - Add expand_entities => 1 to the instantiation at lib/XML/LibXML/SAX.pm
+        - in order to fix https://rt.cpan.org/Public/Bug/Display.html?id=132759
+        - failing XML-Simple tests
+        - Thanks to SREZIC , and GRANTM .
+    - Update HACKING.txt .
+
 2.0205  2020-05-08
     - Add XML::LibXML to the XML/SAX/ParserDetails.ini configuration file
     upon installation.

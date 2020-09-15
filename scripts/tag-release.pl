@@ -3,11 +3,11 @@
 use strict;
 use warnings;
 
-use IO::All qw/ io /;
+use Path::Tiny qw/ path /;
 
 my ($version) =
     ( map { m{\$VERSION *= *"([^"]+)"} ? ($1) : () }
-        io->file('LibXML.pm')->getlines() );
+        path('LibXML.pm')->lines_utf8() );
 
 if ( !defined($version) )
 {

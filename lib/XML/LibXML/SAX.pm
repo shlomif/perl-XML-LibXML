@@ -14,7 +14,7 @@ use warnings;
 
 use vars qw($VERSION @ISA);
 
-$VERSION = "2.0205"; # VERSION TEMPLATE: DO NOT CHANGE
+$VERSION = "2.0206"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use XML::LibXML;
 use XML::SAX::Base;
@@ -47,9 +47,16 @@ sub _parse_characterstream {
     croak( "not implemented yet" );
 }
 
+# See:
+# https://rt.cpan.org/Public/Bug/Display.html?id=132759
+sub _calc_new_XML_LibXML_parser_for_compatibility_with_XML_Simple_etc
+{
+    return XML::LibXML->new( expand_entities => 1, );
+}
+
 sub _parse_bytestream {
     my ( $self, $fh ) = @_;
-    $self->{ParserOptions}{LibParser}      = XML::LibXML->new()     unless defined $self->{ParserOptions}{LibParser};
+    $self->{ParserOptions}{LibParser}      = $self->_calc_new_XML_LibXML_parser_for_compatibility_with_XML_Simple_etc() unless defined $self->{ParserOptions}{LibParser};
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_fh;
     $self->{ParserOptions}{ParseFuncParam} = $fh;
     $self->_parse;
@@ -58,7 +65,7 @@ sub _parse_bytestream {
 
 sub _parse_string {
     my ( $self, $string ) = @_;
-    $self->{ParserOptions}{LibParser}      = XML::LibXML->new()     unless defined $self->{ParserOptions}{LibParser};
+    $self->{ParserOptions}{LibParser}      = $self->_calc_new_XML_LibXML_parser_for_compatibility_with_XML_Simple_etc() unless defined $self->{ParserOptions}{LibParser};
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_string;
     $self->{ParserOptions}{ParseFuncParam} = $string;
     $self->_parse;
@@ -67,7 +74,7 @@ sub _parse_string {
 
 sub _parse_systemid {
     my $self = shift;
-    $self->{ParserOptions}{LibParser}      = XML::LibXML->new()     unless defined $self->{ParserOptions}{LibParser};
+    $self->{ParserOptions}{LibParser}      = $self->_calc_new_XML_LibXML_parser_for_compatibility_with_XML_Simple_etc() unless defined $self->{ParserOptions}{LibParser};
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_file;
     $self->{ParserOptions}{ParseFuncParam} = shift;
     $self->_parse;
@@ -76,7 +83,7 @@ sub _parse_systemid {
 
 sub parse_chunk {
     my ( $self, $chunk ) = @_;
-    $self->{ParserOptions}{LibParser}      = XML::LibXML->new()     unless defined $self->{ParserOptions}{LibParser};
+    $self->{ParserOptions}{LibParser}      = $self->_calc_new_XML_LibXML_parser_for_compatibility_with_XML_Simple_etc() unless defined $self->{ParserOptions}{LibParser};
     $self->{ParserOptions}{ParseFunc}      = \&XML::LibXML::parse_xml_chunk;
     $self->{ParserOptions}{LibParser}->{IS_FILTER}=1; # a hack to prevent parse_xml_chunk from issuing end_document
     $self->{ParserOptions}{ParseFuncParam} = $chunk;
