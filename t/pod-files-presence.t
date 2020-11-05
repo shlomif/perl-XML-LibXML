@@ -3,8 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More;
 use File::Spec;
+
+if ( ! $ENV{AUTHOR_TESTING} ) {
+    plan skip_all => "only for AUTHORS";
+} else {
+    plan tests => 3;
+}
 
 sub _is_present
 {
