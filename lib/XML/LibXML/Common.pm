@@ -19,7 +19,6 @@ use strict;
 use warnings;
 
 require Exporter;
-require DynaLoader;
 use vars qw( @ISA $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
