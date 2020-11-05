@@ -1,0 +1,120 @@
+name: Perl testsuite
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  ubuntu:
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "install deps"
+        run: |
+          sudo apt-get update -y ||:
+          sudo apt-get --no-install-recommends -y install libxml2-dev
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies using cpm
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          install: |
+            Test::CPAN::Changes
+            Test::Pod
+            Test::TrailingSpace
+            Test::Kwalitee
+            Alien::Libxml2
+          sudo: true
+      # this is insane... coming from author testing
+      - run: perl Makefile.PL
+      - run: "make docs ||:"
+      - run: perl Makefile.PL
+      - run: make test
+      - run: make disttest
+
+  linux:
+    name: "linux ${{ matrix.perl-version }}"
+    needs: [ubuntu]
+    env:
+      # no author testing here
+      # need to check that install on most Perl versions succeeds
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 0
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 0
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          [
+            "5.32",
+            "5.30",
+            "5.28",
+            "5.26",
+            "5.24",
+            "5.22",
+            "5.20",
+            "5.18",
+            "5.16",
+            "5.14",
+            "5.12",
+            "5.10",
+            "5.8",
+          ]
+
+    container:
+      image: perl:${{ matrix.perl-version }}
+
+    steps:
+      - name: "install deps"
+        run: |
+          apt-get update -y ||:
+          apt-get -y --no-install-recommends install libxml2-dev
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies Alien::Libxml2
+        uses: perl-actions/install-with-cpanm@v1
+        with:
+          sudo: false
+          install: |
+            Alien::Libxml2
+      - name: Install Dependencies NamespaceSupport
+        uses: perl-actions/install-with-cpanm@v1
+        with:
+          sudo: false
+          install: |
+            XML::NamespaceSupport
+      - name: Install Dependencies using cpanm
+        uses: perl-actions/install-with-cpanm@v1
+        with:
+          sudo: false
+          install: |
+            Carp
+            DynaLoader
+            Encode
+            Exporter
+            IO::Handle
+            Scalar::Util
+            Tie::Hash
+            XML::NamespaceSupport
+            XML::SAX
+            XML::SAX::Base
+            XML::SAX::DocumentLocator
+            XML::SAX::Exception
+      - run: perl Makefile.PL
+      - run: make
+      - run: make test
+      - run: make install
