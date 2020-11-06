@@ -17,7 +17,6 @@ no warnings 'recursion';
 use Encode ();
 
 use vars qw(@error_domains $VERSION $WARNINGS);
-use Carp;
 use overload
   '""' => \&as_string,
   'eq' => sub {
