@@ -254,7 +254,7 @@ sub as_string {
 
 sub dump {
   my ($self)=@_;
-  use Data::Dumper;
+  require Data::Dumper;
   return Data::Dumper->new([$self],['error'])->Dump;
 }
 
