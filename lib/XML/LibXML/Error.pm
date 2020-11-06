@@ -14,8 +14,6 @@ use warnings;
 # To avoid a "Deep recursion on subroutine as_string" warning
 no warnings 'recursion';
 
-use Encode ();
-
 use vars qw(@error_domains $VERSION $WARNINGS);
 use Carp;
 use overload
@@ -243,7 +241,9 @@ sub as_string {
       # warnings.  This has the pleasing benefit of making the test suite
       # run warning-free.
       no warnings 'utf8';
-      my $context = Encode::encode('utf8', $self->{context}, Encode::FB_DEFAULT);
+
+      my $context = $self->{context};
+      utf8::encode($context);
       $msg.=$context."\n";
       $context = substr($context,0,$self->{column});
       $context=~s/[^\t]/ /g;
