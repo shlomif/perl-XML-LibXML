@@ -1118,7 +1118,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
     dTHX;
 
     xs_warn("SV2C: start!\n");
-    if ( scalar != NULL && scalar != &PL_sv_undef ) {
+    if ( scalar != NULL && SvOK(scalar) ) {
         STRLEN len = 0;
         char * t_pv =SvPV(scalar, len);
         xmlChar* ts = NULL;
