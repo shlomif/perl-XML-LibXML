@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::LibXML
 
+2.0207  2021-04-17
+    - Small cleanups:
+        - https://github.com/shlomif/perl-XML-LibXML/pull/63
+        - Thanks to @Grinnz , @Kritzefitz and @atoomic .
+
 2.0206  2020-09-15
     - Add expand_entities => 1 to the instantiation at lib/XML/LibXML/SAX.pm
         - in order to fix https://rt.cpan.org/Public/Bug/Display.html?id=132759
