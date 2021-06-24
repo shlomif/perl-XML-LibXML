@@ -2599,7 +2599,7 @@ print {$out_fh} $doc-&gt;toString;</programlisting>
 
                     <para><emphasis>toStringHTML</emphasis> serialize the tree to a byte string in the document encoding as HTML. With this method indenting is automatic and managed by
                     libxml2 internally. Note the string must contain
-			    &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt; (and not newer &lt;meta charset="utf-8"&gt;),
+			    &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"&gt; (rather than the newer &lt;meta charset="utf-8"&gt;),
                             else all non-ASCII will become entities.</para>
                 </listitem>
             </varlistentry>
