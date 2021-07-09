@@ -525,7 +525,7 @@ EOF
         {
             my $attr = $root->getAttributeNode('fixed');
             # TEST*$xml
-            is (ref($attr), 'XML::LibXML::Attr', ' TODO : Add test name');
+            is (ref($attr), 'XML::LibXML::Attr', ' Complete attributes');
             # TEST*$xml
             is ($attr->value,'foo', ' TODO : Add test name');
             # TEST*$xml
