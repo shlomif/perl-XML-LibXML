@@ -5747,7 +5747,7 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
     CODE:
        /* if ( !nsURI ){
             XSRETURN_UNDEF;
-		} */
+                } */
 
         nsPrefix = nodeSv2C(namespacePrefix, node);
         if ( xmlStrlen( nsPrefix ) == 0 ) {
@@ -5759,22 +5759,22 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
             nsURI = NULL;
         }
         if ( nsPrefix == NULL && nsURI == NULL ) {
-	    /* special case: empty namespace */
-	    if ( (ns = xmlSearchNs(node->doc, node, NULL)) &&
-		 ( ns->href && xmlStrlen( ns->href ) != 0 ) ) {
-		/* won't take it */
-		RETVAL = 0;
-	    } else if ( flag ) {
-		/* no namespace */
-		xmlSetNs(node, NULL);
-		RETVAL = 1;
-	    } else {
-		RETVAL = 0;
-	    }
-	}
+            /* special case: empty namespace */
+            if ( (ns = xmlSearchNs(node->doc, node, NULL)) &&
+                 ( ns->href && xmlStrlen( ns->href ) != 0 ) ) {
+                /* won't take it */
+                RETVAL = 0;
+            } else if ( flag ) {
+                /* no namespace */
+                xmlSetNs(node, NULL);
+                RETVAL = 1;
+            } else {
+                RETVAL = 0;
+            }
+        }
         else if ( flag && (ns = xmlSearchNs(node->doc, node, nsPrefix)) ) {
-	  /* user just wants to set the namespace for the node */
-	  /* try to reuse an existing declaration for the prefix */
+          /* user just wants to set the namespace for the node */
+          /* try to reuse an existing declaration for the prefix */
             if ( xmlStrEqual( ns->href, nsURI ) ) {
                 RETVAL = 1;
             }
@@ -5786,9 +5786,9 @@ _setNamespace(self, namespaceURI, namespacePrefix = &PL_sv_undef, flag = 1 )
             }
         }
         else if ( (ns = xmlNewNs( node, nsURI, nsPrefix )) )
-	  RETVAL = 1;
-	else
-	  RETVAL = 0;
+          RETVAL = 1;
+        else
+          RETVAL = 0;
 
         if ( flag && ns ) {
             xmlSetNs(node, ns);
