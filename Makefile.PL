@@ -73,9 +73,9 @@ my %xsbuild_concat = (
   OBJECT  => '$(O_FILES)',
 );
 my %xsbuild = Alien::Base::Wrapper->mm_args;  # Might contain a definition of DEFINE, must thus concatenate.
-while (my($k,$v) = each %xsbuild_concat) {
+while (my ($k, $v) = each %xsbuild_concat) {
   my $base_val = $xsbuild{$k};
-  $xsbuild{$k} = defined $base_val ? $base_val.' '.$v : $v;
+  $xsbuild{$k} = (defined($base_val) ? ($base_val . ' ' . $v) : $v);
 }
 
 my %WriteMakefileArgs = (
