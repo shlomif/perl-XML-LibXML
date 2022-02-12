@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 54.
-use Test::More tests => 54;
+# Should be 58.
+use Test::More tests => 58;
 
 use lib './t/lib';
 use TestHelpers qw(slurp);
@@ -163,6 +163,58 @@ EOF
 
 {
     my $parser = XML::LibXML->new();
+    $parser->validation(1);
+    # Validation should set implictely load_ext_dtd
+
+    my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
+    my $doc = eval {
+        $parser->parse_string($xml);
+    };
+
+    # TEST
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set implictely');
+}
+
+{
+    my $parser = XML::LibXML->new();
+    $parser->validation(1);
+    $parser->load_ext_dtd(1);
+
+    my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
+    my $doc = eval {
+        $parser->parse_string($xml);
+    };
+
+    # TEST
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitely');
+}
+
+{
+    my $parser = XML::LibXML->new();
+    $parser->validation(1);
+    $parser->load_ext_dtd(0); # This should make libxml not try to get the DTD
+    # We explictely do a partial validation
+
+    my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
+    my $doc = eval {
+        $parser->parse_string($xml);
+    };
+
+    # TEST
+    ok(!$@, ' Validation should not fail');
+    if ($@) {
+        warn "Parsing error: $@\n";
+    }
+
+    # TEST
+    ok($doc, ' Validation should not fail');
+}
+
+{
+    my $parser = XML::LibXML->new();
     $parser->validation(0);
     $parser->load_ext_dtd(0); # This should make libxml not try to get the DTD
 
@@ -173,7 +225,7 @@ EOF
     };
 
     # TEST
-    ok(!$@, ' TODO : Add test name');
+    ok(!$@, ' Partial validation, external DTD not loaded on demand');
     if ($@) {
         warn "Parsing error: $@\n";
     }
