@@ -242,13 +242,13 @@ EOF
     <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
 
     eval { $parser->load_xml(string => $xml); };
-    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set implicitly');
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set implicitly (parser arguments)');
 
     eval { $parser->load_xml(string => $xml, load_ext_dtd => 1); };
-    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitly');
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitly (parser arguments)');
 
     eval { $parser->load_xml(string => $xml, load_ext_dtd => 0); };
-    ok(!$@, ' Validation should fail because the validation is partial');
+    ok(!$@, ' Validation should fail because the validation is partial (parser arguments)');
 
 }
 
