@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec;
 
 if ( ! $ENV{AUTHOR_TESTING} ) {
-    plan skip_all => "only for AUTHORS";
+    plan skip_all => "These tests are for authors only!";
 } else {
     plan tests => 3;
 }
