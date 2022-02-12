@@ -367,7 +367,6 @@ sub new {
       # parser flags
       $opts{no_blanks} = !$opts{keep_blanks} if exists($opts{keep_blanks}) and !exists($opts{no_blanks});
       $opts{load_ext_dtd} = $opts{expand_entities} if exists($opts{expand_entities}) and !exists($opts{load_ext_dtd});
-      $opts{load_ext_dtd} = $opts{validation} if exists($opts{validation}) and !exists($opts{load_ext_dtd});
       $opts{load_ext_dtd} = $opts{complete_attributes} if exists($opts{complete_attributes}) and !exists($opts{load_ext_dtd});
       $opts{load_ext_dtd} = $opts{validation} if exists($opts{validation}) and !exists($opts{load_ext_dtd});
 
