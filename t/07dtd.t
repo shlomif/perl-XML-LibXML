@@ -225,13 +225,13 @@ EOF
     };
 
     # TEST
-    ok(!$@, ' Partial validation, external DTD not loaded on demand');
+    ok(!$@, ' Partial validation, external DTD not loaded (on purpose)');
     if ($@) {
         warn "Parsing error: $@\n";
     }
 
     # TEST
-    ok($doc, ' Partial validation, external DTD not loaded on demand');
+    ok($doc, ' Partial validation, external DTD not loaded (on purpose)');
 }
 
 {
@@ -248,7 +248,7 @@ EOF
     ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitly (parser arguments)');
 
     eval { $parser->load_xml(string => $xml, load_ext_dtd => 0); };
-    ok(!$@, ' Validation should fail because the validation is partial (parser arguments)');
+    ok(!$@, ' Validation should not fail because the validation is partial (parser arguments)');
 
 }
 
