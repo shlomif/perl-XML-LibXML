@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-# Should be 58.
-use Test::More tests => 58;
+# Should be 61.
+use Test::More tests => 61;
 
 use lib './t/lib';
 use TestHelpers qw(slurp);
@@ -188,14 +188,14 @@ EOF
     };
 
     # TEST
-    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitely');
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitly');
 }
 
 {
     my $parser = XML::LibXML->new();
     $parser->validation(1);
     $parser->load_ext_dtd(0); # This should make libxml not try to get the DTD
-    # We explictely do a partial validation
+    # We explictly do a partial validation
 
     my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
@@ -231,7 +231,25 @@ EOF
     }
 
     # TEST
-    ok($doc, ' TODO : Add test name');
+    ok($doc, ' Partial validation, external DTD not loaded on demand');
+}
+
+{
+    my $parser = new XML::LibXML;
+    $parser->validation(1);
+
+    my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
+
+    eval { $parser->load_xml(string => $xml); };
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set implicitly');
+
+    eval { $parser->load_xml(string => $xml, load_ext_dtd => 1); };
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set explicitly');
+
+    eval { $parser->load_xml(string => $xml, load_ext_dtd => 0); };
+    ok(!$@, ' Validation should fail because the validation is partial');
+
 }
 
 {
