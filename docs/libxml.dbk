@@ -1755,22 +1755,30 @@ $parser->input_callbacks($c);
 		XML::LibXML sets this option to 0.</para>
               <para>This flag is also required for DTD Validation, to provide complete attribute,
                 and to expand entities, regardless if the document has an internal subset.
-                Thus switching off external DTD loading, will disable entity expansion,
-                validation, and complete attributes on internal subsets as well.</para>
+                Hence the load of external DTD is set implictly when you activate one of these options.
+                Switching off external DTD loading, will disable entity expansion,
+                and complete attributes on internal subsets as well.
+                If you use validation and force external DTD loading to off, the validation will be "partial",
+                in other words it will ignore external DTD.
+              </para>
             </listitem>
           </varlistentry>
           <varlistentry>
             <term>complete_attributes</term>
             <listitem>
 	      <para>/parser, reader/</para>
-              <para>create default DTD attributes; possible values are 0 and 1</para>
+              <para>create default DTD attributes; possible values are 0 and 1
+	            Also turns the <literal>load_ext_dtd</literal> option to 1.
+              </para>
             </listitem>
           </varlistentry>
           <varlistentry>
             <term>validation</term>
             <listitem>
 	      <para>/parser, reader/</para>
-              <para>validate with the DTD; possible values are 0 and 1</para>
+              <para>validate with the DTD; possible values are 0 and 1
+	            Also turns the <literal>load_ext_dtd</literal> option to 1.
+              </para>
             </listitem>
           </varlistentry>
           <varlistentry>
