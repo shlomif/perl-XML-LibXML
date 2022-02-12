@@ -164,7 +164,7 @@ EOF
 {
     my $parser = XML::LibXML->new();
     $parser->validation(1);
-    # Validation should set implictely load_ext_dtd
+    # Validation should set implictly load_ext_dtd
 
     my $xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://localhost/does_not_exist.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml"><head><title>foo</title></head><body><p>bar</p></body></html>';
@@ -173,7 +173,7 @@ EOF
     };
 
     # TEST
-    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set implictely');
+    ok($@, ' Validation should fail because the dtd does not exist and load_ext_dtd is set implicitly');
 }
 
 {
