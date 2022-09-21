@@ -193,6 +193,7 @@ t/lib/Collector.pm
 t/lib/Counter.pm
 t/lib/Stacker.pm
 t/lib/TestHelpers.pm
+t/namespace-magic-scalar-rt144415.t
 t/pod-files-presence.t
 t/pod.t
 t/release-kwalitee.t

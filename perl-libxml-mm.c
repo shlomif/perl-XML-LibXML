@@ -1118,6 +1118,7 @@ Sv2C( SV* scalar, const xmlChar *encoding )
     dTHX;
 
     xs_warn("SV2C: start!\n");
+    SvGETMAGIC(scalar);
     if ( scalar != NULL && SvOK(scalar) ) {
         STRLEN len = 0;
         char * t_pv =SvPV(scalar, len);
