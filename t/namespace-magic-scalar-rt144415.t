@@ -1,11 +1,13 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 3;
 
 use XML::LibXML;
 
 sub test_one {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     my ($ns, $name) = @_;
     my $doc = XML::LibXML::Document->new;
     my $foo = $doc->createElement('foo');
@@ -15,7 +17,7 @@ sub test_one {
         $doc->createElementNS( $$ns, 'bar' ),
     );
 
-    is(
+    return is(
         $foo->toString,
         qq[<foo><bar xmlns="$$ns"/></foo>],
         "$name: namespace should be in force",
@@ -25,8 +27,9 @@ sub test_one {
 my $ns1 = \'urn:a';
 my $ns2 = \substr($$ns1, 0);
 
+# TEST
 test_one $ns1, 'plain scalar';
+# TEST
 test_one $ns2, 'magic scalar';
+# TEST
 test_one \"$$ns2", 'copy of magic scalar';
-
-done_testing;
