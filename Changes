@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::LibXML
 
+2.0208  2022-09-30
+    - Fix https://rt.cpan.org/Ticket/Display.html?id=144415
+        - Bug #144415 for XML-LibXML: createElementNS & setNamespace get
+          confused by Readonly scalars
+        - thanks to DAKKAR and haarg.
+
 2.0207  2021-04-17
     - Small cleanups:
         - https://github.com/shlomif/perl-XML-LibXML/pull/63
