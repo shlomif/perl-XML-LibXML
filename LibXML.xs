@@ -4025,17 +4025,10 @@ is_valid(self, ...)
     CODE:
         INIT_ERROR_HANDLER;
 
+        memset(&cvp, 0, sizeof(cvp));
         cvp.userData = saved_error;
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error_ctx;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning_ctx;
-
-        /* we need to initialize the node stack, because perl might
-         * already have messed it up.
-         */
-        cvp.nodeNr = 0;
-        cvp.nodeTab = NULL;
-        cvp.vstateNr = 0;
-        cvp.vstateTab = NULL;
 
         PmmClearPSVI(self);
         PmmInvalidatePSVI(self);
@@ -4065,16 +4058,10 @@ validate(self, ...)
     CODE:
         INIT_ERROR_HANDLER;
 
+        memset(&cvp, 0, sizeof(cvp));
         cvp.userData = saved_error;
         cvp.error = (xmlValidityErrorFunc)LibXML_validity_error_ctx;
         cvp.warning = (xmlValidityWarningFunc)LibXML_validity_warning_ctx;
-        /* we need to initialize the node stack, because perl might
-         * already have messed it up.
-         */
-        cvp.nodeNr = 0;
-        cvp.nodeTab = NULL;
-        cvp.vstateNr = 0;
-        cvp.vstateTab = NULL;
 
         PmmClearPSVI(self);
         PmmInvalidatePSVI(self);
