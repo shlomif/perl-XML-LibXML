@@ -75,7 +75,8 @@ jobs:
           ]
 
     container:
-      image: perl:${{ matrix.perl-version }}
+      # image: perl:${{ matrix.perl-version }}
+      image: perldocker/perl-tester:${{ matrix.perl-version }}
 
     steps:
       - name: "install deps"
