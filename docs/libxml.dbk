@@ -3398,6 +3398,13 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
 	              has changed in 1.62 in order to be consistent with the DOM spec
                       (in older versions attributes and namespace information
                       was not copied for elements).</para>
+                    <para><emphasis>NOTE</emphasis>cloneNode creates
+                    a copy of the selected node that includes the parent's
+                    defined <emphasis>namespaces</emphasis> that are in
+                    use by the node (or its children) being cloned. That
+                    makes it useful for extracting a fragment of xml that
+                    can be used as a valid xml document.
+                    </para>
                 </listitem>
             </varlistentry>
 
