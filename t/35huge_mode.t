@@ -82,7 +82,7 @@ my $evil_xml = <<'EOF';
 <root>&ha48;</root>
 EOF
 
-my($parser, $doc);
+my ($parser, $doc, $err);
 
 $parser = XML::LibXML->new;
 #$parser->set_option(huge => 0);
@@ -91,18 +91,22 @@ ok(!$parser->get_option('huge'), "huge mode disabled by default");
 
 $doc = eval { $parser->parse_string($evil_xml); };
 
+$err = $@;
+
 # TEST
-isnt("$@", "", "exception thrown during parse");
+isnt("$err", "", "exception thrown during parse");
 # TEST
-like($@, qr/entity/si, "exception refers to entity maximum loop (libxml2 <= 2.10) or depth (>= 2.11)");
+like($err, qr/entity/si, "exception refers to entity maximum loop (libxml2 <= 2.10) or depth (>= 2.11)");
 
 
 $parser = XML::LibXML->new;
 
 $doc = eval { $parser->parse_string($benign_xml); };
 
+$err = $@;
+
 # TEST
-is("$@", "", "no exception thrown during parse");
+is("$err", "", "no exception thrown during parse");
 
 my $body = $doc->findvalue( '/lolz' );
 # TEST
