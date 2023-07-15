@@ -1,5 +1,13 @@
 Revision history for Perl extension XML::LibXML
 
+2.0209  2023-07-15
+    - t/35huge_mode.t: fix test with libxml2 2.11
+        - thanks to Dominique Martinet
+    - Add clearer reference to using cloneNode to extract node with namespaces
+        - thanks to Timothy Legge
+    - initialize xmlValidCtxt
+        - thanks to Alexander Bluhm
+
 2.0208  2022-09-30
     - Fix https://rt.cpan.org/Ticket/Display.html?id=144415
         - Bug #144415 for XML-LibXML: createElementNS & setNamespace get
