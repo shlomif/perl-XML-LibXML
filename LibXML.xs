@@ -25,6 +25,7 @@ extern "C" {
 #include "Av_CharPtrPtr.h"  /* XS_*_charPtrPtr() */
 
 #include <fcntl.h>
+#include <limits.h> /* INT_MAX */
 
 #ifndef WIN32
 #include <unistd.h>
@@ -869,11 +870,17 @@ LibXML_load_external_entity(
         results = POPs;
 
         results_pv = SvPV(results, results_len);
-        input_buf = xmlParserInputBufferCreateMem(
-                        results_pv,
-                        results_len,
-                        XML_CHAR_ENCODING_NONE
-                        );
+        if (results_len > INT_MAX) {
+            croak("a buffer would be too big\n");
+        }
+        input_buf = xmlAllocParserInputBuffer(XML_CHAR_ENCODING_NONE);
+        if (!input_buf) {
+            croak("cannot create a buffer!\n");
+        }
+        if (-1 == xmlParserInputBufferPush(input_buf, (int)results_len, results_pv)) {
+            xmlFreeParserInputBuffer(input_buf);
+            croak("cannot push an external entity into a buffer!\n");
+        }
 
         PUTBACK;
         FREETMPS;
