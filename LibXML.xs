@@ -812,6 +812,7 @@ LibXML_load_external_entity(
     int count;
     SV * results;
     STRLEN results_len;
+    int int_results_len;
     const char * results_pv;
     xmlParserInputBufferPtr input_buf;
 
@@ -870,14 +871,15 @@ LibXML_load_external_entity(
         results = POPs;
 
         results_pv = SvPV(results, results_len);
-        if (results_len > INT_MAX) {
+        int_results_len = results_len;
+        if ((results_len > INT_MAX) || (int_results_len != results_len)) {
             croak("a buffer would be too big\n");
         }
         input_buf = xmlAllocParserInputBuffer(XML_CHAR_ENCODING_NONE);
         if (!input_buf) {
             croak("cannot create a buffer!\n");
         }
-        if (-1 == xmlParserInputBufferPush(input_buf, (int)results_len, results_pv)) {
+        if (-1 == xmlParserInputBufferPush(input_buf, int_results_len, results_pv)) {
             xmlFreeParserInputBuffer(input_buf);
             croak("cannot push an external entity into a buffer!\n");
         }
