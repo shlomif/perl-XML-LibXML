@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::LibXML
 
+2.0210  2024-01-24
+    - Fix copying external entity from an ext_ent_handler handler
+        - https://github.com/shlomif/perl-XML-LibXML/issues/81
+        - thanks to Petr
+    - libxml-mm: Fix function prototypes in function pointers
+        - thanks to Khem Raj
+
 2.0209  2023-07-15
     - t/35huge_mode.t: fix test with libxml2 2.11
         - thanks to Dominique Martinet
