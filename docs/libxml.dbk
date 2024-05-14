@@ -3432,7 +3432,7 @@ my $dtd      = $document-&gt;createInternalSubset( "foo", "-//FOO//DTD FOO 0.1//
                         <funcsynopsisinfo>$nextnode = $node-&gt;nextSibling();</funcsynopsisinfo>
                     </funcsynopsis>
 
-                    <para>Returns the next sibling if any .</para>
+                    <para>Returns the next sibling, if any.</para>
                 </listitem>
             </varlistentry>
 
