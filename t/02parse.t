@@ -884,7 +884,12 @@ EOXML
         eval {
            $doc2    = $parser->parse_string( $xmldoc );
         };
-        isnt($@, '', "error parsing $xmldoc");
+        # https://gitlab.gnome.org/GNOME/libxml2/-/commit/b717abdd
+        if (XML::LibXML::LIBXML_RUNTIME_VERSION() < 21300) {
+            isnt($@, '', "error parsing $xmldoc");
+        } else {
+            is( $doc2->documentElement()->firstChild()->nodeName(), "foo" );
+        }
 
         $parser->validation(1);
 

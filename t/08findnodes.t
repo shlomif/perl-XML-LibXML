@@ -123,7 +123,13 @@ my $docstring = q{
 my @ns = $root->findnodes('namespace::*');
 # TEST
 
-is(scalar(@ns), 2, ' TODO : Add test name' );
+# https://gitlab.gnome.org/GNOME/libxml2/-/commit/aca16fb3
+# fixed xmlCopyNamespace with XML namespace.
+if (XML::LibXML::LIBXML_RUNTIME_VERSION() < 21300) {
+    is(scalar(@ns), 2, ' TODO : Add test name' );
+} else {
+    is(scalar(@ns), 3, ' TODO : Add test name' );
+}
 
 # bad xpaths
 # TEST:$badxpath=4;
