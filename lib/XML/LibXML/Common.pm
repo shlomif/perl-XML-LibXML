@@ -19,18 +19,17 @@ use strict;
 use warnings;
 
 require Exporter;
-use vars qw( @ISA $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use XML::LibXML qw(:libxml);
 
 #-------------------------------------------------------------------------#
 # export information                                                      #
 #-------------------------------------------------------------------------#
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
                 all => [qw(
                            ELEMENT_NODE
                            ATTRIBUTE_NODE
@@ -131,14 +130,14 @@ use XML::LibXML qw(:libxml);
                                )],
                );
 
-@EXPORT_OK = (
+our @EXPORT_OK = (
               @{$EXPORT_TAGS{encoding}},
               @{$EXPORT_TAGS{w3c}},
               @{$EXPORT_TAGS{libxml}},
               @{$EXPORT_TAGS{gdome}},
              );
 
-@EXPORT = (
+our @EXPORT = (
            @{$EXPORT_TAGS{encoding}},
            @{$EXPORT_TAGS{w3c}},
           );

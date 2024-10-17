@@ -11,17 +11,16 @@ package XML::LibXML::XPathContext;
 
 use strict;
 use warnings;
-use vars qw($VERSION @ISA $USE_LIBXML_DATA_TYPES);
 
 use Carp;
 use XML::LibXML;
 use XML::LibXML::NodeList;
 
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 # should LibXML XPath data types be used for simple objects
 # when passing parameters to extension functions (default: no)
-$USE_LIBXML_DATA_TYPES = 0;
+our $USE_LIBXML_DATA_TYPES = 0;
 
 sub CLONE_SKIP { 1 }
 

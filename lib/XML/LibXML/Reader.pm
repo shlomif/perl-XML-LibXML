@@ -13,8 +13,7 @@ use Carp;
 use strict;
 use warnings;
 
-use vars qw ($VERSION);
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use 5.008_000;
 
@@ -54,13 +53,12 @@ use constant {
     XML_READER_DONE      =>  5,
     XML_READER_ERROR     =>  6
 };
-use vars qw( @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
 sub CLONE_SKIP { 1 }
 
 BEGIN {
 
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
   types =>
   [qw(
     XML_READER_TYPE_NONE
@@ -94,8 +92,8 @@ BEGIN {
     XML_READER_ERROR
    )]
 );
-@EXPORT    = (@{$EXPORT_TAGS{types}},@{$EXPORT_TAGS{states}});
-@EXPORT_OK = @EXPORT;
+our @EXPORT    = (@{$EXPORT_TAGS{types}},@{$EXPORT_TAGS{states}});
+our @EXPORT_OK = @EXPORT;
 $EXPORT_TAGS{all}=\@EXPORT_OK;
 }
 

@@ -15,8 +15,7 @@ use XML::LibXML::Number;
 use strict;
 use warnings;
 
-use vars qw ($VERSION);
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use overload
 		'""' => \&value,

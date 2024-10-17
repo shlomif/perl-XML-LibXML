@@ -30,9 +30,7 @@ use Test::More;
 
 use parent 'Exporter';
 
-use vars '@EXPORT_OK';
-
-@EXPORT_OK = (qw(is_xml_ordered));
+our @EXPORT_OK = (qw(is_xml_ordered));
 
 sub new
 {

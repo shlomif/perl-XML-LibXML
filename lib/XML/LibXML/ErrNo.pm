@@ -12,9 +12,8 @@ package XML::LibXML::ErrNo;
 
 use strict;
 use warnings;
-use vars qw($VERSION);
 
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant ERR_OK                               => 0;
 use constant ERR_INTERNAL_ERROR                   => 1;

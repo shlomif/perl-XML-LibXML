@@ -16,7 +16,6 @@ no warnings 'recursion';
 
 use Encode ();
 
-use vars qw(@error_domains $VERSION $WARNINGS);
 use overload
   '""' => \&as_string,
   'eq' => sub {
@@ -27,8 +26,8 @@ use overload
   },
   fallback => 1;
 
-$WARNINGS = 0; # 0: suppress, 1: report via warn, 2: report via die
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $WARNINGS = 0; # 0: suppress, 1: report via warn, 2: report via die
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use constant XML_ERR_NONE            => 0;
 use constant XML_ERR_WARNING         => 1; # A simple warning
@@ -65,7 +64,7 @@ use constant XML_ERR_FROM_MODULE     => 26; # The dynamically-loaded module modu
 use constant XML_ERR_FROM_I18N       => 27; # The module handling character conversion
 use constant XML_ERR_FROM_SCHEMATRONV=> 28; # The Schematron validator module
 
-@error_domains = ("", "parser", "tree", "namespace", "validity",
+our @error_domains = ("", "parser", "tree", "namespace", "validity",
                   "HTML parser", "memory", "output", "I/O", "ftp",
                   "http", "XInclude", "XPath", "xpointer", "regexp",
                   "Schemas datatype", "Schemas parser", "Schemas validity",

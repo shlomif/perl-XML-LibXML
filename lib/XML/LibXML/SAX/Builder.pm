@@ -15,13 +15,11 @@ use warnings;
 use XML::LibXML;
 use XML::NamespaceSupport;
 
-use vars qw ($VERSION);
-
 sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;
 }
 
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 sub new {
     my $class = shift;

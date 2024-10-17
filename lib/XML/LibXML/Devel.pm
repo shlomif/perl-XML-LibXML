@@ -11,14 +11,11 @@ use warnings;
 
 use XML::LibXML;
 
-use vars qw ($VERSION);
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 use 5.008_000;
 
 use parent qw(Exporter);
-
-use vars qw( @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
 # This allows declaration	use XML::LibXML::Devel ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK

@@ -11,15 +11,14 @@ package XML::LibXML::SAX::Parser;
 
 use strict;
 use warnings;
-use vars qw($VERSION @ISA);
 
 use XML::LibXML;
 use XML::LibXML::Common qw(:libxml);
 use XML::SAX::Base;
 use XML::SAX::DocumentLocator;
 
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
-@ISA = ('XML::SAX::Base');
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our @ISA = ('XML::SAX::Base');
 
 sub CLONE_SKIP {
   return $XML::LibXML::__threads_shared ? 0 : 1;

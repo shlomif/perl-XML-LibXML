@@ -6,8 +6,7 @@ use Scalar::Util qw//;
 use Tie::Hash;
 our @ISA = qw/Tie::Hash/;
 
-use vars qw($VERSION);
-$VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
+our $VERSION = "2.0210"; # VERSION TEMPLATE: DO NOT CHANGE
 
 BEGIN
 {
