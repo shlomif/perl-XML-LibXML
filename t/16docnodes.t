@@ -60,7 +60,12 @@ for my $time (0 .. 2) {
     $doc->setDocumentElement($node);
 
     # TEST
-    is( $node->serialize(), '<test contents="&#xE4;"/>', 'Node serialise works.' );
+    # libxml2 2.14 avoids unnecessary escaping of attribute values.
+    if (XML::LibXML::LIBXML_VERSION() >= 21400) {
+        is( $node->serialize(), "<test contents=\"\xE4\"/>", 'Node serialise works.' );
+    } else {
+        is( $node->serialize(), '<test contents="&#xE4;"/>', 'Node serialise works.' );
+    }
 
     $doc->setEncoding('utf-8');
     # Second output

@@ -52,7 +52,13 @@ use XML::LibXML;
 </div>
 EOS
 
-    {
+    SKIP: {
+        # libxml2 2.14 tokenizes HTML according to HTML5 where
+        # this isn't an error, see "13.2.5.73 Named character
+        # reference state".
+        skip("libxml2 version >= 21400", 1)
+            if XML::LibXML::LIBXML_VERSION >= 21400;
+
         my $buf = '';
         open my $fh, '>', \$buf;
         # redirect STDERR there
