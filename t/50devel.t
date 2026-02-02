@@ -11,7 +11,9 @@ use XML::LibXML::Devel qw(:all);
 $|=1;
 
 # Base line
-{
+SKIP: {
+  skip("memory debugging was removed in 2.16.0", 18)
+    if XML::LibXML::LIBXML_VERSION >= 21600;
   my $doc = XML::LibXML::Document->new();
 
   my $raw;
