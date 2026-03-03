@@ -2076,6 +2076,16 @@ _parse_file(self, filename_sv)
         }
 
         if ( real_doc != NULL ) {
+            /* Work around libxml2 bug: filenames starting with a digit
+             * get percent-encoded in xmlDoc.URL (e.g. "1:b.xml" becomes
+             * "1%3Ab.xml"). Restore the original filename.
+             * See https://github.com/shlomif/perl-XML-LibXML/issues/44
+             * and https://gitlab.gnome.org/GNOME/libxml2/issues/141 */
+            if (real_doc->URL != NULL) {
+                xmlFree((xmlChar *)real_doc->URL);
+            }
+            real_doc->URL = xmlStrdup((const xmlChar *)filename);
+
             if ( ! LibXML_will_die_ctx(saved_error, recover) &&
 		 (recover || ( well_formed &&
                               ( !validate
@@ -2259,6 +2269,10 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
 	    if (URL) {
                 if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
+	    } else {
+                /* Work around libxml2 percent-encoding bug (issue #44) */
+                if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
+                real_doc->URL = xmlStrdup((const xmlChar*) filename);
 	    }
             RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
 
