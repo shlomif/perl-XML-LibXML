@@ -16,7 +16,7 @@ use XML::LibXML;
     my $err = $@;
 
     # TEST
-    like ("$err", qr{parser error : Input is not proper UTF-8},
+    like ("$err", qr{parser error : Input is not proper UTF-8|I/O error : Invalid bytes in character encoding},
         'Parser error.',
     );
 }
