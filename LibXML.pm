@@ -367,6 +367,9 @@ sub new {
       # parser flags
       $opts{no_blanks} = !$opts{keep_blanks} if exists($opts{keep_blanks}) and !exists($opts{no_blanks});
       $opts{load_ext_dtd} = $opts{expand_entities} if exists($opts{expand_entities}) and !exists($opts{load_ext_dtd});
+      $opts{load_ext_dtd} = 1 if !exists($opts{load_ext_dtd}) and
+        (exists($opts{validation}) && $opts{validation} or
+         exists($opts{complete_attributes}) && $opts{complete_attributes});
 
       for (keys %OUR_FLAGS) {
 	$self->{$OUR_FLAGS{$_}} = delete $opts{$_};
@@ -604,6 +607,9 @@ sub set_options {
 
 sub validation {
     my $self = shift;
+    if (scalar(@_) and $_[0]) {
+      return $self->__parser_option(XML_PARSE_DTDVALID | XML_PARSE_DTDLOAD,1);
+    }
     return $self->__parser_option(XML_PARSE_DTDVALID,@_);
 }
 
@@ -667,6 +673,9 @@ sub load_ext_dtd {
 
 sub complete_attributes {
     my $self = shift;
+    if (scalar(@_) and $_[0]) {
+      return $self->__parser_option(XML_PARSE_DTDATTR | XML_PARSE_DTDLOAD,1);
+    }
     return $self->__parser_option(XML_PARSE_DTDATTR,@_);
 }
 
