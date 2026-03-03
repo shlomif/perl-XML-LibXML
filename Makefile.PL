@@ -71,7 +71,45 @@ my %xsbuild_concat = (
   DEFINE  => '-DHAVE_UTF8',
   OBJECT  => '$(O_FILES)',
 );
-my %xsbuild = Alien::Base::Wrapper->mm_args;  # Might contain a definition of DEFINE, must thus concatenate.
+my %xsbuild = Alien::Base::Wrapper->mm_args;
+
+# Validate that the include paths from Alien::Libxml2 actually contain
+# the libxml2 headers. On some macOS configurations, xml2-config --cflags
+# returns a path like -I.../usr/include but the headers live under
+# .../usr/include/libxml2/libxml/ instead of .../usr/include/libxml/.
+# See https://github.com/shlomif/perl-XML-LibXML/issues/61
+{
+  my $inc = $xsbuild{INC} || '';
+  my @inc_dirs;
+  while ($inc =~ /-I(\S+)/g) {
+    push @inc_dirs, $1;
+  }
+  if (@inc_dirs) {
+    my $found = grep { -f "$_/libxml/parser.h" } @inc_dirs;
+    if (!$found) {
+      my @extra;
+      for my $dir (@inc_dirs) {
+        if (-f "$dir/libxml2/libxml/parser.h") {
+          push @extra, "-I$dir/libxml2";
+        }
+      }
+      if (@extra) {
+        $xsbuild{INC} = join(' ', $inc, @extra);
+        warn "Note: appending @extra to INC to find libxml2 headers\n";
+      }
+      else {
+        warn <<"MSG";
+WARNING: Cannot find libxml2 headers (libxml/parser.h) in: $inc
+  The build will likely fail. Try one of:
+    1. env ALIEN_INSTALL_TYPE=share cpanm Alien::Libxml2
+    2. Check that 'xml2-config --cflags' returns the correct path
+MSG
+      }
+    }
+  }
+}
+
+# Might contain a definition of DEFINE, must thus concatenate.
 while (my ($k, $v) = each %xsbuild_concat) {
   my $base_val = $xsbuild{$k};
   $xsbuild{$k} = (defined($base_val) ? ($base_val . ' ' . $v) : $v);
