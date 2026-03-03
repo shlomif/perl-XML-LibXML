@@ -33,7 +33,7 @@ use XML::LibXML;
     }
     plan tests => 1;
 
-    while (defined($err) && $count < 200)
+    while (defined($err) && ref($err) && $count < 200)
     {
         $err = $err->_prev();
     }

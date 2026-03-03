@@ -123,7 +123,7 @@ my $docstring = q{
 my @ns = $root->findnodes('namespace::*');
 # TEST
 
-is(scalar(@ns), 2, ' TODO : Add test name' );
+ok(scalar(@ns) == 2 || scalar(@ns) == 3, 'namespace count is 2 or 3 (newer libxml2 includes implicit xml namespace)' );
 
 # bad xpaths
 # TEST:$badxpath=4;
