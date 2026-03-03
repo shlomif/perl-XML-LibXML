@@ -99,11 +99,20 @@ ok($dtdstr, "DTD String read");
 
 ##
 # Tests for ticket 2021
-{
+eval {
     my $dtd = XML::LibXML::Dtd->new("","");
     # TEST
     ok (!defined($dtd), "XML::LibXML::Dtd not defined." );
-}
+    1;
+} or do {
+    # Apple has patched their libxml2 v2.9.13 so that xmlSAX2ResolveEntity
+    # throws an exception using xmlSAX2ErrMemory for the code path followed for
+    # a NULL URI. Since v2.9.yy upstream libxml2 has reworked the same code to
+    # better handle these problem cases, but it still returns NULL, not an
+    # exception. So this block really only applies on macOS with the system libs
+    is($@, "parser error : xmlSAX2ResolveEntity\n",
+       "XML::LibXML::Dtd throws an exception for a null URL");
+};
 
 {
     my $dtd = XML::LibXML::Dtd->new('', 'example/test.dtd');
