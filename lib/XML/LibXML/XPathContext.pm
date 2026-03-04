@@ -27,6 +27,11 @@ sub CLONE_SKIP { 1 }
 sub findnodes {
     my ($self, $xpath, $node) = @_;
 
+    if (defined $xpath and $xpath =~ /\A\s*\/\/\.\s*\z/) {
+        carp('XPath "//." selects all nodes including the document node.'
+             . ' Did you mean "//*" to select only element nodes?');
+    }
+
     my @nodes = $self->_guarded_find_call('_findnodes', $node, $xpath);
 
     if (wantarray) {

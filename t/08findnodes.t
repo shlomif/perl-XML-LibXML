@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 
-# Should be 45.
-use Test::More tests => 45;
+# Should be 51.
+use Test::More tests => 51;
 
 use XML::LibXML;
 
@@ -244,6 +244,42 @@ foreach my $xp ( @badxpath ) {
     $root->removeChild( $lastc );
     # TEST
     is( $root->toString(), $xmlstr, ' TODO : Add test name' );
+}
+
+# --------------------------------------------------------------------------- #
+# Issue #92: XPath "//." should warn that it matches the document node
+{
+    my $doc = XML::LibXML->new->parse_string('<a><b/></a>');
+    my $root = $doc->documentElement;
+
+    # "//." on document should warn
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, $_[0] };
+    my @nodes = $doc->findnodes('//.');
+    # TEST
+    ok( scalar @warnings, '//. on document triggers a warning' );
+    # TEST
+    like( $warnings[0], qr/\/\/\*/, 'warning suggests //*' );
+    # TEST
+    ok( scalar @nodes, '//. still returns nodes despite warning' );
+
+    # "//." on element node should also warn
+    @warnings = ();
+    @nodes = $root->findnodes('//.');
+    # TEST
+    ok( scalar @warnings, '//. on element node triggers a warning' );
+
+    # "//*" should NOT warn
+    @warnings = ();
+    @nodes = $doc->findnodes('//*');
+    # TEST
+    is( scalar @warnings, 0, '//* does not trigger a warning' );
+
+    # "//." as part of a larger expression should NOT warn
+    @warnings = ();
+    @nodes = $doc->findnodes('(//. | //@*)');
+    # TEST
+    is( scalar @warnings, 0, '//. inside larger expression does not warn' );
 }
 
 # --------------------------------------------------------------------------- #

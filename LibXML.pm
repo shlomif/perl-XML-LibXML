@@ -1269,7 +1269,7 @@ sub finish_push {
 #-------------------------------------------------------------------------#
 package XML::LibXML::Node;
 
-use Carp qw(croak);
+use Carp qw(carp croak);
 
 use overload
     '""'   => sub { $_[0]->toString() },
@@ -1312,6 +1312,10 @@ sub attributes {
 
 sub findnodes {
     my ($node, $xpath) = @_;
+    if (defined $xpath and $xpath =~ /\A\s*\/\/\.\s*\z/) {
+        carp('XPath "//." selects all nodes including the document node.'
+             . ' Did you mean "//*" to select only element nodes?');
+    }
     my @nodes = $node->_findnodes($xpath);
     if (wantarray) {
         return @nodes;
