@@ -53,6 +53,7 @@ extern "C" {
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
 #include <libxml/valid.h>
+#include <libxml/SAX2.h>
 
 #ifdef LIBXML_PATTERN_ENABLED
 #include <libxml/pattern.h>
@@ -945,13 +946,28 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
          * For more information, see:
          *
          * https://rt.cpan.org/Ticket/Display.html?id=76696
+         * https://github.com/shlomif/perl-XML-LibXML/issues/88
+         *
+         * xmlKeepBlanksDefault sets a global default for future contexts.
+         * xmlCtxtUseOptions only sets keepBlanks=0 when NOBLANKS is present,
+         * but never resets it to 1 when NOBLANKS is absent. Since the context
+         * is already created before we get here, we must also explicitly set
+         * ctxt->keepBlanks so the current parse uses the correct value.
          *
          * */
         if (parserOptions & XML_PARSE_NOBLANKS) {
             xmlKeepBlanksDefault(0);
+            if (ctxt) {
+                ctxt->keepBlanks = 0;
+                ctxt->sax->ignorableWhitespace = xmlSAX2IgnorableWhitespace;
+            }
         }
         else {
             xmlKeepBlanksDefault(1);
+            if (ctxt) {
+                ctxt->keepBlanks = 1;
+                ctxt->sax->ignorableWhitespace = xmlSAX2Characters;
+            }
         }
 
         item =  hv_fetch( real_obj, "XML_LIBXML_LINENUMBERS", 22, 0 );
