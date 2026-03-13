@@ -144,13 +144,13 @@ _domReconcileNsAttr(xmlAttrPtr attr, xmlNsPtr * unused)
                 if( ns != NULL && ns->href != NULL && attr->ns->href != NULL &&
                     xmlStrcmp(ns->href,attr->ns->href) == 0 )
                 {
-                        /* Remove the declaration from the element */
+                        /* Matching ns found in ancestor — keep local declaration
+                         * to preserve explicit xmlns on the node (issue #78).
+                         * If no local declaration exists, use ancestor's. */
                         if( domRemoveNsDef(tree, attr->ns) )
-                                /* Queue up this namespace for freeing */
-                                *unused = _domAddNsChain(*unused, attr->ns);
-
-                        /* Replace the namespace with the one found */
-                        attr->ns = ns;
+                                domAddNsDef(tree, attr->ns);
+                        else
+                                attr->ns = ns;
                 }
                 else
                 {
@@ -180,13 +180,13 @@ _domReconcileNs(xmlNodePtr tree, xmlNsPtr * unused)
                 if( ns != NULL && ns->href != NULL && tree->ns->href != NULL &&
                     xmlStrcmp(ns->href,tree->ns->href) == 0 )
                 {
-                        /* Remove the declaration (if present) */
+                        /* Matching ns found in ancestor — keep local declaration
+                         * to preserve explicit xmlns on the node (issue #78).
+                         * If no local declaration exists, use ancestor's. */
                         if( domRemoveNsDef(tree, tree->ns) )
-                                /* Queue the namespace for freeing */
-                                *unused = _domAddNsChain(*unused, tree->ns);
-
-                        /* Replace the namespace with the one found */
-                        tree->ns = ns;
+                                domAddNsDef(tree, tree->ns);
+                        else
+                                tree->ns = ns;
                 }
                 else
                 {

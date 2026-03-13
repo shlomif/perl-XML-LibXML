@@ -422,18 +422,18 @@ print "# 9. namespace reconciliation\n";
     $root->setNamespace( 'http://children', 'child', 0 );
 
     $root->appendChild( my $n = $doc->createElementNS( 'http://default', 'branch' ));
-    # appending an element in the same namespace will
-    # strip its declaration
+    # appending an element in the same namespace preserves
+    # its local declaration (issue #78)
     # TEST
-    ok( !defined($n->getAttribute( 'xmlns' )), ' TODO : Add test name' );
+    is( $n->getAttribute( 'xmlns' ), 'http://default', ' TODO : Add test name' );
 
     $n->appendChild( my $a = $doc->createElementNS( 'http://children', 'child:a' ));
     $n->appendChild( my $b = $doc->createElementNS( 'http://children', 'child:b' ));
 
     $n->appendChild( my $c = $doc->createElementNS( 'http://children', 'child:c' ));
-    # appending $c strips the declaration
+    # appending $c preserves its local declaration (issue #78)
     # TEST
-    ok( !defined($c->getAttribute('xmlns:child')), ' TODO : Add test name' );
+    is( $c->getAttribute('xmlns:child'), 'http://children', ' TODO : Add test name' );
 
     # add another prefix for children
     $c->setAttribute( 'xmlns:foo', 'http://children' );
@@ -463,23 +463,23 @@ print "# 9. namespace reconciliation\n";
     $doca->adoptNode( $a );
     $doca->documentElement->appendChild( $a );
 
-    # $doca declares the child namespace, so the declaration
-    # should now get stripped from $a
+    # $doca declares the child namespace; local declaration
+    # on $a is preserved (issue #78)
     # TEST
-    ok( !defined($a->getAttribute( 'xmlns:child' )), ' TODO : Add test name' );
+    is( $a->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
 
     $doca->documentElement->removeChild( $a );
 
-    # $a should now have its namespace re-declared
+    # $a still has its namespace declared
     # TEST
     is( $a->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
 
     $doca->documentElement->appendChild( $a );
 
-    # $doca declares the child namespace, so the declaration
-    # should now get stripped from $a
+    # $doca declares the child namespace; local declaration
+    # on $a is preserved (issue #78)
     # TEST
-    ok( !defined($a->getAttribute( 'xmlns:child' )), ' TODO : Add test name' );
+    is( $a->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
 
 
     $doc = XML::LibXML::Document->new;
@@ -493,9 +493,9 @@ print "# 9. namespace reconciliation\n";
 
     $n->appendChild( $a );
 
-    # the declaration for xsi should be stripped
+    # the local xsi declaration is preserved (issue #78)
     # TEST
-    ok( !defined($a->getAttribute( 'xmlns:xsi' )), ' TODO : Add test name' );
+    is( $a->getAttribute( 'xmlns:xsi' ), 'http://www.w3.org/2001/XMLSchema-instance', ' TODO : Add test name' );
 
     $n->removeChild( $a );
 
@@ -523,8 +523,8 @@ print "# 9. namespace reconciliation\n";
     # TEST
     ok($child, ' TODO : Add test name');
     $child->setAttributeNodeNS($attr);
-    # TEST
-    ok ( !defined($child->getAttribute( 'xmlns:child' )), ' TODO : Add test name' );
+    # TEST - local ns declaration preserved (issue #78)
+    is( $child->getAttribute( 'xmlns:child' ), 'http://children', ' TODO : Add test name' );
 
     # due to libxml2 limitation, XML::LibXML declares the namespace
     # on the root element
