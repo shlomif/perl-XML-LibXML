@@ -4875,12 +4875,10 @@ replaceNode( self,nNode )
         xmlNodePtr nNode
     PREINIT:
         xmlNodePtr ret = NULL;
-        ProxyNodePtr owner = NULL;
     CODE:
         if ( domIsParent( self, nNode ) == 1 ) {
             XSRETURN_UNDEF;
         }
-        owner = PmmOWNERPO(PmmPROXYNODE(self));
 
         if ( self->type != XML_ATTRIBUTE_NODE ) {
               ret = domReplaceChild( self->parent, nNode, self);
@@ -4895,7 +4893,13 @@ replaceNode( self,nNode )
                 LibXML_set_int_subset(nNode->doc, nNode);
             }
             if ( nNode->_private != NULL ) {
-                PmmFixOwner(PmmPROXYNODE(nNode), owner);
+                /* Compute owner from nNode's document after the
+                 * replacement. We cannot cache the owner before
+                 * LibXML_reparent_removed_node() because that call
+                 * may free the old owner proxy (the replaced node's
+                 * parent proxy) when its refcount drops to zero. */
+                PmmFixOwner(PmmPROXYNODE(nNode),
+                            PmmPROXYNODE((xmlNodePtr)nNode->doc));
             }
         }
         else {
