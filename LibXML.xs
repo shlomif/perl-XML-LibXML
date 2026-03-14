@@ -151,6 +151,7 @@ typedef enum {
 
 /* this should keep the default */
 static xmlExternalEntityLoader LibXML_old_ext_ent_loader = NULL;
+static xmlExternalEntityLoader LibXML_old_ext_ent_loader_global = NULL;
 
 /* global external entity loader */
 SV *EXTERNAL_ENTITY_LOADER_FUNC = (SV *)NULL;
@@ -2813,16 +2814,17 @@ _externalEntityLoader( loader )
         SV* loader
     CODE:
         {
-            RETVAL = EXTERNAL_ENTITY_LOADER_FUNC;
-            if(EXTERNAL_ENTITY_LOADER_FUNC == NULL)
-            {
+            RETVAL = EXTERNAL_ENTITY_LOADER_FUNC == NULL ? &PL_sv_undef : EXTERNAL_ENTITY_LOADER_FUNC;
+            if (SvOK(loader)) {
                 EXTERNAL_ENTITY_LOADER_FUNC = newSVsv(loader);
-            }
-
-            if (LibXML_old_ext_ent_loader == NULL )
-            {
-                LibXML_old_ext_ent_loader = xmlGetExternalEntityLoader();
-                xmlSetExternalEntityLoader((xmlExternalEntityLoader)LibXML_load_external_entity);
+                if (LibXML_old_ext_ent_loader_global == NULL) {
+                    LibXML_old_ext_ent_loader_global = xmlGetExternalEntityLoader();
+                    xmlSetExternalEntityLoader((xmlExternalEntityLoader)LibXML_load_external_entity);
+                }
+            } else {
+                EXTERNAL_ENTITY_LOADER_FUNC = NULL;
+                xmlSetExternalEntityLoader((xmlExternalEntityLoader)LibXML_old_ext_ent_loader_global);
+                LibXML_old_ext_ent_loader_global = NULL;
             }
         }
     OUTPUT:
