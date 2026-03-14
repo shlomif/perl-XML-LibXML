@@ -8806,6 +8806,7 @@ nextPatternMatch(reader, compiled)
     CODE:
         if ( compiled == NULL )
 	   croak("Usage: $reader->nextPatternMatch( a-XML::LibXML::Pattern-object )");
+	INIT_ERROR_HANDLER;
 	do {
 	  RETVAL = xmlTextReaderRead(reader);
           node = xmlTextReaderCurrentNode(reader);
