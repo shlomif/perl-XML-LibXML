@@ -397,6 +397,39 @@ LibXML_report_error_ctx(SV * saved_error, int recover)
 #endif
 }
 
+/* Sanitize encoding extracted from HTML meta tags.
+ * HTML documents may contain meta tags like:
+ *   <meta content="text/html; charset=UTF-8; X-Content-Type-Options=nosniff" ...>
+ * libxml2's HTML parser extracts "UTF-8; X-Content-Type-Options=nosniff"
+ * as the encoding, which is invalid and causes serialization failures.
+ * This function truncates the encoding at the first semicolon or whitespace
+ * after the encoding name, keeping only the valid encoding identifier. */
+static void
+LibXML_sanitize_html_encoding(htmlDocPtr doc) {
+    const xmlChar *enc;
+    xmlChar *semicolon;
+
+    if (doc == NULL || doc->encoding == NULL) return;
+
+    enc = doc->encoding;
+    semicolon = (xmlChar *)xmlStrchr(enc, ';');
+    if (semicolon != NULL) {
+        /* Truncate at semicolon: extract just the encoding name */
+        int len = semicolon - enc;
+        xmlChar *clean;
+
+        /* Trim trailing whitespace before semicolon */
+        while (len > 0 && (enc[len-1] == ' ' || enc[len-1] == '\t'))
+            len--;
+
+        if (len > 0) {
+            clean = xmlStrndup(enc, len);
+            xmlFree((xmlChar *)doc->encoding);
+            doc->encoding = clean;
+        }
+    }
+}
+
 #ifdef HAVE_READER_SUPPORT
 
 #ifndef WITH_SERRORS
@@ -2200,6 +2233,7 @@ _parse_html_string(self, string, svURL, svEncoding, options = 0)
              SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
              real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
            }
+           LibXML_sanitize_html_encoding(real_doc);
             /* This HTML memory parser doesn't use a ctxt; there is no "well-formed"
              * distinction, and if it manages to parse the HTML, it returns non-null. */
            RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
@@ -2260,6 +2294,7 @@ _parse_html_file(self, filename_sv, svURL, svEncoding, options = 0)
                 if (real_doc->URL) xmlFree((xmlChar*) real_doc->URL);
                 real_doc->URL = xmlStrdup((const xmlChar*) URL);
 	    }
+            LibXML_sanitize_html_encoding(real_doc);
             RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
 
         }
@@ -2356,6 +2391,7 @@ _parse_html_fh(self, fh, svURL, svEncoding, options = 0)
                 SV * newURI = sv_2mortal(newSVpvf("unknown-%p", (void*)real_doc));
                 real_doc->URL = xmlStrdup((const xmlChar*)SvPV_nolen(newURI));
             }
+            LibXML_sanitize_html_encoding(real_doc);
 
 	    RETVAL = LibXML_NodeToSv( real_obj, INT2PTR(xmlNodePtr,real_doc) );
         }
