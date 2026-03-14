@@ -13,7 +13,7 @@ BEGIN{
      plan skip_all => "Reader not supported in this libxml2 build";
      exit;
   } else {
-     plan tests => 100;
+     plan tests => 102;
   }
 
   use_ok('XML::LibXML::Reader');
@@ -315,5 +315,26 @@ EOF
     }
     ok($matches,'/root/AA/inner,/root/BB/CC,/root/*,');
   }
+}
+
+# nextPatternMatch error handling (GH#46)
+{
+  my $bad_xml = <<'EOF';
+<root>
+  <x>foo</u>
+  <x>bar</x>
+</root>
+EOF
+  my $pattern = XML::LibXML::Pattern->new('/root/x');
+  ok($pattern, "pattern for error handling test");
+  my $reader = XML::LibXML::Reader->new(string => $bad_xml);
+  my $ok = eval {
+    while ($reader->nextPatternMatch($pattern) == 1) {
+      # just iterate
+    }
+    $reader->finish;
+    1;
+  };
+  ok($@, "nextPatternMatch dies on parse error (GH#46)");
 }
 
