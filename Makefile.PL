@@ -17,18 +17,143 @@ use warnings;
 
 require 5.008001;
 
-use Alien::Base::Wrapper qw( Alien::Libxml2 );
 use ExtUtils::MakeMaker;
-use Config;
 
 my $SKIP_SAX_INSTALL = $ENV{SKIP_SAX_INSTALL};
 
+# -------------------------------------------------------------------------- #
+# Detect libxml2 compiler/linker flags.
+#
+# Detection chain (first match wins):
+#   1. User-provided INC/LIBS on the command line
+#   2. pkg-config libxml-2.0
+#   3. xml2-config
+#   4. Alien::Libxml2 (if installed)
+#
+# This allows systems with libxml2-dev installed to skip the Alien dependency
+# entirely (see GH#109).
+# -------------------------------------------------------------------------- #
+
+my %xsbuild;
+my $libxml2_source;
+
+# Check for user-provided INC/LIBS on the command line
+my ($user_INC, $user_LIBS);
+@ARGV = grep {
+  if (/^INC=(.*)/) { $user_INC = $1; 0 }
+  elsif (/^LIBS=(.*)/) { $user_LIBS = $1; 0 }
+  else { 1 }
+} @ARGV;
+
+if (defined $user_INC || defined $user_LIBS) {
+    # User explicitly provided flags — use them as-is
+    %xsbuild = (
+        INC  => $user_INC  || '',
+        LIBS => [ $user_LIBS || '-lxml2' ],
+    );
+    $libxml2_source = "command line";
+    print "Using user-provided INC/LIBS\n";
+}
+
+if (!$libxml2_source) {
+    # Try pkg-config
+    my $pkg_cflags = `pkg-config --cflags libxml-2.0 2>/dev/null`;
+    my $pkg_libs   = `pkg-config --libs libxml-2.0 2>/dev/null`;
+    if ($? == 0 && $pkg_libs =~ /\S/) {
+        chomp $pkg_cflags;
+        chomp $pkg_libs;
+        %xsbuild = (
+            INC  => $pkg_cflags,
+            LIBS => [ $pkg_libs ],
+        );
+        $libxml2_source = "pkg-config";
+        my $pkg_version = `pkg-config --modversion libxml-2.0 2>/dev/null`;
+        chomp $pkg_version;
+        print "Found libxml2 $pkg_version via pkg-config\n";
+    }
+}
+
+if (!$libxml2_source) {
+    # Try xml2-config
+    my $xml2_prefix = $ENV{XMLPREFIX};
+    my $xml2cfg = defined $xml2_prefix ? "$xml2_prefix/bin/xml2-config" : "xml2-config";
+    my $xml2_cflags = `$xml2cfg --cflags 2>/dev/null`;
+    my $xml2_libs   = `$xml2cfg --libs 2>/dev/null`;
+    if ($? == 0 && $xml2_libs =~ /\S/) {
+        chomp $xml2_cflags;
+        chomp $xml2_libs;
+        %xsbuild = (
+            INC  => $xml2_cflags,
+            LIBS => [ $xml2_libs ],
+        );
+        $libxml2_source = "xml2-config";
+        my $xml2_version = `$xml2cfg --version 2>/dev/null`;
+        chomp $xml2_version;
+        print "Found libxml2 $xml2_version via xml2-config\n";
+    }
+}
+
+if (!$libxml2_source) {
+    # Fall back to Alien::Libxml2
+    eval {
+        require Alien::Base::Wrapper;
+        Alien::Base::Wrapper->import('Alien::Libxml2');
+        %xsbuild = Alien::Base::Wrapper->mm_args;
+        $libxml2_source = "Alien::Libxml2";
+        print "Found libxml2 via Alien::Libxml2\n";
+    };
+    if ($@) {
+        die <<"DEATH";
+
+ERROR: Could not find libxml2.
+
+XML::LibXML requires libxml2 development files to be installed.
+Please install them using one of:
+
+  # Debian/Ubuntu
+  sudo apt-get install libxml2-dev
+
+  # Fedora/RHEL
+  sudo dnf install libxml2-devel
+
+  # macOS (Homebrew)
+  brew install libxml2
+
+  # macOS (Xcode Command Line Tools — usually pre-installed)
+  xcode-select --install
+
+Or specify the location manually:
+  perl Makefile.PL INC="-I/path/to/include/libxml2" LIBS="-L/path/to/lib -lxml2"
+
+Or install the Alien::Libxml2 Perl module as a last resort:
+  cpanm Alien::Libxml2
+
+DEATH
+    }
+}
+
+# Build the xsbuild flags — always add -DHAVE_UTF8 and $(O_FILES)
+my %xsbuild_final = %xsbuild;
+{
+    my $define = $xsbuild_final{DEFINE} || '';
+    $define .= ' -DHAVE_UTF8' unless $define =~ /-DHAVE_UTF8/;
+    $xsbuild_final{DEFINE} = $define;
+    $xsbuild_final{OBJECT} = '$(O_FILES)';
+
+}
+
+# -------------------------------------------------------------------------- #
+# Configure requirements depend on which detection method was used
+# -------------------------------------------------------------------------- #
 my %ConfigReqs = (
-  "Alien::Libxml2" => '0.14',
-  "Alien::Base::Wrapper" => 0,
   "Config" => 0,
   "ExtUtils::MakeMaker" => 0,
 );
+if ($libxml2_source eq 'Alien::Libxml2') {
+    $ConfigReqs{"Alien::Libxml2"} = '0.14';
+    $ConfigReqs{"Alien::Base::Wrapper"} = 0;
+}
+
 my %DevReqs = (
   'Test::CPAN::Changes' => 0,
   'Test::Kwalitee' => 0,
@@ -67,16 +192,6 @@ my %prereqs = (
   "warnings" => 0,
 );
 
-my %xsbuild_concat = (
-  DEFINE  => '-DHAVE_UTF8',
-  OBJECT  => '$(O_FILES)',
-);
-my %xsbuild = Alien::Base::Wrapper->mm_args;  # Might contain a definition of DEFINE, must thus concatenate.
-while (my ($k, $v) = each %xsbuild_concat) {
-  my $base_val = $xsbuild{$k};
-  $xsbuild{$k} = (defined($base_val) ? ($base_val . ' ' . $v) : $v);
-}
-
 my %WriteMakefileArgs = (
   "NAME" => "XML::LibXML",
   "DISTNAME" => "XML-LibXML",
@@ -86,7 +201,7 @@ my %WriteMakefileArgs = (
   "MIN_PERL_VERSION" => '5.008001',
   "VERSION_FROM" => "LibXML.pm",
   'META_MERGE' => {
-    'dynamic_config' => 0,
+    'dynamic_config' => 1,
     'meta-spec' => {version => 2},
     'no_index' => {directory => ['xt']},
     'resources' => {
@@ -124,7 +239,7 @@ my %WriteMakefileArgs = (
 
 %WriteMakefileArgs = (
     %WriteMakefileArgs,
-    %xsbuild,
+    %xsbuild_final,
 );
 unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
     my %fallback = (%prereqs, %TestReqs);
