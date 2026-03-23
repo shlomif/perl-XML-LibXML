@@ -201,6 +201,13 @@ my %WriteMakefileArgs = (
     'dynamic_config' => 1,
     'meta-spec' => {version => 2},
     'no_index' => {directory => ['xt']},
+    'prereqs' => {
+      'configure' => {
+        'suggests' => {
+          'Alien::Libxml2' => '0.14',
+        },
+      },
+    },
     'resources' => {
       repository => {
         type => 'git',
