@@ -143,16 +143,13 @@ my %xsbuild_final = %xsbuild;
 }
 
 # -------------------------------------------------------------------------- #
-# Configure requirements depend on which detection method was used
+# Configure requirements — these are static (must be known before Makefile.PL
+# runs).  Alien::Libxml2 is intentionally absent: it is only a soft fallback,
+# used when already installed and pkg-config/xml2-config are unavailable.
 # -------------------------------------------------------------------------- #
 my %ConfigReqs = (
-  "Config" => 0,
   "ExtUtils::MakeMaker" => 0,
 );
-if ($libxml2_source eq 'Alien::Libxml2') {
-    $ConfigReqs{"Alien::Libxml2"} = '0.14';
-    $ConfigReqs{"Alien::Base::Wrapper"} = 0;
-}
 
 my %DevReqs = (
   'Test::CPAN::Changes' => 0,
