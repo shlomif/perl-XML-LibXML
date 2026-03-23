@@ -2355,7 +2355,7 @@ sub cleanup_callbacks {
     $self->lib_cleanup_callbacks() unless($_CB_NESTED_DEPTH);
 }
 
-$__loaded=1;
+$XML::LibXML::__loaded=1;
 
 1;
 
