@@ -2867,7 +2867,7 @@ _toString(self, format=0)
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
         xmlDtdPtr intSubset = NULL;
-        /* PREINIT_SAVED_ERROR */
+        PREINIT_SAVED_ERROR
     CODE:
         RETVAL = &PL_sv_undef;
         internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
@@ -2882,7 +2882,7 @@ _toString(self, format=0)
                 xmlUnlinkNode( INT2PTR(xmlNodePtr,intSubset) );
         }
 
-        /* INIT_ERROR_HANDLER; */
+        INIT_ERROR_HANDLER;
 
         if ( format <= 0 ) {
             xs_warn( "use no formated toString!" );
@@ -2906,8 +2906,8 @@ _toString(self, format=0)
         }
 
         xmlSaveNoEmptyTags = oldTagFlag;
-
-        /* REPORT_ERROR(0); */
+        CLEANUP_ERROR_HANDLER;
+        REPORT_ERROR(0);
 
         if (result == NULL) {
             xs_warn("Failed to convert doc to string");
@@ -5216,6 +5216,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
         const xmlChar *ret = NULL;
         SV* internalFlag = NULL;
         int oldTagFlag = xmlSaveNoEmptyTags;
+        PREINIT_SAVED_ERROR
     CODE:
         PERL_UNUSED_VAR(ix);
         internalFlag = get_sv("XML::LibXML::setTagCompression", 0);
@@ -5224,6 +5225,8 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
             xmlSaveNoEmptyTags = SvTRUE(internalFlag);
         }
         buffer = xmlBufferCreate();
+
+        INIT_ERROR_HANDLER;
 
         if ( format <= 0 ) {
             xmlNodeDump( buffer,
@@ -5238,6 +5241,8 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
                          self, 0, format);
             xmlIndentTreeOutput = t_indent_var;
         }
+
+        CLEANUP_ERROR_HANDLER;
 
         ret = xmlBufferContent( buffer );
 
@@ -5258,6 +5263,7 @@ toString( self, format=0, useDomEncoding = &PL_sv_undef )
             xs_warn("Failed to convert node to string");
             XSRETURN_UNDEF;
         }
+        REPORT_ERROR(0);
     OUTPUT:
         RETVAL
 
