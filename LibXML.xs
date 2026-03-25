@@ -937,21 +937,54 @@ LibXML_init_parser( SV * self, xmlParserCtxtPtr ctxt ) {
         if ((parserOptions & XML_PARSE_DTDLOAD) == 0) {
             parserOptions &= ~(XML_PARSE_DTDVALID | XML_PARSE_DTDATTR | XML_PARSE_NOENT );
         }
-        if (ctxt) xmlCtxtUseOptions(ctxt, parserOptions ); /* Note: sets ctxt->linenumbers = 1 */
-
         /*
-         * Without this if/else conditional, NOBLANKS has no effect.
+         * Set xmlKeepBlanksDefault BEFORE xmlCtxtUseOptions so the global
+         * state is correct for this parser instance. Previously, this was
+         * called AFTER xmlCtxtUseOptions, causing a state leak: parser
+         * contexts inherit keepBlanks from the global xmlKeepBlanksDefaultValue
+         * at creation time, and xmlCtxtUseOptions only sets keepBlanks=0 for
+         * NOBLANKS but never resets it to 1 when NOBLANKS is absent.
          *
-         * For more information, see:
-         *
-         * https://rt.cpan.org/Ticket/Display.html?id=76696
-         *
-         * */
+         * See: https://rt.cpan.org/Ticket/Display.html?id=76696
+         * See: https://github.com/shlomif/perl-XML-LibXML/issues/88
+         */
         if (parserOptions & XML_PARSE_NOBLANKS) {
             xmlKeepBlanksDefault(0);
         }
         else {
             xmlKeepBlanksDefault(1);
+        }
+
+        if (ctxt) {
+            xmlCtxtUseOptions(ctxt, parserOptions ); /* Note: sets ctxt->linenumbers = 1 */
+
+            /* Fix keepBlanks and the SAX ignorableWhitespace handler.
+             *
+             * The parser context was created BEFORE we called xmlKeepBlanksDefault
+             * above, so it inherited stale global state. Two things must be fixed:
+             *
+             * 1) ctxt->keepBlanks: xmlCtxtUseOptions only sets it to 0 for
+             *    NOBLANKS but never resets it to 1 when NOBLANKS is absent.
+             *
+             * 2) ctxt->sax->ignorableWhitespace: initialized during context
+             *    creation from the stale xmlKeepBlanksDefaultValue. When
+             *    keepBlanks=0, this is set to xmlSAX2IgnorableWhitespace
+             *    (which discards whitespace); when keepBlanks=1, it should be
+             *    xmlSAX2Characters (which preserves whitespace as text nodes).
+             *
+             * See: https://github.com/shlomif/perl-XML-LibXML/issues/88
+             */
+            if (parserOptions & XML_PARSE_NOBLANKS) {
+                ctxt->keepBlanks = 0;
+                if (ctxt->sax) {
+                    ctxt->sax->ignorableWhitespace = xmlSAX2IgnorableWhitespace;
+                }
+            } else {
+                ctxt->keepBlanks = 1;
+                if (ctxt->sax) {
+                    ctxt->sax->ignorableWhitespace = xmlSAX2Characters;
+                }
+            }
         }
 
         item =  hv_fetch( real_obj, "XML_LIBXML_LINENUMBERS", 22, 0 );
